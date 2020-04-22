@@ -838,32 +838,67 @@ public class AppActions {
    * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
    * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
    *
-   * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
    *
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
   public static void cutTokens(Zone zone, Set<GUID> tokenSet) {
+    cutOrDeleteTokens(true, zone, tokenSet);
+  }
+
+  /**
+   * Delete tokens in the set from the given zone.
+   *
+   * <p>If no tokens are deleted (because the incoming set is empty, because none of the tokens in
+   * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
+   * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
+   *
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
+   *
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
+   */
+  public static void deleteTokens(Zone zone, Set<GUID> tokenSet) {
+    cutOrDeleteTokens(false, zone, tokenSet);
+  }
+
+  /**
+   * Cut or Delete tokens in the set from the given zone.
+   *
+   * <p>If no tokens are deleted (because the incoming set is empty, because none of the tokens in
+   * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
+   * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
+   *
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
+   *
+   * @param copy whether the tokens should be copied and deleted (cut) or just deleted
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
+   */
+  public static void cutOrDeleteTokens(Boolean copy, Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
-    boolean anythingDeleted = false;
+    List<GUID> tokensToRemove = new ArrayList<>();
     if (!tokenSet.isEmpty()) {
-      copyTokens(tokenSet);
-
-      // delete tokens
+      if (copy) {
+        copyTokens(tokenSet);
+      }
+      // add tokens to delete to the list
       for (GUID tokenGUID : tokenSet) {
         Token token = zone.getToken(tokenGUID);
         if (AppUtil.playerOwns(token)) {
-          anythingDeleted = true;
-          zone.removeToken(tokenGUID);
-          MapTool.serverCommand().removeToken(zone.getId(), tokenGUID);
+          tokensToRemove.add(tokenGUID);
         }
       }
     }
-    if (anythingDeleted) {
+    if (!tokensToRemove.isEmpty()) {
+      MapTool.serverCommand().removeTokens(zone.getId(), tokensToRemove);
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
       MapTool.getFrame().getCurrentZoneRenderer().updateAfterSelection();
-      keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
+      if (copy) {
+        keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
+      }
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -2071,7 +2106,6 @@ public class AppActions {
           policy.setIsMovementLocked(!policy.isMovementLocked());
 
           MapTool.updateServerPolicy(policy);
-          MapTool.getServer().updateServerPolicy(policy);
         }
       };
 
@@ -2094,7 +2128,6 @@ public class AppActions {
           policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
 
           MapTool.updateServerPolicy(policy);
-          MapTool.getServer().updateServerPolicy(policy);
         }
       };
 
@@ -2141,6 +2174,7 @@ public class AppActions {
                   policy.setPlayersReceiveCampaignMacros(
                       serverProps.getPlayersReceiveCampaignMacros());
                   policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
+                  policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
 
                   // Tool Tips for unformatted inline rolls.
                   policy.setUseToolTipsForDefaultRollFormat(
@@ -2399,8 +2433,7 @@ public class AppActions {
         if (AppState.isSaving()) {
           int count = 30;
           StaticMessageDialog progressDialog =
-              new StaticMessageDialog(
-                  "Waiting up to " + count + " seconds for autosave to finish...");
+              new StaticMessageDialog(I18N.getText("msg.autosave.wait", count));
           MapTool.getFrame().showFilledGlassPane(progressDialog);
           do {
             try {

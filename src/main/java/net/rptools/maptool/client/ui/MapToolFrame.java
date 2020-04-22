@@ -104,6 +104,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -331,58 +332,8 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (!MapTool.confirmTokenDelete()) {
                   return;
                 }
-                Token firstToken = null;
-                Set<GUID> selectedTokenSet = new HashSet<GUID>();
-                for (TreePath path : tree.getSelectionPaths()) {
-                  if (path.getLastPathComponent() instanceof Token) {
-                    Token token = (Token) path.getLastPathComponent();
-                    if (firstToken == null) {
-                      firstToken = token;
-                    }
-                    if (AppUtil.playerOwns(token)) {
-                      selectedTokenSet.add(token.getId());
-                    }
-                  }
-                }
-
-                boolean unhideImpersonated = false;
-                boolean unhideSelected = false;
-                if (getCurrentZoneRenderer().getSelectedTokenSet().size() > 10) {
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden()
-                      == false) {
-                    unhideImpersonated = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                  }
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden()
-                      == false) {
-                    unhideSelected = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
-                  }
-                }
-                for (GUID tokenGUID : selectedTokenSet) {
-                  Token token = getCurrentZoneRenderer().getZone().getToken(tokenGUID);
-
-                  if (AppUtil.playerOwns(token)) {
-                    getCurrentZoneRenderer().getZone().removeToken(tokenGUID);
-                    MapTool.serverCommand()
-                        .removeToken(getCurrentZoneRenderer().getZone().getId(), tokenGUID);
-                  }
-                }
-                if (unhideImpersonated) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                }
-
-                if (unhideSelected) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.SELECTION.name());
-                }
+                ZoneRenderer zr = getCurrentZoneRenderer();
+                AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
               }
             });
       }
@@ -803,11 +754,36 @@ public class MapToolFrame extends DefaultDockableHolder
     return lookupTablePanel;
   }
 
+
   public NoteBookPanel getNoteBookPanel() {
     return noteBookPanel;
   }
 
-  public EditTokenDialog getTokenPropertiesDialog() {
+  /**
+   * Shows the token properties dialog, and saves the token.
+   *
+   * @param token the token to edit
+   * @param zr the ZoneRenderer of the token
+   */
+  public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
+    if (token != null && zr != null) {
+      if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
+        EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
+        dialog.showDialog(token);
+        if (dialog.isTokenSaved()) {
+          // Checks if the map still exists. Fixes #1646.
+          if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
+            MapTool.serverCommand().putToken(zr.getZone().getId(), token);
+            MapTool.getFrame().resetTokenPanels();
+            zr.repaint();
+            zr.flush(token);
+          }
+        }
+      }
+    }
+  }
+
+  private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
       tokenPropertiesDialog = new EditTokenDialog();
     }
@@ -1648,6 +1624,8 @@ public class MapToolFrame extends DefaultDockableHolder
       MapTool.getEventDispatcher()
           .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
       renderer.requestFocusInWindow();
+      // Updates the VBL/MBL button. Fixes #1642.
+      DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
     }
     AppActions.updateActions();
     repaint();

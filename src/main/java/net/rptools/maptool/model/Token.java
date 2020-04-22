@@ -68,6 +68,7 @@ public class Token extends BaseModel implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
+  /** The unique GUID of the token. */
   private GUID id = new GUID();
 
   public static final String FILE_EXTENSION = "rptok";
@@ -729,6 +730,10 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean isBackgroundStamp() {
     return getLayer() == Zone.Layer.BACKGROUND;
+  }
+
+  public boolean isOnTokenLayer() {
+    return getLayer() == Zone.Layer.TOKEN;
   }
 
   public boolean isStamp() {
@@ -1510,6 +1515,32 @@ public class Token extends BaseModel implements Cloneable {
     return footprintBounds;
   }
 
+  /**
+   * Returns the drag offset of the token.
+   *
+   * @param zone the zone where the token is dragged
+   * @return a point representing the offset
+   */
+  public Point getDragOffset(Zone zone) {
+    Grid grid = zone.getGrid();
+    int offsetX, offsetY;
+    if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+        Point centerOffset = grid.getCenterOffset();
+        offsetX = getX() + centerOffset.x;
+        offsetY = getY() + centerOffset.y;
+      } else {
+        Rectangle tokenBounds = getBounds(zone);
+        offsetX = tokenBounds.x + tokenBounds.width / 2;
+        offsetY = tokenBounds.y + tokenBounds.height / 2;
+      }
+    } else {
+      offsetX = getX();
+      offsetY = getY();
+    }
+    return new Point(offsetX, offsetY);
+  }
+
   /** @return the String of the sightType */
   public String getSightType() {
     return sightType;
@@ -1767,7 +1798,7 @@ public class Token extends BaseModel implements Cloneable {
       macroPropertiesMap.put(macro.getIndex(), macro);
 
       // Allows the token macro panels to update only if a macro changes
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
     }
   }
 
@@ -1794,7 +1825,7 @@ public class Token extends BaseModel implements Cloneable {
     MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
 
     // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
   public void deleteMacroButtonProperty(MacroButtonProperties prop) {
@@ -1804,7 +1835,7 @@ public class Token extends BaseModel implements Cloneable {
     // timing problem.
 
     // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
   public void setSpeechMap(Map<String, String> map) {

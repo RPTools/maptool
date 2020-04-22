@@ -77,7 +77,7 @@
             <at name="actionCommand">OK</at>
             <at name="name">okButton</at>
             <at name="width">46</at>
-            <at name="text">OK</at>
+            <at name="text">Button.ok</at>
             <at name="height">22</at>
            </object>
           </at>
@@ -3646,13 +3646,13 @@ Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</a
                                    </at>
                                    <at name="width">176</at>
                                    <at name="name"/>
-                                   <at name="text">Typing Notification Background</at>
+                                   <at name="text">Preferences.label.chat.type.background</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">If enabled, shows a background frame underneath the typing notification.</at>
+                                   <at name="toolTipText">Preferences.label.chat.type.background.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -3797,13 +3797,13 @@ Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</a
                                    </at>
                                    <at name="width">176</at>
                                    <at name="name"/>
-                                   <at name="text">Suppress ToolTips for MacroLinks</at>
+                                   <at name="text">Preferences.label.chat.macrolinks</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">MacroLinks show normally tooltips that state informations about the link target. This is a anti cheating device. This options let you disable this tooltips for aesthetic reasons. </at>
+                                   <at name="toolTipText">Preferences.label.chat.macrolinks.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -5925,7 +5925,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Accessibility</at>
+                   <at name="title">Label.accessibility</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -6000,13 +6000,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">Chat Font Size</at>
+                              <at name="text">Preferences.label.access.size</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Point size for all chat window text (both input and output).</at>
+                              <at name="toolTipText">Preferences.label.access.size.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -6116,13 +6116,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">ToolTip Initial Delay</at>
+                              <at name="text">Preferences.label.access.delay</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">The initial delay (in milliseconds) before a tooltip is displayed.</at>
+                              <at name="toolTipText">Preferences.label.access.delay.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -6177,13 +6177,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">ToolTip Dismiss Delay</at>
+                              <at name="text">Preferences.label.access.delay.dismiss</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">The amount of time (in milliseconds) the tooltip will remain before being removed.</at>
+                              <at name="toolTipText">Preferences.label.access.delay.dismiss.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -6408,7 +6408,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Application</at>
+                   <at name="title">Label.application</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -6505,13 +6505,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">233</at>
                                    <at name="name"/>
-                                   <at name="text">Campaign autosave every</at>
+                                   <at name="text">Preferences.label.autosave</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">&lt;html&gt;Autosaved campaigns are in &lt;b&gt;${appHome}/autosave&lt;/b&gt;.  Autosaving a campaign is memory-intensive.  Be sure to take that into account.  Set to 0 to disable.</at>
+                                   <at name="toolTipText">Preferences.label.autosave.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -6600,13 +6600,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">233</at>
                                    <at name="name"/>
-                                   <at name="text">Save reminder on close</at>
+                                   <at name="text">Preferences.label.save.reminder</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Whether a prompt appears before MapTool closes.</at>
+                                   <at name="toolTipText">Preferences.label.save.reminder.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -6717,13 +6717,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">233</at>
                                    <at name="name"/>
-                                   <at name="text">Time between chat log autosaves</at>
+                                   <at name="text">Preferences.label.autosave.chat</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">The chat log will be autosaved at this interval (in minutes) using the filename pattern below.  Set to 0 to disable.</at>
+                                   <at name="toolTipText">Preferences.label.autosave.chat.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -6812,13 +6812,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">233</at>
                                    <at name="name"/>
-                                   <at name="text">Autosave chat log filename</at>
+                                   <at name="text">Preferences.label.autosave.chat.filename</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">&lt;html&gt;Specify a filename.  Without a directory name is relative to &lt;b&gt;${appHome}/autosave&lt;/b&gt;.</at>
+                                   <at name="toolTipText">Preferences.label.autosave.chat.filename.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -6927,13 +6927,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">233</at>
                                    <at name="name"/>
-                                   <at name="text">File Sync Directory</at>
+                                   <at name="text">Preferences.label.directory.sync</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Specify the path to your cloud sync directy, eg Google Drive, Dropbox, One Drive, etc. This will be used to determine the relative path external files such as Hero Lab portfolios.</at>
+                                   <at name="toolTipText">Preferences.label.directory.sync.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -6992,7 +6992,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    <at name="editable">false</at>
                                    <at name="name">fileSyncPath</at>
                                    <at name="width">195</at>
-                                   <at name="toolTipText">Click the eclipses to the right to set the directory.</at>
+                                   <at name="toolTipText">Preferences.label.directory.sync.set</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -7103,7 +7103,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">16</at>
                                    <at name="name"/>
-                                   <at name="text">min</at>
+                                   <at name="text">Label.minute</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -7163,7 +7163,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">16</at>
                                    <at name="name"/>
-                                   <at name="text">min</at>
+                                   <at name="text">Label.minute</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -7197,7 +7197,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Save</at>
+                                      <at name="title">Label.save</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -7455,13 +7455,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Fill selection box</at>
+                                        <at name="text">Preferences.label.performance.fillselection</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">If enabled, a shaded area is used when dragging the mouse to select multiple tokens.</at>
+                                        <at name="toolTipText">Preferences.label.performance.fillselection.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -7516,13 +7516,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Frame Rate Cap</at>
+                                        <at name="text">Preferences.label.performance.cap</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">Frame rate cap for map renderer in FPS.</at>
+                                        <at name="toolTipText">Preferences.label.performance.cap.tooltip</at>
                                         <at name="height">14</at>
                                        </object>
                                       </at>
@@ -7605,7 +7605,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Performance</at>
+                                           <at name="title">Label.performance</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -7765,13 +7765,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">201</at>
                                         <at name="name"/>
-                                        <at name="text">Hide NPCs from players on new maps</at>
+                                        <at name="text">Preferences.label.initiative.hidenpc</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">If enabled, NPCs will not appear in the players views of the Initiative panel.</at>
+                                        <at name="toolTipText">Preferences.label.initiative.hidenpc.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -7881,13 +7881,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">201</at>
                                         <at name="name"/>
-                                        <at name="text">Give Owners Permission in new campaigns</at>
+                                        <at name="text">Preferences.label.initiative.owner</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">Owner Permission allows players to perform certain actions on their tokens in the Initiative panel.</at>
+                                        <at name="toolTipText">Preferences.label.initiative.owner.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -7997,13 +7997,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">201</at>
                                         <at name="name"/>
-                                        <at name="text">Lock Player Movement in new campaigns</at>
+                                        <at name="text">Preferences.label.initiative.lock</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">When enabled, players will only be able to move their token when that token has initiative.</at>
+                                        <at name="toolTipText">Preferences.label.initiative.lock.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -8113,13 +8113,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">201</at>
                                         <at name="name"/>
-                                        <at name="text">Show Initative Gain Message</at>
+                                        <at name="text">Preferences.label.initiative.msg</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">When enabled, a message is sent to chat when a token gains initative.</at>
+                                        <at name="toolTipText">Preferences.label.initiative.msg.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -8203,7 +8203,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Initiative Defaults</at>
+                                           <at name="title">Preferences.label.initiative.defaults</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -8378,13 +8378,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Fit GM view </at>
+                                        <at name="text">Preferences.label.client.fitview</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">When forcing players to the GM&apos;s view, should the player&apos;s map be zoomed such that their screen shows at least the same content as the GM&apos;s screen?</at>
+                                        <at name="toolTipText">Preferences.label.client.fitview.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -8468,7 +8468,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Client</at>
+                                           <at name="title">Label.client</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -8622,13 +8622,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Default: Allow players to edit macros</at>
+                                        <at name="text">Preferences.label.macros.edit</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">&lt;html&gt;Player-editable macros cannot call &lt;b&gt;trusted&lt;/b&gt; functions.  When developing a framework, this should be disabled.</at>
+                                        <at name="toolTipText">Preferences.label.macros.edit.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -8712,7 +8712,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Macro Panels</at>
+                                           <at name="title">Label.macropanels</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -8869,13 +8869,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Enable External Macro Access</at>
+                                        <at name="text">Preferences.label.macros.permissions</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">&lt;html&gt;Enable macros to call functions that can access your drive &amp; http services.  The following functions will be enabled: getRequest, postRequest, exportData, &amp; getEnvironmentVariable.</at>
+                                        <at name="toolTipText">Preferences.label.macros.permissions.tooltip</at>
                                         <at name="height">12</at>
                                        </object>
                                       </at>
@@ -8959,7 +8959,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Macro Permissions</at>
+                                           <at name="title">Label.macropermissions</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -9170,13 +9170,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Discovery Timeout</at>
+                                        <at name="text">Preferences.label.upnp.timeout</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">Timeout period in milliseconds to wait when looking for UPnP gateways.</at>
+                                        <at name="toolTipText">Preferences.label.upnp.timeout.tooltip</at>
                                         <at name="height">14</at>
                                        </object>
                                       </at>
@@ -9205,7 +9205,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">UPnP</at>
+                                           <at name="title">Label.upnp</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -9477,13 +9477,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Halo line width</at>
+                                   <at name="text">Preferences.label.halo.width</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">The width of the single-color halo around individual tokens.</at>
+                                   <at name="toolTipText">Preferences.label.halo.width.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -9606,13 +9606,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Halo opacity</at>
+                                   <at name="text">Preferences.label.halo.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Measures how opaque the halo vision overlay is drawn (0-255).</at>
+                                   <at name="toolTipText">Preferences.label.halo.opacity.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -9667,13 +9667,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Auto-expose fog on token movement (personal server)</at>
+                                   <at name="text">Preferences.label.fog.autoexpose</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">If enabled, the fog of war is automatically exposed as a token moves on maps with a grid.  Gridless maps cannot auto-expose fog.  When running a server, this setting is ignored in favor of the settings in the &apos;Start Server&apos; dialog.</at>
+                                   <at name="toolTipText">Preferences.label.fog.autoexpose.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -9783,13 +9783,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Aura opacity</at>
+                                   <at name="text">Preferences.label.aura.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Measures how opaque the aura overlay is drawn (0-255).</at>
+                                   <at name="toolTipText">Preferences.label.aura.opacity.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -9844,13 +9844,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Light opacity</at>
+                                   <at name="text">Preferences.label.light.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Measures how opaque the light overlay is drawn (0-255).</at>
+                                   <at name="toolTipText">Preferences.label.light.opacity.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -9973,13 +9973,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Fog opacity</at>
+                                   <at name="text">Preferences.label.fog.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Measures how opaque the &quot;soft fog&quot; overlay is drawn (0-255).</at>
+                                   <at name="toolTipText">Preferences.label.fog.opacity.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -10068,13 +10068,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">355</at>
                                    <at name="name"/>
-                                   <at name="text">Use halo color for vision</at>
+                                   <at name="text">Preferences.label.halo.color</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">If enabled, the area visible to a token will be colored the same as the halo.</at>
+                                   <at name="toolTipText">Preferences.label.halo.color.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -10158,7 +10158,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Map Visuals</at>
+                                      <at name="title">Preferences.label.map</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -10386,7 +10386,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Sounds</at>
+                   <at name="title">Label.sounds</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -10516,13 +10516,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Play system sounds	</at>
+                              <at name="text">Preferences.label.sound.system</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Turn this off to prevent all sounds from within MapTool.  Needed for some Java implementations as too many sounds queued up can crash the JVM.</at>
+                              <at name="toolTipText">Preferences.label.sound.system.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10632,13 +10632,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Turn on Syrinscape Integration</at>
+                              <at name="text">Preferences.label.sound.syrinscape</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Allow MapTool to launch Syrinscape via 3rd party integration URI. This will take affect on next launch of MapTool.</at>
+                              <at name="toolTipText">Preferences.label.sound.syrinscape.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10802,13 +10802,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Play streams</at>
+                              <at name="text">Preferences.label.sound.stream</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Turn this off to prevent streams from playing</at>
+                              <at name="toolTipText">Preferences.label.sound.stream.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10863,13 +10863,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Only when window not focused</at>
+                              <at name="text">Preferences.label.sound.focus</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Only turn off sounds when the window is not focused.</at>
+                              <at name="toolTipText">Preferences.label.sound.focus.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -11045,7 +11045,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Startup</at>
+                   <at name="title">Label.startup</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -11142,13 +11142,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Maximum heap size (-Xmx)</at>
+                                   <at name="text">Preferences.label.jvm.heap</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.heap.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11203,13 +11203,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Initial &amp; minimum heap size (-Xms)</at>
+                                   <at name="text">Preferences.label.jvm.min</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Oracle recommends setting the minimum heap size (-Xms) equal to the maximum heap size (-Xmx) to minimize garbage collections.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.min.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11269,7 +11269,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    <at name="selectionEnd">2</at>
                                    <at name="scrollOffset">1</at>
                                    <at name="text">4G</at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.language.tooltip</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -11384,13 +11384,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Thread stack size (-Xss)</at>
+                                   <at name="text">Preferences.label.jvm.stack</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Thread stacks are memory areas allocated for each Java thread for their internal use. This is where the thread stores its local execution state.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.stack.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11479,7 +11479,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">JVM Memory Settings</at>
+                                      <at name="title">Preferences.label.jvm</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -11648,7 +11648,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Enable assertions</at>
+                                   <at name="text">Preferences.label.advanced.assert</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11870,7 +11870,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Disable Direct3d Pipeline</at>
+                                   <at name="text">Preferences.label.advanced.direct3d</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11930,7 +11930,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Enable OpenGL Pipeline</at>
+                                   <at name="text">Preferences.label.advanced.opengl</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11990,7 +11990,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Intialize AWT before JavaFX</at>
+                                   <at name="text">Preferences.label.advanced.javafx</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -12078,7 +12078,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Advanced Options</at>
+                                      <at name="title">Preferences.label.advanced</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -12259,7 +12259,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.language.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -12380,7 +12380,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Language Override</at>
+                                      <at name="title">Preferences.label.language.override</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -12537,7 +12537,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">70</at>
                                    <at name="name"/>
-                                   <at name="text">Data Directory</at>
+                                   <at name="text">Preferences.label.options.directory</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -12601,7 +12601,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    <at name="width">116</at>
                                    <at name="selectionEnd">14</at>
                                    <at name="text">.maptool-nerps</at>
-                                   <at name="toolTipText">Override default data directory. Default is .maptool under user directory</at>
+                                   <at name="toolTipText">Preferences.label.options.directory.tooltip</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -12630,7 +12630,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Additional Options</at>
+                                      <at name="title">Preferences.label.options</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">

@@ -162,6 +162,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case removeToken:
           removeToken(context.getGUID(0), context.getGUID(1));
           break;
+        case removeTokens:
+          removeTokens(context.getGUID(0), context.getGUIDs(1));
+          break;
         case removeLabel:
           removeLabel(context.getGUID(0), context.getGUID(1));
           break;
@@ -617,13 +620,24 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.removeLabel.name(), RPCContext.getCurrent().parameters);
   }
 
+  /**
+   * Removes the token from the server, and pass the command to all clients.
+   *
+   * @param zoneGUID the GUID of the zone where the token is
+   * @param tokenGUID the GUID of the token
+   */
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeToken(tokenGUID);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.removeToken.name(), RPCContext.getCurrent().parameters);
+    zone.removeToken(tokenGUID); // remove server tokens
+    forwardToClients();
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeTokens(tokenGUIDs); // remove server tokens
+    forwardToClients();
   }
 
   public void updateTokenProperty(
@@ -774,6 +788,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void setServerPolicy(ServerPolicy policy) {
+    server.updateServerPolicy(policy); // updates the server policy, fixes #1648
     forwardToClients();
     MapTool.getFrame().getToolbox().updateTools();
   }
@@ -868,6 +883,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     // Convenience methods
     public GUID getGUID(int index) {
       return (GUID) parameters[index];
+    }
+
+    public List<GUID> getGUIDs(int index) {
+      return (List<GUID>) parameters[index];
     }
 
     public Integer getInt(int index) {

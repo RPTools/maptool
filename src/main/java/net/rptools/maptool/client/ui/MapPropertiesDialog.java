@@ -374,7 +374,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         backgroundPaint != null ? backgroundPaint.getPaint() : null,
-                        "Choose Background");
+                        I18N.getText("MapPropertiesDialog.label.background"));
                 if (paint != null) {
                   backgroundPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -412,7 +412,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         fogPaint != null ? fogPaint.getPaint() : null,
-                        "Choose Fog");
+                        I18N.getText("MapPropertiesDialog.label.fog"));
                 if (paint != null) {
                   fogPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -559,7 +559,7 @@ public class MapPropertiesDialog extends JDialog {
 
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
-      this.setTitle("Select Map Image");
+      this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
       setSize(500, 400);
     }
 
@@ -588,7 +588,7 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JButton createFilesystemButton() {
-      JButton button = new JButton("Filesystem ...");
+      JButton button = new JButton(I18N.getText("Label.filesystem"));
       button.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -618,13 +618,13 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JButton createOKButton() {
-      JButton button = new JButton("OK");
+      JButton button = new JButton(I18N.getText("Button.ok"));
       button.addActionListener(e -> setVisible(false));
       return button;
     }
 
     private JButton createCancelButton() {
-      JButton button = new JButton("Cancel");
+      JButton button = new JButton(I18N.getText("Button.cancel"));
       button.addActionListener(
           e -> {
             selectedAsset = null;

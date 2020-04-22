@@ -41,6 +41,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
@@ -87,7 +88,8 @@ public class BoardTool extends DefaultTool {
       ioe.printStackTrace();
     }
     // Create the control panel
-    controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
+    controlPanel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
     // controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
     boardPositionXTextField = controlPanel.getTextField("offsetX");

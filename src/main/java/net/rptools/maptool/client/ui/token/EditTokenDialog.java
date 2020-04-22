@@ -330,8 +330,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Jamz: Init the VBL tab...
     JTabbedPane tabbedPane = getTabbedPane();
 
+    String vblTitle = I18N.getText("EditTokenDialog.tab.vbl");
     if (MapTool.getPlayer().isGM()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), true);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
       getTokenVblPanel().setToken(token);
       getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
       getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
@@ -342,8 +343,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // Reset scale
       getTokenVblPanel().setScale(1d);
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL")) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(vblTitle)) {
         tabbedPane.setSelectedIndex(0);
       }
     }
@@ -867,7 +868,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getCampaign().getTokenBarsMap().size() > 0) {
       layout = (FormLayout) barPanel.getLayout();
       barPanel.setName("bar");
-      barPanel.setBorder(BorderFactory.createTitledBorder("Bars"));
+      barPanel.setBorder(
+          BorderFactory.createTitledBorder(I18N.getText("CampaignPropertiesDialog.tab.bars")));
       int count = 0;
       row = 0;
       for (BarTokenOverlay bar : MapTool.getCampaign().getTokenBarsMap().values()) {

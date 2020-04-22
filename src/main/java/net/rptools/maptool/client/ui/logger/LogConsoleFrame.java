@@ -120,7 +120,7 @@ public class LogConsoleFrame extends JFrame {
 
   private JButton getClearButton() {
     if (clearButton == null) {
-      clearButton = new JButton("Clear");
+      clearButton = new JButton(I18N.getText("Button.clear"));
       clearButton.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -133,7 +133,7 @@ public class LogConsoleFrame extends JFrame {
 
   private JButton getCloseButton() {
     if (closeButton == null) {
-      closeButton = new JButton("Close");
+      closeButton = new JButton(I18N.getText("Button.close"));
       closeButton.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {

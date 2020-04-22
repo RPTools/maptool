@@ -209,7 +209,7 @@
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Command</at>
+                                      <at name="title">component.label.macro.command</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -2908,7 +2908,7 @@
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">64</at>
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -2964,7 +2964,7 @@
                  <at name="actionCommand">OK</at>
                  <at name="name">okButton</at>
                  <at name="width">46</at>
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -3020,7 +3020,7 @@
                  <at name="actionCommand">OK</at>
                  <at name="name">runButton</at>
                  <at name="width">93</at>
-                 <at name="text">RUN MACRO</at>
+                 <at name="text">Button.runmacro</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -3076,7 +3076,7 @@
                  <at name="actionCommand">OK</at>
                  <at name="name">applyButton</at>
                  <at name="width">62</at>
-                 <at name="text">APPLY</at>
+                 <at name="text">Button.apply</at>
                  <at name="height">22</at>
                 </object>
                </at>
