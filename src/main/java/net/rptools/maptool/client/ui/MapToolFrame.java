@@ -1579,11 +1579,13 @@ public class MapToolFrame extends DefaultDockableHolder
     if (renderer != null && !zoneRendererList.contains(renderer)) {
       zoneRendererList.add(renderer);
     }
+    Zone oldZone = null;
     if (currentRenderer != null) {
       // Check if the zone still exists. Fix #1568
       if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
         stopTokenDrag(); // if a token is being dragged, stop the drag
       }
+      oldZone = currentRenderer.getZone();
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
@@ -1597,8 +1599,9 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbox.setTargetRenderer(renderer);
 
     if (renderer != null) {
+      // Previous zone must be passed for the listeners to be properly removed. Fix #1670.
       MapTool.getEventDispatcher()
-          .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
+          .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
