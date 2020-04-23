@@ -225,12 +225,15 @@ public class MacroButtonPopupMenu extends JPopupMenu {
               }
             }
           } else {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
-          MapTool.getFrame().getSelectionPanel().reset();
         } else if (button.getToken() != null) {
           if (AppUtil.playerOwns(button.getToken())) {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
         }
       }
