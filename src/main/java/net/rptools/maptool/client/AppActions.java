@@ -41,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -2412,6 +2411,16 @@ public class AppActions {
 
   public static void loadCampaign(final File campaignFile) {
 
+    // By default all SwingWorkers run sequentially off the AWT event thread
+    // Until we reconfigure that (load/save is really not something that's
+    // needed to run in parallel though) we have to check the lock here for
+    // good measure as otherwise nothing happens while the UI stays responsive
+    // and the SwingWorker loading task silently waits for its turn.
+    if (AppState.testBackgroundTaskLock()) {
+      MapTool.showError("msg.error.failedLoadCampaignLock");
+      return;
+    }
+
     new CampaignLoader(campaignFile).execute();
   }
 
@@ -2421,7 +2430,7 @@ public class AppActions {
    */
   private static class CampaignLoader extends SwingWorker<PersistedCampaign, String> {
     private File campaignFile;
-    private int maxWaitForAutosave = 30;
+    private int maxWaitForLock = 30;
 
     public CampaignLoader(File campaignFile) {
       this.campaignFile = campaignFile;
@@ -2438,24 +2447,8 @@ public class AppActions {
     protected PersistedCampaign doInBackground() throws Exception {
 
       // wait for auto save to complete
-      if (AppState.isSaving()) {
-
-        publish(I18N.getText("msg.autosave.wait", maxWaitForAutosave));
-
-        long start = System.currentTimeMillis();
-        while ((start + (maxWaitForAutosave * 1000) > System.currentTimeMillis())
-            && !AppState.isSaving()) {
-          Thread.sleep(100);
-        }
-
-        // still saving?
-        if (AppState.isSaving())
-          throw new InterruptedException("msg.error.failedLoadCampaign_Timeout");
-      }
-
-      MapTool.getAutoSaveManager().pause(); // Pause auto-save while loading
-      AppState.setIsLoading(true);
-
+      publish(I18N.getText("msg.autosave.wait", maxWaitForLock));
+      AppState.acquireBackgroundTaskLock(maxWaitForLock);
       publish(I18N.getText("msg.info.campaignLoading"));
 
       try {
@@ -2466,8 +2459,7 @@ public class AppActions {
         // Load
         return PersistenceUtil.loadCampaign(campaignFile);
       } finally {
-        AppState.setIsLoading(false);
-        MapTool.getAutoSaveManager().restart();
+        AppState.releaseBackgroundTaskLock();
       }
     }
 
@@ -2504,10 +2496,10 @@ public class AppActions {
         MapTool.getFrame().getCommandPanel().setIdentityName(null);
         MapTool.getFrame().resetPanels();
 
-      } catch (InterruptedException ie) {
-        MapTool.showError(ie.getMessage());
       } catch (Throwable t) {
-        MapTool.showError("msg.error.failedLoadCampaign", t);
+        if (t.getCause() instanceof AppState.FailedToAcquireLockException)
+          MapTool.showError("msg.error.failedLoadCampaignLock");
+        else MapTool.showError("msg.error.failedSaveCampaign", t.getCause());
       }
     }
   }
@@ -2578,6 +2570,11 @@ public class AppActions {
   }
 
   private static void doSaveCampaign(File file, String campaignVersion, Runnable onSuccess) {
+
+    if (AppState.testBackgroundTaskLock()) {
+      MapTool.showError("msg.error.failedSaveCampaignLock");
+      return;
+    }
     new CampaignSaver(file, campaignVersion, onSuccess).execute();
   }
 
@@ -2586,6 +2583,7 @@ public class AppActions {
     private File file;
     private String campaignVersion;
     private Runnable onSuccess;
+    private int maxWaitForLock = 30;
 
     public CampaignSaver(File file, String campaignVersion, Runnable onSuccess) {
       this.file = file;
@@ -2595,12 +2593,8 @@ public class AppActions {
 
     @Override
     protected Object doInBackground() throws Exception {
-      synchronized (MapTool.getAutoSaveManager()) {
-        if (AppState.isSaving())
-          throw new IllegalStateException("Campaign currently being auto-saved.  Try again later.");
-      }
-      AppState.setIsSaving(true);
-      MapTool.getAutoSaveManager().pause();
+
+      AppState.acquireBackgroundTaskLock(maxWaitForLock);
 
       publish(I18N.getText("msg.info.campaignSaving"));
 
@@ -2614,8 +2608,7 @@ public class AppActions {
         Thread.sleep(Math.max(0, 500 - (System.currentTimeMillis() - start)));
 
       } finally {
-        MapTool.getAutoSaveManager().restart();
-        AppState.setIsSaving(false);
+        AppState.releaseBackgroundTaskLock();
       }
 
       return null;
@@ -2637,10 +2630,10 @@ public class AppActions {
         if (onSuccess != null) {
           onSuccess.run();
         }
-      } catch (ExecutionException ee) {
-        MapTool.showError("msg.error.failedSaveCampaign", ee.getCause());
-      } catch (InterruptedException ie) {
-        MapTool.showError("msg.error.failedSaveCampaign", ie);
+      } catch (Throwable t) {
+        if (t.getCause() instanceof AppState.FailedToAcquireLockException)
+          MapTool.showError("msg.error.failedSaveCampaignLock");
+        else MapTool.showError("msg.error.failedSaveCampaign", t.getCause());
       }
     }
   }
@@ -2765,8 +2758,7 @@ public class AppActions {
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-            File mapFile = chooser.getSelectedFile();
-            loadMap(mapFile);
+            new MapLoader(chooser.getSelectedFile()).execute();
           }
         }
       };
@@ -2817,55 +2809,63 @@ public class AppActions {
     }
   }
 
-  public static void loadMap(final File mapFile) {
-    new Thread() {
-      @Override
-      public void run() {
-        StaticMessageDialog progressDialog =
-            new StaticMessageDialog(I18N.getText("msg.info.mapLoading"));
+  private static class MapLoader extends SwingWorker<PersistedMap, String> {
 
-        try {
-          // I'm going to get struck by lighting for writing code like this.
-          // CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER !
-          MapTool.getFrame().showFilledGlassPane(progressDialog);
+    private File mapFile;
 
-          // Load
-          final PersistedMap map = PersistenceUtil.loadMap(mapFile);
+    public MapLoader(File mapFile) {
+      this.mapFile = mapFile;
+    }
 
-          if (map != null) {
-            AppPreferences.setLoadDir(mapFile.getParentFile());
-            if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
-                || (map.zone.getExposedAreaMetaData() != null
-                    && !map.zone.getExposedAreaMetaData().isEmpty())) {
-              boolean ok =
-                  MapTool.confirm(
-                      "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-              if (ok == true) {
-                // This fires a ModelChangeEvent, but that shouldn't matter
-                map.zone.clearExposedArea(false);
-              }
-            }
-            MapTool.addZone(map.zone);
+    @Override
+    protected PersistedMap doInBackground() throws Exception {
+      publish(I18N.getText("msg.info.mapLoading"));
+      return PersistenceUtil.loadMap(mapFile);
+    }
 
-            MapTool.getAutoSaveManager().restart();
-            MapTool.getAutoSaveManager().tidy();
+    @Override
+    protected void done() {
 
-            // Flush the images associated with the current
-            // campaign
-            // Do this juuuuuust before we get ready to show the
-            // new campaign, since we
-            // don't want the old campaign reloading images
-            // while we loaded the new campaign
+      MapTool.getFrame().hideGlassPane();
 
-            // XXX (FJE) Is this call even needed for loading
-            // maps? Probably not...
-            ImageManager.flush();
+      try {
+        PersistedMap map = get();
+        AppPreferences.setLoadDir(mapFile.getParentFile());
+        if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
+            || (map.zone.getExposedAreaMetaData() != null
+                && !map.zone.getExposedAreaMetaData().isEmpty())) {
+          boolean ok =
+              MapTool.confirm(
+                  "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
+          if (ok == true) {
+            // This fires a ModelChangeEvent, but that shouldn't matter
+            map.zone.clearExposedArea(false);
           }
-        } finally {
-          MapTool.getFrame().hideGlassPane();
         }
+        MapTool.addZone(map.zone);
+
+      } catch (Exception ioe) {
+        MapTool.showError(ioe.getMessage(), ioe);
       }
-    }.start();
+
+      MapTool.getAutoSaveManager().tidy();
+
+      // Flush the images associated with the current
+      // campaign
+      // Do this juuuuuust before we get ready to show the
+      // new campaign, since we
+      // don't want the old campaign reloading images
+      // while we loaded the new campaign
+      // XXX (FJE) Is this call even needed for loading
+      // maps? Probably not...
+      ImageManager.flush();
+    }
+
+    @Override
+    protected void process(List<String> list) {
+      MapTool.getFrame()
+          .showFilledGlassPane(new StaticMessageDialog(I18N.getText(list.get(list.size() - 1))));
+    }
   }
 
   public static final Action CAMPAIGN_PROPERTIES =
