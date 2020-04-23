@@ -7,21 +7,20 @@
   <title>Ace Kitchen Sink</title>
   <meta name="author" content="Fabian Jakobs">
   <!--
-      Ace
-        version 1.4.10
-        commit
+  Ace
+    version 1.4.10
+    commit
   -->
 
-  <link rel="stylesheet" href="ace-editor/demo/kitchen-sink/styles.css" type="text/css"
-        media="screen"
+  <link rel="stylesheet" href="demo/kitchen-sink/styles.css" type="text/css" media="screen"
         charset="utf-8">
 
   <script async="true" src="https://use.edgefonts.net/source-code-pro.js"></script>
 
-  <link href="ace-editor/doc/site/images/favicon.ico" rel="icon" type="image/x-icon">
+
+  <link href="./doc/site/images/favicon.ico" rel="icon" type="image/x-icon">
 </head>
 <body>
-
 <div id="sidePanel" style="position:absolute;height:100%;">
   <div class="toggleButton" id="optionToggle" role="button" aria-label="Hide Options" tabindex="0">
     <div></div>
@@ -30,15 +29,14 @@
   </div>
   <a href="https://c9.io">
     <img id="c9-logo" alt="Cloud9 IDE | Your code anywhere, anytime"
-         src="ace-editor/demo/kitchen-sink/logo.png"
-         style="width: 172px;margin: -9px 30px -12px 51px;">
+         src="demo/kitchen-sink/logo.png" style="width: 172px;margin: -9px 30px -12px 51px;">
   </a>
   <div style="position: absolute; overflow: hidden; top:100px; bottom:0">
     <div id="optionsPanel" style="width: 120%; height:100%; overflow-y: scroll">
 
 
       <a href="https://ace.c9.io">
-        <img id="ace-logo" alt="Ace Website" src="ace-editor/demo/kitchen-sink/ace-logo.png"
+        <img id="ace-logo" alt="Ace Website" src="demo/kitchen-sink/ace-logo.png"
              style="width: 134px;margin: 46px 0px 4px 66px;">
       </a>
 
@@ -48,11 +46,15 @@
 <div id="editor-container"></div>
 
 
-<script src="ace-editor/src-min/ace.js" data-ace-base="ace-editor/src-min" type="text/javascript"
-        charset="utf-8"></script>
-<script src="ace-editor/src-min/keybinding-vim.js"></script>
-<script src="ace-editor/src-min/keybinding-emacs.js"></script>
-<script src="ace-editor/demo/kitchen-sink/demo.js"></script>
-<script type="text/javascript" charset="utf-8">require("kitchen-sink/demo");</script>
+<script src="src/ace.js" data-ace-base="src" type="text/javascript" charset="utf-8"></script>
+<script src="src/keybinding-vim.js"></script>
+<script src="src/keybinding-emacs.js"></script>
+<script src="demo/kitchen-sink/demo.js"></script>
+<script type="text/javascript" charset="utf-8">
+    require("kitchen-sink/demo");
+
+</script>
+
+
 </body>
 </html>
