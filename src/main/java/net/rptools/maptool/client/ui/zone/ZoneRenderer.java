@@ -359,9 +359,13 @@ public class ZoneRenderer extends JComponent
     // repaintDebouncer.dispatch();
   }
 
-  /** Resets the token panels, fire onTokenSelection, repaints. */
+  /**
+   * Resets the token panels, fire onTokenSelection, repaints. The impersonation panel is only reset
+   * if no token is currently impersonated.
+   */
   public void updateAfterSelection() {
-    MapTool.getFrame().resetTokenPanels();
+    MapTool.getFrame().getSelectionPanel().reset();
+    MapTool.getFrame().getImpersonatePanel().resetIfNotImpersonating();
     HTMLFrameFactory.selectedListChanged();
     repaintDebouncer.dispatch();
   }
