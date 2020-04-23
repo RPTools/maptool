@@ -21,7 +21,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller">
+<VBox prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/10.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>

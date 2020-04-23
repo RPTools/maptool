@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<Accordion prefHeight="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<Accordion prefHeight="600.0" xmlns="http://javafx.com/javafx/10.0.2" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroProperties_Controller">
     <panes>
         <TitledPane fx:id="macroDetailsTitledPane" expanded="false" text="Details">
