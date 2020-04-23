@@ -15,32 +15,107 @@
 package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.Transparency;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Observer;
+import java.util.Set;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
+import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
-import net.rptools.maptool.client.ui.*;
+import net.rptools.maptool.client.ui.AddResourceDialog;
+import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.client.ui.CampaignExportDialog;
+import net.rptools.maptool.client.ui.ClientConnectionPanel;
+import net.rptools.maptool.client.ui.ConnectToServerDialog;
+import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
+import net.rptools.maptool.client.ui.ConnectionInfoDialog;
+import net.rptools.maptool.client.ui.ConnectionStatusPanel;
+import net.rptools.maptool.client.ui.ExportDialog;
+import net.rptools.maptool.client.ui.MapPropertiesDialog;
+import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.PreferencesDialog;
+import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
+import net.rptools.maptool.client.ui.StartServerDialog;
+import net.rptools.maptool.client.ui.StartServerDialogPreferences;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
 import net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller;
-import net.rptools.maptool.client.ui.fx.controller.WebBrowser_Controller;
-import net.rptools.maptool.client.ui.io.*;
+import net.rptools.maptool.client.ui.io.FTPClient;
+import net.rptools.maptool.client.ui.io.FTPTransferObject;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
+import net.rptools.maptool.client.ui.io.LoadSaveImpl;
+import net.rptools.maptool.client.ui.io.ProgressBarList;
+import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool.model.CampaignProperties;
+import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.ExposedAreaMetaData;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.LookupTable;
+import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
@@ -54,23 +129,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
-
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.*;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -1550,7 +1608,6 @@ public class AppActions {
         }
       };
 
-
   // For new Macro Editor written using FX
   private static JFrame macroEditorJFrame;
 
@@ -1619,63 +1676,6 @@ public class AppActions {
       macroEditor_Controller.update();
     } catch (IOException ex) {
       log.error("Error loading macroEditorJfxPanel.", ex);
-    }
-  }
-
-  // For new Macro Web Browser Window written using FX
-  private static JFrame webBrowserJFrame;
-
-  private static final String WEB_BROWSER_FXML =
-          "/net/rptools/maptool/client/ui/fx/WebBrowser.fxml";
-
-  public static final Action SHOW_WEB_BROWSER =
-          new DefaultClientAction() {
-            {
-              init("msg.info.showWebBrowser");
-            }
-
-            @Override
-            public boolean isAvailable() {
-              return (MapTool.getPlayer() != null);
-            }
-
-            @Override
-            public void execute(ActionEvent e) {
-              EventQueue.invokeLater(() -> initAndShowWebBrowserFX());
-            }
-          };
-
-  // Invoked this on the EventQueue thread...
-  private static void initAndShowWebBrowserFX() {
-    if (webBrowserJFrame != null) {
-      if (webBrowserJFrame.isShowing()) webBrowserJFrame.dispose();
-      else webBrowserJFrame.setVisible(true);
-    } else {
-      webBrowserJFrame = new JFrame(I18N.getText("msg.info.showWebBrowser"));
-
-      final JFXPanel fxPanel = new JFXPanel();
-      webBrowserJFrame.add(fxPanel);
-      webBrowserJFrame.setSize(1150, 1400);
-      webBrowserJFrame.setLocation(new Point(0,0));
-      webBrowserJFrame.setVisible(true);
-      webBrowserJFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-
-      Platform.runLater(() -> initWebBrowserFX(fxPanel));
-    }
-  }
-
-  // Invoked this on the JavaFX thread...
-  private static void initWebBrowserFX(JFXPanel fxPanel) {
-    try {
-      FXMLLoader loader = new FXMLLoader(AppActions.class.getResource(WEB_BROWSER_FXML));
-      Parent root = loader.load();
-      Scene scene = new Scene(root);
-      fxPanel.setScene(scene);
-
-      WebBrowser_Controller webBrowser_Controller = loader.getController();
-      //webBrowser_Controller.update();
-    } catch (IOException ex) {
-      log.error("Error loading webBrowserJfxPanel.", ex);
     }
   }
 

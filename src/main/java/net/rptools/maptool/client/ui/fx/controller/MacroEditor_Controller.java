@@ -14,31 +14,7 @@
  */
 package net.rptools.maptool.client.ui.fx.controller;
 
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
-import lombok.extern.log4j.Log4j2;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.fx.model.MacroEditorData;
-import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -46,9 +22,38 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.fx.model.MacroEditorData;
+import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Log4j2
 public class MacroEditor_Controller {
+
+  private static final Logger log = LogManager.getLogger();
+
   private WebView webView = new WebView();
   private WebEngine webEngine;
   private TreeItem<MacroEditorData> treeItemRoot = new TreeItem<>();
@@ -74,6 +79,19 @@ public class MacroEditor_Controller {
   @FXML private Color x2;
   @FXML private Font x3;
   @FXML private Color x4;
+
+  private static String toJavaScriptString(String value) {
+    value =
+        value
+            .replace("\u0000", "\\0")
+            .replace("'", "\\'")
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t");
+    return "\"" + value + "\"";
+  }
 
   @FXML
   private void initialize() {
@@ -135,7 +153,9 @@ public class MacroEditor_Controller {
   }
 
   private void treeTableViewSelected(TreeItem<MacroEditorData> selectedItem) {
-    if (selectedItem == null) return;
+    if (selectedItem == null) {
+      return;
+    }
 
     if (selectedItem.isLeaf()) {
       String command = selectedItem.getValue().getCommand();
@@ -145,21 +165,10 @@ public class MacroEditor_Controller {
 
       // log.info("aceFunctionCall: " + aceFunctionCall);
 
-      if (webEngine != null) webEngine.executeScript(aceFunctionCall);
+      if (webEngine != null) {
+        webEngine.executeScript(aceFunctionCall);
+      }
     }
-  }
-
-  private static String toJavaScriptString(String value) {
-    value =
-        value
-            .replace("\u0000", "\\0")
-            .replace("'", "\\'")
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t");
-    return "\"" + value + "\"";
   }
 
   public void update() {
@@ -206,23 +215,28 @@ public class MacroEditor_Controller {
     List<ZoneRenderer> zoneRenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zoneRenderer : zoneRenderers) {
       Zone zone = zoneRenderer.getZone();
-      if (zone == null) continue;
+      if (zone == null) {
+        continue;
+      }
 
       for (Token token : zone.getAllTokens()) {
         // Don't add tokens if they contain no macros
-        if (token.getMacroList(true).isEmpty()) continue;
+        if (token.getMacroList(true).isEmpty()) {
+          continue;
+        }
 
         String tokenName = getFormattedTokenName(token);
         String mapName = zone.getName();
 
         TreeItem<MacroEditorData> treeItem = new TreeItem<>();
 
-        if (tokenName.matches("(?i)^lib:.*"))
+        if (tokenName.matches("(?i)^lib:.*")) {
           treeItem = createItemCategory(treeItemLibs, tokenName);
-        else if (token.getType() == Token.Type.NPC)
+        } else if (token.getType() == Token.Type.NPC) {
           treeItem = createItemCategory(createItemCategory(treeItemNPCs, mapName), tokenName);
-        else if (token.getType() == Token.Type.PC)
+        } else if (token.getType() == Token.Type.PC) {
           treeItem = createItemCategory(createItemCategory(treeItemPCs, mapName), tokenName);
+        }
 
         addTokenMacros(token, treeItem);
       }
@@ -235,11 +249,21 @@ public class MacroEditor_Controller {
 
     treeItemRoot.getChildren().clear();
 
-    if (!treeItemCampaign.isLeaf()) treeItemRoot.getChildren().add(treeItemCampaign);
-    if (!treeItemLibs.isLeaf()) treeItemRoot.getChildren().add(treeItemLibs);
-    if (!treeItemNPCs.isLeaf()) treeItemRoot.getChildren().add(treeItemNPCs);
-    if (!treeItemPCs.isLeaf()) treeItemRoot.getChildren().add(treeItemPCs);
-    if (!treeItemGlobal.isLeaf()) treeItemRoot.getChildren().add(treeItemGlobal);
+    if (!treeItemCampaign.isLeaf()) {
+      treeItemRoot.getChildren().add(treeItemCampaign);
+    }
+    if (!treeItemLibs.isLeaf()) {
+      treeItemRoot.getChildren().add(treeItemLibs);
+    }
+    if (!treeItemNPCs.isLeaf()) {
+      treeItemRoot.getChildren().add(treeItemNPCs);
+    }
+    if (!treeItemPCs.isLeaf()) {
+      treeItemRoot.getChildren().add(treeItemPCs);
+    }
+    if (!treeItemGlobal.isLeaf()) {
+      treeItemRoot.getChildren().add(treeItemGlobal);
+    }
 
     // If we decide to make a item expanded on start...
     // treeItemLibs.setExpanded(true);
@@ -255,9 +279,11 @@ public class MacroEditor_Controller {
       macroData.setMacroGroup(macroButtonProperties.getGroup());
       macroData.setCommand(macroButtonProperties.getCommand());
 
-      if (!macroData.getMacroGroup().isEmpty())
+      if (!macroData.getMacroGroup().isEmpty()) {
         createItem(createItemCategory(tokenGroupTreeItem, macroData.getMacroGroup()), macroData);
-      else createItem(tokenGroupTreeItem, macroData);
+      } else {
+        createItem(tokenGroupTreeItem, macroData);
+      }
     }
   }
 
@@ -273,8 +299,11 @@ public class MacroEditor_Controller {
             macroButtonProperties.getCommand(),
             "");
 
-    if (!group.isEmpty()) return createItem(createItemCategory(parent, group), macroEditorData);
-    else return createItem(parent, macroEditorData);
+    if (!group.isEmpty()) {
+      return createItem(createItemCategory(parent, group), macroEditorData);
+    } else {
+      return createItem(parent, macroEditorData);
+    }
   }
 
   private TreeItem<MacroEditorData> createItem(
@@ -291,10 +320,11 @@ public class MacroEditor_Controller {
           new File(
               "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/exit.png");
 
-      if (macroEditorData.getLabel().contains("<img"))
+      if (macroEditorData.getLabel().contains("<img")) {
         file =
             new File(
                 "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/breath-weapon.png");
+      }
 
       Image image = new Image(file.toURI().toString(), false);
       ImageView imageView = new ImageView(image);
@@ -346,13 +376,19 @@ public class MacroEditor_Controller {
   }
 
   private TreeItem getTreeViewItem(TreeItem<MacroEditorData> item, MacroEditorData value) {
-    if (item.getValue() == null) return null;
+    if (item.getValue() == null) {
+      return null;
+    }
 
-    if (item != null && item.getValue().equals(value)) return item;
+    if (item != null && item.getValue().equals(value)) {
+      return item;
+    }
 
     for (TreeItem<MacroEditorData> child : item.getChildren()) {
       TreeItem<MacroEditorData> s = getTreeViewItem(child, value);
-      if (s != null) return s;
+      if (s != null) {
+        return s;
+      }
     }
 
     return null;
@@ -389,9 +425,11 @@ public class MacroEditor_Controller {
 
   private String getFormattedTokenName(Token token) {
     String tokenName = token.getName();
-    if (token.getGMName() != null)
-      if (!token.getGMName().isEmpty() && token.getGMName() != token.getName())
+    if (token.getGMName() != null) {
+      if (!token.getGMName().isEmpty() && token.getGMName() != token.getName()) {
         tokenName += " (" + token.getGMName() + ")";
+      }
+    }
 
     return tokenName;
   }

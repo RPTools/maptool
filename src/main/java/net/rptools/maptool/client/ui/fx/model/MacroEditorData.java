@@ -15,23 +15,58 @@
 package net.rptools.maptool.client.ui.fx.model;
 
 import javafx.scene.control.Label;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+// Replace me with a record or data class please...
 public class MacroEditorData {
-  //  private String displayName;
 
   private String label;
   private String macroGroup;
   private String command;
-
   private String mapName;
 
+  public MacroEditorData() {}
+
+  public MacroEditorData(String label, String macroGroup, String command, String mapName) {
+    this.label = label;
+    this.macroGroup = macroGroup;
+    this.command = command;
+    this.mapName = mapName;
+  }
+
   //  private MacroButtonProperties macroButtonProperties;
+  //  private String displayName;
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public String getMacroGroup() {
+    return macroGroup;
+  }
+
+  public void setMacroGroup(String macroGroup) {
+    this.macroGroup = macroGroup;
+  }
+
+  public String getCommand() {
+    return command;
+  }
+
+  public void setCommand(String command) {
+    this.command = command;
+  }
+
+  public String getMapName() {
+    return mapName;
+  }
+
+  public void setMapName(String mapName) {
+    this.mapName = mapName;
+  }
 
   public Label getFxLabel() {
     return new Label(label);
