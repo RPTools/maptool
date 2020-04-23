@@ -207,8 +207,11 @@ public class ExpressionParser {
     Result ret = new Result(expression);
     RunData oldData = RunData.hasCurrent() ? RunData.getCurrent() : null;
     try {
-      RunData newRunData = new RunData(ret);
-      RunData.setCurrent(newRunData);
+      RunData newRunData = oldData;
+      if (oldData == null) {
+        newRunData = new RunData(ret);
+        RunData.setCurrent(newRunData);
+      }
 
       synchronized (parser) {
         Expression xp = parser.parseExpression(expression);

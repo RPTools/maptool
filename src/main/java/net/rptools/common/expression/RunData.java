@@ -30,7 +30,7 @@ public class RunData {
   private long randomMax;
   private long randomMin;
 
-  private List<Integer> rolled = new LinkedList<>();
+  protected List<Integer> rolled = new LinkedList<>();
 
   public RunData(Result result) {
     this.result = result;
