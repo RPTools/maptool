@@ -309,11 +309,6 @@ public class Token extends BaseModel implements Cloneable {
   @SuppressWarnings("unused")
   private transient List<Vision> visionList; // 1.3b18
 
-  public enum ChangeEvent {
-    name,
-    MACRO_CHANGED
-  }
-
   private HeroLabData heroLabData;
 
   /**
@@ -1849,37 +1844,6 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
-  /**
-   * Saves the macro, resets the token panels, sends putToken to the server, and fires
-   * MACRO_CHANGED.
-   *
-   * @param prop the macro to save
-   */
-  public void saveMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
-    MapTool.getFrame().resetTokenPanels();
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
-  }
-
-  /**
-   * Deletes the macro, resets the token panels, sends putToken to the server, and fires
-   * MACRO_CHANGED.
-   *
-   * @param prop the macro to delete
-   */
-  public void deleteMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).remove(prop.getIndex());
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-    MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render
-    // timing problem.
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
-  }
-
   public void setSpeechMap(Map<String, String> map) {
     getSpeechMap().clear();
     getSpeechMap().putAll(map);
@@ -2379,6 +2343,7 @@ public class Token extends BaseModel implements Cloneable {
   public void updateProperty(Zone zone, Update update, Object[] parameters) {
     boolean lightChanged = false;
     boolean macroChanged = false;
+    boolean panelLookChanged = false; // appearance of token in a panel changed
     switch (update) {
       case setState:
         setState(parameters[0].toString(), parameters[1]);
@@ -2433,9 +2398,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case clearAllOwners:
         clearAllOwners();
+        panelLookChanged = true;
         break;
       case setOwnedByAll:
         setOwnedByAll((Boolean) parameters[0]);
+        panelLookChanged = true;
         break;
       case addOwner:
         addOwner(parameters[0].toString());
@@ -2486,9 +2453,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setName:
         setName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setGMName:
         setGMName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setVisible:
         setVisible((boolean) parameters[0]);
@@ -2519,6 +2488,7 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        panelLookChanged = true;
         break;
       case setPortraitImage:
         setPortraitImage((MD5Key) parameters[0]);
@@ -2575,7 +2545,10 @@ public class Token extends BaseModel implements Cloneable {
       getZoneRenderer().flushLight(); // flush lights if it changed
     }
     if (macroChanged) {
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
+      zone.tokenMacroChanged(this);
+    }
+    if (panelLookChanged) {
+      zone.tokenPanelChanged(this);
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }
