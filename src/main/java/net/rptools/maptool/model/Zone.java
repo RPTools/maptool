@@ -85,7 +85,9 @@ public class Zone extends BaseModel {
     LABEL_CHANGED,
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED
+    BOARD_CHANGED,
+    TOKEN_MACRO_CHANGED, // a token macro changed
+    TOKEN_PANEL_CHANGED // the panel appearance changed
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
@@ -813,6 +815,24 @@ public class Zone extends BaseModel {
    */
   public void tokenChanged(Token token) {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_MACRO_CHANGED.
+   *
+   * @param token the token that had its macro changed
+   */
+  public void tokenMacroChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_MACRO_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_PANEL_CHANGED.
+   *
+   * @param token the token that had its panel appearance changed
+   */
+  public void tokenPanelChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_PANEL_CHANGED, token));
   }
 
   /**

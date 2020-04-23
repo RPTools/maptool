@@ -124,9 +124,26 @@ public class SelectionPanel extends AbstractMacroPanel {
 
   @Override
   public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Token.ChangeEvent.MACRO_CHANGED
-        || event.eventType == Zone.Event.TOKEN_REMOVED) {
-      reset();
+    if (event.eventType == Zone.Event.TOKEN_REMOVED
+        || event.eventType == Zone.Event.TOKEN_MACRO_CHANGED) {
+      // Only resets if one of the selected tokens is among those changed/deleted.
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
+        if (event.getArg() instanceof List<?>) {
+          List<Token> tokenList = (List<Token>) event.getArg();
+          for (Token token : tokenList) {
+            if (zr.getSelectedTokenSet().contains(token.getId())) {
+              reset();
+              break;
+            }
+          }
+        } else {
+          Token token = (Token) event.getArg();
+          if (zr.getSelectedTokenSet().contains(token.getId())) {
+            reset();
+          }
+        }
+      }
     }
   }
 

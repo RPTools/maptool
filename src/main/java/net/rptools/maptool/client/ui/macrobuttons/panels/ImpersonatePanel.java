@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Zone.Event;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -138,11 +139,19 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     init();
   }
 
+  /** Resets the panel only if no token is impersonated. */
+  public void resetIfNotImpersonating() {
+    if (!currentlyImpersonating || getToken() == null) {
+      reset();
+    }
+  }
+
   @Override
   @SuppressWarnings("unchecked")
   public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Token.ChangeEvent.MACRO_CHANGED
-        || event.eventType == Zone.Event.TOKEN_REMOVED) {
+    if (event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED) {
       // Only resets if the impersonated token is among those changed/deleted
       boolean impersonatedChanged;
       if (event.getArg() instanceof List<?>) {
