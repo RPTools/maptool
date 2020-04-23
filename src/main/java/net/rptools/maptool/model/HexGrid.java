@@ -84,8 +84,8 @@ public abstract class HexGrid extends Grid {
   }
 
   @Override
-  public Point getCenterOffset() {
-    return new Point(0, 0);
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, 0);
   }
 
   /** minorRadius / edgeLength */
