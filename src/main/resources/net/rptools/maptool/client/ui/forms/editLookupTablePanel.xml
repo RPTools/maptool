@@ -135,7 +135,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Table Image</at>
+            <at name="text">Label.table.image</at>
             <at name="height">15</at>
             <at name="width">96</at>
             <at name="name">tableImage</at>
@@ -195,7 +195,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Table Image</at>
+            <at name="text">Label.table.image</at>
             <at name="height">15</at>
             <at name="width">96</at>
             <at name="name"></at>
@@ -277,7 +277,7 @@
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Name:</at>
+                 <at name="text">Label.name</at>
                  <at name="height">15</at>
                  <at name="width">38</at>
                  <at name="name"></at>
@@ -391,7 +391,7 @@
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Roll:</at>
+                 <at name="text">Label.roll</at>
                  <at name="height">15</at>
                  <at name="width">38</at>
                  <at name="name"></at>
@@ -505,7 +505,7 @@
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">(Leave blank for default)</at>
+                 <at name="text">Label.blankdefault</at>
                  <at name="height">14</at>
                  <at name="font">
                   <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -682,7 +682,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Accept</at>
+                 <at name="text">Button.accept</at>
                  <at name="height">25</at>
                  <at name="width">75</at>
                  <at name="name">acceptButton</at>
@@ -738,7 +738,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">25</at>
                  <at name="width">75</at>
                  <at name="name">cancelButton</at>
@@ -876,7 +876,7 @@
           <at name="classname">javax.swing.JCheckBox</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Show Table to Players</at>
+            <at name="text">EditLookupTablePanel.showplayer</at>
             <at name="height">17</at>
             <at name="width">996</at>
             <at name="name">visibleCheckbox</at>
@@ -933,7 +933,7 @@
           <at name="classname">javax.swing.JCheckBox</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Allow Lookup by Players</at>
+            <at name="text">EditLookupTablePanel.lookup</at>
             <at name="height">17</at>
             <at name="width">996</at>
             <at name="name">allowLookupCheckbox</at>
