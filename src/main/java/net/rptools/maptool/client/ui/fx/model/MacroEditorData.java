@@ -24,7 +24,12 @@ public class MacroEditorData {
   private String command;
   private String mapName;
 
-  public MacroEditorData() {}
+  public MacroEditorData() {
+    label = "";
+    macroGroup = "";
+    command = "";
+    mapName = "";
+  }
 
   public MacroEditorData(String label, String macroGroup, String command, String mapName) {
     this.label = label;

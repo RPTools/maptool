@@ -33,8 +33,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -314,24 +312,27 @@ public class MacroEditor_Controller {
     if (treeItem == null) {
       treeItem = new TreeItem<>();
       treeItem.setValue(macroEditorData);
-      // treeItem.setExpanded(true);
+      treeItem.setExpanded(true);
 
-      File file =
-          new File(
-              "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/exit.png");
-
-      if (macroEditorData.getLabel().contains("<img")) {
-        file =
-            new File(
-                "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/breath-weapon.png");
-      }
-
-      Image image = new Image(file.toURI().toString(), false);
-      ImageView imageView = new ImageView(image);
-      imageView.setFitWidth(20);
-      imageView.setFitHeight(20);
-
-      treeItem.setGraphic(imageView);
+      // TODO: display macro graphics? Do we support the full HTML current macro labels support?
+      // File file =
+      //    new File(
+      //        "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro
+      // Buttons/exit.png");
+      //
+      // if (macroEditorData.getLabel().contains("<img")) {
+      //  file =
+      //      new File(
+      //          "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro
+      // Buttons/breath-weapon.png");
+      // }
+      //
+      // Image image = new Image(file.toURI().toString(), false);
+      // ImageView imageView = new ImageView(image);
+      // imageView.setFitWidth(20);
+      // imageView.setFitHeight(20);
+      //
+      // treeItem.setGraphic(imageView);
 
       parent.getChildren().add(treeItem);
     }
@@ -380,6 +381,7 @@ public class MacroEditor_Controller {
       return null;
     }
 
+    // FIXME: This use to work before ripping out lombok...
     if (item != null && item.getValue().equals(value)) {
       return item;
     }
@@ -433,146 +435,4 @@ public class MacroEditor_Controller {
 
     return tokenName;
   }
-
-  private void filterTree() {
-    //    ObservableList<YourObjectClass> actualList = ...;
-    //    FilteredList<YourObjectClass> filteredList = new FilteredList<>(actualList);
-    //
-    //    TableView table = ...;
-    //    table.setItems(filteredList);
-    //
-    //// to filter
-    //    filteredList.setPredicate(
-    //            new Predicate<YourObjectClass>(){
-    //              public boolean test(YourObjectClass t){
-    //                return false; // or true
-    //              }
-    //            }
-    //    );
-  }
-
-  //  // TODO PLACEHOLDER
-  //  private void hideSplitPaneTest() {
-  //    //    Node splitPane;
-  //    //    for (Node node : splitPane.lookupAll(".split-pane-divider")) {
-  //    //      node.setVisible(false);
-  //    //    }
-  //  }
-
-  // For alt info:
-  // https://stackoverflow.com/questions/37955425/override-treetablecell-rendering-in-javafx
-
-  //  private static class MacroTreeCell extends TreeCell<MacroEditorData> {
-  //    Label label;
-  //
-  //    public MacroTreeCell() {
-  //      label = new Label();
-  //    }
-  //
-  //    @Override
-  //    protected void updateItem(MacroButtonProperties item, boolean empty) {
-  //      super.updateItem(item, empty);
-  //      if (!empty && item != null) {
-  //        label.setText(item.getLabel());
-  //        setGraphic(label);
-  //      }
-  //    }
-  //  }
-
-  //  private void initMacroCommandViewRSyntax() {
-  //    AbstractTokenMakerFactory atmf =
-  //            (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-  //    atmf.putMapping(
-  //            "text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax");
-  //
-  //    // Expanding use of tooltip - already accepts HTML so lets show it
-  //    //    getToolTipTextField().setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-  //    //    getToolTipTextField().setLineWrap(true);
-  //    //    getToolTipTextField().setWrapStyleWord(true);
-  //    //    getToolTipTextField().setTabSize(2);
-  //
-  //    // Macro Editor setup
-  //    macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
-  //
-  //    macroEditorRSyntaxTextArea.setEditable(true);
-  //    macroEditorRSyntaxTextArea.setCodeFoldingEnabled(true);
-  //    macroEditorRSyntaxTextArea.setLineWrap(true);
-  //    macroEditorRSyntaxTextArea.setWrapStyleWord(true);
-  //    macroEditorRSyntaxTextArea.setTabSize(4);
-  //
-  //    FoldParserManager.get().addFoldParserMapping("text/MapToolScript", new CurlyFoldParser());
-  //
-  //    //
-  // https://stackoverflow.com/questions/39613186/how-to-add-keywords-for-rsyntaxtextarea-for-syntax-highlighting
-  //    CompletionProvider provider = new MapToolScriptAutoComplete().get();
-  //    AutoCompletion ac = new AutoCompletion(provider);
-  //    ac.setAutoCompleteEnabled(true);
-  //    ac.setAutoActivationEnabled(true);
-  //    ac.setAutoActivationDelay(500);
-  //    ac.setShowDescWindow(true);
-  //    ac.setAutoCompleteSingleChoices(false);
-  //    ac.install(macroEditorRSyntaxTextArea);
-  //
-  //    // Set the color style via Theme
-  //    try {
-  //      File themeFile =
-  //              new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() +
-  // ".xml");
-  //      Theme theme = Theme.load(new FileInputStream(themeFile));
-  //      theme.apply(macroEditorRSyntaxTextArea);
-  //      //      theme.apply(getToolTipTextField());
-  //
-  //      macroEditorRSyntaxTextArea.revalidate();
-  //    } catch (IOException e) {
-  //      e.printStackTrace();
-  //    }
-  //
-  //    // Listen for changes in the text
-  //    macroEditorRSyntaxTextArea
-  //            .getDocument()
-  //            .addDocumentListener(
-  //                    new DocumentListener() {
-  //                      public void changedUpdate(DocumentEvent e) {
-  //                        leftStatusLabel.setText("Ready 1");
-  //                      }
-  //
-  //                      public void removeUpdate(DocumentEvent e) {
-  //                        leftStatusLabel.setText("Ready 2");
-  //                      }
-  //
-  //                      public void insertUpdate(DocumentEvent e) {
-  //                        leftStatusLabel.setText("Ready 3");
-  //                      }
-  //                    });
-  //
-  //    csp = new CollapsibleSectionPanel();
-  //    //    ((GridView) panel.getComponentByName("macroEditorPanel")).add(csp);
-  //
-  //    csp.add(new ErrorStrip(macroEditorRSyntaxTextArea), BorderLayout.LINE_END);
-  //
-  //    RTextScrollPane macroEditorRTextScrollPane = new
-  // RTextScrollPane(macroEditorRSyntaxTextArea);
-  //    macroEditorRTextScrollPane.setLineNumbersEnabled(true);
-  //    // replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane",
-  //    // macroEditorRTextScrollPane);
-  //
-  //    //    csp.add(new ErrorStrip(getToolTipTextField()), BorderLayout.LINE_END);
-  //
-  //    csp.add(macroEditorRTextScrollPane);
-  //
-  //    final SwingNode rSyntaxSwingNode = new SwingNode();
-  //    createSwingContent(rSyntaxSwingNode, csp);
-  //
-  //    AnchorPane.setBottomAnchor(rSyntaxSwingNode, 0.0);
-  //    AnchorPane.setLeftAnchor(rSyntaxSwingNode, 0.0);
-  //    AnchorPane.setRightAnchor(rSyntaxSwingNode, 0.0);
-  //    AnchorPane.setTopAnchor(rSyntaxSwingNode, 0.0);
-  //
-  //    macroEditPane.getChildren().add(rSyntaxSwingNode);
-  //  }
-  //
-  //  private void createSwingContent(SwingNode rSyntaxSwingNode, CollapsibleSectionPanel csp) {
-  //    SwingUtilities.invokeLater(() -> rSyntaxSwingNode.setContent(csp));
-  //  }
-
 }
