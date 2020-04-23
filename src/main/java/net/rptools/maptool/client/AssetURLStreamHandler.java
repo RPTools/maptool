@@ -111,7 +111,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       BufferedImage img = ImageManager.getImageAndWait(assetId);
 
       Asset asset = AssetManager.getAsset(assetId);
-      if (asset != null && asset.getImage() != null) {
+      if (asset != null && asset.getData() != null) {
         if (scaleW > 0 || scaleH > 0) {
           switch (scaleW) {
             case -1:
@@ -134,7 +134,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
           g.drawImage(img, 0, 0, scaleW, scaleH, null);
           g.dispose();
           data = ImageUtil.imageToBytes(bimg, "png"); // assume png because translucent.
-        } else data = asset.getImage();
+        } else data = asset.getData();
       } else {
         log.error("Could not find asset: " + assetId);
         data = new byte[] {};

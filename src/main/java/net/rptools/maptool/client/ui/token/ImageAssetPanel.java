@@ -220,7 +220,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
     if (assets == null || assets.isEmpty() || !(assets.get(0) instanceof Asset)) {
       return;
     }
-    setImageId(((Asset) assets.get(0)).getId());
+    setImageId(((Asset) assets.get(0)).getMD5Key());
   }
 
   public void dropActionChanged(DropTargetDragEvent dtde) {}

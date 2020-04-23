@@ -19,8 +19,8 @@ import java.io.Serializable;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 
-/** Global unique identificator object. */
-public class GUID extends Object implements Serializable, Comparable<GUID> {
+/** Global unique identification object. */
+public final class GUID extends Object implements Serializable, Comparable<GUID> {
   /** Serial version unique identifier. */
   private static final long serialVersionUID = 6361057925697403643L;
 
@@ -31,25 +31,37 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   public static final int GUID_BUCKETS = 100;
   // NOTE: THIS CAN NEVER BE CHANGED, OR IT WILL AFFECT ALL THINGS THAT PREVIOUSLY USED IT
 
+  /** The id value. */
   private final byte[] baGUID;
 
   // Cache of the hashCode for a GUID
   private transient int hash;
 
+  /** Creates a new {@code GUID} object with a new id value. */
   public GUID() {
     this.baGUID = generateGUID();
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified GUID value. */
+  /**
+   * Creates a new GUID based on the specified GUID value
+   *
+   * @param baGUID the id value.
+   */
   public GUID(byte[] baGUID) throws InvalidGUIDException {
-    this.baGUID = baGUID;
+    this.baGUID = baGUID.clone();
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified hexadecimal-code string. */
+  /**
+   * Creates a new GUID based on the specified hexadecimal-code string.
+   *
+   * @param strGUID a {@code String} representing the id value.
+   */
   public GUID(String strGUID) {
-    if (strGUID == null) throw new InvalidGUIDException("GUID is null");
+    if (strGUID == null) {
+      throw new InvalidGUIDException("GUID is null");
+    }
 
     this.baGUID = HexCode.decode(strGUID);
     validateGUID();
@@ -57,24 +69,38 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 
   /** Ensures the GUID is legal. */
   private void validateGUID() throws InvalidGUIDException {
-    if (baGUID == null) throw new InvalidGUIDException("GUID is null");
-    if (baGUID.length != GUID_LENGTH)
+    if (baGUID == null) {
+      throw new InvalidGUIDException("GUID is null");
+    }
+    if (baGUID.length != GUID_LENGTH) {
       throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
+    }
   }
 
-  /** Returns the GUID representation of the {@link byte} array argument. */
+  /**
+   * Returns the GUID representation of the {@link byte} array argument.
+   *
+   * @param bits the id value.
+   */
   public static GUID valueOf(byte[] bits) {
-    if (bits == null) return null;
+    if (bits == null) {
+      return null;
+    }
     return new GUID(bits);
   }
 
-  /** Returns the GUID representation of the {@link String} argument. */
+  /**
+   * Returns the GUID representation of the {@link String} argument.
+   *
+   * @param s The {@code String} value of the id.
+   */
   public static GUID valueOf(String s) {
-    if (s == null) return null;
+    if (s == null) {
+      return null;
+    }
     return new GUID(s);
   }
 
-  /** Determines whether two GUIDs are equal. */
   @Override
   public boolean equals(Object object) {
     if (object == null) {
@@ -95,18 +121,24 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 
     // Compare bytes.
     for (int i = 0; i < GUID_LENGTH; i++) {
-      if (this.baGUID[i] != guid.baGUID[i]) return false;
+      if (this.baGUID[i] != guid.baGUID[i]) {
+        return false;
+      }
     }
 
     // All tests pass.
     return true;
   }
 
+  /**
+   * Returns the {@link byte} array representing the id value.
+   *
+   * @return the {@link byte} array representing the id value.
+   */
   public byte[] getBytes() {
-    return baGUID;
+    return baGUID.clone();
   }
 
-  /** Returns a string for the GUID. */
   @Override
   public String toString() {
     return HexCode.encode(baGUID, false); // false means uppercase
@@ -122,10 +154,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   public int hashCode() {
     int h = hash;
     if (h == 0) {
-      byte val[] = baGUID;
-      int len = GUID_LENGTH;
 
-      for (int i = 0; i < len; i++) h = 31 * h + val[i];
+      for (int i = 0; i < GUID_LENGTH; i++) h = 31 * h + baGUID[i];
       hash = h;
     }
     return h;
@@ -134,7 +164,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   /**
    * Returns a new non-numeric GUID using UUID to generate a unique alphanumeric string
    *
-   * @return a byte[]
+   * @return a byte array representing the new id.
    */
   public static byte[] generateGUID() throws InvalidGUIDException {
     String newGUID = UUID.randomUUID().toString().replaceAll("-", "");
@@ -153,10 +183,13 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     }
   }
 
+  @Override
   public int compareTo(GUID o) {
     if (o != this) {
       for (int i = 0; i < GUID_LENGTH; i++) {
-        if (this.baGUID[i] != o.baGUID[i]) return this.baGUID[i] - o.baGUID[i];
+        if (this.baGUID[i] != o.baGUID[i]) {
+          return this.baGUID[i] - o.baGUID[i];
+        }
       }
     }
     return 0;

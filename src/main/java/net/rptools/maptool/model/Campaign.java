@@ -37,6 +37,8 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.NoteBookManager;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -53,8 +55,7 @@ public class Campaign {
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
-  private final Map<GUID, Zone> zones =
-      Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+  private final Map<GUID, Zone> zones;
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
@@ -96,6 +97,9 @@ public class Campaign {
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
 
+  /** The {@link NoteBook} manages all the {@link MapBookmark}s for the campaign. */
+  private final transient NoteBookManager noteBookManager;
+
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
 
@@ -119,6 +123,8 @@ public class Campaign {
     gmMacroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
+    zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+    noteBookManager = new NoteBookManager();
   }
 
   private void checkCampaignPropertyConversion() {
@@ -155,6 +161,9 @@ public class Campaign {
    */
   public Campaign(Campaign campaign) {
     name = campaign.getName();
+    zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
+    noteBookManager = new NoteBookManager();
 
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
@@ -169,7 +178,9 @@ public class Campaign {
     for (Entry<GUID, Zone> entry : zonesToCopy.entrySet()) {
       Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
+      // TODO: CDW: noteBookManager.zoneAdded(campaign.getId());
     }
+
     campaignProperties = new CampaignProperties(campaign.campaignProperties);
     macroButtonProperties =
         new ArrayList<MacroButtonProperties>(campaign.getMacroButtonPropertiesArray());
@@ -381,10 +392,16 @@ public class Campaign {
    */
   public void putZone(Zone zone) {
     zones.put(zone.getId(), zone);
+    // TODO: CDW: noteBookManager.zoneAdded(zone.getId());
   }
 
   public void removeAllZones() {
+    Set<GUID> removedZoneIds = Set.copyOf(zones.keySet());
     zones.clear();
+
+    for (GUID zid : removedZoneIds) {
+      // TODO: CDW: noteBookManager.zoneRemoved(zid);
+    }
   }
 
   /**
@@ -394,10 +411,11 @@ public class Campaign {
    */
   public void removeZone(GUID id) {
     zones.remove(id);
+    // TODO: CDW: noteBookManager.zoneRemoved(id);
   }
 
   public boolean containsAsset(Asset asset) {
-    return containsAsset(asset.getId());
+    return containsAsset(asset.getMD5Key());
   }
 
   public boolean containsAsset(MD5Key key) {
@@ -680,5 +698,25 @@ public class Campaign {
 
   public void setExportCampaignDialog(CampaignExportDialog d) {
     campaignExportDialog = d;
+  }
+
+  /**
+   * Read resolve to teo replace Object from deserialization.
+   *
+   * @return a {@code Campaign} from deserialization.
+   * @implNote A {@code readResolve()} method is required to ensure that final transient fields are
+   *     correctly initialized.
+   */
+  private Object readResolve() {
+    return new Campaign(this);
+  }
+
+  /**
+   * Returns the {@link NoteBookManager} for the {@code Campaign}.
+   *
+   * @return the {@link NoteBookManager} for the {@code Campaign}.
+   */
+  public NoteBookManager getNoteBookManager() {
+    return noteBookManager;
   }
 }

@@ -123,7 +123,19 @@ public class HTMLWebViewManager {
 
   /** Meta-tag that blocks external file access. */
   private static final String SCRIPT_BLOCK_EXT =
-      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
+      "<meta http-equiv=\"Content-Security-Policy\" "
+          + "content=\" "
+          + " default-src asset: "
+          + " https://code.jquery.com " // JQuery CDN
+          + " https://cdn.jsdelivr.net " // JSDelivr CDN
+          + " https://stackpath.bootstrapcdn.com " // Bootstrap CDN
+          + " https://unpkg.com " // unpkg CDN
+          + " https://cdnjs.cloudflare.com " // CloudFlare JS CDN
+          + " https://ajax.googleapis.com " // Google CDN
+          + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
+          + " 'unsafe-inline' 'unsafe-eval' ; "
+          + " font-src https://fonts.gstatic.com 'self'"
+          + "\">\n";
 
   /** The default rule for the body tag. */
   static final String CSS_BODY =
@@ -156,7 +168,7 @@ public class HTMLWebViewManager {
           + "for(let mutation of mutations) {if (mutation.type === 'childList') {for (let i = 0; i < mutation.addedNodes.length; i++) {MapTool.handleAddedNode(mutation.addedNodes[i]);}}}});"
           + "maptool_observer.observe(document.documentElement, { attributes: false, characterData: false, childList: true, subtree: true });";
 
-  HTMLWebViewManager() {}
+  public HTMLWebViewManager() {}
 
   /**
    * Setup the WebView

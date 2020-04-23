@@ -117,6 +117,8 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
+import net.rptools.maptool.client.ui.notebook.NoteBookPanel;
+import net.rptools.maptool.client.ui.notebook.NoteBookUI;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -216,6 +218,11 @@ public class MapToolFrame extends DefaultDockableHolder
   private final TextureChooserPanel textureChooserPanel;
   private LookupTablePanel lookupTablePanel;
 
+  /** The UI element for displaying note books. */
+  private final NoteBookPanel noteBookPanel = NoteBookPanel.createMapBookmarkPanel();
+
+  private final NoteBookUI noteBookUI;
+
   // External filename support
   private JFileChooser loadPropsFileChooser;
   private JFileChooser loadFileChooser;
@@ -251,6 +258,10 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+
+  public void showNoteBook() {
+    noteBookUI.show();
+  }
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -381,7 +392,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
+  public MapToolFrame(JMenuBar menuBar, NoteBookUI nbUI) {
     // Set up the frame
     super(AppConstants.APP_NAME);
 
@@ -400,7 +411,9 @@ public class MapToolFrame extends DefaultDockableHolder
       log.error(msg, ioe);
       System.err.println(msg);
     }
-    // Notify duration
+
+    noteBookUI = nbUI;
+
     initializeNotifyDuration();
 
     // Components
@@ -584,7 +597,8 @@ public class MapToolFrame extends DefaultDockableHolder
     CAMPAIGN("Campaign"),
     GM("Gm"),
     SELECTION("Selected"),
-    IMPERSONATED("Impersonate");
+    IMPERSONATED("Impersonate"),
+    NOTEBOOK("NoteBook");
     // @formatter:on
 
     private String displayName;
@@ -628,6 +642,7 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.GM));
     getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
+    getDockingManager().addFrame(getFrame(MTFrame.NOTEBOOK));
 
     try {
       getDockingManager()
@@ -687,6 +702,10 @@ public class MapToolFrame extends DefaultDockableHolder
         MTFrame.INITIATIVE,
         createDockingFrame(
             MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+    frameMap.put(
+        MTFrame.NOTEBOOK,
+        createDockingFrame(
+            MTFrame.NOTEBOOK, noteBookPanel, new ImageIcon(AppStyle.bookmarksPanelImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -733,6 +752,10 @@ public class MapToolFrame extends DefaultDockableHolder
       lookupTablePanel = new LookupTablePanel();
     }
     return lookupTablePanel;
+  }
+
+  public NoteBookPanel getNoteBookPanel() {
+    return noteBookPanel;
   }
 
   /**
@@ -1401,14 +1424,14 @@ public class MapToolFrame extends DefaultDockableHolder
           private void createZone(Asset asset) {
             Zone zone = ZoneFactory.createZone();
             zone.setName(asset.getName());
-            BufferedImage image = ImageManager.getImageAndWait(asset.getId());
+            BufferedImage image = ImageManager.getImageAndWait(asset.getMD5Key());
             if (image.getWidth() < 200 || image.getHeight() < 200) {
               zone.setBackgroundPaint(new DrawableTexturePaint(asset));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             } else {
-              zone.setMapAsset(asset.getId());
+              zone.setMapAsset(asset.getMD5Key());
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             }
             MapPropertiesDialog newMapDialog =
                 MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());

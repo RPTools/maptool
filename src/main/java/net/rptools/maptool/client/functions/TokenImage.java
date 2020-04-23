@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonObject;
+import java.awt.Image;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -27,6 +29,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.maptool.util.ImageManager;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -148,7 +151,25 @@ public class TokenImage extends AbstractFunction {
       if (asset == null) {
         return "";
       } else {
-        return asset.getProperties();
+        JsonObject properties = new JsonObject();
+        properties.addProperty("type", asset.getType().toString().toLowerCase());
+        properties.addProperty("subtype", asset.getExtension());
+        properties.addProperty("id", asset.getMD5Key().toString());
+        properties.addProperty("name", asset.getName());
+
+        Image img =
+            ImageManager.getImageAndWait(
+                asset.getMD5Key()); // wait until loaded, so width/height are correct
+        String status = "loaded";
+        if (img == ImageManager.BROKEN_IMAGE) {
+          status = "broken";
+        } else if (img == ImageManager.TRANSFERING_IMAGE) {
+          status = "transferring";
+        }
+        properties.addProperty("status", status);
+        properties.addProperty("width", img.getWidth(null));
+        properties.addProperty("height", img.getHeight(null));
+        return properties;
       }
     }
 
