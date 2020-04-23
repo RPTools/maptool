@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -22,9 +22,7 @@ import java.awt.geom.Area;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -108,21 +106,49 @@ public class FacingTool extends DefaultTool {
     }
     Area visibleArea = null;
     Set<GUID> remoteSelected = new HashSet<GUID>();
+
+    String name = MapTool.getPlayer().getName();
+    boolean isGM = MapTool.getPlayer().isGM();
+    boolean ownerReveal; // if true, reveal FoW if current player owns the token.
+    boolean hasOwnerReveal; // if true, reveal FoW if token has an owner.
+    boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
+    if (MapTool.isPersonalServer()) {
+      ownerReveal =
+          hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
+    } else {
+      ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
+      hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();
+      noOwnerReveal = isGM && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens();
+    }
     for (GUID tokenGUID : selectedTokenSet) {
       Token token = renderer.getZone().getToken(tokenGUID);
       if (token == null) {
         continue;
       }
       token.setFacing(degrees);
-      // if has fog(required)
-      // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
-      if (renderer.getZone().hasFog()
-              && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM()))
-          || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+
+      // Old Logic
+      // if (renderer.getZone().hasFog()
+      //        && ((AppPreferences.getAutoRevealVisionOnGMMovement() &&
+      // MapTool.getPlayer().isGM()))
+      //    || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+      //  visibleArea = renderer.getZoneView().getVisibleArea(token);
+      //  remoteSelected.add(token.getId());
+      //  renderer.getZone().exposeArea(visibleArea, token);
+      // }
+      boolean revealFog = false;
+      if (renderer.getZone().hasFog()) {
+        if (ownerReveal && token.isOwner(name)) revealFog = true;
+        else if (hasOwnerReveal && token.hasOwners()) revealFog = true;
+        else if (noOwnerReveal && !token.hasOwners()) revealFog = true;
+      }
+
+      if (revealFog) {
         visibleArea = renderer.getZoneView().getVisibleArea(token);
         remoteSelected.add(token.getId());
         renderer.getZone().exposeArea(visibleArea, token);
       }
+
       renderer.flushFog();
     }
     // XXX Instead of calling exposeFoW() when visibleArea is null, shouldn't we just skip it?
@@ -142,8 +168,8 @@ public class FacingTool extends DefaultTool {
       if (token == null) {
         continue;
       }
-      renderer.flush(token);
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      // Send the facing to other players
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, token.getFacing());
     }
     // Go back to the pointer tool
     resetTool();

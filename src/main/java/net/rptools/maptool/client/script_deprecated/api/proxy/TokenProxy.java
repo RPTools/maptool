@@ -42,11 +42,11 @@ public class TokenProxy {
   }
 
   // Bars
-  public Object getBar(String bar) throws ParserException {
+  public Object getBar(String bar) {
     return TokenBarFunction.getInstance().getValue(token, bar);
   }
 
-  public void setBar(String bar, Object value) throws ParserException {
+  public void setBar(String bar, Object value) {
     TokenBarFunction.getInstance().setValue(token, bar, value);
   }
 
@@ -55,7 +55,7 @@ public class TokenProxy {
     return TokenHaloFunction.getInstance().getHalo(token).toString();
   }
 
-  public void setHalo(String color) throws ParserException {
+  public void setHalo(String color) {
     TokenHaloFunction.getInstance().setHalo(token, color);
   }
 
@@ -64,8 +64,8 @@ public class TokenProxy {
     return TokenNameFunction.getInstance().getName(token);
   }
 
-  public void setName(Object value) {
-    TokenNameFunction.getInstance().setName(token, value.toString());
+  public void setName(Object value) throws ParserException {
+    TokenNameFunction.setName(token, value.toString());
   }
 
   // GM Name

@@ -52,7 +52,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,8 +60,6 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of
  * the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
- *
- * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class ExportDialog extends JDialog implements IIOWriteProgressListener {
@@ -536,8 +533,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
   /**
    * This is the top-level screen-capture routine. It sends the resulting PNG image to the location
-   * previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()}
-   * for "normal" screenshots, but that's just until this code is considered stable enough.
+   * previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot} for
+   * "normal" screenshots, but that's just until this code is considered stable enough.
    *
    * @throws Exception
    */
@@ -560,16 +557,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           }
           MapTool.getFrame()
               .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
-          ByteArrayOutputStream imageOut = new ByteArrayOutputStream();
-          try {
+          try (ByteArrayOutputStream imageOut = new ByteArrayOutputStream()) {
             ImageIO.write(screenCap, "png", imageOut);
             screenCap = null; // Free up the memory as soon as possible
             MapTool.getFrame()
                 .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
             exportLocation.putContent(
                 new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
-          } finally {
-            IOUtils.closeQuietly(imageOut);
           }
           MapTool.getFrame()
               .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));

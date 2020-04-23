@@ -73,6 +73,7 @@ import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
@@ -128,7 +129,11 @@ public class CommandPanel extends JPanel implements Observer {
     chatProcessor.install(smileyRuleGroup);
   }
 
-  /** Whether the player is currently impersonating a token */
+  /**
+   * Whether the player is currently impersonating a token
+   *
+   * @return {@code true} if there is a token being impersonated.
+   */
   public boolean isImpersonating() {
     return identityName != null;
   }
@@ -136,6 +141,8 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * The name currently in use; if the user is not impersonating a token, this will return the
    * player's name.
+   *
+   * @return the identity to use.
    */
   public String getIdentity() {
     if (identityName == null) {
@@ -151,7 +158,7 @@ public class CommandPanel extends JPanel implements Observer {
    * (perhaps an arbitrary strings was used via {@link #setIdentityName(String)}?) then <code>null
    * </code> is returned.
    *
-   * @return
+   * @return ID of the token that is being impersonated if it was set via ID.
    */
   public GUID getIdentityGUID() {
     return identityGUID;
@@ -162,7 +169,7 @@ public class CommandPanel extends JPanel implements Observer {
       identityGUID = token.getId();
       identityName = token.getName();
       avatarPanel.setImage(ImageManager.getImageAndWait(token.getImageAssetId()));
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     } else {
       identityGUID = null;
       identityName = null;
@@ -176,7 +183,7 @@ public class CommandPanel extends JPanel implements Observer {
    * #getIdentity()} to retrieve the token name and/or token GUID for reporting to the user. (Name
    * is preferred.)
    *
-   * @param guid
+   * @param guid sets the token being impersonated to the token with the id passed in.
    */
   public void setIdentityGUID(GUID guid) {
     Token token = null;
@@ -191,7 +198,7 @@ public class CommandPanel extends JPanel implements Observer {
    * impersonation of a token that doesn't exist; the name is stored with a <code>null</code> for
    * the GUID.
    *
-   * @param identity
+   * @param identity sets the impersonated token by name.
    */
   public void setIdentityName(String identity) {
     if (identity == null) {
@@ -203,7 +210,7 @@ public class CommandPanel extends JPanel implements Observer {
       setIdentityImpl(token);
       // For the name to be used, even if there is no such token
       identityName = identity;
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     }
     HTMLFrameFactory.impersonateToken();
   }
@@ -238,7 +245,7 @@ public class CommandPanel extends JPanel implements Observer {
       scrollLockButton = new JToggleButton();
       scrollLockButton.setIcon(new ImageIcon(AppStyle.chatScrollImage));
       scrollLockButton.setSelectedIcon(new ImageIcon(AppStyle.chatScrollLockImage));
-      scrollLockButton.setToolTipText("Scroll lock");
+      scrollLockButton.setToolTipText(I18N.getText("action.chat.scrolllock.tooltip"));
       scrollLockButton.setUI(new BasicToggleButtonUI());
       scrollLockButton.setBorderPainted(false);
       scrollLockButton.setFocusPainted(false);
@@ -258,7 +265,7 @@ public class CommandPanel extends JPanel implements Observer {
       chatNotifyButton = new JToggleButton();
       chatNotifyButton.setIcon(new ImageIcon(AppStyle.showTypingNotification));
       chatNotifyButton.setSelectedIcon(new ImageIcon(AppStyle.hideTypingNotification));
-      chatNotifyButton.setToolTipText("Show/hide typing notification");
+      chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);
       chatNotifyButton.setFocusPainted(false);
@@ -365,7 +372,7 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * Creates the label for live typing.
    *
-   * @return
+   * @return a {@link JTextPane} to be displayed.
    */
   public JTextPane getCommandTextArea() {
     if (commandTextArea == null) {
@@ -451,7 +458,7 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * Disables the chat notification toggle if the GM enforces notification
    *
-   * @param boolean whether to disable the toggle
+   * @param disable whether to disable the toggle
    */
   public void disableNotifyButton(Boolean disable) {
     // Little clumsy, but when the menu item is _enabled_, the button should be _disabled_
@@ -521,13 +528,14 @@ public class CommandPanel extends JPanel implements Observer {
   public void cancelCommand() {
     commandTextArea.setText("");
     validate();
-    MapTool.getFrame().hideCommandPanel();
+    // Why were we closing the chat window on Esc?
+    // MapTool.getFrame().hideCommandPanel();
   }
 
   /** Inserts a newline into the chat input box. */
   public void insertNewline() {
     String text = commandTextArea.getText();
-    commandTextArea.replaceSelection("\n");
+    commandTextArea.setText(text + "\n");
   }
 
   public void startMacro() {
@@ -622,7 +630,7 @@ public class CommandPanel extends JPanel implements Observer {
       setMinimumSize(new Dimension(15, 15));
       setPreferredSize(new Dimension(15, 15));
       setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      setToolTipText("Set the color of your speech text");
+      setToolTipText(I18N.getText("action.chat.color.tooltip"));
 
       addMouseListener(
           new MouseAdapter() {
@@ -747,7 +755,7 @@ public class CommandPanel extends JPanel implements Observer {
             actionObject,
             new AbstractAction() {
               public void actionPerformed(ActionEvent event) {
-                requestFocus();
+                requestFocusInWindow();
               }
             });
   }

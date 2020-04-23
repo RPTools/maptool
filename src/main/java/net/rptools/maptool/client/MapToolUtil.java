@@ -126,6 +126,8 @@ public class MapToolUtil {
    *
    * @param zone the map that the token is being placed onto
    * @param token the new token to be named
+   * @param force if {@code false} a new name will not be generated unless the token naming
+   *     prefrence in {@link AppPreferences} is {@link Token#NAME_USE_CREATURE}.
    * @return the new token's algorithmically generated name
    */
   public static String nextTokenId(Zone zone, Token token, boolean force) {
@@ -175,8 +177,7 @@ public class MapToolUtil {
         }
         do {
           newNum = randomSuffixFactory.nextSuffixForToken(newName);
-        } while (zone.getTokenByName(newName + " " + newNum) != null
-            && zone.getTokenByGMName(Integer.toString(newNum)) != null);
+        } while (nameIsDuplicate(zone, newName, newNum, addNumToName, addNumToGM));
 
       } else {
         newNum = zone.findFreeNumber(addNumToName ? newName : null, addNumToGM);
@@ -186,9 +187,26 @@ public class MapToolUtil {
         newName += " ";
         newName += newNum;
       }
-      if (addNumToGM) token.setGMName(Integer.toString(newNum));
+
+      // GM names just get a number
+      if (addNumToGM) {
+        token.setGMName(Integer.toString(newNum));
+      }
     }
     return newName;
+  }
+
+  private static boolean nameIsDuplicate(
+      Zone zone, String newName, Integer newNum, boolean playerName, boolean gmName) {
+    boolean result = false;
+
+    if (playerName) {
+      result = zone.getTokenByName(newName + " " + newNum) != null;
+    }
+    if (gmName) {
+      result = zone.getTokenByGMName(Integer.toString(newNum)) != null;
+    }
+    return result;
   }
 
   public static boolean isDebugEnabled() {

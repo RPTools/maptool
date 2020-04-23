@@ -27,6 +27,10 @@ public class TextMessage {
     public static final int ME = 3; // Targeted to the current maptool client
     public static final int GROUP = 4; // All in the group
     public static final int WHISPER = 5; // To a specific player/character
+    public static final int GMME = 6; // Self and gms
+    public static final int NOTME = 7; // To all but self
+    public static final int NOTGM = 8; // To non-gms
+    public static final int NOTGMME = 9; // To non-gms that aren't self
   }
 
   private int channel;
@@ -61,6 +65,33 @@ public class TextMessage {
         Channel.ME, null, MapTool.getPlayer().getName(), message, transformHistory);
   }
 
+  /**
+   * Creates a TextMessage address to the GMs and the current player.
+   *
+   * @param transformHistory the transform history of the message
+   * @param message the text of the message
+   * @return the message
+   */
+  public static TextMessage gmMe(List<String> transformHistory, String message) {
+    return new TextMessage(
+        Channel.GMME, null, MapTool.getPlayer().getName(), message, transformHistory);
+  }
+
+  public static TextMessage notMe(List<String> transformHistory, String message) {
+    return new TextMessage(
+        Channel.NOTME, null, MapTool.getPlayer().getName(), message, transformHistory);
+  }
+
+  public static TextMessage notGm(List<String> transformHistory, String message) {
+    return new TextMessage(
+        Channel.NOTGM, null, MapTool.getPlayer().getName(), message, transformHistory);
+  }
+
+  public static TextMessage notGmMe(List<String> transformHistory, String message) {
+    return new TextMessage(
+        Channel.NOTGMME, null, MapTool.getPlayer().getName(), message, transformHistory);
+  }
+
   public static TextMessage group(List<String> transformHistory, String target, String message) {
     return new TextMessage(
         Channel.GROUP, target, MapTool.getPlayer().getName(), message, transformHistory);
@@ -69,6 +100,10 @@ public class TextMessage {
   public static TextMessage whisper(List<String> transformHistory, String target, String message) {
     return new TextMessage(
         Channel.WHISPER, target, MapTool.getPlayer().getName(), message, transformHistory);
+  }
+
+  public boolean isFromSelf() {
+    return MapTool.getPlayer().getName().equalsIgnoreCase(getSource());
   }
 
   @Override
@@ -136,6 +171,22 @@ public class TextMessage {
 
   public boolean isMe() {
     return channel == Channel.ME;
+  }
+
+  public boolean isGmMe() {
+    return channel == Channel.GMME;
+  }
+
+  public boolean isNotMe() {
+    return channel == Channel.NOTME;
+  }
+
+  public boolean isNotGm() {
+    return channel == Channel.NOTGM;
+  }
+
+  public boolean isNotGmMe() {
+    return channel == Channel.NOTGMME;
   }
 
   public boolean isGroup() {

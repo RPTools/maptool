@@ -1,7 +1,7 @@
-| Branch  | Travis | AppVeyor |
-| :---    |  :--:  |  :--:    |
+| Branch  | Travis | AppVeyor | Localization |
+| :---    |  :--:  |  :--:    |   :--:       |
 | master  | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/master?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/master)
-| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop)
+| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
 
 
 
@@ -28,7 +28,7 @@ Requirements
 Version Numbers
 ---------------
 
-The RPTools team intends to use the "1.5" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.6".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used.)  In any case, the next digit will be even-numbered for stable releases and odd-numbered for development builds.
+The RPTools team intends to use the "1.5" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.6".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used). Our plan to start using [Semantic Versioning](https://semver.org/) more closely from 1.6.0 and up.
 
 All of the exciting new features will be happening in the development builds.  Major bugs or security fixes will be ported between the stable and development branches so that they are available in both.
 
@@ -38,6 +38,8 @@ Resources
  - **Website:** http://rptools.net/ 
  - **Forums:**  http://forums.rptools.net 
  - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+ - **Discord:** https://discord.gg/gevEtpC
+ 
 
 Configuration Steps Prior to Building MapTool
 ---------------------------------------------
@@ -52,37 +54,66 @@ git clone git@github.com:RPTools/maptool.git
 
 From here on, it is expected that you are running these commands from within the directory that was created when you cloned the repository (referred to as the _working directory_ in Git-speak).
 
-[Gradle](http://gradle.org/) is used to build MapTool. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will take a while as it downloads everything it needs.
+[Gradle](http://gradle.org/) is used to build MapTool. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will download and cache the version of gradle our project is currently using as well as any dependencies.
 
-
-* On Linux and macOS (and other Unix systems):
+Building MapTool from Terminal*
+---------------------------------
 ```
-./gradlew wrapper --gradle-version=5.3.1 --distribution-type=bin
-```
-
-* On Windows, remember to use the backslash instead:
-```
-.\gradlew wrapper --gradle-version=5.3.1 --distribution-type=bin
+./gradlew clean build
 ```
 
-You now have Gradle updated to version 5.3.1 with any updates applied to
-the wrapper script itself as well.
+*On Windows, depending on the terminal you use, you may need to use `\` instead of `/`. We recommend using the new Windows Terminal and Powershell 7 or WSL 2.*
 
-Building MapTool
+Contributors
+===
+Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when committing your code and submitting pull requests. We enforce code style using spotless, to insure your build passes our automatic checks, you can run the following gradle command before committing:
+```
+./gradlew spotlessApply
+```
+
+
+Recommended IDE
 ----------------
+We currently recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/) as our editor of choice although Eclipse and other IDE's should work just fine as well. For IntelliJ IDEA, simply open the project folder and it will detect it as a Gradle project and you should be ready to go with minimal effort.
 
-* On Linux and macOS (and other Unix systems):
+
+Code Commits and Pull Requests
+--------------------------------
+We follow GitFlow process for the most part so please work all issues off of our `develop` branch. If you code changes are substantial, me may repoint the pull request to it's own feature branch for testing and further development.
+
+We prefer all pull requests to be preceded and reference an Issue before we accept and merge. If there is not currently an open issue, please create one and leave a comment if you plan to work on the issue. When you commit your code, please reference the issue, e.g. `fixes #1234` in addition to any other comments.
+
+
+Native Installers
+===
+Normally not required or needed during development, but if you need to create and test a native distribution, you must build it on the OS that you wish to create the native distribution for. We currently use Travis CI & AppVeyor to test, build, & deploy or natives for us at release time. You can set up your own CI process on your fork if you want, please review the relative yml files for those services and their documentation. This is currently out of scope and not required for development but may be documented at a later date.
+
+The command to create a release locally is:
 ```
-./gradlew build
+ ./gradlew deploy
 ```
 
-* On Windows, remember to use the backslash instead:
-```
-.\gradlew build
-```
+Additional Requirements for Windows
+------------------------------------
+To create .exe installs, you will need [Inno Setup](https://www.jrsoftware.org/isinfo.php).
+To create .msi installs, you will need [Wix](https://wixtoolset.org/)
+
+Make sure your JAVA_HOME is set to point to JDK 10.
+
+Installers (both .msi and .exe) will be created in the releases subdirectory.
+If you installed a more recent version of Inno Setup than is currently used for MapTool you may have to update the MapTool.iss file to set the proper MinVersion. (Inno Setup will complain if you do not.)
+
+
+Additional Requirements for Linux
+----------------------------------
+Review the [documentation](https://docs.oracle.com/javase/10/deploy/self-contained-application-packaging.htm#JSDPG1089) for any additional requirements depending on your target.
+
+Depending if you wish to create a .rpm or .deb file, you may or may not have everything required.
+
 
 Building the Distributable Zip
 ------------------------------
+*This method of distribution has been deprecated but you are free to use for your own purposes*
 
 * On Linux and macOS (and other Unix systems):
 ```
@@ -95,11 +126,6 @@ Building the Distributable Zip
 ```
 
 This will create a `.zip` file for use on all systems (as well as a zipped `.app` for macOS) in the `maptool/build/` subdirectory. The build number will be based on the latest tag and latest commit.
-
-Contributors
-------------
-
-Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
 
 
 Optional

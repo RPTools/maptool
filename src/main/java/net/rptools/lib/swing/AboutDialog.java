@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import net.rptools.maptool.language.I18N;
 
 @SuppressWarnings("serial")
 public class AboutDialog extends JDialog {
@@ -58,14 +59,10 @@ public class AboutDialog extends JDialog {
     super.setVisible(b);
   }
 
-  /**
-   * This method initializes this
-   *
-   * @return void
-   */
+  /** This method initializes this */
   private void initialize() {
     this.setSize(354, 354);
-    this.setTitle("About");
+    this.setTitle(I18N.getText("Label.about"));
     this.setContentPane(getJContentPane());
   }
 
@@ -109,8 +106,7 @@ public class AboutDialog extends JDialog {
    */
   private JButton getOkButton() {
     if (okButton == null) {
-      okButton = new JButton();
-      okButton.setText("OK");
+      okButton = new JButton(I18N.getText("Button.ok"));
       okButton.addActionListener(
           new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {

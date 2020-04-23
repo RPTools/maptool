@@ -286,7 +286,13 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         // (Really should handle nested parens here)
         int index = line.indexOf("(");
         if (index > 0) {
-          String shortName = line.substring(index + 1, line.lastIndexOf(")")).trim();
+          int indexClose = line.lastIndexOf(")");
+          // Check for unenclosed parentheses. Fix #1575.
+          if (indexClose < index) {
+            MapTool.showError(I18N.getText("CampaignPropertyDialog.error.parenthesis", line));
+            throw new IllegalArgumentException("Missing parenthesis");
+          }
+          String shortName = line.substring(index + 1, indexClose).trim();
           if (shortName.length() > 0) {
             property.setShortName(shortName);
           }

@@ -14,14 +14,11 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.dnd.DragSource;
+import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.util.Set;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -43,6 +40,7 @@ public abstract class DefaultTool extends Tool
   private boolean isDraggingMap;
   private int dragStartX;
   private int dragStartY;
+  private int dragThreshold = DragSource.getDragThreshold();
 
   protected int mouseX;
   protected int mouseY;
@@ -83,14 +81,26 @@ public abstract class DefaultTool extends Tool
 
   ////
   // Mouse
+  @Override
   public void mousePressed(MouseEvent e) {
     // Potential map dragging
     if (SwingUtilities.isRightMouseButton(e)) {
-      dragStartX = e.getX();
-      dragStartY = e.getY();
+      setDragStart(e.getX(), e.getY());
     }
   }
 
+  /**
+   * Set the location of the start of the drag
+   *
+   * @param x the x coordinate of the drag start
+   * @param y the y coordinate of the drag start
+   */
+  public void setDragStart(int x, int y) {
+    dragStartX = x;
+    dragStartY = y;
+  }
+
+  @Override
   public void mouseReleased(MouseEvent e) {
     if (isDraggingMap && isRightMouseButton(e)) {
       renderer.maybeForcePlayersView();
@@ -99,11 +109,17 @@ public abstract class DefaultTool extends Tool
     isDraggingMap = false;
   }
 
+  /** @param isDraggingMap whether the user drags the map */
+  void setDraggingMap(boolean isDraggingMap) {
+    this.isDraggingMap = isDraggingMap;
+  }
+
   /*
    * (non-Javadoc)
    *
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseClicked(MouseEvent e) {}
 
   /*
@@ -111,6 +127,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseEntered(MouseEvent e) {}
 
   /*
@@ -118,6 +135,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseExited(MouseEvent e) {}
 
   ////
@@ -127,6 +145,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseMoved(MouseEvent e) {
     if (renderer == null) {
       return;
@@ -143,6 +162,7 @@ public abstract class DefaultTool extends Tool
     }
   }
 
+  @Override
   public void mouseDragged(MouseEvent e) {
     int mX = e.getX();
     int mY = e.getY();
@@ -154,13 +174,15 @@ public abstract class DefaultTool extends Tool
     }
     // MAP MOVEMENT
     if (isRightMouseButton(e)) {
-      isDraggingMap = true;
 
       mapDX += mX - dragStartX;
       mapDY += mY - dragStartY;
 
-      dragStartX = mX;
-      dragStartY = mY;
+      if (mapDX * mapDX + mapDY * mapDY > dragThreshold * dragThreshold) {
+        isDraggingMap = true;
+      }
+
+      setDragStart(mX, mY);
 
       long now = System.currentTimeMillis();
       if (now - lastMoveRedraw > REDRAW_DELAY) {
@@ -177,6 +199,7 @@ public abstract class DefaultTool extends Tool
 
   ////
   // Mouse Wheel
+  @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
     // Fix for High Resolution Mouse Wheels
     if (e.getWheelRotation() == 0) {
@@ -278,8 +301,8 @@ public abstract class DefaultTool extends Tool
     }
     // ZOOM
     if (!AppState.isZoomLocked()) {
-      boolean direction = e.getWheelRotation() > 0;
-      direction = isKeyDown('z') ? !direction : direction;
+      boolean direction = e.getWheelRotation() < 0;
+      direction = isKeyDown('z') ? direction : !direction; // XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {

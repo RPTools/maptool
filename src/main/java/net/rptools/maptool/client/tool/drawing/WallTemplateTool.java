@@ -31,7 +31,7 @@ import net.rptools.maptool.model.drawing.LineTemplate;
 import net.rptools.maptool.model.drawing.WallTemplate;
 
 /**
- * A tool to draw a wall template for 4e D&D
+ * A tool to draw a wall template for 4e DnD
  *
  * @author Jay
  */

@@ -18,13 +18,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -102,6 +100,11 @@ public class IsometricGrid extends Grid {
     return getSize();
   }
 
+  @Override
+  public Point getCenterOffset() {
+    return new Point(0, (int) getCellHeight() / 2);
+  }
+
   public double getCellWidthHalf() {
     return getSize();
   }
@@ -149,6 +152,15 @@ public class IsometricGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // iso grids have their x at their center;
+    ZonePoint zonePoint = convert(cell);
+    double x = zonePoint.x;
+    double y = zonePoint.y + getCellHeight() / 2.0;
+    return new Point2D.Double(x, y);
   }
 
   private static final GridCapabilities GRID_CAPABILITIES =
@@ -201,15 +213,15 @@ public class IsometricGrid extends Grid {
 
   @Override
   public ZonePoint convert(CellPoint cp) {
-    double mapX = (cp.x - cp.y) * getCellWidthHalf();
-    double mapY = (cp.x + cp.y) * getCellHeightHalf();
+    double mapX = (cp.x - cp.y) * getCellWidthHalf() + getOffsetX();
+    double mapY = (cp.x + cp.y) * getCellHeightHalf() + getOffsetY();
     return new ZonePoint((int) (mapX), (int) (mapY));
   }
 
   @Override
   public ZonePoint getNearestVertex(ZonePoint point) {
-    double px = point.x - getOffsetX();
-    double py = point.y - getOffsetY() + getCellHeightHalf();
+    double px = point.x;
+    double py = point.y + getCellHeightHalf();
     ZonePoint zp = new ZonePoint((int) px, (int) py);
     return convert(convert(zp));
   }
@@ -218,6 +230,11 @@ public class IsometricGrid extends Grid {
   public Rectangle getBounds(CellPoint cp) {
     ZonePoint zp = convert(cp);
     return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
+  }
+
+  @Override
+  public boolean useMetric() {
+    return true;
   }
 
   @Override

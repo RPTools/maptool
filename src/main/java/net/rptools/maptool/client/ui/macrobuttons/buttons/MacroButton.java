@@ -48,9 +48,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
 /**
- * Base class of {@link CampaignMacroButton} and {@link GlobalMacroButton}. {@link TokenMacroButton}
- * doesn't extend this class because it is very simple. <code>MacroButton</code>s that extend this
- * class use {@link MacroButtonProperties}.
+ * <code>MacroButton</code>s that extend this class use {@link MacroButtonProperties}.
  *
  * <p>These buttons are used in Macro Button Panel in the UI.
  */
@@ -216,6 +214,10 @@ public class MacroButton extends JButton implements MouseListener {
             new MacroButtonPopupMenu(this, panelClass, false)
                 .show(this, event.getX(), event.getY());
           }
+        }
+      } else if (getPanelClass().equals("GmPanel")) {
+        if (MapTool.getPlayer().isGM()) {
+          new MacroButtonPopupMenu(this, panelClass, false).show(this, event.getX(), event.getY());
         }
       } else if (getPanelClass().equals("SelectionPanel")
           || getPanelClass().equals("ImpersonatePanel")) {

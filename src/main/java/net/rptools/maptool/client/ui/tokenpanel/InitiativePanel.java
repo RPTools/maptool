@@ -298,7 +298,7 @@ public class InitiativePanel extends JPanel
     list.clearModel();
   }
 
-  /** Make sure that the token references match the zone */
+  /** Update list containing tokens in initiative. Make sure the token references match the zone. */
   public void update() {
     list.update();
   }
@@ -322,6 +322,7 @@ public class InitiativePanel extends JPanel
     }
     EventQueue.invokeLater(
         new Runnable() {
+          @Override
           public void run() {
             model.setList(list);
             if (menuButton != null && menuButton.getAction() == NEXT_ACTION)
@@ -459,6 +460,7 @@ public class InitiativePanel extends JPanel
   /**
    * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
    */
+  @Override
   public void valueChanged(ListSelectionEvent e) {
     if (e != null && e.getValueIsAdjusting()) return;
     TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
@@ -486,6 +488,7 @@ public class InitiativePanel extends JPanel
    *-------------------------------------------------------------------------------------------*/
 
   /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  @Override
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
       String text = list.getRound() < 0 ? "" : Integer.toString(list.getRound());
@@ -521,6 +524,7 @@ public class InitiativePanel extends JPanel
    * @see
    *     net.rptools.maptool.model.ModelChangeListener#modelChanged(net.rptools.maptool.model.ModelChangeEvent)
    */
+  @Override
   public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
       if ((Zone) event.getModel() == zone) {
@@ -542,6 +546,7 @@ public class InitiativePanel extends JPanel
   /** This action will advance initiative to the next token in the list. */
   public final Action NEXT_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           list.nextInitiative();
         };
@@ -550,6 +555,7 @@ public class InitiativePanel extends JPanel
   /** This action will reverse initiative to the previous token in the list. */
   public final Action PREV_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           list.prevInitiative();
         };
@@ -558,6 +564,7 @@ public class InitiativePanel extends JPanel
   /** This action will remove the selected token from the list. */
   public final Action REMOVE_TOKEN_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
@@ -569,6 +576,7 @@ public class InitiativePanel extends JPanel
   /** This action will turn the selected token's initiative on and off. */
   public final Action TOGGLE_HOLD_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
@@ -579,6 +587,7 @@ public class InitiativePanel extends JPanel
   /** This action will make the selected token the current token. */
   public final Action MAKE_CURRENT_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
@@ -589,6 +598,7 @@ public class InitiativePanel extends JPanel
   /** This action toggles the display of token images. */
   public final Action SHOW_TOKENS_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           showTokens = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
@@ -601,6 +611,7 @@ public class InitiativePanel extends JPanel
   /** This action toggles the display of token images. */
   public final Action SHOW_TOKEN_STATES_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           showTokenStates = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
@@ -613,6 +624,7 @@ public class InitiativePanel extends JPanel
   /** This action toggles the display of token images. */
   public final Action SHOW_INIT_STATE =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           showInitState = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
@@ -625,6 +637,7 @@ public class InitiativePanel extends JPanel
   /** This action toggles the display of token images. */
   public final Action INIT_STATE_SECOND_LINE =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           initStateSecondLine = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
@@ -637,6 +650,7 @@ public class InitiativePanel extends JPanel
   /** This action sorts the tokens in the list. */
   public final Action SORT_LIST_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           list.sort();
         };
@@ -645,6 +659,7 @@ public class InitiativePanel extends JPanel
   /** This action will set the initiative state of the currently selected token. */
   public final Action SET_INIT_STATE_VALUE =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
@@ -665,6 +680,7 @@ public class InitiativePanel extends JPanel
   /** This action will clear the initiative state of the currently selected token. */
   public final Action CLEAR_INIT_STATE_VALUE =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
@@ -675,6 +691,7 @@ public class InitiativePanel extends JPanel
   /** This action will remove all tokens from the initiative panel. */
   public final Action REMOVE_ALL_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           clearTokens();
         };
@@ -683,6 +700,7 @@ public class InitiativePanel extends JPanel
   /** This action will add all tokens in the zone to this initiative panel. */
   public final Action ADD_ALL_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           list.insertTokens(list.getZone().getTokens());
         };
@@ -691,6 +709,7 @@ public class InitiativePanel extends JPanel
   /** This action will add all PC tokens in the zone to this initiative panel. */
   public final Action ADD_PCS_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
           for (Token token : list.getZone().getTokens()) {
@@ -703,6 +722,7 @@ public class InitiativePanel extends JPanel
   /** This action will hide all initiative items with NPC tokens from players */
   public final Action TOGGLE_HIDE_NPC_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           list.setHideNPC(!list.isHideNPC());
           if (list.isHideNPC() != hideNPCMenuItem.isSelected())
@@ -715,6 +735,7 @@ public class InitiativePanel extends JPanel
    */
   public final Action TOGGLE_OWNER_PERMISSIONS_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           boolean op = !MapTool.getCampaign().isInitiativeOwnerPermissions();
           if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
@@ -728,6 +749,7 @@ public class InitiativePanel extends JPanel
    */
   public final Action TOGGLE_MOVEMENT_LOCK_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           boolean op = !MapTool.getCampaign().isInitiativeMovementLock();
           if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
@@ -739,6 +761,7 @@ public class InitiativePanel extends JPanel
   /** This action will reset the round counter for the initiative panel. */
   public final Action RESET_COUNTER_ACTION =
       new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           if (!MapTool.getPlayer().isGM()) {
             return;
@@ -774,6 +797,7 @@ public class InitiativePanel extends JPanel
       if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
         SwingUtilities.invokeLater(
             new Runnable() {
+              @Override
               public void run() {
                 if (displayList.getSelectedValue() != null) {
                   // Show the selected token on the map.

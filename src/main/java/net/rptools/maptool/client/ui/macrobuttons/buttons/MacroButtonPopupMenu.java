@@ -25,6 +25,8 @@ import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import net.rptools.lib.FileUtil;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonDialog;
@@ -48,7 +50,7 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       } else {
         addActions();
       }
-    } else if (panelClass.equals("CampaignPanel")) {
+    } else if (panelClass.equals("CampaignPanel") || panelClass.equals("GmPanel")) {
       addCampaignActions();
     } else {
       addActions();
@@ -130,6 +132,11 @@ public class MacroButtonPopupMenu extends JPopupMenu {
             panelClass,
             MapTool.getCampaign().getMacroButtonNextIndex(),
             button.getProperties().getGroup());
+      } else if (panelClass.equals("GmPanel")) {
+        new MacroButtonProperties(
+            panelClass,
+            MapTool.getCampaign().getGmMacroButtonNextIndex(),
+            button.getProperties().getGroup());
       } else if (panelClass.equals("SelectionPanel")) {
         if (MapTool.getFrame()
             .getSelectionPanel()
@@ -166,6 +173,7 @@ public class MacroButtonPopupMenu extends JPopupMenu {
   }
 
   private class DeleteButtonAction extends AbstractAction {
+    /** Adds the "Delete..." button. */
     public DeleteButtonAction() {
       putValue(Action.NAME, I18N.getText("action.macro.delete"));
     }
@@ -185,6 +193,8 @@ public class MacroButtonPopupMenu extends JPopupMenu {
           MacroButtonPrefs.delete(button.getProperties());
         } else if (panelClass.equals("CampaignPanel")) {
           MapTool.getCampaign().deleteMacroButton(button.getProperties());
+        } else if (panelClass.equals("GmPanel")) {
+          MapTool.getCampaign().deleteGmMacroButton(button.getProperties());
         } else if (panelClass.equals("SelectionPanel")) {
           if (MapTool.getFrame()
               .getSelectionPanel()
@@ -204,19 +214,26 @@ public class MacroButtonPopupMenu extends JPopupMenu {
                       MapTool.getPlayer().isGM()
                           || (!MapTool.getPlayer().isGM() && nextMacro.getAllowPlayerEdits());
                   if (!hashCodesMatch || !allowDelete) {
+                    // Keeps macros that can't be deleted or don't match the button
                     workingMacros.add(nextMacro);
                   }
                 }
-                nextToken.replaceMacroList(workingMacros);
+                // Updates the client macros. Fixes #1657.
+                MapTool.serverCommand()
+                    .updateTokenProperty(
+                        nextToken, Token.Update.saveMacroList, workingMacros, true);
               }
             }
           } else {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
-          MapTool.getFrame().getSelectionPanel().reset();
         } else if (button.getToken() != null) {
           if (AppUtil.playerOwns(button.getToken())) {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
         }
       }
@@ -239,6 +256,9 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       } else if (panelClass.equals("CampaignPanel")) {
         new MacroButtonProperties(
             panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), button.getProperties());
+      } else if (panelClass.equals("GmPanel")) {
+        new MacroButtonProperties(
+            panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), button.getProperties());
       } else if (panelClass.equals("SelectionPanel")) {
         if (MapTool.getFrame()
             .getSelectionPanel()
@@ -296,6 +316,11 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       putValue(Action.NAME, name);
     }
 
+    /**
+     * Shows a prompt to save the macro.
+     *
+     * @param event the event
+     */
     public void actionPerformed(ActionEvent event) {
       JFileChooser chooser = MapTool.getFrame().getSaveMacroFileChooser();
 
@@ -303,19 +328,19 @@ public class MacroButtonPopupMenu extends JPopupMenu {
         return;
       }
 
-      final File selectedFile = chooser.getSelectedFile();
+      final File selectedFile =
+          FileUtil.getFileWithExtension(
+              chooser.getSelectedFile(), AppConstants.MACRO_FILE_EXTENSION);
       EventQueue.invokeLater(
           new Runnable() {
             public void run() {
-              if (selectedFile.exists()) {
-                if (selectedFile.getName().endsWith(".mtmacro")) {
-                  if (!MapTool.confirm(
-                      I18N.getText("confirm.macro.exportInto", button.getName()))) {
-                    return;
-                  }
-                } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+              if (!selectedFile.exists()) {
+                if (!MapTool.confirm(
+                    I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
                   return;
                 }
+              } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+                return;
               }
 
               try {

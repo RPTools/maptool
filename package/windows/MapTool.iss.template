@@ -8,7 +8,7 @@ AppVersion=${AppVersion}
 AppVerName=${AppName} ${AppVersion}
 AppPublisher=${Vendor}
 AppComments=${AppName} by ${Vendor}
-AppCopyright=Copyright (C) 2018
+AppCopyright=Copyright (C) 2020
 AppPublisherURL=http://www.rptools.net/
 AppSupportURL=http://forums.rptools.net/viewtopic.php?f=60&t=23681
 ;AppUpdatesURL=http://java.com/
@@ -22,8 +22,8 @@ DisableWelcomePage=no
 DefaultGroupName=${Vendor}
 ;Optional License
 LicenseFile=COPYING.AFFERO
-;WinXP or above
-MinVersion=0,5.1 
+;Windows 7 or above
+MinVersion=0,6.1
 OutputBaseFilename=${AppName}-${AppVersion}
 Compression=lzma
 SolidCompression=yes

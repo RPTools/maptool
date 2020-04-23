@@ -19,7 +19,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -42,7 +42,7 @@ public class TokenLabelFunction extends AbstractFunction {
    * @param token The token to get the label for.
    * @return the label.
    */
-  public String getLabel(Token token) {
+  public static String getLabel(Token token) {
     return token.getLabel() != null ? token.getLabel() : "";
   }
 
@@ -52,10 +52,8 @@ public class TokenLabelFunction extends AbstractFunction {
    * @param token The token to set the label for.
    * @param label the label to set.
    */
-  public void setLabel(Token token, String label) {
-    token.setLabel(label);
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+  public static void setLabel(Token token, String label) {
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLabel, label);
   }
 
   @Override
@@ -76,7 +74,7 @@ public class TokenLabelFunction extends AbstractFunction {
    * @return the name of the token.
    * @throws ParserException when an error occurs.
    */
-  private Object getLabel(Parser parser, List<Object> args) throws ParserException {
+  private static Object getLabel(Parser parser, List<Object> args) throws ParserException {
     Token token;
 
     if (args.size() == 1) {
@@ -112,37 +110,12 @@ public class TokenLabelFunction extends AbstractFunction {
    * @return the new name of the token.
    * @throws ParserException when an error occurs.
    */
-  private Object setLabel(Parser parser, List<Object> args) throws ParserException {
-    Token token;
+  private static Object setLabel(Parser parser, List<Object> args) throws ParserException {
+    FunctionUtil.checkNumberParam("setLabel", args, 1, 3);
 
-    if (args.size() == 2) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPermOther", "setLabel"));
-      }
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "setLabel", args.get(1).toString()));
-      }
-    } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setLabel"));
-      }
-    } else if (args.isEmpty()) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "setLabel", 1, args.size()));
-    } else {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "setLabel", 2, args.size()));
-    }
-    setLabel(token, args.get(0).toString());
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    MapTool.serverCommand().putToken(zone.getId(), token);
-    zone.putToken(token);
-    return args.get(0);
+    String label = args.get(0).toString();
+    Token token = FunctionUtil.getTokenFromParam(parser, "setLabel", args, 1, 2);
+    setLabel(token, label);
+    return label;
   }
 }

@@ -27,7 +27,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
- * New class extending AbstractFunction to create new "Macro Functions" exportData &
+ * New class extending AbstractFunction to create new "Macro Functions" exportData and
  * getEnvironmentVariable
  *
  * <p>These functions is to allow for easier data exports to external files.

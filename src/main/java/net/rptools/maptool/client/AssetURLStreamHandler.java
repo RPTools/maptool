@@ -59,7 +59,18 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
     @Override
     public InputStream getInputStream() throws IOException {
-      final MD5Key assetId = new MD5Key(url.getHost());
+      String strAssetId = url.getHost();
+
+      int scaleW = 0, scaleH = 0;
+      // If assetId has "-", remove it and resize appropriately.
+      int index = strAssetId.indexOf("-");
+      if (index >= 0) {
+        String szStr = strAssetId.substring(index + 1);
+        strAssetId = strAssetId.substring(0, index);
+        scaleW = scaleH = Integer.parseInt(szStr);
+      }
+
+      final MD5Key assetId = new MD5Key(strAssetId);
       String query = url.getQuery();
       Map<String, String> var = new HashMap<String, String>();
 
@@ -81,8 +92,8 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       }
       // Default value is 0: scale the dimension to preserve the aspect ratio
       // Use -1 to indicate that the original dimension from the image should be used
-      int scaleW = var.get("width") != null ? Integer.valueOf(var.get("width")) : 0;
-      int scaleH = var.get("height") != null ? Integer.valueOf(var.get("height")) : 0;
+      scaleW = var.get("width") != null ? Integer.parseInt(var.get("width")) : scaleW;
+      scaleH = var.get("height") != null ? Integer.parseInt(var.get("height")) : scaleH;
 
       // Need to make sure the image is available
       // TODO: Create a AssetManager.getAssetAndWait(id) and put this block in it
@@ -122,7 +133,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
           Graphics2D g = bimg.createGraphics();
           g.drawImage(img, 0, 0, scaleW, scaleH, null);
           g.dispose();
-          data = ImageUtil.imageToBytes(bimg);
+          data = ImageUtil.imageToBytes(bimg, "png"); // assume png because translucent.
         } else data = asset.getImage();
       } else {
         log.error("Could not find asset: " + assetId);

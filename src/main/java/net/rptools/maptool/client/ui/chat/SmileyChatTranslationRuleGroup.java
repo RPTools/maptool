@@ -89,8 +89,9 @@ public class SmileyChatTranslationRuleGroup extends ChatTranslationRuleGroup {
       String value = smileyProps.getProperty(key);
       /*
        * Make sure we're not in roll output. Wouldn't let me do this usinglookbehind :-/
+       * Prevent all characters surrounding smiley except space, tab, and newline
        */
-      key = "^((?:[^\036]|\036[^\036]*\036)*)" + key;
+      key = "^((?:[^\036]|\036[^\036]*\036)*)(?<![^\\s\t\n\r])" + key + "(?![^\\s\t\n\r])";
       value = "$1" + value;
       addRule(new RegularExpressionTranslationRule(key, value));
     }

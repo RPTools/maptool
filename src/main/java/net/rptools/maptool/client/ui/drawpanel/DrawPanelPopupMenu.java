@@ -390,16 +390,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
   }
 
-  /**
-   * Menu items for VBL section. Calls VblTool
-   *
-   * @param pathOnly - boolean, just path if true, otherwise fill shape.
-   * @param isEraser - boolean, erase VBL if true.
-   */
+  /** Menu items for VBL section. Calls VblTool */
   private class VblAction extends AbstractAction {
     private final boolean isEraser;
     private final boolean pathOnly;
-
+    /**
+     * @param pathOnly - boolean, just path if true, otherwise fill shape.
+     * @param isEraser - boolean, erase VBL if true.
+     */
     public VblAction(boolean pathOnly, boolean isEraser) {
       super((isEraser ? "Remove from " : "Add to ") + "VBL");
       enabled = hasPath(elementUnderMouse);
@@ -572,10 +570,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
     if (isEraser) {
       renderer.getZone().removeTopology(area);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     } else {
       renderer.getZone().addTopology(area);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     }
     renderer.repaint();
   }

@@ -22,7 +22,6 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -62,7 +61,7 @@ public class TokenHaloFunction extends AbstractFunction {
    * @param token the token to get the halo for.
    * @return the halo.
    */
-  public Object getHalo(Token token) {
+  public static Object getHalo(Token token) {
     if (token.getHaloColor() != null) {
       return "#" + Integer.toHexString(token.getHaloColor().getRGB()).substring(2);
     } else {
@@ -75,29 +74,26 @@ public class TokenHaloFunction extends AbstractFunction {
    *
    * @param token the token to set halo of.
    * @param value the value to set.
-   * @throws ParserException if there is an error determining color.
    */
-  public void setHalo(Token token, Object value) throws ParserException {
+  public static void setHalo(Token token, Object value) {
+    Color haloColor;
     if (value instanceof Color) {
-      token.setHaloColor((Color) value);
+      haloColor = (Color) value;
     } else if (value instanceof BigDecimal) {
-      token.setHaloColor(new Color(((BigDecimal) value).intValue()));
+      haloColor = new Color(((BigDecimal) value).intValue());
     } else {
       String col = value.toString();
       if (StringUtil.isEmpty(col)
           || col.equalsIgnoreCase("none")
           || col.equalsIgnoreCase("default")) {
-        token.setHaloColor(null);
+        haloColor = null;
       } else {
         String hex = col;
         Color color = MapToolUtil.getColor(hex);
-        token.setHaloColor(color);
+        haloColor = color;
       }
     }
-    // TODO: This works for now but could result in a lot of resending of data
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    zone.putToken(token);
-    MapTool.serverCommand().putToken(zone.getId(), token);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setHaloColor, haloColor);
   }
 
   /**

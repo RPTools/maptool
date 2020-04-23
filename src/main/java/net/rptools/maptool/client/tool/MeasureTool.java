@@ -25,6 +25,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Map;
+import javafx.application.Platform;
+import javafx.scene.ImageCursor;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -44,24 +46,52 @@ import net.rptools.maptool.util.GraphicsUtil;
 /** */
 public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
+  public static final String CURSOR_NAME = "Measure tool";
+
   private ZoneWalker walker;
   private Path<ZonePoint> gridlessPath;
-  private Cursor measureCursor;
+  private static Cursor measureCursor;
+  private static javafx.scene.Cursor measureCursorFX;
+
+  private static final String PATH_RULER_IMG =
+      "net/rptools/maptool/client/image/tool/ruler-blue.png";
+  private static final String PATH_MEASURE_IMG =
+      "net/rptools/maptool/client/image/cursor-tape-measure.png";
 
   public MeasureTool() {
     try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/ruler-blue.png")));
+      setIcon(new ImageIcon(ImageUtil.getImage(PATH_RULER_IMG)));
       measureCursor =
           Toolkit.getDefaultToolkit()
               .createCustomCursor(
-                  ImageUtil.getImage("net/rptools/maptool/client/image/cursor-tape-measure.png"),
-                  new Point(2, 28),
-                  "Measure tool");
+                  ImageUtil.getImage(PATH_MEASURE_IMG), new Point(2, 28), CURSOR_NAME);
+      Platform.runLater(
+          () ->
+              measureCursorFX =
+                  new ImageCursor(new javafx.scene.image.Image(PATH_MEASURE_IMG), 2, 28));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+  }
+
+  public static Cursor getMeasureCursor() {
+    return measureCursor;
+  }
+
+  public static javafx.scene.Cursor getMeasureCursorFX() {
+    return measureCursorFX;
+  }
+
+  @Override
+  protected void attachTo(ZoneRenderer renderer) {
+    renderer.setCursor(measureCursor);
+    super.attachTo(renderer);
+  }
+
+  @Override
+  protected void detachFrom(ZoneRenderer renderer) {
+    renderer.setCursor(Cursor.getDefaultCursor());
+    super.detachFrom(renderer);
   }
 
   @Override
@@ -75,8 +105,6 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    renderer.setCursor(measureCursor);
-
     if (walker == null && gridlessPath == null) {
       return;
     }

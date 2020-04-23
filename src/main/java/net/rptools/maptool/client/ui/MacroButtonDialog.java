@@ -53,6 +53,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
@@ -104,6 +105,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private FindToolBar findToolBar;
   private ReplaceToolBar replaceToolBar;
   private JLabel status;
+  private static final String READY = I18N.getText("Label.ready");
+  private static final String SAVED = I18N.getText("Label.saved");
 
   private static HashSet<String> openMacroList = new HashSet<String>(4);
 
@@ -111,7 +114,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     super(MapTool.getFrame(), "", true);
     this.setModalityType(ModalityType.MODELESS);
 
-    panel = new FormPanel("net/rptools/maptool/client/ui/forms/macroButtonDialog.xml");
+    panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/macroButtonDialog.xml");
     setContentPane(panel);
     setSize(700, 400);
 
@@ -185,15 +188,15 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     String text = null;
     if (result.wasFound()) {
-      text = "Text found; occurrences marked: " + result.getMarkedCount();
+      text = I18N.getText("component.msg.macro.textfound", result.getMarkedCount());
     } else if (type == SearchEvent.Type.MARK_ALL) {
       if (result.getMarkedCount() > 0) {
-        text = "Occurrences marked: " + result.getMarkedCount();
+        text = I18N.getText("component.msg.macro.occurrences", result.getMarkedCount());
       } else {
         text = "";
       }
     } else {
-      text = "Text not found";
+      text = I18N.getText("component.msg.macro.notfound");
     }
 
     status.setText(text);
@@ -201,8 +204,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   @Override
   public String getSelectedText() {
-    // TODO Auto-generated method stub
-    return null;
+    return macroEditorRSyntaxTextArea.getSelectedText();
   }
 
   private void installHotKeyCombo() {
@@ -245,6 +247,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("runButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(false);
 
@@ -264,6 +267,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("applyButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(false);
           }
@@ -274,6 +278,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("okButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(true);
           }
@@ -286,6 +291,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("cancelButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             cancel();
           }
@@ -440,16 +446,19 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         .getDocument()
         .addDocumentListener(
             new DocumentListener() {
+              @Override
               public void changedUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
 
+              @Override
               public void removeUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
 
+              @Override
               public void insertUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
             });
 
@@ -535,8 +544,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /**
    * Creates the slide-up panel at the bottom of the macro editor dialog panel.
    *
-   * @param key string key to lookup in the properties file (used to call {@link
-   *     I18N#getKeystroke()} and {@link I18N#getText()}
+   * @param key string key to lookup in the properties file (used to call {@link I18N#getKeystroke}
+   *     and {@link I18N#getText}
    * @param tb the toolbar that is meant to slide up
    * @return new JMenuItem containing the new {@link Action}
    */
@@ -550,6 +559,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /** Is called when the dialog is about to disappear. We use it to do any menu cleanup. */
   private void destroyMenuBar() {
     JMenuBar mb = MapTool.getFrame().getJMenuBar();
+    if (mb == null) return;
     for (int i = 0; i < mb.getMenuCount(); i++) {
       JMenu menu = mb.getMenu(i);
       if (menu.getText().equalsIgnoreCase(I18N.getText("menu.edit"))) {
@@ -595,7 +605,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    public void execute(ActionEvent e) {
+    protected void executeAction(ActionEvent e) {
       if (replaceDialog.isVisible()) {
         replaceDialog.setVisible(false);
       }
@@ -614,7 +624,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    public void execute(ActionEvent e) {
+    protected void executeAction(ActionEvent e) {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
@@ -630,7 +640,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    public void execute(ActionEvent e) {
+    protected void executeAction(ActionEvent e) {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
@@ -784,12 +794,18 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       MapTool.getFrame().getCampaignPanel().reset();
     }
 
+    if (button.getPanelClass().equals("GmPanel")) {
+      MapTool.serverCommand()
+          .updateGmMacros(MapTool.getCampaign().getGmMacroButtonPropertiesArray());
+      MapTool.getFrame().getGmPanel().reset();
+    }
+
     if (closeDialog) {
       // setVisible(false);
       updateOpenMacroList(false);
       dispose();
     } else {
-      status.setText("Saved");
+      status.setText(SAVED);
     }
   }
 

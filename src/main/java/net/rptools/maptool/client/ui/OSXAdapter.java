@@ -21,42 +21,39 @@ import java.awt.desktop.AboutHandler;
 import java.awt.desktop.OpenFilesHandler;
 import java.awt.desktop.PreferencesHandler;
 import java.awt.desktop.QuitHandler;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
- * Apple's new platform API has deprecated the <code>ApplicationListener</code> class. The preferred approach going forward is to use the various set*() methods of <code>Application</code> instead.
+ * Apple's new platform API has deprecated the <code>ApplicationListener</code> class. The preferred
+ * approach going forward is to use the various set*() methods of <code>Application</code> instead.
  * They are:
+ *
  * <ul>
- * <li><code>requestToggleFullScreen({@link java.awt.Window})
- * <li><code>setAboutHandler({@link java.awt.desktop.AboutHandler})
- * <li><code>setDefaultMenuBar({@link javax.swing.JMenuBar})
- * <li><code>setDockIconBadge({@link java.lang.String})
- * <li><code>setDockIconImage({@link java.awt.Image})
- * <li><code>setDockIconProgress(int)
- * <li><code>setDockMenu({@link java.awt.PopupMenu})
- * <li><code>setOpenFileHandler({@link java.awt.desktop.OpenFilesHandler})
- * <li><code>setOpenURIHandler({@link java.awt.desktop.OpenURIHandler})
- * <li><code>setPreferencesHandler({@link java.awt.desktop.PreferencesHandler})
- * <li><code>setPrintFileHandler({@link java.awt.desktop.PrintFilesHandler})
- * <li><code>setQuitHandler({@link java.awt.desktop.QuitHandler})
- * <li><code>setQuitStrategy({@link java.awt.desktop.QuitStrategy})
- * <li><code>addAppEventListener({@link java.awt.desktop.SystemEventListener})
- * <li><code>removeAppEventListener({@link java.awt.desktop.SystemEventListener})
+ *   <li>requestToggleFullScreen({@link java.awt.Window})
+ *   <li>setAboutHandler({@link java.awt.desktop.AboutHandler})
+ *   <li>setDefaultMenuBar({@link javax.swing.JMenuBar})
+ *   <li>setDockIconBadge({@link java.lang.String})
+ *   <li>setDockIconImage({@link java.awt.Image})
+ *   <li>setDockIconProgress(int)
+ *   <li>setDockMenu({@link java.awt.PopupMenu})
+ *   <li>setOpenFileHandler({@link java.awt.desktop.OpenFilesHandler})
+ *   <li>setOpenURIHandler({@link java.awt.desktop.OpenURIHandler})
+ *   <li>setPreferencesHandler({@link java.awt.desktop.PreferencesHandler})
+ *   <li>setPrintFileHandler({@link java.awt.desktop.PrintFilesHandler})
+ *   <li>setQuitHandler({@link java.awt.desktop.QuitHandler})
+ *   <li>setQuitStrategy({@link java.awt.desktop.QuitStrategy})
+ *   <li>addAppEventListener({@link java.awt.desktop.SystemEventListener})
+ *   <li>removeAppEventListener({@link java.awt.desktop.SystemEventListener})
  * </ul>
  */
 public class OSXAdapter {
+
   private static final Logger log = Logger.getLogger(OSXAdapter.class);
   private static Desktop dt = Desktop.getDesktop();
+  private static final String MAPTOOL_DOCK_ICON_PNG =
+      "net/rptools/maptool/client/image/maptool-dock-icon.png";
 
   /**
    * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the
@@ -109,34 +106,20 @@ public class OSXAdapter {
     // -- and change our application name to just "MapTool" (not currently)
     // We wait until after we call initialize() so that the asset and image managers
     // are configured.
+
     Image img = null;
-    File logoFile = new File(AppUtil.getAppHome("config"), "maptool-dock-icon.png");
-    URL logoURL = null;
     try {
-      logoURL = new URL("http://www.rptools.net/images/logo/RPTools_Map_Logo.png");
-    } catch (MalformedURLException e) {
-      MapTool.showError("Attemping to form URL -- shouldn't happen as URL is hard-coded", e);
-    }
-    try {
-      img = ImageUtil.bytesToImage(FileUtils.readFileToByteArray(logoFile));
+      img = ImageUtil.getImage(MAPTOOL_DOCK_ICON_PNG);
     } catch (IOException e) {
-      log.debug("Attemping to read cached icon: " + logoFile, e);
-      try {
-        img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
-        // If we did download the logo, save it to the 'config' dir for later use.
-        BufferedImage bimg =
-            ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null), null);
-        FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
-        img = bimg;
-      } catch (IOException e1) {
-        log.warn("Cannot read '" + logoURL + "' or  cached '" + logoFile + "'; no dock icon", e1);
-      }
+      log.warn("Cannot read '" + MAPTOOL_DOCK_ICON_PNG + "'; no dock icon", e);
     }
 
     if (Taskbar.isTaskbarSupported()) {
       try {
         Taskbar tb = Taskbar.getTaskbar();
-        if (img != null) tb.setIconImage(img);
+        if (img != null) {
+          tb.setIconImage(img);
+        }
         // We could also modify the popup menu that displays when the user right-clicks the dock
         // image...
         // And we could use the tb.setProgressValue() call to represent campaign loading/saving...

@@ -32,13 +32,23 @@ public class TaskBarFlasher {
 
   public TaskBarFlasher(Frame frame) {
     this.frame = frame;
-
+    Color bgColor = frame.getBackground();
+    Color flashColor;
+    // W3C formula for calculating perceived brightness - basically RGB -> YIQ but just Y.
+    // https://www.w3.org/TR/AERT/#color-contrast
+    int brightness =
+        (bgColor.getRed() * 299 + bgColor.getGreen() * 587 + bgColor.getBlue() * 114) / 1000;
+    if (brightness < 128) {
+      flashColor = bgColor.brighter();
+    } else {
+      flashColor = bgColor.darker();
+    }
     originalImage = frame.getIconImage();
     flashImage =
         new BufferedImage(
             originalImage.getWidth(null), originalImage.getHeight(null), BufferedImage.OPAQUE);
     Graphics g = flashImage.getGraphics();
-    g.setColor(Color.blue);
+    g.setColor(flashColor);
     g.fillRect(0, 0, flashImage.getWidth(), flashImage.getHeight());
     g.drawImage(originalImage, 0, 0, null);
     g.dispose();

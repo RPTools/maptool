@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonObject;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import javax.imageio.stream.ImageInputStream;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.util.ImageManager;
 
 /** The binary representation of an image. */
 public class Asset {
@@ -34,7 +37,7 @@ public class Asset {
   private MD5Key id;
   private String name;
   private String extension;
-  private String type;
+  private String type = "image";
 
   @XStreamConverter(AssetImageConverter.class)
   private byte[] image;
@@ -113,6 +116,31 @@ public class Asset {
 
   public String getName() {
     return name;
+  }
+
+  /**
+   * Get the properties of the asset and put them in a JsonObject.
+   *
+   * @return the JsonObject with the properties.
+   */
+  public JsonObject getProperties() {
+    JsonObject properties = new JsonObject();
+    properties.addProperty("type", type);
+    properties.addProperty("subtype", extension);
+    properties.addProperty("id", id.toString());
+    properties.addProperty("name", name);
+
+    Image img = ImageManager.getImageAndWait(id); // wait until loaded, so width/height are correct
+    String status = "loaded";
+    if (img == ImageManager.BROKEN_IMAGE) {
+      status = "broken";
+    } else if (img == ImageManager.TRANSFERING_IMAGE) {
+      status = "transferring";
+    }
+    properties.addProperty("status", status);
+    properties.addProperty("width", img.getWidth(null));
+    properties.addProperty("height", img.getHeight(null));
+    return properties;
   }
 
   public boolean isTransfering() {

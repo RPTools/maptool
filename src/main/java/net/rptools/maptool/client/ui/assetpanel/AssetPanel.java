@@ -64,10 +64,21 @@ public class AssetPanel extends JComponent {
   private ImagePanel imagePanel;
   private JTextField filterTextField;
   private JCheckBox globalSearchField;
+  private JCheckBox extractRenderedPages;
   private JSlider thumbnailPreviewSlider;
   private final AssetPanelModel assetPanelModel;
   private Timer updateFilterTimer;
   private JProgressBar imagePanelProgressBar;
+
+  public boolean isLimitReached() {
+    return limitReached;
+  }
+
+  public void setLimitReached(boolean limitReached) {
+    this.limitReached = limitReached;
+  }
+
+  private boolean limitReached = false;
 
   public AssetPanel(String controlName) {
     this(controlName, new AssetPanelModel());
@@ -125,10 +136,14 @@ public class AssetPanel extends JComponent {
 
     imagePanel.addMouseWheelListener(
         new MouseWheelListener() {
+          @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
-            if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
+            int steps = e.getWheelRotation();
+            if (steps == 0) {
+              return;
+            }
+            if (SwingUtil.isControlDown(e) || e.isMetaDown()) { // XXX Why either one?
               e.consume();
-              int steps = e.getWheelRotation();
               imagePanel.setGridSize(imagePanel.getGridSize() + steps);
               thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
             } else {
@@ -187,6 +202,7 @@ public class AssetPanel extends JComponent {
 
     panel.add(BorderLayout.NORTH, top);
     panel.add(BorderLayout.CENTER, getGlobalSearchField());
+    panel.add(BorderLayout.SOUTH, getExtractRenderedPages());
 
     return panel;
   }
@@ -214,14 +230,17 @@ public class AssetPanel extends JComponent {
           .getDocument()
           .addDocumentListener(
               new DocumentListener() {
+                @Override
                 public void changedUpdate(DocumentEvent e) {
                   // no op
                 }
 
+                @Override
                 public void insertUpdate(DocumentEvent e) {
                   updateFilter();
                 }
 
+                @Override
                 public void removeUpdate(DocumentEvent e) {
                   updateFilter();
                 }
@@ -242,6 +261,7 @@ public class AssetPanel extends JComponent {
           new JCheckBox(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"), false);
       globalSearchField.addActionListener(
           new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ev) {
               updateFilter();
             }
@@ -287,6 +307,7 @@ public class AssetPanel extends JComponent {
 
       thumbnailPreviewSlider.setUI(
           new MetalSliderUI() {
+            @Override
             protected void scrollDueToClickInTrack(int direction) {
               int value = thumbnailPreviewSlider.getValue();
 
@@ -327,11 +348,13 @@ public class AssetPanel extends JComponent {
           new Timer(
               500,
               new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                   ImageFileImagePanelModel model = (ImageFileImagePanelModel) imagePanel.getModel();
                   if (model == null) {
                     return;
                   }
+                  model.setExtractRenderedPages(getExtractRenderedPages().isSelected());
                   model.setGlobalSearch(getGlobalSearchField().isSelected());
                   model.setFilter(getFilterTextField().getText());
                   // TODO: This should be event based
@@ -383,7 +406,7 @@ public class AssetPanel extends JComponent {
 
   public void setDirectory(Directory dir) {
     imagePanel.setModel(
-        new ImageFileImagePanelModel(dir) {
+        new ImageFileImagePanelModel(dir, this) {
           @Override
           public Transferable getTransferable(int index) {
             // TransferableAsset t = (TransferableAsset) super.getTransferable(index);
@@ -397,5 +420,17 @@ public class AssetPanel extends JComponent {
 
   public AssetTree getAssetTree() {
     return assetTree;
+  }
+
+  public JCheckBox getExtractRenderedPages() {
+    if (extractRenderedPages == null) {
+      extractRenderedPages =
+          new JCheckBox(
+              I18N.getText("panel.Asset.ImageModel.checkbox.extractRenderedPages"), false);
+      extractRenderedPages.setToolTipText(
+          I18N.getString("panel.Asset.ImageModel.checkbox.tooltip.extractRenderedPages"));
+      extractRenderedPages.addActionListener(ev -> updateFilter());
+    }
+    return extractRenderedPages;
   }
 }

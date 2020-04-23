@@ -21,11 +21,19 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
   private HTMLFrameFactory() {}
+
+  public enum FrameType {
+    FRAME,
+    DIALOG,
+    OVERLAY
+  }
 
   private static HTMLFrameFactory.Listener listener;
 
@@ -33,11 +41,14 @@ public class HTMLFrameFactory {
    * Shows a dialog or frame based on the options.
    *
    * @param name The name of the dialog or frame.
-   * @param isFrame Is it a frame.
+   * @param frameType The type of the frame.
+   * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
    * @param html The html contents of frame or dialog.
    */
-  public static void show(String name, boolean isFrame, String properties, String html) {
+  public static void show(
+      String name, FrameType frameType, boolean isHTML5, String properties, String html)
+      throws ParserException {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
     }
@@ -45,11 +56,13 @@ public class HTMLFrameFactory {
     boolean temporary = false;
     int width = -1;
     int height = -1;
+    int zOrder = 0;
     String title = name;
     String tabTitle = null;
     Object frameValue = null;
     boolean hasFrame = true;
     boolean closeButton = true;
+    boolean scrollReset = false;
 
     if (properties != null && !properties.isEmpty()) {
       String[] opts = properties.split(";");
@@ -63,7 +76,7 @@ public class HTMLFrameFactory {
             int v = Integer.parseInt(value);
             if (v != 0) {
               input = true;
-              closeButton = !input;
+              closeButton = !input; // disable button by default
             }
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
@@ -74,7 +87,7 @@ public class HTMLFrameFactory {
           try {
             int v = Integer.parseInt(value);
             if (v != 0) {
-              temporary = true;
+              temporary = true; // undecorated is temporary by default
             }
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
@@ -90,6 +103,14 @@ public class HTMLFrameFactory {
             height = Integer.parseInt(value);
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
+          }
+        } else if (keyLC.equals("zorder")) {
+          try {
+            zOrder = Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            String funcName = frameType.toString().toLowerCase();
+            String msg = I18N.getText("macro.function.general.argumentKeyTypeI", funcName, keyLC);
+            throw new ParserException(msg);
           }
         } else if (keyLC.equals("title")) {
           title = value;
@@ -111,6 +132,11 @@ public class HTMLFrameFactory {
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
           }
+        } else if (keyLC.equals("scrollreset")) {
+          int v = Integer.parseInt(value);
+          if (v != 0) {
+            scrollReset = true;
+          }
         } else if (keyLC.equals("value")) {
           frameValue = value;
         } else if (keyLC.equals("tabtitle")) {
@@ -119,11 +145,25 @@ public class HTMLFrameFactory {
       }
     }
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
-    if (isFrame) {
-      HTMLFrame.showFrame(name, title, tabTitle, width, height, temporary, frameValue, html);
-    } else {
+    if (frameType == FrameType.FRAME) {
+      HTMLFrame.showFrame(
+          name, title, tabTitle, width, height, temporary, scrollReset, isHTML5, frameValue, html);
+    } else if (frameType == FrameType.DIALOG) {
       HTMLDialog.showDialog(
-          name, title, width, height, hasFrame, input, temporary, closeButton, frameValue, html);
+          name,
+          title,
+          width,
+          height,
+          hasFrame,
+          input,
+          temporary,
+          closeButton,
+          scrollReset,
+          isHTML5,
+          frameValue,
+          html);
+    } else if (frameType == FrameType.OVERLAY) {
+      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html);
     }
   }
 
@@ -131,18 +171,21 @@ public class HTMLFrameFactory {
   public static void selectedListChanged() {
     HTMLFrame.doSelectedChanged();
     HTMLDialog.doSelectedChanged();
+    MapTool.getFrame().getOverlayPanel().doSelectedChanged();
   }
 
   /** A new token has been impersonated or cleared. */
   public static void impersonateToken() {
     HTMLFrame.doImpersonatedChanged();
     HTMLDialog.doImpersonatedChanged();
+    MapTool.getFrame().getOverlayPanel().doImpersonatedChanged();
   }
 
   /** One of the tokens has changed. */
   public static void tokenChanged(Token token) {
     HTMLFrame.doTokenChanged(token);
     HTMLDialog.doTokenChanged(token);
+    MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
   }
 
   public static class Listener implements ModelChangeListener, AppEventListener {
@@ -162,9 +205,7 @@ public class HTMLFrameFactory {
         Set<GUID> selectedTokens =
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
         boolean selectedChange = false;
-        Token token;
-        for (int i = 0; i < tokens.size(); i++) {
-          token = tokens.get(i);
+        for (Token token : tokens) {
           if (selectedTokens.contains(token)) selectedChange = true;
           if (token.getName().equals(cpanel.getIdentity())
               || token.getId().equals(cpanel.getIdentityGUID())) {
@@ -172,7 +213,9 @@ public class HTMLFrameFactory {
           }
           tokenChanged(token);
         }
-        if (selectedChange) selectedListChanged();
+        if (selectedChange) {
+          selectedListChanged();
+        }
       }
     }
 
@@ -187,6 +230,13 @@ public class HTMLFrameFactory {
     }
   }
 
+  /**
+   * Return the visibility of the container.
+   *
+   * @param isFrame is it a frame or a container?
+   * @param name the name of the container.
+   * @return is it visible?
+   */
   public static boolean isVisible(boolean isFrame, String name) {
     if (isFrame) {
       return HTMLFrame.isVisible(name);
@@ -195,6 +245,12 @@ public class HTMLFrameFactory {
     }
   }
 
+  /**
+   * Close a container.
+   *
+   * @param isFrame is it a frame or a container?
+   * @param name the name of the container.
+   */
   public static void close(boolean isFrame, String name) {
     if (isFrame) {
       HTMLFrame.close(name);

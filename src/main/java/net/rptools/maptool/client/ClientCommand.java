@@ -30,6 +30,7 @@ public class ClientCommand {
     putToken,
     updateTokenProperty,
     removeToken,
+    removeTokens,
     draw,
     clearAllDrawings,
     updateDrawing,
@@ -38,6 +39,8 @@ public class ClientCommand {
     playerConnected,
     playerDisconnected,
     message,
+    execFunction,
+    execLink,
     undoDraw,
     showPointer,
     hidePointer,
@@ -63,6 +66,7 @@ public class ClientCommand {
     updateTokenInitiative,
     setUseVision,
     updateCampaignMacros,
+    updateGmMacros,
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental chat notification
@@ -71,6 +75,7 @@ public class ClientCommand {
     setBoard,
     updateExposedAreaMeta,
     clearExposedArea,
+    setCampaignName,
     restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and
     // scale a player's view
     // @formatter:on

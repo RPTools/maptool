@@ -32,6 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import net.rptools.maptool.language.I18N;
 
 @SuppressWarnings("serial")
 public class PaintChooser extends JPanel {
@@ -117,7 +118,7 @@ public class PaintChooser extends JPanel {
   }
 
   private JButton createOKButton(final JDialog dialog) {
-    JButton button = new JButton("OK");
+    JButton button = new JButton(I18N.getText("Button.ok"));
     button.addActionListener(
         new ActionListener() {
           public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -128,7 +129,7 @@ public class PaintChooser extends JPanel {
   }
 
   private JButton createCancelButton(final JDialog dialog) {
-    JButton button = new JButton("Cancel");
+    JButton button = new JButton(I18N.getText("Button.cancel"));
     button.addActionListener(
         new ActionListener() {
           public void actionPerformed(java.awt.event.ActionEvent e) {

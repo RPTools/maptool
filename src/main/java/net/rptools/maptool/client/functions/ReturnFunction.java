@@ -57,8 +57,10 @@ public class ReturnFunction extends AbstractFunction implements DefinesSpecialVa
     } else return new BigDecimal(value.intValue());
   }
 
-  public void checkParameters(List<Object> parameters) throws ParameterException {
-    super.checkParameters(parameters);
+  @Override
+  public void checkParameters(String functionName, List<Object> parameters)
+      throws ParameterException {
+    super.checkParameters(functionName, parameters);
 
     Object param = parameters.get(0);
     if (!(param instanceof BigDecimal)) {

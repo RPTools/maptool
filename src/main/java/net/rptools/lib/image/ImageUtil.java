@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -50,26 +51,19 @@ public class ImageUtil {
   // GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
 
   public static final FilenameFilter SUPPORTED_IMAGE_FILE_FILTER =
-      new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          name = name.toLowerCase();
-          // TODO: FJE: When we move to Java 6, use <code>ImageIO.getReaderFileSuffixes()</code>
-          // instead
-          return name.endsWith(".png")
-              || name.endsWith(".gif")
-              || name.endsWith(".jpg")
-              || name.endsWith(".jpeg")
-              || name.endsWith(".bmp");
-        }
+      (dir, name) -> {
+        name = name.toLowerCase();
+        return Arrays.asList(ImageIO.getReaderFileSuffixes()).contains(name);
       };
 
   // public static void setGraphicsConfiguration(GraphicsConfiguration config) {
   // graphicsConfig = config;
   // }
   //
+
   /** Load the image. Does not create a graphics configuration compatible version. */
   public static Image getImage(File file) throws IOException {
-    return bytesToImage(FileUtils.readFileToByteArray(file));
+    return bytesToImage(FileUtils.readFileToByteArray(file), file.getCanonicalPath());
   }
 
   /**
@@ -87,7 +81,7 @@ public class ImageUtil {
     while ((bite = inStream.read()) >= 0) {
       dataStream.write(bite);
     }
-    return bytesToImage(dataStream.toByteArray());
+    return bytesToImage(dataStream.toByteArray(), image);
   }
 
   public static Image getImage(String image, int w, int h) throws IOException {
@@ -106,8 +100,8 @@ public class ImageUtil {
   /**
    * Create a copy of the image that is compatible with the current graphics context
    *
-   * @param img
-   * @return
+   * @param img to use
+   * @return compatible BufferedImage
    */
   public static BufferedImage createCompatibleImage(Image img) {
     return createCompatibleImage(img, null);
@@ -161,7 +155,7 @@ public class ImageUtil {
    * transparent pixel and no translucent pixels it will return Transparency.BITMASK, in all other
    * cases it returns Transparency.OPAQUE, including errors
    *
-   * @param image
+   * @param image to pick transparency from
    * @return one of Transparency constants
    */
   public static int pickBestTransparency(Image image) {
@@ -236,10 +230,25 @@ public class ImageUtil {
     return foundTransparent ? Transparency.BITMASK : Transparency.OPAQUE;
   }
 
+  /**
+   * Convert a BufferedImage to byte[] in the jpg format.
+   *
+   * @param image the buffered image.
+   * @return the byte[] of the image
+   * @throws IOException if the image cannot be written to the output stream.
+   */
   public static byte[] imageToBytes(BufferedImage image) throws IOException {
     return imageToBytes(image, "jpg");
   }
 
+  /**
+   * Convert a BufferedImage to byte[] in an given format.
+   *
+   * @param image the buffered image.
+   * @param format a String containing the informal name of the format.
+   * @return the byte[] of the image.
+   * @throws IOException if the image cannot be written to the output stream.
+   */
   public static byte[] imageToBytes(BufferedImage image, String format) throws IOException {
     ByteArrayOutputStream outStream = new ByteArrayOutputStream(10000);
     ImageIO.write(image, format, outStream);
@@ -253,16 +262,17 @@ public class ImageUtil {
    * Converts a byte array into an {@link Image} instance.
    *
    * @param imageBytes bytes to convert
-   * @return
-   * @throws IOException
+   * @param imageName name of image
+   * @return the image
+   * @throws IOException if image could not be loaded
    */
-  public static Image bytesToImage(byte[] imageBytes) throws IOException {
+  public static Image bytesToImage(byte[] imageBytes, String imageName) throws IOException {
     if (imageBytes == null) {
       throw new IOException("Could not load image - no data provided");
     }
     boolean interrupted = false;
     Throwable exception = null;
-    Image image = null;
+    Image image;
     image = Toolkit.getDefaultToolkit().createImage(imageBytes);
     MediaTracker tracker = new MediaTracker(observer);
     tracker.addImage(image, 0);
@@ -272,7 +282,6 @@ public class ImageUtil {
         tracker.waitForID(0); // This is the only method that throws an exception
       } catch (InterruptedException t) {
         interrupted = true;
-        continue;
       } catch (Throwable t) {
         exception = t;
       }
@@ -285,13 +294,15 @@ public class ImageUtil {
       image = ImageIO.read(new ByteArrayInputStream(imageBytes));
     }
     if (image == null) {
-      throw new IOException("Could not load image", exception);
+      throw new IOException("Could not load image " + imageName, exception);
     }
     return image;
   }
 
   public static void clearImage(BufferedImage image) {
-    if (image == null) return;
+    if (image == null) {
+      return;
+    }
 
     Graphics2D g = null;
     try {
@@ -368,8 +379,7 @@ public class ImageUtil {
             continue;
           }
         }
-        for (int i = 0; i < outlineNeighborMap.length; i++) {
-          int[] neighbor = outlineNeighborMap[i];
+        for (int[] neighbor : outlineNeighborMap) {
           int x = sourceX + neighbor[0];
           int y = sourceY + neighbor[1];
 
@@ -392,7 +402,7 @@ public class ImageUtil {
    * Flip the image and return a new image
    *
    * @param direction 0-nothing, 1-horizontal, 2-vertical, 3-both
-   * @return
+   * @return flipped BufferedImage
    */
   public static BufferedImage flip(BufferedImage image, int direction) {
     BufferedImage workImage =

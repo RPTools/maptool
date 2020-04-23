@@ -14,10 +14,13 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.Component;
-import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.ComboBoxModel;
@@ -30,7 +33,7 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.html.FormView;
 import javax.swing.text.html.HTML;
-import net.sf.json.JSONObject;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -98,35 +101,25 @@ public class HTMLPaneFormView extends FormView {
         method = att.getAttribute(HTML.Attribute.METHOD).toString().toLowerCase();
       }
       if (method.equals("json")) {
-        JSONObject jobj = new JSONObject();
+        JsonObject jobj = new JsonObject();
         String[] values = data.split("&"); // Is this safe? What if the data contains an "&"?
         for (String v : values) {
           String[] dataStr = v.split("=");
           if (dataStr.length == 1) {
-            try {
-              jobj.put(URLDecoder.decode(dataStr[0], "utf8"), "");
-            } catch (UnsupportedEncodingException e) {
-              // Use the raw data.
-              jobj.put(dataStr[0], "");
-            }
-          } else if (dataStr.length > 2) {
-            jobj.put(dataStr[0], dataStr[1]);
+            jobj.addProperty(URLDecoder.decode(dataStr[0], StandardCharsets.UTF_8), "");
           } else {
+            String decodedKey = URLDecoder.decode(dataStr[0], StandardCharsets.UTF_8);
+            String decodedValue = URLDecoder.decode(dataStr[1], StandardCharsets.UTF_8);
             try {
-              jobj.put(
-                  URLDecoder.decode(dataStr[0], "utf8"), URLDecoder.decode(dataStr[1], "utf8"));
-            } catch (UnsupportedEncodingException e) {
-              // Use the raw data.
-              jobj.put(dataStr[0], dataStr[1]);
+              BigDecimal value = new BigDecimal(decodedValue);
+              jobj.addProperty(decodedKey, value);
+            } catch (NumberFormatException nfe) {
+              JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(decodedValue);
+              jobj.add(decodedKey, json);
             }
           }
         }
-        try {
-          data = URLEncoder.encode(jobj.toString(), "utf8");
-        } catch (UnsupportedEncodingException e) {
-          // Use the raw data.
-          data = jobj.toString();
-        }
+        data = URLEncoder.encode(jobj.toString(), StandardCharsets.UTF_8);
       }
       htmlPane.doSubmit(method, action, data);
     }
@@ -223,11 +216,6 @@ public class HTMLPaneFormView extends FormView {
   }
 
   private String encode(String str) {
-    try {
-      return URLEncoder.encode(str, "utf-8");
-    } catch (UnsupportedEncodingException e) {
-      log.error(e.getStackTrace());
-      return str;
-    }
+    return URLEncoder.encode(str, StandardCharsets.UTF_8);
   }
 }

@@ -21,8 +21,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -51,7 +50,6 @@ import yasb.swing.BindingResolver;
  * characteristics to link view fields with model fields.
  *
  * @author tcroft
- * @param <T>
  */
 @SuppressWarnings("serial")
 public class AbeillePanel<T> extends JPanel {
@@ -82,7 +80,8 @@ public class AbeillePanel<T> extends JPanel {
 
   public AbeillePanel(String panelForm) {
     setLayout(new GridLayout());
-    panel = new FormPanel(panelForm);
+    panel = new FormPanelI18N(panelForm);
+
     add(panel);
   }
 
@@ -126,7 +125,7 @@ public class AbeillePanel<T> extends JPanel {
    * <p>Also, this code calls the protected method {@link #preModelBind()} to allow subclasses to
    * modify the binding characteristics before copying the model fields to the view.
    *
-   * @param model
+   * @param model the model
    */
   public void bind(T model) {
     if (this.model != null) {

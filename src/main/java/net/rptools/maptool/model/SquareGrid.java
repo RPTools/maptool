@@ -19,9 +19,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -97,6 +99,11 @@ public class SquareGrid extends Grid {
       boolean faceVertices = AppPreferences.getFaceVertex();
       setFacings(faceEdges, faceVertices);
     }
+  }
+
+  @Override
+  public Point getCenterOffset() {
+    return new Point((int) getCellWidth() / 2, (int) getCellHeight() / 2);
   }
 
   public SquareGrid(boolean faceEdges, boolean faceVertices) {
@@ -230,8 +237,14 @@ public class SquareGrid extends Grid {
   }
 
   @Override
+  public boolean useMetric() {
+    return true;
+  }
+
+  @Override
   public Rectangle getBounds(CellPoint cp) {
-    return new Rectangle(cp.x * getSize(), cp.y * getSize(), getSize(), getSize());
+    return new Rectangle(
+        cp.x * getSize() + getOffsetX(), cp.y * getSize() + getOffsetY(), getSize(), getSize());
   }
 
   @Override
@@ -262,6 +275,15 @@ public class SquareGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // square have their xy at their top left
+    ZonePoint zonePoint = convert(cell);
+    double x = zonePoint.x + getCellWidth() / 2.0;
+    double y = zonePoint.y + getCellHeight() / 2.0;
+    return new Point2D.Double(x, y);
   }
 
   @Override

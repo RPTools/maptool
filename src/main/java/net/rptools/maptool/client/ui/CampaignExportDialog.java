@@ -29,6 +29,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.CampaignExport;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +40,6 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>This uses a modal dialog based on an Abeille form. It allows the user to select a version of
  * MapTool to save the campaign file as for backward compatibility.
- *
- * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class CampaignExportDialog extends JDialog {
@@ -68,7 +67,7 @@ public class CampaignExportDialog extends JDialog {
     //
     // Initialize the panel and button actions
     //
-    mainPanel = new FormPanel("net/rptools/maptool/client/ui/forms/campaignExportDialog.xml");
+    mainPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/campaignExportDialog.xml");
     setLayout(new GridLayout());
     add(mainPanel);
     getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));

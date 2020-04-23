@@ -16,14 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -32,28 +25,18 @@ import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import java.util.Set;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.swing.PaintChooser;
 import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
+import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Grid;
@@ -92,14 +75,60 @@ public class MapPropertiesDialog extends JDialog {
   private Zone zone;
   private PaintChooser paintChooser;
 
-  public MapPropertiesDialog(JFrame owner) {
-    super(owner, "Map Properties", true);
+  // As a new grid is created from scratch, need to hold on to these values.
+  private int gridOffsetX = 0;
+  private int gridOffsetY = 0;
+
+  public static MapPropertiesDialog createMapPropertiesDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.mapProperties.title"), owner);
+  }
+
+  public static MapPropertiesDialog createMapPropertiesImportDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.importedMapProperties.title"), owner);
+  }
+
+  private MapPropertiesDialog(String title, JFrame owner) {
+    super(owner, title, true);
     initialize();
     pack();
   }
 
   public Status getStatus() {
     return status;
+  }
+
+  /**
+   * Set the pixels per cell value and stop user from editing.
+   *
+   * @param pixels the pixels per cell to set.
+   */
+  public void forcePixelsPerCell(int pixels) {
+    getPixelsPerCellTextField().setText(Integer.toString(pixels));
+    getPixelsPerCellTextField().setEditable(false);
+  }
+
+  public void forceMap(Asset asset) {
+    setMapAsset(asset);
+    getMapButton().setEnabled(false);
+  }
+
+  public void forceGridType(String gridType) {
+    if (GridFactory.isHexVertical(gridType)) {
+      getHexVerticalRadio().setSelected(true);
+    } else if (GridFactory.isHexHorizontal(gridType)) {
+      getHexHorizontalRadio().setSelected(true);
+    } else if (GridFactory.isIsometric(gridType)) {
+      getIsometricRadio().setSelected(true);
+    } else if (GridFactory.isSquare(gridType)) {
+      getSquareRadio().setSelected(true);
+    } else {
+      getNoGridRadio().setSelected(true);
+    }
+    getHexVerticalRadio().setEnabled(false);
+    getHexHorizontalRadio().setEnabled(false);
+    getIsometricRadio().setEnabled(false);
+    getSquareRadio().setEnabled(false);
+    getNoGridRadio().setEnabled(false);
   }
 
   @Override
@@ -112,7 +141,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanel("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
+    formPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
 
     initDistanceTextField();
 
@@ -128,6 +157,8 @@ public class MapPropertiesDialog extends JDialog {
     initDistanceTextField();
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
+    initVisionTypeCombo();
+    initAStarRoundingOptionsComboBox();
 
     initIsometricRadio();
     initHexHoriRadio();
@@ -151,11 +182,14 @@ public class MapPropertiesDialog extends JDialog {
             });
     // Color picker
     paintChooser = new PaintChooser();
+    AssetPanelModel model = new AssetPanelModel();
+    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    for (File file : assetRootList) {
+      model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
+    }
+
     TextureChooserPanel textureChooserPanel =
-        new TextureChooserPanel(
-            paintChooser,
-            MapTool.getFrame().getAssetPanel().getModel(),
-            "mapPropertiesTextureChooser");
+        new TextureChooserPanel(paintChooser, model, "mapPropertiesTextureChooser");
     paintChooser.addPaintChooser(textureChooserPanel);
     paintChooser.setPreferredSize(new Dimension(450, 400));
     mapSelectorDialog = new MapSelectorDialog();
@@ -210,6 +244,14 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getRadioButton("isoHexRadio");
   }
 
+  public JComboBox getVisionTypeCombo() {
+    return formPanel.getComboBox("visionType");
+  }
+
+  public JComboBox getAStarRoundingOptionsComboBox() {
+    return formPanel.getComboBox("aStarRoundingOptionsComboBox");
+  }
+
   public void setZone(Zone zone) {
     this.zone = zone;
     copyZoneToUI();
@@ -225,6 +267,11 @@ public class MapPropertiesDialog extends JDialog {
     getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
+    getVisionTypeCombo().setSelectedItem(zone.getVisionType());
+    getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
+
+    gridOffsetX = zone.getGrid().getOffsetX();
+    gridOffsetY = zone.getGrid().getOffsetY();
 
     fogPaint = zone.getFogPaint();
     backgroundPaint = zone.getBackgroundPaint();
@@ -239,6 +286,10 @@ public class MapPropertiesDialog extends JDialog {
     zone.setTokenVisionDistance(
         StringUtil.parseInteger(
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
+
+    zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setAStarRounding(
+        (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
@@ -323,7 +374,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         backgroundPaint != null ? backgroundPaint.getPaint() : null,
-                        "Choose Background");
+                        I18N.getText("MapPropertiesDialog.label.background"));
                 if (paint != null) {
                   backgroundPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -332,19 +383,23 @@ public class MapPropertiesDialog extends JDialog {
             });
   }
 
+  private void setMapAsset(Asset asset) {
+    mapAsset = asset;
+    if (asset != null) {
+      getNameTextField().setText(asset.getName());
+    }
+    updatePreview();
+  }
+
   private void initMapButton() {
     getMapButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                Asset asset = mapSelectorDialog.chooseAsset();
-                if (asset == null) {
-                  return;
-                }
-                mapAsset = asset;
-                getNameTextField().setText(asset.getName());
-                updatePreview();
+            e -> {
+              Asset asset = mapSelectorDialog.chooseAsset();
+              if (asset == null) {
+                return;
               }
+              setMapAsset(asset);
             });
   }
 
@@ -357,7 +412,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         fogPaint != null ? fogPaint.getPaint() : null,
-                        "Choose Fog");
+                        I18N.getText("MapPropertiesDialog.label.fog"));
                 if (paint != null) {
                   fogPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -434,6 +489,20 @@ public class MapPropertiesDialog extends JDialog {
         .setText(Integer.toString(AppPreferences.getDefaultVisionDistance()));
   }
 
+  private void initVisionTypeCombo() {
+    DefaultComboBoxModel<Zone.VisionType> model = new DefaultComboBoxModel<>();
+    for (Zone.VisionType vt : Zone.VisionType.values()) {
+      model.addElement(vt);
+    }
+    model.setSelectedItem(AppPreferences.getDefaultVisionType());
+    getVisionTypeCombo().setModel(model);
+  }
+
+  private void initAStarRoundingOptionsComboBox() {
+    getAStarRoundingOptionsComboBox()
+        .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
+  }
+
   public String getZoneName() {
     return getNameTextField().getText();
   }
@@ -473,6 +542,9 @@ public class MapPropertiesDialog extends JDialog {
       grid = GridFactory.createGrid(GridFactory.NONE);
     }
     grid.setSize(StringUtil.parseInteger(getPixelsPerCellTextField().getText(), grid.getSize()));
+
+    grid.setOffset(gridOffsetX, gridOffsetY);
+
     return grid;
   }
 
@@ -487,7 +559,7 @@ public class MapPropertiesDialog extends JDialog {
 
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
-      this.setTitle("Select Map Image");
+      this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
       setSize(500, 400);
     }
 
@@ -504,7 +576,6 @@ public class MapPropertiesDialog extends JDialog {
 
       JPanel leftPanel = new JPanel();
       leftPanel.add(createFilesystemButton());
-      // leftPanel.add(createClearButton());
 
       JPanel rightPanel = new JPanel();
       rightPanel.add(createOKButton());
@@ -517,7 +588,7 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JButton createFilesystemButton() {
-      JButton button = new JButton("Filesystem ...");
+      JButton button = new JButton(I18N.getText("Label.filesystem"));
       button.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -546,31 +617,18 @@ public class MapPropertiesDialog extends JDialog {
       return button;
     }
 
-    // private JButton createClearButton() {
-    // JButton button = new JButton("Clear");
-    //
-    // return button;
-    // }
-
     private JButton createOKButton() {
-      JButton button = new JButton("OK");
-      button.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              setVisible(false);
-            }
-          });
+      JButton button = new JButton(I18N.getText("Button.ok"));
+      button.addActionListener(e -> setVisible(false));
       return button;
     }
 
     private JButton createCancelButton() {
-      JButton button = new JButton("Cancel");
+      JButton button = new JButton(I18N.getText("Button.cancel"));
       button.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              selectedAsset = null;
-              setVisible(false);
-            }
+          e -> {
+            selectedAsset = null;
+            setVisible(false);
           });
       return button;
     }
@@ -581,11 +639,14 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JComponent createImageExplorerPanel() {
+      AssetPanelModel model = new AssetPanelModel();
+      Set<File> assetRootList = AppPreferences.getAssetRoots();
+      for (File file : assetRootList) {
+        model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
+      }
       final AssetPanel assetPanel =
-          new AssetPanel(
-              "mapPropertiesImageExplorer",
-              MapTool.getFrame().getAssetPanel().getModel(),
-              JSplitPane.HORIZONTAL_SPLIT);
+          new AssetPanel("mapPropertiesImageExplorer", model, JSplitPane.HORIZONTAL_SPLIT);
+
       assetPanel.addImageSelectionListener(
           new SelectionListener() {
             public void selectionPerformed(List<Object> selectedList) {
@@ -613,6 +674,29 @@ public class MapPropertiesDialog extends JDialog {
 
   private class MapPreviewPanel extends JComponent {
     private static final long serialVersionUID = 3761329103161077644L;
+
+    private JButton cancelButton;
+
+    private MapPreviewPanel() {
+      setLayout(new BorderLayout());
+      JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+      northPanel.setOpaque(false);
+      northPanel.add(getCancelButton());
+      add(BorderLayout.NORTH, northPanel);
+    }
+
+    private JButton getCancelButton() {
+      if (cancelButton == null) {
+        cancelButton = new JButton(new ImageIcon(AppStyle.cancelButton));
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setBorderPainted(false);
+        cancelButton.setFocusable(false);
+        cancelButton.setMargin(new Insets(0, 0, 0, 0));
+
+        cancelButton.addActionListener(e -> setMapAsset(null));
+      }
+      return cancelButton;
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -646,6 +730,8 @@ public class MapPropertiesDialog extends JDialog {
 
         g.drawImage(image, x, y, imgSize.width, imgSize.height, this);
       }
+
+      getCancelButton().setVisible(mapAsset != null);
     }
   }
 

@@ -27,12 +27,13 @@ import net.rptools.maptool.model.Token;
 
 /** Macro to run the macro on the selected tokens */
 @MacroDefinition(
-  name = "tmacro",
-  aliases = {"tm"},
-  description = "tmacro.description"
-)
+    name = "tmacro",
+    aliases = {"tm"},
+    description = "tmacro.description")
 public class RunTokenMacroMacro implements Macro {
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /**
+   * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)
+   */
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (selectedTokenSet.size() == 0) {

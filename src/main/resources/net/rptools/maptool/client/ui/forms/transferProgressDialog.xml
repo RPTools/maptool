@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">&lt;html&gt;These are images that are currently being retrieved from the server or a repository.</at>
+            <at name="text">TransferProgressDialog.desc</at>
             <at name="height">30</at>
             <at name="width">312</at>
             <at name="name"></at>
@@ -195,7 +195,7 @@
           <at name="classname">javax.swing.JButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Close</at>
+            <at name="text">Button.close</at>
             <at name="height">25</at>
             <at name="width">69</at>
             <at name="name">closeButton</at>

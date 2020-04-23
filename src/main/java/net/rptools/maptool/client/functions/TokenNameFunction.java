@@ -16,10 +16,9 @@ package net.rptools.maptool.client.functions;
 
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -44,25 +43,21 @@ public class TokenNameFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     Token token;
 
     if (functionName.equals("getName")) {
-      checkNumberOfParameters(functionName, args, 0, 2);
-      token = getTokenFromParam(resolver, functionName, args, 0, 1);
+      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
     } else {
-      checkNumberOfParameters(functionName, args, 1, 3);
-      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+      String name = args.get(0).toString();
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
 
       if (args.get(0).toString().equals("")) {
         throw new ParserException(
             I18N.getText("macro.function.tokenName.emptyTokenNameForbidden", "setName"));
       }
-
-      token.setName(args.get(0).toString());
-
-      ZoneRenderer renderer = token.getZoneRenderer();
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      setName(token, name);
     }
     return token.getName();
   }
@@ -73,88 +68,19 @@ public class TokenNameFunction extends AbstractFunction {
    * @param token the token to get the name of.
    * @return the name of the token.
    */
-  public String getName(Token token) {
+  public static String getName(Token token) {
     return token.getName();
   }
 
   /**
-   * Sets the name of the token.
+   * Validates the name, sets the name of the token, and updates the server.
    *
    * @param token The token to set the name of.
    * @param name the name of the token.
+   * @throws ParserException if an error occurs.
    */
-  public void setName(Token token, String name) {
-    token.setName(name);
-  }
-
-  /**
-   * Gets the token from the specified index or returns the token in context. This method will check
-   * the list size before trying to retrieve the token so it is safe to use for functions that have
-   * the token as a optional argument.
-   *
-   * @param res the variable resolver
-   * @param functionName The function name (used for generating exception messages).
-   * @param param The parameters for the function.
-   * @param indexToken The index to find the token at.
-   * @param indexMap The index to find the map name at. If -1, use current map instead.
-   * @return the token.
-   * @throws ParserException if a token is specified but the macro is not trusted, or the specified
-   *     token can not be found, or if no token is specified and no token is impersonated.
-   */
-  private Token getTokenFromParam(
-      MapToolVariableResolver res,
-      String functionName,
-      List<Object> param,
-      int indexToken,
-      int indexMap)
-      throws ParserException {
-
-    String mapName =
-        indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
-    Token token;
-    if (param.size() > indexToken) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPermOther", functionName));
-      }
-      token = FindTokenFunctions.findToken(param.get(indexToken).toString(), mapName);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken",
-                functionName,
-                param.get(indexToken).toString()));
-      }
-    } else {
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", functionName));
-      }
-    }
-    return token;
-  }
-
-  /**
-   * Checks that the number of objects in the list <code>parameters</code> is within given bounds
-   * (inclusive). Throws a <code>ParserException</code> if the check fails.
-   *
-   * @param functionName this is used in the exception message
-   * @param parameters a list of parameters
-   * @param min the minimum amount of parameters (inclusive)
-   * @param max the maximum amount of parameters (inclusive)
-   * @throws ParserException if there were more or less parameters than allowed
-   */
-  private void checkNumberOfParameters(
-      String functionName, List<Object> parameters, int min, int max) throws ParserException {
-    int numberOfParameters = parameters.size();
-    if (numberOfParameters < min) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
-    } else if (numberOfParameters > max) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.tooManyParam", functionName, max, numberOfParameters));
-    }
+  public static void setName(Token token, String name) throws ParserException {
+    token.validateName(name);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setName, name);
   }
 }

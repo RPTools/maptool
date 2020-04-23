@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ZoneAdminClientAction;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -29,7 +31,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 /**
  * @author jfrazierjr
@@ -163,10 +164,10 @@ public class FogOfWarFunctions extends AbstractFunction {
 
     if (delim.equalsIgnoreCase("json")) {
       // A JSON Array was supplied
-      Object json = JSONMacroFunctions.convertToJSON(paramStr);
-      if (json instanceof JSONArray) {
-        for (Object o : (JSONArray) json) {
-          String identifier = (String) o;
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(paramStr);
+      if (json.isJsonArray()) {
+        for (JsonElement ele : json.getAsJsonArray()) {
+          String identifier = ele.getAsString();
           Token t = zone.resolveToken(identifier);
           if (t != null) {
             tokenSet.add(t.getId());

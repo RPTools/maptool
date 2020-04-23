@@ -19,13 +19,22 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.functions.getInfoFunction;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool.model.Player;
+import net.rptools.maptool.util.MapToolSysInfoProvider;
+import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,10 +45,54 @@ public class MapToolEventQueue extends EventQueue {
           I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
           JOptionPane.ERROR_MESSAGE,
           JideOptionPane.CLOSE_OPTION);
+  /**
+   * This field must only ever be accessed from the EDT. Otherwise, a separate thread could access
+   * it to determine the state of the `Shift` key only to have the EDT progress to a different event
+   * such that the state is outdated.
+   *
+   * <p>An `int` is used to allow for future implementations to include the location of the key,
+   * i.e., Left-Shift or Right-Shift via event.getKeyLocation().
+   */
+  public static int shiftState = 0;
+
+  public static final int ALL_MODIFIERS_EXC_SHIFT =
+      InputEvent.CTRL_DOWN_MASK
+          | InputEvent.ALT_DOWN_MASK
+          | InputEvent.META_DOWN_MASK
+          | InputEvent.ALT_GRAPH_DOWN_MASK;
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
+      if (event instanceof KeyEvent) {
+        KeyEvent ke = (KeyEvent) event;
+        if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
+          switch (ke.getID()) {
+            case KeyEvent.KEY_PRESSED:
+              MapToolEventQueue.shiftState = 1;
+              break;
+            case KeyEvent.KEY_RELEASED:
+              MapToolEventQueue.shiftState = 0;
+              break;
+          }
+          // log.info("shiftState set to " + MapToolEventQueue.shiftState);
+        }
+      } else if (event instanceof FocusEvent) {
+        FocusEvent fe = (FocusEvent) event;
+        if (fe.getID() == FocusEvent.FOCUS_LOST) {
+          // When we lose focus, assume the Shift key is released.
+          MapToolEventQueue.shiftState = 0;
+          // log.info("shiftState forced off (focus lost)");
+        }
+      } else if (event instanceof MouseWheelEvent) {
+        MouseWheelEvent mwe = (MouseWheelEvent) event;
+        if (mwe.isShiftDown() && MapToolEventQueue.shiftState != 1) {
+          // issue 1317: ignore ALL horizontal movement, *even if* the physical Shift is held down.
+          // This means only vertical movement will be recognized and the user will have
+          // to hold down the Shift key to effect it.
+          return;
+        }
+      }
       super.dispatchEvent(event);
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
@@ -105,24 +158,51 @@ public class MapToolEventQueue extends EventQueue {
     // action").build());
 
     UserBuilder user = new UserBuilder();
-    user.setUsername(MapTool.getPlayer().getName());
-    user.setId(MapTool.getClientId());
-    user.setEmail(
-        MapTool.getPlayer().getName().replaceAll(" ", "_")
-            + "@rptools.net"); // Lets prompt for this?
+    Player player = MapTool.getPlayer();
+    if (player != null) {
+      user.setUsername(player.getName());
+      user.setId(MapTool.getClientId());
+      user.setEmail(
+          player.getName().replaceAll(" ", "_") + "@rptools.net"); // Lets prompt for this?
+    } else {
+      user.setUsername("Unknown");
+      user.setId("Unknown");
+      user.setEmail("Unknown");
+    }
 
     // Set the user in the current context.
     Sentry.getContext().setUser(user.build());
 
-    Sentry.getContext().addTag("role", MapTool.getPlayer().getRole().toString());
+    Sentry.getContext().addTag("role", player != null ? player.getRole().toString() : null);
+    boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
-    Sentry.getContext().addExtra("System Info", new SysInfo().getSysInfoJSON());
+    Sentry.getContext().addExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON());
 
-    if (MapTool.isHostingServer())
+    addGetInfoToSentry("campaign");
+
+    if (hostingServer) {
+      addGetInfoToSentry("server");
       Sentry.getContext().addExtra("Server Policy", MapTool.getServerPolicy().toJSON());
+    }
 
     // Send the event!
     Sentry.capture(thrown);
+  }
+
+  private static void addGetInfoToSentry(String command) {
+    Object campaign;
+    try {
+      MapToolMacroContext sentryContext = new MapToolMacroContext(command, "sentryIOLogging", true);
+      MapTool.getParser().enterContext(sentryContext);
+      campaign =
+          getInfoFunction
+              .getInstance()
+              .childEvaluate(null, null, Collections.singletonList(command));
+      MapTool.getParser().exitContext();
+    } catch (ParserException e) {
+      campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
+    }
+    Sentry.getContext().addExtra("getinfo(\"" + command + "\")", campaign);
   }
 }

@@ -14,40 +14,71 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Frame;
+import com.google.gson.JsonObject;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JDialog;
+import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.sf.json.JSONObject;
+import net.rptools.parser.ParserException;
 
+/**
+ * Represents a JDialog holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
+ * (JavaFX) panel.
+ */
 @SuppressWarnings("serial")
 public class HTMLDialog extends JDialog implements HTMLPanelContainer {
-  private static Map<String, HTMLDialog> dialogs = new HashMap<String, HTMLDialog>();
+  /** The static map of the HTMLDialogs. */
+  private static final Map<String, HTMLDialog> dialogs = new HashMap<>();
 
+  /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<String, String>();
+
+  /** The temporary status of the dialog. A temporary dialog isn't stored after being closed. */
   private boolean temporary;
+
+  /** The input status of the dialog (input=true: automatically close on form submit) */
   private boolean input;
+
+  /** The value stored in the frame. */
   private Object value;
-  private final HTMLPanel panel;
+
+  /** Panel for HTML. */
+  private HTMLPanelInterface panel;
+
+  /** The name of the frame. */
   private final String name;
+
+  /** Can the dialog be resized? */
   private final boolean canResize = true;
+
+  /** The parent of the dialog */
   private final Frame parent;
-  private boolean closeButton;
+
+  /** The panel for the close button. */
+  private final JPanel closePanel = new JPanel();
+
+  /** Is the panel HTML5 or HTML3.2. */
+  private boolean isHTML5;
+
+  @Override
+  public Map<String, String> macroCallbacks() {
+    return macroCallbacks;
+  }
 
   /**
-   * Returns if the frame is visible or not.
+   * Return whether the frame is visible or not.
    *
-   * @param name The name of the frame.
+   * @param name the name of the frame.
    * @return true if the frame is visible.
    */
   static boolean isVisible(String name) {
@@ -58,7 +89,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   }
 
   /**
-   * Requests that the frame close.
+   * Request that the frame close.
    *
    * @param name The name of the frame.
    */
@@ -69,25 +100,18 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   }
 
   /**
-   * Creates a HTMLDialog
+   * Create a HTMLDialog
    *
-   * @param parent The parent frame.
-   * @param name The name of the dialog.
-   * @param title The title of the dialog.
-   * @param undecorated If the dialog is decorated or not.
-   * @param width The width of the dialog.
-   * @param height The height of the dialog.
-   * @param closeButton if the close button should be displayed or not.
+   * @param parent the parent frame.
+   * @param name the name of the dialog
+   * @param decorated whether the dialog is decorated (no frame/title)
+   * @param width the width of the dialog
+   * @param height the height of the dialog
+   * @param isHTML5 whether the dialog should use HTML5 or HTML3.2
    */
   private HTMLDialog(
-      Frame parent,
-      String name,
-      String title,
-      boolean undecorated,
-      boolean closeButton,
-      int width,
-      int height) {
-    super(parent, title, false);
+      Frame parent, String name, boolean decorated, int width, int height, boolean isHTML5) {
+    super(parent, name, false);
     addWindowListener(
         new WindowAdapter() {
           @Override
@@ -96,36 +120,66 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
           }
         });
     this.name = name;
-    setUndecorated(undecorated);
+    this.isHTML5 = isHTML5;
+    this.parent = parent;
 
+    // Only set preferred size at creation.
     width = width < 100 ? 400 : width;
     height = height < 50 ? 200 : height;
     setPreferredSize(new Dimension(width, height));
 
-    panel = new HTMLPanel(this, closeButton, !undecorated);
-    add(panel);
-    pack();
-    this.parent = parent;
+    // Creation of HTML panel.
+    addHTMLPanel(decorated, isHTML5);
 
+    // Creation of close panel.
+    JButton jcloseButton = new JButton(I18N.getText("msg.button.close"));
+    jcloseButton.setActionCommand("Close");
+    jcloseButton.addActionListener(this);
+    closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
+    closePanel.add(Box.createHorizontalGlue());
+    closePanel.add(jcloseButton);
+    closePanel.add(Box.createHorizontalGlue());
+
+    // Size the dialog, make it displayable, and validate it
+    pack();
+
+    // Center dialog
     SwingUtil.centerOver(this, parent);
   }
 
+  /**
+   * Add an HTML panel to the dialog.
+   *
+   * @param scrollBar whether the dialog is to have a toolbar; not working for HTML5
+   * @param isHTML5 whether the panel supports HTML5
+   */
+  public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
+    if (isHTML5) {
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+    } else {
+      panel = new HTMLPanel(this, scrollBar);
+    }
+    panel.addToContainer(this);
+    panel.addActionListener(this);
+  }
   /**
    * Shows the HTML Dialog. This will create a new dialog if the named dialog does not already
    * exist. The width and height fields are ignored if the dialog has already been opened so that it
    * will not override any resizing that the user may have done.
    *
-   * @param name The name of the dialog.
-   * @param title The title for the dialog window .
-   * @param width The width in pixels of the dialog.
-   * @param height The height in pixels of the dialog.
-   * @param frame If the dialog is decorated with frame or not.
-   * @param input Is the dialog an input only dialog.
-   * @param temp Is the dialog temporary.
-   * @param closeButton Should the close button be displayed or not.
-   * @param value A value to be returned by getDialogProperties().
-   * @param html The HTML to display in the dialog.
-   * @return The dialog.
+   * @param name the name of the dialog.
+   * @param title the title for the dialog window .
+   * @param width the width in pixels of the dialog.
+   * @param height the height in pixels of the dialog.
+   * @param frame whether the frame is decorated (frame and title)
+   * @param input whether submitting the form closes it
+   * @param temp whether the frame is temporary
+   * @param closeButton whether the close button is to be displayed
+   * @param scrollReset whether the scrollbar should be reset
+   * @param isHTML5 whether the frame should support HTML5
+   * @param value a value to be returned by getDialogProperties()
+   * @param html the HTML to display in the dialog
+   * @return the dialog
    */
   static HTMLDialog showDialog(
       String name,
@@ -136,17 +190,20 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      boolean scrollReset,
+      boolean isHTML5,
       Object value,
       String html) {
     HTMLDialog dialog;
     if (dialogs.containsKey(name)) {
       dialog = dialogs.get(name);
-      dialog.updateContents(html, title, temp, closeButton, input, value);
     } else {
-      dialog = new HTMLDialog(MapTool.getFrame(), name, title, !frame, closeButton, width, height);
+      dialog = new HTMLDialog(MapTool.getFrame(), name, frame, width, height, isHTML5);
       dialogs.put(name, dialog);
-      dialog.updateContents(html, title, temp, closeButton, input, value);
     }
+    dialog.updateContents(
+        html, title, frame, input, temp, closeButton, scrollReset, isHTML5, value);
+
     // dialog.canResize = false;
     if (!dialog.isVisible()) {
       dialog.setVisible(true);
@@ -154,16 +211,24 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     return dialog;
   }
 
+  @Override
   public void setValue(Object value) {
     this.value = value;
   }
 
+  @Override
   public Object getValue() {
     return value;
   }
 
-  private boolean getTemporary() {
+  @Override
+  public boolean getTemporary() {
     return this.temporary;
+  }
+
+  @Override
+  public void setTemporary(boolean temp) {
+    this.temporary = temp;
   }
 
   /**
@@ -172,15 +237,16 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param name The name of the frame.
    * @return A json with the width, height, temporary, title, and value of dialog
    */
-  public static Object getDialogProperties(String name) {
+  public static Object getDialogProperties(String name) throws ParserException {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
-      JSONObject dialogProperties = new JSONObject();
+      JsonObject dialogProperties = new JsonObject();
 
-      dialogProperties.put("width", dialog.getWidth());
-      dialogProperties.put("height", dialog.getHeight());
-      dialogProperties.put("temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
-      dialogProperties.put("title", dialog.getTitle());
+      dialogProperties.addProperty("width", dialog.getWidth());
+      dialogProperties.addProperty("height", dialog.getHeight());
+      dialogProperties.addProperty(
+          "temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+      dialogProperties.addProperty("title", dialog.getTitle());
 
       Object dialogValue = dialog.getValue();
       if (dialogValue == null) {
@@ -189,12 +255,12 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
         if (dialogValue instanceof String) {
           // try to convert to a number
           try {
-            dialogValue = new BigDecimal(dialogValue.toString());
+            BigDecimal dialogValueBD = new BigDecimal(dialogValue.toString());
           } catch (Exception e) {
           }
         }
       }
-      dialogProperties.put("value", dialogValue);
+      dialogProperties.add("value", JSONMacroFunctions.getInstance().asJsonElement(dialogValue));
 
       return dialogProperties;
     } else {
@@ -202,68 +268,34 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     }
   }
 
-  /** The selected token list has changed. */
-  private void selectedChanged() {
-    if (macroCallbacks.get("onChangeSelection") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance().runMacroLink(macroCallbacks.get("onChangeSelection"));
-            }
-          });
-    }
-  }
-
-  /** A new token has been impersonated or the impersonated token is cleared. */
-  private void impersonatedChanged() {
-    if (macroCallbacks.get("onChangeImpersonated") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance()
-                  .runMacroLink(macroCallbacks.get("onChangeImpersonated"));
-            }
-          });
-    }
-  }
-
-  /** One of the tokens has changed. */
-  private void tokenChanged(final Token token) {
-    if (macroCallbacks.get("onChangeToken") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance()
-                  .runMacroLink(macroCallbacks.get("onChangeToken") + token.getId().toString());
-            }
-          });
-    }
-  }
-
-  /** The selected token list has changed. */
+  /** Run all callback macros for "onChangeSelection". */
   public static void doSelectedChanged() {
     for (HTMLDialog dialog : dialogs.values()) {
       if (dialog.isVisible()) {
-        dialog.selectedChanged();
+        HTMLPanelContainer.selectedChanged(dialog.macroCallbacks());
       }
     }
   }
 
-  /** A new token has been impersonated or the impersonated token is cleared. */
+  /** Run all callback macros for "onChangeImpersonated". */
   public static void doImpersonatedChanged() {
     for (HTMLDialog dialog : dialogs.values()) {
       if (dialog.isVisible()) {
-        dialog.impersonatedChanged();
+        HTMLPanelContainer.impersonatedChanged(dialog.macroCallbacks());
       }
     }
   }
 
-  /** One of the tokens has changed. */
+  /**
+   * Run all callback macros for "onChangeToken".
+   *
+   * @param token the token that changed.
+   */
   public static void doTokenChanged(Token token) {
     if (token != null) {
       for (HTMLDialog dialog : dialogs.values()) {
         if (dialog.isVisible()) {
-          dialog.tokenChanged(token);
+          HTMLPanelContainer.tokenChanged(token, dialog.macroCallbacks());
         }
       }
     }
@@ -272,69 +304,105 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   /**
    * Updates the contents of the dialog.
    *
-   * @param html The html contents of the dialog.
-   * @param title The title of the dialog.
-   * @param temp Is the dialog temporary or not.
-   * @param closeButton does the dialog have a close button.
+   * @param html the html contents of the dialog
+   * @param title the title of the dialog
+   * @param decorated whether to decorate form with frame and title bar
+   * @param input whether to close the dialog on form submit
+   * @param temp whether to make the dialog temporary
+   * @param closeButton whether to show a close button
+   * @param scrollReset whether the scrollbar should be reset
+   * @param isHTML5 whether to make the dialog HTML5 (JavaFX)
+   * @param val the value held in the frame
    */
   private void updateContents(
-      String html, String title, boolean temp, boolean closeButton, boolean input, Object val) {
+      String html,
+      String title,
+      boolean decorated,
+      boolean input,
+      boolean temp,
+      boolean closeButton,
+      boolean scrollReset,
+      boolean isHTML5,
+      Object val) {
+    if (this.isHTML5 != isHTML5) {
+      this.isHTML5 = isHTML5;
+      panel.removeFromContainer(this); // remove previous panel
+      addHTMLPanel(decorated, isHTML5); // add new panel of the other HTML type
+    }
+    if (decorated == isUndecorated()) {
+      dispose(); // required by setUndecorated
+      setUndecorated(!decorated);
+      pack();
+      SwingUtil.centerOver(this, parent);
+    }
     this.input = input;
-    this.closeButton = closeButton;
     this.temporary = temp;
     this.value = val;
     this.setTitle(title);
     macroCallbacks.clear();
-    panel.updateContents(html, closeButton);
+    updateButton(closeButton);
+    panel.updateContents(html, scrollReset);
   }
 
+  /**
+   * Updates the close button of the dialog.
+   *
+   * @param closeButton whether to show the closeButton
+   */
+  public void updateButton(boolean closeButton) {
+    if (closeButton) {
+      add(closePanel, BorderLayout.SOUTH);
+    } else {
+      remove(closePanel);
+    }
+    revalidate();
+  }
+
+  @Override
   public void actionPerformed(ActionEvent e) {
-    if (e instanceof HTMLPane.FormActionEvent) {
+    if (e instanceof HTMLActionEvent.FormActionEvent) {
       if (input) {
         closeRequest();
       }
-      HTMLPane.FormActionEvent fae = (HTMLPane.FormActionEvent) e;
-      MacroLinkFunction.getInstance().runMacroLink(fae.getAction() + fae.getData());
+      HTMLActionEvent.FormActionEvent fae = (HTMLActionEvent.FormActionEvent) e;
+      MacroLinkFunction.runMacroLink(fae.getAction() + fae.getData());
     }
-    if (e instanceof HTMLPane.ChangeTitleActionEvent) {
-      this.setTitle(((HTMLPane.ChangeTitleActionEvent) e).getNewTitle());
+    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent) {
+      this.setTitle(((HTMLActionEvent.ChangeTitleActionEvent) e).getNewTitle());
     }
-    if (e instanceof HTMLPane.RegisterMacroActionEvent) {
-      HTMLPane.RegisterMacroActionEvent rmae = (HTMLPane.RegisterMacroActionEvent) e;
+    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent) {
+      HTMLActionEvent.RegisterMacroActionEvent rmae = (HTMLActionEvent.RegisterMacroActionEvent) e;
       macroCallbacks.put(rmae.getType(), rmae.getMacro());
     }
-    if (e instanceof HTMLPane.MetaTagActionEvent) {
-      HTMLPane.MetaTagActionEvent mtae = (HTMLPane.MetaTagActionEvent) e;
-      if (mtae.getName().equalsIgnoreCase("input")) {
-        Boolean val = Boolean.valueOf(mtae.getContent());
-        input = val;
-        closeButton = !input;
-      } else if (mtae.getName().equalsIgnoreCase("closebutton")) {
-        Boolean val = Boolean.valueOf(mtae.getContent());
-        closeButton = val;
-        panel.updateContents(closeButton);
-      } else if (mtae.getName().equalsIgnoreCase("onChangeToken")
-          || mtae.getName().equalsIgnoreCase("onChangeSelection")
-          || mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {
-        macroCallbacks.put(mtae.getName(), mtae.getContent());
-      } else if (mtae.getName().equalsIgnoreCase("width")) {
+
+    if (e instanceof HTMLActionEvent.MetaTagActionEvent) {
+      String name = ((HTMLActionEvent.MetaTagActionEvent) e).getName();
+      String content = ((HTMLActionEvent.MetaTagActionEvent) e).getContent();
+      if (name.equalsIgnoreCase("input")) {
+        input = Boolean.parseBoolean(content);
+      } else if (name.equalsIgnoreCase("closebutton")) {
+        updateButton(Boolean.parseBoolean(content));
+      } else if (name.equalsIgnoreCase("onChangeToken")
+          || name.equalsIgnoreCase("onChangeSelection")
+          || name.equalsIgnoreCase("onChangeImpersonated")) {
+        macroCallbacks.put(name, content);
+      } else if (name.equalsIgnoreCase("width")) {
         if (canResize) {
-          setSize(new Dimension(Integer.parseInt(mtae.getContent()), getHeight()));
+          setSize(new Dimension(Integer.parseInt(content), getHeight()));
           validate();
         }
-      } else if (mtae.getName().equalsIgnoreCase("height")) {
+      } else if (name.equalsIgnoreCase("height")) {
         if (canResize) {
-          setSize(new Dimension(getWidth(), Integer.parseInt(mtae.getContent())));
+          setSize(new Dimension(getWidth(), Integer.parseInt(content)));
           SwingUtil.centerOver(this, parent);
           this.validate();
         }
-      } else if (mtae.getName().equalsIgnoreCase("temporary")) {
-        Boolean val = Boolean.valueOf(mtae.getContent());
+      } else if (name.equalsIgnoreCase("temporary")) {
+        temporary = Boolean.parseBoolean(content);
         SwingUtil.centerOver(this, parent);
-        temporary = val;
-      } else if (mtae.getName().equalsIgnoreCase("value")) {
+      } else if (name.equalsIgnoreCase("value")) {
         SwingUtil.centerOver(this, parent);
-        setValue(mtae.getContent());
+        setValue(content);
       }
     }
     if (e.getActionCommand().equals("Close")) {
@@ -342,6 +410,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     }
   }
 
+  @Override
   public void closeRequest() {
     setVisible(false);
     panel.flush();
@@ -349,5 +418,10 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialogs.remove(this.name);
       dispose();
     }
+  }
+
+  @Override
+  public Component add(Component component) {
+    return super.add(component);
   }
 }

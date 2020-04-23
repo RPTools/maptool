@@ -17,7 +17,9 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -27,7 +29,7 @@ public class TokenBarFunction extends AbstractFunction {
 
   /** Support get and set bar on tokens */
   private TokenBarFunction() {
-    super(1, 3, "getBar", "setBar", "isBarVisible", "setBarVisible");
+    super(1, 4, "getBar", "setBar", "isBarVisible", "setBarVisible");
   }
 
   /** singleton instance of this function */
@@ -45,17 +47,26 @@ public class TokenBarFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    Token token = AbstractTokenAccessorFunction.getTarget(parser, parameters, -1);
     String bar = (String) parameters.get(0);
+    verifyBar(functionName, bar);
+
     if (functionName.equals("getBar")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       return getValue(token, bar);
     } else if (functionName.equals("setBar")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
       return setValue(token, bar, parameters.get(1));
     } else if (functionName.equals("isBarVisible")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       return isVisible(token, bar);
-    } else {
-      return setVisible(
-          token, bar, AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1)));
+    } else { // setBarVisible
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
+      boolean visible = FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      return setVisible(token, bar, visible);
     }
   }
 
@@ -64,11 +75,11 @@ public class TokenBarFunction extends AbstractFunction {
    *
    * @param token Get the value from this token
    * @param bar For this bar
-   * @return A {@link BigDecimal} value.
-   * @throws ParserException
+   * @return A {@link BigDecimal} value, or an empty string "" if bar is not visible
    */
-  public Object getValue(Token token, String bar) throws ParserException {
-    return token.getState(bar);
+  public static Object getValue(Token token, String bar) {
+    Object value = token.getState(bar);
+    return value != null ? value : "";
   }
 
   /**
@@ -76,24 +87,31 @@ public class TokenBarFunction extends AbstractFunction {
    * @param bar For this bar
    * @param value New value for the bar. Will be converted into a {@link BigDecimal} before setting
    * @return The {@link BigDecimal} value that was actually set.
-   * @throws ParserException
    */
-  public Object setValue(Token token, String bar, Object value) throws ParserException {
+  public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    token.setState(bar, val);
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return val;
   }
 
-  public BigDecimal isVisible(Token token, String bar) {
+  /**
+   * @param token Get the value of this token
+   * @param bar For this bar
+   * @return If the bar visible or not
+   */
+  public static BigDecimal isVisible(Token token, String bar) {
     return token.getState(bar) == null ? BigDecimal.ZERO : BigDecimal.ONE;
   }
 
-  public BigDecimal setVisible(Token token, String bar, boolean show) {
-    token.setState(bar, show ? BigDecimal.ONE : null);
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+  /**
+   * @param token Set the value of this token
+   * @param bar For this bar
+   * @param show Should this bar be visible
+   * @return If the bar visible or not
+   */
+  public static BigDecimal setVisible(Token token, String bar, boolean show) {
+    BigDecimal value = show ? BigDecimal.ONE : null;
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
@@ -118,5 +136,17 @@ public class TokenBarFunction extends AbstractFunction {
       } // endtry
     } // endif
     return val;
+  }
+
+  /**
+   * @param functionName the name of the function
+   * @param bar the name of the bar
+   * @throws ParserException if the bar doesn't exist
+   */
+  private static void verifyBar(String functionName, String bar) throws ParserException {
+    if (!MapTool.getCampaign().getTokenBarsMap().containsKey(bar)) {
+      throw new ParserException(
+          I18N.getText("macro.function.tokenBarFunction.unknownBar", functionName, bar));
+    }
   }
 }

@@ -38,6 +38,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Support class used by the token editor dialog on the "Properties" tab to allow a token's image to
@@ -48,6 +50,7 @@ import net.rptools.maptool.util.ImageManager;
  * @author trevor
  */
 public class TokenLayoutPanel extends JPanel {
+  private static final Logger log = LogManager.getLogger(TokenLayoutPanel.class);
   private Token token;
   private int dragOffsetX;
   private int dragOffsetY;
@@ -56,12 +59,14 @@ public class TokenLayoutPanel extends JPanel {
   public TokenLayoutPanel() {
     addMouseWheelListener(
         new MouseWheelListener() {
+          @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
+            int wheelMovement = e.getWheelRotation();
             // Not for snap-to-scale
-            if (!token.isSnapToScale()) {
+            if (!token.isSnapToScale() || wheelMovement == 0) {
               return;
             }
-            double delta = e.getWheelRotation() > 0 ? -.1 : .1;
+            double delta = wheelMovement > 0 ? -.1 : .1;
             if (SwingUtil.isShiftDown(e)) {
               // Nothing yet, as changing the facing isn't the right way to handle it --
               // the image itself really should be rotated. And it's probably better to
@@ -72,6 +77,7 @@ public class TokenLayoutPanel extends JPanel {
               // a way of reducing round off error from multiple rotations).
             }
             double scale = token.getSizeScale() + delta;
+            log.debug(() -> "wheel=" + wheelMovement + ", delta=" + delta);
 
             // Range
             scale = Math.max(.1, scale);

@@ -106,8 +106,8 @@ public class I18N {
    * the main application frame. As described by the {@link #getAccelerator(String)} method, the
    * input key has the string DESCRIPTION_EXTENSION appended to it.
    *
-   * @param key
-   * @return
+   * @param key the key to use for the i18n lookup.
+   * @return the i81n version of the string.
    */
   public static String getDescription(String key) {
     return getString(key + DESCRIPTION_EXTENSION);
@@ -136,6 +136,7 @@ public class I18N {
    * Returns the String that results from a lookup within the properties file.
    *
    * @param key the component to search for
+   * @param bundle the resource bundle to get the i18n string from.
    * @return the String found or <code>null</code>
    */
   public static String getString(String key, ResourceBundle bundle) {
@@ -162,7 +163,7 @@ public class I18N {
 
   /**
    * Returns the text associated with the given key after removing any menu mnemonic. So for the key
-   * <b>action.loadMap</b> that has the value "&Load Map" in the properties file, this method
+   * <b>action.loadMap</b> that has the value {@code &Load Map} in the properties file, this method
    * returns "Load Map".
    *
    * @param key the component to search for
@@ -275,12 +276,22 @@ public class I18N {
     return k;
   }
 
-  /** Returns all matching keys when given a string regular expression. */
+  /**
+   * Returns all matching keys when given a string regular expression.
+   *
+   * @param regex the regular expression used to find the i81n keys.
+   * @return a list of the matching keys from the i18n property file
+   */
   public static List<String> getMatchingKeys(String regex) {
     return getMatchingKeys(Pattern.compile(regex));
   }
 
-  /** Returns all matching keys when given a compiled regular expression pattern. */
+  /**
+   * Returns all matching keys when given a compiled regular expression pattern.
+   *
+   * @param regex the compiled regular expression used to find the i81n keys.
+   * @return a list of the matching keys from the i18n property file
+   */
   public static List<String> getMatchingKeys(Pattern regex) {
     Enumeration<String> keys = BUNDLE.getKeys();
 

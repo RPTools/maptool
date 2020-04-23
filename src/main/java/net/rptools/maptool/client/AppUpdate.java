@@ -14,13 +14,17 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.jayway.jsonpath.JsonPath;
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -31,18 +35,27 @@ import org.apache.logging.log4j.Logger;
 public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
-  static final String GIT_HUB_API_URL = "github.api.url";
-  static final String GIT_HUB_OAUTH_TOKEN =
+  private static final String GIT_HUB_RELEASES = "github.api.releases";
+  private static final String GIT_HUB_OAUTH_TOKEN =
       "github.api.oauth.token"; // Grants read-only access to public information
 
+  /**
+   * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
+   * the update should not be ignored, give a prompt to update. If current version is a release,
+   * update to the most recent release. If the current version is a pre-release, update to the most
+   * recent version (pre-release or release).
+   *
+   * @return has an update been made
+   */
   public static boolean gitHubReleases() {
     // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.getSkipAutoUpdate()) return false;
+    String strURL = getProperty(GIT_HUB_RELEASES);
+    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
 
-    String responseBody = null;
-    String jarCommit = null;
-    String latestGitHubReleaseCommit = "";
-    String latestGitHubReleaseTagName = "";
+    String jarCommit;
+    String latestGitHubReleaseCommit;
+    String latestGitHubReleaseTagName;
 
     // Default for Linux?
     String DOWNLOAD_EXTENSION = ".deb";
@@ -55,36 +68,34 @@ public class AppUpdate {
 
     // If we don't have a commit attribute from JAR, we're done!
     if (jarCommit == null) {
-      log.info(
-          "No commit SHA (running in DEVELOPMENT mode?): "
-              + getProperty(GIT_HUB_API_URL)
-              + getProperty(GIT_HUB_OAUTH_TOKEN));
+      log.info("No commit SHA (running in DEVELOPMENT mode?): " + strRequest);
       return false;
     }
 
+    String strReleases = getReleases();
+    // If can't access the list of releases, we're done
+    if (strReleases == null) return false;
+
+    JsonObject release;
     try {
-      Request request =
-          new Request.Builder()
-              .url(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN))
-              .build();
+      // Get pre-release information regarding MapTool version from github list
+      String path = "$.[?(@.target_commitish == '" + jarCommit + "')].prerelease";
+      List<Boolean> listMatches = JsonPath.parse(strReleases).read(path);
+      boolean prerelease = listMatches.isEmpty() || listMatches.get(0);
 
-      Response response = new OkHttpClient().newCall(request).execute();
-      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-      responseBody = response.body().string();
-
-      log.debug("GitHub API Response: " + responseBody);
-    } catch (IOException e) {
-      log.error("Unable to reach " + getProperty(GIT_HUB_API_URL), e.getLocalizedMessage());
-      return false;
-    }
-
-    JSONObject releases = new JSONObject();
-    try {
-      releases = JSONObject.fromObject(responseBody);
-      latestGitHubReleaseCommit = releases.get("target_commitish").toString();
+      if (prerelease) {
+        JsonArray releasesArray =
+            JSONMacroFunctions.getInstance().asJsonElement(strReleases).getAsJsonArray();
+        release = releasesArray.get(0).getAsJsonObject(); // the latest release is at top of list
+      } else {
+        path = "$.[?(@.prerelease == false)]";
+        listMatches = JsonPath.parse(strReleases).read(path); // get sublist of releases
+        release =
+            JSONMacroFunctions.getInstance().asJsonElement(listMatches.get(0)).getAsJsonObject();
+      }
+      latestGitHubReleaseCommit = release.get("target_commitish").getAsString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
-      latestGitHubReleaseTagName = releases.get("tag_name").toString();
+      latestGitHubReleaseTagName = release.get("tag_name").getAsString();
       log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
     } catch (Exception e) {
       log.error("Unable to parse JSON payload from GitHub...", e);
@@ -95,18 +106,18 @@ public class AppUpdate {
     if (jarCommit.equals(latestGitHubReleaseCommit)
         || AppPreferences.getSkipAutoUpdateCommit().equals(latestGitHubReleaseCommit)) return false;
 
-    JSONArray releaseAssets = releases.getJSONArray("assets");
+    JsonArray releaseAssets = release.get("assets").getAsJsonArray();
     String assetDownloadURL = null;
-    JSONObject asset;
+    JsonObject asset;
 
     for (int i = 0; i < releaseAssets.size(); ++i) {
-      asset = releaseAssets.getJSONObject(i);
+      asset = releaseAssets.get(i).getAsJsonObject();
 
-      log.info("Asset: " + asset.getString("name"));
+      log.info("Asset: " + asset.get("name").getAsString());
 
-      if (asset.getString("name").toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
-        assetDownloadURL = asset.getString("browser_download_url");
-        final long assetDownloadSize = asset.getLong("size");
+      if (asset.get("name").getAsString().toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
+        assetDownloadURL = asset.get("browser_download_url").getAsString();
+        final long assetDownloadSize = asset.get("size").getAsLong();
 
         if (assetDownloadURL != null) {
           log.info("Download: " + assetDownloadURL);
@@ -117,8 +128,7 @@ public class AppUpdate {
             String tagName = latestGitHubReleaseTagName;
             SwingUtilities.invokeLater(
                 () -> {
-                  if (showMessage("New Update Found", commit, tagName))
-                    downloadFile(url, assetDownloadSize);
+                  if (showMessage(commit, tagName)) downloadFile(url, assetDownloadSize);
                 });
           } catch (MalformedURLException e) {
             log.error("Error with URL " + assetDownloadURL, e);
@@ -132,6 +142,33 @@ public class AppUpdate {
     return false;
   }
 
+  /**
+   * Get the String containing the list of the releases and pre-releases from github.
+   *
+   * @return the String with the list of releases, or null if IOException
+   */
+  private static String getReleases() {
+    String strURL = getProperty(GIT_HUB_RELEASES);
+    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
+    try {
+      Request request = new Request.Builder().url(strRequest).build();
+      Response response = new OkHttpClient().newCall(request).execute();
+      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+      String responseBody = response.body().string();
+      log.debug("GitHub API Response: " + responseBody);
+      return responseBody;
+    } catch (IOException e) {
+      log.error("Unable to reach " + strURL, e.getLocalizedMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get the latest commit SHA from MANIFEST.MF
+   *
+   * @return the String of the commit SHA, or null if IOException
+   */
   public static String getCommitSHA() {
     String jarCommit = "";
 
@@ -152,16 +189,18 @@ public class AppUpdate {
     return jarCommit;
   }
 
-  private static boolean showMessage(String aTitle, String commit, String tagName) {
-    JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
+  private static boolean showMessage(String commit, String tagName) {
+    JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
 
-    String title = "Update Available";
-    String msg1 = "A new version of MapTool is available!";
-    String msg2 = "Would you like to download " + tagName + "?";
+    String title = I18N.getText("Update.title");
+    String msg1 = I18N.getText("Update.msg1");
+    String msg2 = I18N.getText("Update.msg2", tagName);
     String blankLine = " ";
 
     Object[] msgContent = {msg1, msg2, blankLine, dontAskCheckbox};
-    Object[] options = {"Yes", "No", "Skip this Version"};
+    Object[] options = {
+      I18N.getText("Button.yes"), I18N.getText("Button.no"), I18N.getText("Update.button")
+    };
     int result =
         JOptionPane.showOptionDialog(
             MapTool.getFrame(),
@@ -187,18 +226,33 @@ public class AppUpdate {
 
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    // Last chance to "cancel" but canceling out of JFileChooser
-    if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-      return;
-    }
+    File chosenLocation = null;
+    while (chosenLocation == null) {
+      // Last chance to "cancel" but canceling out of JFileChooser
+      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+        return;
+      }
 
-    File saveLocation = chooser.getSelectedFile();
+      chosenLocation = chooser.getSelectedFile();
+      try {
+        boolean newFile = chosenLocation.createNewFile();
+        if (!newFile) {
+          MapTool.showError(I18N.getText("msg.error.fileAlreadyExists", chosenLocation));
+          chosenLocation = null;
+        }
+      } catch (IOException ioe) {
+        MapTool.showError(I18N.getText("msg.error.directoryNotWriteable", chosenLocation));
+        chosenLocation = null;
+      }
+    }
+    final File saveLocation = chooser.getSelectedFile();
 
     log.info("URL: " + assetDownloadURL.toString());
     log.info("assetDownloadSize: " + assetDownloadSize);
 
     Runnable updatethread =
         new Runnable() {
+          @Override
           public void run() {
             try (InputStream stream = assetDownloadURL.openStream()) {
               ProgressMonitorInputStream pmis =
@@ -213,9 +267,8 @@ public class AppUpdate {
               pm.setMaximum((int) assetDownloadSize);
 
               FileUtils.copyInputStreamToFile(pmis, saveLocation);
-            } catch (IOException e1) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
+            } catch (IOException ioe) {
+              MapTool.showError("msg.error.failedSavingNewVersion", ioe);
             }
           }
         };

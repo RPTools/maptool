@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -25,12 +26,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
@@ -47,17 +50,8 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  */
 public class HexGridHorizontal extends HexGrid {
 
-  /*
-   * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same grid. Other maps with different grids will remain the same.
-   *
-   * Facings are set when maps are loaded to the current preferences.
-   */
-  private static int[]
-      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final int[] ALL_ANGLES =
       new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
-  private static List<TokenFootprint> footprintList;
-
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       new OffsetTranslator() {
         public void translate(CellPoint originPoint, CellPoint offsetPoint) {
@@ -66,6 +60,15 @@ public class HexGridHorizontal extends HexGrid {
           }
         }
       };
+  /*
+   * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same grid. Other maps with different grids will remain the same.
+   *
+   * Facings are set when maps are loaded to the current preferences.
+   */
+  private static int[]
+      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+  private static List<TokenFootprint> footprintList;
+  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   public HexGridHorizontal() {
     super();
@@ -79,6 +82,16 @@ public class HexGridHorizontal extends HexGrid {
   public HexGridHorizontal(boolean faceEdges, boolean faceVertices) {
     super();
     setFacings(faceEdges, faceVertices);
+  }
+
+  @Override
+  public boolean isHexHorizontal() {
+    return true;
+  }
+
+  @Override
+  protected synchronized Map<Integer, Area> getGridShapeCache() {
+    return gridShapeCache;
   }
 
   /**
@@ -101,6 +114,23 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int y1 = cellA.y;
+    int y2 = cellB.y;
+    int x1 = cellA.x - (int) Math.floor(y1 / 2.0); // convert to 60-degree angle coordinates
+    int x2 = cellB.x - (int) Math.floor(y2 / 2.0);
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+
+    if (Integer.signum(dx) == Integer.signum(dy)) {
+      return Math.abs(dx + dy);
+    } else {
+      return Math.max(Math.abs(dx), Math.abs(dy));
+    }
+  }
+
+  @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
   }
@@ -113,7 +143,7 @@ public class HexGridHorizontal extends HexGrid {
    *	4		5		6
    *		1	-	3
    *
-   * @formatter:off
+   * @formatter:on
    * (non-Javadoc)
    * @see net.rptools.maptool.model.Grid#installMovementKeys(net.rptools.maptool.client.tool.PointerTool, java.util.Map)
    */
@@ -281,5 +311,30 @@ public class HexGridHorizontal extends HexGrid {
     double mapX = (newX - newY) * getVRadius();
     double mapY = ((newX + newY) * heightHalf) + heightHalf;
     return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
+  }
+
+  @Override
+  protected AffineTransform getGridOffset(Token token) {
+    // Adjust to grid if token is an even number of grid cells
+    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
+    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
+    double shortFootprintSide =
+        (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+
+    final AffineTransform at = new AffineTransform();
+    final double coordinateOffsetX;
+    final double coordinateOffsetY;
+
+    if ((shortFootprintSide / getSize()) % 2 != 0) {
+      coordinateOffsetX = -getCellWidth();
+      coordinateOffsetY = getCellOffsetU() * 2;
+    } else {
+      coordinateOffsetX = getCellWidth() * -1.5;
+      coordinateOffsetY = getCellHeight() * -1.375;
+    }
+
+    at.translate(coordinateOffsetX, coordinateOffsetY);
+
+    return at;
   }
 }

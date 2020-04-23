@@ -14,26 +14,28 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.function.AbstractFunction;
 
 /**
  * Set the token initiative
  *
  * @author Jay
  */
-public class TokenInitFunction extends AbstractTokenAccessorFunction {
+public class TokenInitFunction extends AbstractFunction {
 
-  /** Getter has 0 or 1, setter has 1 or 2 */
+  /** Getter has 0 to 2, setter has 1 to 3 */
   private TokenInitFunction() {
-    super(0, 2, "setInitiative", "getInitiative");
+    super(0, 4, "setInitiative", "getInitiative", "addToInitiative");
   }
 
   /** singleton instance of this function */
@@ -44,14 +46,37 @@ public class TokenInitFunction extends AbstractTokenAccessorFunction {
     return singletonInstance;
   };
 
-  /**
-   * @see
-   *     net.rptools.maptool.client.functions.AbstractTokenAccessorFunction#getValue(net.rptools.maptool.model.Token)
-   */
   @Override
-  protected Object getValue(Token token) throws ParserException {
+  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+      throws ParserException {
+    if (functionName.equalsIgnoreCase("getInitiative")) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+      return getInitiative(token);
+    } else if (functionName.equalsIgnoreCase("addToInitiative")) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 4);
+      boolean allowDuplicates =
+          args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : false;
+      String state = args.size() > 1 && !"".equals(args.get(1)) ? args.get(1).toString() : null;
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3);
+      return addToInitiative(allowDuplicates, state, token);
+    } else { // setInitiative
+      FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+      String value = args.get(0).toString();
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      return setInitiative(token, value);
+    }
+  }
+
+  /**
+   * Return a string containing the initiatives of the token
+   *
+   * @param token the token
+   * @return a String list of the initiatives
+   */
+  public static String getInitiative(Token token) {
     String ret = "";
-    List<TokenInitiative> tis = getTokenInitiatives(token);
+    List<TokenInitiative> tis = token.getInitiatives();
     if (tis.isEmpty()) return I18N.getText("macro.function.TokenInit.notOnList");
     for (TokenInitiative ti : tis) {
       if (ret.length() > 0) ret += ", ";
@@ -61,49 +86,53 @@ public class TokenInitFunction extends AbstractTokenAccessorFunction {
   }
 
   /**
-   * @see
-   *     net.rptools.maptool.client.functions.AbstractTokenAccessorFunction#setValue(net.rptools.maptool.model.Token,
-   *     java.lang.Object)
+   * Add a token to the initiative. Can also assign the token an initiative state.
+   *
+   * @param allowDuplicates are duplicates allowed
+   * @param state the initiative to assign to the token
+   * @param token the token to add to the initiative
+   * @return 1 if the token was added, 0 otherwise
+   * @throws ParserException when an error occurs.
    */
-  @Override
-  protected Object setValue(Token token, Object value) throws ParserException {
-    String sValue = null;
-    if (value != null) sValue = value.toString();
-    List<TokenInitiative> tis = getTokenInitiatives(token);
-    if (tis.isEmpty()) return I18N.getText("macro.function.TokenInit.notOnListSet");
-    for (TokenInitiative ti : tis) ti.setState(sValue);
-    return value;
+  public static BigDecimal addToInitiative(boolean allowDuplicates, String state, Token token)
+      throws ParserException {
+    boolean hasPermission = MapTool.getFrame().getInitiativePanel().hasOwnerPermission(token);
+    if (!MapTool.getParser().isMacroTrusted() && !hasPermission) {
+      String message;
+      if (MapTool.getFrame().getInitiativePanel().isOwnerPermissions()) {
+        message = I18N.getText("macro.function.initiative.gmOrOwner", "addToInitiative");
+      } else {
+        message = I18N.getText("macro.function.initiative.gmOnly", "addToInitiative");
+      }
+      throw new ParserException(message);
+    } // endif
+
+    InitiativeList list = token.getZoneRenderer().getZone().getInitiativeList();
+    // insert the token if needed
+    TokenInitiative ti = null;
+    if (allowDuplicates || list.indexOf(token).isEmpty()) {
+      ti = list.insertToken(-1, token);
+      if (state != null) ti.setState(state);
+    } else {
+      setInitiative(token, state);
+    } // endif
+    return ti != null ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
   /**
-   * Get the first token initiative
+   * Set an initiative value to all initiative entries of a token.
    *
-   * @param token Get it for this token
-   * @return The first token initiative value for the passed token
-   * @throws ParserException Token isn't in initiative.
+   * @param token the token to set the initiative of
+   * @param state the initiative to assign to the token
+   * @return the value assigned to the initiative
    */
-  public static TokenInitiative getTokenInitiative(Token token) throws ParserException {
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    List<Integer> list = zone.getInitiativeList().indexOf(token);
-    if (list.isEmpty()) return null;
-    return zone.getInitiativeList().getTokenInitiative(list.get(0).intValue());
-  }
-
-  /**
-   * Get the first token initiative
-   *
-   * @param token Get it for this token
-   * @return The first token initiative value for the passed token
-   * @throws ParserException Token isn't in initiative.
-   */
-  @SuppressWarnings("unchecked")
-  public static List<TokenInitiative> getTokenInitiatives(Token token) throws ParserException {
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    List<Integer> list = zone.getInitiativeList().indexOf(token);
-    if (list.isEmpty()) return Collections.EMPTY_LIST;
-    List<TokenInitiative> ret = new ArrayList<TokenInitiative>(list.size());
-    for (Integer index : list)
-      ret.add(zone.getInitiativeList().getTokenInitiative(index.intValue()));
-    return ret;
+  public static Object setInitiative(Token token, String state) {
+    List<InitiativeList.TokenInitiative> tis = token.getInitiatives();
+    for (InitiativeList.TokenInitiative ti : tis) ti.setState(state);
+    if (tis.isEmpty()) {
+      return I18N.getText("macro.function.TokenInit.notOnListSet");
+    } else {
+      return state;
+    }
   }
 }

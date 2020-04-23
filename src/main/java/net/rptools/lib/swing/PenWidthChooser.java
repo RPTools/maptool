@@ -31,7 +31,7 @@ import javax.swing.JList;
  * Combo box showing the available pen widths and a preview of each.
  *
  * @author Jay
- * @version $Revision: 1307 $ $Date: 2005-10-18 19:51:22 -0500 (Tue, 18 Oct 2005) $ $Author:&
+ * @version $Revision: 1307 $ $Date: 2005-10-18 19:51:22 -0500 (Tue, 18 Oct 2005)$
  */
 @SuppressWarnings("serial")
 public class PenWidthChooser extends JComboBox {

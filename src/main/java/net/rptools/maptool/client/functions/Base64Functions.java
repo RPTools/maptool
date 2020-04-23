@@ -65,11 +65,10 @@ public class Base64Functions extends AbstractFunction {
    * Encodes passed in string to Base64
    *
    * @param functionName
-   * @param string to encode
+   * @param parameters a list, with the message as the first element
    * @return Base64 encoded string
-   * @throws ParserException
    */
-  private Object base64Encode(String functionName, List<Object> parameters) throws ParserException {
+  private Object base64Encode(String functionName, List<Object> parameters) {
     byte[] message = parameters.get(0).toString().getBytes(StandardCharsets.UTF_8);
 
     return Base64.getEncoder().encodeToString(message);
@@ -79,18 +78,17 @@ public class Base64Functions extends AbstractFunction {
    * Decodes a passed in string from Base64
    *
    * @param functionName
-   * @param string to decode
+   * @param parameters a list of parameters with string to decode as first element.
    * @return String decoded from a Base64 encoded string
-   * @throws ParserException
    */
-  private Object base64Decode(String functionName, List<Object> parameters) throws ParserException {
+  private Object base64Decode(String functionName, List<Object> parameters) {
     byte[] decoded = Base64.getDecoder().decode(parameters.get(0).toString());
 
     return new String(decoded, StandardCharsets.UTF_8);
   }
 
   /**
-   * @param function's name
+   * @param functionName the name of the function
    * @param parameters passed into the function call
    * @param min number of parameters required
    * @param max number of parameters required

@@ -4,6 +4,27 @@ matrix:
   include:
   - os: osx
     osx_image: xcode10
+install:
+  # Install Oracle JDK 10 and set as JAVA_HOME
+  - pwd
+  - cd ..
+  - mkdir java
+  - cd java
+  - wget http://maptool.craigs-stuff.net/java/jdk-10.0.2_osx-x64_bin.dmg
+  - MOUNTDEV=$(hdiutil mount jdk-10.0.2_osx-x64_bin.dmg | awk '/dev.disk/{print$1}')
+  - echo $MOUNTDEV
+  - MOUNTDIR="$(mount | grep JDK | awk '{$1=$2="";sub(" [(].*","");sub("^  ","");print}')"
+  - echo $MOUNTDIR
+  - sudo installer -pkg "${MOUNTDIR}/"*.pkg -target /
+  - hdiutil unmount "$MOUNTDIR"
+  - echo java home was $JAVA_HOME
+  - export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home
+  - echo java home is $JAVA_HOME
+  - export PATH=$JAVA_HOME/bin:$PATH
+  - echo $PATH
+  - cd ../maptool
+  - ./gradlew -version
+  - java -version
 script: 
   - ./gradlew build
 before_deploy:
@@ -24,7 +45,8 @@ deploy:
   skip_cleanup: true
   target_commitish: $TRAVIS_COMMIT
   tag_name: $TRAVIS_TAG
-  draft: true
+  draft: false
+  prerelease: true
   on:
     repo: $REPO
     tags: true

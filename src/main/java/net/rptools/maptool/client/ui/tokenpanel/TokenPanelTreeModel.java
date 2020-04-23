@@ -37,8 +37,13 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
+
+  private static final Logger log = LogManager.getLogger(TokenPanelTreeModel.class);
+
   private static final String _TOKENS = "panel.MapExplorer.View.TOKENS";
   private static final String _PLAYERS = "panel.MapExplorer.View.PLAYERS";
   private static final String _GROUPS = "panel.MapExplorer.View.GROUPS";
@@ -67,7 +72,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     Zone.Layer layer;
     boolean isAdmin;
 
-    private View(String key, Zone.Layer layer, boolean required, boolean isAdmin) {
+    View(String key, Zone.Layer layer, boolean required, boolean isAdmin) {
       this.displayName = I18N.getText(key);
       this.description = null; // I18N.getDescription(key); // TODO Tooltip -- not currently used
       this.required = required;
@@ -92,10 +97,13 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     }
   }
 
+  /** The list of token filters. */
   private final List<TokenFilter> filterList = new ArrayList<TokenFilter>();
+
   private final String root = "Views";
   private Zone zone;
   private final JTree tree;
+  /** Is an updateInternal pending? */
   private volatile boolean updatePending = false;
 
   public TokenPanelTreeModel(JTree tree) {
@@ -121,6 +129,11 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     return root;
   }
 
+  /**
+   * Set the zone, updating the listeners and the internals.
+   *
+   * @param zone the Zone to set.
+   */
   public void setZone(Zone zone) {
     if (zone != null) {
       zone.removeModelChangeListener(this);
@@ -187,6 +200,10 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     listenerList.remove(l);
   }
 
+  /**
+   * Run updateInternal on the EventQueue. This clears currentViewList and viewMap, and adds views
+   * in the filterList to currentViewList.
+   */
   public void update() {
     // better solution would be to use a timeout to invoke the internal update to give more
     // token events the chance to arrive, but in this case EventQueue overload will
@@ -203,13 +220,21 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     }
   }
 
+  /** Clear currentViewList and viewMap, and add views in the filterList to currentViewList */
   private void updateInternal() {
     currentViewList.clear();
     viewMap.clear();
 
     // Plan to show all of the views in order to keep the order
     for (TokenFilter filter : filterList) {
-      if (filter.view.isAdmin && !MapTool.getPlayer().isGM()) {
+      try {
+        if (filter.view.isAdmin && !MapTool.getPlayer().isGM()) {
+          continue;
+        }
+      } catch (NullPointerException e) {
+        // This seems to happen when there was a problem creating the initial window. Lets just
+        // ignore this filter for now.
+        log.warn("NullPointerException encountered while trying to update TokenPanelTreeModel", e);
         continue;
       }
       currentViewList.add(filter.view);
@@ -296,6 +321,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
    * useStrictTokenManagement() into account).
    */
   private class PlayerTokenFilter extends TokenFilter {
+    /** Accepts only PCs tokens owned by the current player. */
     public PlayerTokenFilter() {
       super(View.PLAYERS);
     }
@@ -380,6 +406,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
    * </ol>
    */
   private class TokenTokenFilter extends TokenFilter {
+    /** Accepts only NPC tokens (GM) or tokens owned by current player. */
     public TokenTokenFilter() {
       super(View.TOKENS);
     }

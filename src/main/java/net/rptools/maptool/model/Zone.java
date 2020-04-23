@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +31,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -41,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -60,14 +61,17 @@ import org.apache.logging.log4j.Logger;
  * initialized for maximum compatibility.
  */
 public class Zone extends BaseModel {
+
   private static final Logger log = LogManager.getLogger(Zone.class);
 
+  /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
     OFF,
     DAY,
     NIGHT
   }
 
+  /** Event types for the listeners. */
   public enum Event {
     TOKEN_ADDED,
     TOKEN_REMOVED,
@@ -81,9 +85,12 @@ public class Zone extends BaseModel {
     LABEL_CHANGED,
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED
+    BOARD_CHANGED,
+    TOKEN_MACRO_CHANGED, // a token macro changed
+    TOKEN_PANEL_CHANGED // the panel appearance changed
   }
 
+  /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
     TOKEN("Token"),
     GM("Hidden"),
@@ -101,9 +108,10 @@ public class Zone extends BaseModel {
       return displayName;
     }
 
-    // A simple interface to allow layers to be turned on/off
+    /** A simple interface to allow layers to be turned on/off */
     private boolean drawEnabled = true;
 
+    /** @return drawEnabled */
     public boolean isEnabled() {
       return drawEnabled;
     }
@@ -113,11 +121,26 @@ public class Zone extends BaseModel {
     }
   }
 
+  /** The selection type (PC, NPC, ALL, GM). */
   public enum TokenSelection {
     PC,
     NPC,
     ALL,
     GM
+  }
+
+  /** Control how A* Pathfinding distances is rounded off due to terrain costs */
+  public enum AStarRoundingOptions {
+    NONE,
+    CELL_UNIT,
+    INTEGER
+  }
+
+  // Control what topology layer(s) to add/get drawing to/from
+  public enum TopologyMode {
+    VBL,
+    MBL,
+    COMBINED
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -144,6 +167,8 @@ public class Zone extends BaseModel {
   private int tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
+  private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
+  private TopologyMode topologyMode = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -151,18 +176,28 @@ public class Zone extends BaseModel {
   private List<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
+  /** Map each token GUID to the corresponding token. */
   private final Map<GUID, Token> tokenMap = new HashMap<GUID, Token>();
+  /** Map each token GUID to its exposed area metadata */
   private Map<GUID, ExposedAreaMetaData> exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
+
+  /** Token list ordered by Z. */
   private final List<Token> tokenOrderedList = new LinkedList<Token>();
 
   private InitiativeList initiativeList = new InitiativeList(this);
 
+  /** The global exposed area. */
   private Area exposedArea = new Area();
+
   private boolean hasFog;
   private DrawablePaint fogPaint;
   private transient UndoPerZone undo;
 
+  /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
+
+  // New topology to hold Movement Blocking Only
+  private Area topologyTerrain = new Area();
 
   // The 'board' layer, at the very bottom of the layer stack.
   // Itself has two sub-layers:
@@ -182,7 +217,9 @@ public class Zone extends BaseModel {
   private String name;
   private boolean isVisible;
 
+  /** The VisionType of the zone. OFF, DAY or NIGHT. */
   private VisionType visionType = VisionType.OFF;
+
   private TokenSelection tokenSelection = TokenSelection.ALL;
 
   // These are transitionary properties, very soon the width and height won't matter
@@ -241,7 +278,7 @@ public class Zone extends BaseModel {
     this.tokenSelection = tokenSelection;
   }
 
-  /** Returns the distance in map pixels at a 1:1 zoom */
+  /** @return the distance in map pixels at a 1:1 zoom */
   public int getTokenVisionInPixels() {
     if (tokenVisionDistance == 0) {
       // TODO: This is here to provide transition between pre 1.3b19 an 1.3b19. Remove later
@@ -259,6 +296,7 @@ public class Zone extends BaseModel {
     return name;
   }
 
+  /** @return name of the zone */
   public String getName() {
     return name;
   }
@@ -287,7 +325,23 @@ public class Zone extends BaseModel {
    * the old one being passed in, if you have any data that needs to transfer over, you will need to
    * manually copy it as is done below for various items.
    */
+
+  /**
+   * Create a new zone with old zone's properties and with new token ids.
+   *
+   * @param zone The zone to copy.
+   */
   public Zone(Zone zone) {
+    this(zone, false);
+  }
+
+  /**
+   * Create a new zone with old zone's properties.
+   *
+   * @param zone The zone to copy from.
+   * @param keepIds Should the token ids stay the same.
+   */
+  public Zone(Zone zone, boolean keepIds) {
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
@@ -335,29 +389,31 @@ public class Zone extends BaseModel {
       Collections.copy(gmDrawables, zone.gmDrawables);
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {
-      Iterator<GUID> i = zone.labels.keySet().iterator();
-      while (i.hasNext()) {
-        this.putLabel(new Label(zone.labels.get(i.next())));
+      for (GUID guid : zone.labels.keySet()) {
+        this.putLabel(new Label(zone.labels.get(guid)));
       }
     }
     exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>(zone.exposedAreaMeta.size() * 4 / 3);
 
     // Copy the tokens, save a map between old and new for the initiative list.
-    if (zone.initiativeList == null) zone.initiativeList = new InitiativeList(zone);
+    if (zone.initiativeList == null) {
+      zone.initiativeList = new InitiativeList(zone);
+    }
     Object[][] saveInitiative = new Object[zone.initiativeList.getSize()][2];
     initiativeList.setZone(null);
 
     if (zone.tokenMap != null && !zone.tokenMap.isEmpty()) {
-      Iterator<GUID> i = zone.tokenMap.keySet().iterator();
-      while (i.hasNext()) {
-        Token old = zone.tokenMap.get(i.next());
-        Token token = new Token(old);
+      for (GUID oldGUID : zone.tokenMap.keySet()) {
+        Token old = zone.tokenMap.get(oldGUID);
+        Token token = new Token(old, keepIds); // keep old ids at server start
         if (old.getExposedAreaGUID() != null) {
           GUID guid = new GUID();
           token.setExposedAreaGUID(guid);
           // Update the TEA on the new map, since we have the Token object available...
           ExposedAreaMetaData eamd = zone.getExposedAreaMetaData(old.getExposedAreaGUID());
-          if (eamd != null) exposeArea(eamd.getExposedAreaHistory(), token);
+          if (eamd != null) {
+            exposeArea(eamd.getExposedAreaHistory(), token);
+          }
         }
         putToken(token);
         List<Integer> list = zone.initiativeList.indexOf(old);
@@ -387,6 +443,9 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    topologyTerrain = (Area) zone.topologyTerrain.clone();
+    aStarRounding = zone.aStarRounding;
+    topologyMode = zone.topologyMode;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -454,6 +513,8 @@ public class Zone extends BaseModel {
   /**
    * Board pseudo-object. Not making full object since this will change when new layer model is
    * created
+   *
+   * @return has the board changed?
    */
   public boolean isBoardChanged() {
     return boardChanged;
@@ -543,9 +604,9 @@ public class Zone extends BaseModel {
    *       (with HasSight==true) and return intersection of point with the combined area.
    * </ol>
    *
-   * @param point
-   * @param view
-   * @return
+   * @param point the ZonePoint to test.
+   * @param view the PlayerView.
+   * @return is the point visible?
    */
   public boolean isPointVisible(ZonePoint point, PlayerView view) {
     if (!hasFog() || view.isGMView()) {
@@ -557,7 +618,9 @@ public class Zone extends BaseModel {
       if (toks != null && !toks.isEmpty()) {
         for (Token tok : toks) {
           ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
-          if (meta != null) combined.add(meta.getExposedAreaHistory());
+          if (meta != null) {
+            combined.add(meta.getExposedAreaHistory());
+          }
         }
       }
       return combined.contains(point.x, point.y);
@@ -589,8 +652,8 @@ public class Zone extends BaseModel {
    *   <li>If the token's bounds intersect the exposed area for this map, return <code>true</code>.
    * </ol>
    *
-   * @param token
-   * @return
+   * @param token the token to test.
+   * @return is the token visible?
    */
   public boolean isTokenVisible(Token token) {
     if (token == null) {
@@ -678,38 +741,118 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
+  /**
+   * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
+   *
+   * @param area the area
+   */
+  public void addTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
+      case VBL:
+        getTopology().add(area);
+        break;
+      case MBL:
+        getTopologyTerrain().add(area);
+        break;
+      case COMBINED:
+        getTopology().add(area);
+        getTopologyTerrain().add(area);
+        break;
+    }
+
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+  }
+
   public void addTopology(Area area) {
-    topology.add(area);
+    addTopology(area, getTopologyMode());
+  }
+
+  /**
+   * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
+   *
+   * @param area the area
+   */
+  public void removeTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
+      case VBL:
+        getTopology().subtract(area);
+        break;
+      case MBL:
+        getTopologyTerrain().subtract(area);
+        break;
+      case COMBINED:
+        getTopology().subtract(area);
+        getTopologyTerrain().subtract(area);
+        break;
+    }
+
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void removeTopology(Area area) {
-    topology.subtract(area);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    removeTopology(area, getTopologyMode());
   }
 
+  /** Fire the event TOPOLOGY_CHANGED. */
   public void tokenTopologyChanged() {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
+  /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
   }
 
+  /** @return the terrain topology of the zone */
+  public Area getTopologyTerrain() {
+    return topologyTerrain;
+  }
+
+  /**
+   * Fire the event TOKEN_CHANGED
+   *
+   * @param token the token that changed
+   */
   public void tokenChanged(Token token) {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
   }
 
-  // Clears FoW for ALL tokens, including NPC's
-  public void clearExposedArea() {
+  /**
+   * Fire the event TOKEN_MACRO_CHANGED.
+   *
+   * @param token the token that had its macro changed
+   */
+  public void tokenMacroChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_MACRO_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_PANEL_CHANGED.
+   *
+   * @param token the token that had its panel appearance changed
+   */
+  public void tokenPanelChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_PANEL_CHANGED, token));
+  }
+
+  /**
+   * Clears the global exposed area. Can also clear the exposed area for ALL tokens, including NPC's
+   *
+   * @param globalOnly should the exposed area of all tokens be also cleared?
+   */
+  public void clearExposedArea(boolean globalOnly) {
     exposedArea = new Area();
-    // There used to be a foreach loop here that iterated over getTokens() and called .clear() --
-    // why?!
-    exposedAreaMeta.clear();
+    if (!globalOnly) {
+      exposedAreaMeta.clear();
+    }
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
-  // clear only exposed area for tokenSet, eg only PC's
+  /**
+   * Clear only exposed area for tokenSet, eg only PC's. Updates the server and other clients.
+   *
+   * @param tokenSet the set of token GUID to reset
+   */
   public void clearExposedArea(Set<GUID> tokenSet) {
     // Jamz: Clear FoW for set tokens only, for use by
     // ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
@@ -729,6 +872,13 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
+  /**
+   * Expose a FoW area. Add the exposed area to the metadata of the token. If tok is set to null or
+   * the settings disable individual FoW, instead add it to the general exposedArea.
+   *
+   * @param area the area to expose
+   * @param tok the token to expose for, or null
+   */
   public void exposeArea(Area area, Token tok) {
     if (area == null || area.isEmpty()) {
       return;
@@ -745,9 +895,11 @@ public class Zone extends BaseModel {
         meta.addToExposedAreaHistory(area);
         ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(this.getId());
         if (zr != null) // Could be null if the AutoSaveManager is saving the campaign by copying
-          // Zones, but not
-          // ZoneRenderers
+        // Zones, but not
+        // ZoneRenderers
+        {
           zr.getZoneView().flush();
+        }
         putToken(tok);
         fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
         return; // FJE Added so that TEA isn't added to the GEA, below.
@@ -759,11 +911,10 @@ public class Zone extends BaseModel {
 
   /**
    * Retrieves the selected tokens and adds the passed in area to their exposed area. (Why are we
-   * passing in a <code>Set&lt;GUID></code> when <code>Set&lt;Token></code> would be much more
-   * efficient?)
+   * passing in a {@code Set<GUID>} when {@code Set<Token>} would be much more efficient?)
    *
-   * @param area
-   * @param selectedToks
+   * @param area the area to expose
+   * @param selectedToks the set GUID of selected tokens
    */
   public void exposeArea(Area area, Set<GUID> selectedToks) {
     if (area == null || area.isEmpty()) {
@@ -790,7 +941,9 @@ public class Zone extends BaseModel {
 
       for (GUID guid : selectedToks) {
         Token tok = getToken(guid);
-        if (tok == null) continue;
+        if (tok == null) {
+          continue;
+        }
         if ((isAllowed || tok.isOwner(playerId)) && tok.getHasSight()) {
           GUID tea = tok.getExposedAreaGUID();
           meta = exposedAreaMeta.get(tea);
@@ -803,7 +956,9 @@ public class Zone extends BaseModel {
       }
       // If 'meta' is not null, it means at least one token's TEA was modified so we need to flush
       // the ZoneView
-      if (meta != null) zoneView.flush();
+      if (meta != null) {
+        zoneView.flush();
+      }
     } else {
       // Not using IF so add the EA to the GEA instead of a TEA.
       exposedArea.add(area);
@@ -815,8 +970,8 @@ public class Zone extends BaseModel {
    * Modifies the global exposed area (GEA) or token exposed by resetting it and then setting it to
    * the contents of the passed in Area and firing a ModelChangeEvent.
    *
-   * @param area
-   * @param selectedToks
+   * @param area the area to expose
+   * @param selectedToks the selected tokens
    */
   public void setFogArea(Area area, Set<GUID> selectedToks) {
     if (area == null) {
@@ -833,7 +988,9 @@ public class Zone extends BaseModel {
           continue;
         }
         ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
-        if (meta == null) meta = new ExposedAreaMetaData();
+        if (meta == null) {
+          meta = new ExposedAreaMetaData();
+        }
         meta.clearExposedAreaHistory();
         meta.addToExposedAreaHistory(area);
         exposedAreaMeta.put(tok.getExposedAreaGUID(), meta);
@@ -870,7 +1027,9 @@ public class Zone extends BaseModel {
           continue;
         }
         ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
-        if (meta == null) meta = new ExposedAreaMetaData();
+        if (meta == null) {
+          meta = new ExposedAreaMetaData();
+        }
         meta.removeExposedAreaHistory(area);
         exposedAreaMeta.put(tok.getExposedAreaGUID(), meta);
         MapTool.getFrame().getZoneRenderer(this.getId()).getZoneView().flush(tok);
@@ -897,7 +1056,7 @@ public class Zone extends BaseModel {
    * the result is returned.
    *
    * @param view holds whether or not tokens are selected
-   * @return
+   * @return the exposed area
    */
   public Area getExposedArea(PlayerView view) {
     Area combined = new Area(exposedArea);
@@ -916,7 +1075,9 @@ public class Zone extends BaseModel {
       // continue;
       // }
       ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
-      if (meta != null) combined.add(meta.getExposedAreaHistory());
+      if (meta != null) {
+        combined.add(meta.getExposedAreaHistory());
+      }
     }
     return combined;
   }
@@ -936,6 +1097,30 @@ public class Zone extends BaseModel {
 
   public void setUnitsPerCell(double unitsPerCell) {
     this.unitsPerCell = unitsPerCell;
+  }
+
+  public AStarRoundingOptions getAStarRounding() {
+    if (aStarRounding == null) {
+      aStarRounding = AStarRoundingOptions.NONE;
+    }
+
+    return aStarRounding;
+  }
+
+  public void setAStarRounding(AStarRoundingOptions aStarRounding) {
+    this.aStarRounding = aStarRounding;
+  }
+
+  public TopologyMode getTopologyMode() {
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
+    }
+
+    return topologyMode;
+  }
+
+  public void setTopologyMode(TopologyMode topologyMode) {
+    this.topologyMode = topologyMode;
   }
 
   public int getLargestZOrder() {
@@ -1128,6 +1313,7 @@ public class Zone extends BaseModel {
   ///////////////////////////////////////////////////////////////////////////
   // tokens
   ///////////////////////////////////////////////////////////////////////////
+
   /**
    * Adds the specified Token to this zone, accounting for updating the ordered list of tokens as
    * well as firing the appropriate <code>ModelChangeEvent</code> (either <code>Event.TOKEN_ADDED
@@ -1143,7 +1329,7 @@ public class Zone extends BaseModel {
     // LATER: optimize this
     tokenOrderedList.remove(token);
     tokenOrderedList.add(token);
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
     if (newToken) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
@@ -1153,8 +1339,8 @@ public class Zone extends BaseModel {
   }
 
   /**
-   * Same as {@link #putToken(List)} but optimizes map updates by accepting a list of Tokens. Note
-   * that this method fires a single <code>ModelChangeEvent</code> using <code>Event.TOKEN_ADDED
+   * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
+   * that this method fires a single <code>ModelChangeEvent</code> using <code> Event.TOKEN_ADDED
    * </code> and passes the list of added tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED
    * </code>.
    *
@@ -1180,14 +1366,21 @@ public class Zone extends BaseModel {
     }
     tokenOrderedList.removeAll(tokens);
     tokenOrderedList.addAll(tokens);
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
-    if (!addedTokens.isEmpty())
+    if (!addedTokens.isEmpty()) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
-    if (!changedTokens.isEmpty())
+    }
+    if (!changedTokens.isEmpty()) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, changedTokens));
+    }
   }
 
+  /**
+   * Removes a token, and fires Event.TOKEN_REMOVED.
+   *
+   * @param id the id of the token
+   */
   public void removeToken(GUID id) {
     Token token = tokenMap.remove(id);
     if (token != null) {
@@ -1196,11 +1389,35 @@ public class Zone extends BaseModel {
     }
   }
 
+  /**
+   * Removes multiple token, and fires Event.TOKEN_REMOVED once.
+   *
+   * @param ids the list of ids of the tokens
+   */
+  public void removeTokens(List<GUID> ids) {
+    List<Token> removedTokens = new ArrayList<>();
+    if (ids != null) {
+      for (GUID id : ids) {
+        Token token = tokenMap.remove(id);
+        if (token != null) {
+          tokenOrderedList.remove(token);
+          removedTokens.add(token);
+        }
+      }
+      if (!removedTokens.isEmpty()) {
+        fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, removedTokens));
+      }
+    }
+  }
+
   public Token getToken(GUID id) {
     return tokenMap.get(id);
   }
 
-  /** Returns the first token with a given name. The name is matched case-insensitively. */
+  /**
+   * @param name the name of the token.
+   * @return the first token with a given name. The name is matched case-insensitively.
+   */
   public Token getTokenByName(String name) {
     for (Token token : getAllTokens()) {
       if (StringUtil.isEmpty(token.getName())) {
@@ -1216,13 +1433,15 @@ public class Zone extends BaseModel {
   /**
    * Looks for the given identifier as a token name, token GM name, or GUID, in that order.
    *
-   * @param identifier
+   * @param identifier the String identifier of the token
    * @return token that matches the identifier or <code>null</code>
    */
   public Token resolveToken(String identifier) {
     Token token = getTokenByName(identifier);
 
-    if (token == null) token = getTokenByGMName(identifier);
+    if (token == null) {
+      token = getTokenByGMName(identifier);
+    }
 
     if (token == null) {
       try {
@@ -1234,7 +1453,10 @@ public class Zone extends BaseModel {
     return token;
   }
 
-  /** Returns the first token with a given GM name. The name is matched case-insensitively. */
+  /**
+   * @param name the GM name of the token.
+   * @return the first token with a given GM name. The name is matched case-insensitively.
+   */
   public Token getTokenByGMName(String name) {
     for (Token token : getAllTokens()) {
       if (StringUtil.isEmpty(token.getGMName())) {
@@ -1265,11 +1487,15 @@ public class Zone extends BaseModel {
 
   private DrawnElement findDrawnElement(List<DrawnElement> list, GUID id) {
     for (DrawnElement de : list) {
-      if (de.getDrawable().getId() == id) return de;
+      if (de.getDrawable().getId() == id) {
+        return de;
+      }
       if (de.getDrawable() instanceof DrawablesGroup) {
         DrawnElement result =
             findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), id);
-        if (result != null) return result;
+        if (result != null) {
+          return result;
+        }
       }
     }
     return null;
@@ -1335,7 +1561,7 @@ public class Zone extends BaseModel {
     return Collections.unmodifiableList(originalList);
   }
 
-  /** This is the list of non-stamp tokens, both pc and npc */
+  /** @return list of non-stamp tokens, both pc and npc */
   public List<Token> getTokens() {
     return getTokens(true);
   }
@@ -1345,8 +1571,11 @@ public class Zone extends BaseModel {
         new Filter() {
           @Override
           public boolean matchToken(Token t) {
-            if (getAlwaysVisible) return !t.isStamp();
-            else return !t.isStamp() && !t.isAlwaysVisible();
+            if (getAlwaysVisible) {
+              return !t.isStamp();
+            } else {
+              return !t.isStamp() && !t.isAlwaysVisible();
+            }
           }
         });
   }
@@ -1360,8 +1589,11 @@ public class Zone extends BaseModel {
         new Filter() {
           @Override
           public boolean matchToken(Token t) {
-            if (getAlwaysVisible) return t.isGMStamp();
-            else return t.isGMStamp() && !t.isAlwaysVisible();
+            if (getAlwaysVisible) {
+              return t.isGMStamp();
+            } else {
+              return t.isGMStamp() && !t.isAlwaysVisible();
+            }
           }
         });
   }
@@ -1375,8 +1607,11 @@ public class Zone extends BaseModel {
         new Filter() {
           @Override
           public boolean matchToken(Token t) {
-            if (getAlwaysVisible) return t.isObjectStamp();
-            else return t.isObjectStamp() && !t.isAlwaysVisible();
+            if (getAlwaysVisible) {
+              return t.isObjectStamp();
+            } else {
+              return t.isObjectStamp() && !t.isAlwaysVisible();
+            }
           }
         });
   }
@@ -1390,8 +1625,11 @@ public class Zone extends BaseModel {
         new Filter() {
           @Override
           public boolean matchToken(Token t) {
-            if (getAlwaysVisible) return t.isBackgroundStamp();
-            else return t.isBackgroundStamp() && !t.isAlwaysVisible();
+            if (getAlwaysVisible) {
+              return t.isBackgroundStamp();
+            } else {
+              return t.isBackgroundStamp() && !t.isAlwaysVisible();
+            }
           }
         });
   }
@@ -1441,7 +1679,7 @@ public class Zone extends BaseModel {
         new Filter() {
           @Override
           public boolean matchToken(Token t) {
-            return t.getTerrainModifier() != 1.0f;
+            return !t.getTerrainModifierOperation().equals(TerrainModifierOperation.NONE);
           }
         });
   }
@@ -1451,10 +1689,10 @@ public class Zone extends BaseModel {
    * New buttons were added to select what type of tokens, by ownership, should be shown and driven
    * by the TokenSelection enum.
    *
+   * @param p the player
+   * @return the list of tokens
    * @author updated by Jamz
    * @since updated 1.4.1.0
-   * @param Player p
-   * @return
    */
   public List<Token> getOwnedTokensWithSight(Player p) {
     return getTokensFiltered(
@@ -1465,7 +1703,9 @@ public class Zone extends BaseModel {
             // AppUtil.playerOwns(t));
             // return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
 
-            if (tokenSelection == null) tokenSelection = TokenSelection.ALL;
+            if (tokenSelection == null) {
+              tokenSelection = TokenSelection.ALL;
+            }
             // System.out.println("TokenSelection: " + tokenSelection);
             switch (tokenSelection) {
               case ALL: // Show FoW for ANY Token I own
@@ -1488,7 +1728,7 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: For FogUtil.exposePCArea to skip sight test.
+  /** @return list of PCs tokens with sight. For FogUtil.exposePCArea to skip sight test. */
   public List<Token> getPlayerTokensWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1498,9 +1738,12 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
-  // All",
-  // or "Owned" by the current player; in theory, NPC tokens the Player control.
+  /**
+   * Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
+   * All", or "Owned" by the current player; in theory, NPC tokens the Player control.
+   *
+   * @return the list of tokens with sight.
+   */
   public List<Token> getTokensOwnedByAllWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1572,13 +1815,18 @@ public class Zone extends BaseModel {
     return lastUsed;
   }
 
+  /** Interface for matchToken. */
   public static interface Filter {
+
     public boolean matchToken(Token t);
   }
 
+  /** The TokenZOrderComparator used to order token lists. */
   public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
+  /** The class used to compare the Zorder of two tokens. */
   public static class TokenZOrderComparator implements Comparator<Token> {
+
     @Override
     public int compare(Token o1, Token o2) {
       int lval = o1.getZOrder();
@@ -1595,12 +1843,14 @@ public class Zone extends BaseModel {
   /**
    * Replaces the static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid
    * is available and can access token footprint. Only used when Rendering just Figure Tokens.
+   *
+   * @return the token comparator.
    */
   public Comparator<Token> getFigureZOrderComparator() {
     return new Comparator<Token>() {
       @Override
       public int compare(Token o1, Token o2) {
-        /**
+        /*
          * It is an assumption of this comparator that all tokens are being sorted using isometric
          * logic.
          *
@@ -1610,9 +1860,15 @@ public class Zone extends BaseModel {
          */
         int v1 = getFigureZOrder(o1);
         int v2 = getFigureZOrder(o2);
-        if ((v1 - v2) != 0) return v1 - v2;
-        if (!o1.isToken() && o2.isToken()) return -1;
-        if (!o2.isToken() && o1.isToken()) return +1;
+        if ((v1 - v2) != 0) {
+          return v1 - v2;
+        }
+        if (!o1.isToken() && o2.isToken()) {
+          return -1;
+        }
+        if (!o2.isToken() && o1.isToken()) {
+          return +1;
+        }
         if (o1.getHeight() != o2.getHeight()) {
           // Larger tokens at the same position, go behind
           return o2.getHeight() - o1.getHeight();
@@ -1629,14 +1885,18 @@ public class Zone extends BaseModel {
     };
   }
 
+  /**
+   * If set size return the footprint, otherwise return bounding box. Figure tokens are designed for
+   * set sizes so we need to approximate free size tokens
+   *
+   * @param t the token to get center of.
+   * @return the center of the footprint / bounding box.
+   */
   private int getFigureZOrder(Token t) {
-    /**
-     * If set size return the footprint, otherwise return bounding box. Figure tokens are designed
-     * for set sizes so we need to approximate free size tokens
-     */
+
     Rectangle b1 =
         t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
-    /**
+    /*
      * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are
      * usually centred on token x & y So token y + bounding y give you the bottom of the box Then
      * subtract portion of height to get the centre point of the base.
@@ -1646,6 +1906,7 @@ public class Zone extends BaseModel {
     return bottom - centre;
   }
 
+  /** @return this */
   private Zone getZone() {
     return this;
   }
@@ -1787,9 +2048,15 @@ public class Zone extends BaseModel {
     if (undo == null) {
       undo = new UndoPerZone(this);
     }
+
+    // Movement Blocking Layer
+    if (topologyTerrain == null) {
+      topologyTerrain = new Area();
+    }
     return this;
   }
 
+  /** @return the exposedAreaMeta. */
   public Map<GUID, ExposedAreaMetaData> getExposedAreaMetaData() {
     if (exposedAreaMeta == null) {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
@@ -1813,6 +2080,12 @@ public class Zone extends BaseModel {
     return meta;
   }
 
+  /**
+   * Put the ExposedAreaMetaData in the exposedAreaMeta map for a token
+   *
+   * @param tokenExposedAreaGUID the GUID of the token
+   * @param meta the exposed metadata
+   */
   public void setExposedAreaMetaData(GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     if (exposedAreaMeta == null) {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
@@ -1833,7 +2106,7 @@ public class Zone extends BaseModel {
   /**
    * Lee: Tells fog utilities to expose fog normally or only at way points
    *
-   * @param boolean toggle for exposure method
+   * @param toggle toggle for exposure method
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;

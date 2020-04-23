@@ -30,6 +30,7 @@ public class AppState {
   private static boolean linkPlayerViews = false;
   private static boolean useDoubleWideLine = true;
   private static boolean showMovementMeasurements = true;
+  private static boolean showTextLabels = true;
   private static boolean enforceNotification = false;
   private static File campaignFile;
   private static int gridSize = 1;
@@ -137,12 +138,36 @@ public class AppState {
     AppState.campaignFile = campaignFile;
   }
 
+  /**
+   * Returns the campaign name (without extension) from the campaign file. If no campaign file is
+   * defined, instead returns "Default".
+   *
+   * @return The string containing the campaign name
+   */
+  public static String getCampaignName() {
+    if (AppState.campaignFile == null) {
+      return "Default";
+    } else {
+      String s = AppState.campaignFile.getName();
+      // remove the file extension of the campaign file name
+      return s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
+    }
+  }
+
   public static void setShowMovementMeasurements(boolean show) {
     showMovementMeasurements = show;
   }
 
   public static boolean getShowMovementMeasurements() {
     return showMovementMeasurements;
+  }
+
+  public static void setShowTextLabels(boolean show) {
+    showTextLabels = show;
+  }
+
+  public static boolean getShowTextLabels() {
+    return showTextLabels;
   }
 
   public static boolean isShowAsPlayer() {
@@ -170,13 +195,16 @@ public class AppState {
   }
 
   public static synchronized void setIsSaving(boolean saving) {
-    if (log.isDebugEnabled())
+    if (log.isDebugEnabled()) {
       log.debug("AppState.isSaving was " + isSaving + "; setting to " + saving); // $NON-NLS-1$
+    }
     isSaving = saving;
   }
 
   public static synchronized boolean isSaving() {
-    if (log.isDebugEnabled()) log.debug("AppState.isSaving is " + isSaving); // $NON-NLS-1$
+    if (log.isDebugEnabled()) {
+      log.debug("AppState.isSaving is " + isSaving); // $NON-NLS-1$
+    }
     return isSaving;
   }
 

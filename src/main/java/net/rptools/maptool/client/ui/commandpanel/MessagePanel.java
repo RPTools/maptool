@@ -37,6 +37,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
+import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -85,6 +86,8 @@ public class MessagePanel extends JPanel {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
               if (e.getURL() != null) {
                 MapTool.showDocument(e.getURL().toString());
+              } else if (e.getDescription().startsWith("#")) {
+                textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
               } else {
                 Matcher m = URL_PATTERN.matcher(e.getDescription());
                 if (m.matches()) {
@@ -130,9 +133,7 @@ public class MessagePanel extends JPanel {
     add(scrollPane);
     clearMessages();
 
-    MapTool.getSoundManager()
-        .registerSoundEvent(
-            SND_MESSAGE_RECEIVED, MapTool.getSoundManager().getRegisteredSound("Clink"));
+    SoundManager.registerSoundEvent(SND_MESSAGE_RECEIVED, SoundManager.getRegisteredSound("Clink"));
   }
 
   public void refreshRenderer() {

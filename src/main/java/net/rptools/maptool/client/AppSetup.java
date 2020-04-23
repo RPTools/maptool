@@ -44,6 +44,7 @@ public class AppSetup {
     }
 
     installDefaultMacroEditorThemes();
+    installPredefinedProperties();
   }
 
   public static void installDefaultTokens() throws IOException {
@@ -51,20 +52,57 @@ public class AppSetup {
   }
 
   public static void installDefaultMacroEditorThemes() {
-    // Install only once
-    if (AppConstants.THEMES_DIR.listFiles().length > 0) return;
+    installUsingReflection(AppConstants.DEFAULT_MACRO_THEMES, AppConstants.THEMES_DIR, "theme");
+  }
 
-    Reflections reflections =
-        new Reflections(AppConstants.DEFAULT_MACRO_THEMES, new ResourcesScanner());
+  private static void installPredefinedProperties() {
+    installUsingReflection(
+        AppConstants.DEFAULT_CAMPAIGN_PROPERTIES,
+        AppConstants.CAMPAIGN_PROPERTIES_DIR,
+        "campaign property");
+  }
+
+  private static void installUsingReflection(String source, File dir, String name) {
+    if (isNotEmpty(dir)) return;
+
+    Reflections reflections = new Reflections(source, new ResourcesScanner());
     Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*"));
 
     for (String resourcePath : resourcePathSet) {
       URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
-      String resourceName = resourcePath.substring(AppConstants.DEFAULT_MACRO_THEMES.length());
-      File resourceFile = new File(AppConstants.THEMES_DIR, resourceName);
+      String resourceName = resourcePath.substring(source.length());
+      File resourceFile = new File(dir, resourceName);
 
       try {
-        log.info("Installing theme: " + resourceFile);
+        log.info("Installing " + name + " in:" + resourceFile);
+        FileUtils.copyURLToFile(inputUrl, resourceFile);
+      } catch (IOException e) {
+        log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+      }
+    }
+  }
+
+  private static boolean isNotEmpty(File dir) {
+    File[] files = dir.listFiles();
+    return files != null && files.length > 0;
+  }
+
+  /**
+   * Copies the theme files from the resource theme directory in the jar file to the directory
+   * searched on MapTool start for theme files.
+   */
+  public static void installDefaultUIThemes() {
+    Reflections reflections =
+        new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
+    Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
+
+    for (String resourcePath : resourcePathSet) {
+      URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+      String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
+      File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
+
+      try {
+        log.info("Installing ui theme: " + resourceFile);
         FileUtils.copyURLToFile(inputUrl, resourceFile);
       } catch (IOException e) {
         log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
@@ -81,15 +119,9 @@ public class AppSetup {
    */
   private static void createREADME() throws IOException {
     File outFilename = new File(AppConstants.UNZIP_DIR, "README");
-    InputStream inStream = null;
-    OutputStream outStream = null;
-    try {
-      inStream = AppSetup.class.getResourceAsStream("README");
-      outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
+    try (InputStream inStream = AppSetup.class.getResourceAsStream("README");
+        OutputStream outStream = new BufferedOutputStream(new FileOutputStream(outFilename))) {
       IOUtils.copy(inStream, outStream);
-    } finally {
-      IOUtils.closeQuietly(inStream);
-      IOUtils.closeQuietly(outStream);
     }
   }
 

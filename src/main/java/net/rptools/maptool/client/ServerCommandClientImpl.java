@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.functions.ExecFunction;
+import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -32,14 +34,21 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.ServerCommand;
+import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 
+/**
+ * This class is used by a client to send commands to the server. The methods of this class are
+ * typically accessed through MapTool.serverCommand(). Once sent, the commands are then received by
+ * the {@link ServerMethodHandler ServerMethodHandler}
+ */
 public class ServerCommandClientImpl implements ServerCommand {
 
   private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
@@ -69,6 +78,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     } finally {
       campaign.setBeingSerialized(false);
     }
+  }
+
+  public void setCampaignName(String name) {
+    MapTool.getCampaign().setName(name);
+    MapTool.getFrame().setTitle();
+    makeServerCall(COMMAND.setCampaignName, name);
   }
 
   public void setVisionType(GUID zoneGUID, VisionType visionType) {
@@ -123,8 +138,18 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.putToken, zoneGUID, token);
   }
 
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
+    // delete local token immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
     makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    // delete local tokens immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
+    makeServerCall(COMMAND.removeTokens, zoneGUID, tokenGUIDs);
   }
 
   /**
@@ -133,28 +158,28 @@ public class ServerCommandClientImpl implements ServerCommand {
    *
    * @param zoneGUID the GUID of the zone the token is on
    * @param tokenGUID the GUID of the token
-   * @param methodName the string with the setter for the token
+   * @param update the type of token update
    * @param parameters an array of parameters
    */
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
-    makeServerCall(COMMAND.updateTokenProperty, zoneGUID, tokenGUID, methodName, parameters);
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
+    makeServerCall(COMMAND.updateTokenProperty, zoneGUID, tokenGUID, update, parameters);
   }
 
   /**
    * Simplifies the arguments for the method above.
    *
    * @param token the token to be updated
-   * @param methodName the method to be used
+   * @param update the type of token update
    * @param parameters an array of parameters
    */
-  public void updateTokenProperty(Token token, String methodName, Object... parameters) {
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {
     Zone zone = token.getZoneRenderer().getZone();
     GUID tokenGUID = token.getId();
     GUID zoneGUID = zone.getId();
 
-    token.updateProperty(zone, methodName, parameters); // update locally right away
-    updateTokenProperty(zoneGUID, tokenGUID, methodName, parameters);
+    token.updateProperty(zone, update, parameters); // update locally right away
+    updateTokenProperty(zoneGUID, tokenGUID, update, parameters);
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
@@ -193,6 +218,25 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.message, message);
   }
 
+  @Override
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
+    // Execute locally right away
+    ExecFunction.receiveExecFunction(target, source, functionName, args);
+
+    if (ExecFunction.isMessageGlobal(target, source)) {
+      makeServerCall(COMMAND.execFunction, target, source, functionName, args);
+    }
+  }
+
+  @Override
+  public void execLink(String link, String target, String source) {
+    MacroLinkFunction.receiveExecLink(link, target, source); // receive locally right away
+
+    if (ExecFunction.isMessageGlobal(target, source)) {
+      makeServerCall(COMMAND.execLink, link, target, source);
+    }
+  }
+
   public void showPointer(String player, Pointer pointer) {
     makeServerCall(COMMAND.showPointer, player, pointer);
   }
@@ -228,12 +272,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
-  public void addTopology(GUID zoneGUID, Area area) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area);
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
   }
 
-  public void removeTopology(GUID zoneGUID, Area area) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area);
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -285,9 +329,19 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateCampaignMacros, properties);
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
+  public void updateGmMacros(List<MacroButtonProperties> properties) {
+    makeServerCall(COMMAND.updateGmMacros, properties);
+  }
+
+  /**
+   * Send the message to server to clear the exposed area of a map
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should all token exposed areas be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     // System.out.println("in ServerCommandClientImpl");
-    makeServerCall(COMMAND.clearExposedArea, zoneGUID);
+    makeServerCall(COMMAND.clearExposedArea, zoneGUID, globalOnly);
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {

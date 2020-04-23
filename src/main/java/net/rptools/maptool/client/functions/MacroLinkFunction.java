@@ -14,16 +14,15 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.lib.MD5Key;
@@ -31,6 +30,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -40,12 +40,11 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -145,14 +144,30 @@ public class MacroLinkFunction extends AbstractFunction {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
+      FunctionUtil.checkNumberParam(functionName, args, 1, 4);
 
-      boolean defer = false;
-      if (args.size() > 1) {
-        if (args.get(1) instanceof BigDecimal) {
-          defer = BigDecimal.ZERO.equals(args.get(1)) ? false : true;
-        }
+      String link = args.get(0).toString();
+      boolean defer =
+          args.size() > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : false;
+      String strTargets = args.size() > 2 ? args.get(2).toString().trim() : "self";
+      String delim = args.size() > 3 ? args.get(3).toString() : ",";
+
+      JsonArray jsonTargets;
+      if ("json".equals(delim) || strTargets.charAt(0) == '[')
+        jsonTargets = JSONMacroFunctions.getInstance().asJsonElement(strTargets).getAsJsonArray();
+      else {
+        jsonTargets = new JsonArray();
+        for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
       }
-      execLink((String) args.get(0), defer);
+      if (jsonTargets.size() == 0) {
+        return ""; // dont send to empty lists
+      }
+
+      List<String> targets = new ArrayList<>();
+      for (JsonElement ele : jsonTargets) {
+        targets.add(ele.getAsString());
+      }
+      sendExecLink(link, defer, targets);
       return "";
     }
 
@@ -168,16 +183,50 @@ public class MacroLinkFunction extends AbstractFunction {
     return sb.toString();
   }
 
-  private void execLink(final String link, boolean defer) {
+  /**
+   * Send the execLink to targets, either immediately or with a delay
+   *
+   * @param link the macroLinkText
+   * @param defer should the execLink be delayed
+   * @param targets the list of targets
+   */
+  private static void sendExecLink(final String link, boolean defer, Collection<String> targets) {
     if (defer) {
       EventQueue.invokeLater(
           new Runnable() {
             public void run() {
-              runMacroLink(link);
+              sendExecLink(link, targets);
             }
           });
     } else {
-      this.runMacroLink(link);
+      sendExecLink(link, targets);
+    }
+  }
+
+  /**
+   * Send the execLink. If target is local, run locally instead.
+   *
+   * @param link the macroLinkText
+   * @param targets the list of targets
+   */
+  private static void sendExecLink(final String link, Collection<String> targets) {
+    String source = MapTool.getPlayer().getName();
+
+    for (String target : targets) {
+      MapTool.serverCommand().execLink(link, target, source);
+    }
+  }
+
+  /**
+   * Receive an execLink, and run it if the player is a target.
+   *
+   * @param link the macroLinkText
+   * @param target the target.
+   * @param source the name of the source.
+   */
+  public static void receiveExecLink(final String link, String target, String source) {
+    if (ExecFunction.isMessageForMe(target, source)) {
+      runMacroLink(link);
     }
   }
 
@@ -193,9 +242,9 @@ public class MacroLinkFunction extends AbstractFunction {
    * @param macroName such as <code>MacroName@Lib:Core</code>
    * @param who where output should go
    * @param target the string <code>impersonated</code>, <code>all</code>
-   * @param args
-   * @return
-   * @throws ParserException
+   * @param args the arguments to append to the end of the macro invocation
+   * @return the String of the macro invocation
+   * @throws ParserException when an error occurs.
    */
   public String createMacroText(String macroName, String who, String target, String args)
       throws ParserException {
@@ -210,27 +259,15 @@ public class MacroLinkFunction extends AbstractFunction {
     return sb.toString();
   }
 
-  private String encode(String str) throws ParserException {
-    try {
-      JSONObject.fromObject(str);
-      try {
-        return URLEncoder.encode(str, "utf-8");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
-    } catch (JSONException e) {
-      return strPropListToArgs(str);
-    }
+  private String encode(String str) {
+    JSONMacroFunctions.getInstance().asJsonElement(str);
+    return URLEncoder.encode(str, StandardCharsets.UTF_8);
   }
 
-  private String decode(String str) throws ParserException {
-    try {
-      return JSONObject.fromObject(URLDecoder.decode(str, "utf-8")).toString();
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
-    } catch (JSONException e) {
-      return argsToStrPropList(str);
-    }
+  private String decode(String str) {
+    return JSONMacroFunctions.getInstance()
+        .asJsonElement(URLDecoder.decode(str, StandardCharsets.UTF_8))
+        .getAsString();
   }
 
   /**
@@ -238,27 +275,21 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param args the URL argument string.
    * @return a property list representation of the arguments.
-   * @throws ParserException if the argument encoding is incorrect.
    */
-  public String argsToStrPropList(String args) throws ParserException {
+  public static String argsToStrPropList(String args) {
     String vals[] = args.split("&");
     StringBuilder propList = new StringBuilder();
 
-    try {
-      for (String s : vals) {
-        String decoded = URLDecoder.decode(s, "utf-8");
-        decoded = decoded.replaceAll(";", "&#59");
-        if (propList.length() == 0) {
-          propList.append(decoded);
-        } else {
-          propList.append(" ; ");
-          propList.append(decoded);
-        }
+    for (String s : vals) {
+      String decoded = URLDecoder.decode(s, StandardCharsets.UTF_8);
+      if (propList.length() == 0) {
+        propList.append(decoded);
+      } else {
+        propList.append(" ; ");
+        propList.append(decoded);
       }
-      return propList.toString();
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
     }
+    return propList.toString();
   }
 
   /**
@@ -266,24 +297,19 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param props The property list to convert.
    * @return a string that can be used as an argument to a url.
-   * @throws ParserException if there is an error in encoding.
    */
-  public String strPropListToArgs(String props) throws ParserException {
+  public String strPropListToArgs(String props) {
     String vals[] = props.split(";");
     StringBuilder args = new StringBuilder();
-    try {
-      for (String s : vals) {
-        s = s.trim();
-        String encoded = URLEncoder.encode(s, "utf-8");
-        if (args.length() == 0) {
-          args.append(encoded);
-        } else {
-          args.append("&");
-          args.append(encoded);
-        }
+    for (String s : vals) {
+      s = s.trim();
+      String encoded = URLEncoder.encode(s, StandardCharsets.UTF_8);
+      if (args.length() == 0) {
+        args.append(encoded);
+      } else {
+        args.append("&");
+        args.append(encoded);
       }
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
     }
 
     return args.toString();
@@ -320,12 +346,7 @@ public class MacroLinkFunction extends AbstractFunction {
             Double.parseDouble(val);
             // Do nothing as its a number
           } catch (NumberFormatException e) {
-            try {
-              val = "\"" + argsToStrPropList(val) + "\"";
-            } catch (ParserException e1) {
-              MapTool.addLocalMessage(
-                  I18N.getText("macro.function.macroLink.errorRunning", e1.getLocalizedMessage()));
-            }
+            val = "\"" + argsToStrPropList(val) + "\"";
           }
           tip.append("<tr><th>")
               .append(I18N.getText("macro.function.macroLink.arguments"))
@@ -368,7 +389,7 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param link the link to the macro.
    */
-  public void runMacroLink(String link) {
+  public static void runMacroLink(String link) {
     runMacroLink(link, false);
   }
 
@@ -383,7 +404,7 @@ public class MacroLinkFunction extends AbstractFunction {
    *     macro.args.
    */
   @SuppressWarnings("unchecked")
-  public void runMacroLink(String link, boolean setVars) {
+  public static void runMacroLink(String link, boolean setVars) {
     if (link == null || link.length() == 0) {
       return;
     }
@@ -421,17 +442,16 @@ public class MacroLinkFunction extends AbstractFunction {
             Double.parseDouble(val);
             // Do nothing as its a number
           } catch (NumberFormatException e) {
-            try {
-              val = argsToStrPropList(val);
-            } catch (ParserException e1) {
-              MapTool.addLocalMessage("Error running macro link: " + e1.getMessage());
-            }
+            val = argsToStrPropList(val);
           }
           args = val;
           try {
-            JSONObject jobj = JSONObject.fromObject(args);
-            if (jobj.containsKey("mlOutputList")) {
-              outputToPlayers.addAll(jobj.getJSONArray("mlOutputList"));
+            JsonObject jobj =
+                JSONMacroFunctions.getInstance().asJsonElement(args).getAsJsonObject();
+            if (jobj.has("mlOutputList")) {
+              for (JsonElement ele : jobj.get("mlOutputList").getAsJsonArray()) {
+                outputToPlayers.add(ele.getAsString());
+              }
             }
           } catch (Exception e) {
             // Do nothing as we just dont populate the list.
@@ -475,7 +495,8 @@ public class MacroLinkFunction extends AbstractFunction {
     }
   }
 
-  private void doOutput(Token token, OutputTo outputTo, String line, Set<String> playerList) {
+  private static void doOutput(
+      Token token, OutputTo outputTo, String line, Set<String> playerList) {
     /*
      * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
      * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with
@@ -573,7 +594,7 @@ public class MacroLinkFunction extends AbstractFunction {
     }
   }
 
-  private void doWhisper(String message, Token token, String playerName) {
+  private static void doWhisper(String message, Token token, String playerName) {
     ObservableList<Player> playerList = MapTool.getPlayerList();
     List<String> players = new ArrayList<String>();
     for (int count = 0; count < playerList.size(); count++) {
@@ -612,7 +633,7 @@ public class MacroLinkFunction extends AbstractFunction {
             null));
   }
 
-  private String getSelf() {
+  private static String getSelf() {
     return MapTool.getPlayer().getName();
   }
 
@@ -688,7 +709,7 @@ public class MacroLinkFunction extends AbstractFunction {
     return false;
   }
 
-  private void doSay(String msg, Token token, boolean trusted, String macroName) {
+  private static void doSay(String msg, Token token, boolean trusted, String macroName) {
     StringBuilder sb = new StringBuilder();
 
     String identity = token == null ? MapTool.getPlayer().getName() : token.getName();

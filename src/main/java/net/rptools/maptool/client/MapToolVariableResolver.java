@@ -14,31 +14,25 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-import net.rptools.maptool.client.functions.CurrentInitiativeFunction;
-import net.rptools.maptool.client.functions.InitiativeRoundFunction;
-import net.rptools.maptool.client.functions.JSONMacroFunctions;
-import net.rptools.maptool.client.functions.TokenBarFunction;
-import net.rptools.maptool.client.functions.TokenGMNameFunction;
-import net.rptools.maptool.client.functions.TokenHaloFunction;
-import net.rptools.maptool.client.functions.TokenInitFunction;
-import net.rptools.maptool.client.functions.TokenInitHoldFunction;
-import net.rptools.maptool.client.functions.TokenLabelFunction;
-import net.rptools.maptool.client.functions.TokenNameFunction;
-import net.rptools.maptool.client.functions.TokenStateFunction;
-import net.rptools.maptool.client.functions.TokenVisibleFunction;
+import net.rptools.maptool.client.functions.*;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,6 +74,10 @@ public class MapToolVariableResolver extends MapVariableResolver {
   /** The variable name for querying and setting token visible state */
   private static final String TOKEN_VISIBLE = "token.visible";
 
+  private static final String JSON_NULL = "json.null";
+  private static final String JSON_TRUE = "json.true";
+  private static final String JSON_FALSE = "json.false";
+
   private List<Runnable> delayedActionList;
 
   private Token tokenInContext;
@@ -115,7 +113,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
     return false;
   }
 
-  /** Add an action to be performed after the full expression has been evaluated. */
+  /**
+   * Add an action to be performed after the full expression has been evaluated.
+   *
+   * @param runnable the action to be performed.
+   */
   public void addDelayedAction(Runnable runnable) {
     if (!delayedActionList.contains(runnable)) {
       delayedActionList.add(runnable);
@@ -158,36 +160,45 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
     boolean evaluate = false; // Should we try to evaluate the value.
 
+    switch (name) {
+      case JSON_NULL:
+        return JsonNull.INSTANCE;
+      case JSON_TRUE:
+        return new JsonPrimitive(true);
+      case JSON_FALSE:
+        return new JsonPrimitive(false);
+    }
+
     Object result = null;
     if (tokenInContext != null) {
 
       if (name.startsWith(STATE_PREFIX)) {
         String stateName = name.substring(STATE_PREFIX.length());
-        return TokenStateFunction.getInstance().getState(tokenInContext, stateName);
+        return TokenStateFunction.getState(tokenInContext, stateName);
       } else if (name.startsWith(BAR_PREFIX)) {
         String barName = name.substring(BAR_PREFIX.length());
-        return TokenBarFunction.getInstance().getValue(getTokenInContext(), barName);
+        return TokenBarFunction.getValue(getTokenInContext(), barName);
       } else if (name.equals(TOKEN_HALO)) {
         // We don't want this evaluated as the # format is more useful to us then the
         // evaluated
         // format.
-        return TokenHaloFunction.getInstance().getHalo(tokenInContext).toString();
+        return TokenHaloFunction.getHalo(tokenInContext).toString();
       } else if (name.equals(TOKEN_NAME)) {
         // Don't evaluate return value.
-        return TokenNameFunction.getInstance().getName(tokenInContext);
+        return TokenNameFunction.getName(tokenInContext);
       } else if (name.equals(TOKEN_GMNAME)) {
         // Don't evaluate return value.
-        return TokenGMNameFunction.getInstance().getGMName(tokenInContext);
+        return TokenGMNameFunction.getGMName(tokenInContext);
       } else if (name.equals(TOKEN_LABEL)) {
         // Don't evaluate return value.
-        return TokenLabelFunction.getInstance().getLabel(tokenInContext);
+        return TokenLabelFunction.getLabel(tokenInContext);
       } else if (name.equals(TOKEN_VISIBLE)) {
         // Don't evaluate return value.
-        return TokenVisibleFunction.getInstance().getVisible(tokenInContext);
+        return TokenVisibleFunction.getVisible(tokenInContext);
       } else if (name.equals(TOKEN_INITIATIVE)) {
-        return TokenInitFunction.getInstance().getTokenValue(tokenInContext);
+        return TokenInitFunction.getInitiative(tokenInContext);
       } else if (name.equals(TOKEN_INITIATIVE_HOLD)) {
-        return TokenInitHoldFunction.getInstance().getTokenValue(tokenInContext);
+        return TokenInitHoldFunction.getInitiativeHold(tokenInContext);
       } // endif
 
       if (this.validTokenProperty(name, tokenInContext)) {
@@ -213,9 +224,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
       if (name.equals(INITIATIVE_CURRENT)) {
         if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
           throw new ParserException(I18N.getText("lineParser.onlyGMCanGet", INITIATIVE_CURRENT));
-        return CurrentInitiativeFunction.getInstance().getCurrentInitiative();
+        return CurrentInitiativeFunction.getCurrentInitiative();
       } else if (name.equals(INITIATIVE_ROUND)) {
-        return InitiativeRoundFunction.getInstance().getInitiativeRound();
+        return InitiativeRoundFunction.getInitiativeRound();
       } // endif
     }
 
@@ -253,9 +264,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
     Object value;
 
-    if (result instanceof JSONArray) {
+    if (result instanceof JsonArray) {
       value = result;
-    } else if (result instanceof JSONObject) {
+    } else if (result instanceof JsonObject) {
       value = result;
     } else if (result instanceof BigDecimal) {
       value = result;
@@ -263,9 +274,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
       // First we try convert it to a JSON object.
       if (result.toString().trim().startsWith("[") || result.toString().trim().startsWith("{")) {
-        Object obj = JSONMacroFunctions.convertToJSON(result.toString());
-        if (obj != null) {
-          return obj;
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(result.toString());
+        if (json.isJsonArray() || json.isJsonObject()) {
+          return json;
         }
       }
 
@@ -295,59 +306,55 @@ public class MapToolVariableResolver extends MapVariableResolver {
       throws ParserException {
     if (tokenInContext != null) {
       if (validTokenProperty(varname, tokenInContext)) {
-        tokenInContext.setProperty(varname, value.toString());
-        addDelayedAction(
-            new PutTokenAction(
-                MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), tokenInContext));
-        return;
+        MapTool.serverCommand()
+            .updateTokenProperty(
+                tokenInContext, Token.Update.setProperty, varname, value.toString());
       }
     }
 
     // Check to see if it is a token state.
     if (varname.startsWith(STATE_PREFIX)) {
       String stateName = varname.substring(STATE_PREFIX.length());
-      TokenStateFunction.getInstance().setState(tokenInContext, stateName, value);
-      addDelayedAction(
-          new PutTokenAction(
-              MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), tokenInContext));
+      TokenStateFunction.setState(tokenInContext, stateName, value);
       return;
     } else if (varname.startsWith(BAR_PREFIX)) {
       String barName = varname.substring(BAR_PREFIX.length());
-      TokenBarFunction.getInstance().setValue(tokenInContext, barName, value);
+      TokenBarFunction.setValue(tokenInContext, barName, value);
       return;
     } else if (varname.equals(TOKEN_HALO)) {
-      TokenHaloFunction.getInstance().setHalo(tokenInContext, value);
+      TokenHaloFunction.setHalo(tokenInContext, value);
       return;
     } else if (varname.equals(TOKEN_NAME)) {
       if (value.toString().equals("")) {
         throw new ParserException(I18N.getText("lineParser.emptyTokenName"));
       }
-      TokenNameFunction.getInstance().setName(tokenInContext, value.toString());
+      TokenNameFunction.setName(tokenInContext, value.toString());
       return;
     } else if (varname.equals(TOKEN_GMNAME)) {
-      TokenGMNameFunction.getInstance().setGMName(tokenInContext, value.toString());
+      TokenGMNameFunction.setGMName(tokenInContext, value.toString());
       return;
     } else if (varname.equals(TOKEN_LABEL)) {
-      TokenLabelFunction.getInstance().setLabel(tokenInContext, value.toString());
+      TokenLabelFunction.setLabel(tokenInContext, value.toString());
       return;
     } else if (varname.endsWith(TOKEN_VISIBLE)) {
-      TokenVisibleFunction.getInstance().setVisible(tokenInContext, value.toString());
+      TokenVisibleFunction.setVisible(tokenInContext, value.toString());
       return;
     } else if (varname.equals(TOKEN_INITIATIVE)) {
-      TokenInitFunction.getInstance().setTokenValue(tokenInContext, value);
+      TokenInitFunction.setInitiative(tokenInContext, value.toString());
       return;
     } else if (varname.equals(TOKEN_INITIATIVE_HOLD)) {
-      TokenInitHoldFunction.getInstance().setTokenValue(tokenInContext, value);
+      boolean set = FunctionUtil.getBooleanValue(value);
+      TokenInitHoldFunction.setInitiativeHold(tokenInContext, set);
       return;
     } else if (varname.equals(INITIATIVE_CURRENT)) {
       if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
         throw new ParserException(I18N.getText("lineParser.onlyGMCanSet", INITIATIVE_CURRENT));
-      CurrentInitiativeFunction.getInstance().setCurrentInitiative(value);
+      CurrentInitiativeFunction.setCurrentInitiative(value);
       return;
     } else if (varname.equals(INITIATIVE_ROUND)) {
       if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
         throw new ParserException(I18N.getText("lineParser.onlyGMCanSet", INITIATIVE_ROUND));
-      InitiativeRoundFunction.getInstance().setInitiativeRound(value);
+      InitiativeRoundFunction.setInitiativeRound(value);
       return;
     }
     super.setVariable(varname, modifiers, value);
@@ -394,8 +401,8 @@ public class MapToolVariableResolver extends MapVariableResolver {
       } catch (NumberFormatException e) {
         set = Boolean.parseBoolean(val.toString());
       }
-      token.setState(stateName, set);
     }
+    token.setState(stateName, set);
   }
 
   /**
@@ -419,7 +426,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
    * Sets the value of all token states.
    *
    * @param token The token to set the state of.
-   * @param val set or unset the state.
+   * @param value set or unset the state.
    */
   private void setAllBooleanTokenStates(Token token, Object value) {
     for (Object stateName : MapTool.getCampaign().getTokenStatesMap().keySet()) {
@@ -446,6 +453,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
       this.token = token;
     }
 
+    @Override
     public void run() {
       MapTool.serverCommand().putToken(zoneId, token);
     }

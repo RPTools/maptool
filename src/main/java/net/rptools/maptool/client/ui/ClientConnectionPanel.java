@@ -25,9 +25,9 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.PlayerListModel;
 
 /**
- * Implements the contents of the Window -> Connections status panel. Previously this class only
- * displayed a list of connected clients, but it is being extended to include other information as
- * well:
+ * Implements the contents of the Window {@code ->} Connections status panel. Previously this class
+ * only displayed a list of connected clients, but it is being extended to include other information
+ * as well:
  *
  * <ul>
  *   <li>current map name,

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.script_deprecated;
 
+import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,8 +22,8 @@ import java.io.Reader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script_deprecated.api.TokenApi;
-import net.sf.json.JSONObject;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
@@ -101,7 +102,7 @@ public class ScriptManager {
     while ((line = r.readLine()) != null) {
       Matcher m = registerPattern.matcher(line);
       if (m.matches()) {
-        JSONObject o = JSONObject.fromObject(m.group(1));
+        JsonObject o = JSONMacroFunctions.getInstance().asJsonElement(m.group(1)).getAsJsonObject();
         // System.out.println(m.group(1));
         // System.out.println(o);
       }

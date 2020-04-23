@@ -490,8 +490,8 @@ public class MessagePanelImageView extends View {
   /**
    * Sets the size of the view. This should cause layout of the view if it has any layout duties.
    *
-   * @param width the width >= 0
-   * @param height the height >= 0
+   * @param width the width {@code >= 0}
+   * @param height the height {@code >= 0}
    */
   @Override
   public void setSize(float width, float height) {

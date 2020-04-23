@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import javax.imageio.ImageWriter;
-import net.rptools.lib.FileUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -69,25 +68,15 @@ public class FTPLocation implements Location {
   }
 
   public void putContent(InputStream content) throws IOException {
-    OutputStream os = null;
-    try {
-      // os = composeURL().openConnection().getOutputStream();
-      os = new URL(composeFileLocation()).openConnection().getOutputStream();
-      FileUtil.copyWithClose(content, os);
-    } finally {
-      IOUtils.closeQuietly(os);
+    try (OutputStream os = new URL(composeFileLocation()).openConnection().getOutputStream()) {
+      IOUtils.copy(content, os);
     }
   }
 
   public void putContent(ImageWriter writer, BufferedImage content) throws IOException {
-    OutputStream os = null;
-    try {
-      // os = composeURL().openConnection().getOutputStream();
-      os = new URL(composeFileLocation()).openConnection().getOutputStream();
+    try (OutputStream os = new URL(composeFileLocation()).openConnection().getOutputStream()) {
       writer.setOutput(os);
       writer.write(content);
-    } finally {
-      IOUtils.closeQuietly(os);
     }
   }
 

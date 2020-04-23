@@ -14,18 +14,35 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import com.google.common.base.Stopwatch;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.awt.ShapeReader;
+import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.simplify.VWSimplifier;
+import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
  * A utility class that creates and returns an Area based on image pixels. A few convenience methods
@@ -35,25 +52,124 @@ import net.rptools.maptool.util.ImageManager;
  */
 public class TokenVBL {
 
+  private static final Logger log = LogManager.getLogger();
+  private static int sliceSize = 100;
+
   /**
    * A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
-   * @author Jamz
-   * @since 1.4.1.6
-   * @param token
-   * @param alphaSensitivity
+   * @param token the token
+   * @param alphaSensitivity the alpha sensitivity of the VBL area
+   * @param inverseVbl match the ignoreColor or everything but ignoreColor
+   * @param ignoreColor color to match for VBL generation
+   * @param distanceTolerance JTS distance tolerance
+   * @param method JTS method to use for optimization
    * @return Area
+   * @author Jamz
+   * @since 1.6.0
    */
-  public static Area createVblArea(Token token, int alphaSensitivity) {
+  public static Area createOptimizedVblArea(
+      Token token,
+      int alphaSensitivity,
+      boolean inverseVbl,
+      Color ignoreColor,
+      int distanceTolerance,
+      String method) {
+    final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, inverseVbl, ignoreColor);
+    final JTS_SimplifyMethodType jtsMethod = JTS_SimplifyMethodType.fromString(method);
+
+    return simplifyArea(vblArea, distanceTolerance, jtsMethod);
+  }
+
+  public static Area createVblAreaFromToken(
+      Token token, int alphaSensitivity, boolean inverseVbl, Color ignoredColor) {
+    Stopwatch stopwatch = Stopwatch.createStarted();
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
-    // Future enhancement to create solid token VBL vs VBL with holes, further UI options...
-    // int detail = 5;
-    // int angle = 5;
-    // return new Area(makePolyFromImage(image, detail, angle, alphaSensitivity));
+    List<Geometry> geometryList =
+        createVblGeometry(image, alphaSensitivity, inverseVbl, ignoredColor);
+    log.debug("Time to complete createVblGeometry(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    return createVblArea(image, alphaSensitivity);
+    final Area area = createAreaFromGeometries(geometryList);
+    log.debug(
+        "Total time for createVblAreaFromToken(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    return area;
+  }
+
+  private static Area createAreaFromGeometries(List<Geometry> geometryList) {
+    if (geometryList.isEmpty()) {
+      return new Area();
+    } else {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      GeometryCollection geometryCollection =
+          (GeometryCollection) new GeometryFactory().buildGeometry(geometryList);
+
+      final Area area = new Area(new ShapeWriter().toShape(geometryCollection));
+      log.debug("Time to complete convert to Area: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      return area;
+    }
+  }
+
+  public static Area simplifyArea(
+      Area vblArea, double distanceTolerance, JTS_SimplifyMethodType simplifyMethod) {
+
+    if (simplifyMethod.equals(JTS_SimplifyMethodType.NONE)) {
+      return vblArea;
+    }
+
+    final GeometryFactory geometryFactory = new GeometryFactory();
+    ShapeReader shapeReader = new ShapeReader(geometryFactory);
+    Geometry vblGeometry = null;
+
+    if (!vblArea.isEmpty()) {
+      try {
+        vblGeometry = shapeReader.read(vblArea.getPathIterator(null));
+        // .buffer(1); // helps creating valid geometry and prevent self-intersecting polygons
+        if (!vblGeometry.isValid()) {
+          log.debug(
+              "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+        }
+      } catch (Exception e) {
+        log.error("There is a problem reading vblGeometry: ", e);
+      }
+    } else {
+      return vblArea;
+    }
+
+    ShapeWriter sw = new ShapeWriter();
+    Geometry simplifiedGeometry;
+
+    switch (simplifyMethod) {
+      case DOUGLAS_PEUCKER_SIMPLIFIER:
+        DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(vblGeometry);
+        dps.setDistanceTolerance(distanceTolerance);
+        dps.setEnsureValid(false);
+        simplifiedGeometry = dps.getResultGeometry();
+        break;
+      case TOPOLOGY_PRESERVING_SIMPLIFIER:
+        TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(vblGeometry);
+        tss.setDistanceTolerance(distanceTolerance);
+        simplifiedGeometry = tss.getResultGeometry();
+        break;
+      case VW_SIMPLIFIER:
+        VWSimplifier vws = new VWSimplifier(vblGeometry);
+        vws.setDistanceTolerance(distanceTolerance);
+        vws.setEnsureValid(false);
+        simplifiedGeometry = vws.getResultGeometry();
+        break;
+      default:
+        throw new IllegalStateException("Unexpected value: " + simplifyMethod);
+    }
+
+    final Area simplifiedArea = new Area(sw.toShape(simplifiedGeometry));
+
+    if (!simplifiedGeometry.isValid()) {
+      log.debug(
+          "simplifiedGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+    }
+
+    return simplifiedArea;
   }
 
   /**
@@ -62,16 +178,21 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
+   * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
-    if (renderer == null) return area;
+    if (renderer == null) {
+      return area;
+    }
 
     if (erase) {
       renderer.getZone().removeTopology(area);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     } else {
       renderer.getZone().addTopology(area);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
@@ -100,15 +221,14 @@ public class TokenVBL {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
       sy = 1 / (imgSize.getHeight() / token.getHeight());
 
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     } else {
       tx = -newTokenVBL.getBounds().getX();
       ty = -newTokenVBL.getBounds().getY();
       sx = 1 / token.getScaleX();
       sy = 1 / token.getScaleY();
-
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     }
+
+    atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
@@ -197,22 +317,44 @@ public class TokenVBL {
     return newTokenVBL;
   }
 
-  private static Area createVblArea(BufferedImage image, int alphaSensitivity) {
+  /**
+   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
+   * vblRectangle where the alpha of the image is greater or equal to the sensitivity.
+   *
+   * @param image the buffered image.
+   * @param alphaSensitivity the alphaSensitivity.
+   * @param inverseVbl
+   * @return the area.
+   */
+  private static Area createVblArea(BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
     // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
     // >=
     // alphaSensitivity
-    if (image == null) return null;
+    if (image == null) {
+      return new Area();
+    }
 
     Area vblArea = new Area();
     Rectangle vblRectangle;
     int y1, y2;
+    boolean addArea = false;
 
     for (int x = 0; x < image.getWidth(); x++) {
       y1 = 99;
       y2 = -1;
       for (int y = 0; y < image.getHeight(); y++) {
         Color pixelColor = new Color(image.getRGB(x, y), true);
-        if (pixelColor.getAlpha() >= alphaSensitivity) {
+        addArea = false;
+
+        if (!inverseVbl && pixelColor.getAlpha() >= alphaSensitivity) {
+          addArea = true;
+        }
+
+        if (inverseVbl && pixelColor.getAlpha() <= alphaSensitivity) {
+          addArea = true;
+        }
+
+        if (addArea) {
           if (y1 == 99) {
             y1 = y;
             y2 = y;
@@ -232,132 +374,135 @@ public class TokenVBL {
       }
     }
 
-    if (vblArea.isEmpty()) return null;
-    else return vblArea;
+    if (vblArea.isEmpty()) {
+      return new Area();
+    } else {
+      return vblArea;
+    }
   }
 
-  private static Polygon makePolyFromImage(
-      BufferedImage image, int detail, int angle, int alphaSensitivity) {
+  /**
+   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
+   * vblRectangle where the alpha of the image is greater or equal to the sensitivity. Assumes all
+   * colors form the VBL Area, everything except transparent pixels with alpha >= alphaSensitivity
+   *
+   * @param image the buffered image.
+   * @param colorTolerance the alphaSensitivity.
+   * @param inversePickColor choose to pick the chosen color or all colors not chosen
+   * @param pickColor color to compare against pixel color
+   * @return the area.
+   */
+  private static List<Geometry> createVblGeometry(
+      BufferedImage image, int colorTolerance, boolean inversePickColor, Color pickColor) {
 
-    // creates an outline of a transparent image, points are stored in an array
-    // arg0 - BufferedImage source image
-    // arg1 - Int detail (lower = better)
-    // arg2 - Int angle threshold in degrees (will remove points with angle differences below
-    // this
-    // level; 15 is a good value)
-    // making this larger will make the body faster but less accurate;
-
-    int w = image.getWidth(null);
-    int h = image.getHeight(null);
-
-    // increase array size from 255 if needed
-    int[] vertex_x = new int[2555], vertex_y = new int[2555], vertex_k = new int[2555];
-
-    int numPoints = 0, tx = 0, ty = 0, fy = -1, lx = 0, ly = 0;
-    vertex_x[0] = 0;
-    vertex_y[0] = 0;
-    vertex_k[0] = 1;
-
-    for (tx = 0; tx < w; tx += detail)
-      for (ty = 0; ty < h; ty += 1) {
-        // if ((image.getRGB(tx, ty) >> 24) != 0x00) {
-        Color pixelColor = new Color(image.getRGB(tx, ty), true);
-        if (pixelColor.getAlpha() >= alphaSensitivity) {
-          vertex_x[numPoints] = tx;
-          vertex_y[numPoints] = h - ty;
-          vertex_k[numPoints] = 1;
-          numPoints++;
-          if (fy < 0) fy = ty;
-          lx = tx;
-          ly = ty;
-          break;
-        }
-      }
-
-    for (ty = 0; ty < h; ty += detail)
-      for (tx = w - 1; tx >= 0; tx -= 1) {
-        Color pixelColor = new Color(image.getRGB(tx, ty), true);
-        // if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty > ly) {
-        if (pixelColor.getAlpha() >= alphaSensitivity && ty > ly) {
-          vertex_x[numPoints] = tx;
-          vertex_y[numPoints] = h - ty;
-          vertex_k[numPoints] = 1;
-          numPoints++;
-          lx = tx;
-          ly = ty;
-          break;
-        }
-      }
-
-    for (tx = w - 1; tx >= 0; tx -= detail)
-      for (ty = h - 1; ty >= 0; ty -= 1) {
-        Color pixelColor = new Color(image.getRGB(tx, ty), true);
-        if (pixelColor.getAlpha() >= alphaSensitivity && tx < lx) {
-          vertex_x[numPoints] = tx;
-          vertex_y[numPoints] = h - ty;
-          vertex_k[numPoints] = 1;
-          numPoints++;
-          lx = tx;
-          ly = ty;
-          break;
-        }
-      }
-
-    for (ty = h - 1; ty >= 0; ty -= detail)
-      for (tx = 0; tx < w; tx += 1) {
-        Color pixelColor = new Color(image.getRGB(tx, ty), true);
-        // if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty < ly && ty > fy) {
-        if (pixelColor.getAlpha() >= alphaSensitivity && ty < ly && ty > fy) {
-          vertex_x[numPoints] = tx;
-          vertex_y[numPoints] = h - ty;
-          vertex_k[numPoints] = 1;
-          numPoints++;
-          lx = tx;
-          ly = ty;
-          break;
-        }
-      }
-
-    double ang1, ang2;
-
-    for (int i = 0; i < numPoints - 2; i++) {
-      ang1 = PointDirection(vertex_x[i], vertex_y[i], vertex_x[i + 1], vertex_y[i + 1]);
-      ang2 = PointDirection(vertex_x[i + 1], vertex_y[i + 1], vertex_x[i + 2], vertex_y[i + 2]);
-      if (Math.abs(ang1 - ang2) <= angle) vertex_k[i + 1] = 0;
+    if (image == null) {
+      return Collections.emptyList();
     }
 
-    ang1 =
-        PointDirection(
-            vertex_x[numPoints - 2],
-            vertex_y[numPoints - 2],
-            vertex_x[numPoints - 1],
-            vertex_y[numPoints - 1]);
-    ang2 =
-        PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
+    ArrayList<Geometry> geometryList = new ArrayList<>();
+    GeometricShapeFactory gsf = new GeometricShapeFactory();
+    gsf.setNumPoints(4);
+    gsf.setWidth(1);
 
-    if (Math.abs(ang1 - ang2) <= angle) vertex_k[numPoints - 1] = 0;
+    int y1, y2;
+    boolean addArea = false;
 
-    ang1 =
-        PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
-    ang2 = PointDirection(vertex_x[0], vertex_y[0], vertex_x[1], vertex_y[1]);
+    for (int x = 0; x < image.getWidth(); x++) {
+      y1 = 99;
+      y2 = -1;
+      for (int y = 0; y < image.getHeight(); y++) {
+        if (Thread.interrupted()) {
+          log.info("Thread interrupted!");
+          return geometryList;
+        }
 
-    if (Math.abs(ang1 - ang2) <= angle) vertex_k[0] = 0;
+        Color pixelColor = new Color(image.getRGB(x, y), true);
 
-    int n = 0;
-    for (int i = 0; i < numPoints; i++) if (vertex_k[i] == 1) n++;
-
-    Polygon poly = new Polygon();
-
-    for (int i = 0; i < numPoints; i++)
-      if (vertex_k[i] == 1) {
-        poly.addPoint(vertex_x[i], h - vertex_y[i]);
-        n++;
+        if (colorWithinTolerance(pickColor, pixelColor, colorTolerance, inversePickColor)) {
+          if (y1 == 99) {
+            y1 = y;
+            y2 = y;
+          }
+          if (y > (y2 + 1)) {
+            gsf.setHeight(y2 - y1);
+            gsf.setBase(new Coordinate(x, y1));
+            geometryList.add(gsf.createRectangle());
+            y1 = y;
+            y2 = y;
+          }
+          y2 = y;
+        }
       }
 
-    return poly;
+      if ((y2 - y1) >= 0) {
+        gsf.setHeight(y2 - y1 + 1);
+        gsf.setBase(new Coordinate(x, y1));
+        geometryList.add(gsf.createRectangle());
+      }
+    }
+
+    return geometryList;
   }
 
-  private static double PointDirection(double xfrom, double yfrom, double xto, double yto) {
-    return Math.atan2(yto - yfrom, xto - xfrom) * 180 / Math.PI;
+  private static boolean colorWithinTolerance(
+      Color pick, Color pixel, int tolerance, boolean inversePick) {
+
+    double distance = distanceSquared(pick, pixel);
+
+    if (distance > tolerance) {
+      log.trace("Color Distance: {}", distance);
+    }
+
+    if (distance <= tolerance) {
+      return !inversePick;
+    } else {
+      return inversePick;
+    }
+  }
+
+  private static double distanceSquared(Color a, Color b) {
+    int deltaR = a.getRed() - b.getRed();
+    int deltaG = a.getGreen() - b.getGreen();
+    int deltaB = a.getBlue() - b.getBlue();
+    int deltaAlpha = a.getAlpha() - b.getAlpha();
+
+    double rgbDistanceSquared = (deltaR * deltaR + deltaG * deltaG + deltaB * deltaB) / 3;
+
+    double result =
+        deltaAlpha * deltaAlpha / 2.0
+            + rgbDistanceSquared * a.getAlpha() * b.getAlpha() / 65025; // 255^2 = 65025
+
+    return Math.sqrt(result);
+  }
+
+  public enum JTS_SimplifyMethodType {
+    DOUGLAS_PEUCKER_SIMPLIFIER("Douglas Peucker"),
+    TOPOLOGY_PRESERVING_SIMPLIFIER("Topology Preserving"),
+    VW_SIMPLIFIER("VW Simplifier"),
+    NONE("No Optimization");
+
+    private final String label;
+
+    public String getLabel() {
+      return label;
+    }
+
+    JTS_SimplifyMethodType(String label) {
+      this.label = label;
+    }
+
+    public static JTS_SimplifyMethodType getDefault() {
+      return DOUGLAS_PEUCKER_SIMPLIFIER;
+    }
+
+    public static JTS_SimplifyMethodType fromString(String label) {
+      final JTS_SimplifyMethodType jts_simplifyMethod =
+          Stream.of(JTS_SimplifyMethodType.values())
+              .filter(e -> e.label.equalsIgnoreCase(label))
+              .findAny()
+              .orElse(DOUGLAS_PEUCKER_SIMPLIFIER);
+
+      return jts_simplifyMethod;
+    }
   }
 }

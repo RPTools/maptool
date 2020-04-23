@@ -42,10 +42,9 @@ import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-  name = "addtokenstate",
-  aliases = {"tsa"},
-  description = "addtokenstate.description"
-)
+    name = "addtokenstate",
+    aliases = {"tsa"},
+    description = "addtokenstate.description")
 public class AddTokenStateMacro implements Macro {
 
   /** The element that contains the token state name */
@@ -71,7 +70,7 @@ public class AddTokenStateMacro implements Macro {
     CORNER_MAP.put("se", Quadrant.SOUTH_EAST);
   }
 
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /** @see net.rptools.maptool.client.macro.Macro#execute execute(java.lang.String) */
   public void execute(MacroContext context, String aMacro, MapToolMacroContext executionContext) {
     // Split the command line into an array and get the tokens
     String[] tokens = aMacro.split("\\s");

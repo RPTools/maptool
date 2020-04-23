@@ -16,14 +16,13 @@ package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.client.ClientMethodHandler;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
@@ -42,6 +41,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -49,7 +49,15 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.transfer.AssetProducer;
 
-/** @author drice */
+/**
+ * This class is used by the server host to receive client commands sent through {@link
+ * ServerCommandClientImpl ServerCommandClientImpl}. Once the command is received, this will update
+ * the server data, before forwarding the command to the clients. Clients will then handle the
+ * command through {@link ClientMethodHandler ClientMethodHandler}. Updating the server itself is
+ * important as new client receive the server's campaign data when connecting.
+ *
+ * @author drice *
+ */
 public class ServerMethodHandler extends AbstractMethodHandler implements ServerCommand {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
@@ -118,6 +126,16 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case message:
           message((TextMessage) context.get(0));
           break;
+        case execFunction:
+          execFunction(
+              (String) context.get(0),
+              (String) context.get(1),
+              (String) context.get(2),
+              (List<Object>) context.get(3));
+          break;
+        case execLink:
+          execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
+          break;
         case putAsset:
           putAsset((Asset) context.get(0));
           break;
@@ -125,10 +143,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           putLabel(context.getGUID(0), (Label) context.get(1));
           break;
         case updateTokenProperty:
+          Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
-              context.getGUID(0), context.getGUID(1), context.getString(2), context.getObjArray(3));
+              context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
           break;
-
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
@@ -144,6 +162,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case removeToken:
           removeToken(context.getGUID(0), context.getGUID(1));
           break;
+        case removeTokens:
+          removeTokens(context.getGUID(0), context.getGUIDs(1));
+          break;
         case removeLabel:
           removeLabel(context.getGUID(0), context.getGUID(1));
           break;
@@ -152,6 +173,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case setCampaign:
           setCampaign((Campaign) context.get(0));
+          break;
+        case setCampaignName:
+          setCampaignName((String) context.get(0));
           break;
         case setZoneGridSize:
           setZoneGridSize(
@@ -201,10 +225,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           setServerPolicy((ServerPolicy) context.get(0));
           break;
         case addTopology:
-          addTopology(context.getGUID(0), (Area) context.get(1));
+          addTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
           break;
         case removeTopology:
-          removeTopology(context.getGUID(0), (Area) context.get(1));
+          removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -239,6 +263,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case updateCampaignMacros:
           updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
           break;
+        case updateGmMacros:
+          updateGmMacros((List<MacroButtonProperties>) context.get(0));
+          break;
         case setTokenLocation:
           setTokenLocation(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
@@ -251,7 +278,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
           break;
         case clearExposedArea:
-          clearExposedArea(context.getGUID(0));
+          clearExposedArea(context.getGUID(0), context.getBool(1));
           break;
       }
     } finally {
@@ -277,12 +304,36 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             new String[] {}, RPCContext.getCurrent().method, RPCContext.getCurrent().parameters);
   }
 
+  /**
+   * Broadcast a method to all clients excluding one client
+   *
+   * @param exclude the client to exclude
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
   private void broadcastToClients(String exclude, String method, Object... parameters) {
     server.getConnection().broadcastCallMethod(new String[] {exclude}, method, parameters);
   }
 
+  /**
+   * Broadcast a method to all clients
+   *
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
   private void broadcastToAllClients(String method, Object... parameters) {
     server.getConnection().broadcastCallMethod(new String[] {}, method, parameters);
+  }
+
+  /**
+   * Broadcast a method to a single client
+   *
+   * @param client the client to send the method to
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
+  private void broadcastToClient(String client, String method, Object... parameters) {
+    server.getConnection().callMethod(client, method, parameters);
   }
 
   ////
@@ -333,6 +384,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       for (Token token : tokenList) {
         broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
       }
+      zone.sortZOrder(); // update new ZOrder on server zone
     }
   }
 
@@ -507,6 +559,16 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
+  @Override
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
+    forwardToClients();
+  }
+
+  @Override
+  public void execLink(String link, String target, String source) {
+    forwardToClients();
+  }
+
   public void putAsset(Asset asset) {
     AssetManager.putAsset(asset);
   }
@@ -520,19 +582,25 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   public void putToken(GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
+    int zOrder = 0;
     boolean newToken = zone.getToken(token.getId()) == null;
     synchronized (MUTEX) {
       // Set z-order for new tokens
       if (newToken) {
-        token.setZOrder(zone.getLargestZOrder() + 1);
+        zOrder = zone.getLargestZOrder() + 1;
+        token.setZOrder(zOrder);
       }
       zone.putToken(token);
     }
     if (newToken) {
-      forwardToAllClients();
-    } else {
-      forwardToClients();
+      // don't send whole token back to sender, instead just send new ZOrder
+      Object[] parameters = {
+        zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
+      };
+      broadcastToClient(
+          RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
+    forwardToClients();
   }
 
   public void putZone(Zone zone) {
@@ -553,29 +621,37 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.removeLabel.name(), RPCContext.getCurrent().parameters);
   }
 
+  /**
+   * Removes the token from the server, and pass the command to all clients.
+   *
+   * @param zoneGUID the GUID of the zone where the token is
+   * @param tokenGUID the GUID of the token
+   */
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeToken(tokenGUID);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.removeToken.name(), RPCContext.getCurrent().parameters);
+    zone.removeToken(tokenGUID); // remove server tokens
+    forwardToClients();
   }
 
-  public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    Token token = zone.getToken(tokenGUID);
-    token.updateProperty(zone, methodName, parameters); // update server version of token
-
+    zone.removeTokens(tokenGUIDs); // remove server tokens
     forwardToClients();
   }
 
   public void updateTokenProperty(
-      Token token,
-      String methodName,
-      Object...
-          parameters) {} // never actually called, but necessary to satisfy interface requirements
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    Token token = zone.getToken(tokenGUID);
+    token.updateProperty(zone, update, parameters); // update server version of token
+
+    forwardToClients();
+  }
+
+  /** never actually called, but necessary to satisfy interface requirements */
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
 
   public void removeZone(GUID zoneGUID) {
     server.getCampaign().removeZone(zoneGUID);
@@ -606,11 +682,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       for (Token token : tokenList) {
         broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
       }
+      zone.sortZOrder(); // update new ZOrder on server zone
     }
   }
 
   public void setCampaign(Campaign campaign) {
     server.setCampaign(campaign);
+    forwardToClients();
+  }
+
+  public void setCampaignName(String name) {
+    server.getCampaign().setName(name);
     forwardToClients();
   }
 
@@ -707,24 +789,34 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void setServerPolicy(ServerPolicy policy) {
+    server.updateServerPolicy(policy); // updates the server policy, fixes #1648
+    forwardToClients();
+    MapTool.getFrame().getToolbox().updateTools();
+  }
+
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.addTopology(area, topologyMode);
     forwardToClients();
   }
 
-  public void addTopology(GUID zoneGUID, Area area) {
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area);
-    forwardToClients();
-  }
-
-  public void removeTopology(GUID zoneGUID, Area area) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area);
+    zone.removeTopology(area, topologyMode);
     forwardToClients();
   }
 
   public void updateCampaignMacros(List<MacroButtonProperties> properties) {
-    MapTool.getCampaign()
-        .setMacroButtonPropertiesArray(new ArrayList<MacroButtonProperties>(properties));
+    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
+    MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    forwardToClients();
+  }
+
+  public void updateGmMacros(List<MacroButtonProperties> properties) {
+    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
+    MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 
@@ -732,25 +824,33 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Update the server exposed area meta data, and forward the change to the clients
    *
-   * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net. rptools.maptool.model.GUID, net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
+   * @param zoneGUID the zone GUID of the map
+   * @param tokenExposedAreaGUID the GUID of the token to update the exposed meta data
+   * @param meta the exposed area meta data
+   * @see
+   *     net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
+   *     net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
    */
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
     forwardToClients();
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
-    Zone zone = MapTool.getCampaign().getZone(zoneGUID);
-    zone.clearExposedArea();
-    forwardToAllClients();
-
-    // same as forwardToClients?
-    // server.getConnection().broadcastCallMethod(
-    // ClientCommand.COMMAND.clearExposedArea.name(),
-    // RPCContext.getCurrent().parameters);
+  /**
+   * Clear server global exposed area. Can clear all token exposed areas. Forward to clients.
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should only the global area be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.clearExposedArea(globalOnly);
+    forwardToClients();
   }
 
   ////
@@ -784,6 +884,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     // Convenience methods
     public GUID getGUID(int index) {
       return (GUID) parameters[index];
+    }
+
+    public List<GUID> getGUIDs(int index) {
+      return (List<GUID>) parameters[index];
     }
 
     public Integer getInt(int index) {

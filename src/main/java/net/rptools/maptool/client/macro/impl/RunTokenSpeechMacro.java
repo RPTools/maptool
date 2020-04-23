@@ -26,12 +26,13 @@ import net.rptools.maptool.model.Token;
 
 /** Macro to run the speech ID on the given token */
 @MacroDefinition(
-  name = "tsay",
-  aliases = {"ts"},
-  description = "tokenspeech.description"
-)
+    name = "tsay",
+    aliases = {"ts"},
+    description = "tokenspeech.description")
 public class RunTokenSpeechMacro implements Macro {
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /**
+   * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)
+   */
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (selectedTokenSet.size() == 0) {

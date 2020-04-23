@@ -14,26 +14,26 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import java.awt.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
+/** Includes currentToken(), findToken(), and functions to get lists of tokens through filters. */
 public class FindTokenFunctions extends AbstractFunction {
   // @formatter:off
   private enum FindType {
@@ -47,113 +47,189 @@ public class FindTokenFunctions extends AbstractFunction {
     STATE,
     OWNED,
     VISIBLE,
+    PROPERTYTYPE, // 1.5.5
     LAYER // FJE 1.3b77
   }
   // @formatter:on
 
+  private enum Ownership {
+    BYALL, // tokens owned by all players
+    NOTBYALL, // tokens not owned by all players
+    SELF, // tokens owned by the current player
+    NOTSELF, // tokens not owned by the current player
+    OTHERS, // tokens owned by other players, but not yourself
+    ANY, // tokens owned by any player
+    NONE, // tokens owned by no players
+    SINGLE, // tokens owned by a single player
+    MULTIPLE, // tokens owned by more than one player
+    ARRAY // tokens owned by one or more of the players listed in the array
+  }
+
+  private static Ownership getOwnership(String strOwnership) {
+    strOwnership = strOwnership.toLowerCase().trim().replace("-", "");
+    if (strOwnership.equals("byall")) return Ownership.BYALL;
+    if (strOwnership.equals("notbyall")) return Ownership.NOTBYALL;
+    if (strOwnership.equals("1") || strOwnership.equals("self")) return Ownership.SELF;
+    if (strOwnership.equals("0") || strOwnership.equals("notself")) return Ownership.NOTSELF;
+    if (strOwnership.equals("others")) return Ownership.OTHERS;
+    if (strOwnership.equals("any")) return Ownership.ANY;
+    if (strOwnership.equals("none")) return Ownership.NONE;
+    if (strOwnership.equals("single")) return Ownership.SINGLE;
+    if (strOwnership.equals("multiple")) return Ownership.MULTIPLE;
+    if (strOwnership.equals("array")) return Ownership.ARRAY;
+    return null;
+  }
+
   private static final FindTokenFunctions instance = new FindTokenFunctions();
 
-  /** Filter for all tokens. */
-  private class AllFilter implements Zone.Filter {
+  /** Filter for all non image / non lib tokens. */
+  private static class AllFilter implements Zone.Filter {
+    private final boolean match;
+
+    private AllFilter(boolean match) {
+      this.match = match;
+    }
+
     public boolean matchToken(Token t) {
-      // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      return true;
+      // Match=true: filter out utility lib: and image: tokens
+      return match == !t.isImgOrLib();
     }
   }
 
   /** Filter for NPC tokens. */
-  private class NPCFilter implements Zone.Filter {
+  private static class NPCFilter implements Zone.Filter {
+    private final boolean match; // true: NPC, false: Non-NPC
+
+    private NPCFilter(boolean match) {
+      this.match = match;
+    }
+
     public boolean matchToken(Token t) {
-      // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      return t.getType() == Token.Type.NPC;
+      boolean isNPC = t.getType() == Token.Type.NPC && !t.isImgOrLib();
+      return match == isNPC;
     }
   }
 
   /** Filter for PC tokens. */
-  private class PCFilter implements Zone.Filter {
+  private static class PCFilter implements Zone.Filter {
+    private final boolean match; // true: PC, false: Non-PC
+
+    private PCFilter(boolean match) {
+      this.match = match;
+    }
+
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
+      boolean isPC = t.getType() == Token.Type.PC && !t.isImgOrLib();
+      return match == isPC;
+    }
+  }
+
+  /** Filter for Light */
+  private static class LightFilter implements Zone.Filter {
+    private final String type;
+    private final String name;
+    private final boolean match;
+
+    public LightFilter(String type, String name, boolean match) {
+      this.type = type;
+      this.name = name;
+      this.match = match;
+    }
+
+    @Override
+    public boolean matchToken(Token t) {
+      try {
+        return match == TokenLightFunctions.hasLightSource(t, type, name);
+      } catch (ParserException e) {
+        // Should not happen: a test was done already
+        MapTool.showError(e.getLocalizedMessage());
         return false;
       }
-      return t.getType() == Token.Type.PC;
     }
   }
 
   /** Filter for player exposed tokens. */
-  private class ExposedFilter implements Zone.Filter {
+  private static class ExposedFilter implements Zone.Filter {
     private final Zone zone;
+    private final boolean match;
 
-    public ExposedFilter(Zone zone) {
+    public ExposedFilter(Zone zone, boolean match) {
       this.zone = zone;
+      this.match = match;
     }
 
     public boolean matchToken(Token t) {
-      // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      return zone.isTokenVisible(t);
+      boolean isExposed = zone.isTokenVisible(t) && !t.isImgOrLib();
+      return match == isExposed;
     }
   }
 
   /** Filter for finding tokens by set state. */
-  private class StateFilter implements Zone.Filter {
+  private static class StateFilter implements Zone.Filter {
     private final String stateName;
+    private final boolean match;
 
-    public StateFilter(String stateName) {
+    public StateFilter(String stateName, boolean match) {
       this.stateName = stateName;
+      this.match = match;
     }
 
     public boolean matchToken(Token t) {
       Object val = t.getState(stateName);
+      boolean hasState = true;
       // Filter out the utility lib: and image: tokens
-      if (val == null) {
-        return false;
+      if (val == null || t.isImgOrLib()) {
+        hasState = false;
+      } else if (val instanceof Boolean) {
+        hasState = (Boolean) val;
+      } else if (val instanceof BigDecimal) {
+        hasState = !val.equals(BigDecimal.ZERO);
       }
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      if (val instanceof Boolean) {
-        return ((Boolean) val).booleanValue();
-      }
-      if (val instanceof BigDecimal) {
-        if (val.equals(BigDecimal.ZERO)) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-      return true;
+      return match == hasState;
     }
   }
 
   /** Filter for finding tokens by owner. */
-  private class OwnedFilter implements Zone.Filter {
-    private final String name;
+  private static class OwnedFilter implements Zone.Filter {
+    private final String playerName;
+    private final Ownership ownership;
+    private final Set<String> ownerList;
 
-    public OwnedFilter(String name) {
-      this.name = name;
+    OwnedFilter(Ownership ownership) {
+      this.ownership = ownership;
+      this.ownerList = Collections.emptySet();
+      this.playerName = MapTool.getPlayer().getName();
+    }
+
+    OwnedFilter(Ownership ownership, Set<String> ownerList) {
+      this.ownership = ownership;
+      this.ownerList = ownerList;
+      this.playerName = MapTool.getPlayer().getName();
+    }
+
+    OwnedFilter(String playerName, boolean match) {
+      this.ownership =
+          match ? FindTokenFunctions.Ownership.SELF : FindTokenFunctions.Ownership.NOTSELF;
+      this.ownerList = Collections.emptySet();
+      this.playerName = playerName;
     }
 
     public boolean matchToken(Token t) {
-      // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      return t.isOwner(name);
+      if (ownership == Ownership.BYALL) return (t.isOwnedByAll());
+      if (ownership == Ownership.NOTBYALL) return (!t.isOwnedByAll());
+
+      if (ownership == Ownership.ANY) return (t.hasOwners());
+      if (ownership == Ownership.NONE) return (!t.hasOwners());
+      if (ownership == Ownership.MULTIPLE) return (t.isOwnedByAll() || t.getOwners().size() > 1);
+      if (ownership == Ownership.SINGLE) return (!t.isOwnedByAll() && t.getOwners().size() == 1);
+      if (ownership == Ownership.ARRAY) return (!Collections.disjoint(t.getOwners(), ownerList));
+
+      boolean isOwner = t.isOwner(playerName);
+      if (ownership == Ownership.SELF) return (isOwner);
+      if (ownership == Ownership.NOTSELF) return (!isOwner);
+      if (ownership == Ownership.OTHERS) return (!isOwner && t.hasOwners());
+      return false;
     }
   }
 
@@ -161,31 +237,44 @@ public class FindTokenFunctions extends AbstractFunction {
    * Filter by the layer the token is on (allows selecting tokens on the Object and Background
    * layers).
    */
-  private class LayerFilter implements Zone.Filter {
-    private final JSONArray layers;
+  private static class LayerFilter implements Zone.Filter {
+    private final JsonArray filterLayers;
 
-    public LayerFilter(JSONArray layers) {
-      this.layers = new JSONArray();
+    public LayerFilter(JsonArray layers) {
+      filterLayers = new JsonArray();
       for (Object s : layers) {
-        String name = s.toString().toUpperCase();
-        this.layers.add(Zone.Layer.valueOf("HIDDEN".equals(name) ? "GM" : name));
+        // Can't use .toString() as it wraps in extra quotes - bug in the JSON lib?
+        String name = ((JsonPrimitive) s).getAsString().toUpperCase();
+        name = "HIDDEN".equals(name) ? "GM" : name;
+        name = Zone.Layer.valueOf(name).toString();
+        filterLayers.add(name);
       }
     }
 
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      if (t.getName().toLowerCase().startsWith("image:")
-          || t.getName().toLowerCase().startsWith("lib:")) {
-        return false;
-      }
-      return layers.contains(t.getLayer());
+      return filterLayers.contains(new JsonPrimitive(t.getLayer().toString())) && !t.isImgOrLib();
+    }
+  }
+
+  private static class PropertyTypeFilter implements Zone.Filter {
+    private final JsonArray types;
+
+    public PropertyTypeFilter(JsonArray types) {
+      this.types = types;
+    }
+
+    public boolean matchToken(Token t) {
+      // Don't filter out lib and image
+      boolean isType = types.contains(new JsonPrimitive(t.getPropertyType()));
+      return isType;
     }
   }
 
   private FindTokenFunctions() {
     super(
         0,
-        2,
+        3,
         "findToken",
         "currentToken",
         "getTokenName",
@@ -209,6 +298,7 @@ public class FindTokenFunctions extends AbstractFunction {
         "getVisibleTokenNames");
   }
 
+  /** @return the instance. */
   public static FindTokenFunctions getInstance() {
     return instance;
   }
@@ -227,57 +317,56 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if (functionName.equals("findToken")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String mapName = parameters.size() > 1 ? parameters.get(1).toString() : null;
       return findTokenId(parameters.get(0).toString(), mapName);
     }
+    int psize = parameters.size();
     String delim = ",";
     FindType findType;
     String findArgs = null;
+    ZoneRenderer zoneRenderer = null;
     if (functionName.equals("currentToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.CURRENT;
     } else if (functionName.startsWith("getSelected")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.SELECTED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getImpersonated")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.IMPERSONATED;
     } else if (functionName.startsWith("getPC")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.PC;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getNPC")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.NPC;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       findType = FindType.ALL;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getExposedToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.EXPOSED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getWithState")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       findType = FindType.STATE;
       findArgs = parameters.get(0).toString();
-      delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
+      delim = psize > 1 ? parameters.get(1).toString() : delim;
     } else if (functionName.startsWith("getOwned")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       findType = FindType.OWNED;
-      findArgs = parameters.get(0).toString();
-      delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
+      findArgs = psize > 0 ? parameters.get(0).toString() : MapTool.getPlayer().getName();
+      delim = psize > 1 ? parameters.get(1).toString() : delim;
+      zoneRenderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
     } else if (functionName.startsWith("getVisibleToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.VISIBLE;
-      delim = parameters.size() > 0 ? parameters.get(0).toString() : delim;
+      delim = psize > 0 ? parameters.get(0).toString() : delim;
     } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -291,7 +380,7 @@ public class FindTokenFunctions extends AbstractFunction {
     if (findType == FindType.ALL && parameters.size() > 1) {
       return getTokenList(parser, nameOnly, delim, parameters.get(1).toString());
     }
-    return getTokens(parser, findType, nameOnly, delim, findArgs);
+    return getTokens(parser, findType, nameOnly, delim, findArgs, zoneRenderer);
   }
 
   /**
@@ -302,134 +391,160 @@ public class FindTokenFunctions extends AbstractFunction {
    * @param nameOnly whether to return only token names (<code>false</code> = token GUIDs)
    * @param delim either <code>json</code> or a string delimiter between output entries
    * @param jsonString incoming JSON data structure to filter results
-   * @return
-   * @throws ParserException
+   * @return list of filtered tokens
+   * @throws ParserException if a condition is incorrect
    */
-  private Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString)
-      throws ParserException {
-    JSONObject jobj = JSONObject.fromObject(jsonString);
+  private static Object getTokenList(
+      Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
+    JsonObject jobj = JsonParser.parseString(jsonString).getAsJsonObject();
 
     // First get a list of all our tokens. By default this is limited to the TOKEN and GM layers.
     List<Token> allTokens = null;
-    JSONArray layers = null;
-    if (!jobj.containsKey("layer")) {
-      layers = new JSONArray();
+    JsonArray layers = null;
+    if (!jobj.has("layer")) {
+      layers = new JsonArray();
       layers.add(Zone.Layer.TOKEN.toString());
       layers.add(Zone.Layer.GM.toString());
     } else {
       Object o = jobj.get("layer");
-      if (o instanceof JSONArray) {
-        layers = (JSONArray) o;
+      if (o instanceof JsonArray) {
+        layers = (JsonArray) o;
       } else {
-        layers = new JSONArray();
-        layers.add(o.toString());
+        layers = new JsonArray();
+        if (o instanceof JsonPrimitive) {
+          layers.add(((JsonPrimitive) o).getAsString());
+        } else {
+          layers.add(o.toString());
+        }
       }
     }
-    allTokens =
-        MapTool.getFrame()
-            .getCurrentZoneRenderer()
-            .getZone()
-            .getTokensFiltered(new LayerFilter(layers));
+    ZoneRenderer zoneRenderer;
+    String mapName;
+    if (!jobj.has("mapName")) {
+      mapName = null; // set to null so findToken searches the current map
+      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    } else {
+      mapName = jobj.get("mapName").getAsString();
+      zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
+      if (zoneRenderer == null) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.moveTokenMap.unknownMap",
+                nameOnly ? "getTokenNames" : "getTokens",
+                mapName));
+      }
+    }
+    Zone zone = zoneRenderer.getZone();
+    allTokens = zone.getTokensFiltered(new LayerFilter(layers));
     List<Token> tokenList = new ArrayList<Token>(allTokens.size());
     tokenList.addAll(allTokens);
-    JSONObject range = null;
-    JSONObject area = null;
+    JsonObject range = null;
+    JsonObject area = null;
 
-    // Now loop through conditions that are true and only retain tokens returned.
+    boolean match;
+    // Now loop through conditions and filter out tokens that don't match conditions
     for (Object key : jobj.keySet()) {
       String searchType = key.toString();
-      if ("setStates".equalsIgnoreCase(searchType)) {
-        // setStates and layers work the same until you get to the filtering part...
-        JSONArray ary;
-        Object o = jobj.get(searchType);
-        if (o instanceof JSONArray) {
-          ary = (JSONArray) o;
-        } else {
-          ary = new JSONArray();
-          ary.add(o.toString());
+      if ("setStates".equalsIgnoreCase(searchType) || "unsetStates".equalsIgnoreCase(searchType)) {
+        JsonArray states;
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonArray()) states = json.getAsJsonArray();
+        else {
+          states = new JsonArray();
+          states.add(json.getAsString());
         }
-        // Looking for tokens with all of these states set
-        for (Object item : ary) {
-          List<Token> lst = getTokenList(parser, FindType.STATE, item.toString());
-          tokenList.retainAll(lst);
+        match = "setStates".equalsIgnoreCase(searchType);
+        // Looking for tokens that either match or don't match the states
+        for (JsonElement item : states) {
+          tokenList =
+              getTokenList(
+                  parser, FindType.STATE, item.getAsString(), match, tokenList, zoneRenderer);
         }
       } else if ("range".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
         // do it on as few tokens as possible
-        range = jobj.getJSONObject(searchType);
+        range = jobj.get(searchType).getAsJsonObject();
       } else if ("area".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
         // do it on as few tokens as possible
-        area = jobj.getJSONObject(searchType);
+        area = jobj.get(searchType).getAsJsonObject();
         // } else if ("unsetStates".equalsIgnoreCase(searchType)) {
         // // ignore
-      } else {
-        if (booleanCheck(jobj, searchType)) {
-          List<Token> lst = null;
-          if ("npc".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.NPC, "");
-          } else if ("pc".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.PC, "");
-          } else if ("selected".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.SELECTED, "");
-          } else if ("visible".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.VISIBLE, "");
-          } else if ("owned".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.OWNED, MapTool.getPlayer().getName());
-          } else if ("current".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.CURRENT, "");
-          } else if ("impersonated".equalsIgnoreCase(searchType)) {
-            lst = getTokenList(parser, FindType.IMPERSONATED, "");
-          }
-          if (lst != null) tokenList.retainAll(lst);
+      } else if ("propertyType".equalsIgnoreCase(searchType)) {
+        JsonArray types;
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonArray()) types = json.getAsJsonArray();
+        else {
+          types = new JsonArray();
+          types.add(json.getAsString());
         }
-      }
-    }
+        tokenList = getTokensFiltered(new PropertyTypeFilter(types), tokenList);
+      } else if ("light".equalsIgnoreCase(searchType)) {
+        String type, name;
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonObject()) {
+          JsonObject jobjLight = json.getAsJsonObject();
+          match =
+              !jobjLight.has("value")
+                  || FunctionUtil.getBooleanValue(jobjLight.get("value").getAsString());
+          type = jobjLight.has("category") ? jobjLight.get("category").getAsString() : "*";
+          name = jobjLight.has("name") ? jobjLight.get("name").getAsString() : "*";
 
-    // After looping through all the true conditions it's time to loop through
-    // the false conditions and remove any tokens that match from our list.
-    // This is a little more painful as first we get the tokens that match
-    // the criteria, remove those from a list of all tokens, and use that
-    // resultant list to tell the tokenList which to retain.
-    // FJE Huh? Why not just remove ones that match from 'tokenList'???
-    List<Token> inverseList = new ArrayList<Token>();
-    for (Object key : jobj.keySet()) {
-      String searchType = key.toString();
-      if ("unsetStates".equalsIgnoreCase(searchType)) {
-        JSONArray states = (JSONArray) jobj.get(searchType);
-        for (Object st : states) {
-          inverseList.clear();
-          inverseList.addAll(allTokens);
-          inverseList.removeAll(getTokenList(parser, FindType.STATE, st.toString()));
-          tokenList.retainAll(inverseList);
-        }
-        // } else if ("setStates".equalsIgnoreCase(searchType)) {
-        // // ignore
-        // } else if ("range".equalsIgnoreCase(searchType)) {
-        // // ignore
-        // } else if ("area".equalsIgnoreCase(searchType)) {
-        // // ignore
-      } else {
-        if (!booleanCheck(jobj, searchType)) {
-          inverseList.clear();
-          inverseList.addAll(allTokens);
-          if ("npc".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.NPC, ""));
-          } else if ("pc".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.PC, ""));
-          } else if ("selected".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.SELECTED, ""));
-          } else if ("visible".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.VISIBLE, ""));
-          } else if ("owned".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(
-                getTokenList(parser, FindType.OWNED, MapTool.getPlayer().getName()));
-          } else if ("current".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.CURRENT, ""));
-          } else if ("impersonated".equalsIgnoreCase(searchType)) {
-            inverseList.removeAll(getTokenList(parser, FindType.IMPERSONATED, ""));
+          Map<String, Map<GUID, LightSource>> lightSourcesMap =
+              MapTool.getCampaign().getLightSourcesMap();
+
+          if (!"*".equals(type) && !lightSourcesMap.containsKey(type)) {
+            throw new ParserException(
+                I18N.getText("macro.function.tokenLight.unknownLightType", "light", type));
           }
-          if (inverseList != null) tokenList.retainAll(inverseList);
+        } else if (json.isJsonArray()) {
+          throw new ParserException(
+              I18N.getText("macro.function.json.onlyObject", json.toString(), "light"));
+        } else {
+          String value = json.getAsString();
+          if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
+            match = true;
+            type = name = "*";
+          } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
+            match = false;
+            type = name = "*";
+          } else {
+            throw new ParserException(
+                I18N.getText("macro.function.json.onlyObject", value, "light"));
+          }
+        }
+        tokenList = getTokensFiltered(new LightFilter(type, name, match), tokenList);
+      } else if ("owned".equalsIgnoreCase(searchType)) {
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonArray()) {
+          Ownership ownership = Ownership.ARRAY;
+          Set<String> setOwners = new HashSet<>();
+          for (JsonElement ele : json.getAsJsonArray()) {
+            setOwners.add(ele.getAsString());
+          }
+          tokenList = getTokensFiltered(new OwnedFilter(ownership, setOwners), tokenList);
+        } else if (json.isJsonObject()) {
+          throw new ParserException(
+              I18N.getText("macro.function.json.onlyArray", json.toString(), "owned"));
+        } else {
+          Ownership ownership = getOwnership(json.getAsString());
+          tokenList = getTokensFiltered(new OwnedFilter(ownership), tokenList);
+        }
+      } else {
+        match = booleanCheck(jobj, searchType);
+        if ("npc".equalsIgnoreCase(searchType)) {
+          tokenList = getTokenList(parser, FindType.NPC, "", match, tokenList, zoneRenderer);
+        } else if ("pc".equalsIgnoreCase(searchType)) {
+          tokenList = getTokenList(parser, FindType.PC, "", match, tokenList, zoneRenderer);
+        } else if ("selected".equalsIgnoreCase(searchType)) {
+          tokenList = getTokenList(parser, FindType.SELECTED, "", match, tokenList, zoneRenderer);
+        } else if ("visible".equalsIgnoreCase(searchType)) {
+          tokenList = getTokenList(parser, FindType.VISIBLE, "", match, tokenList, zoneRenderer);
+        } else if ("current".equalsIgnoreCase(searchType)) {
+          tokenList = getTokenList(parser, FindType.CURRENT, "", match, tokenList, zoneRenderer);
+        } else if ("impersonated".equalsIgnoreCase(searchType)) {
+          tokenList =
+              getTokenList(parser, FindType.IMPERSONATED, "", match, tokenList, zoneRenderer);
         }
       }
     }
@@ -438,18 +553,19 @@ public class FindTokenFunctions extends AbstractFunction {
     if (range != null) {
       TokenLocationFunctions instance = TokenLocationFunctions.getInstance();
       Token token;
-      if (range.containsKey("token")) {
-        token = findToken(range.getString("token"), null);
+      if (range.has("token")) {
+        token = findToken(range.get("token").getAsString(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText(
-                  "macro.function.general.unknownToken", "getTokens", range.getString("token")));
+                  "macro.function.general.unknownToken",
+                  "getTokens",
+                  range.get("token").getAsString()));
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), null);
+        if (guid != null) token = zone.getToken(guid);
+        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText("macro.function.general.noImpersonated", "getTokens"));
@@ -458,20 +574,20 @@ public class FindTokenFunctions extends AbstractFunction {
       int from = Integer.MIN_VALUE;
       int upto = Integer.MAX_VALUE;
 
-      if (range.containsKey("from")) {
-        from = range.getInt("from");
+      if (range.has("from")) {
+        from = range.get("from").getAsInt();
       }
-      if (range.containsKey("upto")) {
-        upto = range.getInt("upto");
+      if (range.has("upto")) {
+        upto = range.get("upto").getAsInt();
       }
       boolean useDistancePerCell = true;
-      if (range.containsKey("distancePerCell")) {
+      if (range.has("distancePerCell")) {
         useDistancePerCell = booleanCheck(range, "distancePerCell");
       }
 
       String metric = null;
-      if (range.containsKey("metric")) {
-        metric = range.getString("metric");
+      if (range.has("metric")) {
+        metric = range.get("metric").getAsString();
       }
       List<Token> inrange = new LinkedList<Token>();
       for (Token targetToken : tokenList) {
@@ -487,55 +603,55 @@ public class FindTokenFunctions extends AbstractFunction {
     if (area != null) {
       TokenLocationFunctions instance = TokenLocationFunctions.getInstance();
       Token token;
-      if (area.containsKey("token")) {
-        token = findToken(area.getString("token"), null);
+      if (area.has("token")) {
+        token = findToken(area.get("token").getAsString(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText(
-                  "macro.function.general.unknownToken", "getTokens", area.getString("token")));
+                  "macro.function.general.unknownToken",
+                  "getTokens",
+                  area.get("token").getAsString()));
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), null);
+        if (guid != null) token = zone.getToken(guid);
+        else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText("macro.function.general.noImpersonated", "getTokens"));
         }
       }
-      JSONArray offsets = area.getJSONArray("offsets");
+      JsonArray offsets = area.get("offsets").getAsJsonArray();
       if (offsets == null) {
         throw new ParserException(
             I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
       }
       String metric = null;
-      if (area.containsKey("metric")) {
-        metric = area.getString("metric");
+      if (area.has("metric")) {
+        metric = area.get("metric").getAsString();
       }
       CellPoint cp = instance.getTokenCell(token);
 
-      Set<Token> matching = new HashSet<Token>();
+      Point[] points = new Point[offsets.size()];
+      int ip = 0; // create an array of points for each cell
       for (Object o : offsets) {
-        if (!(o instanceof JSONObject)) {
+        if (!(o instanceof JsonObject)) {
           throw new ParserException(
               I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
         }
-        JSONObject joff = (JSONObject) o;
-        if (!joff.containsKey("x") || !joff.containsKey("y")) {
+        JsonObject joff = (JsonObject) o;
+        if (!joff.has("x") || !joff.has("y")) {
           throw new ParserException(
               I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
         }
-        int x = joff.getInt("x");
-        int y = joff.getInt("y");
-        for (Token targetToken : tokenList) {
-          if (!matching.contains(targetToken)) {
-            Double distance = instance.getDistance(targetToken, cp.x + x, cp.y + y, false, metric);
-            if (distance >= 0 && distance < 1) {
-              matching.add(targetToken);
-            }
-          }
-        }
+        // note: cp.x and cp.y returns the top left cell (pixel for gridless
+        points[ip] = new Point(joff.get("x").getAsInt() + cp.x, joff.get("y").getAsInt() + cp.y);
+        ip += 1;
+      }
+      Set<Token> matching = new HashSet<Token>();
+      for (Token targetToken : tokenList) {
+        if (TokenLocationFunctions.isTokenAtXY(targetToken, zone, points))
+          matching.add(targetToken);
       }
       tokenList.retainAll(matching);
     }
@@ -549,77 +665,104 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(values);
+      JsonArray jsonArray = new JsonArray();
+      for (String val : values) {
+        jsonArray.add(val);
+      }
+      return jsonArray;
     } else {
       return StringFunctions.getInstance().join(values, delim);
     }
   }
 
-  private boolean booleanCheck(JSONObject jobj, String searchType) {
-    Object val = jobj.get(searchType);
-    if (val instanceof Boolean) {
-      if (Boolean.TRUE.equals(val)) {
-        return true;
+  private static boolean booleanCheck(JsonObject jobj, String searchType) {
+    JsonElement jel = jobj.get(searchType);
+    if (jel.isJsonPrimitive()) {
+      JsonPrimitive jprim = jel.getAsJsonPrimitive();
+      if (jprim.isBoolean()) {
+        return jprim.getAsBoolean();
+      } else if (jprim.isNumber()) {
+        if (jprim.getAsInt() == 0) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return false;
-      }
-    } else if (val instanceof Integer) {
-      if (Integer.valueOf(0).equals(val)) {
-        return false;
-      } else {
+        // What's the rationale for returning true for other types?
+        // Should we be looking at strings for true/false?
         return true;
       }
-    } else {
-      return val == null ? true : false;
     }
+    return false;
   }
 
-  private List<Token> getTokenList(Parser parser, FindType findType, String findArgs)
+  /**
+   * Take a list of tokens and return a new sublist where each token satisfies the specified
+   * condition
+   *
+   * @param parser The parser, to get variables in context
+   * @param findType the type of search to do
+   * @param findArgs additional argument for the search
+   * @param match should the property match? true: only include matches, false: exclude matches
+   * @param originalList the list of tokens to search from
+   * @param zoneRenderer the zone render of the map where the tokens are
+   * @return tokenList satisfying the requirement
+   */
+  private static List<Token> getTokenList(
+      Parser parser,
+      FindType findType,
+      String findArgs,
+      boolean match,
+      List<Token> originalList,
+      ZoneRenderer zoneRenderer)
       throws ParserException {
     List<Token> tokenList = new LinkedList<Token>();
-    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    if (originalList.size() == 0) return tokenList;
+
     Zone zone = zoneRenderer.getZone();
     switch (findType) {
       case ALL:
-        tokenList = zone.getTokensFiltered(new AllFilter());
+        tokenList = getTokensFiltered(new AllFilter(match), originalList);
         break;
       case NPC:
-        tokenList = zone.getTokensFiltered(new NPCFilter());
+        tokenList = getTokensFiltered(new NPCFilter(match), originalList);
         break;
       case PC:
-        tokenList = zone.getTokensFiltered(new PCFilter());
+        tokenList = getTokensFiltered(new PCFilter(match), originalList);
         break;
       case SELECTED:
-        tokenList = zoneRenderer.getSelectedTokensList();
+        tokenList = getTokensFiltered(zoneRenderer.getSelectedTokensList(), originalList, match);
         break;
       case CURRENT:
         Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
         if (token != null) {
-          tokenList.add(token);
-        }
+          tokenList = getTokensFiltered(Collections.singletonList(token), originalList, match);
+        } else if (!match) tokenList = originalList;
         break;
       case IMPERSONATED:
         Token t;
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null) t = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        if (guid != null) t = zone.getToken(guid);
         else t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
-        if (t != null) tokenList.add(t);
+        if (t != null) {
+          tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
+        } else if (!match) tokenList = originalList;
         break;
       case EXPOSED:
-        tokenList = zone.getTokensFiltered(new ExposedFilter(zone));
+        tokenList = getTokensFiltered(new ExposedFilter(zone, match), originalList);
         break;
       case STATE:
-        tokenList = zone.getTokensFiltered(new StateFilter(findArgs));
+        tokenList = getTokensFiltered(new StateFilter(findArgs, match), originalList);
         break;
-      case OWNED:
-        tokenList = zone.getTokensFiltered(new OwnedFilter(findArgs));
+      case OWNED: // for "getOwned" and "getOwnedNames" only. getTokens uses different code
+        tokenList = getTokensFiltered(new OwnedFilter(findArgs, match), originalList);
         break;
       case VISIBLE:
-        for (GUID id : zoneRenderer.getVisibleTokenSet()) {
-          tokenList.add(zone.getToken(id));
-        }
+        tokenList = getTokensFiltered(zoneRenderer.getVisibleTokens(), originalList, match);
+        break;
       case LAYER:
         // Layer check already performed and unneeded here
+        tokenList = originalList;
         break;
       default:
         // Should never get here, but if we do then another enum type was added and we didn't
@@ -631,22 +774,51 @@ public class FindTokenFunctions extends AbstractFunction {
     return tokenList;
   }
 
+  private static List<Token> getTokensFiltered(Zone.Filter filter, List<Token> originalList) {
+    List<Token> tokenList = new ArrayList<Token>(originalList.size());
+
+    for (Token token : originalList) {
+      if (filter.matchToken(token)) tokenList.add(token);
+    }
+    return tokenList;
+  }
+
+  private static List<Token> getTokensFiltered(
+      List<Token> editList, List<Token> originalList, boolean match) {
+    List<Token> tokenList = new ArrayList<Token>(originalList);
+
+    if (match) tokenList.retainAll(editList); // keep tokens in both lists
+    else tokenList.removeAll(editList); // remove edit list from original list
+    return tokenList;
+  }
+
   /**
-   * Gets the names or ids of the tokens on the current map.
+   * Gets the names or ids of the tokens on a map.
    *
    * @param parser The parser that called the function.
    * @param findType The type of tokens to find.
    * @param nameOnly If a list of names is wanted.
    * @param delim The delimiter to use for lists, or "json" for a json array.
    * @param findArgs Any arguments for the find function
+   * @param zoneRenderer the zone renderer, or null if using the current one
    * @return a string list that contains the ids or names of the tokens.
    * @throws ParserException if this code adds a new enum but doesn't properly handle it
    */
-  private String getTokens(
-      Parser parser, FindType findType, boolean nameOnly, String delim, String findArgs)
+  private static String getTokens(
+      Parser parser,
+      FindType findType,
+      boolean nameOnly,
+      String delim,
+      String findArgs,
+      ZoneRenderer zoneRenderer)
       throws ParserException {
     ArrayList<String> values = new ArrayList<String>();
-    List<Token> tokens = getTokenList(parser, findType, findArgs);
+    if (zoneRenderer == null) {
+      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    }
+    Zone zone = zoneRenderer.getZone();
+    List<Token> tokens =
+        getTokenList(parser, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
 
     if (tokens != null && !tokens.isEmpty()) {
       for (Token token : tokens) {
@@ -658,17 +830,22 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(values).toString();
+      JsonArray jsonArray = new JsonArray();
+      for (String val : values) {
+        jsonArray.add(val);
+      }
+      return jsonArray.toString();
     } else {
       return StringFunctions.getInstance().join(values, delim);
     }
   }
 
   /**
-   * Finds the specified token.
+   * Finds the specified token id.
    *
    * @param identifier the name of the token.
-   * @return the token.
+   * @param zoneName the name of the zone.
+   * @return the token Id, or a blank string if none found.
    */
   private String findTokenId(String identifier, String zoneName) {
     Token token = findToken(identifier, zoneName);
@@ -679,7 +856,8 @@ public class FindTokenFunctions extends AbstractFunction {
    * Finds the specified token.
    *
    * @param identifier the name of the token.
-   * @return the token.
+   * @param zoneName the name of the zone. If null, check current zone.
+   * @return the token, or null if none found.
    */
   public static Token findToken(String identifier, String zoneName) {
     if (zoneName == null || zoneName.length() == 0) {

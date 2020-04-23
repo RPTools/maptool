@@ -51,6 +51,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -62,19 +63,14 @@ import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.ImageManager;
 
-/** */
+/** Tool used for background and object tokens, and to resize a token in free size mode. */
 public class StampTool extends DefaultTool implements ZoneOverlay {
   private static BufferedImage resizeImage;
 
@@ -123,6 +119,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
             new LayerSelectionListener() {
+              @Override
               public void layerSelected(Layer layer) {
                 if (renderer != null) {
                   renderer.setActiveLayer(layer);
@@ -211,16 +208,24 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     dragOffsetY = 0;
   }
 
+  /**
+   * Set the tokenList, x, y, in the StackPanel, and isShowingTokenStackPupup to true
+   *
+   * @param tokenList to set
+   * @param x the x to set
+   * @param y the y to set
+   */
   private void showTokenStackPopup(List<Token> tokenList, int x, int y) {
     tokenStackPanel.show(tokenList, x, y);
     isShowingTokenStackPopup = true;
-    repaint();
   }
 
   private class TokenStackPanel {
     private static final int PADDING = 4;
 
     private List<Token> tokenList;
+
+    /** List of token locations, each containing a token and its bounds. */
     private final List<TokenLocation> tokenLocationList = new ArrayList<TokenLocation>();
 
     private int x;
@@ -238,6 +243,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           tokenList.size() * (gridSize + PADDING) + PADDING, gridSize + PADDING * 2);
     }
 
+    /**
+     * Does nothing
+     *
+     * @param event the mousevent
+     */
     public void handleMouseEvent(MouseEvent event) {
       // Nothing to do right now
     }
@@ -247,10 +257,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       for (TokenLocation location : tokenLocationList) {
         if (location.getBounds().contains(p.x, p.y)) {
           if (!AppUtil.playerOwns(location.getToken())) {
-            return;
+            return; //  drag not allowed
           }
           renderer.clearSelectedTokens();
           boolean selected = renderer.selectToken(location.getToken().getId());
+          renderer.updateAfterSelection();
 
           if (selected) {
             Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -359,20 +370,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // Stack
         renderer.clearSelectedTokens();
         showTokenStackPopup(tokenList, e.getX(), e.getY());
+        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = getTokenAt(e.getX(), e.getY());
-        if (token != null) {
-          EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-          tokenPropertiesDialog.showDialog(token);
-
-          if (tokenPropertiesDialog.isTokenSaved()) {
-            MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-            renderer.getZone().putToken(token);
-            renderer.repaint();
-            renderer.flush(token);
-          }
-        }
+        MapTool.getFrame().showTokenPropertiesDialog(token, renderer);
       }
       return;
     }
@@ -386,25 +388,36 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       if (!AppUtil.playerOwns(token)) {
         if (!SwingUtil.isShiftDown(e)) {
           renderer.clearSelectedTokens();
+          renderer.updateAfterSelection();
         }
         return;
       }
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
-        if (!renderer.getSelectedTokenSet().contains(token.getId()) && !SwingUtil.isShiftDown(e)) {
+        if (SwingUtil.isShiftDown(e)) {
+          // if shift, we invert the selection of the token
+          if (renderer.getSelectedTokenSet().contains(token.getId())) {
+            renderer.deselectToken(token.getId());
+          } else {
+            renderer.selectToken(token.getId());
+          }
+          renderer.updateAfterSelection();
+        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+          // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
           renderer.clearSelectedTokens();
-        }
-        if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
-          renderer.deselectToken(token.getId());
-        } else {
           renderer.selectToken(token.getId());
+          renderer.updateAfterSelection();
         }
-        // Dragging offset for currently selected token
+        // Position on the zone of the click
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        dragOffsetX = pos.x - token.getX();
-        dragOffsetY = pos.y - token.getY();
+
+        // Offset specific to the token
+        Point tokenOffset = token.getDragOffset(getZone());
+
+        dragOffsetX = pos.x - tokenOffset.x;
+        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -457,6 +470,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               renderer.clearSelectedTokens();
             }
             renderer.selectTokens(selectionBoundBox);
+            renderer.updateAfterSelection();
           }
 
           selectionBoundBox = null;
@@ -467,18 +481,16 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // DRAG TOKEN COMPLETE
         if (isDraggingToken) {
           stopTokenDrag();
-        }
-
-        // SELECT SINGLE TOKEN
-        Token token = getTokenAt(e.getX(), e.getY());
-        if (token != null
-            && SwingUtilities.isLeftMouseButton(e)
-            && !isDraggingToken
-            && !SwingUtil.isShiftDown(e)) {
-          // Only if it isn't already being moved
-          if (!renderer.isTokenMoving(token)) {
-            renderer.clearSelectedTokens();
-            renderer.selectToken(token.getId());
+        } else {
+          // IF SELECTING MULTIPLE, SELECT SINGLE TOKEN
+          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
+            Token token = getTokenAt(e.getX(), e.getY());
+            // Only if it isn't already being moved
+            if (renderer.isSubsetSelected(token) && !renderer.isTokenMoving(token)) {
+              renderer.clearSelectedTokens();
+              renderer.selectToken(token.getId());
+              renderer.updateAfterSelection();
+            }
           }
         }
       } finally {
@@ -495,6 +507,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           renderer.clearSelectedTokens();
         }
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && renderer.getSelectedTokenSet().size() > 0) {
@@ -648,7 +661,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
       if (SwingUtil.isControlDown(e)
           && tokenBeingResized.isSnapToGrid()
-          && tokenBeingResized.isObjectStamp()) {
+          && !tokenBeingResized.isBackgroundStamp()) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();
@@ -778,9 +791,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         return;
       }
 
-      if (isNewTokenSelected) {
+      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
         renderer.clearSelectedTokens();
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
       }
 
       isNewTokenSelected = false;
@@ -830,7 +844,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint) {
     // TODO: Optimize this (combine with calling code)
-    if (tokenBeingDragged.isSnapToGrid()) {
+    if (tokenBeingDragged.isSnapToGrid()
+        && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
       zonePoint.translate(-dragOffsetX, -dragOffsetY);
       CellPoint cellUnderMouse = renderer.getZone().getGrid().convert(zonePoint);
       zonePoint = renderer.getZone().getGrid().convert(cellUnderMouse);
@@ -862,6 +877,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             if (renderer.getSelectedTokenSet().isEmpty()) {
               return;
@@ -879,6 +895,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_D, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             if (!isDraggingToken) {
               return;
@@ -890,6 +907,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             if (!isDraggingToken) {
               return;
@@ -903,6 +921,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, false);
           }
@@ -910,6 +929,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, false);
           }
@@ -917,6 +937,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, false);
           }
@@ -924,6 +945,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, false);
           }
@@ -931,6 +953,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, -1, false);
           }
@@ -938,6 +961,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, -1, false);
           }
@@ -945,6 +969,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 1, false);
           }
@@ -952,6 +977,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 1, false);
           }
@@ -960,6 +986,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, true);
           }
@@ -967,6 +994,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, true);
           }
@@ -974,6 +1002,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, true);
           }
@@ -981,6 +1010,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, true);
           }
@@ -988,6 +1018,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, -1, true);
           }
@@ -995,6 +1026,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, -1, true);
           }
@@ -1002,6 +1034,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 1, true);
           }
@@ -1009,6 +1042,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 1, true);
           }
@@ -1016,6 +1050,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_T, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             cycleSelectedToken(1);
           }
@@ -1023,6 +1058,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.SHIFT_DOWN_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             cycleSelectedToken(-1);
           }
@@ -1030,6 +1066,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, false);
           }
@@ -1037,6 +1074,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, false);
           }
@@ -1044,6 +1082,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, false);
           }
@@ -1051,6 +1090,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, false);
           }
@@ -1058,6 +1098,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, true);
           }
@@ -1065,6 +1106,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, true);
           }
@@ -1072,6 +1114,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, true);
           }
@@ -1079,6 +1122,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK),
         new AbstractAction() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, true);
           }
@@ -1117,6 +1161,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     // Make the selection
     renderer.clearSelectedTokens();
     renderer.selectToken(visibleTokens.get(newSelection).getId());
+    renderer.updateAfterSelection();
   }
 
   private void handleKeyMove(int dx, int dy, boolean micro) {
@@ -1173,6 +1218,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
    *
    * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
    */
+  @Override
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (selectionBoundBox != null) {
       if (renderer.isAutoResizeStamp()) {
@@ -1205,18 +1251,19 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         Stroke stroke = g.getStroke();
         g.setStroke(new BasicStroke(2));
 
-        Composite composite = g.getComposite();
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
-        g.setPaint(AppStyle.selectionBoxFill);
-        g.fillRoundRect(
-            selectionBoundBox.x,
-            selectionBoundBox.y,
-            selectionBoundBox.width,
-            selectionBoundBox.height,
-            10,
-            10);
-        g.setComposite(composite);
-
+        if (AppPreferences.getFillSelectionBox()) {
+          Composite composite = g.getComposite();
+          g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
+          g.setPaint(AppStyle.selectionBoxFill);
+          g.fillRoundRect(
+              selectionBoundBox.x,
+              selectionBoundBox.y,
+              selectionBoundBox.width,
+              selectionBoundBox.height,
+              10,
+              10);
+          g.setComposite(composite);
+        }
         g.setColor(AppStyle.selectionBoxOutline);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawRoundRect(

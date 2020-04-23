@@ -58,6 +58,7 @@ public class ImageManager {
    */
   private static final String UNKNOWN_IMAGE_PNG = "net/rptools/maptool/client/image/unknown.png";
 
+  /** The buffered "?" image to display while transferring the image. */
   public static BufferedImage TRANSFERING_IMAGE;
 
   /** The broken image, a "X" is used for all situations where the asset or image was invalid. */
@@ -107,7 +108,7 @@ public class ImageManager {
   /**
    * Loads the asset's raw image data into a buffered image, and waits for the image to load.
    *
-   * @param asset Load image data from this asset
+   * @param assetId Load image data from this asset
    * @return BufferedImage Return the loaded image
    */
   public static BufferedImage getImageAndWait(MD5Key assetId) {
@@ -131,7 +132,7 @@ public class ImageManager {
   /**
    * Loads the asset's raw image data into a buffered image, and waits for the image to load.
    *
-   * @param asset Load image data from this asset
+   * @param assetId Load image data from this asset
    * @param hintMap Hints used when loading the image
    * @return BufferedImage Return the loaded image
    */
@@ -171,10 +172,25 @@ public class ImageManager {
     return image;
   }
 
+  /**
+   * Return the image corresponding to the assetId.
+   *
+   * @param assetId Load image data from this asset.
+   * @param observers the observers to be notified when the image loads, if it hasn't already.
+   * @return the image, or BROKEN_IMAGE if assetId null, or TRANSFERING_IMAGE if loading.
+   */
   public static BufferedImage getImage(MD5Key assetId, ImageObserver... observers) {
     return getImage(assetId, null, observers);
   }
 
+  /**
+   * Return the image corresponding to the assetId.
+   *
+   * @param assetId Load image data from this asset.
+   * @param hints hints used when loading image data, if it isn't in the imageMap already.
+   * @param observers the observers to be notified when the image loads, if it hasn't already.
+   * @return the image, or BROKEN_IMAGE if assetId null, or TRANSFERING_IMAGE if loading.
+   */
   public static BufferedImage getImage(
       MD5Key assetId, Map<String, Object> hints, ImageObserver... observers) {
     if (assetId == null) {
@@ -225,7 +241,6 @@ public class ImageManager {
    * completed loading.
    *
    * @param assetId Waiting for this asset to load
-   * @param hints Load the asset image with these hints
    * @param observers Observers to be notified
    */
   public static void addObservers(MD5Key assetId, ImageObserver... observers) {
@@ -287,7 +302,9 @@ public class ImageManager {
         try {
           assert asset.getImage() != null
               : "asset.getImage() for " + asset.toString() + "returns null?!";
-          image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
+          image =
+              ImageUtil.createCompatibleImage(
+                  ImageUtil.bytesToImage(asset.getImage(), asset.getName()), hints);
         } catch (Throwable t) {
           log.error(
               "BackgroundImageLoader.run("

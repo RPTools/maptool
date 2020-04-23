@@ -15,22 +15,55 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import javax.swing.*;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JToggleButton;
 import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.*;
+import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppSetup;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MRUCampaignManager;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
 public class AppMenuBar extends JMenuBar {
+  /** The manager of the Most Recently Used campaigns. */
   private static MRUCampaignManager mruManager;
+
+  /** The menu for the overlays. */
+  private static JMenu overlayMenu;
+
+  /** The map containing the overlay items. */
+  private static final Map<String, JCheckBoxMenuItem> overlayItems = new HashMap<>();
 
   public AppMenuBar() {
     add(createFileMenu());
@@ -39,16 +72,27 @@ public class AppMenuBar extends JMenuBar {
     add(createViewMenu());
     add(createToolsMenu());
     add(createWindowMenu());
+    Map<String, File> themes = AppUtil.getUIThemeNames();
+    if (themes.size() > 0) {
+      add(createThemesMenu(themes));
+    }
     add(createHelpMenu());
+    // shift to the right
+    add(Box.createGlue());
+
+    add(
+        createMinimizeButton(
+            "net/rptools/maptool/client/image/tool/downArrow.png",
+            "net/rptools/maptool/client/image/tool/upArrow.png",
+            I18N.getText("tools.hidetoolbar.tooltip"),
+            I18N.getText("tools.unhidetoolbar.tooltip")));
   }
 
   // This is a hack to allow the menubar shortcut keys to still work even
   // when it isn't showing (fullscreen mode)
   @Override
   public boolean isShowing() {
-    return MapTool.getFrame() != null && MapTool.getFrame().isFullScreen()
-        ? true
-        : super.isShowing();
+    return MapTool.getFrame() != null && MapTool.getFrame().isFullScreen() || super.isShowing();
   }
 
   protected JMenu createFileMenu() {
@@ -101,6 +145,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(createQuickMapMenu());
     menu.add(new JMenuItem(AppActions.LOAD_MAP));
     menu.add(new JMenuItem(AppActions.SAVE_MAP_AS));
+    menu.add(new JMenuItem(AppActions.IMPORT_DUNGEON_DRAFT_MAP));
     menu.addSeparator();
 
     // MAP TOGGLES
@@ -117,11 +162,12 @@ public class AppMenuBar extends JMenuBar {
           public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) fowRevealToggleMenuItem.setEnabled(true);
             else {
-              MapTool.getFrame()
-                  .getCurrentZoneRenderer()
-                  .getZone()
-                  .setWaypointExposureToggle(false);
-              fowRevealToggleMenuItem.setEnabled(false);
+              ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+              // Check in case no map exists. Fix #1572.
+              if (zr != null) {
+                zr.getZone().setWaypointExposureToggle(false);
+                fowRevealToggleMenuItem.setEnabled(false);
+              }
             }
           }
         });
@@ -164,6 +210,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new JMenuItem(AppActions.ENFORCE_ZONE));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LINK_PLAYER_VIEW, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_MOVEMENT_LOCK, menu));
+    menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_TOKEN_EDITOR_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ZOOM_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ENFORCE_NOTIFICATION, menu));
 
@@ -171,6 +218,9 @@ public class AppMenuBar extends JMenuBar {
 
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_COLLECT_PROFILING_DATA, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LOG_CONSOLE, menu));
+
+    menu.addSeparator();
+    menu.add(new JCheckBoxMenuItem(AppActions.SHOW_MACRO_EDITOR));
 
     return menu;
   }
@@ -206,8 +256,11 @@ public class AppMenuBar extends JMenuBar {
     menu.add(createZoomMenu());
     menu.add(new JMenuItem(AppActions.TOGGLE_SHOW_TOKEN_NAMES));
 
-    JCheckBoxMenuItem item =
-        new RPCheckBoxMenuItem(AppActions.TOGGLE_SHOW_MOVEMENT_MEASUREMENTS, menu);
+    JCheckBoxMenuItem item = new RPCheckBoxMenuItem(AppActions.TOGGLE_SHOW_TEXT_LABELS, menu);
+    item.setSelected(AppState.getShowTextLabels());
+    menu.add(item);
+
+    item = new RPCheckBoxMenuItem(AppActions.TOGGLE_SHOW_MOVEMENT_MEASUREMENTS, menu);
     item.setSelected(AppState.getShowMovementMeasurements());
     menu.add(item);
 
@@ -281,8 +334,46 @@ public class AppMenuBar extends JMenuBar {
   }
 
   /**
+   * Creates a minimize button that can hide the toolbar
+   *
+   * @param icon the icon when the toolbar is hidden
+   * @param offIcon the icon when the toolbar is showing
+   * @param hidetooltip the tooltip when the toolbar is showing
+   * @param unhidetooltip the tooltip when the toolbar is hidden
+   * @return the JToggleButton
+   */
+  protected JToggleButton createMinimizeButton(
+      final String icon, final String offIcon, String hidetooltip, String unhidetooltip) {
+    final JToggleButton button = new JToggleButton();
+    try {
+      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage((icon))));
+      button.setIcon(new ImageIcon(ImageUtil.getImage((offIcon))));
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+    button.setOpaque(false);
+    button.setContentAreaFilled(false);
+    button.setBorderPainted(false);
+    button.setToolTipText(hidetooltip);
+    button.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            ToolbarPanel toolbarPanel = MapTool.getFrame().getToolbarPanel();
+            if (button.isSelected()) {
+              button.setToolTipText(unhidetooltip);
+              toolbarPanel.setVisible(false);
+            } else {
+              button.setToolTipText(hidetooltip);
+              toolbarPanel.setVisible(true);
+            }
+          }
+        });
+    return button;
+  }
+
+  /**
    * Builds the help menu. This menu contains a block of special url items. These items are
-   * populated from {@link I18N#getUrlActionKeys()}.
+   * populated from {@link I18N#getMatchingKeys}.
    *
    * @return the help menu
    */
@@ -337,22 +428,68 @@ public class AppMenuBar extends JMenuBar {
     return menu;
   }
 
+  /** @return an overlay menu. */
+  protected JMenu createOverlayMenu() {
+    overlayMenu = I18N.createMenu("menu.overlay");
+    overlayMenu.setEnabled(false); // empty by default
+    return overlayMenu;
+  }
+
+  /**
+   * Creates and add an overlay toggle menu item based on a overlayManager.
+   *
+   * @param overlayManager the overlayManager correspond to the overlay to toggle
+   */
+  public static void addToOverlayMenu(HTMLOverlayManager overlayManager) {
+    JCheckBoxMenuItem menuItem =
+        new RPCheckBoxMenuItem(new AppActions.ToggleOverlayAction(overlayManager), overlayMenu);
+    menuItem.setText(overlayManager.getName());
+    overlayMenu.add(menuItem);
+    overlayMenu.setEnabled(true);
+    overlayItems.put(overlayManager.getName(), menuItem);
+  }
+
+  /**
+   * Removes an overlay menu item based on its name.
+   *
+   * @param overlayName the name of the overlay
+   */
+  public static void removeFromOverlayMenu(String overlayName) {
+    JCheckBoxMenuItem menuItem = overlayItems.get(overlayName);
+    if (menuItem != null) {
+      overlayItems.remove(overlayName);
+      overlayMenu.remove(menuItem);
+    }
+    if (overlayItems.isEmpty()) {
+      overlayMenu.setEnabled(false);
+    }
+  }
+
   protected JMenu createWindowMenu() {
     JMenu menu = I18N.createMenu("menu.window");
+
+    menu.add(createOverlayMenu());
+
+    menu.addSeparator();
 
     menu.add(
         new AbstractAction() {
           {
             putValue(Action.NAME, I18N.getText("msg.info.restoreLayout"));
+            putValue(Action.SHORT_DESCRIPTION, I18N.getText("msg.info.restoreLayout.description"));
           }
 
           public void actionPerformed(ActionEvent e) {
             MapTool.getFrame().getDockingManager().resetToDefault();
           }
         });
+
     menu.addSeparator();
 
-    for (MTFrame frame : MapToolFrame.MTFrame.values()) {
+    for (MTFrame frame :
+        Stream.of(MTFrame.values())
+            .sorted(Comparator.comparing(MTFrame::toString))
+            .collect(Collectors.toList())) {
       JCheckBoxMenuItem menuItem =
           new RPCheckBoxMenuItem(new AppActions.ToggleWindowAction(frame), menu);
       menu.add(menuItem);
@@ -360,9 +497,26 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
 
-    menu.addSeparator();
-    menu.add(new JCheckBoxMenuItem(AppActions.SHOW_MACRO_EDITOR));
+    return menu;
+  }
 
+  private JMenu createThemesMenu(Map<String, File> themes) {
+    JMenu menu = I18N.createMenu("menu.themes");
+
+    for (Entry<String, File> theme : themes.entrySet()) {
+      menu.add(
+          new AbstractAction() {
+            {
+              putValue(Action.NAME, theme.getKey());
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              AppUtil.setThemeName(theme.getKey());
+              MapTool.showInformation(I18N.getText("msg.theme.needrestart"));
+            }
+          });
+    }
     return menu;
   }
 
