@@ -19,7 +19,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
@@ -102,8 +101,8 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public Point getCenterOffset() {
-    return new Point((int) getCellWidth() / 2, (int) getCellHeight() / 2);
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
   }
 
   public SquareGrid(boolean faceEdges, boolean faceVertices) {
