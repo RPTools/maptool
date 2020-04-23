@@ -492,9 +492,8 @@ public class MacroFunctions extends AbstractFunction {
     mbp.setLabel(label);
     mbp.setSaveLocation("Token");
     mbp.setTokenId(token);
-    mbp.save();
 
-    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
     return BigDecimal.valueOf(mbp.getIndex());
   }
 
@@ -524,8 +523,9 @@ public class MacroFunctions extends AbstractFunction {
             I18N.getText(KEY_NO_PERM, "setMacroProps", index, token.getName()));
       }
       setMacroProps(mbp, props, delim);
-      mbp.save();
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
     } else {
+      List<MacroButtonProperties> mbpList = new ArrayList<>();
       for (MacroButtonProperties mbp : token.getMacroList(false)) {
         if (mbp.getLabel().equals(value.toString())) {
           if (!mbp.getAllowPlayerEdits() && !MapTool.getParser().isMacroTrusted()) {
@@ -535,12 +535,14 @@ public class MacroFunctions extends AbstractFunction {
                 I18N.getText(KEY_NO_PERM_OTHER, "setMacroProps", label, index, token.getName()));
           } else {
             setMacroProps(mbp, props, delim);
-            mbp.save();
+            mbpList.add(mbp);
           }
         }
       }
+      // Replaces the matching macros with the new versions
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.saveMacroList, mbpList, false);
     }
-    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
     return "";
   }
 
@@ -561,8 +563,7 @@ public class MacroFunctions extends AbstractFunction {
           I18N.getText(KEY_OUT_OF_RANGE, "setMacroCommand", index, token.getName()));
     }
     mbp.setCommand(command);
-    mbp.save();
-    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
     return "";
   }
 
@@ -583,7 +584,7 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     String label = mbp.getLabel();
-    token.deleteMacroButtonProperty(mbp);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
     return "Removed macro button " + label + "(index = " + index + ") from " + token.getName();
   }
 

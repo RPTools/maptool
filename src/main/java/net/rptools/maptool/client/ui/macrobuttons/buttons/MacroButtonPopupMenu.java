@@ -173,6 +173,7 @@ public class MacroButtonPopupMenu extends JPopupMenu {
   }
 
   private class DeleteButtonAction extends AbstractAction {
+    /** Adds the "Delete..." button. */
     public DeleteButtonAction() {
       putValue(Action.NAME, I18N.getText("action.macro.delete"));
     }
@@ -213,19 +214,26 @@ public class MacroButtonPopupMenu extends JPopupMenu {
                       MapTool.getPlayer().isGM()
                           || (!MapTool.getPlayer().isGM() && nextMacro.getAllowPlayerEdits());
                   if (!hashCodesMatch || !allowDelete) {
+                    // Keeps macros that can't be deleted or don't match the button
                     workingMacros.add(nextMacro);
                   }
                 }
-                nextToken.replaceMacroList(workingMacros);
+                // Updates the client macros. Fixes #1657.
+                MapTool.serverCommand()
+                    .updateTokenProperty(
+                        nextToken, Token.Update.saveMacroList, workingMacros, true);
               }
             }
           } else {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
-          MapTool.getFrame().getSelectionPanel().reset();
         } else if (button.getToken() != null) {
           if (AppUtil.playerOwns(button.getToken())) {
-            button.getToken().deleteMacroButtonProperty(button.getProperties());
+            int index = button.getProperties().getIndex();
+            Token token = button.getToken();
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
           }
         }
       }

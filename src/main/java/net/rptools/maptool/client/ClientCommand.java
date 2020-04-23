@@ -30,6 +30,7 @@ public class ClientCommand {
     putToken,
     updateTokenProperty,
     removeToken,
+    removeTokens,
     draw,
     clearAllDrawings,
     updateDrawing,

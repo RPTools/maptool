@@ -85,7 +85,9 @@ public class Zone extends BaseModel {
     LABEL_CHANGED,
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED
+    BOARD_CHANGED,
+    TOKEN_MACRO_CHANGED, // a token macro changed
+    TOKEN_PANEL_CHANGED // the panel appearance changed
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
@@ -816,6 +818,24 @@ public class Zone extends BaseModel {
   }
 
   /**
+   * Fire the event TOKEN_MACRO_CHANGED.
+   *
+   * @param token the token that had its macro changed
+   */
+  public void tokenMacroChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_MACRO_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_PANEL_CHANGED.
+   *
+   * @param token the token that had its panel appearance changed
+   */
+  public void tokenPanelChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_PANEL_CHANGED, token));
+  }
+
+  /**
    * Clears the global exposed area. Can also clear the exposed area for ALL tokens, including NPC's
    *
    * @param globalOnly should the exposed area of all tokens be also cleared?
@@ -1356,11 +1376,37 @@ public class Zone extends BaseModel {
     }
   }
 
+  /**
+   * Removes a token, and fires Event.TOKEN_REMOVED.
+   *
+   * @param id the id of the token
+   */
   public void removeToken(GUID id) {
     Token token = tokenMap.remove(id);
     if (token != null) {
       tokenOrderedList.remove(token);
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, token));
+    }
+  }
+
+  /**
+   * Removes multiple token, and fires Event.TOKEN_REMOVED once.
+   *
+   * @param ids the list of ids of the tokens
+   */
+  public void removeTokens(List<GUID> ids) {
+    List<Token> removedTokens = new ArrayList<>();
+    if (ids != null) {
+      for (GUID id : ids) {
+        Token token = tokenMap.remove(id);
+        if (token != null) {
+          tokenOrderedList.remove(token);
+          removedTokens.add(token);
+        }
+      }
+      if (!removedTokens.isEmpty()) {
+        fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, removedTokens));
+      }
     }
   }
 

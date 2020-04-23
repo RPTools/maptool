@@ -321,58 +321,8 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (!MapTool.confirmTokenDelete()) {
                   return;
                 }
-                Token firstToken = null;
-                Set<GUID> selectedTokenSet = new HashSet<GUID>();
-                for (TreePath path : tree.getSelectionPaths()) {
-                  if (path.getLastPathComponent() instanceof Token) {
-                    Token token = (Token) path.getLastPathComponent();
-                    if (firstToken == null) {
-                      firstToken = token;
-                    }
-                    if (AppUtil.playerOwns(token)) {
-                      selectedTokenSet.add(token.getId());
-                    }
-                  }
-                }
-
-                boolean unhideImpersonated = false;
-                boolean unhideSelected = false;
-                if (getCurrentZoneRenderer().getSelectedTokenSet().size() > 10) {
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden()
-                      == false) {
-                    unhideImpersonated = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                  }
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden()
-                      == false) {
-                    unhideSelected = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
-                  }
-                }
-                for (GUID tokenGUID : selectedTokenSet) {
-                  Token token = getCurrentZoneRenderer().getZone().getToken(tokenGUID);
-
-                  if (AppUtil.playerOwns(token)) {
-                    getCurrentZoneRenderer().getZone().removeToken(tokenGUID);
-                    MapTool.serverCommand()
-                        .removeToken(getCurrentZoneRenderer().getZone().getId(), tokenGUID);
-                  }
-                }
-                if (unhideImpersonated) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                }
-
-                if (unhideSelected) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.SELECTION.name());
-                }
+                ZoneRenderer zr = getCurrentZoneRenderer();
+                AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
               }
             });
       }
@@ -1629,11 +1579,13 @@ public class MapToolFrame extends DefaultDockableHolder
     if (renderer != null && !zoneRendererList.contains(renderer)) {
       zoneRendererList.add(renderer);
     }
+    Zone oldZone = null;
     if (currentRenderer != null) {
       // Check if the zone still exists. Fix #1568
       if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
         stopTokenDrag(); // if a token is being dragged, stop the drag
       }
+      oldZone = currentRenderer.getZone();
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
@@ -1647,8 +1599,9 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbox.setTargetRenderer(renderer);
 
     if (renderer != null) {
+      // Previous zone must be passed for the listeners to be properly removed. Fix #1670.
       MapTool.getEventDispatcher()
-          .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
+          .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
