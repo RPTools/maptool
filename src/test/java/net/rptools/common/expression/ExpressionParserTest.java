@@ -19,7 +19,6 @@ import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
-import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
 public class ExpressionParserTest extends TestCase {
