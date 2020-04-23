@@ -18,7 +18,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -101,8 +100,8 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public Point getCenterOffset() {
-    return new Point(0, (int) getCellHeight() / 2);
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, getCellHeight() / 2);
   }
 
   public double getCellWidthHalf() {
