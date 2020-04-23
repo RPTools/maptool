@@ -2075,7 +2075,7 @@ public class MapToolFrame extends DefaultDockableHolder
       saveTableFileChooser = new JFileChooser();
       saveTableFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
       saveTableFileChooser.addChoosableFileFilter(tableFilter);
-      saveTableFileChooser.setDialogTitle("Export Table");
+      saveTableFileChooser.setDialogTitle(I18N.getText("Label.table.export"));
     }
     saveTableFileChooser.setAcceptAllFileFilterUsed(true);
     return saveTableFileChooser;
@@ -2089,7 +2089,7 @@ public class MapToolFrame extends DefaultDockableHolder
       loadTableFileChooser = new JFileChooser();
       loadTableFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
       loadTableFileChooser.addChoosableFileFilter(tableFilter);
-      loadTableFileChooser.setDialogTitle("Import Table");
+      loadTableFileChooser.setDialogTitle(I18N.getText("Label.table.import"));
     }
     loadTableFileChooser.setFileFilter(tableFilter);
     return loadTableFileChooser;
