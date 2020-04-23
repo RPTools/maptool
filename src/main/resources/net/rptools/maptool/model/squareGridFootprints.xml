@@ -16,80 +16,89 @@
       <cellSet/>
       <name>Fine</name>
       <id>
-        <baGUID>fwABAc1lFSoBAAAAKgABAQ==</baGUID>
+        <baGUID>x3T4ePmKTECX7nHwg4NlPA==</baGUID>
       </id>
+      <isDefault>false</isDefault>
       <scale>0.5</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
       <name>Diminutive</name>
       <id>
-        <baGUID>fwABAc1lFSoCAAAAKgABAQ==</baGUID>
+        <baGUID>uw+DKfi9QlGZ7S3RUhlXIQ==</baGUID>
       </id>
+      <isDefault>false</isDefault>
       <scale>0.5</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
       <name>Tiny</name>
       <id>
-        <baGUID>fwABAc5lFSoDAAAAKgABAA==</baGUID>
+        <baGUID>hOHPGQMbQySliL5tJxjVow==</baGUID>
       </id>
+      <isDefault>false</isDefault>
       <scale>0.5</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
       <name>Small</name>
       <id>
-        <baGUID>fwABAc5lFSoEAAAAKgABAA==</baGUID>
+        <baGUID>GdAIbe1rQhGOPGxkQard+g==</baGUID>
       </id>
+      <isDefault>false</isDefault>
       <scale>0.75</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
       <name>Medium</name>
       <id>
-        <baGUID>fwABAc9lFSoFAAAAKgABAQ==</baGUID>
+        <baGUID>djLnNrpmT/mtic6UWrosXA==</baGUID>
       </id>
-      <scale>1</scale>
       <isDefault>true</isDefault>
+      <scale>1.0</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
-        <java.awt.Point>
-          <x>1</x>
-          <y>1</y>
-        </java.awt.Point>
         <java.awt.Point>
           <x>1</x>
           <y>0</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
           <y>1</y>
         </java.awt.Point>
       </cellSet>
       <name>Large</name>
       <id>
-        <baGUID>fwABAdBlFSoGAAAAKgABAA==</baGUID>
+        <baGUID>ElV+IsLXSf2p0cU48MKWTQ==</baGUID>
       </id>
-      <scale>1</scale>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
         <java.awt.Point>
-          <x>2</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
           <x>1</x>
-          <y>2</y>
+          <y>0</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
           <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
           <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
@@ -97,71 +106,44 @@
           <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
-          <x>2</x>
-          <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
           <x>1</x>
-          <y>0</y>
+          <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
-          <x>0</x>
-          <y>1</y>
+          <x>2</x>
+          <y>2</y>
         </java.awt.Point>
       </cellSet>
       <name>Huge</name>
       <id>
-        <baGUID>fwABAdBlFSoHAAAAKgABAA==</baGUID>
+        <baGUID>8OZKI+aTQ9itWI/sdD7BpA==</baGUID>
       </id>
-      <scale>1</scale>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
         <java.awt.Point>
-          <x>3</x>
-          <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
           <x>2</x>
           <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>1</x>
-          <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>2</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>0</x>
-          <y>3</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>3</x>
-          <y>3</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>1</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>2</x>
-          <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>1</x>
           <y>1</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>2</x>
-          <y>3</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>0</x>
           <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
           <x>3</x>
           <y>2</y>
         </java.awt.Point>
@@ -170,73 +152,58 @@
           <y>3</y>
         </java.awt.Point>
         <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
           <x>0</x>
           <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
           <x>3</x>
           <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
         </java.awt.Point>
       </cellSet>
       <name>Gargantuan</name>
       <id>
-        <baGUID>fwABAdFlFSoIAAAAKgABAQ==</baGUID>
+        <baGUID>aWMVJcYTRX2zn1vSP1eXpw==</baGUID>
       </id>
-      <scale>1</scale>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
         <java.awt.Point>
           <x>2</x>
-          <y>4</y>
+          <y>0</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>4</x>
           <y>1</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>3</x>
-          <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>1</x>
-          <y>4</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>5</x>
-          <y>5</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>4</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>5</x>
-          <y>1</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>4</x>
-          <y>5</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>5</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>2</x>
-          <y>0</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>0</x>
-          <y>4</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>3</x>
-          <y>4</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>1</x>
-          <y>0</y>
+          <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>2</x>
@@ -244,10 +211,42 @@
         </java.awt.Point>
         <java.awt.Point>
           <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
           <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
           <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
           <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
@@ -255,7 +254,113 @@
           <y>4</y>
         </java.awt.Point>
         <java.awt.Point>
+          <x>4</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
           <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+      </cellSet>
+      <name>5x5 squares</name>
+      <id>
+        <baGUID>YhEscXK3TdyztaPgGwhYLA==</baGUID>
+      </id>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
+    </net.rptools.maptool.model.TokenFootprint>
+    <net.rptools.maptool.model.TokenFootprint>
+      <cellSet>
+        <java.awt.Point>
+          <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
           <y>1</y>
         </java.awt.Point>
         <java.awt.Point>
@@ -263,44 +368,20 @@
           <y>5</y>
         </java.awt.Point>
         <java.awt.Point>
-          <x>2</x>
-          <y>5</y>
+          <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>4</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>5</x>
           <y>4</y>
         </java.awt.Point>
         <java.awt.Point>
-          <x>0</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>3</x>
-          <y>2</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>0</x>
-          <y>1</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>3</x>
-          <y>1</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>4</x>
-          <y>0</y>
-        </java.awt.Point>
-        <java.awt.Point>
           <x>3</x>
           <y>5</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>0</x>
-          <y>5</y>
-        </java.awt.Point>
-        <java.awt.Point>
-          <x>5</x>
-          <y>0</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>4</x>
@@ -312,10 +393,34 @@
         </java.awt.Point>
         <java.awt.Point>
           <x>0</x>
-          <y>3</y>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
         </java.awt.Point>
         <java.awt.Point>
           <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
           <y>3</y>
         </java.awt.Point>
         <java.awt.Point>
@@ -323,15 +428,1224 @@
           <y>3</y>
         </java.awt.Point>
         <java.awt.Point>
-          <x>1</x>
-          <y>3</y>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>5</y>
         </java.awt.Point>
       </cellSet>
       <name>Colossal</name>
       <id>
-        <baGUID>fwABAeFlFSoJAAAAKgABAQ==</baGUID>
+        <baGUID>fMf8quqGSV+Jl+KWjOpT/g==</baGUID>
       </id>
-      <scale>1</scale>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
+    </net.rptools.maptool.model.TokenFootprint>
+    <net.rptools.maptool.model.TokenFootprint>
+      <cellSet>
+        <java.awt.Point>
+          <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>6</y>
+        </java.awt.Point>
+      </cellSet>
+      <name>7x7 squares</name>
+      <id>
+        <baGUID>AL76yj6DR3mG2thrrmHoJw==</baGUID>
+      </id>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
+    </net.rptools.maptool.model.TokenFootprint>
+    <net.rptools.maptool.model.TokenFootprint>
+      <cellSet>
+        <java.awt.Point>
+          <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>7</y>
+        </java.awt.Point>
+      </cellSet>
+      <name>8x8 squares</name>
+      <id>
+        <baGUID>RYPbjX0YR9+PVse7/KTenQ==</baGUID>
+      </id>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
+    </net.rptools.maptool.model.TokenFootprint>
+    <net.rptools.maptool.model.TokenFootprint>
+      <cellSet>
+        <java.awt.Point>
+          <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>8</y>
+        </java.awt.Point>
+      </cellSet>
+      <name>9x9 squares</name>
+      <id>
+        <baGUID>GqPVkNlcQdSi0ovXWMWfyw==</baGUID>
+      </id>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
+    </net.rptools.maptool.model.TokenFootprint>
+    <net.rptools.maptool.model.TokenFootprint>
+      <cellSet>
+        <java.awt.Point>
+          <x>2</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>7</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>5</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>8</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>9</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>1</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>9</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>2</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>1</x>
+          <y>0</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>0</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>2</x>
+          <y>3</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>3</x>
+          <y>4</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>4</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>6</x>
+          <y>8</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>5</x>
+          <y>6</y>
+        </java.awt.Point>
+        <java.awt.Point>
+          <x>7</x>
+          <y>8</y>
+        </java.awt.Point>
+      </cellSet>
+      <name>10x10 squares</name>
+      <id>
+        <baGUID>Pn+kvQeOTiqduj1EgC+cSQ==</baGUID>
+      </id>
+      <isDefault>false</isDefault>
+      <scale>1.0</scale>
     </net.rptools.maptool.model.TokenFootprint>
   </a>
 </java.util.Arrays_-ArrayList>
