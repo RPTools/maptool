@@ -181,7 +181,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static PersistedMap loadMap(File mapFile) {
+  public static PersistedMap loadMap(File mapFile) throws IOException {
     PersistedMap persistedMap = null;
 
     // TODO: split in a try with resources and a try/catch
@@ -216,13 +216,13 @@ public class PersistenceUtil {
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
-        MapTool.showWarning(
+        throw new IOException(
             I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
     } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.mapVersion", ce);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapVersion"), ce);
     } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.mapRead", ioe);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapRead"), ioe);
     }
     return persistedMap;
   }

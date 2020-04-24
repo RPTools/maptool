@@ -605,7 +605,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    protected void executeAction(ActionEvent e) {
+    protected void executeAction() {
       if (replaceDialog.isVisible()) {
         replaceDialog.setVisible(false);
       }
@@ -624,7 +624,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    protected void executeAction(ActionEvent e) {
+    protected void executeAction() {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
@@ -640,7 +640,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     @Override
-    protected void executeAction(ActionEvent e) {
+    protected void executeAction() {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
