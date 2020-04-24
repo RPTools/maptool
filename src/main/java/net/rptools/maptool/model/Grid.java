@@ -237,7 +237,7 @@ public abstract class Grid implements Cloneable {
   }
 
   /** @return the difference in pixels between the center of a cell and its converted zonepoint. */
-  public abstract Point getCenterOffset();
+  public abstract Point2D.Double getCenterOffset();
 
   /**
    * @return The offset required to translate from the center of a cell to the top right (x_min,

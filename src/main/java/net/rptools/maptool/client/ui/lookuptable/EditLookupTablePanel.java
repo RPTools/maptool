@@ -291,7 +291,11 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
                 new String[] {range, value, imageId != null ? imageId.toString() : null}));
       }
     }
-    return new LookupTableTableModel(rows, "Range", "Value", "Image");
+    return new LookupTableTableModel(
+        rows,
+        I18N.getText("Label.range"),
+        I18N.getText("Label.value"),
+        I18N.getText("Label.image"));
   }
 
   private class ImageCellRenderer extends ImageAssetPanel implements TableCellRenderer {

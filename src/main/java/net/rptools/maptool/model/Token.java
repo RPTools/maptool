@@ -24,6 +24,7 @@ import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
@@ -124,6 +125,7 @@ public class Token extends BaseModel implements Cloneable {
     setShape,
     setSnapToScale,
     setSnapToGrid,
+    setSnapToGridAndXY,
     setFootprint,
     setProperty,
     resetProperty,
@@ -1524,9 +1526,9 @@ public class Token extends BaseModel implements Cloneable {
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
       if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
-        Point centerOffset = grid.getCenterOffset();
-        offsetX = getX() + centerOffset.x;
-        offsetY = getY() + centerOffset.y;
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = getX() + (int) centerOffset.x;
+        offsetY = getY() + (int) centerOffset.y;
       } else {
         Rectangle tokenBounds = getBounds(zone);
         offsetX = tokenBounds.x + tokenBounds.width / 2;
@@ -1537,6 +1539,79 @@ public class Token extends BaseModel implements Cloneable {
       offsetY = getY();
     }
     return new Point(offsetX, offsetY);
+  }
+
+  /**
+   * Gets the point where the token should go, if it were to be snapped to the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once snapped
+   */
+  public ZonePoint getSnappedPoint(Zone zone) {
+    if (snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    }
+    Grid grid = zone.getGrid();
+    Rectangle tokenBounds = getBounds(zone);
+    ZonePoint zp;
+    double tx, ty;
+    if (grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        Dimension offset = grid.getCellOffset();
+        tx = getX() - tokenBounds.width * offset.width / grid.getCellWidth();
+        ty = getY() - tokenBounds.height * offset.height / grid.getCellHeight();
+      } else {
+        tx = getX() + tokenBounds.width / 2.0;
+        ty = getY() + tokenBounds.height / 2.0;
+      }
+      zp = grid.convert(grid.convert(new ZonePoint((int) tx, (int) ty)));
+    } else {
+      double newX = getX() + (tokenBounds.width / 2.0) - (grid.getCellWidth() / 2.0);
+      double newY = getY() + (tokenBounds.height / 2.0) - (grid.getCellHeight() / 2.0);
+      // Odd rounding necessary or there will be a 1 pixel offset when snapping
+      int roundedX, roundedY;
+      if (Math.signum(newX) == Math.signum(getX())) {
+        roundedX = (int) ((newX >= 0) ? Math.ceil(newX) : Math.floor(newX));
+      } else {
+        roundedX = (int) newX;
+      }
+      if (Math.signum(newY) == Math.signum(getY())) {
+        roundedY = (int) ((newY >= 0) ? Math.ceil(newY) : Math.floor(newY));
+      } else {
+        roundedY = (int) newY;
+      }
+      zp = new ZonePoint(roundedX, roundedY);
+    }
+    return zp;
+  }
+  /**
+   * Gets the point where the token should go, if it were to be unsnapped from the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once unsnapped
+   */
+  public ZonePoint getUnsnappedPoint(Zone zone) {
+    if (!snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    }
+    double offsetX, offsetY;
+    Rectangle tokenBounds = getBounds(zone);
+    Grid grid = zone.getGrid();
+    if (grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        Dimension offset = grid.getCellOffset();
+        offsetX = -tokenBounds.width * offset.width / grid.getCellWidth();
+        offsetY = -tokenBounds.height * offset.height / grid.getCellHeight();
+      } else {
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = tokenBounds.width / 2.0 - centerOffset.x;
+        offsetY = tokenBounds.height / 2.0 - centerOffset.y;
+      }
+    } else {
+      offsetX = tokenBounds.width / 2.0 - grid.getCellWidth() / 2.0;
+      offsetY = tokenBounds.height / 2.0 - grid.getCellHeight() / 2.0;
+    }
+    return new ZonePoint((int) (getX() - offsetX), (int) (getY() - offsetY));
   }
 
   /** @return the String of the sightType */
@@ -2375,6 +2450,14 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setSnapToGrid:
         setSnapToGrid((Boolean) parameters[0]);
+        break;
+      case setSnapToGridAndXY:
+        if (hasLightSources()) {
+          lightChanged = true;
+        }
+        setSnapToGrid((boolean) parameters[0]);
+        setX((int) parameters[1]);
+        setY((int) parameters[2]);
         break;
       case setFootprint:
         setSnapToScale(true);
