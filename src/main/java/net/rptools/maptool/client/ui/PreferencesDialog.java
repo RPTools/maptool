@@ -1212,7 +1212,9 @@ public class PreferencesDialog extends JDialog {
     forceFacingArrowCheckBox.setSelected(AppPreferences.getForceFacingArrow());
     backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.getBackgroundsStartSnapToGrid());
     defaultGridSizeTextField.setText(Integer.toString(AppPreferences.getDefaultGridSize()));
-    defaultUnitsPerCellTextField.setText(Double.toString(AppPreferences.getDefaultUnitsPerCell()));
+    // Localizes units per cell, using the proper separator. Fixes #507.
+    defaultUnitsPerCellTextField.setText(
+        StringUtil.formatDecimal(AppPreferences.getDefaultUnitsPerCell(), 1));
     defaultVisionDistanceTextField.setText(
         Integer.toString(AppPreferences.getDefaultVisionDistance()));
     statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));

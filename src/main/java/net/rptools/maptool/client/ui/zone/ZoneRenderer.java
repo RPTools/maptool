@@ -3370,6 +3370,10 @@ public class ZoneRenderer extends JComponent
       timer.start("tokenlist-7");
       // If the token is a figure and if its visible, draw all of it.
       if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
+        // Lets skip tokens on the Hidden layer
+        if (token.isGMStamp()) {
+          continue;
+        }
         Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
           // the cell intersects visible area so
