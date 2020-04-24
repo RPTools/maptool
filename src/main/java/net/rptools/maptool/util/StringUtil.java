@@ -23,10 +23,26 @@ import java.util.List;
 /** @author Tylere */
 public class StringUtil {
   private static NumberFormat nf = NumberFormat.getNumberInstance();
+  private static final int MIN_FRACTION_DIGITS = 0;
 
   public static String formatDecimal(double value) {
     String result1;
     result1 = nf.format(value); // On a separate line to allow for breakpoints
+    return result1;
+  }
+
+  /**
+   * Format a number using the locale.
+   *
+   * @param value the double to format
+   * @param minFractionDigits the minimum number of fraction digits to be shown
+   * @return the formated number
+   */
+  public static String formatDecimal(double value, int minFractionDigits) {
+    nf.setMinimumFractionDigits(minFractionDigits);
+    String result1;
+    result1 = nf.format(value); // On a separate line to allow for breakpoints
+    nf.setMinimumFractionDigits(MIN_FRACTION_DIGITS);
     return result1;
   }
 
