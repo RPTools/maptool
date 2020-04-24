@@ -15,6 +15,8 @@
 package net.rptools.maptool.client;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.plaf.UIDefaultsLookup;
+import com.jidesoft.plaf.basic.ThemePainter;
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
@@ -1245,7 +1247,7 @@ public class MapTool {
         new LookAndFeelFactory.UIDefaultsCustomizer() {
           @Override
           public void customize(UIDefaults defaults) {
-//            ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
+            ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
             defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
             defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
@@ -1259,9 +1261,9 @@ public class MapTool {
             defaults.put("OptionPane.bannerFontSize", 13);
             defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
             defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-//            defaults.put(
-//                "OptionPane.bannerForeground",
-//                painter != null ? painter.getOptionPaneBannerForeground() : null); // you
+            defaults.put(
+                "OptionPane.bannerForeground",
+                painter != null ? painter.getOptionPaneBannerForeground() : null); // you
             // should
             // adjust
             // this
@@ -1277,12 +1279,12 @@ public class MapTool {
 
             // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
             // gradient
-//            defaults.put(
-//                "OptionPane.bannerBackgroundDk",
-//                painter != null ? painter.getOptionPaneBannerDk() : null);
-//            defaults.put(
-//                "OptionPane.bannerBackgroundLt",
-//                painter != null ? painter.getOptionPaneBannerLt() : null);
+            defaults.put(
+                "OptionPane.bannerBackgroundDk",
+                painter != null ? painter.getOptionPaneBannerDk() : null);
+            defaults.put(
+                "OptionPane.bannerBackgroundLt",
+                painter != null ? painter.getOptionPaneBannerLt() : null);
             defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
             // true
 
