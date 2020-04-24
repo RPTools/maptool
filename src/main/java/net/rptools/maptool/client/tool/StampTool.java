@@ -481,6 +481,17 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // DRAG TOKEN COMPLETE
         if (isDraggingToken) {
           stopTokenDrag();
+        } else {
+          // IF SELECTING MULTIPLE, SELECT SINGLE TOKEN
+          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
+            Token token = getTokenAt(e.getX(), e.getY());
+            // Only if it isn't already being moved
+            if (renderer.isSubsetSelected(token) && !renderer.isTokenMoving(token)) {
+              renderer.clearSelectedTokens();
+              renderer.selectToken(token.getId());
+              renderer.updateAfterSelection();
+            }
+          }
         }
       } finally {
         isDraggingToken = false;

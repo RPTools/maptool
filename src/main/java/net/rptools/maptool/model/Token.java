@@ -24,6 +24,7 @@ import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
@@ -124,6 +125,7 @@ public class Token extends BaseModel implements Cloneable {
     setShape,
     setSnapToScale,
     setSnapToGrid,
+    setSnapToGridAndXY,
     setFootprint,
     setProperty,
     resetProperty,
@@ -137,6 +139,9 @@ public class Token extends BaseModel implements Cloneable {
     setScaleXY,
     setNotes,
     setGMNotes,
+    saveMacro,
+    saveMacroList,
+    deleteMacro,
     setX,
     setY,
     setXY,
@@ -305,11 +310,6 @@ public class Token extends BaseModel implements Cloneable {
 
   @SuppressWarnings("unused")
   private transient List<Vision> visionList; // 1.3b18
-
-  public enum ChangeEvent {
-    name,
-    MACRO_CHANGED
-  }
 
   private HeroLabData heroLabData;
 
@@ -1526,9 +1526,9 @@ public class Token extends BaseModel implements Cloneable {
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
       if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
-        Point centerOffset = grid.getCenterOffset();
-        offsetX = getX() + centerOffset.x;
-        offsetY = getY() + centerOffset.y;
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = getX() + (int) centerOffset.x;
+        offsetY = getY() + (int) centerOffset.y;
       } else {
         Rectangle tokenBounds = getBounds(zone);
         offsetX = tokenBounds.x + tokenBounds.width / 2;
@@ -1539,6 +1539,79 @@ public class Token extends BaseModel implements Cloneable {
       offsetY = getY();
     }
     return new Point(offsetX, offsetY);
+  }
+
+  /**
+   * Gets the point where the token should go, if it were to be snapped to the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once snapped
+   */
+  public ZonePoint getSnappedPoint(Zone zone) {
+    if (snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    }
+    Grid grid = zone.getGrid();
+    Rectangle tokenBounds = getBounds(zone);
+    ZonePoint zp;
+    double tx, ty;
+    if (grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        Dimension offset = grid.getCellOffset();
+        tx = getX() - tokenBounds.width * offset.width / grid.getCellWidth();
+        ty = getY() - tokenBounds.height * offset.height / grid.getCellHeight();
+      } else {
+        tx = getX() + tokenBounds.width / 2.0;
+        ty = getY() + tokenBounds.height / 2.0;
+      }
+      zp = grid.convert(grid.convert(new ZonePoint((int) tx, (int) ty)));
+    } else {
+      double newX = getX() + (tokenBounds.width / 2.0) - (grid.getCellWidth() / 2.0);
+      double newY = getY() + (tokenBounds.height / 2.0) - (grid.getCellHeight() / 2.0);
+      // Odd rounding necessary or there will be a 1 pixel offset when snapping
+      int roundedX, roundedY;
+      if (Math.signum(newX) == Math.signum(getX())) {
+        roundedX = (int) ((newX >= 0) ? Math.ceil(newX) : Math.floor(newX));
+      } else {
+        roundedX = (int) newX;
+      }
+      if (Math.signum(newY) == Math.signum(getY())) {
+        roundedY = (int) ((newY >= 0) ? Math.ceil(newY) : Math.floor(newY));
+      } else {
+        roundedY = (int) newY;
+      }
+      zp = new ZonePoint(roundedX, roundedY);
+    }
+    return zp;
+  }
+  /**
+   * Gets the point where the token should go, if it were to be unsnapped from the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once unsnapped
+   */
+  public ZonePoint getUnsnappedPoint(Zone zone) {
+    if (!snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    }
+    double offsetX, offsetY;
+    Rectangle tokenBounds = getBounds(zone);
+    Grid grid = zone.getGrid();
+    if (grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        Dimension offset = grid.getCellOffset();
+        offsetX = -tokenBounds.width * offset.width / grid.getCellWidth();
+        offsetY = -tokenBounds.height * offset.height / grid.getCellHeight();
+      } else {
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = tokenBounds.width / 2.0 - centerOffset.x;
+        offsetY = tokenBounds.height / 2.0 - centerOffset.y;
+      }
+    } else {
+      offsetX = tokenBounds.width / 2.0 - grid.getCellWidth() / 2.0;
+      offsetY = tokenBounds.height / 2.0 - grid.getCellHeight() / 2.0;
+    }
+    return new ZonePoint((int) (getX() - offsetX), (int) (getY() - offsetY));
   }
 
   /** @return the String of the sightType */
@@ -1745,6 +1818,12 @@ public class Token extends BaseModel implements Cloneable {
     return maxIndex + 1;
   }
 
+  /**
+   * Returns the macroPropertiesMap of the token, or a blank map if not permitted.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the map
+   */
   public Map<Integer, Object> getMacroPropertiesMap(boolean secure) {
     if (macroPropertiesMap == null) {
       macroPropertiesMap = new HashMap<Integer, Object>();
@@ -1753,7 +1832,7 @@ public class Token extends BaseModel implements Cloneable {
       loadOldMacros();
     }
     if (secure && !AppUtil.playerOwns(this)) {
-      return new HashMap<Integer, Object>();
+      return new HashMap<Integer, Object>(); // blank map
     } else {
       return macroPropertiesMap;
     }
@@ -1785,10 +1864,16 @@ public class Token extends BaseModel implements Cloneable {
     return list;
   }
 
-  public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
-    // used by the token edit dialog, which will handle resetting panels and putting token to
-    // zone
-    macroPropertiesMap.clear();
+  /**
+   * Add a list of macros to the token.
+   *
+   * @param newMacroList the macro list to add
+   * @param clearOld whether the old macros at other indexes should be removed
+   */
+  public void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
+    if (clearOld) {
+      macroPropertiesMap.clear();
+    }
     for (MacroButtonProperties macro : newMacroList) {
       if (macro.getLabel() == null
           || macro.getLabel().trim().length() == 0
@@ -1796,10 +1881,25 @@ public class Token extends BaseModel implements Cloneable {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
-
-      // Allows the token macro panels to update only if a macro changes
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
     }
+  }
+
+  /**
+   * Saves the macro on the token.
+   *
+   * @param prop the properties of the macro
+   */
+  public void saveMacro(MacroButtonProperties prop) {
+    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
+  }
+
+  /**
+   * Deletes the macro at the given index.
+   *
+   * @param index the index of the macro
+   */
+  public void deleteMacro(int index) {
+    getMacroPropertiesMap(false).remove(index);
   }
 
   public List<String> getMacroNames(boolean secure) {
@@ -1817,25 +1917,6 @@ public class Token extends BaseModel implements Cloneable {
       return true;
     }
     return false;
-  }
-
-  public void saveMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
-    MapTool.getFrame().resetTokenPanels();
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
-  }
-
-  public void deleteMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).remove(prop.getIndex());
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-    MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render
-    // timing problem.
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
   public void setSpeechMap(Map<String, String> map) {
@@ -2336,6 +2417,8 @@ public class Token extends BaseModel implements Cloneable {
    */
   public void updateProperty(Zone zone, Update update, Object[] parameters) {
     boolean lightChanged = false;
+    boolean macroChanged = false;
+    boolean panelLookChanged = false; // appearance of token in a panel changed
     switch (update) {
       case setState:
         setState(parameters[0].toString(), parameters[1]);
@@ -2368,6 +2451,14 @@ public class Token extends BaseModel implements Cloneable {
       case setSnapToGrid:
         setSnapToGrid((Boolean) parameters[0]);
         break;
+      case setSnapToGridAndXY:
+        if (hasLightSources()) {
+          lightChanged = true;
+        }
+        setSnapToGrid((boolean) parameters[0]);
+        setX((int) parameters[1]);
+        setY((int) parameters[2]);
+        break;
       case setFootprint:
         setSnapToScale(true);
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
@@ -2390,9 +2481,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case clearAllOwners:
         clearAllOwners();
+        panelLookChanged = true;
         break;
       case setOwnedByAll:
         setOwnedByAll((Boolean) parameters[0]);
+        panelLookChanged = true;
         break;
       case addOwner:
         addOwner(parameters[0].toString());
@@ -2443,9 +2536,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setName:
         setName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setGMName:
         setGMName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setVisible:
         setVisible((boolean) parameters[0]);
@@ -2476,6 +2571,7 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        panelLookChanged = true;
         break;
       case setPortraitImage:
         setPortraitImage((MD5Key) parameters[0]);
@@ -2515,9 +2611,27 @@ public class Token extends BaseModel implements Cloneable {
         }
         setSightType((String) parameters[0]);
         break;
+      case saveMacro:
+        saveMacro((MacroButtonProperties) parameters[0]);
+        macroChanged = true;
+        break;
+      case saveMacroList:
+        saveMacroList((List<MacroButtonProperties>) parameters[0], (boolean) parameters[1]);
+        macroChanged = true;
+        break;
+      case deleteMacro:
+        deleteMacro((int) parameters[0]);
+        macroChanged = true;
+        break;
     }
     if (lightChanged) {
       getZoneRenderer().flushLight(); // flush lights if it changed
+    }
+    if (macroChanged) {
+      zone.tokenMacroChanged(this);
+    }
+    if (panelLookChanged) {
+      zone.tokenPanelChanged(this);
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }

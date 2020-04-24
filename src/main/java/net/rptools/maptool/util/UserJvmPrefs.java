@@ -210,8 +210,11 @@ public class UserJvmPrefs {
     for (String resourcePath : resourcePathSet) {
       int index = I18N_RESOURCE_PATH.length() + I18N_RESOURCE_PREFIX.length() + 1;
       String languageCode = resourcePath.substring(index, index + 2);
-      Locale locale = new Locale(languageCode);
-      languages.put(locale.getDisplayLanguage(), languageCode);
+      // Crowdin file i18n_ach.properties isn't a language. Fix #1686.
+      if (!languageCode.equals("ac")) {
+        Locale locale = new Locale(languageCode);
+        languages.put(locale.getDisplayLanguage(), languageCode);
+      }
     }
 
     log.debug("languages: " + languages.toString());

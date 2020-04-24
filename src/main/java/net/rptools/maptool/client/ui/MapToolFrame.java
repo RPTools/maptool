@@ -1562,11 +1562,13 @@ public class MapToolFrame extends DefaultDockableHolder
     if (renderer != null && !zoneRendererList.contains(renderer)) {
       zoneRendererList.add(renderer);
     }
+    Zone oldZone = null;
     if (currentRenderer != null) {
       // Check if the zone still exists. Fix #1568
       if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
         stopTokenDrag(); // if a token is being dragged, stop the drag
       }
+      oldZone = currentRenderer.getZone();
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
@@ -1580,8 +1582,9 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbox.setTargetRenderer(renderer);
 
     if (renderer != null) {
+      // Previous zone must be passed for the listeners to be properly removed. Fix #1670.
       MapTool.getEventDispatcher()
-          .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
+          .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
@@ -2055,7 +2058,7 @@ public class MapToolFrame extends DefaultDockableHolder
       saveTableFileChooser = new JFileChooser();
       saveTableFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
       saveTableFileChooser.addChoosableFileFilter(tableFilter);
-      saveTableFileChooser.setDialogTitle("Export Table");
+      saveTableFileChooser.setDialogTitle(I18N.getText("Label.table.export"));
     }
     saveTableFileChooser.setAcceptAllFileFilterUsed(true);
     return saveTableFileChooser;
@@ -2069,7 +2072,7 @@ public class MapToolFrame extends DefaultDockableHolder
       loadTableFileChooser = new JFileChooser();
       loadTableFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
       loadTableFileChooser.addChoosableFileFilter(tableFilter);
-      loadTableFileChooser.setDialogTitle("Import Table");
+      loadTableFileChooser.setDialogTitle(I18N.getText("Label.table.import"));
     }
     loadTableFileChooser.setFileFilter(tableFilter);
     return loadTableFileChooser;

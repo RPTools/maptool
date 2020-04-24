@@ -965,11 +965,11 @@ public class MapTool {
     ZoneRenderer currRenderer = null;
 
     // Clean up
-    clientFrame.setCurrentZoneRenderer(null);
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
     clientFrame.clearTokenTree();
     if (campaign == null) {
+      clientFrame.setCurrentZoneRenderer(null);
       return;
     }
     // Install new campaign
