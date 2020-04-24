@@ -203,24 +203,14 @@ repositories {
     maven { url = 'http://www.nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 
-    flatDir {
-        dirs 'lib/jide'
-    }
+//    flatDir {
+//        dirs 'lib/jide'
+//    }
 }
 
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // This jar needs to be placed in the lib dir manually for now until we find a home for it
-    implementation name: 'jide-common'
-    implementation name: 'jide-components'
-    implementation name: 'jide-dialogs'
-    implementation name: 'jide-dock'
-    implementation name: 'jide-editor'
-    implementation name: 'jide-grids'
-    implementation name: 'jide-properties'
-    implementation name: 'jide-shortcut'
-
     // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
     // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.1'
@@ -256,14 +246,15 @@ dependencies {
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.5.5'
 
-//    implementation 'jide-common:jide-common:3.2.3'
-//    implementation 'jide-components:jide-components:3.2.3'
-//    implementation 'jide-dialogs:jide-dialogs:3.2.3'
-//    implementation 'jide-dock:jide-dock:3.2.3'
-//    implementation 'jide-editor:jide-editor:3.2.3'
-//    implementation 'jide-grids:jide-grids:3.2.3'
-//    implementation 'jide-properties:jide-properties:3.2.3'
-//    implementation 'jide-shortcut:jide-shortcut:3.2.3'
+    // Currently hosted on nerps.net/repo
+    implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-components', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-dialogs', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-dock', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-editor', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-grids', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-servlet:9.4.25.v20191220'
