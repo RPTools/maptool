@@ -180,11 +180,12 @@ public class getInfoFunction extends AbstractFunction {
     if (MapTool.getParser().isMacroTrusted()) {
       getInfoOnTokensOfType(cinfo, "library tokens", "lib:", "libversion", "unknown");
       getInfoOnTokensOfType(cinfo, "image tokens", "image:", "libversion", "unknown");
-      JsonArray udf = new JsonArray();
-      for (String name : UserDefinedMacroFunctions.getInstance().getAliases()) {
-        udf.add(name);
+      JsonObject udfList = new JsonObject();
+      UserDefinedMacroFunctions UDF = UserDefinedMacroFunctions.getInstance();
+      for (String name : UDF.getAliases()) {
+        udfList.addProperty(name, UDF.getFunctionLocation(name));
       }
-      cinfo.add("user defined functions", udf);
+      cinfo.add("user defined functions", udfList);
       cinfo.addProperty("client id", MapTool.getClientId());
     }
     return cinfo;

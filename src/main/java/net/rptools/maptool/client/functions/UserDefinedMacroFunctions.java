@@ -338,4 +338,49 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
     return null;
   }
+
+  /**
+   * Get the macro location for the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the macroName, or null if no such function exists
+   */
+  public String getFunctionLocation(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    return (theDef == null) ? null : theDef.macroName;
+  }
+
+  /**
+   * Get the tooltip from the macro button mapped to the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the evaluated tooltip, or null if no corresponding macro button can be found
+   */
+  public String getFunctionTooltip(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    if (theDef != null) {
+      String[] macroParts = theDef.macroName.split("@", 2);
+      if (macroParts.length != 2) return null;
+      String macroName = macroParts[0];
+      String macroLocation = macroParts[1];
+      try {
+        Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
+        MacroButtonProperties buttonProps = libToken.getMacro(macroName, false);
+        return (buttonProps == null) ? null : buttonProps.getEvaluatedToolTip();
+      } catch (ParserException e) {
+        // this means we couldn't find the unique macro used in the mapping - may want a warning
+        // instead of null?
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
 }
