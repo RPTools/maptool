@@ -349,7 +349,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (saveLocation.equals("Token") && tokenId != null) {
       Token token = getToken();
       if (token != null) {
-        token.saveMacroButtonProperty(this);
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, this);
       } else {
         MapTool.showError(I18N.getText("msg.error.macro.buttonNullToken", getLabel(), tokenId));
       }

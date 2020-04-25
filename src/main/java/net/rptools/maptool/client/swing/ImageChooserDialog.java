@@ -40,7 +40,7 @@ public class ImageChooserDialog extends JDialog {
       new AssetPanel("imageAssetPanel", MapTool.getFrame().getAssetPanel().getModel());
 
   public ImageChooserDialog(JFrame owner) {
-    super(owner, "Choose Image", true);
+    super(owner, I18N.getText("Label.image.choose"), true);
     setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
     addWindowListener(
         new WindowAdapter() {
