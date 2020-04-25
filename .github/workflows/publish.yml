@@ -41,6 +41,10 @@ jobs:
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
       run: ./gradlew jpackage
+    - name: Build uberJar on Windows
+      if: matrix.os == 'windows-latest'
+      run: ./gradlew uberJar
+      # For debugging purposes...
     - name: zip up macOS app dir
       if: matrix.os == 'macOS-latest'
       run: cd releases/MapTool.app; zip -r ../MapTool.zip .
@@ -75,6 +79,17 @@ jobs:
         asset_path: releases/MapTool-${{ github.event.release.tag_name }}.msi
         asset_name: MapTool-${{ github.event.release.tag_name }}.msi
         asset_content_type: application/octet-stream
+    - name: Upload Uber Jar Release Asset
+        id: upload-release-asset-jar
+        uses: actions/upload-release-asset@v1
+        if: matrix.os == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: releases/MapTool-${{ github.event.release.tag_name }}.jar
+          asset_name: MapTool-${{ github.event.release.tag_name }}.jar
+          asset_content_type: application/octet-stream
       #       __     _                    
       #      / /    (_)____   __  __ _  __
       #     / /    / // __ \ / / / /| |/_/

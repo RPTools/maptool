@@ -6,8 +6,8 @@
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.0.1"
-    id 'org.openjfx.javafxplugin' version '0.0.8'
     id "com.diffplug.gradle.spotless" version "3.28.0"
+    id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.runtime' version '1.8.1'
 }
 
@@ -72,15 +72,6 @@ ext {
     println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
 }
 
-run {
-    args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
-
-    if(System.getProperty("exec.args") != null) {
-        args System.getProperty("exec.args").split()
-    }
-}
-
 spotless {
     java {
         target project.fileTree(project.rootDir) {
@@ -116,12 +107,18 @@ javafx {
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
 
+run {
+    args = [ '-v='+version ]
+    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
+
+    if(System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
+}
+
 // Badass Runtime Plugin Options
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
-    // modules = ['java.naming', 'java.xml']
-
-    // forceMerge('log4j-api', 'gson')
 
 //    launcher {
 //        installerName = 'MapTool'
@@ -178,17 +175,17 @@ runtime {
                     '--linux-shortcut'
             ]
 
-            // if (installerType == 'deb') {
-            //     installerOptions += [
-            //             '--linux-deb-maintainer', 'office@walczak.it'
-            //     ]
-            // }
+             if (installerType == 'deb') {
+                 installerOptions += [
+                         '--linux-deb-maintainer', 'admin@rptools.net'
+                 ]
+             }
 
-            // if (installerType == 'rpm') {
-            //     installerOptions += [
-            //             '--linux-rpm-license-type', 'GPLv3'
-            //     ]
-            // }
+             if (installerType == 'rpm') {
+                 installerOptions += [
+                         '--linux-rpm-license-type', 'AGPLv3'
+                 ]
+             }
         }
     }
 }
@@ -202,10 +199,6 @@ repositories {
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'http://www.nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
-
-//    flatDir {
-//        dirs 'lib/jide'
-//    }
 }
 
 
@@ -213,9 +206,9 @@ repositories {
 dependencies {
     // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
     // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.12.1'	// Bridges v1 to v2 for other code in other libs
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.13.0'	// Bridges v1 to v2 for other code in other libs
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
@@ -224,15 +217,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
-
-    implementation 'net.java.abeille:abeille-formsrt:2.0'
-
-    // sourceControl gitRepository currently not producing classpath for Eclipse
-    // using jitpack.io for now
-    // implementation 'net.rptools.clientserver:clientserver:1.4.0.+'
-    implementation 'com.github.RPTools:clientserver:1.4.0.0'
-    implementation 'org.hibernate:antlr:2.7.5H3'
+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
     implementation 'commons-io:commons-io:2.6'
@@ -241,10 +226,12 @@ dependencies {
     implementation 'commons-net:commons-net:3.6'
     implementation 'commons-cli:commons-cli:1.4'
 
+    // RPTool Libs
     implementation 'net.rptools.decktool:decktool:1.0.b1'
-
+    implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.5.5'
+    implementation 'com.github.RPTools:dicelib:1.5.5'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -267,7 +254,8 @@ dependencies {
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
-
+    implementation 'net.java.abeille:abeille-formsrt:2.0'
+    implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho.hessian:hessian:3.1.6'
     implementation 'org.mozilla:rhino:1.7.12'
@@ -324,15 +312,8 @@ dependencies {
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
 
-    // sourceControl gitRepository currently not producing classpath for Eclipse
-    // using jitpack.io for now
-    // compile ('net.rptools.dicelib:dicelib:1.5.2')
-    implementation 'com.github.RPTools:dicelib:1.5.5'
-
-
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
-
 }
 
 
@@ -354,6 +335,7 @@ task uberJar(type: Jar) {
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion
+    destinationDirectory = file("$rootDir/releases")
 
     manifest {
         attributes 'Implementation-Title': project.name,

@@ -39,5 +39,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Junit Report to Annotations
+        uses: ashley-taylor/junit-report-annotations-action@v1.0
       - name: Build with Gradle
         run: ./gradlew build
