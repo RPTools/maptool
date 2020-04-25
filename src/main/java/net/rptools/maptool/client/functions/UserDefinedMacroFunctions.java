@@ -16,8 +16,12 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,8 +43,12 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDescription {
+  private static final Logger log = LogManager.getLogger(UserDefinedMacroFunctions.class);
 
   private final Map<String, FunctionDefinition> userDefinedFunctions =
       new HashMap<String, FunctionDefinition>();
@@ -283,6 +291,71 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
   }
 
+  /**
+   * Macro function to retrieve information about all defined functions. Uses the corresponding
+   * macroButton's tooltip, if any, as a function description.
+   *
+   * <p>If the provided delim is empty, this function produces plain text output: listAngryNPCs -
+   * Lists all NPCs that are angry at PCs.
+   *
+   * <p>If the provided delim is "json", this function produces a JsonArray: [{"name":
+   * "listAngryNPCs", "description": "Lists all NPCs that are angry at PCs."}]
+   *
+   * <p>Otherwise, the output is a string list separated by the given delimiter:
+   * "listAngryNPCs","Lists all NPCs that are angry at PCs."
+   *
+   * @param delim delimiter used to separate values in string list. "" and "json" produce special
+   *     formatting
+   * @param showFullLocations whether fully-qualified macro locations should be included in the
+   *     output
+   * @return a list of user defined functions
+   */
+  public Object getDefinedFunctions(String delim, boolean showFullLocations) {
+    List<String> aliases = Arrays.asList(getAliases());
+    log.info("Found {} defined functions", aliases.size());
+    Collections.sort(aliases);
+    if ("".equals(delim)) {
+      // plain-text output
+      List<String> lines = new ArrayList<>();
+      for (String name : aliases) {
+        StringBuilder line = new StringBuilder(name);
+        if (showFullLocations) line.append(" - ").append(getFunctionLocation(name));
+        String tooltip = getFunctionTooltip(name);
+        if (tooltip != null && !tooltip.isEmpty()) {
+          tooltip = StringFunctions.getInstance().replace(tooltip, "<", "&lt;");
+          line.append(" - ");
+          line.append(tooltip);
+        }
+        lines.add(line.toString());
+      }
+      return StringUtils.join(lines, "<br />");
+    } else if ("json".equals(delim)) {
+      // json output
+      JsonArray jsonArray = new JsonArray();
+      for (String name : aliases) {
+        JsonObject fDef = new JsonObject();
+        fDef.addProperty("name", name);
+        if (showFullLocations) fDef.addProperty("source", getFunctionLocation(name));
+        String tooltip = getFunctionTooltip(name);
+        if (tooltip != null && !tooltip.isEmpty()) {
+          tooltip = StringFunctions.getInstance().replace(tooltip, "<", "&lt;");
+          fDef.addProperty("description", tooltip);
+        }
+        jsonArray.add(fDef);
+      }
+      return jsonArray;
+    } else {
+      // string list output, using delim
+      List<String> strings = new ArrayList<>();
+      for (String name : aliases) {
+        strings.add(name);
+        if (showFullLocations) strings.add(getFunctionLocation(name));
+        strings.add(getFunctionTooltip(name));
+      }
+      return StringUtils.join(strings, delim);
+    }
+  }
+
   @Override
   public String getFunctionSummary(String functionName) {
     if (functionName == null) {
@@ -337,5 +410,50 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       }
     }
     return null;
+  }
+
+  /**
+   * Get the macro location for the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the macroName, or null if no such function exists
+   */
+  public String getFunctionLocation(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    return (theDef == null) ? null : theDef.macroName;
+  }
+
+  /**
+   * Get the tooltip from the macro button mapped to the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the evaluated tooltip, or null if no corresponding macro button can be found
+   */
+  public String getFunctionTooltip(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    if (theDef != null) {
+      String[] macroParts = theDef.macroName.split("@", 2);
+      if (macroParts.length != 2) return null;
+      String macroName = macroParts[0];
+      String macroLocation = macroParts[1];
+      try {
+        Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
+        MacroButtonProperties buttonProps = libToken.getMacro(macroName, false);
+        return (buttonProps == null) ? null : buttonProps.getEvaluatedToolTip();
+      } catch (ParserException e) {
+        // this means we couldn't find the unique macro used in the mapping - may want a warning
+        // instead of null?
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 }
