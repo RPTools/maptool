@@ -42,4 +42,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew build -x test # Because tests are broken again
+        run: ./gradlew buil
