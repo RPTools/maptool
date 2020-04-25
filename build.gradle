@@ -105,7 +105,7 @@ spotless {
 }
 
 jacoco {
-toolVersion = "0.8.1"
+toolVersion = "0.8.5"
 reportsDir = file("$buildDir/reports/jacoco")
 }
 
@@ -318,8 +318,8 @@ dependencies {
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
