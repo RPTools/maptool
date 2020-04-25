@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
@@ -177,7 +176,7 @@ public class GridlessGrid extends Grid {
   }
 
   @Override
-  public Point getCenterOffset() {
-    return new Point(0, 0);
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, 0);
   }
 }

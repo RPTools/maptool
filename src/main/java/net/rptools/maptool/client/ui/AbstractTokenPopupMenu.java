@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -806,23 +805,15 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setSnapToGrid(!snapToGrid);
-        Grid grid = zone.getGrid();
-        Dimension offset = grid.getCellOffset();
-        if (token.isSnapToGrid()) {
-          if (grid.getCapabilities().isSnapToGridSupported()) {
-            ZonePoint zp = new ZonePoint(token.getX() - offset.width, token.getY() - offset.height);
-            zp = grid.convert(grid.convert(zp));
-            token.setX(zp.x);
-            token.setY(zp.y);
-          }
+        ZonePoint zp;
+        if (snapToGrid) {
+          zp = token.getUnsnappedPoint(zone);
         } else {
-          // If SnapToGrid is now off, change the (x,y) coordinates based on the cell offset being
-          // used by the grid
-          token.setX(token.getX() + offset.width);
-          token.setY(token.getY() + offset.height);
+          zp = token.getSnappedPoint(zone);
         }
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        // Updates both snap-to-grid and new location in one command
+        Token.Update update = Token.Update.setSnapToGridAndXY;
+        MapTool.serverCommand().updateTokenProperty(token, update, !snapToGrid, zp.x, zp.y);
       }
     }
   }

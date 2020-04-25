@@ -50,7 +50,6 @@ import javax.swing.event.DocumentListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
@@ -556,12 +555,6 @@ public class PreferencesDialog extends JDialog {
           public void stateChanged(ChangeEvent ce) {
             int newInterval = (Integer) autoSaveSpinner.getValue();
             AppPreferences.setAutoSaveIncrement(newInterval);
-            // If we're saving, we shouldn't restart as the timer is currently paused.
-            // If we're loading, the load function will restart the timer when the load
-            // is complete -- if we do it now, we might try to autosave a loading campaign.
-            if (!AppState.isSaving() && !AppState.isLoading()) {
-              MapTool.getAutoSaveManager().restart();
-            }
           }
         });
     newMapsHaveFOWCheckBox.addActionListener(
@@ -1212,7 +1205,9 @@ public class PreferencesDialog extends JDialog {
     forceFacingArrowCheckBox.setSelected(AppPreferences.getForceFacingArrow());
     backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.getBackgroundsStartSnapToGrid());
     defaultGridSizeTextField.setText(Integer.toString(AppPreferences.getDefaultGridSize()));
-    defaultUnitsPerCellTextField.setText(Double.toString(AppPreferences.getDefaultUnitsPerCell()));
+    // Localizes units per cell, using the proper separator. Fixes #507.
+    defaultUnitsPerCellTextField.setText(
+        StringUtil.formatDecimal(AppPreferences.getDefaultUnitsPerCell(), 1));
     defaultVisionDistanceTextField.setText(
         Integer.toString(AppPreferences.getDefaultVisionDistance()));
     statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));
