@@ -7,6 +7,8 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
 - MapTool can now import the Dungeondraft VTT export format.
 
+Changes since 1.7.0-alpha-1 in **BOLD**.
+
 **Enhancements**
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
@@ -15,8 +17,20 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
 - [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
 - [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
+- [#500][i500] **Ars Magica Stress Dice roll option.**
+  - ASnb#+b / ASnb#-b (or asn#+b / asn#-b) - return is a string
+  - ANSnb#+b / ANSnb#-b (or ansn#+b / ansn#-b) - return is a number
+- [#412][i412] **New macro function `getDefinedFunctions()` to get list of user-defined functions. Output of `getInfo("client")` also updated to include location of called function.**
+- [#27][i27] **Reroll Once roll option added.**
+  - 2d6rk3 - reroll any die less than 3 and keep new result
+  - 2d6rc3 - reroll any die less than 3 and keep higher value
 
 **Bug Fixes**
+- [#1700][i1700] **Tokens/stamps showing as "?" image until map is updated. Fixed.**
+- [#1686][i1686] **Crowdin configuration file was display as option in Preferences -> Language. Fixed.**
+- [#1666][i1666] **Changing token selection was causing Impersonated panel to update causing a delay. Fixed.**
+- [#1658][i1658] **Deleting a token was causing the Impersonated panel to update cause a delay. Fixed.**
+- [#1653][i1653] **Changing snap-to-grid status for tokens and stamps could cause them to move. Fixed.**
 - [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
 - [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
 - [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
@@ -24,6 +38,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1614][i1614] Pressing map zoom keys while a frame5 textbox had focus would zoom map. Fixed.
 - [#1613][i1613] User selected theme was not being applied to menus causing text to not be rendered for some languages such as Japanese. Fixed.
   - Also fixed Edit Token dialog throwing exception for translated VBL tab name.
+- [#1608][i1608] **Various menu optoins would throw an exception if no maps in campaign. Fixed.**
 - [#1605][i1605] Clicking on FoW button and others after last map was deleted would throw NPE. Fixed.
 - [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
 - [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
@@ -39,12 +54,22 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
+**Other**
+- [#1704][i1704] dicelib updated to 1.6.0
+
+[i1704]: https://github.com/RPTools/maptool/pull/1704
+[i1700]: https://github.com/RPTools/maptool/issues/1700
+[i1686]: https://github.com/RPTools/maptool/issues/1686
+[i1666]: https://github.com/RPTools/maptool/issues/1666
+[i1658]: https://github.com/RPTools/maptool/issues/1658
+[i1653]: https://github.com/RPTools/maptool/issues/1653
 [i1642]: https://github.com/RPTools/maptool/issues/1642
 [i1638]: https://github.com/RPTools/maptool/issues/1638
 [i1631]: https://github.com/RPTools/maptool/issues/1631
 [i1629]: https://github.com/RPTools/maptool/issues/1629
 [i1614]: https://github.com/RPTools/maptool/issues/1614
 [i1613]: https://github.com/RPTools/maptool/issues/1613
+[i1608]: https://github.com/RPTools/maptool/issues/1608
 [i1605]: https://github.com/RPTools/maptool/issues/1605
 [i1597]: https://github.com/RPTools/maptool/issues/1597
 [i1589]: https://github.com/RPTools/maptool/issues/1589
@@ -66,7 +91,10 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1473]: https://github.com/RPTools/maptool/issues/1473
 [i1463]: https://github.com/RPTools/maptool/issues/1463
 [i1425]: https://github.com/RPTools/maptool/issues/1425
+[i500]: https://github.com/RPTools/maptool/issues/500
+[i412]: https://github.com/RPTools/maptool/issues/412
 [i375]: https://github.com/RPTools/maptool/issues/375
+[i27]: https://github.com/RPTools/dicelib/issues/27
 
 Maptool 1.6.1
 =====
