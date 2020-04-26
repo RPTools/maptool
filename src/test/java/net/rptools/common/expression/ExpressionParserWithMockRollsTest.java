@@ -68,9 +68,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     RunData.setCurrent(mockRD);
     Result result = new ExpressionParser().evaluate("2d6rc3");
     assertEquals(new BigDecimal(6), result.getValue());
-  }
-
-  public void testEvaluate_CountSuccessesWithMockRunData() throws ParserException {
+  }public void testEvaluate_CountSuccessesWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // count the 5 and 6s
     setUpMockRunData(rolls);
     Result result = new ExpressionParser().evaluate("6d6s5");
@@ -110,5 +108,135 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     setUpMockRunData(rolls);
     Result result = new ExpressionParser().evaluate("4df");
     assertEquals(BigDecimal.ZERO, result.getValue());
+  }
+
+  public void testEvaluate_arsMagicaStress() throws ParserException {
+    int[] rolls = {3, 7, 5, 2, 3, 2, 8, 9, 4, 7};
+    setUpMockRunData(rolls);
+    for (int i = 0; i < rolls.length; i++) {
+      Result result = new ExpressionParser().evaluate("ans2");
+      assertEquals(BigDecimal.valueOf(rolls[i]), result.getValue());
+    }
+
+    setUpMockRunData(rolls);
+    for (int i = 0; i < rolls.length; i++) {
+      Result result = new ExpressionParser().evaluate("as2");
+      assertEquals(Integer.toString(rolls[i]), result.getValue());
+    }
+
+    int[] bonus = {1, 3, 0, -4, 5, -2, -1, 4};
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      for (int i = 0; i < rolls.length; i++) {
+        String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+        Result result = new ExpressionParser().evaluate("ans2b#" + bonusStr);
+        assertEquals(BigDecimal.valueOf(Math.max(rolls[i] + bonus[x], 0)), result.getValue());
+      }
+
+      setUpMockRunData(rolls);
+      for (int i = 0; i < rolls.length; i++) {
+        String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+        Result result = new ExpressionParser().evaluate("as2b#" + bonusStr);
+        assertEquals(Integer.toString(Math.max(rolls[i] + bonus[x], 0)), result.getValue());
+      }
+    }
+  }
+
+  public void testEvaluate_arsMagicaStressNoBotch() throws ParserException {
+    int[] rolls = {10, 3, 2};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("ans2");
+    assertEquals(BigDecimal.valueOf(0), result.getValue());
+
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("as2");
+    assertEquals(Integer.toString(0), result.getValue());
+
+    int[] bonus = {1, 3, 0, -4, 5, -2, -1, 4};
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("ans2b#" + bonusStr);
+      assertEquals(BigDecimal.valueOf(Math.max(0, bonus[x])), result.getValue());
+    }
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("as2b#" + bonusStr);
+      assertEquals(Integer.toString(Math.max(0, bonus[x])), result.getValue());
+    }
+
+    rolls = new int[] {10, 1, 1};
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("ans2");
+    assertEquals(BigDecimal.valueOf(0), result.getValue());
+
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("as2");
+    assertEquals(Integer.toString(0), result.getValue());
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("ans2b#" + bonusStr);
+      assertEquals(BigDecimal.valueOf(Math.max(0, bonus[x])), result.getValue());
+    }
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("as2b#" + bonusStr);
+      assertEquals(Integer.toString(Math.max(0, bonus[x])), result.getValue());
+    }
+  }
+
+  public void testEvaluate_arsMagicaStressBotch() throws ParserException {
+    int[] rolls = {10, 10, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("ans2");
+    assertEquals(BigDecimal.valueOf(-1), result.getValue());
+
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("as2");
+    assertEquals("0 (1 botch)", result.getValue());
+
+    rolls = new int[] {10, 10, 10, 10};
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("ans2");
+    assertEquals(BigDecimal.valueOf(-2), result.getValue());
+
+    setUpMockRunData(rolls);
+    result = new ExpressionParser().evaluate("as2");
+    assertEquals("0 (2 botches)", result.getValue());
+
+    int[] bonus = {1, 3, 0, -4, 5, -2, -1, 4};
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("ans2b#" + bonusStr);
+      assertEquals(BigDecimal.valueOf(-2), result.getValue());
+    }
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("as2b#" + bonusStr);
+      assertEquals("0 (2 botches)", result.getValue());
+    }
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("ans3b#" + bonusStr);
+      assertEquals(BigDecimal.valueOf(-3), result.getValue());
+    }
+
+    for (int x = 0; x < bonus.length; x++) {
+      setUpMockRunData(rolls);
+      String bonusStr = bonus[x] < 0 ? Integer.toString(bonus[x]) : "+" + bonus[x];
+      result = new ExpressionParser().evaluate("as3b#" + bonusStr);
+      assertEquals("0 (3 botches)", result.getValue());
+    }
   }
 }
