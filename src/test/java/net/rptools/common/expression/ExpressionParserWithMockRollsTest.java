@@ -54,7 +54,21 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(17), result.getValue());
   }
 
-  public void testEvaluate_CountSuccessesWithMockRunData() throws ParserException {
+  public void testEvaluate_RerollOnceAndKeepWithMockRunData() throws ParserException {
+    int[] rolls = {4, 2, 1}; // the 2 will be re-rolled, and the 1 will be kept
+    RunDataMockForTesting mockRD = new RunDataMockForTesting(new Result(""), rolls);
+    RunData.setCurrent(mockRD);
+    Result result = new ExpressionParser().evaluate("2d6rk3");
+    assertEquals(new BigDecimal(5), result.getValue());
+  }
+
+  public void testEvaluate_RerollOnceAndChooseWithMockRunData() throws ParserException {
+    int[] rolls = {4, 2, 1}; // the 2 will be re-rolled, but still kept as it is higher than the 1
+    RunDataMockForTesting mockRD = new RunDataMockForTesting(new Result(""), rolls);
+    RunData.setCurrent(mockRD);
+    Result result = new ExpressionParser().evaluate("2d6rc3");
+    assertEquals(new BigDecimal(6), result.getValue());
+  }public void testEvaluate_CountSuccessesWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // count the 5 and 6s
     setUpMockRunData(rolls);
     Result result = new ExpressionParser().evaluate("6d6s5");

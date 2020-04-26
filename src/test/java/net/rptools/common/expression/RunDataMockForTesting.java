@@ -119,7 +119,7 @@ public class RunDataMockForTesting extends RunData {
    * @param num the desired number of rolls (N)
    * @param minValue the lower bound
    * @param maxValue the upper bound
-   * @return integers less than or equal to maxValue
+   * @return integers greater than or equal to minValue and less than or equal to maxValue
    * @throws IllegalArgumentException if minValue is too high or maxValue is too low for the next N
    *     pre-configured rolls
    */
