@@ -168,7 +168,7 @@ public class AppActions {
 
   /** This action will rotate through the PC tokens owned by the player. */
   public static final Action NEXT_TOKEN =
-      new DefaultClientAction() {
+      new ZoneClientAction() {
         {
           init("menu.nextToken");
         }
@@ -227,8 +227,8 @@ public class AppActions {
         }
       };
 
-  public static final DefaultClientAction EXPORT_SCREENSHOT =
-      new DefaultClientAction() {
+  public static final ClientAction EXPORT_SCREENSHOT =
+      new ZoneClientAction() {
         {
           init("action.exportScreenShotAs");
         }
@@ -246,7 +246,7 @@ public class AppActions {
       };
 
   public static final Action EXPORT_SCREENSHOT_LAST_LOCATION =
-      new DefaultClientAction() {
+      new ZoneClientAction() {
         {
           init("action.exportScreenShot");
         }
@@ -592,7 +592,7 @@ public class AppActions {
       };
 
   public static final Action RENAME_ZONE =
-      new AdminClientAction() {
+      new ZoneAdminClientAction() {
 
         {
           init("action.renameMap");
@@ -701,8 +701,8 @@ public class AppActions {
         }
       };
 
-  public static final DefaultClientAction UNDO_PER_MAP =
-      new DefaultClientAction() {
+  public static final ClientAction UNDO_PER_MAP =
+      new ZoneClientAction() {
         {
           init("action.undoDrawing");
           isAvailable(); // XXX FJE Is this even necessary?
@@ -734,8 +734,8 @@ public class AppActions {
         }
       };
 
-  public static final DefaultClientAction REDO_PER_MAP =
-      new DefaultClientAction() {
+  public static final ClientAction REDO_PER_MAP =
+      new ZoneClientAction() {
         {
           init("action.redoDrawing");
           isAvailable(); // XXX Is this even necessary?
@@ -780,8 +780,8 @@ public class AppActions {
    * @Override public boolean isAvailable() { setEnabled(DrawableUndoManager.getInstance().getUndoManager().canRedo()); return isEnabled(); } };
    */
 
-  public static final DefaultClientAction CLEAR_DRAWING =
-      new DefaultClientAction() {
+  public static final ClientAction CLEAR_DRAWING =
+      new ZoneClientAction() {
         {
           init("action.clearDrawing");
         }
@@ -800,22 +800,12 @@ public class AppActions {
           // FJE ServerMethodHandler.clearAllDrawings() now empties the DrawableUndoManager as well.
           MapTool.serverCommand().clearAllDrawings(renderer.getZone().getId(), layer);
         }
-
-        @Override
-        public boolean isAvailable() {
-          return true;
-        }
       };
 
-  public static final DefaultClientAction CUT_TOKENS =
-      new DefaultClientAction() {
+  public static final ClientAction CUT_TOKENS =
+      new ZoneClientAction() {
         {
           init("action.cutTokens");
-        }
-
-        @Override
-        public boolean isAvailable() {
-          return super.isAvailable() && MapTool.getFrame().getCurrentZoneRenderer() != null;
         }
 
         @Override
@@ -899,15 +889,10 @@ public class AppActions {
     }
   }
 
-  public static final DefaultClientAction COPY_TOKENS =
-      new DefaultClientAction() {
+  public static final ClientAction COPY_TOKENS =
+      new ZoneClientAction() {
         {
           init("action.copyTokens");
-        }
-
-        @Override
-        public boolean isAvailable() {
-          return super.isAvailable() && MapTool.getFrame().getCurrentZoneRenderer() != null;
         }
 
         @Override
@@ -1044,8 +1029,8 @@ public class AppActions {
     }
   }
 
-  public static final DefaultClientAction PASTE_TOKENS =
-      new DefaultClientAction() {
+  public static final ClientAction PASTE_TOKENS =
+      new ZoneClientAction() {
         {
           init("action.pasteTokens");
         }
@@ -2686,8 +2671,9 @@ public class AppActions {
 
         @Override
         public boolean isAvailable() {
-          return MapTool.isHostingServer()
-              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+          return MapTool.getFrame().getCurrentZoneRenderer() != null
+              && (MapTool.isHostingServer()
+                  || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM()));
         }
 
         @Override
@@ -3032,7 +3018,7 @@ public class AppActions {
       };
 
   public static final Action EDIT_MAP =
-      new AdminClientAction() {
+      new ZoneAdminClientAction() {
         {
           init("action.editMap");
         }
@@ -3323,6 +3309,17 @@ public class AppActions {
     @Override
     public boolean isAvailable() {
       return super.isAvailable() && MapTool.getFrame().getCurrentZoneRenderer() != null;
+    }
+  }
+
+  /**
+   * This class simply provides an implementation for <code>isAvailable()</code> that returns <code>
+   * true</code> if there is a ZoneRenderer current.
+   */
+  public abstract static class ZoneClientAction extends ClientAction {
+    @Override
+    public boolean isAvailable() {
+      return MapTool.getFrame().getCurrentZoneRenderer() != null;
     }
   }
 
