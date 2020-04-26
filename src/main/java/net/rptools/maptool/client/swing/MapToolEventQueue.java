@@ -88,7 +88,8 @@ public class MapToolEventQueue extends EventQueue {
       } else if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
         if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
-          // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is held down.
+          // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
+          // held down.
           return;
         }
       }
