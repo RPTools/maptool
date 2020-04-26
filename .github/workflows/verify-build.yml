@@ -42,4 +42,6 @@ jobs:
       #- name: Junit Report to Annotations
       #  uses: ashley-taylor/junit-report-annotations-action@v1.0
       - name: Build with Gradle
-        run: ./gradlew build
+        uses: GabrielBB/xvfb-action@v1.0
+        with: 
+          run: ./gradlew build
