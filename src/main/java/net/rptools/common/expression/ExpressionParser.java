@@ -160,7 +160,13 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)"},
         new String[] {"\\b[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)"},
         new String[] {"\\b(\\d+)[dD](\\d+)[qQ]\\b", "rollAddWithLower($1, $2, 0, 1)"},
-        new String[] {"\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)"}
+        new String[] {"\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)"},
+
+        // Ars Magica Stress Die
+        new String[] {"\\b[aA][sS](\\d+)\\b", "arsMagicaStress($1, 0)"},
+        new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
+        new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
+        new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
       };
 
   private final Parser parser;
@@ -198,6 +204,7 @@ public class ExpressionParser {
     parser.addFunction(new RollWithBounds());
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
+    parser.addFunction(new ArsMagicaStress());
 
     parser.addFunction(new If());
 

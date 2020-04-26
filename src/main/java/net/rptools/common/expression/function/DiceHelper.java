@@ -117,7 +117,7 @@ public class DiceHelper {
 
     if (lowerBound > sides)
       throw new EvaluationException(
-              "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
+          "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
 
     int[] values = new int[times];
 
@@ -137,23 +137,28 @@ public class DiceHelper {
   }
 
   /**
-   * Rolls X dice with Y sides each, with any result lower than L being re-rolled once.  If chooseHigher is true, the higher of the two rolled values is kept.  Otherwise, the new roll is kept regardless.
-   * <p>
-   * Differs from {@link #rerollDice(int, int, int)} in that the new results are allowed to fall beneath the given lowerBound, instead of being re-rolled again.
+   * Rolls X dice with Y sides each, with any result lower than L being re-rolled once. If
+   * chooseHigher is true, the higher of the two rolled values is kept. Otherwise, the new roll is
+   * kept regardless.
    *
-   * @param times        the number of dice
-   * @param sides        the number of sides
-   * @param lowerBound   the number below which dice will be re-rolled. Must be strictly lower than the number of sides.
+   * <p>Differs from {@link #rerollDice(int, int, int)} in that the new results are allowed to fall
+   * beneath the given lowerBound, instead of being re-rolled again.
+   *
+   * @param times the number of dice
+   * @param sides the number of sides
+   * @param lowerBound the number below which dice will be re-rolled. Must be strictly lower than
+   *     the number of sides.
    * @param chooseHigher whether the original result may be preserved if it was the higher value
    * @return the total of the rolled and re-rolled dice
    * @throws EvaluationException if an invalid lowerBound is provided
    */
-  public static int rerollDiceOnce(int times, int sides, int lowerBound, boolean chooseHigher) throws EvaluationException {
+  public static int rerollDiceOnce(int times, int sides, int lowerBound, boolean chooseHigher)
+      throws EvaluationException {
     RunData runData = RunData.getCurrent();
 
     if (lowerBound > sides)
       throw new EvaluationException(
-              "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
+          "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
 
     int[] values = new int[times];
 
