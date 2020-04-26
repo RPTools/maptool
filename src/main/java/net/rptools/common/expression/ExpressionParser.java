@@ -57,6 +57,14 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[dD](\\d+)[rR](\\d+)\\b", "reroll($1, $2, $3)"},
         new String[] {"\\b[dD](\\d+)[rR](\\d+)\\b", "reroll(1, $1, $2)"},
 
+        // re-roll once and keep the new value
+        new String[] {"\\b(\\d+)[dD](\\d+)[rR][kK](\\d+)\\b", "rerollOnce($1, $2, $3)"},
+        new String[] {"\\b[dD](\\d+)[rR][kK](\\d+)\\b", "rerollOnce(1, $1, $2)"},
+
+        // re-roll once and choose the higher value
+        new String[] {"\\b(\\d+)[dD](\\d+)[rR][cC](\\d+)\\b", "rerollOnce($1, $2, $3, true)"},
+        new String[] {"\\b[dD](\\d+)[rR][cC](\\d+)\\b", "rerollOnce(1, $1, $2, true)"},
+
         // count success
         new String[] {"\\b(\\d+)[dD](\\d+)[sS](\\d+)\\b", "success($1, $2, $3)"},
         new String[] {"\\b[dD](\\d+)[sS](\\d+)\\b", "success(1, $1, $2)"},
@@ -152,7 +160,13 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)"},
         new String[] {"\\b[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)"},
         new String[] {"\\b(\\d+)[dD](\\d+)[qQ]\\b", "rollAddWithLower($1, $2, 0, 1)"},
-        new String[] {"\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)"}
+        new String[] {"\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)"},
+
+        // Ars Magica Stress Die
+        new String[] {"\\b[aA][sS](\\d+)\\b", "arsMagicaStress($1, 0)"},
+        new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
+        new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
+        new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
       };
 
   private final Parser parser;
@@ -177,6 +191,7 @@ public class ExpressionParser {
     parser.addFunction(new ExplodeDice());
     parser.addFunction(new KeepRoll());
     parser.addFunction(new RerollDice());
+    parser.addFunction(new RerollDiceOnce());
     parser.addFunction(new HeroRoll());
     parser.addFunction(new HeroKillingRoll());
     parser.addFunction(new FudgeRoll());
@@ -189,6 +204,7 @@ public class ExpressionParser {
     parser.addFunction(new RollWithBounds());
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
+    parser.addFunction(new ArsMagicaStress());
 
     parser.addFunction(new If());
 
@@ -207,8 +223,11 @@ public class ExpressionParser {
     Result ret = new Result(expression);
     RunData oldData = RunData.hasCurrent() ? RunData.getCurrent() : null;
     try {
-      RunData newRunData = new RunData(ret);
-      RunData.setCurrent(newRunData);
+      RunData newRunData = oldData;
+      if (oldData == null) {
+        newRunData = new RunData(ret);
+        RunData.setCurrent(newRunData);
+      }
 
       synchronized (parser) {
         Expression xp = parser.parseExpression(expression);

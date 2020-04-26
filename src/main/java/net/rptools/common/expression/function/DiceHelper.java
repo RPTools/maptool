@@ -136,6 +136,53 @@ public class DiceHelper {
     return result;
   }
 
+  /**
+   * Rolls X dice with Y sides each, with any result lower than L being re-rolled once. If
+   * chooseHigher is true, the higher of the two rolled values is kept. Otherwise, the new roll is
+   * kept regardless.
+   *
+   * <p>Differs from {@link #rerollDice(int, int, int)} in that the new results are allowed to fall
+   * beneath the given lowerBound, instead of being re-rolled again.
+   *
+   * @param times the number of dice
+   * @param sides the number of sides
+   * @param lowerBound the number below which dice will be re-rolled. Must be strictly lower than
+   *     the number of sides.
+   * @param chooseHigher whether the original result may be preserved if it was the higher value
+   * @return the total of the rolled and re-rolled dice
+   * @throws EvaluationException if an invalid lowerBound is provided
+   */
+  public static int rerollDiceOnce(int times, int sides, int lowerBound, boolean chooseHigher)
+      throws EvaluationException {
+    RunData runData = RunData.getCurrent();
+
+    if (lowerBound > sides)
+      throw new EvaluationException(
+          "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
+
+    int[] values = new int[times];
+
+    for (int i = 0; i < values.length; i++) {
+      int roll = runData.randomInt(sides);
+      if (roll < lowerBound) {
+        int roll2 = runData.randomInt(sides);
+        if (chooseHigher) {
+          roll = Math.max(roll, roll2);
+        } else {
+          roll = roll2;
+        }
+      }
+      values[i] = roll;
+    }
+
+    int result = 0;
+    for (int i = 0; i < values.length; i++) {
+      result += values[i];
+    }
+
+    return result;
+  }
+
   public static int explodeDice(int times, int sides) throws EvaluationException {
     int result = 0;
 

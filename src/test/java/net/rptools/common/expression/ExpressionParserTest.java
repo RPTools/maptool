@@ -53,6 +53,20 @@ public class ExpressionParserTest extends TestCase {
     assertEquals(new BigDecimal(138), result.getValue());
   }
 
+  public void testEvaluate_RerollOnceAndKeep() throws ParserException {
+    RunData.setSeed(10423L);
+    Result result = new ExpressionParser().evaluate("20d10rk5");
+    // the sequence of rolls produced includes an instance of a 4 being replaced by a 3
+    assertEquals(new BigDecimal(121), result.getValue());
+  }
+
+  public void testEvaluate_RerollOnceAndChoose() throws ParserException {
+    RunData.setSeed(10423L);
+    Result result = new ExpressionParser().evaluate("20d10rc5");
+    // in rerollAndChoose mode, the 4 gets preserved instead of being replaced by the 3
+    assertEquals(new BigDecimal(122), result.getValue());
+  }
+
   public void testEvaluate_CountSuccess() throws ParserException {
     RunData.setSeed(10423L);
     Result result = new ExpressionParser().evaluate("100+10d6s4+1");
