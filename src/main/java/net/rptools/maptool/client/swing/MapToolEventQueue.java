@@ -28,6 +28,8 @@ import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -86,7 +88,7 @@ public class MapToolEventQueue extends EventQueue {
         }
       } else if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (mwe.isShiftDown() && MapToolEventQueue.shiftState != 1) {
+        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
           // issue 1317: ignore ALL horizontal movement, *even if* the physical Shift is held down.
           // This means only vertical movement will be recognized and the user will have
           // to hold down the Shift key to effect it.
