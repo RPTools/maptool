@@ -1144,6 +1144,8 @@ public class ZoneRenderer extends JComponent
     timer.start("setup");
     g2d.setFont(AppStyle.labelFont);
     Object oldAA = SwingUtil.useAntiAliasing(g2d);
+    g2d.setRenderingHint(
+        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
     Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
     Area viewArea = new Area(viewRect);
