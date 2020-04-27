@@ -4796,9 +4796,10 @@ public class ZoneRenderer extends JComponent
         }
       }
     }
-    ;
+
     if (image == null) {
-      image = ImageManager.getImage(token.getImageAssetId());
+      // Adds this as observer so we can repaint once the image is ready. Fixes #1700.
+      image = ImageManager.getImage(token.getImageAssetId(), this);
     }
     return image;
   }
