@@ -1604,7 +1604,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize(), false);
+          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
         }
 
         Dimension statSize = null;
