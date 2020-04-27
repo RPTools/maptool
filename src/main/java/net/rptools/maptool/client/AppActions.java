@@ -1655,7 +1655,7 @@ public class AppActions {
         }
 
         @Override
-        protected void executeAction(ActionEvent e) {
+        protected void executeAction() {
           MapTool.getFrame().showNoteBook();
         }
       };
