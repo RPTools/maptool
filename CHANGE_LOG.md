@@ -11,12 +11,14 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 
 **Enhancements**
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
+- [#1553][i1553] Many of the dialogs in MapTool have been localized so that the text strings are pulled from the I18N translation files.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
 - [#1518][i1518] PDF image extraction in the Resource Library now supports extaction of full page images.
 - [#1506][i1506] MapTool now supports importing Dungeondraft `.dd2vtt` files. This brings in not only the map image but also vision blocking information and the location of light sources.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
 - [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
 - [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
+- [#975][i975] **New GM option to disable use of Edit Token dialog by player clients.**
 - [#500][i500] **Ars Magica Stress Dice roll option.**
   - ASnb#+b / ASnb#-b (or asn#+b / asn#-b) - return is a string
   - ANSnb#+b / ANSnb#-b (or ansn#+b / ansn#-b) - return is a number
@@ -28,9 +30,15 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 **Bug Fixes**
 - [#1700][i1700] **Tokens/stamps showing as "?" image until map is updated. Fixed.**
 - [#1686][i1686] **Crowdin configuration file was display as option in Preferences -> Language. Fixed.**
+- [#1675][i1675] **Left-click on a token when multiple are already selected wasn't clearing selection on other tokens. Fixed.**
+- [#1670][i1670] **ModelChangeListeners on Impersonate/Selection panels were not getting removed causing a performance hit as more maps were added to campaign. Fixed.**
 - [#1666][i1666] **Changing token selection was causing Impersonated panel to update causing a delay. Fixed.**
 - [#1658][i1658] **Deleting a token was causing the Impersonated panel to update cause a delay. Fixed.**
+- [#1657][i1657] **Macros deleted via the Common group were not being updated on clients. Fixed.**
+- [#1654][i1654] **Deleting/cutting multiple tokens cause the TOKEN_REMOVED event to be fired multiple times creating lag as the Selection and Impersonate panels were then reset for eac one. Fixed.**
 - [#1653][i1653] **Changing snap-to-grid status for tokens and stamps could cause them to move. Fixed.**
+- [#1648][i1648] **Null Pointer Exception when toggling Player Movement Lock as non-hosting GM. Fixed.**
+- [#1646][i1646] **Null Pointer Exception when a map is deleted while a token is being edited. Fixed.**
 - [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
 - [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
 - [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
@@ -52,6 +60,8 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
+- [#1317][i1317] **Horizontal scrolling issues on MacOS fixed.**
+- [#507][i507] **The map setting Units per Cell wasn't being handled correctly for locales that use a comma for the decimal point. Fixed.**
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
 **Other**
@@ -60,9 +70,15 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 [i1704]: https://github.com/RPTools/maptool/pull/1704
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1686]: https://github.com/RPTools/maptool/issues/1686
+[i1675]: https://github.com/RPTools/maptool/issues/1675
+[i1670]: https://github.com/RPTools/maptool/issues/1670
 [i1666]: https://github.com/RPTools/maptool/issues/1666
 [i1658]: https://github.com/RPTools/maptool/issues/1658
+[i1657]: https://github.com/RPTools/maptool/issues/1657
+[i1654]: https://github.com/RPTools/maptool/issues/1654
 [i1653]: https://github.com/RPTools/maptool/issues/1653
+[i1648]: https://github.com/RPTools/maptool/issues/1648
+[i1646]: https://github.com/RPTools/maptool/issues/1646
 [i1642]: https://github.com/RPTools/maptool/issues/1642
 [i1638]: https://github.com/RPTools/maptool/issues/1638
 [i1631]: https://github.com/RPTools/maptool/issues/1631
@@ -79,6 +95,7 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 [i1568]: https://github.com/RPTools/maptool/issues/1568
 [i1566]: https://github.com/RPTools/maptool/issues/1566
 [i1564]: https://github.com/RPTools/maptool/issues/1564
+[i1553]: https://github.com/RPTools/maptool/issues/1553
 [i1551]: https://github.com/RPTools/maptool/issues/1551
 [i1548]: https://github.com/RPTools/maptool/issues/1548
 [i1538]: https://github.com/RPTools/maptool/issues/1538
@@ -91,6 +108,9 @@ Changes since 1.7.0-alpha-1 in **BOLD**.
 [i1473]: https://github.com/RPTools/maptool/issues/1473
 [i1463]: https://github.com/RPTools/maptool/issues/1463
 [i1425]: https://github.com/RPTools/maptool/issues/1425
+[i1317]: https://github.com/RPTools/maptool/issues/1317
+[i975]: https://github.com/RPTools/maptool/issues/975
+[i507]: https://github.com/RPTools/maptool/issues/507
 [i500]: https://github.com/RPTools/maptool/issues/500
 [i412]: https://github.com/RPTools/maptool/issues/412
 [i375]: https://github.com/RPTools/maptool/issues/375
