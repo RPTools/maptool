@@ -49,6 +49,7 @@ build-resources/rptools-keystore
 /log.html
 /report.html
 /output.xml
+/lib/jide/
 
 
 ################################################################################
