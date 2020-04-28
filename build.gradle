@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.0.1"
     id "com.diffplug.gradle.spotless" version "3.28.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.8.1'
+    id 'org.beryx.runtime' version '1.8.2'
 }
 
 // Apply the java plugin to add support for Java
@@ -46,32 +46,27 @@ ext {
         enviroment = "Production"
         sentryDSN = sentry_production_dsn
     } else {
-
         tagVersion = 'SNAPSHOT-' + revision
         project.description = "SNAPSHOT-" + revision
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
 
-    // TODO: verify this follows x.x.x semver otherwise do fix for jpackage because we are
-    //       unable to use non-semver tagging because jpackage forces msi versioning on installers
-    appVersion = tagVersion
+    // This will strip anything other than core semver from the tag
+    // e.g. "1.7.2-rc.1" becomes "1.7.2"
+    appSemVer = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
 
-    // not doing anything as of a bug in grgit when opening with currentDir/dir
-    // https://github.com/ajoberstar/grgit/issues/288
-    grgit.close()
-    // therefore close the underlying repository manually
-    grgit.repository.jgit.getRepository().close()
+    // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
+    if(appSemVer.isEmpty()) {
+        appSemVer = defaultVersion
+    }
 
-    // Unable to use non-semver tagging because of .msi restrictions
-    // releaseDir = file("/releases/" + tagVersion + "/")
-    releaseDir = file("/releases/")
-
-    // vendor, tagVersion, appVersion, and DSNs defaults are set in gradle.properties
-    println "OS Detected: " + osdetector.os
-
-    // vendor, tagVersion, appVersion, and DSN's defaults are set in gradle.properties
+    // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
+    println "AppVersion: " + appSemVer
+
+    // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
+    println "OS Detected: " + osdetector.os
 }
 
 spotless {
@@ -110,7 +105,7 @@ javafx {
 }
 
 run {
-    args = ['-v=' + appVersion]
+    args = ['-v=' + appSemVer]
     applicationDefaultJvmArgs = ["-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor]
     // Add -Dlog4j2.debug to see log4j2 details
 
@@ -133,11 +128,12 @@ runtime {
     jpackage {
         // not working :(
         // installerOutputDir = releaseDir
-        // installerOutputDir = file("releases")
+       // installerOutputDir = file("releases")
         // imageOutputDir = file("$buildDir/my-packaging-image")
         outputDir = "../releases"
 
         imageOptions = []
+//        imageOptions = ['--icon', 'src/main/resources/java.ico']
         imageName = 'MapTool'
 
         installerName = 'MapTool'
@@ -146,8 +142,9 @@ runtime {
                 '--description', project.description,
                 '--copyright', 'Copyright 2000-2020 RPTools.net',
                 '--license-file', 'package/license/COPYING.AFFERO',
-                '--app-version', appVersion,
-                '--vendor', vendor
+                '--app-version', appSemVer,
+                '--vendor', vendor//,
+               // '--file-associations', 'src/main/resources/associations.properties'
         ]
 
         if (osdetector.os.is('windows')) {
