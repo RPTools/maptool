@@ -1688,8 +1688,7 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash =
-        new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)

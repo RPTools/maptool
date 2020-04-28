@@ -43,17 +43,19 @@ ext {
 
     if (tags) {
         tagVersion = tags.getName()
-        msiVersion = tagVersion
         enviroment = "Production"
         sentryDSN = sentry_production_dsn
     } else {
-        // Unable to use non-semver tagging because of .msi restrictions
-        //tagVersion = 'SNAPSHOT-' + revision
-        tagVersion = msiVersion
+
+        tagVersion = 'SNAPSHOT-' + revision
         project.description = "SNAPSHOT-" + revision
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
+
+    // TODO: verify this follows x.x.x semver otherwise do fix for jpackage because we are
+    //       unable to use non-semver tagging because jpackage forces msi versioning on installers
+    appVersion = tagVersion
 
     // not doing anything as of a bug in grgit when opening with currentDir/dir
     // https://github.com/ajoberstar/grgit/issues/288
@@ -65,10 +67,10 @@ ext {
     // releaseDir = file("/releases/" + tagVersion + "/")
     releaseDir = file("/releases/")
 
-    // vendor, tagVersion, msiVersion, and DSNs defaults are set in gradle.properties
+    // vendor, tagVersion, appVersion, and DSNs defaults are set in gradle.properties
     println "OS Detected: " + osdetector.os
 
-    // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
+    // vendor, tagVersion, appVersion, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
 }
 
@@ -96,8 +98,8 @@ spotless {
 }
 
 jacoco {
-toolVersion = "0.8.5"
-reportsDir = file("$buildDir/reports/jacoco")
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/reports/jacoco")
 }
 
 // org.openjfx.javafxplugin
@@ -108,10 +110,11 @@ javafx {
 }
 
 run {
-    args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
+    args = ['-v=' + appVersion]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor]
+    // Add -Dlog4j2.debug to see log4j2 details
 
-    if(System.getProperty("exec.args") != null) {
+    if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
     }
 }
@@ -143,7 +146,7 @@ runtime {
                 '--description', project.description,
                 '--copyright', 'Copyright 2000-2020 RPTools.net',
                 '--license-file', 'package/license/COPYING.AFFERO',
-                '--app-version', tagVersion,
+                '--app-version', appVersion,
                 '--vendor', vendor
         ]
 
@@ -175,17 +178,17 @@ runtime {
                     '--linux-shortcut'
             ]
 
-             if (installerType == 'deb') {
-                 installerOptions += [
-                         '--linux-deb-maintainer', 'admin@rptools.net'
-                 ]
-             }
+            if (installerType == 'deb') {
+                installerOptions += [
+                        '--linux-deb-maintainer', 'admin@rptools.net'
+                ]
+            }
 
-             if (installerType == 'rpm') {
-                 installerOptions += [
-                         '--linux-rpm-license-type', 'AGPLv3'
-                 ]
-             }
+            if (installerType == 'rpm') {
+                installerOptions += [
+                        '--linux-rpm-license-type', 'AGPLv3'
+                ]
+            }
         }
     }
 }
@@ -204,6 +207,8 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    implementation files('lib/packager.jar')
+
     // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
     // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
@@ -322,9 +327,9 @@ task configSentryRelease(type: Copy) {
     into("src/main/resources/")
     rename("sentry.properties.template", "sentry.properties")
     def tokens = [
-        AppVersion: "${tagVersion}",
-        Environment: "${enviroment}",
-        SentryDSN: "${sentryDSN}"
+            AppVersion : "${tagVersion}",
+            Environment: "${enviroment}",
+            SentryDSN  : "${sentryDSN}"
     ]
     expand(tokens)
     inputs.properties(tokens)
@@ -339,16 +344,16 @@ task uberJar(type: Jar) {
 
     manifest {
         attributes 'Implementation-Title': project.name,
-        'Implementation-Version': tagVersion,
-        'Implementation-Vendor': vendor,
-        'Git-Commit': revision,
-        'Git-Commit-SHA': revisionFull,
-        'Built-By': System.getProperty('user.name'),
-        'Built-Date': new Date(),
-        'Built-JDK': System.getProperty('java.version'),
-        'Source-Compatibility': project.sourceCompatibility,
-        'Target-Compatibility': project.targetCompatibility,
-        'Main-Class': project.mainClassName
+                'Implementation-Version': tagVersion,
+                'Implementation-Vendor': vendor,
+                'Git-Commit': revision,
+                'Git-Commit-SHA': revisionFull,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                'Main-Class': project.mainClassName
     }
 
     from {
