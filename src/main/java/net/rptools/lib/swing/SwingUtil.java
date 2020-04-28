@@ -143,18 +143,12 @@ public class SwingUtil {
   }
 
   public static void constrainTo(Dimension dim, int size) {
-    constrainTo(dim, size, true);
-  }
-
-  public static void constrainTo(Dimension dim, int size, boolean grow) {
     boolean widthBigger = dim.width > dim.height;
 
     if (widthBigger) {
-      if (!grow) size = Math.min(size, dim.width);
       dim.height = (int) ((dim.height / (double) dim.width) * size);
       dim.width = size;
     } else {
-      if (!grow) size = Math.min(size, dim.height);
       dim.width = (int) ((dim.width / (double) dim.height) * size);
       dim.height = size;
     }
