@@ -628,7 +628,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getPropertyTable().getCellEditor().stopCellEditing();
     }
     // Commit the changes to the token properties
-    if (!super.commit()) {
+    // If no map available, cancel the commit. Fixes #1646.
+    if (!super.commit() || MapTool.getFrame().getCurrentZoneRenderer() == null) {
       return false;
     }
     // SIZE
