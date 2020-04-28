@@ -298,7 +298,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           }
           line = line.substring(0, index);
         }
-        property.setName(line.trim());
+        line = line.trim();
+        property.setName(line);
         // Since property names are not case-sensitive, let's make sure that we don't
         // already have this name represented somewhere in the list.
         String old = caseCheck.get(line);
