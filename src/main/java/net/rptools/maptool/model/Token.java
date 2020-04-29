@@ -1552,37 +1552,15 @@ public class Token extends BaseModel implements Cloneable {
       return new ZonePoint(getX(), getY());
     }
     Grid grid = zone.getGrid();
-    Rectangle tokenBounds = getBounds(zone);
-    ZonePoint zp;
-    double tx, ty;
-    if (grid.getCapabilities().isSnapToGridSupported()) {
-      if (isBackgroundStamp() || isSnapToScale()) {
-        Dimension offset = grid.getCellOffset();
-        tx = getX() - tokenBounds.width * offset.width / grid.getCellWidth();
-        ty = getY() - tokenBounds.height * offset.height / grid.getCellHeight();
-      } else {
-        tx = getX() + tokenBounds.width / 2.0;
-        ty = getY() + tokenBounds.height / 2.0;
-      }
-      zp = grid.convert(grid.convert(new ZonePoint((int) tx, (int) ty)));
+    Point2D.Double offset = getSnapToUnsnapOffset(zone);
+    double newX = getX() + offset.x;
+    double newY = getY() + offset.y;
+    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+      return grid.convert(
+          grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
-      double newX = getX() + (tokenBounds.width / 2.0) - (grid.getCellWidth() / 2.0);
-      double newY = getY() + (tokenBounds.height / 2.0) - (grid.getCellHeight() / 2.0);
-      // Odd rounding necessary or there will be a 1 pixel offset when snapping
-      int roundedX, roundedY;
-      if (Math.signum(newX) == Math.signum(getX())) {
-        roundedX = (int) ((newX >= 0) ? Math.ceil(newX) : Math.floor(newX));
-      } else {
-        roundedX = (int) newX;
-      }
-      if (Math.signum(newY) == Math.signum(getY())) {
-        roundedY = (int) ((newY >= 0) ? Math.ceil(newY) : Math.floor(newY));
-      } else {
-        roundedY = (int) newY;
-      }
-      zp = new ZonePoint(roundedX, roundedY);
+      return new ZonePoint((int) newX, (int) newY);
     }
-    return zp;
   }
   /**
    * Gets the point where the token should go, if it were to be unsnapped from the grid.
@@ -1593,25 +1571,56 @@ public class Token extends BaseModel implements Cloneable {
   public ZonePoint getUnsnappedPoint(Zone zone) {
     if (!snapToGrid) {
       return new ZonePoint(getX(), getY());
+    } else {
+      Point2D.Double offset = getSnapToUnsnapOffset(zone);
+      return new ZonePoint((int) (getX() - offset.x), (int) (getY() - offset.y));
     }
+  }
+
+  /**
+   * Gets the offset from the snapped position to the unsnapped position.
+   *
+   * @param zone the zone where the token is
+   * @return a point representing the x, y offset
+   */
+  private Point2D.Double getSnapToUnsnapOffset(Zone zone) {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
       if (isBackgroundStamp() || isSnapToScale()) {
-        Dimension offset = grid.getCellOffset();
-        offsetX = -tokenBounds.width * offset.width / grid.getCellWidth();
-        offsetY = -tokenBounds.height * offset.height / grid.getCellHeight();
+        TokenFootprint footprint = getFootprint(grid);
+        Rectangle footprintBounds = footprint.getBounds(grid);
+        double footprintOffsetX = 0;
+        double footprintOffsetY = 0;
+        if (!isBackgroundStamp()) {
+          // Non-background tokens can have an offset from top left corner
+          footprintOffsetX = tokenBounds.width - footprintBounds.width;
+          footprintOffsetY = tokenBounds.height - footprintBounds.height;
+        }
+        double cellsX = footprintBounds.width / grid.getCellWidth();
+        double cellsY = footprintBounds.height / grid.getCellHeight();
+        Dimension cellOffset = grid.getCellOffset();
+
+        offsetX = footprintOffsetX / 2.0 - cellOffset.width * cellsX;
+        offsetY = footprintOffsetY / 2.0 - cellOffset.height * cellsY;
+        if (grid.isHex() && "large".equalsIgnoreCase(footprint.getName())) {
+          // Merudo: not sure why this special case is needed.
+          offsetX = offsetX - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
+          offsetY = offsetY - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
+        }
       } else {
+        // Free-size tokens have their position at their center, plus a grid-specific offset
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = tokenBounds.width / 2.0 - centerOffset.x;
         offsetY = tokenBounds.height / 2.0 - centerOffset.y;
       }
     } else {
+      // Gridless non-background tokens hve their position at their center, plus half a cell
       offsetX = tokenBounds.width / 2.0 - grid.getCellWidth() / 2.0;
       offsetY = tokenBounds.height / 2.0 - grid.getCellHeight() / 2.0;
     }
-    return new ZonePoint((int) (getX() - offsetX), (int) (getY() - offsetY));
+    return new Point2D.Double(offsetX, offsetY);
   }
 
   /** @return the String of the sightType */

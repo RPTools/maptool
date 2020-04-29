@@ -1340,10 +1340,9 @@ public class MapTool {
         AppActions.loadCampaign(campaignFile);
       }
     }
-    // loadCampaign() is guaranteed to restart the ASM so we don't need this, but
-    // we can't be sure which path of the IF statement is taken, so this is easy
-    // and relatively inexpensive.
-    getAutoSaveManager().restart();
+
+    // fire up autosaves
+    getAutoSaveManager().start();
 
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 

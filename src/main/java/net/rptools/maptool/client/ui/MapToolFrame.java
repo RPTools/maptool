@@ -966,6 +966,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   private void showGlassPane(JComponent component, int x, int y, boolean modal) {
+    glassPane.removeAll();
     component.setSize(component.getPreferredSize());
     component.setLocation(x, y);
     glassPane.setLayout(null);
@@ -975,6 +976,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void showFilledGlassPane(JComponent component) {
+    glassPane.removeAll();
     glassPane.setLayout(new GridLayout());
     glassPane.add(component);
     // glassPane.setActionMap(null);
@@ -1808,18 +1810,7 @@ public class MapToolFrame extends DefaultDockableHolder
           return;
         }
         if (result == JOptionPane.YES_OPTION) {
-          final Observer callback =
-              new Observer() {
-                public void update(java.util.Observable o, Object arg) {
-                  if (arg instanceof String) {
-                    // There was an error during the save -- don't terminate MapTool!
-                  } else {
-                    MapTool.getFrame().close();
-                  }
-                }
-              };
-          ActionEvent ae = new ActionEvent(callback, 0, "close");
-          AppActions.SAVE_CAMPAIGN.actionPerformed(ae);
+          AppActions.doSaveCampaign(() -> MapTool.getFrame().close());
           return;
         }
       } else {

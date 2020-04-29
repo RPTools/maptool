@@ -3057,7 +3057,7 @@ public class ZoneRenderer extends JComponent
         // Don't bother if it's not visible
         // NOTE: Not going to use zone.isTokenVisible as it is very slow. In fact, it's faster
         // to just draw the tokens and let them be clipped
-        if (!token.isVisible() && !isGMView) {
+        if ((!token.isVisible() || token.isGMStamp()) && !isGMView) {
           continue;
         }
         if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
@@ -3370,10 +3370,6 @@ public class ZoneRenderer extends JComponent
       timer.start("tokenlist-7");
       // If the token is a figure and if its visible, draw all of it.
       if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
-        // Lets skip tokens on the Hidden layer
-        if (token.isGMStamp()) {
-          continue;
-        }
         Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
           // the cell intersects visible area so
@@ -3391,10 +3387,6 @@ public class ZoneRenderer extends JComponent
           }
         }
       } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
-        // Lets skip tokens on the Hidden layer
-        if (token.isGMStamp()) {
-          continue;
-        }
         // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
         Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
@@ -4796,9 +4788,10 @@ public class ZoneRenderer extends JComponent
         }
       }
     }
-    ;
+
     if (image == null) {
-      image = ImageManager.getImage(token.getImageAssetId());
+      // Adds this as observer so we can repaint once the image is ready. Fixes #1700.
+      image = ImageManager.getImage(token.getImageAssetId(), this);
     }
     return image;
   }

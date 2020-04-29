@@ -181,7 +181,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static PersistedMap loadMap(File mapFile) {
+  public static PersistedMap loadMap(File mapFile) throws IOException {
     PersistedMap persistedMap = null;
 
     // TODO: split in a try with resources and a try/catch
@@ -216,13 +216,13 @@ public class PersistenceUtil {
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
-        MapTool.showWarning(
+        throw new IOException(
             I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
     } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.mapVersion", ce);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapVersion"), ce);
     } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.mapRead", ioe);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapRead"), ioe);
     }
     return persistedMap;
   }
@@ -903,16 +903,21 @@ public class PersistenceUtil {
    * Converts an object to a macro, launching an error message if of an incorrect type
    *
    * @param object the object to convert
-   * @return the macroset, or null if no conversion done
+   * @return the macro, or null if no conversion done
    */
   private static MacroButtonProperties asMacro(Object object) {
     if (object instanceof MacroButtonProperties) {
       return (MacroButtonProperties) object;
+    } else if (object instanceof List && ((List) object).get(0) instanceof MacroButtonProperties) {
+      MapTool.showError(
+          I18N.getText(
+              "PersistenceUtil.warn.macroWrongFileType",
+              I18N.getText("PersistenceUtil.warn.macroSet")));
     } else {
       String className = object.getClass().getSimpleName();
       MapTool.showError(I18N.getText("PersistenceUtil.warn.macroWrongFileType", className));
-      return null;
     }
+    return null;
   }
 
   /**

@@ -44,6 +44,7 @@ import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -372,7 +373,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   }
 
   public ExportDialog() throws Exception {
-    super(MapTool.getFrame(), "Export Screenshot", true);
+    super(MapTool.getFrame(), I18N.getText("action.exportScreenShot.title"), true);
     if (instanceCount == 0) {
       instanceCount++;
     } else {
@@ -391,7 +392,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // Initialize the panel and button actions
     //
     createWaitPanel();
-    interactPanel = new FormPanel("net/rptools/maptool/client/ui/forms/exportDialog.xml");
+    interactPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/exportDialog.xml");
     setLayout(new GridLayout());
     add(interactPanel);
     getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
