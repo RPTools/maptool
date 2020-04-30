@@ -296,8 +296,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           if (shortName.length() > 0) {
             property.setShortName(shortName);
           }
-          line = line.substring(0, index).trim();
+          line = line.substring(0, index);
         }
+        line = line.trim();
         property.setName(line);
         // Since property names are not case-sensitive, let's make sure that we don't
         // already have this name represented somewhere in the list.
