@@ -914,16 +914,21 @@ public class PersistenceUtil {
    * Converts an object to a macro, launching an error message if of an incorrect type
    *
    * @param object the object to convert
-   * @return the macroset, or null if no conversion done
+   * @return the macro, or null if no conversion done
    */
   private static MacroButtonProperties asMacro(Object object) {
     if (object instanceof MacroButtonProperties) {
       return (MacroButtonProperties) object;
+    } else if (object instanceof List && ((List) object).get(0) instanceof MacroButtonProperties) {
+      MapTool.showError(
+          I18N.getText(
+              "PersistenceUtil.warn.macroWrongFileType",
+              I18N.getText("PersistenceUtil.warn.macroSet")));
     } else {
       String className = object.getClass().getSimpleName();
       MapTool.showError(I18N.getText("PersistenceUtil.warn.macroWrongFileType", className));
-      return null;
     }
+    return null;
   }
 
   /**

@@ -45,28 +45,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -520,6 +499,10 @@ public class MapToolFrame extends DefaultDockableHolder
     chatTyperTimers.addObserver(chatTyperObserver);
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
+  }
+
+  public void showWindowDecorations(boolean decorations) {
+    getRootPane().setWindowDecorationStyle(decorations ? JRootPane.FRAME : JRootPane.NONE);
   }
 
   public ChatNotificationTimers getChatNotificationTimers() {
@@ -1779,7 +1762,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
-      setUndecorated(true);
+      SwingUtil.setUndecorated(this);
     }
   }
 

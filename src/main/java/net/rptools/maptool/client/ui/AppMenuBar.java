@@ -28,19 +28,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.AppConstants;
@@ -355,13 +346,16 @@ public class AppMenuBar extends JMenuBar {
     button.addActionListener(
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            ToolbarPanel toolbarPanel = MapTool.getFrame().getToolbarPanel();
+            MapToolFrame frame = MapTool.getFrame();
+            ToolbarPanel toolbarPanel = frame.getToolbarPanel();
             if (button.isSelected()) {
               button.setToolTipText(unhidetooltip);
               toolbarPanel.setVisible(false);
+              if (SwingUtil.isMaximized(frame)) frame.showWindowDecorations(false);
             } else {
               button.setToolTipText(hidetooltip);
               toolbarPanel.setVisible(true);
+              frame.showWindowDecorations(true);
             }
           }
         });
