@@ -16,7 +16,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
 <AnchorPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBookContentsController">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -27,7 +26,7 @@
                      <content>
                         <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
                            <top>
-                              <GridPane BorderPane.alignment="CENTER">
+                              <GridPane prefWidth="800.0" BorderPane.alignment="CENTER">
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="115.0" minWidth="10.0" prefWidth="91.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="178.0" minWidth="10.0" prefWidth="147.0" />
@@ -83,7 +82,6 @@
                                       <columns>
                                         <TableColumn prefWidth="55.0" text="%noteBooks.table.column.namespace" />
                                         <TableColumn prefWidth="95.0" text="%noteBooks.table.column.version" />
-                                          <TableColumn prefWidth="75.0" text="%noteBooks.table.column.alias" />
                                       </columns>
                                        <columnResizePolicy>
                                           <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

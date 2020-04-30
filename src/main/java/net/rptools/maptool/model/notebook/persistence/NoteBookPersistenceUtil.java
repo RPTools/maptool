@@ -78,20 +78,15 @@ public class NoteBookPersistenceUtil {
     /** The version of the dependency. */
     private final String version;
 
-    /** The alias used to refer to the dependency. */
-    private final String alias;
-
     /**
      * Creates a new {@code NoteBookDependencyInfo} object.
      *
      * @param ns The name space for the dependency.
      * @param ver the version for the dependency.
-     * @param dAlias The alias used to refer to the dependency.
      */
-    private NoteBookDependencyInfo(String ns, String ver, String dAlias) {
+    private NoteBookDependencyInfo(String ns, String ver) {
       namespace = ns;
       version = ver;
-      alias = dAlias;
     }
   }
 
@@ -210,7 +205,7 @@ public class NoteBookPersistenceUtil {
 
     if (nbi.dependencies != null) {
       for (NoteBookDependencyInfo deps : nbi.dependencies) {
-        noteBook.putDependency(new NoteBookDependency(deps.namespace, deps.version, deps.alias));
+        noteBook.putDependency(new NoteBookDependency(deps.namespace, deps.version));
       }
     }
 
@@ -294,7 +289,7 @@ public class NoteBookPersistenceUtil {
       for (var dependency : dependencies) {
         dependenciesInfo.add(
             new NoteBookDependencyInfo(
-                dependency.getNamespace(), dependency.getVersion(), dependency.getAlias()));
+                dependency.getNamespace(), dependency.getVersion()));
       }
       noteBookInfo.dependencies = dependenciesInfo.toArray(noteBookInfo.dependencies);
     }

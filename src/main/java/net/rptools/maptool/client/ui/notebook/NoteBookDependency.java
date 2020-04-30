@@ -21,21 +21,15 @@ public class NoteBookDependency {
   /** The version of the {@link net.rptools.maptool.model.notebook.NoteBook}. */
   private final String version;
 
-  /** The alias to use to refer to the {@link net.rptools.maptool.model.notebook.NoteBook}. */
-  private final String alias;
-
   /**
    * Creates a new {@code NoteBookDependency} object.
    *
    * @param namespace The namespace of the {@link net.rptools.maptool.model.notebook.NoteBook}.
    * @param version The version of the {@link net.rptools.maptool.model.notebook.NoteBook}.
-   * @param alias The alias used to refer to the {@link
-   *     net.rptools.maptool.model.notebook.NoteBook}.
    */
-  public NoteBookDependency(String namespace, String version, String alias) {
+  public NoteBookDependency(String namespace, String version) {
     this.namespace = namespace;
     this.version = version;
-    this.alias = alias;
   }
 
   /**
@@ -56,12 +50,4 @@ public class NoteBookDependency {
     return version;
   }
 
-  /**
-   * Returns the alias used to refer to the dependency.
-   *
-   * @return the alias used to refer to the dependency.
-   */
-  public String getAlias() {
-    return alias;
-  }
 }

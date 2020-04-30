@@ -160,6 +160,9 @@ public class NoteBookContentsController {
           setEditMode(false);
         });
 
+
+    dependencyTableView.setPlaceholder(new Label(I18N.getText("noteBooks.label.noDependencies")));
+
     readMeContentPane.getChildren().add(readMeMarkDownPane);
     AnchorPane.setTopAnchor(readMeMarkDownPane, 0.0);
     AnchorPane.setBottomAnchor(readMeMarkDownPane, 0.0);
