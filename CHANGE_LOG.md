@@ -33,6 +33,7 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 
 **Bug Fixes**
 - [#1725][i1725] **Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.**
+- [#1720][i1720] **Token properties with default values were not having spaces trimmed from name. Fixed.**
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
 - [#1688][i1688] **Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.**
 - [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
@@ -80,6 +81,7 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 [i1728]: https://github.com/RPTools/maptool/pull/1728
 [i1725]: https://github.com/RPTools/maptool/pull/1725
 [i1704]: https://github.com/RPTools/maptool/pull/1704
+[i1720]: https://github.com/RPTools/maptool/issues/1720
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1688]: https://github.com/RPTools/maptool/issues/1688
 [i1686]: https://github.com/RPTools/maptool/issues/1686
