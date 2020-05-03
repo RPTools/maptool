@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.0.1"
     id "com.diffplug.gradle.spotless" version "3.28.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.8.1'
+    id 'org.beryx.runtime' version '1.8.3'
 }
 
 // Apply the java plugin to add support for Java
@@ -28,6 +28,7 @@ targetCompatibility = 14
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss8M"]
+def appSemVer = ""
 
 // Custom properties
 ext {
@@ -43,33 +44,32 @@ ext {
 
     if (tags) {
         tagVersion = tags.getName()
-        msiVersion = tagVersion
         enviroment = "Production"
         sentryDSN = sentry_production_dsn
     } else {
-        // Unable to use non-semver tagging because of .msi restrictions
-        //tagVersion = 'SNAPSHOT-' + revision
-        tagVersion = msiVersion
+        tagVersion = 'SNAPSHOT-' + revision
         project.description = "SNAPSHOT-" + revision
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
 
-    // not doing anything as of a bug in grgit when opening with currentDir/dir
-    // https://github.com/ajoberstar/grgit/issues/288
-    grgit.close()
-    // therefore close the underlying repository manually
-    grgit.repository.jgit.getRepository().close()
+    // This will strip anything other than core semver from the tag
+    // e.g. "1.7.2-rc.1" becomes "1.7.2"
+    def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
 
-    // Unable to use non-semver tagging because of .msi restrictions
-    // releaseDir = file("/releases/" + tagVersion + "/")
-    releaseDir = file("/releases/")
+    // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
+    if (appSemVer.isEmpty()) {
+        appSemVer = defaultVersion
+    } else {
+        appSemVer = foundTags[0]
+    }
 
-    // vendor, tagVersion, msiVersion, and DSNs defaults are set in gradle.properties
+    // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
+    println 'Configuring for ' + project.name + developerRelease + " " + tagVersion + " by " + vendor
+    println "AppVersion: " + appSemVer
+
+    // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
     println "OS Detected: " + osdetector.os
-
-    // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
-    println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
 }
 
 spotless {
@@ -96,8 +96,8 @@ spotless {
 }
 
 jacoco {
-toolVersion = "0.8.5"
-reportsDir = file("$buildDir/reports/jacoco")
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/reports/jacoco")
 }
 
 // org.openjfx.javafxplugin
@@ -108,10 +108,11 @@ javafx {
 }
 
 run {
-    args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
+    args = ['-v=' + appSemVer]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor]
+    // Add -Dlog4j2.debug to see log4j2 details
 
-    if(System.getProperty("exec.args") != null) {
+    if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
     }
 }
@@ -120,36 +121,28 @@ run {
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
 
-//    launcher {
-//        installerName = 'MapTool'
-//        args = ['-v=' + tagVersion, '-vendor=' + vendor]
-//        jvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
-//
-//    }
-
     jpackage {
-        // not working :(
-        // installerOutputDir = releaseDir
-        // installerOutputDir = file("releases")
-        // imageOutputDir = file("$buildDir/my-packaging-image")
-        outputDir = "../releases"
+        installerOutputDir = file("releases")
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase()]
 
         imageOptions = []
-        imageName = 'MapTool'
-
-        installerName = 'MapTool'
+        imageName = project.name + developerRelease
+        installerName = project.name + developerRelease
         installerOptions = [
+                //'--temp', 'releases/temp-files',
                 '--verbose',
                 '--description', project.description,
                 '--copyright', 'Copyright 2000-2020 RPTools.net',
                 '--license-file', 'package/license/COPYING.AFFERO',
-                '--app-version', tagVersion,
-                '--vendor', vendor
+                '--app-version', appSemVer,
+                '--vendor', vendor,
+                '--file-associations', 'package/associations.properties'
         ]
 
         if (osdetector.os.is('windows')) {
             println "Setting Windows installer options"
-            imageOptions += ['--icon', 'package/windows/MapTool.ico']
+            resourceDir = file('package/windows')
+            imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
                     '--win-dir-chooser',
                     '--win-per-user-install',
@@ -161,31 +154,31 @@ runtime {
 
         if (osdetector.os.is('osx')) {
             println "Setting MacOS installer options"
-            imageOptions += ['--icon', 'package/macosx/maptool-icon.icns']
+            imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
-
+                    '--mac-package-name', project.name + developerRelease
             ]
         }
 
         if (osdetector.os.is('unix')) {
             println "Setting Linux installer options"
-            imageOptions += ['--icon', 'package/linux/MapTool.png']
+            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
                     '--linux-menu-group', vendor,
                     '--linux-shortcut'
             ]
 
-             if (installerType == 'deb') {
-                 installerOptions += [
-                         '--linux-deb-maintainer', 'admin@rptools.net'
-                 ]
-             }
+            if (installerType == 'deb') {
+                installerOptions += [
+                        '--linux-deb-maintainer', 'admin@rptools.net'
+                ]
+            }
 
-             if (installerType == 'rpm') {
-                 installerOptions += [
-                         '--linux-rpm-license-type', 'AGPLv3'
-                 ]
-             }
+            if (installerType == 'rpm') {
+                installerOptions += [
+                        '--linux-rpm-license-type', 'AGPLv3'
+                ]
+            }
         }
     }
 }
@@ -218,6 +211,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
 
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
     implementation 'commons-io:commons-io:2.6'
@@ -322,9 +316,9 @@ task configSentryRelease(type: Copy) {
     into("src/main/resources/")
     rename("sentry.properties.template", "sentry.properties")
     def tokens = [
-        AppVersion: "${tagVersion}",
-        Environment: "${enviroment}",
-        SentryDSN: "${sentryDSN}"
+            AppVersion : "${tagVersion}",
+            Environment: "${enviroment}",
+            SentryDSN  : "${sentryDSN}"
     ]
     expand(tokens)
     inputs.properties(tokens)
@@ -338,17 +332,17 @@ task uberJar(type: Jar) {
     destinationDirectory = file("$rootDir/releases")
 
     manifest {
-        attributes 'Implementation-Title': project.name,
-        'Implementation-Version': tagVersion,
-        'Implementation-Vendor': vendor,
-        'Git-Commit': revision,
-        'Git-Commit-SHA': revisionFull,
-        'Built-By': System.getProperty('user.name'),
-        'Built-Date': new Date(),
-        'Built-JDK': System.getProperty('java.version'),
-        'Source-Compatibility': project.sourceCompatibility,
-        'Target-Compatibility': project.targetCompatibility,
-        'Main-Class': project.mainClassName
+        attributes 'Implementation-Title': project.name + developerRelease,
+                'Implementation-Version': tagVersion,
+                'Implementation-Vendor': vendor,
+                'Git-Commit': revision,
+                'Git-Commit-SHA': revisionFull,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                'Main-Class': project.mainClassName
     }
 
     from {
@@ -363,7 +357,7 @@ task uberJar(type: Jar) {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': project.name,
+        attributes 'Implementation-Title': project.name + developerRelease,
                 'Implementation-Version': tagVersion,
                 'Implementation-Vendor': vendor,
                 'Git-Commit': revision,

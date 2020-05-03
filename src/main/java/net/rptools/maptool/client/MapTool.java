@@ -96,7 +96,7 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
-import net.rptools.maptool.util.UserJvmPrefs;
+import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
@@ -1608,7 +1608,7 @@ public class MapTool {
       listMacros = getCommandLineOption(cmd, "macros");
 
       if (getCommandLineOption(cmd, "reset")) {
-        UserJvmPrefs.resetJvmOptions();
+        UserJvmOptions.resetJvmOptions();
       }
     } catch (ParseException e) {
       // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
@@ -1688,8 +1688,7 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash =
-        new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
