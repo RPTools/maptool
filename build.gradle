@@ -28,6 +28,7 @@ targetCompatibility = 14
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss8M"]
+def appSemVer = ""
 
 // Custom properties
 ext {
@@ -54,11 +55,13 @@ ext {
 
     // This will strip anything other than core semver from the tag
     // e.g. "1.7.2-rc.1" becomes "1.7.2"
-    appSemVer = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
+    def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
 
     // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
     if (appSemVer.isEmpty()) {
         appSemVer = defaultVersion
+    } else {
+        appSemVer = foundTags[0]
     }
 
     // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
