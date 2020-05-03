@@ -76,6 +76,7 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 **Other**
 - [#1704][i1704] dicelib updated to 1.6.0
 
+[i1728]: https://github.com/RPTools/maptool/pull/1728
 [i1704]: https://github.com/RPTools/maptool/pull/1704
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1688]: https://github.com/RPTools/maptool/issues/1688
