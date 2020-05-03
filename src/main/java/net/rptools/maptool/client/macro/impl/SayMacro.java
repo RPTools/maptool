@@ -51,6 +51,8 @@ public class SayMacro extends AbstractMacro {
         sb.append("<td valign='top' width='40' style=\"padding-right:5px\"><img src=\"asset://")
             .append(imageId)
             .append("-40\" ></td>");
+      } else {
+        sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
       }
     } else if (AppPreferences.getShowAvatarInChat()) {
       sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
