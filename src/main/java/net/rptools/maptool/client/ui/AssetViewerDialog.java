@@ -53,7 +53,7 @@ public class AssetViewerDialog extends JDialog {
     this.assetId = assetId;
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setLayout(new GridLayout());
-    setUndecorated(true);
+    SwingUtil.setUndecorated(this);
 
     add(new InnerPanel());
   }

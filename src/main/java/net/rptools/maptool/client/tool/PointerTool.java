@@ -1604,7 +1604,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize(), false);
+          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
         }
 
         Dimension statSize = null;
@@ -1828,6 +1828,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
                         AppStyle.panelTexture.getWidth(),
                         AppStyle.panelTexture.getHeight())));
             statsG.fill(bounds);
+            statsG.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);

@@ -35,8 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.ImageCursor;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.MeasureTool;
 
@@ -143,18 +142,12 @@ public class SwingUtil {
   }
 
   public static void constrainTo(Dimension dim, int size) {
-    constrainTo(dim, size, true);
-  }
-
-  public static void constrainTo(Dimension dim, int size, boolean grow) {
     boolean widthBigger = dim.width > dim.height;
 
     if (widthBigger) {
-      if (!grow) size = Math.min(size, dim.width);
       dim.height = (int) ((dim.height / (double) dim.width) * size);
       dim.width = size;
     } else {
-      if (!grow) size = Math.min(size, dim.height);
       dim.width = (int) ((dim.width / (double) dim.height) * size);
       dim.height = size;
     }
@@ -351,5 +344,24 @@ public class SwingUtil {
       default:
         return javafx.scene.Cursor.DEFAULT;
     }
+  }
+
+  public static void setDefaultLookAndFeelDecorated(boolean set) {
+    JFrame.setDefaultLookAndFeelDecorated(set);
+    JDialog.setDefaultLookAndFeelDecorated(set);
+  }
+
+  public static void setUndecorated(JFrame frame) {
+    frame.setUndecorated(true);
+    frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+  }
+
+  public static void setUndecorated(JDialog dialog) {
+    dialog.setUndecorated(true);
+    dialog.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+  }
+
+  public static boolean isMaximized(JFrame frame) {
+    return frame.getExtendedState() == JFrame.MAXIMIZED_BOTH;
   }
 }

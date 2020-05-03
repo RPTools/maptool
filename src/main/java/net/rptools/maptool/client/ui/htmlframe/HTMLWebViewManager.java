@@ -123,7 +123,19 @@ public class HTMLWebViewManager {
 
   /** Meta-tag that blocks external file access. */
   private static final String SCRIPT_BLOCK_EXT =
-      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
+      "<meta http-equiv=\"Content-Security-Policy\" "
+          + "content=\" "
+          + " default-src asset: "
+          + " https://code.jquery.com " // JQuery CDN
+          + " https://cdn.jsdelivr.net " // JSDelivr CDN
+          + " https://stackpath.bootstrapcdn.com " // Bootstrap CDN
+          + " https://unpkg.com " // unpkg CDN
+          + " https://cdnjs.cloudflare.com " // CloudFlare JS CDN
+          + " https://ajax.googleapis.com " // Google CDN
+          + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
+          + " 'unsafe-inline' 'unsafe-eval' ; "
+          + " font-src https://fonts.gstatic.com 'self'"
+          + "\">\n";
 
   /** The default rule for the body tag. */
   static final String CSS_BODY =
@@ -300,7 +312,10 @@ public class HTMLWebViewManager {
    * @param event the error event
    */
   private static void showError(WebErrorEvent event) {
-    MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    // Hide error "User data directory is already in use", directory not used anyway
+    if (event.getEventType() != WebErrorEvent.USER_DATA_DIRECTORY_ALREADY_IN_USE) {
+      MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    }
   }
 
   String getCSSRule() {
