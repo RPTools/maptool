@@ -152,7 +152,8 @@ public final class NoteBookTableTreeModel {
    */
   private void addEntry(NoteBookEntry entry) {
     assert Platform.isFxApplicationThread() : "initializeModel() must be run on the JavaFX thread.";
-    String parentPath = entry.getPath().replaceFirst("(.*)/[^/]*", "$1");
+    String[] parts = entry.getPath().split("/");
+    String parentPath = String.join("/", Arrays.copyOfRange(parts, 0, parts.length - 1));
     TreeItem<NoteBookEntry> parent = getNodeFromPath(parentPath);
     if (parent == null) {
       throw new IllegalStateException("Parent path " + parentPath + " not found.");
@@ -170,11 +171,15 @@ public final class NoteBookTableTreeModel {
    */
   private TreeItem<NoteBookEntry> getNodeFromPath(String path) {
     assert Platform.isFxApplicationThread() : "getNodeFromPath() must be run on the JavaFX thread.";
-    String[] paths = path.split("/");
-    if (paths.length > 0 && paths[0].isEmpty()) {
-      paths = Arrays.copyOfRange(paths, 1, path.length());
+    if (path.isEmpty()) {
+      return root;
+    } else {
+      String[] paths = path.split("/");
+      if (paths.length > 0 && paths[0].isEmpty()) {
+        paths = Arrays.copyOfRange(paths, 1, paths.length);
+      }
+      return getNodeFromPath(paths, root);
     }
-    return getNodeFromPath(paths, root);
   }
 
   /**
@@ -193,7 +198,11 @@ public final class NoteBookTableTreeModel {
     for (TreeItem<NoteBookEntry> child : node.getChildren()) {
       NoteBookEntry entry = child.getValue();
       if (entry instanceof DirectoryEntry && entry.getName().equals(paths[0])) {
-        return getNodeFromPath(Arrays.copyOfRange(paths, 1, paths.length - 1), node);
+        if (paths.length == 1) {
+          return child;
+        } else {
+          return getNodeFromPath(Arrays.copyOfRange(paths, 1, paths.length), child);
+        }
       }
     }
 

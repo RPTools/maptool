@@ -38,12 +38,15 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapTool.CampaignEvent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.model.notebook.NoteBookManager;
+import net.rptools.maptool.model.notebook.entry.DirectoryEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntryType;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
@@ -60,9 +63,13 @@ public class NoteBooksController {
   /** The next number for a new {@link @NoteBook}. */
   private int nextNewNoteBookNumber = 1;
 
+  private NoteBook currentNoteBook;
+
   private final Map<NoteBook, TitledPane> noteBookTitledPaneMap = new HashMap<>();
+  private final Map<NoteBook, TreeView<NoteBookEntry>> noteBookTreeMap = new HashMap<>();
 
   private final PropertyChangeListener noteBookManagerPCL = this::noteBookManagerChange;
+
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -70,28 +77,32 @@ public class NoteBooksController {
   @FXML // URL location of the FXML file that was given to the FXMLLoader
   private URL location;
 
+  @FXML // fx:id="noteBookAccordion"
+  private Accordion noteBookAccordion; // Value injected by FXMLLoader
+
+  @FXML // fx:id="newDirectoryButton"
+  private Button newDirectoryButton; // Value injected by FXMLLoader
+
+  @FXML // fx:id="newNoteButton"
+  private Button newNoteButton; // Value injected by FXMLLoader
+
   @FXML // fx:id="importNoteBookButton"
   private Button importNoteBookButton; // Value injected by FXMLLoader
 
   @FXML // fx:id="newNoteBookButton"
   private Button newNoteBookButton; // Value injected by FXMLLoader
 
-  @FXML // fx:id="noteBookAccordion"
-  private Accordion noteBookAccordion; // Value injected by FXMLLoader
-
   @FXML // fx:id="contentsPane"
   private AnchorPane contentsPane; // Value injected by FXMLLoader
 
   @FXML // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
-    assert importNoteBookButton != null
-        : "fx:id=\"importNoteBookButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
-    assert newNoteBookButton != null
-        : "fx:id=\"newNoteBookButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
-    assert noteBookAccordion != null
-        : "fx:id=\"noteBookAccordion\" was not injected: check your FXML file 'NoteBooks.fxml'.";
-    assert contentsPane != null
-        : "fx:id=\"contentsPane\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert noteBookAccordion != null : "fx:id=\"noteBookAccordion\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert newDirectoryButton != null : "fx:id=\"newDirectoryButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert newNoteButton != null : "fx:id=\"newNoteButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert importNoteBookButton != null : "fx:id=\"importNoteBookButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert newNoteBookButton != null : "fx:id=\"newNoteBookButton\" was not injected: check your FXML file 'NoteBooks.fxml'.";
+    assert contentsPane != null : "fx:id=\"contentsPane\" was not injected: check your FXML file 'NoteBooks.fxml'.";
 
     // Load the UI used to display the details of the Note Book    // Load the UI used to display
     // the details of the Note Book
@@ -112,17 +123,47 @@ public class NoteBooksController {
             (observable, oldValue, newValue) -> {
               if (newValue != null) {
                 NoteBook nb = (NoteBook) newValue.getUserData();
+                setCurrentNoteBook(nb);
                 showNoteBook(nb);
               }
             });
 
     newNoteBookButton.setOnAction(e -> createNewNoteBook());
+    newDirectoryButton.setOnAction(e -> createNewDirectory());
     MapTool.getCampaign().getNoteBookManager().addPropertyChangeListener(noteBookManagerPCL);
 
     MapTool.getEventDispatcher()
         .addListener(
             e -> campaignChanged((Campaign) e.getOldValue(), (Campaign) e.getNewValue()),
             CampaignEvent.Changed);
+  }
+
+  private void setCurrentNoteBook(NoteBook nb) {
+    currentNoteBook = nb;
+  }
+
+  private NoteBook getCurrentNoteBook() {
+    return currentNoteBook;
+  }
+
+  private void createNewDirectory() {
+    final NoteBook noteBook = getCurrentNoteBook();
+
+        SwingUtilities.invokeLater( () -> {
+          String dialogTitle = I18N.getText("noteBooks.dialog.createDirectory.title");
+    Object result =
+        JOptionPane.showInputDialog(
+            MapTool.getFrame(),
+            dialogTitle,
+            dialogTitle,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            null,
+             "/dir");
+
+        noteBook.putEntry(new DirectoryEntry(result.toString()));
+
+    });
   }
 
   private void noteBookManagerChange(PropertyChangeEvent pce) {
@@ -166,6 +207,7 @@ public class NoteBooksController {
         () -> {
           noteBookAccordion.getPanes().clear();
           noteBookTitledPaneMap.clear();
+          noteBookTreeMap.clear();
           if (oldCampaign != null) {
             oldCampaign.getNoteBookManager().removePropertyChangeListener(noteBookManagerPCL);
           }
@@ -196,11 +238,11 @@ public class NoteBooksController {
                       protected void updateItem(NoteBookEntry item, boolean empty) {
                         super.updateItem(item, empty);
                         if (empty) {
-                          setText("");
+                          setText(null);
                           setGraphic(null);
                         } else {
                           if (item.getType() == NoteBookEntryType.DIRECTORY
-                              && "/".equals(item.getName())) {
+                              && "/".equals(item.getPath())) {
                             setText(I18N.getText("noteBooks.noteBook.treeNode"));
                           } else {
                             setText(item.getName());
@@ -214,6 +256,7 @@ public class NoteBooksController {
                 .selectedItemProperty()
                 .addListener(
                     ((observable, oldValue, newValue) -> {
+                      System.out.println(newValue.getValue().getPath());
                       // TODO: CDW
                     }));
             ScrollPane scrollPane = new ScrollPane(treeView);
@@ -233,6 +276,7 @@ public class NoteBooksController {
             noteBookAccordion.getPanes().add(titledPane);
             noteBookAccordion.setExpandedPane(titledPane);
             noteBookTitledPaneMap.put(noteBook, titledPane);
+            noteBookTreeMap.put(noteBook, treeView);
           }
         });
   }

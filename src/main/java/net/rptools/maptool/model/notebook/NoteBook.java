@@ -16,7 +16,9 @@ package net.rptools.maptool.model.notebook;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +36,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntryType;
 
 /**
  * {@code MapBookmarkManager} class is used to manage all the {@code NoteBookEntry}s in a campaign.
@@ -816,13 +819,16 @@ public class NoteBook implements Comparable<NoteBook> {
    * false} to this you are expected to perform the notification, this is to support bulk updates.
    *
    * <p>Since a path can only point to a single {@code NoteBookEntry} if the passed in {@link
-   * NoteBookEntry} has the path of an existing entry then that existing entry will be removed.
+   * NoteBookEntry} has the path of an existing entry then that existing entry will be removed.</p>
+   *
    *
    * @see NoteBookEntry#getId()
    * @param entry the {@code NoteBookEntry} to add or replace.
    * @param firePropertyChange {@code true} if listeners should be notified.
+   *
+   * @return a {@link Set<NoteBook>} containing any entries that were replaced.
    */
-  private void putEntry(NoteBookEntry entry, boolean firePropertyChange) {
+  private Set<NoteBookEntry> putEntry(NoteBookEntry entry, boolean firePropertyChange) {
     writeLock.lock();
     Set<NoteBookEntry> removed = new HashSet<>();
     try {
@@ -845,6 +851,9 @@ public class NoteBook implements Comparable<NoteBook> {
        */
       EntryDetails oldEntry = idEntryMap.get(entry.getId());
       if (oldEntry != null) {
+        if (!oldEntry.getEntry().getType().equals(entry.getType())) {
+          throw new IllegalStateException("Can only replace note book entry with same type");
+        }
         removeEntry(oldEntry.getEntry(), false);
         removed.add(oldEntry.getEntry());
       }
@@ -854,7 +863,7 @@ public class NoteBook implements Comparable<NoteBook> {
        * This is to avoid storing entries for zones that have already been removed.
        */
       if (entry.getZoneId().isPresent() && removedZones.contains(entry.getZoneId().get())) {
-        return;
+        return new HashSet<>();
       }
 
       EntryDetails entryDetails =
@@ -862,13 +871,19 @@ public class NoteBook implements Comparable<NoteBook> {
       idEntryMap.put(entry.getId(), entryDetails);
       pathIdMap.put(entry.getPath(), entry.getId());
 
+      // If there was a removed entry and it had children add them to the new entry
+      if (oldEntry.getEntry().getType() == NoteBookEntryType.DIRECTORY) {
+      }
+
     } finally {
       writeLock.unlock();
     }
 
     if (firePropertyChange) {
-      fireChangeEvent(ENTRIES_ADDED_EVENT, removed, Set.of(entry));
+      fireChangeEvent(ENTRIES_ADDED_EVENT, Collections.unmodifiableSet(removed), Set.of(entry));
     }
+
+    return removed;
   }
 
   /**
@@ -878,23 +893,19 @@ public class NoteBook implements Comparable<NoteBook> {
    * @see NoteBookEntry#getId()
    * @param entries the {@code NoteBookEntry}s to add or replace.
    */
-  public void putEntries(Map<String, NoteBookEntry> entries) {
-    Map<String, NoteBookEntry> added = new HashMap<>(entries);
-    if (!added.isEmpty()) {
-      Map<String, NoteBookEntry> oldEntries = new HashMap<>();
-      writeLock.lock(); // Want to lock the whole transaction
+  public void putEntries(Collection<NoteBookEntry> entries) {
+    if (!entries.isEmpty()) {
+      Set<NoteBookEntry> oldEntries = new HashSet<>();
+      writeLock.lock();
       try {
-        for (Entry<String, NoteBookEntry> entry : added.entrySet()) {
-          if (idEntryMap.containsKey(entry.getValue().getId())) {
-            EntryDetails entryPath = idEntryMap.get(entry.getValue().getId());
-            oldEntries.put(entryPath.getPath(), entryPath.getEntry());
-            putEntry(entryPath.getEntry(), false);
-          }
+        for (NoteBookEntry entry : entries) {
+          Set<NoteBookEntry> removed = putEntry(entry, false);
+          oldEntries.addAll(removed);
         }
-      } finally {
+      } finally{
         writeLock.unlock();
       }
-      fireChangeEvent(ENTRIES_ADDED_EVENT, oldEntries, added.values());
+      fireChangeEvent(ENTRIES_ADDED_EVENT, oldEntries, new HashSet<>(entries));
     }
   }
 
@@ -1160,6 +1171,25 @@ public class NoteBook implements Comparable<NoteBook> {
       entries.put(ed.getPath(), ed.getEntry());
     }
     return entries;
+  }
+
+  public void makePath(String path) {
+    int ind = 0;
+    while (true) {
+      ind = path.indexOf("/", ind);
+      if (ind < 0) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Returns <code>true</code> if the path exists in the {@code NoteBook}.
+   * @param path The path to check.
+   * @return <code>true</code> if the path exists otherwise <code>false</code>.
+   */
+  public boolean containsPath(String path) {
+    return getByPath(path).isPresent();
   }
 
   @Override

@@ -5,6 +5,9 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="620.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBooksController">
    <left>
@@ -17,14 +20,24 @@
             </ScrollPane>
          </center>
          <bottom>
-            <BorderPane>
-               <left>
-                  <Button fx:id="importNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.import" BorderPane.alignment="CENTER" />
-               </left>
-               <right>
-                  <Button fx:id="newNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.new" BorderPane.alignment="CENTER" />
-               </right>
-            </BorderPane>
+            <VBox>
+               <children>
+                  <HBox>
+                     <children>
+                        <Button fx:id="newDirectoryButton" mnemonicParsing="false" text="%noteBooks.button.newDirectory" HBox.hgrow="NEVER" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="newNoteButton" mnemonicParsing="false" text="%noteBooks.button.newNote" HBox.hgrow="NEVER" />
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Button fx:id="importNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.import" HBox.hgrow="NEVER" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="newNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.new" HBox.hgrow="NEVER" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
          </bottom>
       </BorderPane>
    </left>

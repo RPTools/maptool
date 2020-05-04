@@ -216,6 +216,7 @@ public class NoteBookPersistenceUtil {
             JsonParser.parseReader(packedFile.getFileAsReader(noteBookDir + "/" + noteFile))
                 .getAsJsonObject();
         NoteBookEntry entry = nbePersistenceUtil.fromJson(jsonObject);
+        noteBook.makePath(entry.getPath());
         noteBook.putEntry(entry);
         allAssetIds.addAll(entry.getAssetKeys());
       }
