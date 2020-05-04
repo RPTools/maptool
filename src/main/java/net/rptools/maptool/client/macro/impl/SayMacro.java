@@ -51,9 +51,14 @@ public class SayMacro extends AbstractMacro {
         sb.append("<td valign='top' width='40' style=\"padding-right:5px\"><img src=\"asset://")
             .append(imageId)
             .append("-40\" ></td>");
+      } else {
+        sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
       }
+    } else if (AppPreferences.getShowAvatarInChat()) {
+      sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
     }
-    sb.append("<td valign=top style=\"margin-right: 5px\">");
+    sb.append(
+        "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
     if (executionContext != null
         && MapTool.getParser().isMacroPathTrusted()
         && !MapTool.getPlayer().isGM()) {
@@ -62,14 +67,12 @@ public class SayMacro extends AbstractMacro {
           .append(executionContext.getName());
       sb.append("@").append(executionContext.getSource()).append("'>");
     }
-    sb.append(identity).append(": ");
+    sb.append("<b>").append(identity).append(":</b> ");
     if (executionContext != null
         && MapTool.getParser().isMacroPathTrusted()
         && !MapTool.getPlayer().isGM()) {
       sb.append("</span>");
     }
-    sb.append("</td><td valign=top>");
-
     Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
     if (color != null) {
       sb.append("<span style='color:#")

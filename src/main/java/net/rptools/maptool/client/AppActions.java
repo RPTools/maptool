@@ -203,8 +203,8 @@ public class AppActions {
             // Move to chosen token
             if (chosenOne != null) {
               renderer.clearSelectedTokens();
-              renderer.updateAfterSelection();
               renderer.centerOn(chosenOne);
+              renderer.updateAfterSelection();
             }
           }
         }
