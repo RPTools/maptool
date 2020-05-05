@@ -346,21 +346,6 @@ public class SwingUtil {
     }
   }
 
-  public static void setDefaultLookAndFeelDecorated(boolean set) {
-    JFrame.setDefaultLookAndFeelDecorated(set);
-    JDialog.setDefaultLookAndFeelDecorated(set);
-  }
-
-  public static void setUndecorated(JFrame frame) {
-    frame.setUndecorated(true);
-    frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-  }
-
-  public static void setUndecorated(JDialog dialog) {
-    dialog.setUndecorated(true);
-    dialog.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-  }
-
   public static boolean isMaximized(JFrame frame) {
     return frame.getExtendedState() == JFrame.MAXIMIZED_BOTH;
   }
