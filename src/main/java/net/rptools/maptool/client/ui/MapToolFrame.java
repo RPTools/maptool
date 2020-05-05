@@ -488,10 +488,6 @@ public class MapToolFrame extends DefaultDockableHolder
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
   }
 
-  public void showWindowDecorations(boolean decorations) {
-    getRootPane().setWindowDecorationStyle(decorations ? JRootPane.FRAME : JRootPane.NONE);
-  }
-
   public ChatNotificationTimers getChatNotificationTimers() {
     return chatTyperTimers;
   }
@@ -1739,7 +1735,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
-      SwingUtil.setUndecorated(this);
+      setUndecorated(true);
     }
   }
 
