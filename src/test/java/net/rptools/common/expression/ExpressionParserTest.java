@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.function.EvaluationException;
 
 public class ExpressionParserTest extends TestCase {
 
@@ -51,6 +52,24 @@ public class ExpressionParserTest extends TestCase {
     Result result = new ExpressionParser().evaluate("100+10d6k8+1");
 
     assertEquals(new BigDecimal(138), result.getValue());
+  }
+
+  public void testEvaluate_Keep_error_tooManyDice() throws ParserException {
+    try {
+      Result result = new ExpressionParser().evaluate("2d6k4");
+      fail("Expected EvaluationException from trying to keep too many dice");
+    } catch (EvaluationException expected) {
+      // test passes if expected exception is produced
+    }
+  }
+
+  public void testEvaluate_KeepLowest_error_tooManyDice() throws ParserException {
+    try {
+      Result result = new ExpressionParser().evaluate("2d6kl4");
+      fail("Expected EvaluationException from trying to keep too many dice");
+    } catch (EvaluationException expected) {
+      // test passes if expected exception is produced
+    }
   }
 
   public void testEvaluate_RerollOnceAndKeep() throws ParserException {
