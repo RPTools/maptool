@@ -42,6 +42,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -97,12 +98,17 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
               .getResource("net/rptools/maptool/client/image/currentIndicator.png"));
 
   /** Border used to show that an item is selected */
-  public static final Border SELECTED_BORDER = BorderFactory.createLineBorder(Color.BLACK);
+  public static final Border SELECTED_BORDER = ImageBorder.RED;
 
   /** Border used to show that an item is not selected */
-  public static final Border UNSELECTED_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+  public static final Border UNSELECTED_BORDER =
+      BorderFactory.createEmptyBorder(
+          ImageBorder.RED.getTopMargin(),
+          ImageBorder.RED.getLeftMargin(),
+          ImageBorder.RED.getBottomMargin(),
+          ImageBorder.RED.getRightMargin());
 
-  /** Border used to show that an item is selected */
+  /** Border used for name plate */
   public static final Border NAME_BORDER = BorderFactory.createEmptyBorder(2, 4, 3, 4);
 
   /** The size of the ICON shown in the list renderer */
@@ -122,8 +128,8 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
     // Set up the panel
     panel = aPanel;
     setLayout(new FormLayout("1px pref 1px pref:grow", "fill:pref"));
-    setBorder(SELECTED_BORDER);
-    setBackground(Color.WHITE);
+    //    setBorder(SELECTED_BORDER);
+    //    setBackground(Color.WHITE);
 
     // The current indicator
     currentIndicator = new JLabel();
@@ -152,6 +158,8 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
    */
   public Component getListCellRendererComponent(
       JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+    setOpaque(false);
 
     // Set the background by type
     Token token = null;
