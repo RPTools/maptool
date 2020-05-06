@@ -14,16 +14,15 @@
  */
 package net.rptools.lib.swing;
 
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import javax.swing.border.Border;
 import net.rptools.lib.image.ImageUtil;
 
 /** @author trevor */
-public class ImageBorder {
+public class ImageBorder implements Border {
   public static final ImageBorder GRAY = new ImageBorder("net/rptools/lib/swing/image/border/gray");
   public static final ImageBorder RED = new ImageBorder("net/rptools/lib/swing/image/border/red");
   public static final ImageBorder BLUE = new ImageBorder("net/rptools/lib/swing/image/border/blue");
@@ -183,5 +182,20 @@ public class ImageBorder {
   private int max(int i1, int i2, int i3) {
     int bigger = i1 > i2 ? i1 : i2;
     return bigger > i3 ? bigger : i3;
+  }
+
+  @Override
+  public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+    paintWithin((Graphics2D) g, x, y, width, height);
+  }
+
+  @Override
+  public Insets getBorderInsets(Component c) {
+    return new Insets(getTopMargin(), getLeftMargin(), getBottomMargin(), getRightMargin());
+  }
+
+  @Override
+  public boolean isBorderOpaque() {
+    return false;
   }
 }

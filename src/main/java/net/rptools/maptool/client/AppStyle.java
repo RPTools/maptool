@@ -92,8 +92,10 @@ public class AppStyle {
   public static BufferedImage arrowOut;
   public static BufferedImage arrowRotateClockwise;
   public static BufferedImage arrowIn;
+  public static BufferedImage arrowDown;
   public static BufferedImage arrowRight;
   public static BufferedImage arrowLeft;
+  public static BufferedImage arrowHold;
 
   public static BufferedImage lightSourceIcon;
 
@@ -163,6 +165,8 @@ public class AppStyle {
       arrowIn = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_in_red.png");
       arrowRight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_right.png");
       arrowLeft = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_left.png");
+      arrowDown = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_down.png");
+      arrowHold = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_hold.png");
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");
