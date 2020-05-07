@@ -14,11 +14,17 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.vladsch.flexmark.ext.definition.DefinitionExtension;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.ext.toc.TocExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.ParserEmulationProfile;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.util.misc.Extension;
+import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
@@ -51,11 +57,28 @@ public class MarkDownFunctions extends AbstractFunction {
     if (args.size() > 1) {
       profile = getParserType(args.get(1).toString());
     } else {
-      profile = ParserEmulationProfile.MULTI_MARKDOWN;
+      profile = ParserEmulationProfile.GITHUB_DOC;
     }
 
+    List<Extension> extensions = new ArrayList<>();
     MutableDataHolder options = new MutableDataSet();
-    options.setFrom(profile);
+
+    if (profile == ParserEmulationProfile.GITHUB_DOC) {
+      extensions.add(TablesExtension.create());
+      extensions.add(TaskListExtension.create());
+      extensions.add(DefinitionExtension.create());
+      extensions.add(TocExtension.create());
+      options
+          .set(com.vladsch.flexmark.parser.Parser.SPACE_IN_LINK_URLS, true)
+          .setFrom(ParserEmulationProfile.GITHUB_DOC)
+          .set(TablesExtension.COLUMN_SPANS, false)
+          .set(TablesExtension.APPEND_MISSING_COLUMNS, true)
+          .set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
+          .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
+          .set(com.vladsch.flexmark.parser.Parser.EXTENSIONS, extensions);
+    } else {
+      options.setFrom(profile);
+    }
 
     var mdParser = com.vladsch.flexmark.parser.Parser.builder(options).build();
     HtmlRenderer renderer = HtmlRenderer.builder(options).build();
