@@ -488,10 +488,6 @@ public class MapToolFrame extends DefaultDockableHolder
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
   }
 
-  public void showWindowDecorations(boolean decorations) {
-    getRootPane().setWindowDecorationStyle(decorations ? JRootPane.FRAME : JRootPane.NONE);
-  }
-
   public ChatNotificationTimers getChatNotificationTimers() {
     return chatTyperTimers;
   }
@@ -674,7 +670,11 @@ public class MapToolFrame extends DefaultDockableHolder
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
     JScrollPane global = scrollPaneFactory(globalPanel);
-    JScrollPane selection = scrollPaneFactory(selectionPanel);
+
+    JPanel selection = new JPanel(new BorderLayout());
+    selection.add(scrollPaneFactory(selectionPanel), BorderLayout.CENTER);
+    selection.add(new MenuButtonsPanel(), BorderLayout.NORTH);
+
     JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
     frameMap.put(
         MTFrame.GLOBAL,
@@ -1739,7 +1739,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
-      SwingUtil.setUndecorated(this);
+      setUndecorated(true);
     }
   }
 

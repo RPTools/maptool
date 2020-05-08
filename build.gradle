@@ -2,21 +2,13 @@
 * For more details take a look at the Java Quickstart chapter in the Gradle
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
 */
-import org.gradle.plugins.ide.eclipse.model.AccessRule
-
-buildscript {
-    dependencies {
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.27.1"
-    }
-
-    repositories {
-        mavenCentral()
-    }
-}
-
 // Access Git info from build script
 plugins {
+    id "application"
     id "org.ajoberstar.grgit" version "4.0.1"
+    id "com.diffplug.gradle.spotless" version "3.28.0"
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'org.beryx.runtime' version '1.8.3'
 }
 
 // Apply the java plugin to add support for Java
@@ -29,13 +21,14 @@ apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 10
-targetCompatibility = 10
+sourceCompatibility = 14
+targetCompatibility = 14
 
 
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss8M"]
+def appSemVer = ""
 
 // Custom properties
 ext {
@@ -51,32 +44,32 @@ ext {
 
     if (tags) {
         tagVersion = tags.getName()
-        msiVersion = tagVersion
         enviroment = "Production"
         sentryDSN = sentry_production_dsn
     } else {
         tagVersion = 'SNAPSHOT-' + revision
+        project.description = "SNAPSHOT-" + revision
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
 
-    // not doing anything as of a bug in grgit when opening with currentDir/dir
-    // https://github.com/ajoberstar/grgit/issues/288
-    grgit.close()
-    // therefore close the underlying repository manually
-    grgit.repository.jgit.getRepository().close()
+    // This will strip anything other than core semver from the tag
+    // e.g. "1.7.2-rc.1" becomes "1.7.2"
+    def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
 
-    // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
-    println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
-}
-
-run {
-    args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
-
-    if(System.getProperty("exec.args") != null) {
-        args System.getProperty("exec.args").split()
+    // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
+    if (appSemVer.isEmpty()) {
+        appSemVer = defaultVersion
+    } else {
+        appSemVer = foundTags[0]
     }
+
+    // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
+    println 'Configuring for ' + project.name + developerRelease + " " + tagVersion + " by " + vendor
+    println "AppVersion: " + appSemVer
+
+    // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
+    println "OS Detected: " + osdetector.os
 }
 
 spotless {
@@ -103,38 +96,92 @@ spotless {
 }
 
 jacoco {
-toolVersion = "0.8.1"
-reportsDir = file("$buildDir/reports/jacoco")
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/reports/jacoco")
 }
 
-// Set eclipse natures, access rules, and other settings
-// https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseProject.html
-// https://discuss.gradle.org/t/buildship-1-0-18-is-now-available/19012
-eclipse {
-    project {
-        natures 'org.eclipse.buildship.core.gradleprojectnature'
-        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
-    }
+// org.openjfx.javafxplugin
+javafx {
+    version = '14'
+    // modules = ['javafx.fxml', 'javafx.graphics']
+    modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
+}
 
-    classpath {
-        file {
-            withXml {
-                def node = it.asNode()
-                node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
+run {
+    args = ['-v=' + appSemVer]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor]
+    // Add -Dlog4j2.debug to see log4j2 details
+
+    if (System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
+}
+
+// Badass Runtime Plugin Options
+runtime {
+    options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
+
+    jpackage {
+        installerOutputDir = file("releases")
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase()]
+
+        imageOptions = []
+        imageName = project.name + developerRelease
+        installerName = project.name + developerRelease
+        installerOptions = [
+                //'--temp', 'releases/temp-files',
+                '--verbose',
+                '--description', project.description,
+                '--copyright', 'Copyright 2000-2020 RPTools.net',
+                '--license-file', 'package/license/COPYING.AFFERO',
+                '--app-version', appSemVer,
+                '--vendor', vendor,
+                '--file-associations', 'package/associations.properties'
+        ]
+
+        if (osdetector.os.is('windows')) {
+            println "Setting Windows installer options"
+            resourceDir = file('package/windows')
+            imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
+            installerOptions += [
+                    '--win-dir-chooser',
+                    '--win-per-user-install',
+                    '--win-shortcut',
+                    '--win-menu',
+                    '--win-menu-group', vendor
+            ]
+        }
+
+        if (osdetector.os.is('osx')) {
+            println "Setting MacOS installer options"
+            imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
+            installerOptions += [
+                    '--mac-package-name', project.name + developerRelease
+            ]
+        }
+
+        if (osdetector.os.is('unix')) {
+            println "Setting Linux installer options"
+            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
+            installerOptions += [
+                    '--linux-menu-group', vendor,
+                    '--linux-shortcut'
+            ]
+
+            if (installerType == 'deb') {
+                installerOptions += [
+                        '--linux-deb-maintainer', 'admin@rptools.net'
+                ]
             }
-            whenMerged {
-                entries.each { source ->
-                    if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
-                        source.accessRules.add(new AccessRule('0', 'javafx/**'))
-                        source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
-                    }
-                }
+
+            if (installerType == 'rpm') {
+                installerOptions += [
+                        '--linux-rpm-license-type', 'AGPLv3'
+                ]
             }
         }
     }
 }
-
-
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
@@ -142,8 +189,8 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'http://www.nerps.net/repo/' }
+    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
 
@@ -152,9 +199,9 @@ repositories {
 dependencies {
     // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
     // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.12.1'	// Bridges v1 to v2 for other code in other libs
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.13.0'	// Bridges v1 to v2 for other code in other libs
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
@@ -163,15 +210,8 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
-
-    implementation 'net.java.abeille:abeille-formsrt:2.0'
-
-    // sourceControl gitRepository currently not producing classpath for Eclipse
-    // using jitpack.io for now
-    // implementation 'net.rptools.clientserver:clientserver:1.4.0.+'
-    implementation 'com.github.RPTools:clientserver:1.4.0.0'
-    implementation 'org.hibernate:antlr:2.7.5H3'
+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
 
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
     implementation 'commons-io:commons-io:2.6'
@@ -180,19 +220,22 @@ dependencies {
     implementation 'commons-net:commons-net:3.6'
     implementation 'commons-cli:commons-cli:1.4'
 
+    // RPTool Libs
     implementation 'net.rptools.decktool:decktool:1.0.b1'
-
+    implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.5.5'
+    implementation 'com.github.RPTools:dicelib:1.6.0'
 
-    implementation 'jide-common:jide-common:3.2.3'
-    implementation 'jide-components:jide-components:3.2.3'
-    implementation 'jide-dialogs:jide-dialogs:3.2.3'
-    implementation 'jide-dock:jide-dock:3.2.3'
-    implementation 'jide-editor:jide-editor:3.2.3'
-    implementation 'jide-grids:jide-grids:3.2.3'
-    implementation 'jide-properties:jide-properties:3.2.3'
-    implementation 'jide-shortcut:jide-shortcut:3.2.3'
+    // Currently hosted on nerps.net/repo
+    implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-components', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-dialogs', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-dock', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-editor', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-grids', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
+    implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-servlet:9.4.25.v20191220'
@@ -205,7 +248,8 @@ dependencies {
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
-
+    implementation 'net.java.abeille:abeille-formsrt:2.0'
+    implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho.hessian:hessian:3.1.6'
     implementation 'org.mozilla:rhino:1.7.12'
@@ -256,8 +300,8 @@ dependencies {
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
@@ -268,9 +312,12 @@ dependencies {
     implementation 'com.github.RPTools:dicelib:1.6.0'
 
 
+
+    // flexmark markdown parsing / conversion
+    implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
+
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
-
 }
 
 
@@ -279,9 +326,9 @@ task configSentryRelease(type: Copy) {
     into("src/main/resources/")
     rename("sentry.properties.template", "sentry.properties")
     def tokens = [
-        AppVersion: "${tagVersion}",
-        Environment: "${enviroment}",
-        SentryDSN: "${sentryDSN}"
+            AppVersion : "${tagVersion}",
+            Environment: "${enviroment}",
+            SentryDSN  : "${sentryDSN}"
     ]
     expand(tokens)
     inputs.properties(tokens)
@@ -292,19 +339,20 @@ task uberJar(type: Jar) {
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion
+    destinationDirectory = file("$rootDir/releases")
 
     manifest {
-        attributes 'Implementation-Title': project.name,
-        'Implementation-Version': tagVersion,
-        'Implementation-Vendor': vendor,
-        'Git-Commit': revision,
-        'Git-Commit-SHA': revisionFull,
-        'Built-By': System.getProperty('user.name'),
-        'Built-Date': new Date(),
-        'Built-JDK': System.getProperty('java.version'),
-        'Source-Compatibility': project.sourceCompatibility,
-        'Target-Compatibility': project.targetCompatibility,
-        'Main-Class': project.mainClassName
+        attributes 'Implementation-Title': project.name + developerRelease,
+                'Implementation-Version': tagVersion,
+                'Implementation-Vendor': vendor,
+                'Git-Commit': revision,
+                'Git-Commit-SHA': revisionFull,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                'Main-Class': project.mainClassName
     }
 
     from {
@@ -315,6 +363,22 @@ task uberJar(type: Jar) {
     with jar
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
     exclude 'module-info.class' //This is to make sure maptool doesn't become a module by including module-info of dependencies. Probably needs to be fixed before we go to jdk 11+
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': project.name + developerRelease,
+                'Implementation-Version': tagVersion,
+                'Implementation-Vendor': vendor,
+                'Git-Commit': revision,
+                'Git-Commit-SHA': revisionFull,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                'Main-Class': project.mainClassName
+    }
 }
 
 // For logging Git Commit during CI
@@ -331,71 +395,6 @@ task copyPackageExtras(type: Copy) {
     include('*')
 }
 
-task prepareInnoSetup(type: Copy) {
-    from("package/windows/MapTool.iss.template")
-    into("package/windows/")
-    rename("MapTool.iss.template", "MapTool.iss")
-    def tokens = [
-        AppName: "${project.name}",
-        AppVersion: "${tagVersion}",
-        Vendor: "${vendor}",
-        WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
-        Slash: "\\",
-    ]
-    expand(tokens)
-    inputs.properties(tokens)
-}
-
-task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepareInnoSetup]) {
-    group = 'distribution'
-    description = 'Create native installers'
-
-    tasks.findByName('copyPackageExtras').mustRunAfter 'uberJar'
-
-    doLast {
-        // Using the -deploy Command with Bundler Arguments
-        // 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist
-        //		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"
-        // *Note: You can specify a JRE using "-Bruntime=../../../deploy-ready-jre"
-        //		  It will bundle system/workspace JDK by default
-        def javapackager_deploy = exec {
-            workingDir "${project.projectDir.absolutePath}"
-
-            println workingDir
-
-            commandLine "javapackager",
-                "-deploy", "-v",
-                "-native", "installer",
-                "-appclass", mainClassName,
-                "-srcdir", "build/libs",
-                "-outdir", "releases/release-" + tagVersion,
-                "-outfile", project.name,
-                "-name", project.name,
-                "-description", project.name + " " + tagVersion + " by " + vendor,
-                "-title", project.name,
-                "-vendor", vendor,
-                "-BdropinResourcesRoot=.",
-                "-BAssociations=cmpgn",
-                "-BinstalldirChooser=true",
-                "-BsystemWide=false",
-                "-BmenuHint=true",
-                "-Bwin.menuGroup=" + vendor,
-                "-BshortcutHint=true",
-                "-BappVersion=" + tagVersion,
-                "-Bwin.msi.productVersion=" + msiVersion,
-                "-BlicenseFile=COPYING.AFFERO",
-                "-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
-                "-Bcategory=Games",
-                "-Bemail=maptool@rptools.net",
-                "-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
-                "-BuserJvmOptions=-Dfile.encoding\\==UTF-8",
-                "-BuserJvmOptions=-Xss=8M"
-
-                println commandLine
-        }
-    }
-}
-
 javadoc {
     options.addStringOption('Xmaxwarns', '2000')
     options.addBooleanOption('html5', true)
@@ -407,7 +406,7 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '5.3.1'
+    gradleVersion = '6.3'
 }
 
 // Configure current release tag in Sentry.io properties

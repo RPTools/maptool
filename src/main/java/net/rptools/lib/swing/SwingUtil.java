@@ -27,8 +27,7 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.Window;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -346,22 +345,25 @@ public class SwingUtil {
     }
   }
 
-  public static void setDefaultLookAndFeelDecorated(boolean set) {
-    JFrame.setDefaultLookAndFeelDecorated(set);
-    JDialog.setDefaultLookAndFeelDecorated(set);
-  }
-
-  public static void setUndecorated(JFrame frame) {
-    frame.setUndecorated(true);
-    frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-  }
-
-  public static void setUndecorated(JDialog dialog) {
-    dialog.setUndecorated(true);
-    dialog.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-  }
-
   public static boolean isMaximized(JFrame frame) {
     return frame.getExtendedState() == JFrame.MAXIMIZED_BOTH;
+  }
+
+  /**
+   * Connects a JButton to a popup menu - to be used in toolbars for a simply button that opens
+   * popup on press
+   *
+   * @param button the button to use as trigger
+   * @param menu the popup menu to show
+   * @return the button
+   */
+  public static JButton makePopupMenuButton(JButton button, final JPopupMenu menu) {
+    button.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            menu.show(button, 0, button.getSize().height);
+          }
+        });
+    return button;
   }
 }

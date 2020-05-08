@@ -41,7 +41,7 @@ public class MemoryStatusBar extends JProgressBar {
     setMinimum(0);
     setStringPainted(true);
 
-    // Adjust the minimum size to be big enought for the font used
+    // Adjust the minimum size to be big enough for the font used
     // plus a bit extra padding.
     fm = getFontMetrics(getFont());
     int w = 26 + fm.stringWidth("9.99 MB/9.99 MB");

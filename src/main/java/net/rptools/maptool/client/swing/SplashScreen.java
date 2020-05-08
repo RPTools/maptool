@@ -25,10 +25,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javax.swing.JFrame;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.util.CreateVersionedInstallSplash;
 
 public class SplashScreen extends JFrame {
+
   private static int imgWidth = 490;
   private static int imgHeight = 290;
 
@@ -36,7 +36,7 @@ public class SplashScreen extends JFrame {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     final JFXPanel fxPanel = new JFXPanel();
 
-    SwingUtil.setUndecorated(this);
+    setUndecorated(true);
     setType(Type.UTILITY);
 
     add(fxPanel);
@@ -70,6 +70,10 @@ public class SplashScreen extends JFrame {
     // This method is invoked on the JavaFX thread
     Group root = new Group();
     Scene scene = new Scene(root, Color.TRANSPARENT);
+
+    if (Character.isDigit(versionText.charAt(0))) {
+      versionText = "v" + versionText;
+    }
 
     Image splashImage =
         SwingFXUtils.toFXImage(

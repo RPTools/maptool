@@ -97,7 +97,6 @@ public class PersistenceUtil {
   private static final ModelVersionManager tokenVersionManager = new ModelVersionManager();
 
   static {
-    PackedFile.init(AppUtil.getAppHome("tmp")); // $NON-NLS-1$
 
     // Whenever a new transformation needs to be added, put the version of MT into the
     // CAMPAIGN_VERSION
@@ -603,7 +602,7 @@ public class PersistenceUtil {
 
   public static Token loadToken(URL url) throws IOException {
     // Create a temporary file from the downloaded URL
-    File newFile = new File(PackedFile.getTmpDir(), new GUID() + ".url");
+    File newFile = new File(AppUtil.getTmpDir(), new GUID() + ".url");
     FileUtils.copyURLToFile(url, newFile);
     Token token = loadToken(newFile);
     newFile.delete();

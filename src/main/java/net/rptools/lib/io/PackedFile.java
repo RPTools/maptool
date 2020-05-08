@@ -46,6 +46,7 @@ import java.util.zip.ZipOutputStream;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.model.GUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -98,8 +99,7 @@ public class PackedFile implements AutoCloseable {
 
   private static final Logger log = LogManager.getLogger(PackedFile.class);
 
-  private static File tmpDir =
-      new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
+  private final File tmpDir;
 
   private final XStream xstream = FileUtil.getConfiguredXStream();
 
@@ -115,16 +115,8 @@ public class PackedFile implements AutoCloseable {
 
   private ModelVersionManager versionManager;
 
-  /**
-   * By default all temporary files are handled in /tmp. Use this method to globally set the
-   * location of the temporary directory
-   */
-  public static void init(File tmpDir) {
-    PackedFile.tmpDir = tmpDir;
-  }
-
-  public static File getTmpDir() {
-    return PackedFile.tmpDir;
+  public File getTmpDir() {
+    return tmpDir;
   }
 
   public void setModelVersionManager(ModelVersionManager versionManager) {
@@ -138,6 +130,7 @@ public class PackedFile implements AutoCloseable {
 
   public PackedFile(File file) {
     this.file = file;
+    tmpDir = AppUtil.getTmpDir();
     dirty = !file.exists();
     tmpFile = new File(tmpDir, new GUID() + ".tmp");
   }
