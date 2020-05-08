@@ -133,7 +133,7 @@ public class InitiativePanel extends JPanel
 
     popupMenu = new JPopupMenu();
     toolBar.add(
-        SwingUtil.makePopupMenuButton(new JButton(new ImageIcon(AppStyle.arrowDown)), popupMenu));
+        SwingUtil.makePopupMenuButton(new JButton(new ImageIcon(AppStyle.arrowMenu)), popupMenu));
 
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));
@@ -143,6 +143,7 @@ public class InitiativePanel extends JPanel
     round = new JLabel("", SwingConstants.LEFT);
     toolBar.add(Box.createHorizontalGlue());
     toolBar.add(round);
+    toolBar.add(Box.createHorizontalStrut(8));
 
     ownerPermissions = MapTool.getCampaign().isInitiativeOwnerPermissions();
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
@@ -188,7 +189,6 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.remove", REMOVE_TOKEN_ACTION);
     I18N.setAction("initPanel.removeAll", REMOVE_ALL_ACTION);
     I18N.setAction("initPanel.remove", REMOVE_TOKEN_ACTION);
-    I18N.setAction("initPanel.menuButton", NEXT_ACTION);
     I18N.setAction("initPanel.toggleOwnerPermissions", TOGGLE_OWNER_PERMISSIONS_ACTION);
     I18N.setAction("initPanel.toggleMovementLock", TOGGLE_MOVEMENT_LOCK_ACTION);
     I18N.setAction("initPanel.round", RESET_COUNTER_ACTION);
@@ -216,9 +216,9 @@ public class InitiativePanel extends JPanel
 
     // Set up the buttons
     PREV_ACTION.setEnabled(hasGMPermission());
-    if (hasGMPermission() || (ownerPermissions && hasOwnerPermission(list.getCurrentToken()))) {
-      NEXT_ACTION.setEnabled(true);
-    } // endif
+    RESET_COUNTER_ACTION.setEnabled(hasGMPermission());
+    NEXT_ACTION.setEnabled(
+        hasGMPermission() || (ownerPermissions && hasOwnerPermission(list.getCurrentToken())));
 
     // Set up the menu
     popupMenu.removeAll();

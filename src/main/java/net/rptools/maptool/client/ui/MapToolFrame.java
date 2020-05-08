@@ -670,7 +670,11 @@ public class MapToolFrame extends DefaultDockableHolder
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
     JScrollPane global = scrollPaneFactory(globalPanel);
-    JScrollPane selection = scrollPaneFactory(selectionPanel);
+
+    JPanel selection = new JPanel(new BorderLayout());
+    selection.add(scrollPaneFactory(selectionPanel), BorderLayout.CENTER);
+    selection.add(new MenuButtonsPanel(), BorderLayout.NORTH);
+
     JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
     frameMap.put(
         MTFrame.GLOBAL,
