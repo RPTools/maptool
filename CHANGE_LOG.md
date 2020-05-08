@@ -81,7 +81,7 @@ Changes since 1.7.0-beta-1 in **BOLD**.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
 ## Other
-- [#1776][i1776] dicelib updated to 1.6.1
+- [#1776][i1776] **dicelib updated to 1.6.1**
 - [#1704][i1704] dicelib updated to 1.6.0
 
 [i1776]: https://github.com/RPTools/maptool/issues/1776
