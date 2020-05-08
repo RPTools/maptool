@@ -66,10 +66,12 @@ public class DiceHelper {
   }
 
   public static int keepDice(int times, int sides, int keep) throws EvaluationException {
+    if (keep > times) throw new EvaluationException("You cannot keep more dice than you roll");
     return dropDice(times, sides, times - keep);
   }
 
   public static int keepLowestDice(int times, int sides, int keep) throws EvaluationException {
+    if (keep > times) throw new EvaluationException("You cannot keep more dice than you roll");
     return dropDiceHighest(times, sides, times - keep);
   }
 
