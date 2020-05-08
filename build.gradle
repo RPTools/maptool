@@ -265,7 +265,7 @@ dependencies {
     // sourceControl gitRepository currently not producing classpath for Eclipse
     // using jitpack.io for now
     // compile ('net.rptools.dicelib:dicelib:1.5.2')
-    implementation 'com.github.RPTools:dicelib:1.6.0'
+    implementation 'com.github.RPTools:dicelib:1.6.1'
 
 
 
