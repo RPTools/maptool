@@ -1043,7 +1043,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         new AbstractAction() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            cycleSelectedToken(1);
+            renderer.cycleSelectedToken(1);
           }
         });
     actionMap.put(
@@ -1051,7 +1051,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         new AbstractAction() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            cycleSelectedToken(-1);
+            renderer.cycleSelectedToken(-1);
           }
         });
     actionMap.put(
@@ -1118,41 +1118,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             handleKeyMove(0, -1, true);
           }
         });
-  }
-
-  private void cycleSelectedToken(int direction) {
-    List<Token> visibleTokens = renderer.getTokensOnScreen();
-    if (visibleTokens.size() == 0) {
-      return;
-    }
-    Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
-    Integer newSelection = 0;
-
-    if (selectedTokenSet.size() != 0) {
-      // Find the first selected token on the screen
-      for (int i = 0; i < visibleTokens.size(); i++) {
-        Token token = visibleTokens.get(i);
-        if (!renderer.isTokenSelectable(token.getId())) {
-          continue;
-        }
-        if (renderer.getSelectedTokenSet().contains(token.getId())) {
-          newSelection = i;
-          break;
-        }
-      }
-      // Pick the next
-      newSelection += direction;
-    }
-    if (newSelection < 0) {
-      newSelection = visibleTokens.size() - 1;
-    }
-    if (newSelection >= visibleTokens.size()) {
-      newSelection = 0;
-    }
-    // Make the selection
-    renderer.clearSelectedTokens();
-    renderer.selectToken(visibleTokens.get(newSelection).getId());
-    renderer.updateAfterSelection();
   }
 
   private void handleKeyMove(int dx, int dy, boolean micro) {
