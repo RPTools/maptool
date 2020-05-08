@@ -88,8 +88,6 @@ public class SelectionPanel extends AbstractMacroPanel {
 
     // paint panel only when it's visible or active
     if (panelVisible) {
-      // add the selection panel controls first
-      add(new MenuButtonsPanel());
 
       // draw common group only when there is more than one token selected
       if (selectedTokenList.size() > 1) {

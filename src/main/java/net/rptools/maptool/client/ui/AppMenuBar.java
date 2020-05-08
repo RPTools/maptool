@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.AppConstants;
@@ -351,11 +350,9 @@ public class AppMenuBar extends JMenuBar {
             if (button.isSelected()) {
               button.setToolTipText(unhidetooltip);
               toolbarPanel.setVisible(false);
-              if (SwingUtil.isMaximized(frame)) frame.showWindowDecorations(false);
             } else {
               button.setToolTipText(hidetooltip);
               toolbarPanel.setVisible(true);
-              frame.showWindowDecorations(true);
             }
           }
         });

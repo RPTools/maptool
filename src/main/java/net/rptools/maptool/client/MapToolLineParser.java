@@ -131,7 +131,8 @@ public class MapToolLineParser {
               Base64Functions.getInstance(),
               TokenTerrainModifierFunctions.getInstance(),
               TestFunctions.getInstance(),
-              TextLabelFunctions.getInstance())
+              TextLabelFunctions.getInstance(),
+              new MarkDownFunctions())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */

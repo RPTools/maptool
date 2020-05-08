@@ -1749,8 +1749,6 @@ public class MapTool {
           });
       LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
-      SwingUtil.setDefaultLookAndFeelDecorated(true);
-
       configureJide();
     } catch (Exception e) {
       MapTool.showError("msg.error.lafSetup", e);

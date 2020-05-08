@@ -89,11 +89,16 @@ public class AppStyle {
   public static BufferedImage impersonatePanelImage;
   public static BufferedImage tablesPanelImage;
   public static BufferedImage initiativePanelImage;
+
+  public static BufferedImage resize;
+
   public static BufferedImage arrowOut;
   public static BufferedImage arrowRotateClockwise;
   public static BufferedImage arrowIn;
+  public static BufferedImage arrowMenu;
   public static BufferedImage arrowRight;
   public static BufferedImage arrowLeft;
+  public static BufferedImage arrowHold;
 
   public static BufferedImage lightSourceIcon;
 
@@ -156,6 +161,9 @@ public class AppStyle {
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/layers.png");
       initiativePanelImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/initiativePanel.png");
+
+      resize = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/resize.png");
+
       arrowOut = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_out.png");
       arrowRotateClockwise =
           ImageUtil.getCompatibleImage(
@@ -163,6 +171,8 @@ public class AppStyle {
       arrowIn = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_in_red.png");
       arrowRight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_right.png");
       arrowLeft = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_left.png");
+      arrowMenu = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_menu.png");
+      arrowHold = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_hold.png");
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");
