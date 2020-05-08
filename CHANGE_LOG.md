@@ -1,6 +1,4 @@
 # Maptool 1.7.0
-=====
-
 Lots of enhancements, bug fixes and improvements to the code base.
 
 ## Some Highlights
