@@ -251,10 +251,14 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (!MapTool.confirmDrawDelete()) {
                   return;
                 }
+                TreePath[] selection = tree.getSelectionPaths();
+                if (selection == null || selection.length == 0) {
+                  return;
+                }
                 DrawnElement firstElement = null;
                 Set<GUID> selectedDrawSet = new HashSet<GUID>();
                 boolean topLevelOnly = true;
-                for (TreePath path : tree.getSelectionPaths()) {
+                for (TreePath path : selection) {
                   if (path.getPathCount() != 3) topLevelOnly = false;
                   if (path.getLastPathComponent() instanceof DrawnElement) {
                     DrawnElement de = (DrawnElement) path.getLastPathComponent();
