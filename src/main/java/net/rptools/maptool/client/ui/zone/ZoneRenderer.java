@@ -2886,7 +2886,7 @@ public class ZoneRenderer extends JComponent
 
     // Always assume tokens, for now
     List<TokenLocation> tokenLocationListCopy = new ArrayList<TokenLocation>();
-    tokenLocationListCopy.addAll(getTokenLocations(Zone.Layer.TOKEN));
+    tokenLocationListCopy.addAll(getTokenLocations(getActiveLayer()));
     for (TokenLocation location : tokenLocationListCopy) {
       list.add(location.token);
     }
@@ -4004,14 +4004,12 @@ public class ZoneRenderer extends JComponent
   public void cycleSelectedToken(int direction) {
     List<Token> visibleTokens = getTokensOnScreen();
     Set<GUID> selectedTokenSet = getSelectedTokenSet();
-    Integer newSelection = null;
+    int newSelection = 0;
 
     if (visibleTokens.size() == 0) {
       return;
     }
-    if (selectedTokenSet.size() == 0) {
-      newSelection = 0;
-    } else {
+    if (selectedTokenSet.size() > 0) {
       // Find the first selected token on the screen
       for (int i = 0; i < visibleTokens.size(); i++) {
         Token token = visibleTokens.get(i);
