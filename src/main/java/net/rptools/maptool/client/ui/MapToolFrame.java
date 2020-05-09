@@ -254,7 +254,7 @@ public class MapToolFrame extends DefaultDockableHolder
                 DrawnElement firstElement = null;
                 Set<GUID> selectedDrawSet = new HashSet<GUID>();
                 boolean topLevelOnly = true;
-                for (TreePath path : tree.getSelectionPaths()) {
+                for (TreePath path : selection) {
                   if (path.getPathCount() != 3) topLevelOnly = false;
                   if (path.getLastPathComponent() instanceof DrawnElement) {
                     DrawnElement de = (DrawnElement) path.getLastPathComponent();
