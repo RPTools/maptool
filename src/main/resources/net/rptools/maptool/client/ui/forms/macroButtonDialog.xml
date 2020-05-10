@@ -338,7 +338,7 @@
                               </at>
                               <at name="name">statusBarLabel</at>
                               <at name="width">1260</at>
-                              <at name="text">Ready</at>
+                              <at name="text">Label.ready</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -346,7 +346,7 @@
                               </at>
                               <at name="font">
                                <object classname="com.jeta.forms.store.properties.FontProperty">
-                                <at name="family">Tahoma</at>
+                                <at name="family">SansSerif</at>
                                 <at name="style">0</at>
                                 <at name="size">10</at>
                                </object>
