@@ -83,7 +83,7 @@
             </at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">12</at>
              </object>
