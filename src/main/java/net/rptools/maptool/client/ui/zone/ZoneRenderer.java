@@ -2923,6 +2923,7 @@ public class ZoneRenderer extends JComponent
 
     if (!keepSelectedTokenSet) {
       selectedTokenSet.clear();
+      updateAfterSelection();
     } else {
       keepSelectedTokenSet = false; // Always reset it back, temp boolean only
     }
@@ -3957,30 +3958,26 @@ public class ZoneRenderer extends JComponent
    * non-empty. Fires onTokenSelection events.
    */
   public void undoSelectToken() {
-    // System.out.println("num history items: " + selectedTokenSetHistory.size());
-    // for (Set<GUID> set : selectedTokenSetHistory) {
-    // System.out.println("history item");
-    // for (GUID guid : set) {
-    // System.out.println(zone.getToken(guid).getName());
-    // }
-    // }
-    if (selectedTokenSetHistory.size() > 0) {
+
+    while (selectedTokenSetHistory.size() > 0) {
+
       selectedTokenSet = selectedTokenSetHistory.remove(0);
+
       // user may have deleted some of the tokens that are contained in the selection history.
+      // There could also be tokens in another than the current layer which we don't want to go
+      // back to.
       // find them and filter them otherwise the selectionSet will have orphaned GUIDs and
       // they will cause NPE
       Set<GUID> invalidTokenSet = new HashSet<GUID>();
       for (GUID guid : selectedTokenSet) {
-        if (zone.getToken(guid) == null) {
+        Token token = zone.getToken(guid);
+        if (token == null || token.getLayer() != getActiveLayer()) {
           invalidTokenSet.add(guid);
         }
       }
       selectedTokenSet.removeAll(invalidTokenSet);
 
-      // if there is no token left in the set, undo again
-      if (selectedTokenSet.size() == 0) {
-        undoSelectToken();
-      }
+      if (!selectedTokenSet.isEmpty()) break;
     }
     // TODO: if selection history is empty, notify the selection panel to
     // disable the undo button.
