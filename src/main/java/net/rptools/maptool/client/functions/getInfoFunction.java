@@ -297,7 +297,7 @@ public class getInfoFunction extends AbstractFunction {
         // }
         JsonArray lightList = new JsonArray();
         for (Light light : ls.getLightList()) {
-          lightList.add(gson.toJson(light));
+          lightList.add(gson.toJsonTree(light));
         }
         linfo.add("light segments", lightList);
         ltinfo.add(linfo);
