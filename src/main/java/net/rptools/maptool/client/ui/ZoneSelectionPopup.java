@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -25,7 +24,6 @@ import java.util.ListIterator;
 import javax.swing.*;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 public class ZoneSelectionPopup extends JScrollPopupMenu {
@@ -36,11 +34,12 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
 
   @Override
   public void show(Component invoker, int x, int y) {
-    createEntries();
+    Component selection = createEntries();
     super.show(invoker, x, y);
+    scrollComponentToVisible(selection);
   }
 
-  private void createEntries() {
+  private Component createEntries() {
     removeAll();
 
     List<ZoneRenderer> rendererList =
@@ -66,14 +65,16 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
           }
         });
 
+    JCheckBoxMenuItem selection = null;
     for (ZoneRenderer renderer : rendererList) {
-
-      BufferedImage thumb =
-          MapTool.takeMapScreenShot(new PlayerView(MapTool.getPlayer().getRole()));
-
-      add(new JCheckBoxMenuItem(new SelectAction(renderer)))
-          .setSelected(renderer == MapTool.getFrame().getCurrentZoneRenderer());
+      JCheckBoxMenuItem item = new JCheckBoxMenuItem(new SelectAction(renderer));
+      boolean current = renderer == MapTool.getFrame().getCurrentZoneRenderer();
+      item.setSelected(current);
+      if (current) selection = item;
+      add(item);
     }
+
+    return selection;
   }
 
   private class SelectAction extends AbstractAction {
