@@ -38,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.tool.AI_Tool;
@@ -260,13 +261,7 @@ public class ToolbarPanel extends JToolBar {
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/tool/btn-world.png")));
     button.setToolTipText(title);
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            ZoneSelectionPopup popup = new ZoneSelectionPopup();
-            popup.show(button, button.getSize().width - popup.getPreferredSize().width, 0);
-          }
-        });
+    SwingUtil.makePopupMenuButton(button, new ZoneSelectionPopup());
     return button;
   }
 
