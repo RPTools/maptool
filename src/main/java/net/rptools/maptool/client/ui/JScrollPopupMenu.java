@@ -141,6 +141,8 @@ public class JScrollPopupMenu extends JPopupMenu {
       int height = heightMargin + extent;
 
       setPopupSize(new Dimension(width, height));
+    } else {
+      setPopupSize(null);
     }
 
     super.show(invoker, x, y);
