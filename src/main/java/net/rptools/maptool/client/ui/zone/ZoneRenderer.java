@@ -76,7 +76,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
@@ -196,10 +195,8 @@ public class ZoneRenderer extends JComponent
   private boolean showAllPaths = true; // Jamz: new option to show path
   // Optimizations
   private final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
-  private final Map<Token, BufferedImage> replacementImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
-  private final Map<Token, BufferedImage> opacityImageMap = new HashMap<Token, BufferedImage>();
   private Token tokenUnderMouse;
 
   private ScreenPoint pointUnderMouse;
@@ -743,8 +740,6 @@ public class ZoneRenderer extends JComponent
     }
     flipImageMap.remove(token);
     flipIsoImageMap.remove(token);
-    opacityImageMap.remove(token);
-    replacementImageMap.remove(token);
     labelRenderingCache.remove(token.getId());
 
     // This should be smarter, but whatever
@@ -777,10 +772,8 @@ public class ZoneRenderer extends JComponent
     // tokenLocationCache.clear();
 
     flushDrawableRenderer();
-    replacementImageMap.clear();
     flipImageMap.clear();
     flipIsoImageMap.clear();
-    opacityImageMap.clear();
     fogBuffer = null;
     renderedLightMap = null;
     renderedAuraMap = null;
@@ -3212,17 +3205,8 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("renderTokens:OnscreenCheck");
 
-      // Moving ?
-      timer.start("renderTokens:ShowMovement");
-      if (isTokenMoving(token)) {
-        BufferedImage replacementImage = replacementImageMap.get(token);
-        if (replacementImage == null) {
-          replacementImage = ImageUtil.rgbToGrayscale(image);
-          replacementImageMap.put(token, replacementImage);
-        }
-        image = replacementImage;
-      }
-      timer.stop("renderTokens:ShowMovement");
+      // create a per token Graphics object
+      Graphics2D tokenG = (Graphics2D) g.create();
 
       // Previous path
       timer.start("renderTokens:ShowPath");
@@ -3234,11 +3218,9 @@ public class ZoneRenderer extends JComponent
       timer.start("tokenlist-4");
       // Halo
       if (token.hasHalo()) {
-        Stroke oldStroke = clippedG.getStroke();
-        clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-        clippedG.setColor(token.getHaloColor());
-        clippedG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
-        clippedG.setStroke(oldStroke);
+        tokenG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+        tokenG.setColor(token.getHaloColor());
+        tokenG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
       }
       timer.stop("tokenlist-4");
 
@@ -3350,22 +3332,13 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("tokenlist-6");
 
-      // Apply Alpha Transparency
+      // Apply Alpha Transparency from token and use opacity for indicating that token is moving
       float opacity = token.getTokenOpacity();
+
+      if (isTokenMoving(token)) opacity = opacity / 2.0f;
+
       if (opacity < 1.0f) {
-        if (opacityImageMap.get(token) == null) {
-          BufferedImage dest =
-              new BufferedImage(
-                  workImage.getWidth(), workImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-          Graphics2D gAlpha = dest.createGraphics();
-          gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-          gAlpha.drawImage(workImage, 0, 0, null);
-          gAlpha.dispose();
-          workImage = dest;
-          opacityImageMap.put(token, workImage);
-        } else {
-          workImage = opacityImageMap.get(token);
-        }
+        tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
       }
 
       timer.start("tokenlist-7");
@@ -3376,15 +3349,14 @@ public class ZoneRenderer extends JComponent
           // the cell intersects visible area so
           if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
             // if we can see the centre, draw the whole token
-            g.drawImage(workImage, at, this);
+            tokenG.drawImage(workImage, at, this);
             // g.draw(cb); // debugging
           } else {
             // else draw the clipped token
-            Graphics2D cellOnly = (Graphics2D) clippedG.create();
             Area cellArea = new Area(visibleScreenArea);
             cellArea.intersect(cb);
-            cellOnly.setClip(cellArea);
-            cellOnly.drawImage(workImage, at, this);
+            tokenG.setClip(cellArea);
+            tokenG.drawImage(workImage, at, this);
           }
         }
       } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
@@ -3394,20 +3366,19 @@ public class ZoneRenderer extends JComponent
           // if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
           if (zone.getGrid()
               .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
-            g.drawImage(workImage, at, this);
+            tokenG.drawImage(workImage, at, this);
           } else {
             // else draw the clipped stamp/token
             // This will only show the part of the token that does not have VBL on it
             // as any VBL on the token will block LOS, affecting the clipping.
-            Graphics2D cellOnly = (Graphics2D) clippedG.create();
             Area cellArea = new Area(visibleScreenArea);
             cellArea.intersect(cb);
-            cellOnly.setClip(cellArea);
-            cellOnly.drawImage(workImage, at, this);
+            tokenG.setClip(cellArea);
+            tokenG.drawImage(workImage, at, this);
           }
         }
       } else {
-        clippedG.drawImage(workImage, at, this);
+        tokenG.drawImage(workImage, at, this);
       }
       timer.stop("tokenlist-7");
 
@@ -3439,16 +3410,15 @@ public class ZoneRenderer extends JComponent
             double fx = location.x + location.scaledWidth / 2;
             double fy = location.y + location.scaledHeight / 2;
 
-            clippedG.translate(fx, fy);
+            tokenG.translate(fx, fy);
             if (token.getFacing() < 0) {
-              clippedG.setColor(Color.yellow);
+              tokenG.setColor(Color.yellow);
             } else {
-              clippedG.setColor(TRANSLUCENT_YELLOW);
+              tokenG.setColor(TRANSLUCENT_YELLOW);
             }
-            clippedG.fill(arrow);
-            clippedG.setColor(Color.darkGray);
-            clippedG.draw(arrow);
-            clippedG.translate(-fx, -fy);
+            tokenG.fill(arrow);
+            tokenG.setColor(Color.darkGray);
+            tokenG.draw(arrow);
             break;
           case TOP_DOWN:
             if (AppPreferences.getForceFacingArrow() == false) {
@@ -3463,12 +3433,11 @@ public class ZoneRenderer extends JComponent
             double cx = location.x + location.scaledWidth / 2;
             double cy = location.y + location.scaledHeight / 2;
 
-            clippedG.translate(cx, cy);
-            clippedG.setColor(Color.yellow);
-            clippedG.fill(arrow);
-            clippedG.setColor(Color.darkGray);
-            clippedG.draw(arrow);
-            clippedG.translate(-cx, -cy);
+            tokenG.translate(cx, cy);
+            tokenG.setColor(Color.yellow);
+            tokenG.fill(arrow);
+            tokenG.setColor(Color.darkGray);
+            tokenG.draw(arrow);
             break;
           case SQUARE:
             if (zone.getGrid().isIsometric()) {
@@ -3509,12 +3478,12 @@ public class ZoneRenderer extends JComponent
               cy -= yp;
             }
 
-            clippedG.translate(cx, cy);
-            clippedG.setColor(Color.yellow);
-            clippedG.fill(arrow);
-            clippedG.setColor(Color.darkGray);
-            clippedG.draw(arrow);
-            clippedG.translate(-cx, -cy);
+            tokenG.translate(cx, cy);
+            tokenG.setColor(Color.yellow);
+            tokenG.fill(arrow);
+            tokenG.setColor(Color.darkGray);
+            tokenG.draw(arrow);
+            tokenG.translate(-cx, -cy);
             break;
         }
       }
@@ -3524,7 +3493,7 @@ public class ZoneRenderer extends JComponent
       // Set up the graphics so that the overlay can just be painted.
       Graphics2D locg =
           (Graphics2D)
-              clippedG.create(
+              tokenG.create(
                   (int) tokenBounds.getBounds().getX(),
                   (int) tokenBounds.getBounds().getY(),
                   (int) tokenBounds.getBounds().getWidth(),

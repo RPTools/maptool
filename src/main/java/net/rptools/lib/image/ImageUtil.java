@@ -318,31 +318,6 @@ public class ImageUtil {
     }
   }
 
-  public static BufferedImage rgbToGrayscale(BufferedImage image) {
-    if (image == null) {
-      return null;
-    }
-    BufferedImage returnImage =
-        new BufferedImage(image.getWidth(), image.getHeight(), pickBestTransparency(image));
-    for (int y = 0; y < image.getHeight(); y++) {
-      for (int x = 0; x < image.getWidth(); x++) {
-        int encodedPixel = image.getRGB(x, y);
-
-        int alpha = (encodedPixel >> 24) & 0xff;
-        int red = (encodedPixel >> 16) & 0xff;
-        int green = (encodedPixel >> 8) & 0xff;
-        int blue = (encodedPixel) & 0xff;
-
-        int average = (int) ((red + blue + green) / 3.0);
-
-        // y = 0.3R + 0.59G + 0.11B luminance formula
-        int value = (alpha << 24) + (average << 16) + (average << 8) + average;
-        returnImage.setRGB(x, y, value);
-      }
-    }
-    return returnImage;
-  }
-
   private static final int[][] outlineNeighborMap = {
     {0, -1, 100}, // N
     {1, 0, 100}, // E
