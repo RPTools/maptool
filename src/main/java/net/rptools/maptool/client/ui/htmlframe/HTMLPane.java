@@ -155,7 +155,7 @@ public class HTMLPane extends JEditorPane {
    * @param action The action for the submit.
    * @param data The data from the form.
    */
-  void doSubmit(String method, String action, String data) {
+  public void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
       if (log.isDebugEnabled()) {
         log.debug(
