@@ -3419,6 +3419,7 @@ public class ZoneRenderer extends JComponent
             tokenG.fill(arrow);
             tokenG.setColor(Color.darkGray);
             tokenG.draw(arrow);
+            tokenG.translate(-fx, -fy);
             break;
           case TOP_DOWN:
             if (AppPreferences.getForceFacingArrow() == false) {
@@ -3438,6 +3439,7 @@ public class ZoneRenderer extends JComponent
             tokenG.fill(arrow);
             tokenG.setColor(Color.darkGray);
             tokenG.draw(arrow);
+            tokenG.translate(-cx, -cy);
             break;
           case SQUARE:
             if (zone.getGrid().isIsometric()) {
