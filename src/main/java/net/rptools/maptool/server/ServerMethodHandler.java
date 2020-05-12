@@ -475,8 +475,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken
       // image instead of blowing up
-      Asset asset = new Asset("broken", new byte[] {});
-      asset.setId(assetID);
+      Asset asset = Asset.createBrokenImageAsset(assetID);
       server
           .getConnection()
           .callMethod(RPCContext.getCurrent().id, ClientCommand.COMMAND.putAsset.name(), asset);

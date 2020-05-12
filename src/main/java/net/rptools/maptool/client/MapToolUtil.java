@@ -282,10 +282,10 @@ public class MapToolUtil {
     if (asset == null) {
       return;
     }
-    if (!AssetManager.hasAsset(asset.getId())) {
+    if (!AssetManager.hasAsset(asset.getMD5Key())) {
       AssetManager.putAsset(asset);
     }
-    if (!MapTool.isHostingServer() && !MapTool.getCampaign().containsAsset(asset.getId())) {
+    if (!MapTool.isHostingServer() && !MapTool.getCampaign().containsAsset(asset.getMD5Key())) {
       MapTool.serverCommand().putAsset(asset);
     }
   }

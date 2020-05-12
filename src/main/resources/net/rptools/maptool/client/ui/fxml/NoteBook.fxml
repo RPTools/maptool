@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <FlowPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="%notebooks.label.name" />
+            <TextField fx:id="nameTextField" />
+            <Label text="%notebooks.label.version" />
+            <TextField fx:id="versionTextField" />
+            <Label text="%notebooks.label.namespace" />
+            <TextField fx:id="namespaceTextField" />
+         </children>
+      </FlowPane>
+   </top>
+</BorderPane>

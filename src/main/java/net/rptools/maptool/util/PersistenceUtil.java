@@ -62,6 +62,8 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.notebook.NoteBookManager;
+import net.rptools.maptool.model.notebook.persistence.NoteBookPersistenceUtil;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -73,6 +75,7 @@ import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class PersistenceUtil {
+  /** Extension to use for generic binary data. */
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
@@ -80,7 +83,7 @@ public class PersistenceUtil {
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
 
-  private static final String CAMPAIGN_VERSION = "1.4.1";
+  private static final String CAMPAIGN_VERSION = "1.6.0";
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -305,6 +308,13 @@ public class PersistenceUtil {
           pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
         }
 
+        if (campaignVersion == null || campaignVersion.startsWith("1.7")) {
+          saveTimer.start("Save NoteBooks");
+          new NoteBookPersistenceUtil()
+              .saveCampaignNoteBooks(pakFile, persistedCampaign.campaign.getNoteBookManager());
+          saveTimer.stop("Save NoteBooks");
+        }
+
         saveTimer.stop("Set content");
         saveTimer.start("Save");
         pakFile.save();
@@ -438,13 +448,8 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
-        // for (Entry<String, Map<GUID, LightSource>> entry :
-        // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-        // for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-        // System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() +
-        // " :: " + entryLs.getValue().getLumens());
-        // }
-        // }
+        NoteBookManager noteBookManager = persistedCampaign.campaign.getNoteBookManager();
+        new NoteBookPersistenceUtil().loadCampaignNoteBooks(pakFile, noteBookManager);
 
         return persistedCampaign;
       }
@@ -609,7 +614,19 @@ public class PersistenceUtil {
     return token;
   }
 
-  private static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
+  public static void putAssets(Collection<Asset> assets, PackedFile packedFile) throws IOException {
+    // Special handling of assets: XML file to describe the Asset, but binary file for the image
+    // data
+    packedFile.getXStream().processAnnotations(Asset.class);
+
+    for (Asset asset : assets) {
+      packedFile.putFile(
+          ASSET_DIR + asset.getMD5Key() + "." + asset.getExtension(), asset.getData());
+      packedFile.putFile(ASSET_DIR + asset.getName() + "", asset);
+    }
+  }
+
+  public static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
     // data
@@ -630,7 +647,7 @@ public class PersistenceUtil {
         Asset asset = null;
         if (fixRequired) {
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset = new Asset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
+            asset = Asset.createAsset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
           } catch (Exception e) {
@@ -657,12 +674,12 @@ public class PersistenceUtil {
         }
         // pre 1.3b52 campaign files stored the image data directly in the asset serialization.
         // New XStreamConverter creates empty byte[] for image.
-        if (asset.getImage() == null || asset.getImage().length < 4) {
-          String ext = asset.getImageExtension();
+        if (asset.getData() == null || asset.getData().length < 4) {
+          String ext = asset.getExtension();
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset.setImage(IOUtils.toByteArray(is));
+            asset = asset.setData(IOUtils.toByteArray(is), false);
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
             continue;
@@ -697,10 +714,8 @@ public class PersistenceUtil {
 
   private static void saveAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
-    // Special handling of assets: XML file to describe the Asset, but binary file for the image
-    // data
-    pakFile.getXStream().processAnnotations(Asset.class);
 
+    Set<Asset> allAssets = new HashSet<>();
     for (MD5Key assetId : assetIds) {
       if (assetId == null) continue;
 
@@ -713,14 +728,10 @@ public class PersistenceUtil {
         continue;
       }
 
-      String extension = asset.getImageExtension();
-      byte[] assetData = asset.getImage();
-      // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
-      // assetData.length);
-
-      pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
-      pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image
+      allAssets.add(asset);
     }
+
+    putAssets(allAssets, pakFile);
   }
 
   private static void clearAssets(PackedFile pakFile) throws IOException {
@@ -1045,7 +1056,7 @@ public class PersistenceUtil {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
           ImageUtil.createCompatibleImage(
-              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
+              ImageUtil.bytesToImage(asset.getData(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

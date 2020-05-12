@@ -25,7 +25,7 @@ public class AssetPaint extends TexturePaint {
   private Asset asset;
 
   public AssetPaint(Asset asset) {
-    this(ImageManager.getImageAndWait(asset.getId()));
+    this(ImageManager.getImageAndWait(asset.getMD5Key()));
     this.asset = asset;
   }
 

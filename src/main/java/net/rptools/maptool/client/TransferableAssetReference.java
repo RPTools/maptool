@@ -30,7 +30,7 @@ public class TransferableAssetReference implements Transferable {
   private MD5Key assetID;
 
   public TransferableAssetReference(Asset asset) {
-    this.assetID = asset.getId();
+    this.assetID = asset.getMD5Key();
   }
 
   public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
