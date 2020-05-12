@@ -39,6 +39,7 @@ public class FindTokenFunctions extends AbstractFunction {
   private enum FindType {
     SELECTED,
     IMPERSONATED,
+    IMPERSONATED_GLOBAL,
     NPC,
     PC,
     ALL,
@@ -334,8 +335,10 @@ public class FindTokenFunctions extends AbstractFunction {
       findType = FindType.SELECTED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getImpersonated")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-      findType = FindType.IMPERSONATED;
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      boolean global =
+          psize > 0 ? FunctionUtil.paramAsBoolean(functionName, parameters, 0, false) : false;
+      findType = global ? FindType.IMPERSONATED_GLOBAL : FindType.IMPERSONATED;
     } else if (functionName.startsWith("getPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.PC;
@@ -744,6 +747,17 @@ public class FindTokenFunctions extends AbstractFunction {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
         if (guid != null) t = zone.getToken(guid);
         else t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
+        if (t != null) {
+          tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
+        } else if (!match) tokenList = originalList;
+        break;
+      case IMPERSONATED_GLOBAL:
+        t = null;
+        guid = MapTool.getFrame().getImpersonatePanel().getTokenId();
+        if (guid != null) {
+          // Searches all maps to find impersonated token
+          t = findToken(guid.toString());
+        }
         if (t != null) {
           tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
         } else if (!match) tokenList = originalList;

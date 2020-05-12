@@ -1,17 +1,20 @@
-Maptool 1.7.0
-=====
+# Maptool 1.7.0
 Lots of enhancements, bug fixes and improvements to the code base.
 
-**Some Highlights**
+## Some Highlights
+- New GM option to disable the use of the Edit Token dialog by players.
+- Issue with decimal point in Map Units per Cell for European locales fixed.
 - New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
 - Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
 - MapTool can now import the Dungeondraft VTT export format.
 
-Changes since 1.7.0-alpha-2 in **BOLD**.
+Changes since 1.7.0-beta-1 in **BOLD**.
 
-**Enhancements**
-- [#1728][i1728] **Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.**  See issue for details.
-- [#1678][i1678] **Error reporting improved when MapTool can't start. More likely to get information in log file.**
+## Enhancements
+- [#1765][i1765] **New macro function to take Markdown text and covert to HTML.**  See issue for details.
+- [#1758][i1758] **Restylee Initiative and Selection windows for usability and compatibility with Look & Feel.**  See issue for details.
+- [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.**  See issue for details.
+- [#1678][i1678] Error reporting improved when MapTool can't start. More likely to get information in log file.
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1553][i1553] Many of the dialogs in MapTool have been localized so that the text strings are pulled from the I18N translation files.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
@@ -20,7 +23,7 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
 - [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
 - [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
-- [#1318][i1318] **Chat output tweaked so that token names are now part of the first output line keeping long token names from causing the output are from being reduced leaving large empty areas.**
+- [#1318][i1318] Chat output tweaked so that token names are now part of the first output line keeping long token names from causing the output are from being reduced leaving large empty areas.
 - [#975][i975] New GM option to disable use of Edit Token dialog by player clients.
 - [#500][i500] Ars Magica Stress Dice roll option.
   - ASnb#+b / ASnb#-b (or asn#+b / asn#-b) - return is a string
@@ -29,13 +32,14 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 - [#27][i27] Reroll Once roll option added.
   - 2d6rk3 - reroll any die less than 3 and keep new result
   - 2d6rc3 - reroll any die less than 3 and keep higher value
-- [#368][i368] **Macro groups can now be renamed.**
+- [#368][i368] Macro groups can now be renamed.
 
-**Bug Fixes**
-- [#1725][i1725] **Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.**
-- [#1720][i1720] **Token properties with default values were not having spaces trimmed from name. Fixed.**
+## Bug Fixes
+- [#1752][i1752] **Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.**
+- [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
+- [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
-- [#1688][i1688] **Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.**
+- [#1688][i1688] Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.
 - [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
 - [#1675][i1675] Left-click on a token when multiple are already selected wasn't clearing selection on other tokens. Fixed.
 - [#1670][i1670] ModelChangeListeners on Impersonate/Selection panels were not getting removed causing a performance hit as more maps were added to campaign. Fixed.
@@ -49,7 +53,7 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 - [#1646][i1646] Null Pointer Exception when a map is deleted while a token is being edited. Fixed.
 - [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
 - [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
-- [#1635][i1635] **Window decorations in MapTool dialogs and frames changed to pick up color scheme from themes.**
+- [#1635][i1635] Window decorations in MapTool dialogs and frames changed to pick up color scheme from themes.
 - [#1631][i1631] Add Resource dialog wasn't using theme colors. Fixed.
 - [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
 - [#1614][i1614] Pressing map zoom keys while a frame5 textbox had focus would zoom map. Fixed.
@@ -70,17 +74,22 @@ Changes since 1.7.0-alpha-2 in **BOLD**.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
-- [#1441][i1441] **Content of `input()` dialogs wouldn't fill full width of window with minimal prompt/input sizes. Fixed.**
+- [#1441][i1441] Content of `input()` dialogs wouldn't fill full width of window with minimal prompt/input sizes. Fixed.
 - [#1317][i1317] Horizontal scrolling issues on MacOS fixed.
 - [#507][i507] The map setting Units per Cell wasn't being handled correctly for locales that use a comma for the decimal point. Fixed.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
-**Other**
+## Other
+- [#1776][i1776] **dicelib updated to 1.6.1**
 - [#1704][i1704] dicelib updated to 1.6.0
 
-[i1728]: https://github.com/RPTools/maptool/pull/1728
-[i1725]: https://github.com/RPTools/maptool/pull/1725
-[i1704]: https://github.com/RPTools/maptool/pull/1704
+[i1776]: https://github.com/RPTools/maptool/issues/1776
+[i1765]: https://github.com/RPTools/maptool/issues/1765
+[i1758]: https://github.com/RPTools/maptool/issues/1758
+[i1752]: https://github.com/RPTools/maptool/issues/1752
+[i1728]: https://github.com/RPTools/maptool/issues/1728
+[i1725]: https://github.com/RPTools/maptool/issues/1725
+[i1704]: https://github.com/RPTools/maptool/issues/1704
 [i1720]: https://github.com/RPTools/maptool/issues/1720
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1688]: https://github.com/RPTools/maptool/issues/1688

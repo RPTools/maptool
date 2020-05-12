@@ -509,7 +509,7 @@
                  <at name="height">14</at>
                  <at name="font">
                   <object classname="com.jeta.forms.store.properties.FontProperty">
-                   <at name="family">Dialog</at>
+                   <at name="family">SansSerif</at>
                    <at name="style">2</at>
                    <at name="size">11</at>
                   </object>

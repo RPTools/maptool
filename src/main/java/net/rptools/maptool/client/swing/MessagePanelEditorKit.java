@@ -66,6 +66,9 @@ public class MessagePanelEditorKit extends HTMLEditorKit {
       Object o = (elementName != null) ? null : attrs.getAttribute(StyleConstants.NameAttribute);
       if (o instanceof HTML.Tag) {
         HTML.Tag kind = (HTML.Tag) o;
+        if (kind == HTML.Tag.INPUT || kind == HTML.Tag.SELECT || kind == HTML.Tag.TEXTAREA) {
+          return new SubmitFormView(elem);
+        }
         if (kind == HTML.Tag.IMG) {
           return new MessagePanelImageView(elem, imageCache);
         }
