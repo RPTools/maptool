@@ -60,7 +60,7 @@ public class HeroLabFunctions extends AbstractFunction {
     if (functionName.equals("herolab.getInfo")) {
       Token token;
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 1) {
@@ -89,7 +89,7 @@ public class HeroLabFunctions extends AbstractFunction {
 
       return token.getHeroLabData().getInfo();
     } else if (functionName.equals("herolab.getStatBlock")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() > 2)
@@ -133,7 +133,7 @@ public class HeroLabFunctions extends AbstractFunction {
     } else if (functionName.equals("herolab.hasChanged")) {
       Token token;
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 1) {
@@ -165,7 +165,7 @@ public class HeroLabFunctions extends AbstractFunction {
     } else if (functionName.equals("herolab.refresh")) {
       Token token;
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 1) {
@@ -216,7 +216,7 @@ public class HeroLabFunctions extends AbstractFunction {
       }
 
     } else if (functionName.equals("herolab.XPath")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() > 2)
@@ -261,7 +261,7 @@ public class HeroLabFunctions extends AbstractFunction {
         return new BigDecimal(result).stripTrailingZeros().toPlainString();
       else return result;
     } else if (functionName.equals("herolab.getImage")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() > 2)
@@ -310,7 +310,7 @@ public class HeroLabFunctions extends AbstractFunction {
     } else if (functionName.equals("herolab.isMinion")) {
       Token token;
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 1) {
@@ -342,7 +342,7 @@ public class HeroLabFunctions extends AbstractFunction {
     } else if (functionName.equals("herolab.getMasterName")) {
       Token token;
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 1) {
