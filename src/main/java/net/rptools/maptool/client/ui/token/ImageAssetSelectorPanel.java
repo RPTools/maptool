@@ -68,7 +68,7 @@ public class ImageAssetSelectorPanel extends JPanel {
 
             Integer imageIndex = (Integer) selectedList.get(0);
 
-            getImageAssetPanel().setImageId(assetPanel.getAsset(imageIndex).getId());
+            getImageAssetPanel().setImageId(assetPanel.getAsset(imageIndex).getMD5Key());
           }
         });
 

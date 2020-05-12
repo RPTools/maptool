@@ -484,6 +484,7 @@ public class AppMenuBar extends JMenuBar {
     }
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
+    menu.add(new JMenuItem(AppActions.CAMPAIGN_NOTE_BOOK));
 
     return menu;
   }

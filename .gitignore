@@ -50,3 +50,8 @@ build-resources/rptools-keystore
 /report.html
 /output.xml
 /lib/jide/
+
+
+################################################################################
+# include icon resources
+!src/main/resources/net/rptools/maptool/client/image/icons

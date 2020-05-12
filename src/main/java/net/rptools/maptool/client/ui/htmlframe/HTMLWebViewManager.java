@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.awt.*;
@@ -168,7 +169,7 @@ public class HTMLWebViewManager {
           + "for(let mutation of mutations) {if (mutation.type === 'childList') {for (let i = 0; i < mutation.addedNodes.length; i++) {MapTool.handleAddedNode(mutation.addedNodes[i]);}}}});"
           + "maptool_observer.observe(document.documentElement, { attributes: false, characterData: false, childList: true, subtree: true });";
 
-  HTMLWebViewManager() {}
+  public HTMLWebViewManager() {}
 
   /**
    * Setup the WebView
@@ -603,7 +604,20 @@ public class HTMLWebViewManager {
       } else if (collection.item(i) instanceof HTMLSelectElement) {
         HTMLSelectElement element = (HTMLSelectElement) collection.item(i);
         name = element.getName();
-        value = element.getValue();
+        if (element.getMultiple()) {
+          // If multiple selection enabled, returns a JSON array of selected values
+          JsonArray selected = new JsonArray();
+          HTMLCollection options = element.getOptions();
+          for (int o = 0; o < options.getLength(); o++) {
+            HTMLOptionElement option = (HTMLOptionElement) options.item(o);
+            if (option.getSelected()) {
+              selected.add(option.getValue());
+            }
+          }
+          value = selected.toString();
+        } else {
+          value = element.getValue();
+        }
       } else if (collection.item(i) instanceof HTMLTextAreaElement) {
         HTMLTextAreaElement element = (HTMLTextAreaElement) collection.item(i);
         name = element.getName();

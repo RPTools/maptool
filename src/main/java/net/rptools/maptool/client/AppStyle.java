@@ -35,6 +35,7 @@ public class AppStyle {
   public static Font labelFont = Font.decode("serif-NORMAL-12");
 
   public static BufferedImage tokenInvisible;
+  public static BufferedImage notVisible;
 
   public static BufferedImage cellWaypointImage;
   public static BufferedImage validMoveImage;
@@ -99,6 +100,7 @@ public class AppStyle {
   public static BufferedImage arrowRight;
   public static BufferedImage arrowLeft;
   public static BufferedImage arrowHold;
+  public static BufferedImage bookmarksPanelImage;
 
   public static BufferedImage lightSourceIcon;
 
@@ -107,6 +109,7 @@ public class AppStyle {
       // Set defaults
       tokenInvisible =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/icon_invisible.png");
+      notVisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/notvisible.png");
       cellWaypointImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
       validMoveImage =
@@ -173,6 +176,8 @@ public class AppStyle {
       arrowLeft = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_left.png");
       arrowMenu = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_menu.png");
       arrowHold = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_hold.png");
+      bookmarksPanelImage =
+          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/book_open.png");
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");

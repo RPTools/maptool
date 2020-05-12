@@ -87,7 +87,7 @@ public class AssetExtractor {
               newFile.delete();
             }
             newFile.createNewFile();
-            try (ByteArrayInputStream is = new ByteArrayInputStream(asset.getImage());
+            try (ByteArrayInputStream is = new ByteArrayInputStream(asset.getData());
                 OutputStream out = new FileOutputStream(newFile)) {
               IOUtils.copy(is, out);
             }

@@ -339,9 +339,14 @@ public class Zone extends BaseModel {
    * Create a new zone with old zone's properties.
    *
    * @param zone The zone to copy from.
-   * @param keepIds Should the token ids stay the same.
+   * @param keepIds Should the zone and token ids stay the same.
    */
   public Zone(Zone zone, boolean keepIds) {
+
+    if (keepIds) {
+      id = zone.getId();
+    }
+
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
