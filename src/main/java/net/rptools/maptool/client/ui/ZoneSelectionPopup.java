@@ -16,7 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -24,23 +24,21 @@ import java.util.List;
 import java.util.ListIterator;
 import javax.swing.*;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 
 public class ZoneSelectionPopup extends JScrollPopupMenu {
 
-  private static final int PADDING = 5;
-
-  public ZoneSelectionPopup() {}
-
   @Override
   public void show(Component invoker, int x, int y) {
-    createEntries();
+    Component selection = createEntries();
     super.show(invoker, x, y);
+    scrollComponentToVisible(selection);
   }
 
-  private void createEntries() {
+  private Component createEntries() {
     removeAll();
 
     List<ZoneRenderer> rendererList =
@@ -66,27 +64,54 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
           }
         });
 
+    JMenuItem selection = null;
     for (ZoneRenderer renderer : rendererList) {
-
-      BufferedImage thumb =
-          MapTool.takeMapScreenShot(new PlayerView(MapTool.getPlayer().getRole()));
-
-      add(new JCheckBoxMenuItem(new SelectAction(renderer)))
-          .setSelected(renderer == MapTool.getFrame().getCurrentZoneRenderer());
+      ZoneItem item = new ZoneItem(renderer);
+      boolean current = renderer == MapTool.getFrame().getCurrentZoneRenderer();
+      if (current) {
+        item.setSelected(true);
+        selection = item;
+      } else if (!renderer.getZone().isVisible()) {
+        item.setIcon(new ImageIcon(AppStyle.notVisible));
+      }
+      add(item);
     }
+
+    return selection;
   }
 
-  private class SelectAction extends AbstractAction {
+  private class ZoneItem extends JCheckBoxMenuItem implements ActionListener {
 
     private ZoneRenderer renderer;
 
-    public SelectAction(ZoneRenderer renderer) {
+    ZoneItem(ZoneRenderer renderer) {
       this.renderer = renderer;
-      super.putValue(Action.NAME, renderer.getZone().getName());
+      String name = renderer.getZone().getName();
+      if ("".equals(name)) {
+        name = I18N.getText("Button.map");
+      }
+      setText(name);
+      addActionListener(this);
     }
 
+    @Override
+    public boolean isShowing() {
+
+      // The JScrollPopupMenu does a layout that moves menu items into negative y
+      // with the help of the scrollbar. If after the popup is shown the user releases
+      // the mouse over the button above the popu menu, then the MenuSelectionManager
+      // selects the menu item under the mouse even though that menu item is covered by
+      // the button leading to unexpected item selection.
+      // Checking the y position here to avoid that kind of release choosing a menu item
+      // that shouldn't be selectable. This way the MenuSelectionManager consuming the
+      // mouse release event doesn't consider this item wrongly.
+      return getY() >= 0 && super.isShowing();
+    }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
 
+      // Set current zone renderer if new
       if (MapTool.getFrame().getCurrentZoneRenderer() != renderer) {
         MapTool.getFrame().setCurrentZoneRenderer(renderer);
         MapTool.getFrame().refresh();
@@ -96,8 +121,6 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
           renderer.forcePlayersView();
         }
       }
-
-      ZoneSelectionPopup.this.setVisible(false);
     }
   }
 }

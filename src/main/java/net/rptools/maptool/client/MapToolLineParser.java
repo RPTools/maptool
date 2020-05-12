@@ -1701,7 +1701,7 @@ public class MapToolLineParser {
         throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
       }
       macroBody = mbp.getCommand();
-      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getPlayer().isGM());
+      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getParser().isMacroTrusted());
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;
@@ -2058,10 +2058,11 @@ public class MapToolLineParser {
    */
   public void enterContext(MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
-    // Any subsequent trips through we only change trusted path if conext
+    // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we dont change
     // anything as trusted context will remain the same as it was before the call).
     if (contextStack.size() == 0) {
+      // The path is untrusted if any typing is involved, including GM's
       macroPathTrusted = context == null ? false : context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
     } else if (context != null) {

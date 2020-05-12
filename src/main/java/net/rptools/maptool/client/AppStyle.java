@@ -35,6 +35,7 @@ public class AppStyle {
   public static Font labelFont = Font.decode("serif-NORMAL-12");
 
   public static BufferedImage tokenInvisible;
+  public static BufferedImage notVisible;
 
   public static BufferedImage cellWaypointImage;
   public static BufferedImage validMoveImage;
@@ -107,6 +108,7 @@ public class AppStyle {
       // Set defaults
       tokenInvisible =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/icon_invisible.png");
+      notVisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/notvisible.png");
       cellWaypointImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
       validMoveImage =
