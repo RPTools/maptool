@@ -2058,11 +2058,12 @@ public class MapToolLineParser {
    */
   public void enterContext(MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
-    // Any subsequent trips through we only change trusted path if conext
+    // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we dont change
     // anything as trusted context will remain the same as it was before the call).
     if (contextStack.size() == 0) {
-      macroPathTrusted = context == null ? false : context.isTrusted();
+      // If null context, path trust depends on GM status. Fixes #1814.
+      macroPathTrusted = context == null ? MapTool.getPlayer().isGM() : context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
     } else if (context != null) {
       if (!context.isTrusted()) {
