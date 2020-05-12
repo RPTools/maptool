@@ -14,6 +14,7 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 
 ## Enhancements
 - [#1801][i1801] **Performance improvement for token image handling.** Copying large sets of tokens from map to map, switching between maps with a larg number of tokens, dragging large numbers of tokens have all been improved.
+- [#1797][i1797] **Forms now work in Chat window!**
 - [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
 - [#1758][i1758] Restylee Initiative and Selection windows for usability and compatibility with Look & Feel.  See issue for details.
 - [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.  See issue for details.
@@ -96,6 +97,7 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 
 [i1801]: https://github.com/RPTools/maptool/issues/1801
 [i1799]: https://github.com/RPTools/maptool/issues/1799
+[i1797]: https://github.com/RPTools/maptool/issues/1797
 [i1790]: https://github.com/RPTools/maptool/issues/1790
 [i1788]: https://github.com/RPTools/maptool/issues/1788
 [i1784]: https://github.com/RPTools/maptool/issues/1784
