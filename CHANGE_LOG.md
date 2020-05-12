@@ -2,18 +2,21 @@
 Lots of enhancements, bug fixes and improvements to the code base.
 
 ## Some Highlights
+- New macro function `markdownToHTML()` converts text in Markdown to HTML.
+- nmeier has brought the majority of the MapTool UI under the control of the Look & Feel themes accessible from the Themes menu.
 - New GM option to disable the use of the Edit Token dialog by players.
 - Issue with decimal point in Map Units per Cell for European locales fixed.
 - New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
 - Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
 - MapTool can now import the Dungeondraft VTT export format.
 
-Changes since 1.7.0-beta-1 in **BOLD**.
+Changes since 1.7.0-beta-2 in **BOLD**.
 
 ## Enhancements
-- [#1765][i1765] **New macro function to take Markdown text and covert to HTML.**  See issue for details.
-- [#1758][i1758] **Restylee Initiative and Selection windows for usability and compatibility with Look & Feel.**  See issue for details.
-- [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.**  See issue for details.
+- [#1801][i1801] **Performance improvement for token image handling.** Copying large sets of tokens from map to map, switching between maps with a larg number of tokens, dragging large numbers of tokens have all been improved.
+- [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
+- [#1758][i1758] Restylee Initiative and Selection windows for usability and compatibility with Look & Feel.  See issue for details.
+- [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.  See issue for details.
 - [#1678][i1678] Error reporting improved when MapTool can't start. More likely to get information in log file.
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1553][i1553] Many of the dialogs in MapTool have been localized so that the text strings are pulled from the I18N translation files.
@@ -35,7 +38,15 @@ Changes since 1.7.0-beta-1 in **BOLD**.
 - [#368][i368] Macro groups can now be renamed.
 
 ## Bug Fixes
-- [#1752][i1752] **Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.**
+- [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed.** Fixed.
+- [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters.** Fixed.
+- [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE.** Fixed.
+- [#1784][i1784] **Attempting to use a port outside of valid range would cause start server to fail without a message.** Fixed.
+- [#1782][i1782] **Form `<select multiple>` element only returned one element.** Fixed.
+- [#1775][i1775] **Select next/previous token in Selection window broken (Unreleased).** Fixed.
+- [#1757][i1757] **Macro function `moveToken()` did not correctly handle tokens not centered in the layout config.** Fixed.
+- [#1752][i1752] Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.
+- [#1732][i1732] **Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.**
 - [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
 - [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
@@ -43,7 +54,7 @@ Changes since 1.7.0-beta-1 in **BOLD**.
 - [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
 - [#1675][i1675] Left-click on a token when multiple are already selected wasn't clearing selection on other tokens. Fixed.
 - [#1670][i1670] ModelChangeListeners on Impersonate/Selection panels were not getting removed causing a performance hit as more maps were added to campaign. Fixed.
-- [#1667][i1667] **Fix for token properties issues was not pulled from 1.6.1. Fixed.**
+- [#1667][i1667] Fix for token properties issues was not pulled from 1.6.1. Fixed.
 - [#1666][i1666] Changing token selection was causing Impersonated panel to update causing a delay. Fixed.
 - [#1658][i1658] Deleting a token was causing the Impersonated panel to update cause a delay. Fixed.
 - [#1657][i1657] Macros deleted via the Common group were not being updated on clients. Fixed.
@@ -65,7 +76,7 @@ Changes since 1.7.0-beta-1 in **BOLD**.
 - [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
 - [#1575][i1575] Unclosed parens in Token properties definition would produce a StringIndexOutOfbounds exception. Fixed.
 - [#1572][i1572] Deleting last map with FoW would produce an NPE if Map menu opened. Fixed.
-- [#1570][i1570] **Attempting to import a macroset as a macro produced exception. Exception caught and error message shown to user.**
+- [#1570][i1570] Attempting to import a macroset as a macro produced exception. Exception caught and error message shown to user.
 - [#1568][i1568] Deleting a map while a token was being dragged would produce a NPE. Fixed.
 - [#1566][i1566] Saving lib:tokens would fail due to colon in name throwing exception. Fixed.
 - [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
@@ -80,13 +91,22 @@ Changes since 1.7.0-beta-1 in **BOLD**.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
 ## Other
-- [#1776][i1776] **dicelib updated to 1.6.1**
+- [#1776][i1776] dicelib updated to 1.6.1
 - [#1704][i1704] dicelib updated to 1.6.0
 
+[i1801]: https://github.com/RPTools/maptool/issues/1801
+[i1799]: https://github.com/RPTools/maptool/issues/1799
+[i1790]: https://github.com/RPTools/maptool/issues/1790
+[i1788]: https://github.com/RPTools/maptool/issues/1788
+[i1784]: https://github.com/RPTools/maptool/issues/1784
+[i1782]: https://github.com/RPTools/maptool/issues/1782
 [i1776]: https://github.com/RPTools/maptool/issues/1776
+[i1775]: https://github.com/RPTools/maptool/issues/1775
 [i1765]: https://github.com/RPTools/maptool/issues/1765
 [i1758]: https://github.com/RPTools/maptool/issues/1758
+[i1757]: https://github.com/RPTools/maptool/issues/1757
 [i1752]: https://github.com/RPTools/maptool/issues/1752
+[i1732]: https://github.com/RPTools/maptool/issues/1732
 [i1728]: https://github.com/RPTools/maptool/issues/1728
 [i1725]: https://github.com/RPTools/maptool/issues/1725
 [i1704]: https://github.com/RPTools/maptool/issues/1704
