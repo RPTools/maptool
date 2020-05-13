@@ -261,7 +261,7 @@ public class ToolbarPanel extends JToolBar {
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/tool/btn-world.png")));
     button.setToolTipText(title);
-    SwingUtil.makePopupMenuButton(button, new ZoneSelectionPopup());
+    SwingUtil.makePopupMenuButton(button, () -> new ZoneSelectionPopup(), true);
     return button;
   }
 

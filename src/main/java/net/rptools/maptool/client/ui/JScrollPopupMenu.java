@@ -108,6 +108,23 @@ public class JScrollPopupMenu extends JPopupMenu {
   }
 
   @Override
+  public void remove(int index) {
+    int c = getComponentCount();
+
+    // scrollbar should be next to go?
+    if (c == maximumVisibleRows + 1) {
+      index = getComponentIndex(getScrollBar());
+    } else if (c > maximumVisibleRows + 1) {
+      // not the scroll-bar yet
+      if (getComponent(index) == getScrollBar()) {
+        index = (index + 1) % c;
+      }
+    }
+
+    super.remove(index);
+  }
+
+  @Override
   public void show(Component invoker, int x, int y) {
     JScrollBar scrollBar = getScrollBar();
     if (scrollBar.getParent() != null) {
@@ -141,8 +158,6 @@ public class JScrollPopupMenu extends JPopupMenu {
       int height = heightMargin + extent;
 
       setPopupSize(new Dimension(width, height));
-    } else {
-      setPopupSize(null);
     }
 
     super.show(invoker, x, y);
@@ -163,11 +178,13 @@ public class JScrollPopupMenu extends JPopupMenu {
     @Override
     public Dimension preferredLayoutSize(Container parent) {
       int visibleAmount = Integer.MAX_VALUE;
+      int scrollbarWidth = 0;
       Dimension dim = new Dimension();
       for (Component comp : parent.getComponents()) {
         if (comp instanceof JScrollBar) {
           JScrollBar scrollBar = (JScrollBar) comp;
           visibleAmount = scrollBar.getVisibleAmount();
+          scrollbarWidth = comp.getPreferredSize().width;
         } else {
           Dimension pref = comp.getPreferredSize();
           dim.width = Math.max(dim.width, pref.width);
@@ -177,6 +194,11 @@ public class JScrollPopupMenu extends JPopupMenu {
 
       Insets insets = parent.getInsets();
       dim.height = Math.min(dim.height + insets.top + insets.bottom, visibleAmount);
+      dim.width += scrollbarWidth;
+
+      Dimension min = parent.getMinimumSize();
+      dim.width = Math.max(dim.width, min.width);
+      dim.height = Math.max(dim.height, min.height);
 
       return dim;
     }
