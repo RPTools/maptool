@@ -2482,7 +2482,7 @@ public class AppActions {
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
-        MapTool.getFrame().getCommandPanel().setIdentityName(null);
+        MapTool.getFrame().getCommandPanel().clearAllIdentities();
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {

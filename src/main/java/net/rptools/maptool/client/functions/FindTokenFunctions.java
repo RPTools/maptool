@@ -869,21 +869,52 @@ public class FindTokenFunctions extends AbstractFunction {
   /**
    * Finds the specified token.
    *
-   * @param identifier the name of the token.
+   * @param identifier the identifier of the token (name, GM name, or GUID).
    * @param zoneName the name of the zone. If null, check current zone.
    * @return the token, or null if none found.
    */
   public static Token findToken(String identifier, String zoneName) {
+    if (identifier == null) {
+      return null;
+    }
     if (zoneName == null || zoneName.length() == 0) {
-      Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-      Token token = zone.resolveToken(identifier);
-      return token;
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().resolveToken(identifier);
     } else {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         Zone zone = zr.getZone();
         if (zone.getName().equalsIgnoreCase(zoneName)) {
           Token token = zone.resolveToken(identifier);
+          if (token != null) {
+            return token;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Finds the specified token by ID.
+   *
+   * @param guid the id of the token.
+   * @param zoneName the name of the zone. If null, check current zone.
+   * @return the token, or null if none found.
+   */
+  public static Token findToken(GUID guid, String zoneName) {
+    if (guid == null) {
+      return null;
+    }
+    if (zoneName == null || zoneName.length() == 0) {
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().getToken(guid);
+    } else {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        Zone zone = zr.getZone();
+        if (zone.getName().equalsIgnoreCase(zoneName)) {
+          Token token = zone.getToken(guid);
           if (token != null) {
             return token;
           }
