@@ -31,15 +31,19 @@ import net.rptools.maptool.language.I18N;
 
 public class ZoneSelectionPopup extends JScrollPopupMenu {
 
+  private JMenuItem selection;
+
+  public ZoneSelectionPopup() {
+    selection = createEntries();
+  }
+
   @Override
   public void show(Component invoker, int x, int y) {
-    Component selection = createEntries();
     super.show(invoker, x, y);
     scrollComponentToVisible(selection);
   }
 
-  private Component createEntries() {
-    removeAll();
+  private JMenuItem createEntries() {
 
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());

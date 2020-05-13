@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.*;
@@ -357,11 +358,20 @@ public class SwingUtil {
    * @param menu the popup menu to show
    * @return the button
    */
-  public static JButton makePopupMenuButton(JButton button, final JPopupMenu menu) {
+  public static JButton makePopupMenuButton(
+      JButton button, Supplier<JPopupMenu> menu, boolean rightAligned) {
     button.addMouseListener(
         new MouseAdapter() {
           public void mousePressed(MouseEvent e) {
-            menu.show(button, 0, button.getSize().height);
+            JPopupMenu popup = menu.get();
+            // make popup at least as wide as the button
+            Dimension buttonDim = button.getSize();
+            popup.setMinimumSize(new Dimension(buttonDim.width, 0));
+            int x = 0;
+            if (rightAligned) {
+              x += Math.min(0, buttonDim.width - popup.getPreferredSize().width);
+            }
+            popup.show(button, x, button.getSize().height);
           }
         });
     return button;
