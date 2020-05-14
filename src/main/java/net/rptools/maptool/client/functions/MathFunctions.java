@@ -128,7 +128,8 @@ public class MathFunctions extends AbstractFunction {
         outVals.add((BigDecimal) o);
       } else {
         throw new ParserException(
-            I18N.getText("macro.function.general.argumentTypeN", functionName, i, o.toString()));
+            I18N.getText(
+                "macro.function.general.argumentTypeN", functionName, i + 1, o.toString()));
       }
     }
 
