@@ -318,7 +318,7 @@ public class VBL_Functions extends AbstractFunction {
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
       }
 
-      if (!MapTool.getParser().isMacroPathTrusted()) {
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 

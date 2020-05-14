@@ -247,24 +247,21 @@ public class MapToolFrame extends DefaultDockableHolder
         EventQueue.invokeLater(
             new Runnable() {
               public void run() {
+                TreePath[] selection = tree.getSelectionPaths();
+                Set<GUID> selectedDrawSet = new HashSet<GUID>();
+                if (selection != null) {
+                  for (TreePath path : selection) {
+                    if (path.getLastPathComponent() instanceof DrawnElement) {
+                      DrawnElement de = (DrawnElement) path.getLastPathComponent();
+                      selectedDrawSet.add(de.getDrawable().getId());
+                    }
+                  }
+                }
+                if (selectedDrawSet.isEmpty()) return;
                 // check to see if this is the required action
                 if (!MapTool.confirmDrawDelete()) {
                   return;
                 }
-                DrawnElement firstElement = null;
-                Set<GUID> selectedDrawSet = new HashSet<GUID>();
-                boolean topLevelOnly = true;
-                for (TreePath path : tree.getSelectionPaths()) {
-                  if (path.getPathCount() != 3) topLevelOnly = false;
-                  if (path.getLastPathComponent() instanceof DrawnElement) {
-                    DrawnElement de = (DrawnElement) path.getLastPathComponent();
-                    if (firstElement == null) {
-                      firstElement = de;
-                    }
-                    selectedDrawSet.add(de.getDrawable().getId());
-                  }
-                }
-
                 for (GUID id : selectedDrawSet) {
                   MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
                 }

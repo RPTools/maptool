@@ -256,6 +256,18 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
+   * Returns the token pixel offset between its reported pixel location and its true (x,y) pixel
+   * coordinate.
+   *
+   * @param token the token to return the offset of
+   * @return a point representing the (x,y) offset
+   */
+  private Point getTokenPixelLocationOffset(Token token) {
+    TokenLocation loc = getTokenLocation(true, token);
+    return new Point(loc.x - token.getX(), loc.y - token.getY());
+  }
+
+  /**
    * Gets the distance between two tokens following map movement rules. Always use closedForm
    * because VBL &amp; terrain are currently ignored. The other walker-based approach is kept as it
    * will be needed if we implement distance based on terrain &amp; VBL.
@@ -535,6 +547,12 @@ public class TokenLocationFunctions extends AbstractFunction {
         args.size() > 2 ? FunctionUtil.paramAsBoolean("moveToken", args, 2, false) : true;
     Token token = FunctionUtil.getTokenFromParam(parser, "moveToken", args, 3, -1);
 
+    if (useDistance) {
+      // Remove pixel offset, so that getTokenX / getTokenY and coordinates match. Fixes #1757.
+      Point offset = getInstance().getTokenPixelLocationOffset(token);
+      x -= offset.x;
+      y -= offset.y;
+    }
     ZonePoint zp = getZonePoint(x, y, useDistance);
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, zp.x, zp.y);
     return "";

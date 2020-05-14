@@ -133,7 +133,8 @@ public class InitiativePanel extends JPanel
 
     popupMenu = new JPopupMenu();
     toolBar.add(
-        SwingUtil.makePopupMenuButton(new JButton(new ImageIcon(AppStyle.arrowMenu)), popupMenu));
+        SwingUtil.makePopupMenuButton(
+            new JButton(new ImageIcon(AppStyle.arrowMenu)), () -> popupMenu, false));
 
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));

@@ -2131,6 +2131,10 @@ public class AppActions {
                   StartServerDialogPreferences serverProps =
                       new StartServerDialogPreferences(); // data retrieved from
                   // Preferences.userRoot()
+                  if (serverProps.getPort() == 0 || serverProps.getPort() > 65535) {
+                    MapTool.showError("ServerDialog.error.port.outOfRange");
+                    return;
+                  }
 
                   ServerPolicy policy = new ServerPolicy();
                   policy.setAutoRevealOnMovement(serverProps.isAutoRevealOnMovement());
@@ -2478,7 +2482,7 @@ public class AppActions {
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
-        MapTool.getFrame().getCommandPanel().setIdentityName(null);
+        MapTool.getFrame().getCommandPanel().clearAllIdentities();
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {
