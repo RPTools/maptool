@@ -51,7 +51,8 @@ public class HTMLOverlayPanel extends JFXPanel {
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
   /** The ordered map of the overlays. */
-  private Map<String, HTMLOverlayManager> overlays = new LinkedHashMap<>();
+  private Map<String, HTMLOverlayManager> overlays =
+      Collections.synchronizedMap(new LinkedHashMap<>());
 
   /** The StackPane holding all the overlays. */
   private StackPane root;
@@ -93,6 +94,21 @@ public class HTMLOverlayPanel extends JFXPanel {
     this.setScene(scene);
   }
 
+  /** @return the map of the overlays. */
+  public Map<String, HTMLOverlayManager> getOverlays() {
+    return overlays;
+  }
+
+  /**
+   * Returns whether the overlay exists.
+   *
+   * @param name the name of the overlay
+   * @return true if it exists, false otherwise
+   */
+  public boolean isRegistered(String name) {
+    return overlays.containsKey(name);
+  }
+
   /**
    * Sets the overlay cursor to a JavaFX cursor.
    *
@@ -129,7 +145,7 @@ public class HTMLOverlayPanel extends JFXPanel {
    *
    * @param name The name of the overlay.
    */
-  void removeOverlay(String name) {
+  public void removeOverlay(String name) {
     if (overlays.containsKey(name)) {
       root.getChildren().remove(overlays.get(name).getWebView());
       overlays.remove(name);
@@ -217,7 +233,7 @@ public class HTMLOverlayPanel extends JFXPanel {
       List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
       list.sort(Map.Entry.comparingByValue());
 
-      Map<K, V> result = new LinkedHashMap<>();
+      Map<K, V> result = Collections.synchronizedMap(new LinkedHashMap<>());
       for (Map.Entry<K, V> entry : list) {
         result.put(entry.getKey(), entry.getValue());
       }
