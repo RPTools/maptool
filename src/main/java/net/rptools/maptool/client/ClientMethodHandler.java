@@ -231,6 +231,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
                 return;
 
+              case editToken:
+                zoneGUID = (GUID) parameters[0];
+                zone = MapTool.getCampaign().getZone(zoneGUID);
+                token = (Token) parameters[1];
+                zone.editToken(token);
+                MapTool.getFrame().refresh();
+                return;
+
               case putToken:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);

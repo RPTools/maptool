@@ -86,6 +86,7 @@ public class Zone extends BaseModel {
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
     BOARD_CHANGED,
+    TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
     TOKEN_PANEL_CHANGED // the panel appearance changed
   }
@@ -1338,6 +1339,15 @@ public class Zone extends BaseModel {
     }
   }
 
+  /**
+   * Put the token, and also fires the token edited event.
+   *
+   * @param token the token that was edited
+   */
+  public void editToken(Token token) {
+    putToken(token);
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_EDITED, token));
+  }
   /**
    * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
    * that this method fires a single <code>ModelChangeEvent</code> using <code> Event.TOKEN_ADDED

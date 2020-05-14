@@ -151,7 +151,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   public void modelChanged(ModelChangeEvent event) {
     if (event.eventType == Event.TOKEN_MACRO_CHANGED
         || event.eventType == Event.TOKEN_REMOVED
-        || event.eventType == Event.TOKEN_PANEL_CHANGED) {
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
       // Only resets if the impersonated token is among those changed/deleted
       boolean impersonatedChanged;
       if (event.getArg() instanceof List<?>) {
