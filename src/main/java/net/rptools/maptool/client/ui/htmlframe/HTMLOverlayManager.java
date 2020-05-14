@@ -77,7 +77,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   }
 
   /** @return the zOrder of the overlay. */
-  int getZOrder() {
+  public int getZOrder() {
     return zOrder;
   }
 
