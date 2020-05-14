@@ -14,13 +14,23 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
+import net.rptools.parser.function.ParameterException;
 
 /*
  * This software Copyright by the RPTools.net development team, and licensed under the GPL Version 3 or, at your option, any later version.
@@ -73,7 +83,19 @@ public class MathFunctions extends AbstractFunction {
         "math.e",
         "math.isOdd",
         "math.isEven",
-        "math.isInt");
+        "math.isInt",
+        "math.arraySum",
+        "math.arrayMin",
+        "math.arrayMax",
+        "math.arrayMean",
+        "math.arrayMedian",
+        "math.arrayProduct",
+        "math.listSum",
+        "math.listMin",
+        "math.listMax",
+        "math.listMean",
+        "math.listMedian",
+        "math.listProduct");
   }
 
   public static MathFunctions getInstance() {
@@ -121,6 +143,84 @@ public class MathFunctions extends AbstractFunction {
 
     // Otherwise we have to go for a slower check
     return num.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) == 0;
+  }
+
+  /**
+   * Convert a single function parameter containing a non-empty JSON Array into a parallel stream of
+   * numeric values.
+   *
+   * @param functionName the function name to use in error reporting
+   * @param param the list of parameters, which should contain a single non-empty JSON array
+   * @return a parallel stream of numeric values
+   * @throws ParserException if too few/many params are present, if the provided param cannot be
+   *     parsed as a JSON array, or if the JSON array is empty
+   * @throws NumberFormatException if any element of the json array is non-numeric
+   */
+  static Stream<BigDecimal> getNumericValuesFromArrayParam(String functionName, List<Object> param)
+      throws ParserException {
+    checkParamNumber(functionName, param, 1, 1);
+    JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, param, 0);
+    if (jsonArray.size() == 0) {
+      throw new ParserException(
+          I18N.getText("macro.function.json.arrayCannotBeEmpty", functionName, 1));
+    }
+    return StreamSupport.stream(jsonArray.spliterator(), true).map(JsonElement::getAsBigDecimal);
+  }
+
+  /**
+   * Convert a non-empty string list and optional delim parameter into a parallel stream of numeric
+   * values.
+   *
+   * @param functionName the function name to use in error reporting
+   * @param param the list of parameters, which should contain a non-empty string list and an
+   *     optional delimiter
+   * @return a parallel stream of numeric values
+   * @throws ParserException if too few/many params are present, if the provided param cannot be
+   *     parsed as a string list with the given delimiter, or if the string list is empty
+   * @throws NumberFormatException if any element of the string list is non-numeric
+   */
+  static Stream<BigDecimal> getNumericValuesFromStrListParam(
+      String functionName, List<Object> param) throws ParserException {
+    checkParamNumber(functionName, param, 1, 2);
+    String delim = (param.size() > 1) ? param.get(1).toString() : ",";
+    List<String> stringList = new ArrayList<>();
+    StrListFunctions.parse(param.get(0).toString(), stringList, delim);
+    if (stringList.size() == 0) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.listCannotBeEmpty", functionName, 1));
+    }
+    return stringList.parallelStream().map(BigDecimal::new);
+  }
+
+  /**
+   * Check the number of provided parameters, throwing a ParserException if an unacceptable number
+   * is found
+   *
+   * @param functionName the function name to use in error reporting
+   * @param param the list of parameters
+   * @param minParameters the minimum number of acceptable parameters
+   * @param maxParameters the maximum number of acceptable parameters
+   * @throws ParserException if too few or too many parameters are present
+   */
+  static void checkParamNumber(
+      String functionName, List<Object> param, int minParameters, int maxParameters)
+      throws ParserException {
+    int pCount = param == null ? 0 : param.size();
+    if (minParameters == maxParameters) {
+      if (pCount != maxParameters)
+        throw new ParameterException(
+            I18N.getText(
+                "macro.function.general.wrongNumParam", functionName, minParameters, pCount));
+    } else {
+      if (pCount < minParameters)
+        throw new ParameterException(
+            I18N.getText(
+                "macro.function.general.notEnoughParam", functionName, minParameters, pCount));
+      if (maxParameters != UNLIMITED_PARAMETERS && pCount > maxParameters)
+        throw new ParameterException(
+            I18N.getText(
+                "macro.function.general.tooManyParam", functionName, maxParameters, pCount));
+    }
   }
 
   @Override
@@ -281,8 +381,114 @@ public class MathFunctions extends AbstractFunction {
     } else if ("math.isInt".equals(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
       return isInteger(nparam.get(0)) ? BigDecimal.ONE : BigDecimal.ZERO;
+    } else if ("math.arraySum".equals(functionName)) {
+      return streamSum(getNumericValuesFromArrayParam(functionName, param));
+    } else if ("math.arrayProduct".equals(functionName)) {
+      return streamProduct(getNumericValuesFromArrayParam(functionName, param));
+    } else if ("math.arrayMin".equals(functionName)) {
+      return streamMin(getNumericValuesFromArrayParam(functionName, param));
+    } else if ("math.arrayMax".equals(functionName)) {
+      return streamMax(getNumericValuesFromArrayParam(functionName, param));
+    } else if ("math.arrayMean".equals(functionName)) {
+      List<BigDecimal> theValues =
+          getNumericValuesFromArrayParam(functionName, param).collect(Collectors.toList());
+      return getMean(theValues);
+    } else if ("math.arrayMedian".equals(functionName)) {
+      List<BigDecimal> theValues =
+          getNumericValuesFromArrayParam(functionName, param).collect(Collectors.toList());
+      return getMedian(theValues);
+    } else if ("math.listSum".equals(functionName)) {
+      return streamSum(getNumericValuesFromStrListParam(functionName, param));
+    } else if ("math.listProduct".equals(functionName)) {
+      return streamProduct(getNumericValuesFromStrListParam(functionName, param));
+    } else if ("math.listMin".equals(functionName)) {
+      return streamMin(getNumericValuesFromStrListParam(functionName, param));
+    } else if ("math.listMax".equals(functionName)) {
+      return streamMax(getNumericValuesFromStrListParam(functionName, param));
+    } else if ("math.listMean".equals(functionName)) {
+      List<BigDecimal> theValues =
+          getNumericValuesFromStrListParam(functionName, param).collect(Collectors.toList());
+      return getMean(theValues);
+    } else if ("math.listMedian".equals(functionName)) {
+      List<BigDecimal> theValues =
+          getNumericValuesFromStrListParam(functionName, param).collect(Collectors.toList());
+      return getMedian(theValues);
     }
 
     return "";
+  }
+
+  /**
+   * Calculate the sum of a stream of numbers
+   *
+   * @param stream a potentially parallel stream of numbers
+   * @return the sum
+   */
+  static BigDecimal streamSum(Stream<BigDecimal> stream) {
+    return stream.reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  /**
+   * Calculate the product of a stream of numbers
+   *
+   * @param stream a potentially parallel stream of numbers
+   * @return the product
+   */
+  static BigDecimal streamProduct(Stream<BigDecimal> stream) {
+    return stream.reduce(BigDecimal.ONE, BigDecimal::multiply);
+  }
+
+  /**
+   * Find the minimum value in a stream of numbers
+   *
+   * @param stream a potentially parallel stream of numbers
+   * @return the minimum value found
+   * @throws java.util.NoSuchElementException if stream contained no elements
+   */
+  static BigDecimal streamMin(Stream<BigDecimal> stream) {
+    return stream.min(BigDecimal::compareTo).orElseThrow();
+  }
+
+  /**
+   * Find the maximum value in a stream of numbers
+   *
+   * @param stream a potentially parallel stream of numbers
+   * @return the maximum value found
+   * @throws java.util.NoSuchElementException if stream contained no elements
+   */
+  static BigDecimal streamMax(Stream<BigDecimal> stream) {
+    return stream.max(BigDecimal::compareTo).orElseThrow();
+  }
+
+  /**
+   * Compute the arithmetic mean of a collection of numbers
+   *
+   * @param theValues collection of numbers
+   * @return the mean, computed to Decimal128 precision
+   * @throws ArithmeticException if the provided collection is empty
+   */
+  static BigDecimal getMean(Collection<BigDecimal> theValues) {
+    BigDecimal total = streamSum(theValues.parallelStream());
+    return total.divide(new BigDecimal(theValues.size()), MathContext.DECIMAL128);
+  }
+
+  /**
+   * Compute the median value of a collection of numbers
+   *
+   * @param theValues collection of numbers
+   * @return the median, computed to Decimal128 precision
+   * @throws IndexOutOfBoundsException if the provided list is empty
+   */
+  static BigDecimal getMedian(List<BigDecimal> theValues) {
+    Collections.sort(theValues);
+    if (theValues.size() % 2 == 0) {
+      // even number, median is between the 2 middle numbers
+      BigDecimal d1 = theValues.get(theValues.size() / 2 - 1);
+      BigDecimal d2 = theValues.get(theValues.size() / 2);
+      return d1.add(d2).divide(new BigDecimal(2), MathContext.DECIMAL128);
+    } else {
+      // odd number, select the middle one
+      return theValues.get((theValues.size() - 1) / 2);
+    }
   }
 }
