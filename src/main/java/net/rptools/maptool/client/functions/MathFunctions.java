@@ -99,9 +99,9 @@ public class MathFunctions extends AbstractFunction {
               "macro.function.general.tooManyParam", functionName, maxParams, param.size()));
     }
 
-    int i = 0;
     List<BigDecimal> outVals = new ArrayList<>();
-    for (Object o : param) {
+    for (int i = 0; i < param.size(); i++) {
+      Object o = param.get(i);
       if (o instanceof BigDecimal) {
         outVals.add((BigDecimal) o);
       } else {
