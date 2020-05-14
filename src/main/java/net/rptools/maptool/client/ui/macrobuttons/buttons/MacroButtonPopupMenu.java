@@ -167,8 +167,13 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       putValue(Action.NAME, I18N.getText("action.macro.edit"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent event) {
-      new MacroButtonDialog().show(button);
+      String macroUUID = button.getProperties().getMacroUUID();
+      // Don't create new dialog is it is already opened. Fixes #1426 and #1495.
+      if (!MacroButtonDialog.isMacroDialogOpen(macroUUID)) {
+        new MacroButtonDialog().show(button);
+      }
     }
   }
 
