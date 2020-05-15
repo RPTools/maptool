@@ -847,8 +847,8 @@ public abstract class Grid implements Cloneable {
    * edge of cells
    *
    * @param radius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet<Point>} that includes all cells that only equal in distance to the
-   *     given radius
+   * @return a {@link HashSet} that includes all cells that only equal in distance to the given
+   *     radius
    */
   protected HashSet<Point> generateRing(int radius) {
     return generateRadius(radius, radius);
@@ -858,7 +858,7 @@ public abstract class Grid implements Cloneable {
    * Generates a set of {@link Point} used to create a grid area
    *
    * @param radius The maximum radius to generate all cell points within this range
-   * @return a {@link HashSet<Point>} that includes all cells up to the radius
+   * @return a {@link HashSet} that includes all cells up to the radius
    */
   protected HashSet<Point> generateRadius(int radius) {
     return generateRadius(0, radius);
@@ -869,7 +869,7 @@ public abstract class Grid implements Cloneable {
    *
    * @param minRadius The minimum radius to generate the ring of cell points for this range
    * @param maxRadius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet<Point>} that includes all cells between the minRadius to the maxRadius
+   * @return a {@link HashSet} that includes all cells between the minRadius to the maxRadius
    */
   protected HashSet<Point> generateRadius(int minRadius, int maxRadius) {
     HashSet<Point> points = new HashSet<>();

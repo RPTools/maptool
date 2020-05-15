@@ -104,7 +104,7 @@ public class AssetLoader {
    * text file into a {@code Map<String, String>} for the return value.
    *
    * @param repository repository to extract the map from
-   * @return
+   * @return the extracted map
    */
   protected Map<String, String> getIndexMap(String repository) {
     RepoState status = RepoState.ACTIVE;
@@ -172,8 +172,8 @@ public class AssetLoader {
    * Converts the specified repository of assets into an index file that can be uploaded and used as
    * the <b>index.gz</b> (after being compressed, of course).
    *
-   * @param repository
-   * @return
+   * @param repository the repository to create index for
+   * @return a byte array with the content of the index file
    */
   protected byte[] createIndexFile(String repository) {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();

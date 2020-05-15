@@ -19,7 +19,7 @@ public interface GridCapabilities {
    * Whether the parent grid type supports snap-to-grid. Some may not, such as the Gridless grid
    * type.
    *
-   * @return
+   * @return true if snapping is supported
    */
   public boolean isSnapToGridSupported();
 
@@ -27,14 +27,14 @@ public interface GridCapabilities {
    * Whether the parent grid type supports automatic pathing from point A to point B. Usually true
    * except for the Gridless grid type.
    *
-   * @return
+   * @return true if the grid supports automatic pathing
    */
   public boolean isPathingSupported();
 
   /**
    * Whether ...
    *
-   * @return
+   * @return ...
    */
   public boolean isPathLineSupported();
 
@@ -43,13 +43,16 @@ public interface GridCapabilities {
    * this requires a grid type that has some notion of "cell size", which means Gridless need not
    * apply. ;-)
    *
-   * @return
+   * @return true if grid supports coordinates
    */
   public boolean isCoordinatesSupported();
 
   /**
    * The secondary dimension should be linked to changes in the primary dimension but the primary
    * dimension is independent of the secondary.
+   *
+   * @return true if secondary dimension should be linked to changes in the primary dimension but
+   *     the primary dimension is independent of the secondary
    */
   public boolean isSecondDimensionAdjustmentSupported();
 }

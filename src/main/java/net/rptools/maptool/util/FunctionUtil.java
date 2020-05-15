@@ -83,6 +83,7 @@ public class FunctionUtil {
    * the list size before trying to retrieve the token so it is safe to use for functions that have
    * the token as a optional argument.
    *
+   * @param parser the parser for variables
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
    * @param indexToken the index to find the token at. If -1, use current token instead.

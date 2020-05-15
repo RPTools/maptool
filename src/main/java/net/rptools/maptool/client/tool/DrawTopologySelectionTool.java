@@ -92,7 +92,7 @@ public class DrawTopologySelectionTool extends DefaultTool {
     return drawTopologySelectionTool;
   }
 
-  /** Set the Selection Tool to the next mode (Combined -> MBL -> VBL -> Combined). */
+  /** Set the Selection Tool to the next mode ({@literal Combined -> MBL -> VBL -> Combined}). */
   public void nextMode() {
     if (isSelected()) {
       // If Combined, switch to MBL
