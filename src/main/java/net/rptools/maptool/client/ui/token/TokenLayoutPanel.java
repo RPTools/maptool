@@ -63,7 +63,7 @@ public class TokenLayoutPanel extends JPanel {
           @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
             int wheelMovement;
-            if (AppUtil.MAC_OS_X && e.isShiftDown()) {
+            if (AppUtil.MAC_OS_X && SwingUtil.isShiftDown(e)) {
               return;
             } else {
               wheelMovement = e.getWheelRotation();

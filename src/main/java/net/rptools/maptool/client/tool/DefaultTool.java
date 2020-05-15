@@ -303,7 +303,7 @@ public abstract class DefaultTool extends Tool
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
       direction = isKeyDown('z') ? direction : !direction; // Why check for this?
-      if (AppUtil.MAC_OS_X && e.isShiftDown()) {
+      if (AppUtil.MAC_OS_X && SwingUtil.isShiftDown(e)) {
         return;
       } else {
         if (direction) {
