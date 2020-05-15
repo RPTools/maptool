@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.web.WebView;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
@@ -77,7 +76,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   }
 
   /** @return the zOrder of the overlay. */
-  int getZOrder() {
+  public int getZOrder() {
     return zOrder;
   }
 
@@ -175,8 +174,6 @@ public class HTMLOverlayManager extends HTMLWebViewManager
       return HTMLOverlayPanel.mousePassResult.PASS;
     }
   }
-
-  private static Rectangle2D onePixel = new Rectangle2D(0, 0, 1, 1);
 
   @Override
   public boolean isVisible() {
