@@ -926,11 +926,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public PlayerView getPlayerView() {
-    Player.Role role = MapTool.getPlayer().getRole();
-    if (role == Player.Role.GM && AppState.isShowAsPlayer()) {
-      role = Player.Role.PLAYER;
-    }
-    return getPlayerView(role);
+    return getPlayerView(MapTool.getPlayer().getEffectiveRole());
   }
 
   /**
