@@ -13,7 +13,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 Changes since 1.7.0-beta-2 in **BOLD**.
 
 ## Enhancements
-- [#1801][i1801] **Performance improvement for token image handling.** Copying large sets of tokens from map to map, switching between maps with a larg number of tokens, dragging large numbers of tokens have all been improved.
+- [#1801][i1801] **Performance improvement for token image handling. Copying large sets of tokens from map to map, switching between maps with a larg number of tokens, dragging large numbers of tokens have all been improved.**
 - [#1797][i1797] **Forms now work in Chat window!**
 - [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
 - [#1758][i1758] Restylee Initiative and Selection windows for usability and compatibility with Look & Feel.  See issue for details.
@@ -39,15 +39,18 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#368][i368] Macro groups can now be renamed.
 
 ## Bug Fixes
-- [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed.** Fixed.
-- [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters.** Fixed.
-- [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE.** Fixed.
-- [#1784][i1784] **Attempting to use a port outside of valid range would cause start server to fail without a message.** Fixed.
-- [#1782][i1782] **Form `<select multiple>` element only returned one element.** Fixed.
-- [#1775][i1775] **Select next/previous token in Selection window broken (Unreleased).** Fixed.
-- [#1757][i1757] **Macro function `moveToken()` did not correctly handle tokens not centered in the layout config.** Fixed.
+- [#1822][i1822] **Changing name/image of impersonated token wasn't updating Chat window.** Fixed.
+- [#1814][i1814] **Several macro functions would fail as not trusted when called by GM in chat.** Fixed.
+- [#1812][i1812] **Call a macro on the GM panel from a trusted context wasn't keeping trusted status.** Fixed.
+- [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed. Fixed.
+- [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters. Fixed.
+- [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE. Fixed.
+- [#1784][i1784] **Attempting to use a port outside of valid range would cause start server to fail without a message. Fixed.
+- [#1782][i1782] **Form `<select multiple>` element only returned one element. Fixed.
+- [#1775][i1775] **Select next/previous token in Selection window broken (Unreleased). Fixed.
+- [#1757][i1757] **Macro function `moveToken()` did not correctly handle tokens not centered in the layout config. Fixed.
 - [#1752][i1752] Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.
-- [#1732][i1732] **Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.**
+- [#1732][i1732] Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.
 - [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
 - [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
@@ -86,8 +89,12 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
+- [#1495][i1495] **Chosing Edit on a macro already being edited no longer creates new Find/Replace entries in Edit menu.**
 - [#1441][i1441] Content of `input()` dialogs wouldn't fill full width of window with minimal prompt/input sizes. Fixed.
+- [#1426][i1426] **NPE on close caused by editing the same macro twice (simultaneously).** Fixed.
 - [#1317][i1317] Horizontal scrolling issues on MacOS fixed.
+- [#1264][i1264] **Fixes for thread-safety in Campaign Auto-Save.**
+- [#1263][i1263] **Fixes for thread-safety in Campaign Loading.**
 - [#507][i507] The map setting Units per Cell wasn't being handled correctly for locales that use a comma for the decimal point. Fixed.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
@@ -95,6 +102,9 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#1776][i1776] dicelib updated to 1.6.1
 - [#1704][i1704] dicelib updated to 1.6.0
 
+[i1822]: https://github.com/RPTools/maptool/issues/1822
+[i1814]: https://github.com/RPTools/maptool/issues/1814
+[i1812]: https://github.com/RPTools/maptool/issues/1812
 [i1801]: https://github.com/RPTools/maptool/issues/1801
 [i1799]: https://github.com/RPTools/maptool/issues/1799
 [i1797]: https://github.com/RPTools/maptool/issues/1797
@@ -111,8 +121,8 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 [i1732]: https://github.com/RPTools/maptool/issues/1732
 [i1728]: https://github.com/RPTools/maptool/issues/1728
 [i1725]: https://github.com/RPTools/maptool/issues/1725
-[i1704]: https://github.com/RPTools/maptool/issues/1704
 [i1720]: https://github.com/RPTools/maptool/issues/1720
+[i1704]: https://github.com/RPTools/maptool/issues/1704
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1688]: https://github.com/RPTools/maptool/issues/1688
 [i1686]: https://github.com/RPTools/maptool/issues/1686
@@ -155,12 +165,16 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 [i1506]: https://github.com/RPTools/maptool/issues/1506
 [i1501]: https://github.com/RPTools/maptool/issues/1501
 [i1498]: https://github.com/RPTools/maptool/issues/1498
+[i1495]: https://github.com/RPTools/maptool/issues/1495
 [i1473]: https://github.com/RPTools/maptool/issues/1473
 [i1463]: https://github.com/RPTools/maptool/issues/1463
 [i1441]: https://github.com/RPTools/maptool/issues/1441
+[i1426]: https://github.com/RPTools/maptool/issues/1426
 [i1425]: https://github.com/RPTools/maptool/issues/1425
 [i1318]: https://github.com/RPTools/maptool/issues/1318
 [i1317]: https://github.com/RPTools/maptool/issues/1317
+[i1264]: https://github.com/RPTools/maptool/issues/1264
+[i1263]: https://github.com/RPTools/maptool/issues/1263
 [i975]: https://github.com/RPTools/maptool/issues/975
 [i507]: https://github.com/RPTools/maptool/issues/507
 [i500]: https://github.com/RPTools/maptool/issues/500
