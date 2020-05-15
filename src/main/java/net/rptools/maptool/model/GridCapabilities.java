@@ -51,8 +51,8 @@ public interface GridCapabilities {
    * The secondary dimension should be linked to changes in the primary dimension but the primary
    * dimension is independent of the secondary.
    *
-   * @return true if secondary dimension should be linked to changes in the primary dimension but the primary
-   *              dimension is independent of the secondary
+   * @return true if secondary dimension should be linked to changes in the primary dimension but
+   *     the primary dimension is independent of the secondary
    */
   public boolean isSecondDimensionAdjustmentSupported();
 }

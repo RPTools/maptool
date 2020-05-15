@@ -209,7 +209,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   /**
    * @param id the id to look for
-   * @return whether the macro dialog is already opened. */
+   * @return whether the macro dialog is already opened.
+   */
   public static boolean isMacroDialogOpen(String id) {
     return openMacroList.contains(id);
   }

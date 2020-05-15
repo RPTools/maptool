@@ -29,7 +29,6 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.parser.ParserException;
 
 /**
  * Represents a JDialog holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5

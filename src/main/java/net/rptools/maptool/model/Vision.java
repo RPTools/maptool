@@ -37,7 +37,8 @@ public abstract class Vision {
     this.enabled = enabled;
   }
 
-  /** The Vision's name
+  /**
+   * The Vision's name
    *
    * @param name the new name
    */
@@ -45,7 +46,8 @@ public abstract class Vision {
     this.name = name;
   }
 
-  /** The Vision's name
+  /**
+   * The Vision's name
    *
    * @return the name
    */
@@ -53,7 +55,8 @@ public abstract class Vision {
     return name;
   }
 
-  /** The Vision's menu label
+  /**
+   * The Vision's menu label
    *
    * @return the menu label
    */
@@ -67,14 +70,12 @@ public abstract class Vision {
         + ")</font></html>";
   }
 
-  /** @return Angle in degrees
-   */
+  /** @return Angle in degrees */
   public int getAngle() {
     return angle;
   }
 
-  /**
-   * @param angle Angle in degrees */
+  /** @param angle Angle in degrees */
   public void setAngle(int angle) {
     this.angle = angle;
     flush();
@@ -95,7 +96,8 @@ public abstract class Vision {
     flush();
   }
 
-  /** Get the area shape that this vision represents, in zone points, centered on the origin x,y
+  /**
+   * Get the area shape that this vision represents, in zone points, centered on the origin x,y
    *
    * @param zone the zone for units
    * @param token the vision token
@@ -109,7 +111,8 @@ public abstract class Vision {
     return area;
   }
 
-  /** Specific vision types must be able to create the shape they represent
+  /**
+   * Specific vision types must be able to create the shape they represent
    *
    * @param zone the zone for units
    * @param token the vision token

@@ -48,7 +48,8 @@ public class PenWidthChooser extends JComboBox {
   /** The maximum number of eleemnts in the list before it scrolls */
   public static final int MAX_ROW_COUNT = 10;
 
-  /** Create the renderer and model for the combo box
+  /**
+   * Create the renderer and model for the combo box
    *
    * @param defaultThickness the default thickness of the item
    */

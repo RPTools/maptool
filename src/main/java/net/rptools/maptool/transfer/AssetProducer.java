@@ -42,10 +42,7 @@ public class AssetProducer {
     length = assetFile.length();
   }
 
-  /**
-   * @return the header needed to create the corresponding AssetConsumer
-   *
-   */
+  /** @return the header needed to create the corresponding AssetConsumer */
   public AssetHeader getHeader() {
     return new AssetHeader(id, name, assetFile.length());
   }
@@ -72,7 +69,8 @@ public class AssetProducer {
     return new AssetChunk(id, data);
   }
 
-  /** Whether all the data has been transferred
+  /**
+   * Whether all the data has been transferred
    *
    * @return true if all data been transferred
    */

@@ -203,7 +203,8 @@ public class Campaign {
    * This is a workaround to avoid the renderer and the serializer interating on the drawables at
    * the same time
    *
-   * @param isBeingSerialized the new value of isBeingSerialized, should be true if the object is being serialized
+   * @param isBeingSerialized the new value of isBeingSerialized, should be true if the object is
+   *     being serialized
    */
   public void setBeingSerialized(boolean isBeingSerialized) {
     this.isBeingSerialized = isBeingSerialized;

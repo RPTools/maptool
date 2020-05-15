@@ -68,8 +68,8 @@ public class AssetConsumer {
    * Add the next chunk of data to this consumer
    *
    * @param chunk produced from the corresponding AssetProducer
-   * @throws IOException if the file exists but is a directory rather than a regular file, does not exist but cannot
-   *                     be created, or cannot be opened for any other reason
+   * @throws IOException if the file exists but is a directory rather than a regular file, does not
+   *     exist but cannot be created, or cannot be opened for any other reason
    */
   public void update(AssetChunk chunk) throws IOException {
     File file = getFilename();

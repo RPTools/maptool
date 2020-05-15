@@ -145,10 +145,11 @@ public class ServerPolicy {
     return useToolTipsForDefaultRollFormat;
   }
 
-  /** Gets the local server time
+  /**
+   * Gets the local server time
    *
-   * @return the current server time as the difference, measured in milliseconds, between the
-   *         now and midnight, January 1, 1970 UTC
+   * @return the current server time as the difference, measured in milliseconds, between the now
+   *     and midnight, January 1, 1970 UTC
    */
   public long getSystemTime() {
     return System.currentTimeMillis();

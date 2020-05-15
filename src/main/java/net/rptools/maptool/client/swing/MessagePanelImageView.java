@@ -124,8 +124,7 @@ public class MessagePanelImageView extends View {
 
   /**
    * @return the text to display if the image can't be loaded. This is obtained from the Elements
-   * attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
-   *
+   *     attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
    */
   public String getAltText() {
     return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
@@ -167,8 +166,8 @@ public class MessagePanelImageView extends View {
    * first asked for, otherwise it will be loaded asynchronously. The default is to not load
    * synchronously, that is to load the image asynchronously.
    *
-   * @param newValue If true, the image we be loaded when first asked for,
-   *                otherwise it will be loaded asynchronously.
+   * @param newValue If true, the image we be loaded when first asked for, otherwise it will be
+   *     loaded asynchronously.
    */
   public void setLoadsSynchronously(boolean newValue) {
     synchronized (this) {
@@ -185,7 +184,8 @@ public class MessagePanelImageView extends View {
     return ((state & SYNC_LOAD_FLAG) != 0);
   }
 
-  /** Convenience method to get the StyleSheet.
+  /**
+   * Convenience method to get the StyleSheet.
    *
    * @return the StyleSheet
    */

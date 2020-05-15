@@ -236,7 +236,8 @@ public class AssetManager {
    * Similar to getAsset(), but does not block. It will always use the listeners to pass the data
    *
    * @param id MD5 of the asset requested
-   * @param listeners instances of {@link AssetAvailableListener} that will be notified when the asset is available
+   * @param listeners instances of {@link AssetAvailableListener} that will be notified when the
+   *     asset is available
    */
   public static void getAssetAsynchronously(
       final MD5Key id, final AssetAvailableListener... listeners) {

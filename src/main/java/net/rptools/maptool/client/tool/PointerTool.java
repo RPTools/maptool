@@ -1025,7 +1025,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   /**
    * @note These keystrokes are currently hard-coded and should be exported to a property file in a
    *     perfect universe. :)
-   *
    *     <table>
    * <caption>Keystrokes</caption>
    * <tr>

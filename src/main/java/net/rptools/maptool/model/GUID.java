@@ -41,7 +41,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified GUID value.
+  /**
+   * Creates a new GUID based on the specified GUID value.
    *
    * @param baGUID the new GUID
    * @throws InvalidGUIDException if the GUID is invalid
@@ -51,7 +52,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified hexadecimal-code string.
+  /**
+   * Creates a new GUID based on the specified hexadecimal-code string.
    *
    * @param strGUID the guid as a hexadecimal-code string
    * @throws InvalidGUIDException if the GUID is invalid
@@ -63,7 +65,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     validateGUID();
   }
 
-  /** Ensures the GUID is legal.
+  /**
+   * Ensures the GUID is legal.
    *
    * @throws InvalidGUIDException if the GUID is invalid
    */
@@ -73,7 +76,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
       throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
   }
 
-  /** Returns the GUID representation of the {@link byte} array argument.
+  /**
+   * Returns the GUID representation of the {@link byte} array argument.
    *
    * @param bits the {@link byte} array of the GUID
    * @return a new GUID instance
@@ -83,7 +87,8 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     return new GUID(bits);
   }
 
-  /** Returns the GUID representation of the {@link String} argument.
+  /**
+   * Returns the GUID representation of the {@link String} argument.
    *
    * @param s the guid as a hexadecimal-code string
    * @return a new GUID instance

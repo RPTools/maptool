@@ -60,7 +60,8 @@ public class ImageUtil {
   // graphicsConfig = config;
   // }
   //
-  /** Load the image. Does not create a graphics configuration compatible version.
+  /**
+   * Load the image. Does not create a graphics configuration compatible version.
    *
    * @param file the file with the image in it
    * @throws IOException when the image can't be read in the file
@@ -133,7 +134,8 @@ public class ImageUtil {
    * @param img the image to copy
    * @param width width of the created image
    * @param height height of the created image
-   * @param hints a {@link Map} that may contain the key HINT_TRANSPARENCY to define a the transparency color
+   * @param hints a {@link Map} that may contain the key HINT_TRANSPARENCY to define a the
+   *     transparency color
    * @return a {@link BufferedImage} with a copy of img
    */
   public static BufferedImage createCompatibleImage(

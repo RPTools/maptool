@@ -193,7 +193,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       form.getRadioButton(this.toString()).setEnabled(enabled);
     }
 
-    /** Shortcut to allow clean code and type-checking of invocations of specific buttons
+    /**
+     * Shortcut to allow clean code and type-checking of invocations of specific buttons
      *
      * @param listener an instance to get callbacks for actions
      */

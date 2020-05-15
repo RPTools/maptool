@@ -376,7 +376,8 @@ public class HTMLOverlayPanel extends JFXPanel {
     }
   }
 
-  /** Run all callback macros for "onTokenChanged".
+  /**
+   * Run all callback macros for "onTokenChanged".
    *
    * @param token the token that have changed
    */

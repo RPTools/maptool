@@ -85,8 +85,8 @@ public class AssetTransferManager {
    * When the asset is complete it will be removed from the internal map automatically
    *
    * @param chunk the chunk to with the data of the update
-   * @throws IOException if the file exists but is a directory rather than a regular file, does not exist but cannot
-   *                     be created, or cannot be opened for any other reason
+   * @throws IOException if the file exists but is a directory rather than a regular file, does not
+   *     exist but cannot be created, or cannot be opened for any other reason
    */
   public synchronized void update(AssetChunk chunk) throws IOException {
     AssetConsumer consumer = consumerMap.get(chunk.getId());

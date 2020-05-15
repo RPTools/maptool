@@ -15,7 +15,6 @@
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;

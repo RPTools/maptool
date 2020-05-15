@@ -31,12 +31,13 @@ public class Handshake {
     public static final int ERROR = 2;
   }
 
-  /** Server side of the handshake
+  /**
+   * Server side of the handshake
    *
    * @param server the MapTool server instance
    * @param s the server socket
-   * @throws IOException if an I/O error occurs when creating the input stream, the socket is closed, the socket
-   *                     is not connected, or the socket input has been shutdown using
+   * @throws IOException if an I/O error occurs when creating the input stream, the socket is
+   *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return A player structure for the connected player or null on issues
    */
   public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException {
@@ -89,12 +90,13 @@ public class Handshake {
         : null;
   }
 
-  /** Client side of the handshake
+  /**
+   * Client side of the handshake
    *
    * @param request the handshake request
    * @param s the socket to send the request on
-   * @throws IOException if an I/O error occurs when creating the input stream, the socket is closed, the socket
-   *                     is not connected, or the socket input has been shutdown using
+   * @throws IOException if an I/O error occurs when creating the input stream, the socket is
+   *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return the response from the srever
    */
   public static Response sendHandshake(Request request, Socket s) throws IOException {

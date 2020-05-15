@@ -52,7 +52,8 @@ public class ConnectionInfoDialog extends JDialog {
 
   private static final Logger log = LogManager.getLogger(ConnectionInfoDialog.class);
 
-  /** This is the default constructor
+  /**
+   * This is the default constructor
    *
    * @param server the server instance for the connection dialog
    */

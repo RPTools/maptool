@@ -182,7 +182,8 @@ public class HTMLFrameFactory {
     MapTool.getFrame().getOverlayPanel().doImpersonatedChanged();
   }
 
-  /** One of the tokens has changed.
+  /**
+   * One of the tokens has changed.
    *
    * @param token the token that have changed
    */

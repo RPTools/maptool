@@ -133,7 +133,8 @@ public class PackedFile implements AutoCloseable {
     this.versionManager = versionManager;
   }
 
-  /** Useful for configuring the xstream for object serialization
+  /**
+   * Useful for configuring the xstream for object serialization
    *
    * @return the configured {@link XStream}
    */

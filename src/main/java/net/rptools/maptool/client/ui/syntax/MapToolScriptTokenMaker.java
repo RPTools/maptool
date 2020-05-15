@@ -475,7 +475,8 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     return map;
   }
 
-  /** Closes the input stream.
+  /**
+   * Closes the input stream.
    *
    * @throws IOException If an I/O error occurs
    */

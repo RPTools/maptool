@@ -1364,7 +1364,8 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  /** Return the vbl area of the token
+  /**
+   * Return the vbl area of the token
    *
    * @return the current VBL of the token
    */
@@ -1778,16 +1779,12 @@ public class Token extends BaseModel implements Cloneable {
     return val;
   }
 
-  /**
-   * @return  all property names, all in lowercase.
-   */
+  /** @return all property names, all in lowercase. */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /**
-   * @return all property names, preserving their case.
-   */
+  /** @return all property names, preserving their case. */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }

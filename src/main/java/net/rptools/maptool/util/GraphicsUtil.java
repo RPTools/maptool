@@ -282,8 +282,8 @@ public class GraphicsUtil {
   /**
    * @param lhs the left hand side area
    * @param rhs the right hand side area
-   *
-   * @return True if the lhs area totally contains the rhs area */
+   * @return True if the lhs area totally contains the rhs area
+   */
   public static boolean contains(Area lhs, Area rhs) {
     if (lhs == null || lhs.isEmpty() || rhs == null || rhs.isEmpty()) {
       return false;

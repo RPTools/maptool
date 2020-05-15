@@ -40,7 +40,8 @@ public class AboutDialog extends JDialog {
   private JLabel logoLabel = null;
   private JEditorPane creditEditorPane = null;
 
-  /** This is the default constructor
+  /**
+   * This is the default constructor
    *
    * @param parent the Frame from which the dialog is displayed
    * @param logo the logo to be displayed
