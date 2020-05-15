@@ -45,6 +45,7 @@ public class HTMLFrameFactory {
    * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
    * @param html The html contents of frame or dialog.
+   * @throws ParserException if zorder is not numerical
    */
   public static void show(
       String name, FrameType frameType, boolean isHTML5, String properties, String html)

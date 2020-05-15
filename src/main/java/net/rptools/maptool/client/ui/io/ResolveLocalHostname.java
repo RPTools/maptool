@@ -26,9 +26,9 @@ public class ResolveLocalHostname {
    * underlying platform says it is, that's when it fallsback to using localhost.
    *
    * @param intendedDestination used to determine which NIC MapTool should bind to
-   * @return
-   * @throws UnknownHostException
-   * @throws SocketException
+   * @return a {@link InetAddress} with the hostname of the localhost
+   * @throws UnknownHostException if IP address is of illegal length (this should be a bug)
+   * @throws SocketException  if the local host name could not be resolved into an address
    */
   public static InetAddress getLocalHost(InetAddress intendedDestination)
       throws UnknownHostException, SocketException {

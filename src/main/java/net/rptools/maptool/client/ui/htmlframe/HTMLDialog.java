@@ -237,7 +237,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param name The name of the frame.
    * @return A json with the width, height, temporary, title, and value of dialog
    */
-  public static Object getDialogProperties(String name) throws ParserException {
+  public static Object getDialogProperties(String name) {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
       JsonObject dialogProperties = new JsonObject();

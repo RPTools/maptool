@@ -129,6 +129,12 @@ public class ImageUtil {
   /**
    * Create a copy of the image that is compatible with the current graphics context and scaled to
    * the supplied size
+   *
+   * @param img the image to copy
+   * @param width width of the created image
+   * @param height height of the created image
+   * @param hints a {@link Map} that may contain the key HINT_TRANSPARENCY to define a the transparency color
+   * @return a {@link BufferedImage} with a copy of img
    */
   public static BufferedImage createCompatibleImage(
       Image img, int width, int height, Map<String, Object> hints) {
@@ -384,6 +390,7 @@ public class ImageUtil {
   /**
    * Flip the image and return a new image
    *
+   * @param image the image to flip
    * @param direction 0-nothing, 1-horizontal, 2-vertical, 3-both
    * @return flipped BufferedImage
    */

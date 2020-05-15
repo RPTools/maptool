@@ -54,6 +54,8 @@ public class MiniSheet {
    * Renders the card at 0, 0 (this means the caller must position the graphics position before
    * calling)
    *
+   * @param g the 2D graphics to draw into
+   * @param portraitImage the portrait to render
    * @param propertyMap What to show, presumably a LinkedHashMap to preserve order
    */
   public void render(Graphics2D g, BufferedImage portraitImage, Map<String, String> propertyMap) {

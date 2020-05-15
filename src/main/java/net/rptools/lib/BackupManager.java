@@ -40,7 +40,10 @@ public class BackupManager {
     backupDir.mkdirs();
   }
 
-  /** The maximum number of bytes that the backup directory should use for backups */
+  /** The maximum number of bytes that the backup directory should use for backups
+   *
+   * @param size the maximum number of bytes that the backup directory should use for backups
+   */
   public void setMaxBackupSize(long size) {
     maxBackupSize = size;
   }

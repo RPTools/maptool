@@ -192,6 +192,8 @@ public class Campaign {
   /**
    * This is a workaround to avoid the renderer and the serializer interating on the drawables at
    * the same time
+   *
+   * @return true if currently being serialized
    */
   public boolean isBeingSerialized() {
     return isBeingSerialized;
@@ -200,6 +202,8 @@ public class Campaign {
   /**
    * This is a workaround to avoid the renderer and the serializer interating on the drawables at
    * the same time
+   *
+   * @param isBeingSerialized the new value of isBeingSerialized, should be true if the object is being serialized
    */
   public void setBeingSerialized(boolean isBeingSerialized) {
     this.isBeingSerialized = isBeingSerialized;
@@ -239,7 +243,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenTypeMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of token types
    */
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -264,7 +268,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getSightTypeMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of {@link SightType}s
    */
   public Map<String, SightType> getSightTypeMap() {
     checkCampaignPropertyConversion();
@@ -274,7 +278,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getLookupTableMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of {@link LookupTable}s types
    */
   public Map<String, LookupTable> getLookupTableMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -291,7 +295,8 @@ public class Campaign {
    * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value
    * for the key <code>lightSourceId</code>.
    *
-   * @return
+   * @param lightSourceId the id to look for
+   * @return the {@link LightSource} or null if not found
    */
   public LightSource getLightSource(GUID lightSourceId) {
 
@@ -306,7 +311,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getLightSourcesMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
    */
   public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -317,7 +322,8 @@ public class Campaign {
    * Convenience method that calls {@link #getLightSourcesMap()} and returns the value for the key
    * <code>type</code>.
    *
-   * @return
+   * @param type the key
+   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s for a specifict type
    */
   public Map<GUID, LightSource> getLightSourceMap(String type) {
     return getLightSourcesMap().get(type);
@@ -326,7 +332,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenStatesMap()</code>.
    *
-   * @return
+   * @return the {@link Map} for token states
    */
   public Map<String, BooleanTokenOverlay> getTokenStatesMap() {
     return campaignProperties.getTokenStatesMap();
@@ -335,7 +341,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenBarsMap()</code>.
    *
-   * @return
+   * @return the {@link Map} for token bars
    */
   public Map<String, BarTokenOverlay> getTokenBarsMap() {
     return campaignProperties.getTokenBarsMap();
@@ -355,7 +361,7 @@ public class Campaign {
    * Returns an <code>ArrayList</code> of all available <code>Zone</code>s from the <code>zones
    * </code> <code>LinkedHashMap</code>.
    *
-   * @return
+   * @return a list of zones
    */
   public List<Zone> getZones() {
     synchronized (zones) { // Must lock synchronized map while iterating over contents.
@@ -366,8 +372,8 @@ public class Campaign {
   /**
    * Return the <code>Zone</code> with the given GUID.
    *
-   * @param id
-   * @return
+   * @param id the id to look for
+   * @return the Zone for the id
    */
   public Zone getZone(GUID id) {
     return zones.get(id);
@@ -580,7 +586,7 @@ public class Campaign {
    * This method iterates through all Zones, TokenStates, TokenBars, and LookupTables and writes the
    * keys into a new, empty set. That set is the return value.
    *
-   * @return
+   * @return a set of MD5 keys
    */
   public Set<MD5Key> getAllAssetIds() {
 
