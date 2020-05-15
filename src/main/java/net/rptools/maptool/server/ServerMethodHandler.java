@@ -464,16 +464,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               producer.getHeader());
       server.addAssetProducer(RPCContext.getCurrent().id, producer);
 
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-
-      // Old fashioned way
-      server
-          .getConnection()
-          .callMethod(
-              RPCContext.getCurrent().id,
-              ClientCommand.COMMAND.putAsset.name(),
-              AssetManager.getAsset(assetID));
     } catch (IllegalArgumentException iae) {
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken

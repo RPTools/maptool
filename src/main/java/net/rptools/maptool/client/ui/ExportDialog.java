@@ -193,7 +193,10 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       form.getRadioButton(this.toString()).setEnabled(enabled);
     }
 
-    /** Shortcut to allow clean code and type-checking of invocations of specific buttons */
+    /** Shortcut to allow clean code and type-checking of invocations of specific buttons
+     *
+     * @param listener an instance to get callbacks for actions
+     */
     public void addActionListener(ActionListener listener) {
       form.getRadioButton(this.toString()).addActionListener(listener);
     }
@@ -537,7 +540,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot} for
    * "normal" screenshots, but that's just until this code is considered stable enough.
    *
-   * @throws Exception
+   * @throws Exception if unable to take screen capture
    */
   @SuppressWarnings("unused")
   public void screenCapture() throws Exception {

@@ -49,12 +49,12 @@ public class AutoResizeStampDialog extends JDialog {
   /**
    * Create the dialog.
    *
-   * @param selectedWidth
-   * @param selectedHeight
-   * @param stampWidth
-   * @param stampHeight
-   * @param anchorX
-   * @param anchorY
+   * @param selectedWidth the currently selected width
+   * @param selectedHeight the currently selected height
+   * @param stampWidth the width in the label
+   * @param stampHeight the height in the label
+   * @param anchorX the x anchor point
+   * @param anchorY the y anchor point
    */
   public AutoResizeStampDialog(
       int selectedWidth,

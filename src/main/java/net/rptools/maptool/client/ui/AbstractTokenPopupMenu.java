@@ -987,7 +987,10 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       MapTool.getFrame().showTokenPropertiesDialog(getTokenUnderMouse(), getRenderer());
     }
 
-    /** Converts the action to a JMenuItem, and adds a tooltip if the action is blocked. */
+    /** Converts the action to a JMenuItem, and adds a tooltip if the action is blocked.
+     *
+     * @return the new {@link JMenuItem}
+     */
     public JMenuItem asJMenuItem() {
       JMenuItem jMenuItem = new JMenuItem(this);
       if (selectedTokenSet.size() > 1) {

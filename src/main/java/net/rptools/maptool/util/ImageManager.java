@@ -120,6 +120,8 @@ public class ImageManager {
   /**
    * Flush all images that are <b>not</b> in the provided set. This presumes that the images in the
    * exception set will still be in use after the flush.
+   *
+   * @param exceptionSet a set of images not to be flushed
    */
   public static void flush(Set<MD5Key> exceptionSet) {
     synchronized (imageLoaderMutex) {

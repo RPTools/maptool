@@ -20,7 +20,12 @@ import java.util.StringTokenizer;
 // This should really be in rplib
 public class ResourceLoader {
 
-  /** Rectangles are in the form x, y, width, height */
+  /** Rectangles are in the form x, y, width, height
+   *
+   * @throws IllegalArgumentException if rectString can't be parsed
+   * @param rectString string describing the rectangle
+   * @return a {@link Rectangle} for x, y, width, height
+   */
   public static Rectangle loadRectangle(String rectString) {
 
     StringTokenizer strtok = new StringTokenizer(rectString, ",");

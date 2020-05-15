@@ -41,8 +41,8 @@ public class OutlookPanel extends JPanel {
   }
 
   /**
-   * @param label
-   * @param component
+   * @param label the text of the button
+   * @param component the component to be affected by the button
    * @return index of the button
    */
   public int addButton(String label, JComponent component) {

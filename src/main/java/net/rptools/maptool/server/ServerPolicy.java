@@ -51,7 +51,7 @@ public class ServerPolicy {
   /**
    * Whether token management can be done by everyone or only the GM and assigned tokens
    *
-   * @return
+   * @return true if tokens only can be handled by GM and assignee
    */
   public boolean useStrictTokenManagement() {
     return strictTokenMovement;
@@ -145,7 +145,11 @@ public class ServerPolicy {
     return useToolTipsForDefaultRollFormat;
   }
 
-  /** Gets the local server time */
+  /** Gets the local server time
+   *
+   * @return the current server time as the difference, measured in milliseconds, between the
+   *         now and midnight, January 1, 1970 UTC
+   */
   public long getSystemTime() {
     return System.currentTimeMillis();
   }

@@ -402,6 +402,7 @@ public class PersistenceUtil {
    * Gets a file pointing to where the campaign's thumbnail image should be.
    *
    * @param fileName The campaign's file name.
+   * @return the file for the campaign thumbnail
    */
   public static File getCampaignThumbnailFile(String fileName) {
     return new File(AppUtil.getAppHome("campaignthumbs"), fileName + ".jpg");

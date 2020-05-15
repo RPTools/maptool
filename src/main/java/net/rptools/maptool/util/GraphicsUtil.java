@@ -58,8 +58,13 @@ public class GraphicsUtil {
   /**
    * A multiline text wrapping popup.
    *
+   * @param g The graphics to draw into
    * @param string - the string to display in he popup
+   * @param x the x position of the popup
+   * @param y the y position of the popup
+   * @param justification justification of the text
    * @param maxWidth - the max width in pixels before wrapping the text
+   * @return the surrounding rectangle for the popup
    */
   public static Rectangle drawPopup(
       Graphics2D g, String string, int x, int y, int justification, int maxWidth) {
@@ -213,6 +218,7 @@ public class GraphicsUtil {
   }
 
   /**
+   * @param c the color to lighten up
    * @return a lighter color, as opposed to a brighter color as in Color.brighter(). This prevents
    *     light colors from getting bleached out.
    */
@@ -273,7 +279,11 @@ public class GraphicsUtil {
     return !newArea.isEmpty();
   }
 
-  /** True if the lhs area totally contains the rhs area */
+  /**
+   * @param lhs the left hand side area
+   * @param rhs the right hand side area
+   *
+   * @return True if the lhs area totally contains the rhs area */
   public static boolean contains(Area lhs, Area rhs) {
     if (lhs == null || lhs.isEmpty() || rhs == null || rhs.isEmpty()) {
       return false;

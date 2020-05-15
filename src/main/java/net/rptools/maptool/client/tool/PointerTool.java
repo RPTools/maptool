@@ -159,8 +159,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    * use. Those keystrokes are then added to the InputMap and ActionMap for the component by calling
    * the superclass's addListeners() method.
    *
-   * @param comp
+   * @deprecated
+   * @param comp the component to add as listener
    */
+  @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
     if (comp != null && comp instanceof ZoneRenderer) {
       Grid grid = ((ZoneRenderer) comp).getZone().getGrid();
@@ -1023,7 +1025,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   /**
    * @note These keystrokes are currently hard-coded and should be exported to a property file in a
    *     perfect universe. :)
-   *     <p>
+   *
    *     <table>
    * <caption>Keystrokes</caption>
    * <tr>
