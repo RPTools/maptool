@@ -18,8 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-import javafx.application.Platform;
+import java.util.concurrent.ConcurrentSkipListSet;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
@@ -109,16 +108,18 @@ public class MacroDialogFunctions extends AbstractFunction {
    * @return either a json array, a json object, or an empty string
    */
   private Object getOverlayProperties(String name) {
-    Map<String, HTMLOverlayManager> overlays = MapTool.getFrame().getOverlayPanel().getOverlays();
     if (name.equals("*")) {
+      ConcurrentSkipListSet<HTMLOverlayManager> overlays =
+          MapTool.getFrame().getOverlayPanel().getOverlays();
       JsonArray jarr = new JsonArray();
-      for (HTMLOverlayManager overlay : overlays.values()) {
+      for (HTMLOverlayManager overlay : overlays) {
         jarr.add(getOverlayProperties(overlay));
       }
       return jarr;
     } else {
-      if (overlays.containsKey(name)) {
-        return getOverlayProperties(overlays.get(name));
+      HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
+      if (overlay != null) {
+        return getOverlayProperties(overlay);
       } else {
         return "";
       }
@@ -145,14 +146,11 @@ public class MacroDialogFunctions extends AbstractFunction {
    * @param name the name of the overlay, or "*" if removing all overlays.
    */
   private void removeOverlay(String name) {
-    Platform.runLater(
-        () -> {
-          if (name.equals("*")) {
-            MapTool.getFrame().getOverlayPanel().removeAllOverlays();
-          } else {
-            MapTool.getFrame().getOverlayPanel().removeOverlay(name);
-          }
-        });
+    if (name.equals("*")) {
+      MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    } else {
+      MapTool.getFrame().getOverlayPanel().removeOverlay(name);
+    }
   }
 
   /**

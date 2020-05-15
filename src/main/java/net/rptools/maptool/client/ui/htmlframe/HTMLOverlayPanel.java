@@ -18,7 +18,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
@@ -50,9 +50,8 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
-  /** The ordered map of the overlays. */
-  private Map<String, HTMLOverlayManager> overlays =
-      Collections.synchronizedMap(new LinkedHashMap<>());
+  /** The ordered set of the overlays. */
+  private final ConcurrentSkipListSet<HTMLOverlayManager> overlays = new ConcurrentSkipListSet<>();
 
   /** The StackPane holding all the overlays. */
   private StackPane root;
@@ -79,7 +78,7 @@ public class HTMLOverlayPanel extends JFXPanel {
         javafx.scene.input.MouseEvent.ANY,
         event -> {
           // Passes the mouse event to all overlays
-          for (HTMLOverlayManager overlay : overlays.values()) {
+          for (HTMLOverlayManager overlay : overlays) {
             if (overlay.isVisible()) {
               overlay.getWebView().fireEvent(event);
             }
@@ -94,9 +93,24 @@ public class HTMLOverlayPanel extends JFXPanel {
     this.setScene(scene);
   }
 
-  /** @return the map of the overlays. */
-  public Map<String, HTMLOverlayManager> getOverlays() {
-    return overlays;
+  /** @return a cloned set of the overlays. */
+  public ConcurrentSkipListSet<HTMLOverlayManager> getOverlays() {
+    return overlays.clone();
+  }
+
+  /**
+   * Returns the overlay associated with the name.
+   *
+   * @param name the name of the overlay
+   * @return the overlay, or null if not existing
+   */
+  public HTMLOverlayManager getOverlay(String name) {
+    for (HTMLOverlayManager overlay : overlays) {
+      if (overlay.getName().equals(name)) {
+        return overlay;
+      }
+    }
+    return null;
   }
 
   /**
@@ -106,7 +120,7 @@ public class HTMLOverlayPanel extends JFXPanel {
    * @return true if it exists, false otherwise
    */
   public boolean isRegistered(String name) {
-    return overlays.containsKey(name);
+    return getOverlay(name) != null;
   }
 
   /**
@@ -129,7 +143,7 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** @return whether all overlay WebViews have the default cursor. */
   public boolean areWebViewCursorsDefault() {
-    for (HTMLOverlayManager overlay : overlays.values()) {
+    for (HTMLOverlayManager overlay : overlays) {
       if (overlay.isVisible()) {
         Cursor cursor = overlay.getWebView().getCursor();
         if (cursor == null || !"DEFAULT".equals(cursor.toString())) {
@@ -141,15 +155,24 @@ public class HTMLOverlayPanel extends JFXPanel {
   }
 
   /**
-   * Removes one overlay.
+   * Removes one overlay. Executed on the JavaFX Application thread.
    *
    * @param name The name of the overlay.
    */
   public void removeOverlay(String name) {
-    if (overlays.containsKey(name)) {
-      root.getChildren().remove(overlays.get(name).getWebView());
-      overlays.remove(name);
-      AppMenuBar.removeFromOverlayMenu(name);
+    Platform.runLater(() -> removeOverlay(getOverlay(name)));
+  }
+
+  /**
+   * Removes an overlay.
+   *
+   * @param overlay the overlay to remove
+   */
+  private void removeOverlay(HTMLOverlayManager overlay) {
+    if (overlay != null) {
+      root.getChildren().remove(overlay.getWebView());
+      overlays.remove(overlay);
+      AppMenuBar.removeFromOverlayMenu(overlay.getName());
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -162,7 +185,7 @@ public class HTMLOverlayPanel extends JFXPanel {
     Platform.runLater(
         () -> {
           ObservableList<Node> listChildren = root.getChildren();
-          for (HTMLOverlayManager overlay : overlays.values()) {
+          for (HTMLOverlayManager overlay : overlays) {
             listChildren.remove(overlay.getWebView());
             AppMenuBar.removeFromOverlayMenu(overlay.getName());
           }
@@ -183,22 +206,24 @@ public class HTMLOverlayPanel extends JFXPanel {
     setVisible(true);
     Platform.runLater(
         () -> {
-          HTMLOverlayManager overlayManager;
           boolean needsSorting = false;
-          if (overlays.containsKey(name)) {
-            overlayManager = overlays.get(name);
+          HTMLOverlayManager overlayManager = getOverlay(name);
+          if (overlayManager != null) {
             if ("".equals(html)) {
               // Blank removes the overlay
-              removeOverlay(name);
+              removeOverlay(overlayManager);
               return;
             } else if (zOrder != overlayManager.getZOrder()) {
+              // Resorts by removing and adding back the overlay
+              overlays.remove(overlayManager);
               overlayManager.setZOrder(zOrder);
+              overlays.add(overlayManager);
               needsSorting = true;
             }
           } else {
             overlayManager = new HTMLOverlayManager(name, zOrder);
             overlayManager.setupWebView(new WebView());
-            overlays.put(name, overlayManager);
+            overlays.add(overlayManager);
             root.getChildren().add(overlayManager.getWebView());
             AppMenuBar.addToOverlayMenu(overlayManager);
             needsSorting = true;
@@ -210,35 +235,10 @@ public class HTMLOverlayPanel extends JFXPanel {
         });
   }
 
-  /** Sorts all overlays according to their zOrder. */
+  /** Display the overlays according to their zOrder. */
   private void sortOverlays() {
-    overlays = MapUtil.sortByValue(overlays);
-    for (Map.Entry<String, HTMLOverlayManager> entries : overlays.entrySet()) {
-      entries.getValue().getWebView().toFront();
-    }
+    overlays.forEach(overlay -> overlay.getWebView().toFront());
     front.toFront();
-  }
-
-  /** Utility class to return a sorted copy of a map. */
-  public static class MapUtil {
-    /**
-     * Returns a sorted copy of a map
-     *
-     * @param map the map
-     * @param <K> the keys of the map
-     * @param <V> the values of the map
-     * @return the sorted copy
-     */
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-      List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
-      list.sort(Map.Entry.comparingByValue());
-
-      Map<K, V> result = Collections.synchronizedMap(new LinkedHashMap<>());
-      for (Map.Entry<K, V> entry : list) {
-        result.put(entry.getKey(), entry.getValue());
-      }
-      return result;
-    }
   }
 
   /**
@@ -270,7 +270,7 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   private mousePassResult getMousePassResult(MouseEvent e) {
     mousePassResult globalResult = mousePassResult.PASS;
-    for (HTMLOverlayManager overlay : overlays.values()) {
+    for (HTMLOverlayManager overlay : overlays) {
       mousePassResult result = overlay.getMousePassResult(e.getX(), e.getY());
       if (result == mousePassResult.BLOCK) {
         globalResult = mousePassResult.BLOCK;
@@ -378,7 +378,7 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** Run all callback macros for "onTokenChanged". */
   public void doTokenChanged(Token token) {
-    for (HTMLOverlayManager overlay : overlays.values()) {
+    for (HTMLOverlayManager overlay : overlays) {
       if (overlay.getWebView().isVisible()) {
         HTMLPanelContainer.tokenChanged(token, overlay.macroCallbacks());
       }
@@ -387,7 +387,7 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** Run all callback macros for "onChangeImpersonated". */
   public void doImpersonatedChanged() {
-    for (HTMLOverlayManager overlay : overlays.values()) {
+    for (HTMLOverlayManager overlay : overlays) {
       if (overlay.getWebView().isVisible()) {
         HTMLPanelContainer.impersonatedChanged(overlay.macroCallbacks());
       }
@@ -396,7 +396,7 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** Run all callback macros for "onChangeSelection". */
   public void doSelectedChanged() {
-    for (HTMLOverlayManager overlay : overlays.values()) {
+    for (HTMLOverlayManager overlay : overlays) {
       if (overlay.getWebView().isVisible()) {
         HTMLPanelContainer.selectedChanged(overlay.macroCallbacks());
       }
