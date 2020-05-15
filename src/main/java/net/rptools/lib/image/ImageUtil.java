@@ -60,14 +60,22 @@ public class ImageUtil {
   // graphicsConfig = config;
   // }
   //
-
-  /** Load the image. Does not create a graphics configuration compatible version. */
+  /** Load the image. Does not create a graphics configuration compatible version.
+   *
+   * @param file the file with the image in it
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
+   */
   public static Image getImage(File file) throws IOException {
     return bytesToImage(FileUtils.readFileToByteArray(file), file.getCanonicalPath());
   }
 
   /**
    * Load the image in the classpath. Does not create a graphics configuration compatible version.
+   *
+   * @param image the resource name of the image file
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
    */
   public static Image getImage(String image) throws IOException {
     ByteArrayOutputStream dataStream = new ByteArrayOutputStream(8192);

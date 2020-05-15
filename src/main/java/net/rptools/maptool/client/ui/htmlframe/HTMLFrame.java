@@ -94,6 +94,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    *
    * @param name the name of the frame.
    * @param title the title of the frame.
+   * @param tabTitle the title of the tab.
    * @param width the width of the frame in pixels.
    * @param height the height of the frame in pixels.
    * @param temp whether the frame should be temporary.
