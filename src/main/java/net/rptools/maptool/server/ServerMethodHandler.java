@@ -150,6 +150,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
+        case editToken:
+          editToken(context.getGUID(0), (Token) context.get(1));
+          break;
         case putZone:
           putZone((Zone) context.get(0));
           break;
@@ -577,6 +580,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.putLabel(label);
     forwardToClients();
+  }
+
+  public void editToken(GUID zoneGUID, Token token) {
+    putToken(zoneGUID, token);
   }
 
   public void putToken(GUID zoneGUID, Token token) {
