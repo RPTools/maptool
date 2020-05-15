@@ -423,6 +423,8 @@ public class CampaignProperties {
   /**
    * Getter for characterSheets. Only called by {@link Campaign#getCharacterSheets()} and that
    * function is never used elsewhere within MapTool. Yet. ;-)
+   *
+   * @return a Map of the characterSheets
    */
   public Map<String, String> getCharacterSheets() {
     if (characterSheets == null) initCharacterSheetsMap();

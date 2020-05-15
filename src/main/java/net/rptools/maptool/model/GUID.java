@@ -41,13 +41,23 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified GUID value. */
+  /**
+   * Creates a new GUID based on the specified GUID value.
+   *
+   * @param baGUID the new GUID
+   * @throws InvalidGUIDException if the GUID is invalid
+   */
   public GUID(byte[] baGUID) throws InvalidGUIDException {
     this.baGUID = baGUID;
     validateGUID();
   }
 
-  /** Creates a new GUID based on the specified hexadecimal-code string. */
+  /**
+   * Creates a new GUID based on the specified hexadecimal-code string.
+   *
+   * @param strGUID the guid as a hexadecimal-code string
+   * @throws InvalidGUIDException if the GUID is invalid
+   */
   public GUID(String strGUID) {
     if (strGUID == null) throw new InvalidGUIDException("GUID is null");
 
@@ -55,20 +65,34 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     validateGUID();
   }
 
-  /** Ensures the GUID is legal. */
+  /**
+   * Ensures the GUID is legal.
+   *
+   * @throws InvalidGUIDException if the GUID is invalid
+   */
   private void validateGUID() throws InvalidGUIDException {
     if (baGUID == null) throw new InvalidGUIDException("GUID is null");
     if (baGUID.length != GUID_LENGTH)
       throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
   }
 
-  /** Returns the GUID representation of the {@link byte} array argument. */
+  /**
+   * Returns the GUID representation of the {@link byte} array argument.
+   *
+   * @param bits the {@link byte} array of the GUID
+   * @return a new GUID instance
+   */
   public static GUID valueOf(byte[] bits) {
     if (bits == null) return null;
     return new GUID(bits);
   }
 
-  /** Returns the GUID representation of the {@link String} argument. */
+  /**
+   * Returns the GUID representation of the {@link String} argument.
+   *
+   * @param s the guid as a hexadecimal-code string
+   * @return a new GUID instance
+   */
   public static GUID valueOf(String s) {
     if (s == null) return null;
     return new GUID(s);

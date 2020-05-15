@@ -376,7 +376,11 @@ public class HTMLOverlayPanel extends JFXPanel {
     }
   }
 
-  /** Run all callback macros for "onTokenChanged". */
+  /**
+   * Run all callback macros for "onTokenChanged".
+   *
+   * @param token the token that have changed
+   */
   public void doTokenChanged(Token token) {
     for (HTMLOverlayManager overlay : overlays) {
       if (overlay.getWebView().isVisible()) {

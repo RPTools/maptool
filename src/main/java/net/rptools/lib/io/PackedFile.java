@@ -118,6 +118,8 @@ public class PackedFile implements AutoCloseable {
   /**
    * By default all temporary files are handled in /tmp. Use this method to globally set the
    * location of the temporary directory
+   *
+   * @param tmpDir the new directory for tmp files
    */
   public static void init(File tmpDir) {
     PackedFile.tmpDir = tmpDir;
@@ -131,7 +133,11 @@ public class PackedFile implements AutoCloseable {
     this.versionManager = versionManager;
   }
 
-  /** Useful for configuring the xstream for object serialization */
+  /**
+   * Useful for configuring the xstream for object serialization
+   *
+   * @return the configured {@link XStream}
+   */
   public XStream getXStream() {
     return xstream;
   }
@@ -149,7 +155,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param key key for accessing the property map
    * @return the value (typically a String)
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object getProperty(String key) throws IOException {
     return getPropertyMap().get(key);
@@ -160,7 +166,7 @@ public class PackedFile implements AutoCloseable {
    * #getProperty(String)}.
    *
    * @return list of all keys
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Iterator<String> getPropertyNames() throws IOException {
     return getPropertyMap().keySet().iterator();
@@ -169,10 +175,10 @@ public class PackedFile implements AutoCloseable {
   /**
    * Stores a new key/value pair into the property map. Existing keys are overwritten.
    *
-   * @param key
+   * @param key the key for vaule
    * @param value any POJO; will be serialized into XML upon writing
    * @return the previous value for the given key
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object setProperty(String key, Object value) throws IOException {
     dirty = true;
@@ -182,9 +188,9 @@ public class PackedFile implements AutoCloseable {
   /**
    * Remove the property with the associated key from the property map.
    *
-   * @param key
+   * @param key the key to be removed
    * @return the previous value for the given key
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object removeProperty(String key) throws IOException {
     dirty = true;
@@ -196,7 +202,7 @@ public class PackedFile implements AutoCloseable {
    * data structure for all information regarding the content of the PackedFile.
    *
    * @return the results of the deserialization
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object getContent() throws IOException {
     return getContent(versionManager, (String) getProperty("version"));
@@ -210,7 +216,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param fileVersion such as "1.3.70"
    * @return the results of the deserialization
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object getContent(String fileVersion) throws IOException {
     return getContent(versionManager, fileVersion);
@@ -223,7 +229,7 @@ public class PackedFile implements AutoCloseable {
    * @param versionManager which set of transforms to apply to older file versions
    * @param fileVersion such as "1.3.70"
    * @return the results of the deserialization
-   * @throws IOException
+   * @throws IOException when the property file is missing
    */
   public Object getContent(ModelVersionManager versionManager, String fileVersion)
       throws IOException {
@@ -401,8 +407,8 @@ public class PackedFile implements AutoCloseable {
   /**
    * Set the given object as the information to write to the 'content.xml' file in the archive.
    *
-   * @param content
-   * @throws IOException
+   * @param content the content to be stored
+   * @throws IOException If an I/O error occurs
    */
   public void setContent(Object content) throws IOException {
     putFile(CONTENT_FILE, content);
@@ -415,9 +421,8 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path path within the ZIP to write to
    * @return the <code>File</code> object for the temporary location
-   * @throws IOException
    */
-  private File putFileImpl(String path) throws IOException {
+  private File putFileImpl(String path) {
     if (!tmpFile.exists()) tmpFile.getParentFile().mkdirs();
 
     // Have to store it in the exploded area since we can't directly save it to the zip
@@ -441,7 +446,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path location within the ZIP file
    * @param data the binary data to be written
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public void putFile(String path, byte[] data) throws IOException {
     try (InputStream is = new ByteArrayInputStream(data)) {
@@ -455,7 +460,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path location within the ZIP file
    * @param is the binary data to be written in the form of an InputStream
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public void putFile(String path, InputStream is) throws IOException {
     File explodedFile = putFileImpl(path);
@@ -471,7 +476,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path location within the ZIP file
    * @param obj the object to be written
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public void putFile(String path, Object obj) throws IOException {
     File explodedFile = putFileImpl(path);
@@ -492,7 +497,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path location within the ZIP file
    * @param url the url of the binary data to be written
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public void putFile(String path, URL url) throws IOException {
     try (InputStream is = url.openStream()) {
@@ -531,7 +536,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path zip file archive path entry
    * @return Object created by translating the XML
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public Object getFileObject(String path) throws IOException {
     // This next line really should be routed thru the version manager...
@@ -560,7 +565,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path zip file archive path entry
    * @return Reader representing the data stream
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public LineNumberReader getFileAsReader(String path) throws IOException {
     File explodedFile = getExplodedFile(path);
@@ -593,7 +598,7 @@ public class PackedFile implements AutoCloseable {
    *
    * @param path zip file archive path entry
    * @return InputStream representing the data stream
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public InputStream getFileAsInputStream(String path) throws IOException {
     File explodedFile = getExplodedFile(path);

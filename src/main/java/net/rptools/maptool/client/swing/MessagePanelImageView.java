@@ -112,6 +112,7 @@ public class MessagePanelImageView extends View {
    * Creates a new view that represents an IMG element.
    *
    * @param elem the element to create a view for
+   * @param imageCache the image cache instance to load images into
    */
   public MessagePanelImageView(Element elem, ImageLoaderCache imageCache) {
     super(elem);
@@ -122,14 +123,14 @@ public class MessagePanelImageView extends View {
   }
 
   /**
-   * Returns the text to display if the image can't be loaded. This is obtained from the Elements
-   * attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
+   * @return the text to display if the image can't be loaded. This is obtained from the Elements
+   *     attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
    */
   public String getAltText() {
     return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
   }
 
-  /** Return a URL for the image source, or null if it could not be determined. */
+  /** @return a URL for the image source, or null if it could not be determined. */
   public URL getImageURL() {
     String src = (String) getElement().getAttributes().getAttribute(HTML.Attribute.SRC);
     if (src == null) {
@@ -144,17 +145,17 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** Returns the icon to use if the image couldn't be found. */
+  /** @return the icon to use if the image couldn't be found. */
   public Icon getNoImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(MISSING_IMAGE);
   }
 
-  /** Returns the icon to use while in the process of loading the image. */
+  /** @return the icon to use while in the process of loading the image. */
   public Icon getLoadingImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(PENDING_IMAGE);
   }
 
-  /** Returns the image to render. */
+  /** @return the image to render. */
   public Image getImage() {
     sync();
     return imageCache.get(getImageURL(), imageObserver);
@@ -164,6 +165,9 @@ public class MessagePanelImageView extends View {
    * Sets how the image is loaded. If <code>newValue</code> is true, the image we be loaded when
    * first asked for, otherwise it will be loaded asynchronously. The default is to not load
    * synchronously, that is to load the image asynchronously.
+   *
+   * @param newValue If true, the image we be loaded when first asked for, otherwise it will be
+   *     loaded asynchronously.
    */
   public void setLoadsSynchronously(boolean newValue) {
     synchronized (this) {
@@ -175,12 +179,16 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** Returns true if the image should be loaded when first asked for. */
+  /** @return true if the image should be loaded when first asked for. */
   public boolean getLoadsSynchronously() {
     return ((state & SYNC_LOAD_FLAG) != 0);
   }
 
-  /** Convenience method to get the StyleSheet. */
+  /**
+   * Convenience method to get the StyleSheet.
+   *
+   * @return the StyleSheet
+   */
   protected StyleSheet getStyleSheet() {
     HTMLDocument doc = (HTMLDocument) getDocument();
     return doc.getStyleSheet();
@@ -189,6 +197,8 @@ public class MessagePanelImageView extends View {
   /**
    * Fetches the attributes to use when rendering. This is implemented to multiplex the attributes
    * specified in the model with a StyleSheet.
+   *
+   * @return the attributes for rendering
    */
   @Override
   public AttributeSet getAttributes() {

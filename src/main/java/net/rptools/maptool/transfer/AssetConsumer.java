@@ -55,7 +55,7 @@ public class AssetConsumer {
     }
   }
 
-  /** Get the ID of the incoming asset */
+  /** @return the ID of the incoming asset */
   public Serializable getId() {
     return header.getId();
   }
@@ -68,7 +68,8 @@ public class AssetConsumer {
    * Add the next chunk of data to this consumer
    *
    * @param chunk produced from the corresponding AssetProducer
-   * @throws IOException
+   * @throws IOException if the file exists but is a directory rather than a regular file, does not
+   *     exist but cannot be created, or cannot be opened for any other reason
    */
   public void update(AssetChunk chunk) throws IOException {
     File file = getFilename();
@@ -82,7 +83,7 @@ public class AssetConsumer {
   /**
    * Whether all the data has been transferred
    *
-   * @return
+   * @return true if all data been transferred
    */
   public boolean isComplete() {
     return currentPosition >= header.getSize();
@@ -99,7 +100,7 @@ public class AssetConsumer {
   /**
    * When complete this will point to the file containing the data
    *
-   * @return
+   * @return the file with the data
    */
   public File getFilename() {
     return new File(destinationDir.getAbsolutePath() + "/" + header.getId() + ".part");
