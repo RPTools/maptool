@@ -729,10 +729,7 @@ public class MapToolFrame extends DefaultDockableHolder
         if (dialog.isTokenSaved()) {
           // Checks if the map still exists. Fixes #1646.
           if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
-            MapTool.serverCommand().putToken(zr.getZone().getId(), token);
-            MapTool.getFrame().resetTokenPanels();
-            zr.repaint();
-            zr.flush(token);
+            MapTool.serverCommand().editToken(zr.getZone().getId(), token);
           }
         }
       }

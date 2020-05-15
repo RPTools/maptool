@@ -50,6 +50,7 @@ public interface ServerCommand {
     getAsset,
     removeAsset,
     putToken,
+    editToken,
     removeToken,
     removeTokens,
     updateTokenProperty,
@@ -138,6 +139,8 @@ public interface ServerCommand {
   public void getAsset(MD5Key assetID);
 
   public void removeAsset(MD5Key assetID);
+
+  public void editToken(GUID zoneGUID, Token token);
 
   public void putToken(GUID zoneGUID, Token token);
 
