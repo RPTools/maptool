@@ -33,7 +33,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -122,8 +122,10 @@ public class SelectionPanel extends AbstractMacroPanel {
 
   @Override
   public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Zone.Event.TOKEN_REMOVED
-        || event.eventType == Zone.Event.TOKEN_MACRO_CHANGED) {
+    if (event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
       // Only resets if one of the selected tokens is among those changed/deleted.
       ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
       if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {

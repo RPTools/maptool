@@ -32,6 +32,7 @@ import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -101,7 +102,8 @@ public abstract class AbstractMacroPanel extends JPanel
     if (this.tokenId == null) {
       return null;
     } else {
-      return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().getToken(this.tokenId);
     }
   }
 

@@ -194,7 +194,7 @@ public class JScrollPopupMenu extends JPopupMenu {
 
       Insets insets = parent.getInsets();
       dim.height = Math.min(dim.height + insets.top + insets.bottom, visibleAmount);
-      dim.width += scrollbarWidth;
+      dim.width += scrollbarWidth + insets.left + insets.right;
 
       Dimension min = parent.getMinimumSize();
       dim.width = Math.max(dim.width, min.width);

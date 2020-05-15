@@ -76,13 +76,18 @@ import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.ModelChangeEvent;
+import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel implements Observer {
+public class CommandPanel extends JPanel
+    implements Observer, AppEventListener, ModelChangeListener {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -110,6 +115,9 @@ public class CommandPanel extends JPanel implements Observer {
   /** The stack of impersonated identities. The most current is at the top of the stack. */
   private final Stack<TokenIdentity> identityStack = new Stack<>();
 
+  /** The identity representing no impersonation. */
+  private static final TokenIdentity emptyIdentity = new TokenIdentity();
+
   public CommandPanel() {
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createLineBorder(Color.gray));
@@ -118,6 +126,8 @@ public class CommandPanel extends JPanel implements Observer {
     add(BorderLayout.CENTER, getMessagePanel());
     initializeSmilies();
     addFocusHotKey();
+
+    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
   }
 
   public ChatProcessor getChatProcessor() {
@@ -135,7 +145,7 @@ public class CommandPanel extends JPanel implements Observer {
   /** Clears both the identity stack and the global identity. */
   public void clearAllIdentities() {
     identityStack.clear();
-    setGlobalIdentity(new TokenIdentity());
+    setGlobalIdentity(emptyIdentity);
   }
 
   /**
@@ -179,7 +189,7 @@ public class CommandPanel extends JPanel implements Observer {
 
   /** Clears the globally impersonated token. */
   public void clearGlobalIdentity() {
-    setGlobalIdentity(new TokenIdentity());
+    setGlobalIdentity(emptyIdentity);
   }
 
   /**
@@ -197,13 +207,20 @@ public class CommandPanel extends JPanel implements Observer {
     } else {
       MapTool.getFrame().getImpersonatePanel().startImpersonating(token);
     }
-    if (identityStack.isEmpty()) {
-      // If the global identity is the current one, update the image and label
-      updateImageAndLabel(true);
-    }
+    // Update the image and label.
+    updateImageAndLabel(token, globalIdentity.getCharacterLabel());
 
     // Fires the event for impersonation.
     HTMLFrameFactory.impersonateToken();
+  }
+
+  /** Refreshes the global identity so that it matches the impersonated token. */
+  public void refreshGlobalIdentity() {
+    if (globalIdentity.getIdentityGUID() != null) {
+      TokenIdentity identity = globalIdentity;
+      identity = new TokenIdentity(identity.getIdentityGUID(), identity.getIdentity());
+      setGlobalIdentity(identity);
+    }
   }
 
   /**
@@ -238,7 +255,6 @@ public class CommandPanel extends JPanel implements Observer {
    */
   public void enterContextIdentity(TokenIdentity macroIdentity) {
     identityStack.push(macroIdentity);
-    updateImageAndLabel(false);
   }
 
   /**
@@ -247,7 +263,6 @@ public class CommandPanel extends JPanel implements Observer {
    */
   public void leaveContextIdentity() {
     identityStack.pop();
-    updateImageAndLabel(true);
   }
 
   /**
@@ -263,16 +278,60 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * Updates the label and the image displayed in the chat.
    *
-   * @param verifyToken whether the token existence on the map is to be verified
+   * @param token the token to change the image and label to
+   * @param label the backup label to set the name to if the token is null
    */
-  private void updateImageAndLabel(boolean verifyToken) {
-    TokenIdentity currentIdentity = getCurrentIdentity();
+  private void updateImageAndLabel(Token token, String label) {
     BufferedImage image = null;
-    if (!verifyToken || currentIdentity.validToken()) {
-      image = currentIdentity.getImage();
+    if (token != null) {
+      image = ImageManager.getImageAndWait(token.getImageAssetId());
     }
     avatarPanel.setImage(image);
-    setCharacterLabel(currentIdentity.getCharacterLabel());
+    setCharacterLabel(token == null ? label : token.getName());
+  }
+
+  @Override
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Event.TOKEN_PANEL_CHANGED || event.eventType == Event.TOKEN_EDITED) {
+      GUID tokenId = globalIdentity.getIdentityGUID();
+      if (tokenId != null) {
+        // If the impersonated token has changed, update the identity
+        Token impersonated;
+        if (event.getArg() instanceof List<?>) {
+          impersonated = getImpersonatedAmongList((List<Token>) event.getArg());
+        } else {
+          Token token = (Token) event.getArg();
+          impersonated = isTokenImpersonated(token) ? token : null;
+        }
+        if (impersonated != null) {
+          setGlobalIdentity(new TokenIdentity(impersonated));
+        }
+      }
+    }
+  }
+
+  private boolean isTokenImpersonated(Token token) {
+    return token != null && token.getId().equals(globalIdentity.getIdentityGUID());
+  }
+
+  private Token getImpersonatedAmongList(List<Token> list) {
+    for (Token token : list) {
+      if (isTokenImpersonated(token)) {
+        return token;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public void handleAppEvent(AppEvent event) {
+    Zone oldZone = (Zone) event.getOldValue();
+    Zone newZone = (Zone) event.getNewValue();
+
+    if (oldZone != null) {
+      oldZone.removeModelChangeListener(this);
+    }
+    newZone.addModelChangeListener(this);
   }
 
   /**
@@ -284,8 +343,6 @@ public class CommandPanel extends JPanel implements Observer {
     private final String identityName;
     /** The GUID of the identity. */
     private final GUID identityGUID;
-    /** The token of the identity. */
-    private final Token token;
     /** Whether the player is allowed to set the token in the Impersonate panel. */
     private final boolean canImpersonate;
 
@@ -293,7 +350,6 @@ public class CommandPanel extends JPanel implements Observer {
     public TokenIdentity() {
       identityName = null;
       identityGUID = null;
-      token = null;
       canImpersonate = false;
     }
 
@@ -304,6 +360,15 @@ public class CommandPanel extends JPanel implements Observer {
      */
     TokenIdentity(Token token) {
       this(token, null);
+    }
+
+    /**
+     * Creates an identity from a name. If null, nothing is impersonated.
+     *
+     * @param name the name to impersonate
+     */
+    TokenIdentity(String name) {
+      this(null, name, false);
     }
 
     /**
@@ -318,6 +383,17 @@ public class CommandPanel extends JPanel implements Observer {
     }
 
     /**
+     * Creates an identity from a GUID. If there is no associated token, the identity uses the
+     * specified backup name.
+     *
+     * @param tokenId the token GUID
+     * @param backupName the backup name to impersonate if the token is null
+     */
+    public TokenIdentity(GUID tokenId, String backupName) {
+      this(FindTokenFunctions.findToken(tokenId, null), backupName);
+    }
+
+    /**
      * Creates an identity from a token. If the token is null, the identity uses the specified
      * backup name. Impersonation through the Impersonate panel can be disabled.
      *
@@ -326,7 +402,6 @@ public class CommandPanel extends JPanel implements Observer {
      * @param canImpersonate whether the token can be impersonated in the Impersonate panel
      */
     public TokenIdentity(Token token, String backupName, boolean canImpersonate) {
-      this.token = token;
       if (token != null) {
         this.identityGUID = token.getId();
         this.identityName = token.getName();
@@ -359,21 +434,12 @@ public class CommandPanel extends JPanel implements Observer {
 
     /** @return the token of the identity. */
     public Token getToken() {
-      return token;
+      return FindTokenFunctions.findToken(identityGUID, null);
     }
 
     /** @return whether the identity has a name. */
     public boolean hasName() {
       return identityName != null;
-    }
-
-    /** @return the image of the identity. */
-    public BufferedImage getImage() {
-      if (token == null) {
-        return null;
-      } else {
-        return ImageManager.getImageAndWait(token.getImageAssetId());
-      }
     }
 
     /** @return whether the token can still be found on the current map. */
