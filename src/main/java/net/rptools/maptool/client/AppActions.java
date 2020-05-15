@@ -1343,6 +1343,9 @@ public class AppActions {
         protected void executeAction() {
 
           AppState.setShowAsPlayer(!AppState.isShowAsPlayer());
+          MapTool.getFrame().getInitiativePanel().updateView();
+          MapTool.getFrame().getInitiativePanel().getModel().updateModel();
+          MapTool.getFrame().updateTokenTree();
           MapTool.getFrame().refresh();
         }
       };

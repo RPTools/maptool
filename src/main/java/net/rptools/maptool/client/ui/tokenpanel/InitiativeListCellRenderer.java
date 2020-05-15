@@ -59,7 +59,8 @@ import net.rptools.maptool.util.ImageManager;
  *
  * @author Jay
  */
-public class InitiativeListCellRenderer extends JPanel implements ListCellRenderer {
+public class InitiativeListCellRenderer extends JPanel
+    implements ListCellRenderer<TokenInitiative> {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -157,13 +158,12 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
    *     java.lang.Object, int, boolean, boolean)
    */
   public Component getListCellRendererComponent(
-      JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      JList list, TokenInitiative ti, int index, boolean isSelected, boolean cellHasFocus) {
 
     setOpaque(false);
 
     // Set the background by type
     Token token = null;
-    TokenInitiative ti = (TokenInitiative) value;
     if (ti != null) token = ti.getToken();
     if (token == null) { // Can happen when deleting a token before all events have propagated
       currentIndicator.setIcon(null);

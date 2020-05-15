@@ -68,7 +68,7 @@ public class InitiativePanel extends JPanel
   private final JLabel round;
 
   /** Component that displays the initiative list. */
-  private final JList displayList;
+  private final JList<TokenInitiative> displayList;
 
   /** Flag indicating that token images are shown in the list. */
   private boolean showTokens = AppPreferences.getInitShowTokens();
@@ -150,7 +150,7 @@ public class InitiativePanel extends JPanel
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
 
     // Set up the list with an empty model
-    displayList = new JList();
+    displayList = new JList<TokenInitiative>();
     model = new InitiativeListModel();
     displayList.setModel(model);
     setList(new InitiativeList(null));
@@ -381,7 +381,7 @@ public class InitiativePanel extends JPanel
    * @return The value <code>true</code> if this player has permission for all actions.
    */
   public boolean hasGMPermission() {
-    return (MapTool.getPlayer() == null || MapTool.getPlayer().isGM());
+    return (MapTool.getPlayer() == null || MapTool.getPlayer().isEffectiveGM());
   }
 
   /** @return Getter for ownerPermissions */
@@ -438,7 +438,7 @@ public class InitiativePanel extends JPanel
   @Override
   public void valueChanged(ListSelectionEvent e) {
     if (e != null && e.getValueIsAdjusting()) return;
-    TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+    TokenInitiative ti = displayList.getSelectedValue();
     boolean enabled = (ti != null && hasOwnerPermission(ti.getToken())) ? true : false;
     CLEAR_INIT_STATE_VALUE.setEnabled(enabled);
     SET_INIT_STATE_VALUE.setEnabled(enabled);
@@ -528,7 +528,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+          TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           int index = list.indexOf(ti);
           list.removeToken(index);
@@ -540,7 +540,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+          TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           ti.setHolding(!ti.isHolding());
         };
@@ -551,7 +551,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+          TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           list.setCurrent(list.indexOf(ti));
         };
@@ -623,7 +623,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+          TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           Token token = ti.getToken();
           String sName = (token == null) ? "" : token.getName();
@@ -644,7 +644,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
+          TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           ti.setState(null);
         };
@@ -725,7 +725,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          if (!MapTool.getPlayer().isGM()) {
+          if (!MapTool.getPlayer().isEffectiveGM()) {
             return;
           }
 
@@ -763,11 +763,11 @@ public class InitiativePanel extends JPanel
               public void run() {
                 if (displayList.getSelectedValue() != null) {
                   // Show the selected token on the map.
-                  Token token = ((TokenInitiative) displayList.getSelectedValue()).getToken();
+                  Token token = displayList.getSelectedValue().getToken();
                   ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                   if (renderer == null
                       || token == null
-                      || (!token.isToken() && !MapTool.getPlayer().isGM())
+                      || (!token.isToken() && !MapTool.getPlayer().isEffectiveGM())
                       || !AppUtil.playerOwns(token)) {
                     return;
                   }
@@ -775,7 +775,7 @@ public class InitiativePanel extends JPanel
                   renderer.centerOn(token);
                   renderer.maybeForcePlayersView();
 
-                  if (MapTool.getPlayer().isGM()) {
+                  if (MapTool.getPlayer().isEffectiveGM()) {
                     // If the user is a GM, recenter on the token.
                     renderer.centerOn(token);
 
@@ -793,8 +793,7 @@ public class InitiativePanel extends JPanel
             });
       } else if (SwingUtilities.isRightMouseButton(e)) {
         TokenInitiative ti =
-            (TokenInitiative)
-                displayList.getModel().getElementAt(displayList.locationToIndex(e.getPoint()));
+            displayList.getModel().getElementAt(displayList.locationToIndex(e.getPoint()));
         if (ti == null) {
           return;
         }
