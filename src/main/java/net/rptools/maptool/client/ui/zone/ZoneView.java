@@ -851,8 +851,7 @@ public class ZoneView implements ModelChangeListener {
 
     for (Token token : tokens) {
       boolean hasLightSource =
-          token.hasLightSources()
-              && (token.isVisible() || (MapTool.getPlayer().isGM() && !AppState.isShowAsPlayer()));
+          token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
       if (token.hasVBL()) hasVBL = true;
       for (AttachedLightSource als : token.getLightSources()) {
         LightSource lightSource = c.getLightSource(als.getLightSourceId());
