@@ -85,8 +85,6 @@ public class UIBuilder extends JDialog {
      *
      * <p>An example of how to use this method to add a sequence of three nodes:
      *
-     * <p>
-     *
      * <pre>
      * UIBuilder form = new UIBuilder();
      * DefaultMutableTreeNode root = ((DefaultTreeModel) form.getTree().getModel()).getRoot();

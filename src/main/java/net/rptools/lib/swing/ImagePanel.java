@@ -324,8 +324,8 @@ public class ImagePanel extends JComponent
    * Go through the image bounds map to see if any of the entries encompass the passed in X,Y values
    * and return the index.
    *
-   * @param x
-   * @param y
+   * @param x the x value
+   * @param y the y value
    * @return the index or -1 if not found
    */
   protected int getIndex(int x, int y) {
@@ -340,8 +340,8 @@ public class ImagePanel extends JComponent
   /**
    * Get the ID for the image currently displayed at X,Y
    *
-   * @param x
-   * @param y
+   * @param x the x value
+   * @param y the y value
    * @return Asset ID or null if no selection
    */
   protected Object getImageIDAt(int x, int y) {

@@ -68,6 +68,7 @@ public class StatSheet {
    * Renders the card at 0, 0 (this means the caller must position the graphics position before
    * calling)
    *
+   * @param g the graphics to render into
    * @param propertyMap What to show, presumably a LinkedHashMap to preserve order
    */
   public void render(Graphics2D g, Map<String, String> propertyMap) {

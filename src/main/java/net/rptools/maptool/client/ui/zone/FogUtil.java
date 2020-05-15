@@ -434,6 +434,7 @@ public class FogUtil {
    *
    * @param token the token to get the vision center of.
    * @param zone the Zone where the token is.
+   * @return the center point
    */
   public static Point calculateVisionCenter(Token token, Zone zone) {
     Grid grid = zone.getGrid();
