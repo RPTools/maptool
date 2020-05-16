@@ -830,7 +830,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   /**
    * Move the keytoken being dragged to this zone point
    *
-   * @param zonePoint
+   * @param zonePoint the zone point to move to
    * @return true if the move was successful
    */
   public boolean handleDragToken(ZonePoint zonePoint) {

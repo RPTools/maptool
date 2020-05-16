@@ -29,7 +29,6 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.parser.ParserException;
 
 /**
  * Represents a JDialog holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
@@ -237,7 +236,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param name The name of the frame.
    * @return A json with the width, height, temporary, title, and value of dialog
    */
-  public static Object getDialogProperties(String name) throws ParserException {
+  public static Object getDialogProperties(String name) {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
       JsonObject dialogProperties = new JsonObject();

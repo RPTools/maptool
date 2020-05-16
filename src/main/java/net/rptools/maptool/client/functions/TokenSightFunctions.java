@@ -62,7 +62,11 @@ public class TokenSightFunctions extends AbstractFunction {
       if (functionName.equals("hasSight"))
         return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
 
-      if (functionName.equals("getSightType")) return token.getSightType();
+      // if (functionName.equals("getSightType"))
+      // Don't test to remove code warning for always true if statement
+      String sightType = token.getSightType();
+      if (sightType == null) sightType = "";
+      return sightType;
     }
 
     // For functions with only 1 parameter and optional second parameter of tokenID & mapname

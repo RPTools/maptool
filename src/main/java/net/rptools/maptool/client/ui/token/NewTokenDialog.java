@@ -54,6 +54,8 @@ public class NewTokenDialog extends AbeillePanel<Token> {
    * Create a new token notes dialog.
    *
    * @param token The token being displayed.
+   * @param x x value for center point of the token dialog
+   * @param y y value for center point of the token dialog
    */
   public NewTokenDialog(Token token, int x, int y) {
     super("net/rptools/maptool/client/ui/forms/newTokenDialog.xml");
