@@ -358,7 +358,7 @@ public class HTMLWebViewManager {
     // Deal with CSS and events of <link>.
     nodeList = doc.getElementsByTagName("link");
     for (int i = 0; i < nodeList.getLength(); i++) {
-      fixLink(nodeList.item(i), nodeCSS, doc);
+      fixLink(nodeList.item(i), doc);
     }
 
     // Set the title if using <title>.
@@ -410,8 +410,6 @@ public class HTMLWebViewManager {
     if (!scrollReset) {
       scrollTo(scrollX, scrollY);
     }
-    String html = (String) webEngine.executeScript("document.documentElement.outerHTML");
-    System.out.println(html);
   }
 
   /**
@@ -436,10 +434,9 @@ public class HTMLWebViewManager {
    * "macro", register the href as a callback macro.
    *
    * @param node the node for the link tag
-   * @param refNode the node to append the new CSS rules to
    * @param doc the document to update with the modified link
    */
-  private void fixLink(Node node, Node refNode, Document doc) {
+  private void fixLink(Node node, Document doc) {
 
     NamedNodeMap attr = node.getAttributes();
     Node rel = attr.getNamedItem("rel");
@@ -458,8 +455,8 @@ public class HTMLWebViewManager {
           Element styleNode = doc.createElement("style");
           Text styleContent = doc.createTextNode(cssText);
           styleNode.appendChild(styleContent);
-          // Replace the link node with a style node containing the contents.
-          node.getParentNode().replaceChild(styleNode, node);
+          // Insert the style node before the link.
+          node.getParentNode().insertBefore(styleNode, node);
         } catch (ParserException e) {
           // Do nothing
         }
