@@ -412,7 +412,6 @@ public class HTMLWebViewManager {
     }
     String html = (String) webEngine.executeScript("document.documentElement.outerHTML");
     System.out.println(html);
-
   }
 
   /**
