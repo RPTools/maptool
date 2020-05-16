@@ -50,11 +50,11 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
-  /** The ordered set of the overlays. Ordered by Z order and then by hashcode of the name. */
+  /** The ordered set of the overlays. Ordered by Z order and then by name. */
   private final ConcurrentSkipListSet<HTMLOverlayManager> overlays =
       new ConcurrentSkipListSet<>(
           Comparator.comparingInt(HTMLOverlayManager::getZOrder)
-              .thenComparingInt(overlayManager -> overlayManager.getName().hashCode()));
+              .thenComparing(HTMLOverlayManager::getName));
 
   /** The StackPane holding all the overlays. */
   private StackPane root;
