@@ -13,6 +13,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 Changes since 1.7.0-beta-2 in **BOLD**.
 
 ## Enhancements
+- [#1847][i1847] **Horizontal scrolling restored for MacOS.**
 - [#1801][i1801] **Performance improvement for token image handling. Copying large sets of tokens from map to map, switching between maps with a larg number of tokens, dragging large numbers of tokens have all been improved.**
 - [#1797][i1797] **Forms now work in Chat window!**
 - [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
@@ -39,9 +40,12 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#368][i368] Macro groups can now be renamed.
 
 ## Bug Fixes
+- [#1853][i1853] **CSS loading in incorrect order for Frame5/Dialog5/Overlay when CSS link points to macro.** Fixed.
+- [#1828][i1828] **`getSightType()` would fail on new created tokens.** Fixed.
 - [#1822][i1822] **Changing name/image of impersonated token wasn't updating Chat window.** Fixed.
 - [#1814][i1814] **Several macro functions would fail as not trusted when called by GM in chat.** Fixed.
 - [#1812][i1812] **Call a macro on the GM panel from a trusted context wasn't keeping trusted status.** Fixed.
+- [#1803][i1803] **PC Tokens on Hidden layer were visible on Player's Map Explorer when Strict Token Ownership was off.** Fixed.
 - [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed. Fixed.
 - [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters. Fixed.
 - [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE. Fixed.
@@ -53,6 +57,7 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#1732][i1732] Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.
 - [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
 - [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
+- [#1709][i1709] **Portrait images were rendered with low quality scaling.** Improved.
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
 - [#1688][i1688] Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.
 - [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
@@ -101,10 +106,15 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 ## Other
 - [#1776][i1776] dicelib updated to 1.6.1
 - [#1704][i1704] dicelib updated to 1.6.0
+- [#1223][i1223] **Javadocs now build without errors.**
 
+[i1853]: https://github.com/RPTools/maptool/issues/1853
+[i1847]: https://github.com/RPTools/maptool/issues/1847
+[i1828]: https://github.com/RPTools/maptool/issues/1828
 [i1822]: https://github.com/RPTools/maptool/issues/1822
 [i1814]: https://github.com/RPTools/maptool/issues/1814
 [i1812]: https://github.com/RPTools/maptool/issues/1812
+[i1803]: https://github.com/RPTools/maptool/issues/1803
 [i1801]: https://github.com/RPTools/maptool/issues/1801
 [i1799]: https://github.com/RPTools/maptool/issues/1799
 [i1797]: https://github.com/RPTools/maptool/issues/1797
@@ -122,6 +132,7 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 [i1728]: https://github.com/RPTools/maptool/issues/1728
 [i1725]: https://github.com/RPTools/maptool/issues/1725
 [i1720]: https://github.com/RPTools/maptool/issues/1720
+[i1709]: https://github.com/RPTools/maptool/issues/1709
 [i1704]: https://github.com/RPTools/maptool/issues/1704
 [i1700]: https://github.com/RPTools/maptool/issues/1700
 [i1688]: https://github.com/RPTools/maptool/issues/1688
@@ -175,6 +186,7 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 [i1317]: https://github.com/RPTools/maptool/issues/1317
 [i1264]: https://github.com/RPTools/maptool/issues/1264
 [i1263]: https://github.com/RPTools/maptool/issues/1263
+[i1223]: https://github.com/RPTools/maptool/issues/1223
 [i975]: https://github.com/RPTools/maptool/issues/975
 [i507]: https://github.com/RPTools/maptool/issues/507
 [i500]: https://github.com/RPTools/maptool/issues/500
