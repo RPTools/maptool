@@ -29,11 +29,9 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /** The manager for the HTMLWebView of an overlay. */
-public class HTMLOverlayManager extends HTMLWebViewManager
-    implements Comparable<HTMLOverlayManager>, HTMLPanelContainer {
+public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelContainer {
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
@@ -92,11 +90,6 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   /** @return the name of the overlay. */
   public String getName() {
     return name;
-  }
-
-  @Override
-  public int compareTo(@NotNull HTMLOverlayManager o) {
-    return getZOrder() - o.getZOrder();
   }
 
   @Override
