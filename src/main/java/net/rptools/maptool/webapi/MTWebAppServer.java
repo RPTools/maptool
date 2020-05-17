@@ -63,7 +63,7 @@ public class MTWebAppServer {
   /**
    * Sets the port
    *
-   * @param port
+   * @param port the port for the server
    */
   public synchronized void setPort(int port) {
     if (started) {

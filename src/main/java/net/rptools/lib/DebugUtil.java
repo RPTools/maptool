@@ -19,7 +19,7 @@ public class DebugUtil {
   /**
    * Get the bits in the number represented as a string
    *
-   * @param num
+   * @param num the number
    * @return the bits in the number represented as a string
    */
   public static String getBits(long num) {
@@ -38,7 +38,7 @@ public class DebugUtil {
   /**
    * Get the bits in the number represented as a string
    *
-   * @param num
+   * @param num the number
    * @return the bits in the number represented as a string
    */
   public static String getBits(int num) {

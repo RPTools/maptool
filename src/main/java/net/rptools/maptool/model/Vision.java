@@ -37,17 +37,29 @@ public abstract class Vision {
     this.enabled = enabled;
   }
 
-  /** The Vision's name */
+  /**
+   * The Vision's name
+   *
+   * @param name the new name
+   */
   public void setName(String name) {
     this.name = name;
   }
 
-  /** The Vision's name */
+  /**
+   * The Vision's name
+   *
+   * @return the name
+   */
   public String getName() {
     return name;
   }
 
-  /** The Vision's menu label */
+  /**
+   * The Vision's menu label
+   *
+   * @return the menu label
+   */
   public String getLabel() {
     return "<html>"
         + (name != null ? name : "")
@@ -58,18 +70,18 @@ public abstract class Vision {
         + ")</font></html>";
   }
 
-  /** Angle in degrees */
+  /** @return Angle in degrees */
   public int getAngle() {
     return angle;
   }
 
-  /** Angle in degrees */
+  /** @param angle Angle in degrees */
   public void setAngle(int angle) {
     this.angle = angle;
     flush();
   }
 
-  /** Distance in zone points */
+  /** @return Distance in zone points */
   public int getDistance() {
     return distance;
   }
@@ -84,7 +96,13 @@ public abstract class Vision {
     flush();
   }
 
-  /** Get the area shape that this vision represents, in zone points, centered on the origin x,y */
+  /**
+   * Get the area shape that this vision represents, in zone points, centered on the origin x,y
+   *
+   * @param zone the zone for units
+   * @param token the vision token
+   * @return the area shape that this vision represents
+   */
   public Area getArea(Zone zone, Token token) {
     if (area == null || lastGridSize != zone.getGrid().getSize()) {
       area = createArea(zone, token);
@@ -93,7 +111,13 @@ public abstract class Vision {
     return area;
   }
 
-  /** Specific vision types must be able to create the shape they represent */
+  /**
+   * Specific vision types must be able to create the shape they represent
+   *
+   * @param zone the zone for units
+   * @param token the vision token
+   * @return the area the vision represent
+   */
   protected abstract Area createArea(Zone zone, Token token);
 
   // This won't be abstract when anchor points are fleshed out, but rather a field on this class

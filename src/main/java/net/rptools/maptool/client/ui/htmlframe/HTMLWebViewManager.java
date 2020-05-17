@@ -358,7 +358,7 @@ public class HTMLWebViewManager {
     // Deal with CSS and events of <link>.
     nodeList = doc.getElementsByTagName("link");
     for (int i = 0; i < nodeList.getLength(); i++) {
-      fixLink(nodeList.item(i).getAttributes(), nodeCSS, doc);
+      fixLink(nodeList.item(i), doc);
     }
 
     // Set the title if using <title>.
@@ -433,11 +433,12 @@ public class HTMLWebViewManager {
    * href, the CSS sheet is attached at the end of the refNode. If the href instead starts with
    * "macro", register the href as a callback macro.
    *
-   * @param attr the attributes of the link tag
-   * @param refNode the node to append the new CSS rules to
+   * @param node the node for the link tag
    * @param doc the document to update with the modified link
    */
-  private void fixLink(NamedNodeMap attr, Node refNode, Document doc) {
+  private void fixLink(Node node, Document doc) {
+
+    NamedNodeMap attr = node.getAttributes();
     Node rel = attr.getNamedItem("rel");
     Node type = attr.getNamedItem("type");
     Node href = attr.getNamedItem("href");
@@ -454,8 +455,8 @@ public class HTMLWebViewManager {
           Element styleNode = doc.createElement("style");
           Text styleContent = doc.createTextNode(cssText);
           styleNode.appendChild(styleContent);
-          // Append the style sheet node to the refNode
-          refNode.appendChild(styleNode);
+          // Insert the style node before the link.
+          node.getParentNode().insertBefore(styleNode, node);
         } catch (ParserException e) {
           // Do nothing
         }

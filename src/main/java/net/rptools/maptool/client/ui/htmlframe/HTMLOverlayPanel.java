@@ -50,8 +50,11 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
-  /** The ordered set of the overlays. */
-  private final ConcurrentSkipListSet<HTMLOverlayManager> overlays = new ConcurrentSkipListSet<>();
+  /** The ordered set of the overlays. Ordered by Z order and then by name. */
+  private final ConcurrentSkipListSet<HTMLOverlayManager> overlays =
+      new ConcurrentSkipListSet<>(
+          Comparator.comparingInt(HTMLOverlayManager::getZOrder)
+              .thenComparing(HTMLOverlayManager::getName));
 
   /** The StackPane holding all the overlays. */
   private StackPane root;
@@ -376,7 +379,11 @@ public class HTMLOverlayPanel extends JFXPanel {
     }
   }
 
-  /** Run all callback macros for "onTokenChanged". */
+  /**
+   * Run all callback macros for "onTokenChanged".
+   *
+   * @param token the token that have changed
+   */
   public void doTokenChanged(Token token) {
     for (HTMLOverlayManager overlay : overlays) {
       if (overlay.getWebView().isVisible()) {

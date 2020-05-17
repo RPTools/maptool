@@ -227,6 +227,8 @@ public abstract class HexGrid extends Grid {
   /**
    * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
    * the cell's bounding rectangle.
+   *
+   * @return a {@link Dimension} object where width and height is translated to the grid
    */
   protected abstract Dimension setCellOffset();
 
@@ -377,7 +379,7 @@ public abstract class HexGrid extends Grid {
   /**
    * Default orientation is for a vertical hex grid Override for other orientations
    *
-   * @param hex
+   * @param hex a grid to orient
    */
   protected void orientHex(GeneralPath hex) {
     return;
@@ -452,6 +454,8 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(ZonePoint zp) to allow for alternate grid orientations
    *
+   * @param zpU Zone point U dimension
+   * @param zpV Zone point V dimension
    * @return Coordinates in Cell-space of the ZonePoint
    */
   protected CellPoint convertZP(int zpU, int zpV) {
@@ -532,6 +536,8 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(CellPoint cp) to allow for alternate grid orientations
    *
+   * @param cpU Cell point U dimension
+   * @param cpV Cell point V dimension
    * @return A ZonePoint positioned at the center of the Hex
    */
   protected ZonePoint convertCP(int cpU, int cpV) {

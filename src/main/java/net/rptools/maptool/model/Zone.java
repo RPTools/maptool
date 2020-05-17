@@ -746,6 +746,7 @@ public class Zone extends BaseModel {
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
@@ -772,6 +773,7 @@ public class Zone extends BaseModel {
    * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void removeTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
