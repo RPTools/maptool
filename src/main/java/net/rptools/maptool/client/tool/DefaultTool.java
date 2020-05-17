@@ -207,7 +207,7 @@ public abstract class DefaultTool extends Tool
     }
 
     // QUICK ROTATE
-    if (SwingUtil.isShiftDown(e) && !AppUtil.MAC_OS_X) {
+    if (SwingUtil.isShiftDown(e)) {
       Set<GUID> tokenGUIDSet = renderer.getSelectedTokenSet();
       if (tokenGUIDSet.isEmpty()) {
         return;
@@ -302,16 +302,12 @@ public abstract class DefaultTool extends Tool
     // ZOOM
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
-      direction = isKeyDown('z') ? direction : !direction; // Why check for this?
-      if (AppUtil.MAC_OS_X && SwingUtil.isShiftDown(e)) {
-        return;
-      } else {
-        if (direction) {
-          renderer.zoomOut(e.getX(), e.getY());
+      direction = isKeyDown('z') ? direction : !direction; // XXX Why check for this?
+      if (direction) {
+        renderer.zoomOut(e.getX(), e.getY());
         } else {
           renderer.zoomIn(e.getX(), e.getY());
         }
-      }
       renderer.maybeForcePlayersView();
     }
   }
