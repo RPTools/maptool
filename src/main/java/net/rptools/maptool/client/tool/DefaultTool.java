@@ -305,9 +305,9 @@ public abstract class DefaultTool extends Tool
       direction = isKeyDown('z') ? direction : !direction; // XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
-        } else {
-          renderer.zoomIn(e.getX(), e.getY());
-        }
+      } else {
+        renderer.zoomIn(e.getX(), e.getY());
+      }
       renderer.maybeForcePlayersView();
     }
   }

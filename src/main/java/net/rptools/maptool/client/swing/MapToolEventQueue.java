@@ -25,7 +25,6 @@ import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
