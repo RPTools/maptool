@@ -569,8 +569,11 @@ public class HTMLWebViewManager {
     }
     if (form == null) return;
 
+    // formAction can override action
+    String formAction = target.getAttribute("formaction");
+    String action = (formAction == null || "".equals(formAction)) ? form.getAction() : formAction;
+
     // Check for non-macrolinktext action
-    String action = form.getAction();
     if (action == null || action.startsWith("javascript:")) {
       return;
     }
