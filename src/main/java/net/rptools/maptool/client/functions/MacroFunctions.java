@@ -175,7 +175,7 @@ public class MacroFunctions extends AbstractFunction {
       } else {
         props.addProperty("tooltooltip", "");
       }
-      props.addProperty("toolapplyToSelected", mbp.getApplyToTokens());
+      props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
       JsonArray compare = new JsonArray();
 
