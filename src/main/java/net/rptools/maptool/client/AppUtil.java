@@ -16,9 +16,11 @@ package net.rptools.maptool.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -38,23 +40,15 @@ import org.apache.logging.log4j.Logger;
 
 /** This class provides utility functions for maptool client. */
 public class AppUtil {
-  static {
-    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
-  }
-
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
 
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-
-  private static File dataDirPath;
-
+  private static final Logger log = LogManager.getLogger(AppUtil.class);
   private static final String CLIENT_ID_FILE = "client-id";
-
+  private static final String PACKAGER_CFG_FILENAME = AppConstants.APP_NAME + ".cfg";
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
       (System.getProperty("os.name").toLowerCase().startsWith("windows"));
-
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
@@ -63,6 +57,11 @@ public class AppUtil {
       MAC_OS_X
           ? "net.rptools.maptool.client.TinyLookAndFeelMac"
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
+  private static File dataDirPath;
+
+  static {
+    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
+  }
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -92,8 +91,9 @@ public class AppUtil {
       path = new File(path.getAbsolutePath(), subdir);
     }
     // Now check for characters known to cause problems. See getDataDir() for details.
-    if (path.getAbsolutePath().matches("!"))
+    if (path.getAbsolutePath().matches("!")) {
       throw new RuntimeException(I18N.getText("msg.error.unusableDir", path.getAbsolutePath()));
+    }
 
     if (!path.exists()) {
       path.mkdirs();
@@ -102,7 +102,9 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log.isInfoEnabled()) log.info("msg.error.unableToCreateDataDir", re);
+        if (log.isInfoEnabled()) {
+          log.info("msg.error.unableToCreateDataDir", re);
+        }
         throw re;
       }
     }
@@ -131,8 +133,9 @@ public class AppUtil {
       // the built-in "jar://" URL uses the "!" as a separator between the archive name
       // and the archive member. :( Right now we're only checking for that one character
       // but the list may need to be expanded in the future.
-      if (path.matches("!"))
+      if (path.matches("!")) {
         throw new RuntimeException(I18N.getText("msg.error.unusableDataDir", path));
+      }
 
       dataDirPath = new File(path);
     }
@@ -154,6 +157,52 @@ public class AppUtil {
    */
   public static File getAppHome() {
     return getAppHome("");
+  }
+
+  /**
+   * Returns a File path representing the base directory that the application is running from. e.g.
+   * C:\Users\Troll\AppData\Local\MapTool\app
+   *
+   * @return the maptool install directory
+   */
+  public static String getAppInstallLocation() {
+    String path = "UNKNOWN";
+
+    try {
+      CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
+      File jarFile = new File(codeSource.getLocation().toURI().getPath());
+      path = jarFile.getParentFile().getPath();
+    } catch (URISyntaxException e) {
+      log.error("Error retrieving MapTool installation directory: ", e);
+      throw new RuntimeException(I18N.getText("msg.error.unknownInstallPath"));
+    }
+
+    return path;
+  }
+
+  /**
+   * Returns a File path representing the base directory that the application is running from. e.g.
+   * C:\Users\Troll\AppData\Local\MapTool\app
+   *
+   * @return the maptool install directory
+   */
+  public static File getAppCfgFile() {
+    File cfgFile;
+
+    try {
+      CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
+      File jarFile = new File(codeSource.getLocation().toURI().getPath());
+      String cfgFilepath =
+          jarFile.getParentFile().getPath() + File.separator + PACKAGER_CFG_FILENAME;
+
+      cfgFile = new File(cfgFilepath);
+
+    } catch (URISyntaxException e) {
+      log.error("Error retrieving MapTool cfg file: ", e);
+      throw new RuntimeException(I18N.getText("msg.error.retrieveCfgFile"));
+    }
+
+    return cfgFile;
   }
 
   /**
@@ -222,9 +271,9 @@ public class AppUtil {
    * adjusting to kb/mb/gb etc.
    *
    * @param directory the directory to retrieve the space used for.
+   * @return String of disk usage information.
    * @author Jamz
    * @since 1.4.0.1
-   * @return String of disk usage information.
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
@@ -239,10 +288,10 @@ public class AppUtil {
    * Returns the free disk spaced for a given directory in a human readable format automatically
    * adjusting to kb/mb/gb etc.
    *
-   * @author Jamz
-   * @since 1.4.0.
    * @param directory the directory to retrieve the free space for.
    * @return String of free disk space
+   * @author Jamz
+   * @since 1.4.0.
    */
   public static String getFreeDiskSpace(File directory) {
     return FileUtils.byteCountToDisplaySize(directory.getFreeSpace()) + " ";
@@ -298,16 +347,6 @@ public class AppUtil {
   }
 
   /**
-   * Sets the name of the theme to use for the MapTool UI.
-   *
-   * @param themeName the name of the theme to use for the MapTool UI.
-   */
-  public static void setThemeName(String themeName) {
-    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
-    prefs.put("themeName", themeName);
-  }
-
-  /**
    * Returns the name of the theme to use for the MapTool UI.
    *
    * @return the name of the theme to use for the MapTool UI.
@@ -315,6 +354,16 @@ public class AppUtil {
   public static String getThemeName() {
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
     return prefs.get("themeName", AppConstants.DEFAULT_THEME_NAME);
+  }
+
+  /**
+   * Sets the name of the theme to use for the MapTool UI.
+   *
+   * @param themeName the name of the theme to use for the MapTool UI.
+   */
+  public static void setThemeName(String themeName) {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    prefs.put("themeName", themeName);
   }
 
   /**
