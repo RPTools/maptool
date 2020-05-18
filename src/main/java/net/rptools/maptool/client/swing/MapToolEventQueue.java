@@ -19,11 +19,13 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -45,6 +47,14 @@ public class MapToolEventQueue extends EventQueue {
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
+      if (event instanceof MouseWheelEvent) {
+        MouseWheelEvent mwe = (MouseWheelEvent) event;
+        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
+          // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
+          // held down.
+          return;
+        }
+      }
       super.dispatchEvent(event);
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
