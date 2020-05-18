@@ -39,6 +39,7 @@ public class FindTokenFunctions extends AbstractFunction {
   private enum FindType {
     SELECTED,
     IMPERSONATED,
+    IMPERSONATED_GLOBAL,
     NPC,
     PC,
     ALL,
@@ -334,8 +335,10 @@ public class FindTokenFunctions extends AbstractFunction {
       findType = FindType.SELECTED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getImpersonated")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-      findType = FindType.IMPERSONATED;
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      boolean global =
+          psize > 0 ? FunctionUtil.paramAsBoolean(functionName, parameters, 0, false) : false;
+      findType = global ? FindType.IMPERSONATED_GLOBAL : FindType.IMPERSONATED;
     } else if (functionName.startsWith("getPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.PC;
@@ -748,6 +751,17 @@ public class FindTokenFunctions extends AbstractFunction {
           tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
         } else if (!match) tokenList = originalList;
         break;
+      case IMPERSONATED_GLOBAL:
+        t = null;
+        guid = MapTool.getFrame().getImpersonatePanel().getTokenId();
+        if (guid != null) {
+          // Searches all maps to find impersonated token
+          t = findToken(guid.toString());
+        }
+        if (t != null) {
+          tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
+        } else if (!match) tokenList = originalList;
+        break;
       case EXPOSED:
         tokenList = getTokensFiltered(new ExposedFilter(zone, match), originalList);
         break;
@@ -855,21 +869,52 @@ public class FindTokenFunctions extends AbstractFunction {
   /**
    * Finds the specified token.
    *
-   * @param identifier the name of the token.
+   * @param identifier the identifier of the token (name, GM name, or GUID).
    * @param zoneName the name of the zone. If null, check current zone.
    * @return the token, or null if none found.
    */
   public static Token findToken(String identifier, String zoneName) {
+    if (identifier == null) {
+      return null;
+    }
     if (zoneName == null || zoneName.length() == 0) {
-      Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-      Token token = zone.resolveToken(identifier);
-      return token;
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().resolveToken(identifier);
     } else {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         Zone zone = zr.getZone();
         if (zone.getName().equalsIgnoreCase(zoneName)) {
           Token token = zone.resolveToken(identifier);
+          if (token != null) {
+            return token;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Finds the specified token by ID.
+   *
+   * @param guid the id of the token.
+   * @param zoneName the name of the zone. If null, check current zone.
+   * @return the token, or null if none found.
+   */
+  public static Token findToken(GUID guid, String zoneName) {
+    if (guid == null) {
+      return null;
+    }
+    if (zoneName == null || zoneName.length() == 0) {
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().getToken(guid);
+    } else {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        Zone zone = zr.getZone();
+        if (zone.getName().equalsIgnoreCase(zoneName)) {
+          Token token = zone.getToken(guid);
           if (token != null) {
             return token;
           }

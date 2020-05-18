@@ -23,10 +23,26 @@ import java.util.List;
 /** @author Tylere */
 public class StringUtil {
   private static NumberFormat nf = NumberFormat.getNumberInstance();
+  private static final int MIN_FRACTION_DIGITS = 0;
 
   public static String formatDecimal(double value) {
     String result1;
     result1 = nf.format(value); // On a separate line to allow for breakpoints
+    return result1;
+  }
+
+  /**
+   * Format a number using the locale.
+   *
+   * @param value the double to format
+   * @param minFractionDigits the minimum number of fraction digits to be shown
+   * @return the formated number
+   */
+  public static String formatDecimal(double value, int minFractionDigits) {
+    nf.setMinimumFractionDigits(minFractionDigits);
+    String result1;
+    result1 = nf.format(value); // On a separate line to allow for breakpoints
+    nf.setMinimumFractionDigits(MIN_FRACTION_DIGITS);
     return result1;
   }
 
@@ -52,6 +68,7 @@ public class StringUtil {
    * method is locale-aware.
    *
    * @param text string to convert to a number
+   * @throws ParseException if the beginning of the specified string cannot be parsed
    * @return the result
    */
   public static Double parseDecimal(String text) throws ParseException {
@@ -85,6 +102,7 @@ public class StringUtil {
    * locale-aware (which doesn't mean much for integers).
    *
    * @param text string to convert to a number
+   * @throws ParseException if the beginning of the specified string cannot be parsed
    * @return the result
    */
   public static Integer parseInteger(String text) throws ParseException {
@@ -120,6 +138,7 @@ public class StringUtil {
    * using a case-insensitive comparison or represents a non-zero value as an integer.
    *
    * @param text string to convert to a Boolean
+   * @throws ParseException if the beginning of the specified string cannot be parsed
    * @return the result
    */
   public static Boolean parseBoolean(String text) throws ParseException {
@@ -170,6 +189,7 @@ public class StringUtil {
    *
    * @param string The multiline string to be wrapped
    * @param wrapLength the number of characters before wrapping
+   * @return the wrapped text
    */
   public static String wrapText(String string, int wrapLength) {
     return wrapText(string, wrapLength, 0, "\n");
@@ -178,6 +198,9 @@ public class StringUtil {
   /**
    * Whether the string is null or all whitespace chars (This should use {@link String#isEmpty()}
    * but that's new to Java 6 and we're trying to stay compatible with Java 5 if possible.)
+   *
+   * @param string the string to be checked
+   * @return true if the string is all whitespace or null
    */
   public static boolean isEmpty(String string) {
     return string == null || string.trim().length() == 0;

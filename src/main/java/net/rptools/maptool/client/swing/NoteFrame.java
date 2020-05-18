@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.JTextComponent;
+import net.rptools.maptool.language.I18N;
 
 public class NoteFrame extends JFrame {
   private JTextComponent noteArea;
@@ -63,7 +64,7 @@ public class NoteFrame extends JFrame {
 
   private JButton getClearButton() {
     if (clearButton == null) {
-      clearButton = new JButton("Clear");
+      clearButton = new JButton(I18N.getText("Button.clear"));
       clearButton.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -76,7 +77,7 @@ public class NoteFrame extends JFrame {
 
   private JButton getCloseButton() {
     if (closeButton == null) {
-      closeButton = new JButton("Close");
+      closeButton = new JButton(I18N.getText("Button.close"));
       closeButton.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {

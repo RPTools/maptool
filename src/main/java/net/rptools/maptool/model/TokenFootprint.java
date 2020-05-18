@@ -110,6 +110,7 @@ public class TokenFootprint {
    * @param grid the {@link Grid} that the footprint corresponds to
    * @param cell origin cell of this footprint; <code>null</code> means that <code>(0,0)</code> will
    *     be used
+   * @return the bounding rectangle that bounds the footprint
    */
   public Rectangle getBounds(Grid grid, CellPoint cell) {
     cell = cell != null ? cell : new CellPoint(0, 0);

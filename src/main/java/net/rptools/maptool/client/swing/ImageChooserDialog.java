@@ -29,6 +29,7 @@ import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 
@@ -39,7 +40,7 @@ public class ImageChooserDialog extends JDialog {
       new AssetPanel("imageAssetPanel", MapTool.getFrame().getAssetPanel().getModel());
 
   public ImageChooserDialog(JFrame owner) {
-    super(owner, "Choose Image", true);
+    super(owner, I18N.getText("Label.image.choose"), true);
     setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
     addWindowListener(
         new WindowAdapter() {
@@ -100,7 +101,7 @@ public class ImageChooserDialog extends JDialog {
   }
 
   private JButton createOKButton() {
-    JButton button = new JButton("OK");
+    JButton button = new JButton(I18N.getText("Button.ok"));
     button.addActionListener(
         new ActionListener() {
           @Override
@@ -113,7 +114,7 @@ public class ImageChooserDialog extends JDialog {
   }
 
   private JButton createCancelButton() {
-    JButton button = new JButton("Cancel");
+    JButton button = new JButton(I18N.getText("Button.cancel"));
     button.addActionListener(
         new ActionListener() {
           @Override

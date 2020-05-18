@@ -18,7 +18,6 @@ import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
 import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
@@ -42,7 +41,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,16 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
@@ -93,6 +82,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -171,7 +161,7 @@ public class MapTool {
 
   private static ObservableList<Player> playerList;
   private static ObservableList<TextMessage> messageList;
-  private static Player player;
+  private static LocalPlayer player;
 
   private static ClientConnection conn;
   private static ClientMethodHandler handler;
@@ -704,7 +694,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new Player("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, "");
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -779,6 +769,7 @@ public class MapTool {
     return serverCommand;
   }
 
+  /** @return the server, or null if player is a client. */
   public static MapToolServer getServer() {
     return server;
   }
@@ -975,11 +966,11 @@ public class MapTool {
     ZoneRenderer currRenderer = null;
 
     // Clean up
-    clientFrame.setCurrentZoneRenderer(null);
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
     clientFrame.clearTokenTree();
     if (campaign == null) {
+      clientFrame.setCurrentZoneRenderer(null);
       return;
     }
     // Install new campaign
@@ -999,6 +990,8 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
+    // overlay vanishes after campaign change
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 
@@ -1146,7 +1139,7 @@ public class MapTool {
     }
   }
 
-  public static Player getPlayer() {
+  public static LocalPlayer getPlayer() {
     return player;
   }
 
@@ -1158,16 +1151,16 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new Player(username, Player.Role.GM, null));
+        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player)
-      throws UnknownHostException, IOException {
+  public static void createConnection(String host, int port, LocalPlayer player)
+      throws IOException {
     MapTool.player = player;
-    MapTool.getFrame().getCommandPanel().setIdentityName(null);
+    MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     ClientConnection clientConn = new MapToolConnection(host, port, player);
 
@@ -1349,10 +1342,9 @@ public class MapTool {
         AppActions.loadCampaign(campaignFile);
       }
     }
-    // loadCampaign() is guaranteed to restart the ASM so we don't need this, but
-    // we can't be sure which path of the IF statement is taken, so this is easy
-    // and relatively inexpensive.
-    getAutoSaveManager().restart();
+
+    // fire up autosaves
+    getAutoSaveManager().start();
 
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
@@ -1734,6 +1726,7 @@ public class MapTool {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
+        loadTheme();
       }
       // If running on Windows based OS, CJK font is broken when using TinyLAF.
       // else if (WINDOWS) {
@@ -1742,29 +1735,9 @@ public class MapTool {
       // }
       else {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        loadTheme();
         menuBar = new AppMenuBar();
       }
-      // After the TinyLAF library is initialized, look to see if there is a Default.theme
-      // in our AppHome directory and load it if there is. Unfortunately, changing the
-      // search path for the default theme requires subclassing TinyLAF and because
-      // we have both the original and a Mac version that gets cumbersome. (Really
-      // the Mac version should use the default and then install the keystroke differences
-      // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-      File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
-      // File f = AppUtil.getAppHome("config");
-      // if (f.exists()) {
-      // File f2 = new File(f, "Default.theme");
-      if (f2.exists()) {
-        if (Theme.loadTheme(f2)) {
-          // re-install the Tiny Look and Feel
-          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-
-          // Update the ComponentUIs for all Components. This
-          // needs to be invoked for all windows.
-          // SwingUtilities.updateComponentTreeUI(rootComponent);
-        }
-      }
-      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
@@ -1777,18 +1750,6 @@ public class MapTool {
             }
           });
       LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
-
-      /**
-       * ************************************************************************** For TinyLAF
-       * 1.3.04 this is how the color was changed for a button.
-       */
-      // Theme.buttonPressedColor[Theme.style] = new ColorReference(Color.gray);
-
-      /**
-       * ************************************************************************** And this is how
-       * it's done in TinyLAF 1.4.0 (no idea about the intervening versions).
-       */
-      Theme.buttonPressedColor = new SBReference(Color.GRAY, 0, -6, SBReference.SUB3_COLOR);
 
       configureJide();
     } catch (Exception e) {
@@ -1843,5 +1804,31 @@ public class MapTool {
           }
         });
     // new Thread(new HeapSpy()).start();
+  }
+
+  private static void loadTheme()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+          UnsupportedLookAndFeelException {
+    // After the TinyLAF library is initialized, look to see if there is a Default.theme
+    // in our AppHome directory and load it if there is. Unfortunately, changing the
+    // search path for the default theme requires subclassing TinyLAF and because
+    // we have both the original and a Mac version that gets cumbersome. (Really
+    // the Mac version should use the default and then install the keystroke differences
+    // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
+    File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
+    // File f = AppUtil.getAppHome("config");
+    // if (f.exists()) {
+    // File f2 = new File(f, "Default.theme");
+    if (f2.exists()) {
+      if (Theme.loadTheme(f2)) {
+        // re-install the Tiny Look and Feel
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+
+        // Update the ComponentUIs for all Components. This
+        // needs to be invoked for all windows.
+        // SwingUtilities.updateComponentTreeUI(rootWindow);
+      }
+    }
+    // }
   }
 }

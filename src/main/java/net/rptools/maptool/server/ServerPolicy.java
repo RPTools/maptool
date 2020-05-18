@@ -26,6 +26,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 public class ServerPolicy {
   private boolean strictTokenMovement;
   private boolean isMovementLocked;
+  private boolean isTokenEditorLocked;
   private boolean playersCanRevealVision;
   private boolean gmRevealsVisionForUnownedTokens;
   private boolean useIndividualViews;
@@ -50,7 +51,7 @@ public class ServerPolicy {
   /**
    * Whether token management can be done by everyone or only the GM and assigned tokens
    *
-   * @return
+   * @return true if tokens only can be handled by GM and assignee
    */
   public boolean useStrictTokenManagement() {
     return strictTokenMovement;
@@ -66,6 +67,14 @@ public class ServerPolicy {
 
   public void setIsMovementLocked(boolean locked) {
     isMovementLocked = locked;
+  }
+
+  public boolean isTokenEditorLocked() {
+    return isTokenEditorLocked;
+  }
+
+  public void setIsTokenEditorLocked(boolean locked) {
+    isTokenEditorLocked = locked;
   }
 
   public void setPlayersCanRevealVision(boolean flag) {
@@ -136,7 +145,12 @@ public class ServerPolicy {
     return useToolTipsForDefaultRollFormat;
   }
 
-  /** Gets the local server time */
+  /**
+   * Gets the local server time
+   *
+   * @return the current server time as the difference, measured in milliseconds, between the now
+   *     and midnight, January 1, 1970 UTC
+   */
   public long getSystemTime() {
     return System.currentTimeMillis();
   }
@@ -212,6 +226,8 @@ public class ServerPolicy {
     sinfo.addProperty(
         "auto reveal on movement", isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "token editor locked", isTokenEditorLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(

@@ -806,7 +806,7 @@ public class JsonArrayFunctions {
    * @param jsonArray The JsonArray to get the sub array from.
    * @param startInd The starting index of the sub array.
    * @param endInd The ending index of the sub array.
-   * @return
+   * @return the subset JsonArray
    */
   public JsonArray get(JsonArray jsonArray, int startInd, int endInd) {
     JsonArray newArray = new JsonArray();

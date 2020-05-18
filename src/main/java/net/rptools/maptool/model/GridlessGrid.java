@@ -174,4 +174,9 @@ public class GridlessGrid extends Grid {
   public double getCellHeight() {
     return getSize();
   }
+
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, 0);
+  }
 }

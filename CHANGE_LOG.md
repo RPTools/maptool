@@ -1,3 +1,219 @@
+# Maptool 1.7.0
+Lots of enhancements, bug fixes and improvements to the code base.
+
+## Some Highlights
+- **New macro functions for math operations on lists and arrays.**
+- New macro function `markdownToHTML()` converts text in Markdown to HTML.
+- nmeier has brought the majority of the MapTool UI under the control of the Look & Feel themes accessible from the Themes menu.
+- New GM option to disable the use of the Edit Token dialog by players.
+- Issue with decimal point in Map Units per Cell for European locales fixed.
+- New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
+- **New Overlay helper functions for management.**
+- Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
+- MapTool can now import the Dungeondraft VTT export format.
+
+Changes since 1.7.0-beta-2 in **BOLD**.
+
+## Enhancements
+- [#1847][i1847] **Horizontal scrolling restored for MacOS.**
+- [#1808][i1808] **New `impersonate()` function for setting impersonation.**
+- [#1801][i1801] **Performance improvement for token image handling. Copying large sets of tokens from map to map, switching between maps with a large number of tokens, dragging large numbers of tokens have all been improved.**
+- [#1797][i1797] **Forms now work in Chat window!**
+- [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
+- [#1764][i1764] **New macro functions math operations on lists and JSON arrays.**
+  - `math.arraySum()`, `math.arrayMin()`, `math.arrayMax()`, `math.arrayMean()`, `math.arrayMedian()`, `math.arrayProduct()`
+  - `math.listSum()`, `math.listMin()`, `math.listMax()`, `math.listMean()`, `math.listMedian()`, `math.listProduct()`
+- [#1758][i1758] Restyled Initiative and Selection windows for usability and compatibility with Look & Feel themes.  See issue for details.
+- [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.  See issue for details.
+- [#1678][i1678] Error reporting improved when MapTool can't start. More likely to get information in log file.
+- [#1669][i1669] **New helper functions for HTML Overlays**
+  - `isOverlayRegistered()`, `closeOverlay()`, `getOverlayProperties()`
+- [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
+- [#1553][i1553] Many of the dialogs in MapTool have been localized so that the text strings are pulled from the I18N translation files.
+- [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
+- [#1518][i1518] PDF image extraction in the Resource Library now supports extaction of full page images.
+- [#1506][i1506] MapTool now supports importing Dungeondraft `.dd2vtt` files. This brings in not only the map image but also vision blocking information and the location of light sources.
+- [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
+- [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
+- [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
+- [#1318][i1318] Chat output tweaked so that token names are now part of the first output line keeping long token names from causing the output are from being reduced leaving large empty areas.
+- [#975][i975] New GM option to disable use of Edit Token dialog by player clients.
+- [#500][i500] Ars Magica Stress Dice roll option.
+  - ASnb#+b / ASnb#-b (or asn#+b / asn#-b) - return is a string
+  - ANSnb#+b / ANSnb#-b (or ansn#+b / ansn#-b) - return is a number
+- [#412][i412] New macro function `getDefinedFunctions()` to get list of user-defined functions. Output of `getInfo("client")` also updated to include location of called function.
+- [#27][i27] Reroll Once roll option added.
+  - 2d6rk3 - reroll any die less than 3 and keep new result
+  - 2d6rc3 - reroll any die less than 3 and keep higher value
+- [#368][i368] Macro groups can now be renamed.
+
+## Bug Fixes
+- [#1853][i1853] **CSS loading in incorrect order for Frame5/Dialog5/Overlay when CSS link points to macro.** Fixed.
+- [#1838][i1838] **Internal changes to make detecting Show as Player within code more consistent.**
+- [#1831][i1831] **math.\* functions always returned `0` as the bad argument when passed non-numeric values.** Fixed.
+- [#1828][i1828] **`getSightType()` would fail on new created tokens.** Fixed.
+- [#1822][i1822] **Changing name/image of impersonated token wasn't updating Chat window.** Fixed.
+- [#1814][i1814] **Several macro functions would fail as not trusted when called by GM in chat.** Fixed.
+- [#1812][i1812] **Call a macro on the GM panel from a trusted context wasn't keeping trusted status.** Fixed.
+- [#1804][i1804] **Map selector reworked to behave like a normal popup menu and be theme compliant.**
+- [#1803][i1803] **PC Tokens on Hidden layer were visible on Player's Map Explorer when Strict Token Ownership was off.** Fixed.
+- [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed. Fixed.
+- [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters. Fixed.
+- [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE. Fixed.
+- [#1784][i1784] **Attempting to use a port outside of valid range would cause start server to fail without a message. Fixed.
+- [#1782][i1782] **Form `<select multiple>` element only returned one element. Fixed.
+- [#1775][i1775] **Select next/previous token in Selection window broken (Unreleased). Fixed.
+- [#1757][i1757] **Macro function `moveToken()` did not correctly handle tokens not centered in the layout config. Fixed.
+- [#1752][i1752] Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.
+- [#1732][i1732] Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.
+- [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
+- [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
+- [#1709][i1709] **Portrait images were rendered with low quality scaling.** Improved.
+- [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
+- [#1688][i1688] Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.
+- [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
+- [#1675][i1675] Left-click on a token when multiple are already selected wasn't clearing selection on other tokens. Fixed.
+- [#1670][i1670] ModelChangeListeners on Impersonate/Selection panels were not getting removed causing a performance hit as more maps were added to campaign. Fixed.
+- [#1667][i1667] Fix for token properties issues was not pulled from 1.6.1. Fixed.
+- [#1666][i1666] Changing token selection was causing Impersonated panel to update causing a delay. Fixed.
+- [#1658][i1658] Deleting a token was causing the Impersonated panel to update cause a delay. Fixed.
+- [#1657][i1657] Macros deleted via the Common group were not being updated on clients. Fixed.
+- [#1654][i1654] Deleting/cutting multiple tokens cause the TOKEN_REMOVED event to be fired multiple times creating lag as the Selection and Impersonate panels were then reset for eac one. Fixed.
+- [#1653][i1653] Changing snap-to-grid status for tokens and stamps could cause them to move. Fixed.
+- [#1648][i1648] Null Pointer Exception when toggling Player Movement Lock as non-hosting GM. Fixed.
+- [#1646][i1646] Null Pointer Exception when a map is deleted while a token is being edited. Fixed.
+- [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
+- [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
+- [#1635][i1635] Window decorations in MapTool dialogs and frames changed to pick up color scheme from themes.
+- [#1631][i1631] Add Resource dialog wasn't using theme colors. Fixed.
+- [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
+- [#1614][i1614] Pressing map zoom keys while a frame5 textbox had focus would zoom map. Fixed.
+- [#1613][i1613] User selected theme was not being applied to menus causing text to not be rendered for some languages such as Japanese. Fixed.
+  - Also fixed Edit Token dialog throwing exception for translated VBL tab name.
+- [#1608][i1608] Various menu options would throw an exception if no maps in campaign. Fixed.
+- [#1605][i1605] Clicking on FoW button and others after last map was deleted would throw NPE. Fixed.
+- [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
+- [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
+- [#1575][i1575] Unclosed parens in Token properties definition would produce a StringIndexOutOfbounds exception. Fixed.
+- [#1572][i1572] Deleting last map with FoW would produce an NPE if Map menu opened. Fixed.
+- [#1570][i1570] Attempting to import a macroset as a macro produced exception. Exception caught and error message shown to user.
+- [#1568][i1568] Deleting a map while a token was being dragged would produce a NPE. Fixed.
+- [#1566][i1566] Saving lib:tokens would fail due to colon in name throwing exception. Fixed.
+- [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
+- [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
+- [#1548][i1548] Table functions `getTableAccess()`, `getTableVisible()`, `setTableAccess()`, `setTableVisible()`, `getTablePickOnce()` and `setTablePickOnce()` were returning strings instead of BigInteger values. Fixed.
+- [#1538][i1538] Close button on Token Editor changed to Cancel.
+- [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
+- [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
+- [#1495][i1495] **Chosing Edit on a macro already being edited no longer creates new Find/Replace entries in Edit menu.**
+- [#1441][i1441] Content of `input()` dialogs wouldn't fill full width of window with minimal prompt/input sizes. Fixed.
+- [#1426][i1426] **NPE on close caused by editing the same macro twice (simultaneously).** Fixed.
+- [#1317][i1317] Horizontal scrolling issues on MacOS fixed.
+- [#1264][i1264] **Fixes for thread-safety in Campaign Auto-Save.**
+- [#1263][i1263] **Fixes for thread-safety in Campaign Loading.**
+- [#507][i507] The map setting Units per Cell wasn't being handled correctly for locales that use a comma for the decimal point. Fixed.
+- [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
+
+## Other
+- [#1843][i1843] **Refactor of Initiative classes to avoid raw list types.**
+- [#1776][i1776] dicelib updated to 1.6.1
+- [#1704][i1704] dicelib updated to 1.6.0
+- [#1223][i1223] **Javadocs now build without errors.**
+
+[i1853]: https://github.com/RPTools/maptool/issues/1853
+[i1847]: https://github.com/RPTools/maptool/issues/1847
+[i1843]: https://github.com/RPTools/maptool/issues/1843
+[i1838]: https://github.com/RPTools/maptool/issues/1838
+[i1831]: https://github.com/RPTools/maptool/issues/1831
+[i1828]: https://github.com/RPTools/maptool/issues/1828
+[i1822]: https://github.com/RPTools/maptool/issues/1822
+[i1814]: https://github.com/RPTools/maptool/issues/1814
+[i1812]: https://github.com/RPTools/maptool/issues/1812
+[i1808]: https://github.com/RPTools/maptool/issues/1808
+[i1804]: https://github.com/RPTools/maptool/issues/1804
+[i1803]: https://github.com/RPTools/maptool/issues/1803
+[i1801]: https://github.com/RPTools/maptool/issues/1801
+[i1799]: https://github.com/RPTools/maptool/issues/1799
+[i1797]: https://github.com/RPTools/maptool/issues/1797
+[i1790]: https://github.com/RPTools/maptool/issues/1790
+[i1788]: https://github.com/RPTools/maptool/issues/1788
+[i1784]: https://github.com/RPTools/maptool/issues/1784
+[i1782]: https://github.com/RPTools/maptool/issues/1782
+[i1776]: https://github.com/RPTools/maptool/issues/1776
+[i1775]: https://github.com/RPTools/maptool/issues/1775
+[i1765]: https://github.com/RPTools/maptool/issues/1765
+[i1764]: https://github.com/RPTools/maptool/issues/1764
+[i1758]: https://github.com/RPTools/maptool/issues/1758
+[i1757]: https://github.com/RPTools/maptool/issues/1757
+[i1752]: https://github.com/RPTools/maptool/issues/1752
+[i1732]: https://github.com/RPTools/maptool/issues/1732
+[i1728]: https://github.com/RPTools/maptool/issues/1728
+[i1725]: https://github.com/RPTools/maptool/issues/1725
+[i1720]: https://github.com/RPTools/maptool/issues/1720
+[i1709]: https://github.com/RPTools/maptool/issues/1709
+[i1704]: https://github.com/RPTools/maptool/issues/1704
+[i1700]: https://github.com/RPTools/maptool/issues/1700
+[i1688]: https://github.com/RPTools/maptool/issues/1688
+[i1686]: https://github.com/RPTools/maptool/issues/1686
+[i1678]: https://github.com/RPTools/maptool/issues/1678
+[i1675]: https://github.com/RPTools/maptool/issues/1675
+[i1670]: https://github.com/RPTools/maptool/issues/1670
+[i1669]: https://github.com/RPTools/maptool/issues/1669
+[i1667]: https://github.com/RPTools/maptool/issues/1667
+[i1666]: https://github.com/RPTools/maptool/issues/1666
+[i1658]: https://github.com/RPTools/maptool/issues/1658
+[i1657]: https://github.com/RPTools/maptool/issues/1657
+[i1654]: https://github.com/RPTools/maptool/issues/1654
+[i1653]: https://github.com/RPTools/maptool/issues/1653
+[i1648]: https://github.com/RPTools/maptool/issues/1648
+[i1646]: https://github.com/RPTools/maptool/issues/1646
+[i1642]: https://github.com/RPTools/maptool/issues/1642
+[i1638]: https://github.com/RPTools/maptool/issues/1638
+[i1635]: https://github.com/RPTools/maptool/issues/1635
+[i1631]: https://github.com/RPTools/maptool/issues/1631
+[i1629]: https://github.com/RPTools/maptool/issues/1629
+[i1614]: https://github.com/RPTools/maptool/issues/1614
+[i1613]: https://github.com/RPTools/maptool/issues/1613
+[i1608]: https://github.com/RPTools/maptool/issues/1608
+[i1605]: https://github.com/RPTools/maptool/issues/1605
+[i1597]: https://github.com/RPTools/maptool/issues/1597
+[i1589]: https://github.com/RPTools/maptool/issues/1589
+[i1588]: https://github.com/RPTools/maptool/issues/1588
+[i1575]: https://github.com/RPTools/maptool/issues/1575
+[i1572]: https://github.com/RPTools/maptool/issues/1572
+[i1570]: https://github.com/RPTools/maptool/issues/1570
+[i1568]: https://github.com/RPTools/maptool/issues/1568
+[i1566]: https://github.com/RPTools/maptool/issues/1566
+[i1564]: https://github.com/RPTools/maptool/issues/1564
+[i1553]: https://github.com/RPTools/maptool/issues/1553
+[i1551]: https://github.com/RPTools/maptool/issues/1551
+[i1548]: https://github.com/RPTools/maptool/issues/1548
+[i1538]: https://github.com/RPTools/maptool/issues/1538
+[i1528]: https://github.com/RPTools/maptool/issues/1528
+[i1518]: https://github.com/RPTools/maptool/issues/1518
+[i1513]: https://github.com/RPTools/maptool/issues/1513
+[i1506]: https://github.com/RPTools/maptool/issues/1506
+[i1501]: https://github.com/RPTools/maptool/issues/1501
+[i1498]: https://github.com/RPTools/maptool/issues/1498
+[i1495]: https://github.com/RPTools/maptool/issues/1495
+[i1473]: https://github.com/RPTools/maptool/issues/1473
+[i1463]: https://github.com/RPTools/maptool/issues/1463
+[i1441]: https://github.com/RPTools/maptool/issues/1441
+[i1426]: https://github.com/RPTools/maptool/issues/1426
+[i1425]: https://github.com/RPTools/maptool/issues/1425
+[i1318]: https://github.com/RPTools/maptool/issues/1318
+[i1317]: https://github.com/RPTools/maptool/issues/1317
+[i1264]: https://github.com/RPTools/maptool/issues/1264
+[i1263]: https://github.com/RPTools/maptool/issues/1263
+[i1223]: https://github.com/RPTools/maptool/issues/1223
+[i975]: https://github.com/RPTools/maptool/issues/975
+[i507]: https://github.com/RPTools/maptool/issues/507
+[i500]: https://github.com/RPTools/maptool/issues/500
+[i412]: https://github.com/RPTools/maptool/issues/412
+[i375]: https://github.com/RPTools/maptool/issues/375
+[i368]: https://github.com/RPTools/maptool/issues/368
+[i27]: https://github.com/RPTools/dicelib/issues/27
+
 Maptool 1.6.1
 =====
 Hotfix for token property issue.

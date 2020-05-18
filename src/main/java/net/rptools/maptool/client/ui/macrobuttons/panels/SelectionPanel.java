@@ -31,7 +31,9 @@ import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,8 +88,6 @@ public class SelectionPanel extends AbstractMacroPanel {
 
     // paint panel only when it's visible or active
     if (panelVisible) {
-      // add the selection panel controls first
-      add(new MenuButtonsPanel());
 
       // draw common group only when there is more than one token selected
       if (selectedTokenList.size() > 1) {
@@ -118,6 +118,33 @@ public class SelectionPanel extends AbstractMacroPanel {
       if (log.isDebugEnabled()) log.debug(results);
     }
     MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+  }
+
+  @Override
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
+      // Only resets if one of the selected tokens is among those changed/deleted.
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
+        if (event.getArg() instanceof List<?>) {
+          List<Token> tokenList = (List<Token>) event.getArg();
+          for (Token token : tokenList) {
+            if (zr.getSelectedTokenSet().contains(token.getId())) {
+              reset();
+              break;
+            }
+          }
+        } else {
+          Token token = (Token) event.getArg();
+          if (zr.getSelectedTokenSet().contains(token.getId())) {
+            reset();
+          }
+        }
+      }
+    }
   }
 
   private void populateCommonButtons(List<Token> tokenList) {
@@ -198,5 +225,11 @@ public class SelectionPanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* not used for the moment by this one */
+    return null;
   }
 }

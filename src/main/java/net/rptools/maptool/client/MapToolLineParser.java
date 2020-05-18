@@ -39,6 +39,7 @@ import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionExcepti
 import net.rptools.maptool.client.functions.ReturnFunction.ReturnFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -130,7 +131,8 @@ public class MapToolLineParser {
               Base64Functions.getInstance(),
               TokenTerrainModifierFunctions.getInstance(),
               TestFunctions.getInstance(),
-              TextLabelFunctions.getInstance())
+              TextLabelFunctions.getInstance(),
+              new MarkDownFunctions())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
@@ -209,6 +211,7 @@ public class MapToolLineParser {
   private enum OutputLoc { // Mutually exclusive output location
     CHAT,
     DIALOG,
+    OVERLAY,
     DIALOG5,
     FRAME,
     FRAME5
@@ -357,6 +360,8 @@ public class MapToolLineParser {
     DIALOG5("dialog5", 1, 2, "\"\""),
     // HTML webView
     FRAME5("frame5", 1, 2, "\"\""),
+    // HTML overlay
+    OVERLAY("overlay", 1, 2, "\"\""),
     // Run for another token
     TOKEN("token", 1, 1);
 
@@ -517,6 +522,10 @@ public class MapToolLineParser {
       matcher.region(start, endOfString);
       List<String> paramList = new ArrayList<String>();
       boolean lastItem = false; // true if last match ended in ")"
+      if (")".equals(optionString.substring(start))) {
+        lastItem = true;
+        start += 1;
+      }
 
       while (!lastItem) {
         if (matcher.find()) {
@@ -1028,6 +1037,12 @@ public class MapToolLineParser {
                   frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
                   outputTo = OutputLoc.FRAME5;
                   break;
+                case OVERLAY:
+                  codeType = CodeType.CODEBLOCK;
+                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  outputTo = OutputLoc.OVERLAY;
+                  break;
                   ///////////////////////////////////////////////////
                   // CODE OPTIONS
                   ///////////////////////////////////////////////////
@@ -1419,21 +1434,30 @@ public class MapToolLineParser {
           switch (outputTo) {
             case FRAME:
               HTMLFrameFactory.show(
-                  frameName, true, false, frameOpts, expressionBuilder.toString());
+                  frameName, FrameType.FRAME, false, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG:
               HTMLFrameFactory.show(
-                  frameName, false, false, frameOpts, expressionBuilder.toString());
+                  frameName, FrameType.DIALOG, false, frameOpts, expressionBuilder.toString());
+              break;
+            case OVERLAY:
+              HTMLFrameFactory.show(
+                  frameName, FrameType.OVERLAY, true, frameOpts, expressionBuilder.toString());
               break;
             case CHAT:
               builder.append(expressionBuilder);
               break;
             case FRAME5:
-              HTMLFrameFactory.show(frameName, true, true, frameOpts, expressionBuilder.toString());
+              HTMLFrameFactory.show(
+                  frameName, FrameType.FRAME, true, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG5:
               HTMLFrameFactory.show(
-                  frameName, false, true, frameOpts, expressionBuilder.toString());
+                  frameName,
+                  HTMLFrameFactory.FrameType.DIALOG,
+                  true,
+                  frameOpts,
+                  expressionBuilder.toString());
               break;
           }
 
@@ -1677,7 +1701,7 @@ public class MapToolLineParser {
         throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
       }
       macroBody = mbp.getCommand();
-      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getPlayer().isGM());
+      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getParser().isMacroTrusted());
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;
@@ -2034,10 +2058,11 @@ public class MapToolLineParser {
    */
   public void enterContext(MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
-    // Any subsequent trips through we only change trusted path if conext
+    // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we dont change
     // anything as trusted context will remain the same as it was before the call).
     if (contextStack.size() == 0) {
+      // The path is untrusted if any typing is involved, including GM's
       macroPathTrusted = context == null ? false : context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
     } else if (context != null) {

@@ -38,6 +38,8 @@ public class AppPreferences {
 
   private static final String KEY_ASSET_ROOTS = "assetRoots";
   private static final String KEY_SAVE_DIR = "saveDir";
+  private static final String KEY_SAVE_TOKEN_DIR = "saveTokenDir";
+  private static final String KEY_SAVE_MAP_DIR = "saveMapDir";
   private static final String KEY_LOAD_DIR = "loadDir";
   private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
@@ -946,6 +948,24 @@ public class AppPreferences {
     return filePath != null ? new File(filePath) : new File(File.separator);
   }
 
+  public static File getSaveTokenDir() {
+    String filePath = prefs.get(KEY_SAVE_TOKEN_DIR, null);
+    return filePath != null ? new File(filePath) : getSaveDir();
+  }
+
+  public static void setTokenSaveDir(File file) {
+    prefs.put(KEY_SAVE_TOKEN_DIR, file.toString());
+  }
+
+  public static File getSaveMapDir() {
+    String filePath = prefs.get(KEY_SAVE_MAP_DIR, null);
+    return filePath != null ? new File(filePath) : getSaveDir();
+  }
+
+  public static void setSaveMapDir(File file) {
+    prefs.put(KEY_SAVE_MAP_DIR, file.toString());
+  }
+
   public static void setLoadDir(File file) {
     prefs.put(KEY_LOAD_DIR, file.toString());
   }
@@ -1205,7 +1225,16 @@ public class AppPreferences {
         prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
   }
 
+  /**
+   * Sets the topology mode preference.
+   *
+   * @param mode the mode. A value of null resets to default.
+   */
   public static void setTopologyDrawingMode(TopologyMode mode) {
-    prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
+    if (mode == null) {
+      prefs.remove(KEY_TOPOLOGY_DRAWING_MODE);
+    } else {
+      prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
+    }
   }
 }

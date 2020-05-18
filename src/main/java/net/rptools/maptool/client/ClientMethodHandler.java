@@ -114,6 +114,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             Zone zone;
             Token token;
             Set<GUID> selectedToks = null;
+            List<GUID> tokenGUIDs;
 
             switch (cmd) {
               case bootPlayer:
@@ -230,6 +231,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
                 return;
 
+              case editToken:
+                zoneGUID = (GUID) parameters[0];
+                zone = MapTool.getCampaign().getZone(zoneGUID);
+                token = (Token) parameters[1];
+                zone.editToken(token);
+                MapTool.getFrame().refresh();
+                return;
+
               case putToken:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
@@ -262,6 +271,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 zone = MapTool.getCampaign().getZone(zoneGUID);
                 tokenGUID = (GUID) parameters[1];
                 zone.removeToken(tokenGUID);
+                MapTool.getFrame().refresh();
+                return;
+
+              case removeTokens:
+                zoneGUID = (GUID) parameters[0];
+                zone = MapTool.getCampaign().getZone(zoneGUID);
+                tokenGUIDs = (List<GUID>) parameters[1];
+                zone.removeTokens(tokenGUIDs);
                 MapTool.getFrame().refresh();
                 return;
 

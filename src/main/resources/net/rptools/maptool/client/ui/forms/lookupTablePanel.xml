@@ -89,7 +89,7 @@
                  <at name="width">50</at>
                  <at name="name">newButton</at>
                  <at name="actionCommand">New</at>
-                 <at name="toolTipText">Create a new lookup table</at>
+                 <at name="toolTipText">EditLookupTablePanel.create.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -154,7 +154,7 @@
                  <at name="width">50</at>
                  <at name="name">editButton</at>
                  <at name="actionCommand">Edit</at>
-                 <at name="toolTipText">Edit selected table</at>
+                 <at name="toolTipText">EditLookupTablePanel.edit.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -219,7 +219,7 @@
                  <at name="width">50</at>
                  <at name="name">deleteButton</at>
                  <at name="actionCommand">Delete</at>
-                 <at name="toolTipText">Delete table</at>
+                 <at name="toolTipText">EditLookupTablePanel.delete.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -284,7 +284,7 @@
                  <at name="width">50</at>
                  <at name="name">duplicateButton</at>
                  <at name="actionCommand">Duplicate</at>
-                 <at name="toolTipText">Duplicate selected table</at>
+                 <at name="toolTipText">EditLookupTablePanel.duplicate.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -336,7 +336,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Import</at>
+                 <at name="text">Button.import</at>
                  <at name="height">25</at>
                  <at name="width">76</at>
                  <at name="name">importButton</at>
@@ -392,7 +392,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Export</at>
+                 <at name="text">Button.export</at>
                  <at name="height">25</at>
                  <at name="width">74</at>
                  <at name="name">exportButton</at>

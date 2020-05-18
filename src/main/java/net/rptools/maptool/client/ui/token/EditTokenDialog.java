@@ -327,8 +327,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Jamz: Init the VBL tab...
     JTabbedPane tabbedPane = getTabbedPane();
 
+    String vblTitle = I18N.getText("EditTokenDialog.tab.vbl");
     if (MapTool.getPlayer().isGM()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), true);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
       getTokenVblPanel().setToken(token);
       getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
       getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
@@ -339,8 +340,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // Reset scale
       getTokenVblPanel().setScale(1d);
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL")) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(vblTitle)) {
         tabbedPane.setSelectedIndex(0);
       }
     }
@@ -627,7 +628,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getPropertyTable().getCellEditor().stopCellEditing();
     }
     // Commit the changes to the token properties
-    if (!super.commit()) {
+    // If no map available, cancel the commit. Fixes #1646.
+    if (!super.commit() || MapTool.getFrame().getCurrentZoneRenderer() == null) {
       return false;
     }
     // SIZE
@@ -863,7 +865,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getCampaign().getTokenBarsMap().size() > 0) {
       layout = (FormLayout) barPanel.getLayout();
       barPanel.setName("bar");
-      barPanel.setBorder(BorderFactory.createTitledBorder("Bars"));
+      barPanel.setBorder(
+          BorderFactory.createTitledBorder(I18N.getText("CampaignPropertiesDialog.tab.bars")));
       int count = 0;
       row = 0;
       for (BarTokenOverlay bar : MapTool.getCampaign().getTokenBarsMap().values()) {
@@ -1280,7 +1283,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               getTokenVblPanel().updateUI();
 
               if (getVblColorPickerToggleButton().isSelected()) {
-                getTokenVblPanel().setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                getTokenVblPanel().setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
               } else {
                 getTokenVblPanel().setCursor(Cursor.getDefaultCursor());
               }
@@ -1820,7 +1823,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     @Override
     protected void done() {
       getTokenVblPanel().setInProgress(false);
-      grabFocus();
+      requestFocusInWindow();
       getTokenVblPanel().requestFocus();
     }
   }

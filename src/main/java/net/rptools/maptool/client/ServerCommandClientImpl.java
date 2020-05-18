@@ -130,6 +130,11 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.restoreZoneView, zoneGUID);
   }
 
+  public void editToken(GUID zoneGUID, Token token) {
+    MapTool.getCampaign().getZone(zoneGUID).editToken(token);
+    makeServerCall(COMMAND.editToken, zoneGUID, token);
+  }
+
   public void putToken(GUID zoneGUID, Token token) {
     // Hack to generate zone event. All functions that update tokens call this method
     // after changing the token. But they don't tell the zone about it so classes
@@ -138,8 +143,18 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.putToken, zoneGUID, token);
   }
 
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
+    // delete local token immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
     makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    // delete local tokens immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
+    makeServerCall(COMMAND.removeTokens, zoneGUID, tokenGUIDs);
   }
 
   /**

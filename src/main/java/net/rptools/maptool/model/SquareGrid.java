@@ -100,6 +100,11 @@ public class SquareGrid extends Grid {
     }
   }
 
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
+  }
+
   public SquareGrid(boolean faceEdges, boolean faceVertices) {
     setFacings(faceEdges, faceVertices);
   }

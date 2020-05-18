@@ -254,7 +254,7 @@ public class TwoToneTextPane extends JTextPane {
     /**
      * Create a new TwoToneLabelView
      *
-     * @param element
+     * @param element the element
      */
     public TwoToneLabelView(Element element) {
       super(element);

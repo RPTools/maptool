@@ -38,7 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.swing.SwingWorker;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
@@ -568,19 +567,17 @@ public class ZoneView implements ModelChangeListener {
             }
             for (Light light : lightSource.getLightList()) {
               boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
-              if ((light.isGM() && !MapTool.getPlayer().isGM())) {
+              if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
                 continue;
               }
-              if ((light.isGM() || !token.isVisible())
-                  && MapTool.getPlayer().isGM()
-                  && AppState.isShowAsPlayer()) {
+              if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
                 continue;
               }
               if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                 continue;
               }
               if (light.isOwnerOnly() && lightSource.getType() == LightSource.Type.AURA) {
-                if (!isOwner && !MapTool.getPlayer().isGM()) {
+                if (!isOwner && !MapTool.getPlayer().isEffectiveGM()) {
                   continue;
                 }
               }
@@ -797,17 +794,26 @@ public class ZoneView implements ModelChangeListener {
       }
 
       if (evt == Zone.Event.TOKEN_REMOVED) {
-        Token token = (Token) event.getArg();
-        if (token.hasVBL()) tokenChangedVBL = true;
+        Object o = event.getArg();
+        List<Token> tokens;
+        if (o instanceof Token) {
+          tokens = new ArrayList<>(1);
+          tokens.add((Token) o);
+        } else {
+          tokens = (List<Token>) o;
+        }
 
-        for (AttachedLightSource als : token.getLightSources()) {
-          LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-          if (lightSource == null) {
-            continue;
-          }
-          Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-          if (lightSet != null) {
-            lightSet.remove(token.getId());
+        for (Token token : tokens) {
+          if (token.hasVBL()) tokenChangedVBL = true;
+          for (AttachedLightSource als : token.getLightSources()) {
+            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+            if (lightSource == null) {
+              continue;
+            }
+            Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
+            if (lightSet != null) {
+              lightSet.remove(token.getId());
+            }
           }
         }
       }
@@ -842,8 +848,7 @@ public class ZoneView implements ModelChangeListener {
 
     for (Token token : tokens) {
       boolean hasLightSource =
-          token.hasLightSources()
-              && (token.isVisible() || (MapTool.getPlayer().isGM() && !AppState.isShowAsPlayer()));
+          token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
       if (token.hasVBL()) hasVBL = true;
       for (AttachedLightSource als : token.getLightSources()) {
         LightSource lightSource = c.getLightSource(als.getLightSourceId());

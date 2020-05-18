@@ -17,9 +17,9 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -28,7 +28,7 @@ public class HasImpersonated extends AbstractFunction {
   private static final HasImpersonated instance = new HasImpersonated();
 
   private HasImpersonated() {
-    super(0, 0, "hasImpersonated");
+    super(0, 1, "hasImpersonated", "impersonate");
   }
 
   public static HasImpersonated getInstance() {
@@ -38,11 +38,42 @@ public class HasImpersonated extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    Token t;
-    GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-    if (guid != null) t = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-    else t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
-    return t == null ? BigDecimal.ZERO : BigDecimal.ONE;
+
+    int psize = parameters.size();
+    if (functionName.equalsIgnoreCase("hasImpersonated")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      boolean global =
+          psize > 0 ? FunctionUtil.paramAsBoolean(functionName, parameters, 0, false) : false;
+      return hasImpersonated(global) ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+    if (functionName.equalsIgnoreCase("impersonate")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      if (psize > 0 && parameters.get(0).toString().equals("")) {
+        // Stop impersonating
+        MapTool.getFrame().getCommandPanel().clearGlobalIdentity();
+        return "";
+      } else {
+        Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, -1);
+        MapTool.getFrame().getCommandPanel().setGlobalIdentity(token);
+        return token.getName();
+      }
+    }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  /**
+   * Returns the current impersonation status. The impersonation can be either global (impersonated
+   * panel) or specific to the macro context.
+   *
+   * @param global whether the global impersonation should be queried
+   * @return true if there is a token impersonated, false if not
+   */
+  private boolean hasImpersonated(boolean global) {
+    if (global) {
+      // Global impersonation, aka the one from the Impersonate Panel
+      return MapTool.getFrame().getCommandPanel().isGlobalImpersonatingToken();
+    } else {
+      return MapTool.getFrame().getCommandPanel().isImpersonatingToken();
+    }
   }
 }

@@ -349,7 +349,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (saveLocation.equals("Token") && tokenId != null) {
       Token token = getToken();
       if (token != null) {
-        token.saveMacroButtonProperty(this);
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, this);
       } else {
         MapTool.showError(I18N.getText("msg.error.macro.buttonNullToken", getLabel(), tokenId));
       }
@@ -372,7 +372,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
    * for the duration of the macro barring any use of the <b>token()</b> or <b>switchToken()</b>
    * roll options inside the macro itself.
    *
-   * @param tokenList
+   * @param tokenList tokens to execute macro on
    */
   public void executeMacro(Collection<Token> tokenList) {
     if (tokenList == null || tokenList.size() == 0) {

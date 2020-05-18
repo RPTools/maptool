@@ -99,6 +99,11 @@ public class IsometricGrid extends Grid {
     return getSize();
   }
 
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, getCellHeight() / 2);
+  }
+
   public double getCellWidthHalf() {
     return getSize();
   }
@@ -464,7 +469,7 @@ public class IsometricGrid extends Grid {
   /**
    * Take a rectangular image, rotate it 45 degrees then reduce its resulting height by half.
    *
-   * @param planImage
+   * @param planImage the image to rotate and scale
    * @return image in isometric format
    */
   public static BufferedImage isoImage(BufferedImage planImage) {
@@ -504,7 +509,7 @@ public class IsometricGrid extends Grid {
   /**
    * Take a rectangular Area, rotate it 45 degrees then reduce its resulting height by half.
    *
-   * @param planArea
+   * @param planArea the area to rotate and scale
    * @return Area in isometric format
    */
   public static Area isoArea(Area planArea) {

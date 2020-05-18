@@ -85,7 +85,10 @@ public class Zone extends BaseModel {
     LABEL_CHANGED,
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED
+    BOARD_CHANGED,
+    TOKEN_EDITED, // the token was edited
+    TOKEN_MACRO_CHANGED, // a token macro changed
+    TOKEN_PANEL_CHANGED // the panel appearance changed
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
@@ -166,7 +169,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private TopologyMode topologyMode = TopologyMode.VBL;
+  private TopologyMode topologyMode = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -743,6 +746,7 @@ public class Zone extends BaseModel {
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
@@ -769,6 +773,7 @@ public class Zone extends BaseModel {
    * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void removeTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
@@ -813,6 +818,24 @@ public class Zone extends BaseModel {
    */
   public void tokenChanged(Token token) {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_MACRO_CHANGED.
+   *
+   * @param token the token that had its macro changed
+   */
+  public void tokenMacroChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_MACRO_CHANGED, token));
+  }
+
+  /**
+   * Fire the event TOKEN_PANEL_CHANGED.
+   *
+   * @param token the token that had its panel appearance changed
+   */
+  public void tokenPanelChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_PANEL_CHANGED, token));
   }
 
   /**
@@ -1319,6 +1342,15 @@ public class Zone extends BaseModel {
   }
 
   /**
+   * Put the token, and also fires the token edited event.
+   *
+   * @param token the token that was edited
+   */
+  public void editToken(Token token) {
+    putToken(token);
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_EDITED, token));
+  }
+  /**
    * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
    * that this method fires a single <code>ModelChangeEvent</code> using <code> Event.TOKEN_ADDED
    * </code> and passes the list of added tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED
@@ -1356,11 +1388,37 @@ public class Zone extends BaseModel {
     }
   }
 
+  /**
+   * Removes a token, and fires Event.TOKEN_REMOVED.
+   *
+   * @param id the id of the token
+   */
   public void removeToken(GUID id) {
     Token token = tokenMap.remove(id);
     if (token != null) {
       tokenOrderedList.remove(token);
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, token));
+    }
+  }
+
+  /**
+   * Removes multiple token, and fires Event.TOKEN_REMOVED once.
+   *
+   * @param ids the list of ids of the tokens
+   */
+  public void removeTokens(List<GUID> ids) {
+    List<Token> removedTokens = new ArrayList<>();
+    if (ids != null) {
+      for (GUID id : ids) {
+        Token token = tokenMap.remove(id);
+        if (token != null) {
+          tokenOrderedList.remove(token);
+          removedTokens.add(token);
+        }
+      }
+      if (!removedTokens.isEmpty()) {
+        fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, removedTokens));
+      }
     }
   }
 

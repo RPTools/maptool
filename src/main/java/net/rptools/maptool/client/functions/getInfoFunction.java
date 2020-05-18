@@ -178,30 +178,50 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.addProperty("timeDate", getTimeDate());
     cinfo.addProperty("isoTimeDate", getIsoTimeDate());
     if (MapTool.getParser().isMacroTrusted()) {
-      JsonObject libInfo = new JsonObject();
-      for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-        Zone zone = zr.getZone();
-        for (Token token : zone.getTokens()) {
-          if (token.getName().toLowerCase().startsWith("lib:")) {
-            if (token.getProperty("libversion") != null) {
-              libInfo.addProperty(token.getName(), token.getProperty("libversion").toString());
-            } else {
-              libInfo.addProperty(token.getName(), "unknown");
-            }
-          }
-        }
+      getInfoOnTokensOfType(cinfo, "library tokens", "lib:", "libversion", "unknown");
+      getInfoOnTokensOfType(cinfo, "image tokens", "image:", "libversion", "unknown");
+      JsonObject udfList = new JsonObject();
+      UserDefinedMacroFunctions UDF = UserDefinedMacroFunctions.getInstance();
+      for (String name : UDF.getAliases()) {
+        udfList.addProperty(name, UDF.getFunctionLocation(name));
       }
-      if (libInfo.size() > 0) {
-        cinfo.add("library tokens", libInfo);
-      }
-      JsonArray udf = new JsonArray();
-      for (String name : UserDefinedMacroFunctions.getInstance().getAliases()) {
-        udf.add(name);
-      }
-      cinfo.add("user defined functions", udf);
+      cinfo.add("user defined functions", udfList);
       cinfo.addProperty("client id", MapTool.getClientId());
     }
     return cinfo;
+  }
+
+  /**
+   * Gets info on tokens with names starting with the prefix.
+   *
+   * @param cinfo json object to add info to
+   * @param token_type token type
+   * @param prefix token prefix (e.g. "lib:" "image:")
+   * @param versionProperty Property (if any) to get token version from
+   * @param unknownVersionText text to show if version is unknown
+   */
+  private void getInfoOnTokensOfType(
+      JsonObject cinfo,
+      String token_type,
+      String prefix,
+      String versionProperty,
+      String unknownVersionText) {
+    JsonObject libInfo = new JsonObject();
+    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+      Zone zone = zr.getZone();
+      for (Token token : zone.getTokens()) {
+        if (token.getName().toLowerCase().startsWith(prefix)) {
+          if (token.getProperty(versionProperty) != null) {
+            libInfo.addProperty(token.getName(), token.getProperty(versionProperty).toString());
+          } else {
+            libInfo.addProperty(token.getName(), unknownVersionText);
+          }
+        }
+      }
+    }
+    if (libInfo.size() > 0) {
+      cinfo.add(token_type, libInfo);
+    }
   }
 
   private String getTimeDate() {
@@ -277,7 +297,7 @@ public class getInfoFunction extends AbstractFunction {
         // }
         JsonArray lightList = new JsonArray();
         for (Light light : ls.getLightList()) {
-          lightList.add(gson.toJson(light));
+          lightList.add(gson.toJsonTree(light));
         }
         linfo.add("light segments", lightList);
         ltinfo.add(linfo);

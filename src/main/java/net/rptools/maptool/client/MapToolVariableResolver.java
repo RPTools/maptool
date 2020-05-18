@@ -169,6 +169,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
         return new JsonPrimitive(false);
     }
 
+    // MT Script doesnt have much in the way of types.
+    if (name.startsWith(MarkDownFunctions.MARKDOWN_PREFIX)) {
+      return new MarkDownFunctions().getMTSTypeLabel(name);
+    }
+
     Object result = null;
     if (tokenInContext != null) {
 

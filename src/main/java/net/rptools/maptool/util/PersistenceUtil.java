@@ -216,13 +216,13 @@ public class PersistenceUtil {
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
-        MapTool.showWarning(
+        throw new IOException(
             I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
     } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.mapVersion", ce);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapVersion"), ce);
     } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.mapRead", ioe);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapRead"), ioe);
     }
     return persistedMap;
   }
@@ -402,6 +402,7 @@ public class PersistenceUtil {
    * Gets a file pointing to where the campaign's thumbnail image should be.
    *
    * @param fileName The campaign's file name.
+   * @return the file for the campaign thumbnail
    */
   public static File getCampaignThumbnailFile(String fileName) {
     return new File(AppUtil.getAppHome("campaignthumbs"), fileName + ".jpg");
@@ -834,11 +835,12 @@ public class PersistenceUtil {
 
   public static MacroButtonProperties loadMacro(InputStream in) {
     MacroButtonProperties mbProps = null;
+
     try {
       mbProps =
-          (MacroButtonProperties)
+          asMacro(
               FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
     }
@@ -851,7 +853,7 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      return (MacroButtonProperties) pakFile.getContent();
+      return asMacro(pakFile.getContent());
     } catch (IOException e) {
       return loadLegacyMacro(file);
     }
@@ -881,14 +883,57 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Converts an object to a macroset, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macroset, or null if no conversion done
+   */
   @SuppressWarnings("unchecked")
+  private static List<MacroButtonProperties> asMacroSet(Object object) {
+    if (object instanceof List<?>) {
+      return (List<MacroButtonProperties>) object;
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macrosetWrongFileType", className));
+      return null;
+    }
+  }
+
+  /**
+   * Converts an object to a macro, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macro, or null if no conversion done
+   */
+  private static MacroButtonProperties asMacro(Object object) {
+    if (object instanceof MacroButtonProperties) {
+      return (MacroButtonProperties) object;
+    } else if (object instanceof List && ((List) object).get(0) instanceof MacroButtonProperties) {
+      MapTool.showError(
+          I18N.getText(
+              "PersistenceUtil.warn.macroWrongFileType",
+              I18N.getText("PersistenceUtil.warn.macroSet")));
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macroWrongFileType", className));
+    }
+    return null;
+  }
+
+  /**
+   * Returns a macroset from an inputstream
+   *
+   * @param in the inputstream
+   * @return the macroset
+   */
   public static List<MacroButtonProperties> loadMacroSet(InputStream in) {
     List<MacroButtonProperties> macroButtonSet = null;
     try {
       macroButtonSet =
-          (List<MacroButtonProperties>)
+          asMacroSet(
               FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -904,7 +949,7 @@ public class PersistenceUtil {
         String progVersion = (String) pakFile.getProperty(PROP_VERSION);
         if (!versionCheck(progVersion)) return null;
 
-        macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
+        macroButtonSet = asMacroSet(pakFile.getContent());
       } catch (ConversionException ce) {
         MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
       }
@@ -1001,7 +1046,8 @@ public class PersistenceUtil {
     try {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
-          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+          ImageUtil.createCompatibleImage(
+              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

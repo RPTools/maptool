@@ -38,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.tool.AI_Tool;
@@ -77,6 +78,7 @@ import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleTool;
 import net.rptools.maptool.client.tool.drawing.RectangleTopologyTool;
 import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
@@ -259,13 +261,7 @@ public class ToolbarPanel extends JToolBar {
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/tool/btn-world.png")));
     button.setToolTipText(title);
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            ZoneSelectionPopup popup = new ZoneSelectionPopup();
-            popup.show(button, button.getSize().width - popup.getPreferredSize().width, 0);
-          }
-        });
+    SwingUtil.makePopupMenuButton(button, () -> new ZoneSelectionPopup(), true);
     return button;
   }
 
@@ -307,16 +303,17 @@ public class ToolbarPanel extends JToolBar {
           protected void activate() {
             super.activate();
             Campaign c = MapTool.getCampaign();
-            boolean tokensSelected =
-                !MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet().isEmpty();
-            if (tokensSelected
-                && c.hasUsedFogToolbar() == false
-                && MapTool.isHostingServer() == false) {
-              MapTool.addLocalMessage(
-                  "<span class='whisper' style='color: blue'>"
-                      + I18N.getText("ToolbarPanel.manualFogActivated")
-                      + "</span>");
-              MapTool.showWarning("ToolbarPanel.manualFogActivated");
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check if there is a map. Fix #1605
+            if (zr != null) {
+              boolean tokensSelected = !zr.getSelectedTokenSet().isEmpty();
+              if (tokensSelected && !c.hasUsedFogToolbar() && !MapTool.isHostingServer()) {
+                MapTool.addLocalMessage(
+                    "<span class='whisper' style='color: blue'>"
+                        + I18N.getText("ToolbarPanel.manualFogActivated")
+                        + "</span>");
+                MapTool.showWarning("ToolbarPanel.manualFogActivated");
+              }
             }
           }
         };
@@ -417,13 +414,12 @@ public class ToolbarPanel extends JToolBar {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (button.isSelected()) {
-              MapTool.getFrame()
-                  .getCurrentZoneRenderer()
-                  .getZone()
-                  .setTokenSelection(tokenSelection);
+        e -> {
+          if (button.isSelected()) {
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check if there is a map. Fix #1605
+            if (zr != null) {
+              zr.getZone().setTokenSelection(tokenSelection);
               MapTool.getFrame().refresh();
             }
           }

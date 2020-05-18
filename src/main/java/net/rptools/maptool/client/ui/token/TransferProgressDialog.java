@@ -29,6 +29,7 @@ import javax.swing.table.TableColumnModel;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.ConsumerListener;
@@ -46,7 +47,8 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
 
   public void showDialog() {
     dialog =
-        new GenericDialog("Assets in Transit", MapTool.getFrame(), this, false) {
+        new GenericDialog(
+            I18N.getText("TransferProgressDialog.title"), MapTool.getFrame(), this, false) {
           @Override
           public void showDialog() {
             MapTool.getAssetTransferManager().addConsumerListener(TransferProgressDialog.this);
@@ -121,7 +123,7 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
     public Object getValueAt(int rowIndex, int columnIndex) {
 
       if (consumerList.size() == 0) {
-        return columnIndex == 0 ? "None" : "";
+        return columnIndex == 0 ? I18N.getText("AddResourcesDialog.label.none") : "";
       }
 
       AssetConsumer consumer = consumerList.get(rowIndex);
@@ -147,11 +149,11 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
     public String getColumnName(int column) {
       switch (column) {
         case 0:
-          return "ID";
+          return I18N.getText("EditTokenDialog.msg.speech.colID");
         case 1:
-          return "Size";
+          return I18N.getText("token.popup.menu.size");
         case 2:
-          return "Progress";
+          return I18N.getText("Label.progress");
       }
       return "";
     }

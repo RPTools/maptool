@@ -51,7 +51,7 @@ public class ExportDataFunctions extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    if (!MapTool.getParser().isMacroPathTrusted())
+    if (!MapTool.getParser().isMacroTrusted())
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
     if (!AppPreferences.getAllowExternalMacroAccess())

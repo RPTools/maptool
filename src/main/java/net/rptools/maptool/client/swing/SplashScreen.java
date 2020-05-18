@@ -36,6 +36,8 @@ public class SplashScreen extends JFrame {
     final JFXPanel fxPanel = new JFXPanel();
 
     setUndecorated(true);
+    setType(Type.UTILITY);
+
     add(fxPanel);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

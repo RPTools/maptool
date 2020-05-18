@@ -47,6 +47,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;
 import net.rptools.maptool.client.TransferableToken;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
@@ -82,6 +83,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   private Directory dir;
   private static String filter;
   private boolean global;
+  private boolean extractRenderedPages;
   private List<File> fileList = new ArrayList<File>();
   private List<Directory> subDirList;
 
@@ -275,14 +277,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
                 + "<b>"
                 + name
                 + "</b>"
-                + "<br>Dimensions: "
-                + width
-                + " x "
-                + height
-                + "<br>Type: "
-                + fileType
-                + "<br>Size: "
-                + fileSize
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.dimensions", width, height)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.type", fileType)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.size", fileSize)
                 + "</html>";
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -375,6 +375,10 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
   }
 
+  public void setExtractRenderedPages(boolean extractRenderedPages) {
+    this.extractRenderedPages = extractRenderedPages;
+  }
+
   private class PdfExtractor extends SwingWorker<Void, Boolean> {
     private ExtractImagesFromPDF extractor;
     private final int pageCount;
@@ -387,7 +391,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       this.forceRescan = forceRescan;
 
       try {
-        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
 
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -448,7 +452,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan)
         throws IOException {
       this.pageNumber = pageNumber;
-      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
     }
 
     @Override

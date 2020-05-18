@@ -232,6 +232,16 @@ public class InitiativeList implements Serializable {
     return old;
   }
 
+  public Token getCurrentToken() {
+    int currentIndex = getCurrent();
+    return currentIndex < 0 ? null : getToken(currentIndex);
+  }
+
+  public TokenInitiative getCurrentTokenInitiative() {
+    int currentIndex = getCurrent();
+    return currentIndex < 0 ? null : getTokenInitiative(currentIndex);
+  }
+
   /** @return Getter for current */
   public int getCurrent() {
     return current;

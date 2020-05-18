@@ -27,26 +27,31 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.Window;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
+import java.util.function.Supplier;
+import javafx.application.Platform;
+import javafx.scene.ImageCursor;
+import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.tool.MeasureTool;
 
 /** */
 public class SwingUtil {
   public static Cursor emptyCursor;
+  public static javafx.scene.Cursor emptyCursorFX;
+  private static final String PATH_EMPTY = "net/rptools/lib/swing/image/empty.png";
 
   static {
     try {
       emptyCursor =
           Toolkit.getDefaultToolkit()
-              .createCustomCursor(
-                  ImageUtil.getImage("net/rptools/lib/swing/image/empty.png"), new Point(0, 0), "");
+              .createCustomCursor(ImageUtil.getImage(PATH_EMPTY), new Point(0, 0), "");
+      Platform.runLater(
+          () -> emptyCursorFX = new ImageCursor(new javafx.scene.image.Image(PATH_EMPTY), 0, 0));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -59,6 +64,7 @@ public class SwingUtil {
   /**
    * Tell the Graphics2D to use anti-aliased drawing and text.
    *
+   * @param g the Graphics to be affected
    * @return old AA
    */
   public static Object useAntiAliasing(Graphics2D g) {
@@ -70,6 +76,7 @@ public class SwingUtil {
   /**
    * Used after useAntiAliasing
    *
+   * @param g the Graphics to be affected
    * @param oldAA the value returned from useAntiAliasing
    */
   public static void restoreAntiAliasing(Graphics2D g, Object oldAA) {
@@ -167,7 +174,7 @@ public class SwingUtil {
   /**
    * Don't show the mouse pointer for this component
    *
-   * @param component
+   * @param component the component to hide mouse pointer inside
    */
   public static void hidePointer(Component component) {
     component.setCursor(emptyCursor);
@@ -176,7 +183,7 @@ public class SwingUtil {
   /**
    * Set the mouse pointer for this component to the default system cursor
    *
-   * @param component
+   * @param component the component to show mouse pointer inside
    */
   public static void showPointer(Component component) {
     component.setCursor(Cursor.getDefaultCursor());
@@ -290,5 +297,86 @@ public class SwingUtil {
 
   public static boolean hasComponent(JComponent container, String name) {
     return getComponent(container, name) != null;
+  }
+
+  /**
+   * Returns the JavaFX cursor equivalent of a Swing cursor
+   *
+   * @param cursor the Swing cursor
+   * @return the JavaFX cursor
+   */
+  public static javafx.scene.Cursor swingCursorToFX(Cursor cursor) {
+    if (cursor == null) {
+      return javafx.scene.Cursor.DEFAULT;
+    }
+    if (cursor == emptyCursor) {
+      return emptyCursorFX;
+    }
+    if (cursor == MeasureTool.getMeasureCursor()) {
+      return MeasureTool.getMeasureCursorFX();
+    }
+
+    switch (cursor.getType()) {
+      case Cursor.CROSSHAIR_CURSOR:
+        return javafx.scene.Cursor.CROSSHAIR;
+      case Cursor.E_RESIZE_CURSOR:
+        return javafx.scene.Cursor.E_RESIZE;
+      case Cursor.HAND_CURSOR:
+        return javafx.scene.Cursor.HAND;
+      case Cursor.MOVE_CURSOR:
+        return javafx.scene.Cursor.MOVE;
+      case Cursor.N_RESIZE_CURSOR:
+        return javafx.scene.Cursor.N_RESIZE;
+      case Cursor.NE_RESIZE_CURSOR:
+        return javafx.scene.Cursor.NE_RESIZE;
+      case Cursor.NW_RESIZE_CURSOR:
+        return javafx.scene.Cursor.NW_RESIZE;
+      case Cursor.S_RESIZE_CURSOR:
+        return javafx.scene.Cursor.S_RESIZE;
+      case Cursor.SE_RESIZE_CURSOR:
+        return javafx.scene.Cursor.SE_RESIZE;
+      case Cursor.SW_RESIZE_CURSOR:
+        return javafx.scene.Cursor.SW_RESIZE;
+      case Cursor.TEXT_CURSOR:
+        return javafx.scene.Cursor.TEXT;
+      case Cursor.W_RESIZE_CURSOR:
+        return javafx.scene.Cursor.W_RESIZE;
+      case Cursor.WAIT_CURSOR:
+        return javafx.scene.Cursor.WAIT;
+      default:
+        return javafx.scene.Cursor.DEFAULT;
+    }
+  }
+
+  public static boolean isMaximized(JFrame frame) {
+    return frame.getExtendedState() == JFrame.MAXIMIZED_BOTH;
+  }
+
+  /**
+   * Connects a JButton to a popup menu - to be used in toolbars for a simply button that opens
+   * popup on press
+   *
+   * @param button the button to use as trigger
+   * @param menu the popup menu to show
+   * @param rightAligned set to true to make the button right aligned
+   * @return the button
+   */
+  public static JButton makePopupMenuButton(
+      JButton button, Supplier<JPopupMenu> menu, boolean rightAligned) {
+    button.addMouseListener(
+        new MouseAdapter() {
+          public void mousePressed(MouseEvent e) {
+            JPopupMenu popup = menu.get();
+            // make popup at least as wide as the button
+            Dimension buttonDim = button.getSize();
+            popup.setMinimumSize(new Dimension(buttonDim.width, 0));
+            int x = 0;
+            if (rightAligned) {
+              x += Math.min(0, buttonDim.width - popup.getPreferredSize().width);
+            }
+            popup.show(button, x, button.getSize().height);
+          }
+        });
+    return button;
   }
 }
