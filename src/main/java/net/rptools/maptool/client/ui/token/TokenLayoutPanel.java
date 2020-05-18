@@ -33,7 +33,6 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
@@ -62,12 +61,7 @@ public class TokenLayoutPanel extends JPanel {
         new MouseWheelListener() {
           @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
-            int wheelMovement;
-            if (AppUtil.MAC_OS_X && SwingUtil.isShiftDown(e)) {
-              return;
-            } else {
-              wheelMovement = e.getWheelRotation();
-            }
+            int wheelMovement = e.getWheelRotation();
             // Not for snap-to-scale
             if (!token.isSnapToScale() || wheelMovement == 0) {
               return;
