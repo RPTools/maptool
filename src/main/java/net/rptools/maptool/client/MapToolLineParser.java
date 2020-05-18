@@ -1257,8 +1257,10 @@ public class MapToolLineParser {
                   Matcher testMatcher = Pattern.compile(testRegex).matcher(roll);
                   if (testMatcher.find()) { // verifies that roll body is well-formed
                     rollBranch = testMatcher.group(1 + whichBranch);
-                    if (rollBranch == null)
-                      rollBranch = "''"; // quick-and-dirty way to get no output
+                    if (rollBranch == null) {
+                      // Produces no output. If codeblock, empty string to fix #1876.
+                      rollBranch = codeType == CodeType.CODEBLOCK ? "" : "''";
+                    }
                     rollBranch = rollBranch.trim();
                   } else {
                     throw doError("lineParser.ifError", opts, roll);
