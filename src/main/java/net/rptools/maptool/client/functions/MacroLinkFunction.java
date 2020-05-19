@@ -497,6 +497,11 @@ public class MacroLinkFunction extends AbstractFunction {
 
   private static void doOutput(
       Token token, OutputTo outputTo, String line, Set<String> playerList) {
+
+    // Don't output blank messages. Fixes #1867.
+    if ("".equals(line)) {
+      return;
+    }
     /*
      * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
      * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with
