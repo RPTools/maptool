@@ -1750,13 +1750,6 @@ public class Token extends BaseModel implements Cloneable {
     if (val == null) {
       return "";
     }
-    // First we try convert it to a JSON object.
-    if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonObject() || json.isJsonArray()) {
-        return json;
-      }
-    }
     try {
       if (log.isDebugEnabled()) {
         log.debug(
@@ -1775,6 +1768,14 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (val == null) {
       val = "";
+    } else {
+      // Finally we try convert it to a JSON object. Fixes #1560.
+      if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+        if (json.isJsonObject() || json.isJsonArray()) {
+          return json;
+        }
+      }
     }
     return val;
   }
