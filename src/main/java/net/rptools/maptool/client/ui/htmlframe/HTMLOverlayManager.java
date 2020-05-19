@@ -26,6 +26,7 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,8 +112,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     if (newCursor != null && "DEFAULT".equals(newCursor.toString())) {
       // Only changes to the default cursor if all WebViews have the default cursor
       if (MapTool.getFrame().getOverlayPanel().areWebViewCursorsDefault()) {
-        Cursor cursor = MapTool.getFrame().getCurrentZoneRenderer().getCursor();
-        MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
+        ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+        if (zr != null) {
+          Cursor cursor = zr.getCursor();
+          MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
+        }
       }
     } else if (newCursor != null) {
       MapTool.getFrame().getOverlayPanel().setOverlayCursor(newCursor);
