@@ -18,10 +18,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +28,8 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
+import org.apache.commons.collections4.map.AbstractReferenceMap;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,7 +49,10 @@ public class ImageManager {
   /** Cache of images loaded for assets. */
   private static final Map<MD5Key, BufferedImage> imageMap = new HashMap<MD5Key, BufferedImage>();
 
-  private static final Map<MD5Key, byte[]> textureMap = new HashMap<MD5Key, byte[]>();
+  /** Additional Soft-reference Cache of images that allows best . */
+  private static final Map<MD5Key, BufferedImage> backupImageMap =
+      new ReferenceMap(
+          AbstractReferenceMap.ReferenceStrength.HARD, AbstractReferenceMap.ReferenceStrength.SOFT);
 
   /**
    * The unknown image, a "?" is used for all situations where the image will eventually appear e.g.
@@ -118,6 +120,8 @@ public class ImageManager {
   /**
    * Flush all images that are <b>not</b> in the provided set. This presumes that the images in the
    * exception set will still be in use after the flush.
+   *
+   * @param exceptionSet a set of images not to be flushed
    */
   public static void flush(Set<MD5Key> exceptionSet) {
     synchronized (imageLoaderMutex) {
@@ -201,6 +205,14 @@ public class ImageManager {
       if (image != null && image != TRANSFERING_IMAGE) {
         return image;
       }
+
+      // check if the soft reference still resolves image
+      image = backupImageMap.get(assetId);
+      if (image != null) {
+        imageMap.put(assetId, image);
+        return image;
+      }
+
       // Make note that we're currently processing it
       imageMap.put(assetId, TRANSFERING_IMAGE);
 
@@ -233,7 +245,6 @@ public class ImageManager {
   public static void flushImage(MD5Key assetId) {
     // LATER: investigate how this effects images that are already in progress
     imageMap.remove(assetId);
-    textureMap.remove(assetId);
   }
 
   /**
@@ -322,6 +333,7 @@ public class ImageManager {
       synchronized (imageLoaderMutex) {
         // Replace placeholder with actual image
         imageMap.put(asset.getId(), image);
+        backupImageMap.put(asset.getId(), image);
         notifyObservers(asset, image);
       }
     }

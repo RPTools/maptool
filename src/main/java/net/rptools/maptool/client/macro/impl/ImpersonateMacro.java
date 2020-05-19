@@ -23,7 +23,6 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 
 @MacroDefinition(
@@ -35,18 +34,14 @@ public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
     final CommandPanel cpanel = frame.getCommandPanel();
-    macro = macro.trim();
+    if (macro != null) macro = macro.trim();
 
-    // Stop impersonating
+    // Clear current identity
     if (macro == null || macro.length() == 0) {
-      cpanel.setIdentityGUID(null);
-      frame.getImpersonatePanel().stopImpersonating();
+      cpanel.setIdentity(new CommandPanel.TokenIdentity());
       return;
     }
     // Figure out what we want to impersonate
-    GUID oldGuid = cpanel.getIdentityGUID();
-    String oldIdentity = cpanel.getIdentity();
-
     String name = macro;
     int index = macro.indexOf(":");
     if (index > 0) {
@@ -69,24 +64,22 @@ public class ImpersonateMacro implements Macro {
     }
     // Impersonate
     if (index > 0) {
-      if (token != null) cpanel.setIdentityGUID(token.getId());
-      else cpanel.setIdentityName(name);
+      // Enter impersonation context for the duration of the macro
+      cpanel.enterContextIdentity(new CommandPanel.TokenIdentity(token, name));
       MacroManager.executeMacro(macro, executionContext);
-      if (oldGuid != null) cpanel.setIdentityGUID(oldGuid);
-      else cpanel.setIdentityName(oldIdentity);
+      cpanel.leaveContextIdentity();
     } else {
-      cpanel.setIdentityName(name);
-      if (token == null || !canLoadTokenMacros(token)) {
-        // we are impersonating but it's not a token or we are not allowed to see it's macros. so
-        // clear the token macro buttons panel
-        frame.getImpersonatePanel().stopImpersonating();
-      } else {
-        // we are impersonating another token now. we need to display its token macro buttons
-        frame.getImpersonatePanel().startImpersonating(token);
-      }
+      // Set current identity
+      cpanel.setIdentity(new CommandPanel.TokenIdentity(token, name, canLoadTokenMacros(token)));
     }
   }
 
+  /**
+   * Returns whether the player is allowed to impersonate the token or not.
+   *
+   * @param token the token to impersonate. Can be null for name-only impersonation.
+   * @return true if the player is allowed to impersonate, false otherwise
+   */
   private boolean canImpersonate(Token token) {
     // my addition
     if (!MapTool.getServerPolicy().isRestrictedImpersonation()) {
@@ -101,10 +94,16 @@ public class ImpersonateMacro implements Macro {
     return token.isOwner(MapTool.getPlayer().getName());
   }
 
+  /**
+   * Returns whether the player is allowed to run macros on the token.
+   *
+   * @param token the token
+   * @return true if the player can run macro on token, false otherwise.
+   */
   private boolean canLoadTokenMacros(Token token) {
-    if (MapTool.getPlayer().isGM()) {
-      return true;
+    if (token == null) {
+      return false;
     }
-    return token.isOwner(MapTool.getPlayer().getName());
+    return MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName());
   }
 }

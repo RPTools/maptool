@@ -1006,7 +1006,7 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
-  /** Return false if lightSourceList is null or empty, and true otherwise */
+  /** @return false if lightSourceList is null or empty, and true otherwise */
   public boolean hasLightSources() {
     return lightSourceList != null && !lightSourceList.isEmpty();
   }
@@ -1232,7 +1232,7 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOrigin;
   }
 
-  /**
+  /*
    * Lee: changing this to apply new X and Y values (as end point) for the token BEFORE its path is
    * computed. Path to be saved will be computed here instead of in ZoneRenderer
    */
@@ -1364,7 +1364,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  /** Return the vbl area of the token */
+  /**
+   * Return the vbl area of the token
+   *
+   * @return the current VBL of the token
+   */
   public Area getVBL() {
     return vbl;
   }
@@ -1377,7 +1381,8 @@ public class Token extends BaseModel implements Cloneable {
    * This method returns the vbl stored on the token with AffineTransformations applied for scale,
    * position, rotation, &amp; flipping.
    *
-   * @return
+   * @param areaToTransform transformations to apply to the VBL
+   * @return the transformed VBL for the token
    * @author Jamz
    * @since 1.4.1.5
    */
@@ -1632,7 +1637,12 @@ public class Token extends BaseModel implements Cloneable {
     this.sightType = sightType;
   }
 
-  /** @return Returns the size. */
+  /**
+   * Calculate the foot print of a grid
+   *
+   * @param grid the grid to get foot print of
+   * @return Returns the size.
+   */
   public TokenFootprint getFootprint(Grid grid) {
     return grid.getFootprint(getSizeMap().get(grid.getClass()));
   }
@@ -1769,20 +1779,12 @@ public class Token extends BaseModel implements Cloneable {
     return val;
   }
 
-  /**
-   * Returns all property names, all in lowercase.
-   *
-   * @return
-   */
+  /** @return all property names, all in lowercase. */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /**
-   * Returns all property names, preserving their case.
-   *
-   * @return
-   */
+  /** @return all property names, preserving their case. */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }
@@ -1964,6 +1966,7 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Get a set containing the names of all the states that match the passed value.
    *
+   * @param value the value to look for
    * @return The set of state property names that match the passed value.
    */
   public Set<String> getStatePropertyNames(Object value) {

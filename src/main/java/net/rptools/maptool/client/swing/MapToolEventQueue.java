@@ -19,9 +19,6 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
-import java.awt.event.FocusEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -46,46 +43,11 @@ public class MapToolEventQueue extends EventQueue {
           I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
           JOptionPane.ERROR_MESSAGE,
           JideOptionPane.CLOSE_OPTION);
-  /**
-   * This field must only ever be accessed from the EDT. Otherwise, a separate thread could access
-   * it to determine the state of the `Shift` key only to have the EDT progress to a different event
-   * such that the state is outdated.
-   *
-   * <p>An `int` is used to allow for future implementations to include the location of the key,
-   * i.e., Left-Shift or Right-Shift via event.getKeyLocation().
-   */
-  public static int shiftState = 0;
-
-  public static final int ALL_MODIFIERS_EXC_SHIFT =
-      InputEvent.CTRL_DOWN_MASK
-          | InputEvent.ALT_DOWN_MASK
-          | InputEvent.META_DOWN_MASK
-          | InputEvent.ALT_GRAPH_DOWN_MASK;
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
-      if (event instanceof KeyEvent) {
-        KeyEvent ke = (KeyEvent) event;
-        if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
-          switch (ke.getID()) {
-            case KeyEvent.KEY_PRESSED:
-              MapToolEventQueue.shiftState = 1;
-              break;
-            case KeyEvent.KEY_RELEASED:
-              MapToolEventQueue.shiftState = 0;
-              break;
-          }
-          // log.info("shiftState set to " + MapToolEventQueue.shiftState);
-        }
-      } else if (event instanceof FocusEvent) {
-        FocusEvent fe = (FocusEvent) event;
-        if (fe.getID() == FocusEvent.FOCUS_LOST) {
-          // When we lose focus, assume the Shift key is released.
-          MapToolEventQueue.shiftState = 0;
-          // log.info("shiftState forced off (focus lost)");
-        }
-      } else if (event instanceof MouseWheelEvent) {
+      if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
         if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
           // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is

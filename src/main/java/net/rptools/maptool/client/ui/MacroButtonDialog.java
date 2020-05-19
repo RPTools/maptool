@@ -108,7 +108,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private static final String READY = I18N.getText("Label.ready");
   private static final String SAVED = I18N.getText("Label.saved");
 
-  private static HashSet<String> openMacroList = new HashSet<String>(4);
+  private static final HashSet<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);
@@ -205,6 +205,14 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   @Override
   public String getSelectedText() {
     return macroEditorRSyntaxTextArea.getSelectedText();
+  }
+
+  /**
+   * @param id the id to look for
+   * @return whether the macro dialog is already opened.
+   */
+  public static boolean isMacroDialogOpen(String id) {
+    return openMacroList.contains(id);
   }
 
   private void installHotKeyCombo() {

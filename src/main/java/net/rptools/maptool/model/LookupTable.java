@@ -92,7 +92,7 @@ public class LookupTable {
    *
    * @param roll A string containing a dice expression or integer.
    * @return A LookupEntry matching the roll.
-   * @throws ParserException
+   * @throws ParserException if roll can't be parsed as integer or die expression
    */
   public LookupEntry getLookup(String roll) throws ParserException {
     LookupEntry entry;
@@ -112,7 +112,6 @@ public class LookupTable {
       entry = getStandardLookup(roll);
     }
 
-    // throw new ParserException("Unknown table lookup: " + tableResult);
     return entry;
   }
 
