@@ -104,4 +104,14 @@ public class RunData {
   public List<Integer> getRolled() {
     return Collections.unmodifiableList(rolled);
   }
+
+  /**
+   * Create a new RunData instance for a child execution.
+   *
+   * @param childResult the Result object for the new RunData
+   * @return a new RunData
+   */
+  public RunData createChildRunData(Result childResult) {
+    return new RunData(childResult);
+  }
 }
