@@ -940,12 +940,7 @@ public class ZoneRenderer extends JComponent
     List<Token> selectedTokens = null;
     if (getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
       selectedTokens = getSelectedTokensList();
-      for (ListIterator<Token> iter = selectedTokens.listIterator(); iter.hasNext(); ) {
-        Token token = iter.next();
-        if (!token.getHasSight() || !AppUtil.playerOwns(token)) {
-          iter.remove();
-        }
-      }
+      selectedTokens.removeIf(token -> !token.getHasSight() || !AppUtil.playerOwns(token));
     }
     if (selectedTokens == null || selectedTokens.isEmpty()) {
       // if no selected token qualifying for view, use owned tokens or player tokens with sight
@@ -1384,7 +1379,7 @@ public class ZoneRenderer extends JComponent
       // and figure tokens need sorting via alternative logic.
       List<Token> tokens = zone.getFigureTokens();
       List<Token> sortedTokens = new ArrayList<Token>(tokens);
-      Collections.sort(sortedTokens, zone.getFigureZOrderComparator());
+      sortedTokens.sort(zone.getFigureZOrderComparator());
       if (!tokens.isEmpty()) {
         timer.start("tokens - figures");
         renderTokens(g2d, sortedTokens, view, true);
@@ -1417,9 +1412,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("visionOverlayPlayer");
     }
     timer.start("overlays");
-    for (int i = 0; i < overlayList.size(); i++) {
+    for (ZoneOverlay overlay : overlayList) {
       String msg = null;
-      ZoneOverlay overlay = overlayList.get(i);
       if (timer.isEnabled()) {
         msg = "overlays:" + overlay.getClass().getSimpleName();
         timer.start(msg);
@@ -1514,11 +1508,8 @@ public class ZoneRenderer extends JComponent
         // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
         if (light.getType() == LightSource.Type.NORMAL) {
           if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
-            List<Area> areaList = colorMap.get(light.getPaint().getPaint());
-            if (areaList == null) {
-              areaList = new ArrayList<Area>();
-              colorMap.put(light.getPaint().getPaint(), areaList);
-            }
+            List<Area> areaList =
+                colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
             areaList.add(new Area(light.getArea()));
           }
         } else {
@@ -1710,9 +1701,7 @@ public class ZoneRenderer extends JComponent
     boolean isOwner = AppUtil.playerOwns(tokenUnderMouse);
     boolean tokenIsPC = tokenUnderMouse.getType() == Token.Type.PC;
     boolean strictOwnership =
-        MapTool.getServerPolicy() == null
-            ? false
-            : MapTool.getServerPolicy().useStrictTokenManagement();
+        MapTool.getServerPolicy() != null && MapTool.getServerPolicy().useStrictTokenManagement();
     boolean showVisionAndHalo = isOwner || view.isGMView() || (tokenIsPC && !strictOwnership);
     // String player = MapTool.getPlayer().getName();
     // System.err.print("tokenUnderMouse.ownedBy(" + player + "): " + isOwner);
@@ -2314,7 +2303,7 @@ public class ZoneRenderer extends JComponent
         double iso_ho = 0;
         Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
         if (token.getShape() == TokenShape.FIGURE) {
-          double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+          double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
           iso_ho = footprintBounds.height - th;
           footprintBounds =
               new Rectangle(
