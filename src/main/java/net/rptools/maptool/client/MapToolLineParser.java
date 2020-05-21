@@ -1703,7 +1703,8 @@ public class MapToolLineParser {
         throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
       }
       macroBody = mbp.getCommand();
-      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getParser().isMacroTrusted());
+      // GM macros can't be edited by players, so they are always trusted.
+      macroContext = new MapToolMacroContext(macroName, "Gm", true);
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;
