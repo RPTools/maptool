@@ -294,7 +294,7 @@ public class ZoneView implements ModelChangeListener {
       lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
       lightArea.intersect(visibleArea);
 
-      if (light.getPaint() != null || isPersonalLight) {
+      if (light.getPaint() != null) {
         lightSet.add(new DrawableLight(lightSource.getType(), light.getPaint(), lightArea));
       } else {
         brightLightSet.add(lightArea);
