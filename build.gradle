@@ -238,7 +238,7 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.29.v20200521'
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.25.v20191220'
