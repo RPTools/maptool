@@ -20,7 +20,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -163,18 +162,18 @@ public class ZoneView implements ModelChangeListener {
   // }
 
   /**
-   * Return the lightSourceArea of the lightSourceToken, for the baseToken's sight type. Fill the
+   * Return the lightSourceArea of a lightSourceToken for a given sight type. Fill the
    * lightSourceCache entry if null.
    *
-   * @param baseToken the base token. Used to get the appropriate sight type.
+   * @param sightName the name of the sight type for which to get the light source area
    * @param lightSourceToken the token holding the light sources.
    * @return the lightSourceArea.
    */
-  private TreeMap<Double, Area> getLightSourceArea(Token baseToken, Token lightSourceToken) {
-    Map<String, TreeMap<Double, Area>> areaBySightMap =
-        lightSourceCache.get(lightSourceToken.getId());
+  private TreeMap<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
+    GUID tokenId = lightSourceToken.getId();
+    Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
     if (areaBySightMap != null) {
-      TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(baseToken.getSightType());
+      TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
       if (lightSourceArea != null) {
         return lightSourceArea;
       }
@@ -192,7 +191,7 @@ public class ZoneView implements ModelChangeListener {
       if (lightSource == null) {
         continue;
       }
-      SightType sight = MapTool.getCampaign().getSightType(baseToken.getSightType());
+      SightType sight = MapTool.getCampaign().getSightType(sightName);
       Area visibleArea =
           calculateLightSourceArea(
               lightSource, lightSourceToken, sight, attachedLightSource.getDirection());
@@ -210,7 +209,7 @@ public class ZoneView implements ModelChangeListener {
     }
 
     // Cache
-    areaBySightMap.put(baseToken.getSightType(), lightSourceAreaMap);
+    areaBySightMap.put(sightName, lightSourceAreaMap);
     return lightSourceAreaMap;
   }
 
@@ -275,13 +274,31 @@ public class ZoneView implements ModelChangeListener {
     }
     Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopologyTree());
 
-    if (visibleArea == null) {
-      return null;
+    if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
+      addLightSourceToCache(visibleArea, p, lightSource, lightSourceToken, sight, direction);
     }
+    return visibleArea;
+  }
 
-    if (lightSource.getType() != LightSource.Type.NORMAL) {
-      return visibleArea;
-    }
+  /**
+   * Adds the light source as seen by a given sight to the corresponding cache. Lights with a color
+   * CSS value are stored in the drawableLightCache, while lights without are stored in
+   * brightLightCache.
+   *
+   * @param visibleArea the area visible from the light source token
+   * @param p the vision center of the light source token
+   * @param lightSource the light source
+   * @param lightSourceToken the light source token
+   * @param sight the sight
+   * @param direction the direction of the light source
+   */
+  private void addLightSourceToCache(
+      Area visibleArea,
+      Point p,
+      LightSource lightSource,
+      Token lightSourceToken,
+      SightType sight,
+      Direction direction) {
     // Keep track of colored light
     Set<DrawableLight> lightSet = new HashSet<DrawableLight>();
     Set<Area> brightLightSet = new HashSet<Area>();
@@ -322,7 +339,6 @@ public class ZoneView implements ModelChangeListener {
     } else {
       brightLightMap.put(sight.getName(), brightLightSet);
     }
-    return visibleArea;
   }
 
   /**
@@ -388,7 +404,7 @@ public class ZoneView implements ModelChangeListener {
       // stopwatch.start();
       // Jamz: Iterate through all tokens and combine light areas by lumens
       CombineLightsSwingWorker workerThread =
-          new CombineLightsSwingWorker(token, lightSourceTokens);
+          new CombineLightsSwingWorker(token.getSightType(), lightSourceTokens);
       workerThread.execute();
       try {
         workerThread
@@ -451,13 +467,13 @@ public class ZoneView implements ModelChangeListener {
   }
 
   private class CombineLightsSwingWorker extends SwingWorker<Void, List<Token>> {
-    private final Token baseToken;
+    private final String sightName;
     private final List<Token> lightSourceTokens;
     private final ExecutorService lightsThreadPool;
     private final long startTime = System.currentTimeMillis();
 
-    private CombineLightsSwingWorker(Token baseToken, List<Token> lightSourceTokens) {
-      this.baseToken = baseToken;
+    private CombineLightsSwingWorker(String sightName, List<Token> lightSourceTokens) {
+      this.sightName = sightName;
       this.lightSourceTokens = lightSourceTokens;
       lightsThreadPool = Executors.newCachedThreadPool();
     }
@@ -465,7 +481,7 @@ public class ZoneView implements ModelChangeListener {
     @Override
     protected Void doInBackground() throws Exception {
       for (Token lightSourceToken : lightSourceTokens) {
-        CombineLightsTask task = new CombineLightsTask(baseToken, lightSourceToken);
+        CombineLightsTask task = new CombineLightsTask(sightName, lightSourceToken);
         lightsThreadPool.submit(task);
       }
 
@@ -491,17 +507,17 @@ public class ZoneView implements ModelChangeListener {
    *     task
    */
   private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
-    private final Token baseToken;
+    private final String sightName;
     private final Token lightSourceToken;
 
-    private CombineLightsTask(Token baseToken, Token lightSourceToken) {
-      this.baseToken = baseToken;
+    private CombineLightsTask(String sightName, Token lightSourceToken) {
+      this.sightName = sightName;
       this.lightSourceToken = lightSourceToken;
     }
 
     @Override
     public TreeMap<Double, Area> call() {
-      TreeMap<Double, Area> lightArea = getLightSourceArea(baseToken, lightSourceToken);
+      TreeMap<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
         // Area tempArea = light.getValue();
@@ -626,8 +642,7 @@ public class ZoneView implements ModelChangeListener {
     Set<Area> lightSet = new HashSet<Area>();
     // MJ: There seems to be contention for this cache, but that looks inconspicuous enough to
     // try this easy way out. Better: solve the synchronization issues.
-    Collection<Map<String, Set<Area>>> copy =
-        new ArrayList<Map<String, Set<Area>>>(brightLightCache.values());
+    List<Map<String, Set<Area>>> copy = new ArrayList<>(brightLightCache.values());
     for (Map<String, Set<Area>> map : copy) {
       for (Set<Area> set : map.values()) {
         lightSet.addAll(set);
