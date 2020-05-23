@@ -498,8 +498,7 @@ public class StrPropFunctions extends AbstractFunction {
       throw new ParameterException(
           I18N.getText("macro.function.strPropFromVar.wrongArgs", varStyleString));
     }
-    List<String> varList = new ArrayList<String>();
-    StrListFunctions.parse(parameters.get(0).toString(), varList, ",");
+    List<String> varList = StrListFunctions.toList(parameters.get(0).toString(), ",");
     StringBuilder sb = new StringBuilder();
     int i = 0;
     int varListSize = varList.size();

@@ -184,8 +184,7 @@ public class MathFunctions extends AbstractFunction {
       String functionName, List<Object> param) throws ParserException {
     checkParamNumber(functionName, param, 1, 2);
     String delim = (param.size() > 1) ? param.get(1).toString() : ",";
-    List<String> stringList = new ArrayList<>();
-    StrListFunctions.parse(param.get(0).toString(), stringList, delim);
+    List<String> stringList = StrListFunctions.toList(param.get(0).toString(), delim);
     if (stringList.size() == 0) {
       throw new ParserException(
           I18N.getText("macro.function.general.listCannotBeEmpty", functionName, 1));

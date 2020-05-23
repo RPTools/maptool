@@ -973,8 +973,7 @@ public class MapToolLineParser {
 
                     // If we still dont have a list treat it list a string list
                     if (foreachList == null) {
-                      foreachList = new ArrayList<String>();
-                      StrListFunctions.parse(listString, foreachList, listDelim);
+                      foreachList = StrListFunctions.toList(listString, listDelim);
                     }
                     loopCount = foreachList.size();
 
