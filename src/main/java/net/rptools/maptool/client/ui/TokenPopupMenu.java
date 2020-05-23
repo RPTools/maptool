@@ -1017,9 +1017,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         token.setLastPath(null);
 
         MapTool.serverCommand().putToken(zone.getId(), token);
-
-        // Cache clearing
-        getRenderer().flush(token);
       }
       getRenderer().repaint();
     }

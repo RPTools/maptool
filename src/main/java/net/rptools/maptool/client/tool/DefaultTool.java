@@ -292,7 +292,6 @@ public abstract class DefaultTool extends Tool
 
         token.setFacing(facing);
 
-        renderer.flush(token);
         MapTool.serverCommand().putToken(getZone().getId(), token);
       }
 

@@ -407,7 +407,6 @@ public class FogUtil {
 
       timer.stop("exposeLastPath-" + token.getName());
       renderer.flush(tokenClone);
-      renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
 
       filteredToks.clear();
       filteredToks.add(token.getId());
