@@ -418,8 +418,7 @@ public class Zone extends BaseModel {
         }
         putToken(token);
         List<Integer> list = zone.initiativeList.indexOf(old);
-        for (Integer integer : list) {
-          int index = integer.intValue();
+        for (Integer index : list) {
           saveInitiative[index][0] = token;
           saveInitiative[index][1] = zone.initiativeList.getTokenInitiative(index);
         }
@@ -955,11 +954,6 @@ public class Zone extends BaseModel {
           }
           meta.addToExposedAreaHistory(area);
         }
-      }
-      // If 'meta' is not null, it means at least one token's TEA was modified so we need to flush
-      // the ZoneView
-      if (meta != null) {
-        zoneView.flush();
       }
     } else {
       // Not using IF so add the EA to the GEA instead of a TEA.
