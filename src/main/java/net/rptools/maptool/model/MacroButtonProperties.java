@@ -356,9 +356,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     } else if (saveLocation.equals("GlobalPanel")) {
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
-      MapTool.getCampaign().saveMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, false);
     } else if (saveLocation.equals("GmPanel")) {
-      MapTool.getCampaign().saveGmMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, true);
     }
   }
 
@@ -380,10 +380,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     } else if (commonMacro) {
       executeCommonMacro(tokenList);
     } else {
-      if (tokenList.size() > 0) {
-        for (Token token : tokenList) {
-          executeCommand(token.getId());
-        }
+      for (Token token : tokenList) {
+        executeCommand(token.getId());
       }
     }
   }
