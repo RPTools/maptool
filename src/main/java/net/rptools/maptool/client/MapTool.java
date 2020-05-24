@@ -98,6 +98,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
+import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -877,6 +878,21 @@ public class MapTool {
    */
   public static void addLocalMessage(String message) {
     addMessage(TextMessage.me(null, message));
+  }
+
+  /**
+   * Adds an error message that includes the macro stack trace.
+   *
+   * @param e the ParserException to display the error of
+   */
+  public static void addErrorMessage(ParserException e) {
+    MapTool.addLocalMessage(e.getMessage());
+
+    String[] macroStackTrace = e.getMacroStackTrace();
+    if (macroStackTrace.length > 0) {
+      MapTool.addLocalMessage(
+          I18N.getText("msg.error.trace", String.join(" &lt;&lt;&lt; ", macroStackTrace)));
+    }
   }
 
   /**

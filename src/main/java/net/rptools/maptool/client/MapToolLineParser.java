@@ -1414,6 +1414,9 @@ public class MapToolLineParser {
                   if (!catchAssert) throw assertEx;
                   MapTool.addLocalMessage(assertEx.getMessage());
                   output_text = "";
+                } catch (ParserException e) {
+                  e.addMacro(callName);
+                  throw e;
                 }
 
                 if (output != Output.NONE) {
