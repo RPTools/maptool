@@ -373,7 +373,7 @@ public abstract class Grid implements Cloneable {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
         // which Hex type you choose
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
-        visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+        visionRange += Math.min(footprintWidth, footprintHeight);
       }
     }
 
@@ -432,7 +432,7 @@ public abstract class Grid implements Cloneable {
 
         double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-        double adjustment = (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+        double adjustment = Math.min(footprintWidth, footprintHeight);
         x -= adjustment / 2;
         y -= adjustment / 2;
 
