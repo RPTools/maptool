@@ -475,7 +475,9 @@ public class MacroLinkFunction extends AbstractFunction {
       } catch (AbortFunctionException e) {
         // Do nothing
       } catch (ParserException e) {
-        MapTool.addLocalMessage(e.getMessage());
+        e.addMacro(macroName);
+        e.addMacro("macroLink");
+        MapTool.addErrorMessage(e);
       }
     }
   }
