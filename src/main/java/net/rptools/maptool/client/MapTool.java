@@ -96,8 +96,9 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
-import net.rptools.maptool.util.UserJvmPrefs;
+import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
+import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -880,6 +881,21 @@ public class MapTool {
   }
 
   /**
+   * Adds an error message that includes the macro stack trace.
+   *
+   * @param e the ParserException to display the error of
+   */
+  public static void addErrorMessage(ParserException e) {
+    MapTool.addLocalMessage(e.getMessage());
+
+    String[] macroStackTrace = e.getMacroStackTrace();
+    if (macroStackTrace.length > 0) {
+      MapTool.addLocalMessage(
+          I18N.getText("msg.error.trace", String.join(" &lt;&lt;&lt; ", macroStackTrace)));
+    }
+  }
+
+  /**
    * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
    *
    * @param message message to be sent
@@ -1609,7 +1625,7 @@ public class MapTool {
       listMacros = getCommandLineOption(cmd, "macros");
 
       if (getCommandLineOption(cmd, "reset")) {
-        UserJvmPrefs.resetJvmOptions();
+        UserJvmOptions.resetJvmOptions();
       }
     } catch (ParseException e) {
       // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
@@ -1689,8 +1705,7 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash =
-        new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)

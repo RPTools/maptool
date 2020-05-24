@@ -418,8 +418,7 @@ public class Zone extends BaseModel {
         }
         putToken(token);
         List<Integer> list = zone.initiativeList.indexOf(old);
-        for (Integer integer : list) {
-          int index = integer.intValue();
+        for (Integer index : list) {
           saveInitiative[index][0] = token;
           saveInitiative[index][1] = zone.initiativeList.getTokenInitiative(index);
         }
@@ -936,9 +935,8 @@ public class Zone extends BaseModel {
           MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
       String playerId = MapTool.getPlayer().getName();
       MapToolFrame frame = MapTool.getFrame();
-      ZoneRenderer zr =
-          frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen? Fix is to
-      // use getId() instead of 'this'
+      // FIXME 'zr' was null -- how can this happen? Fix is to use getId() instead of 'this'
+      ZoneRenderer zr = frame.getZoneRenderer(getId());
       ZoneView zoneView = zr.getZoneView();
       ExposedAreaMetaData meta = null;
 
@@ -956,11 +954,6 @@ public class Zone extends BaseModel {
           }
           meta.addToExposedAreaHistory(area);
         }
-      }
-      // If 'meta' is not null, it means at least one token's TEA was modified so we need to flush
-      // the ZoneView
-      if (meta != null) {
-        zoneView.flush();
       }
     } else {
       // Not using IF so add the EA to the GEA instead of a TEA.
@@ -1432,10 +1425,7 @@ public class Zone extends BaseModel {
    */
   public Token getTokenByName(String name) {
     for (Token token : getAllTokens()) {
-      if (StringUtil.isEmpty(token.getName())) {
-        continue;
-      }
-      if (token.getName().equalsIgnoreCase(name)) {
+      if (name.equalsIgnoreCase(token.getName())) {
         return token;
       }
     }
@@ -1449,18 +1439,20 @@ public class Zone extends BaseModel {
    * @return token that matches the identifier or <code>null</code>
    */
   public Token resolveToken(String identifier) {
-    Token token = getTokenByName(identifier);
 
-    if (token == null) {
-      token = getTokenByGMName(identifier);
+    // try fast lookup first for an identifier that might be a GUID len=16
+    if (!GUID.isNotGUID(identifier)) {
+      try {
+        return getToken(GUID.valueOf(identifier));
+      } catch (Exception e) {
+        // wasn't a GUID afterall, OK to ignore
+      }
     }
 
+    // look at (GM)name
+    Token token = getTokenByName(identifier);
     if (token == null) {
-      try {
-        token = getToken(GUID.valueOf(identifier));
-      } catch (Exception e) {
-        // indication of not a GUID, OK to ignore
-      }
+      token = getTokenByGMName(identifier);
     }
     return token;
   }

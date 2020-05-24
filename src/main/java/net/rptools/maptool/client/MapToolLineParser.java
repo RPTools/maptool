@@ -1257,8 +1257,10 @@ public class MapToolLineParser {
                   Matcher testMatcher = Pattern.compile(testRegex).matcher(roll);
                   if (testMatcher.find()) { // verifies that roll body is well-formed
                     rollBranch = testMatcher.group(1 + whichBranch);
-                    if (rollBranch == null)
-                      rollBranch = "''"; // quick-and-dirty way to get no output
+                    if (rollBranch == null) {
+                      // Produces no output. If codeblock, empty string to fix #1876.
+                      rollBranch = codeType == CodeType.CODEBLOCK ? "" : "''";
+                    }
                     rollBranch = rollBranch.trim();
                   } else {
                     throw doError("lineParser.ifError", opts, roll);
@@ -1412,6 +1414,9 @@ public class MapToolLineParser {
                   if (!catchAssert) throw assertEx;
                   MapTool.addLocalMessage(assertEx.getMessage());
                   output_text = "";
+                } catch (ParserException e) {
+                  e.addMacro(callName);
+                  throw e;
                 }
 
                 if (output != Output.NONE) {
@@ -1701,7 +1706,8 @@ public class MapToolLineParser {
         throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
       }
       macroBody = mbp.getCommand();
-      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getParser().isMacroTrusted());
+      // GM macros can't be edited by players, so they are always trusted.
+      macroContext = new MapToolMacroContext(macroName, "Gm", true);
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;

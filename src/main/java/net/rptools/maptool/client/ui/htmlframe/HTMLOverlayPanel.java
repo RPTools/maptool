@@ -360,7 +360,9 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   void passMouseEvent(MouseEvent e) {
     Component c = MapTool.getFrame().getCurrentZoneRenderer();
-    c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
+    if (c != null) {
+      c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
+    }
   }
 
   /**

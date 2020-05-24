@@ -52,9 +52,6 @@ public class AnimationManager {
     public void run() {
 
       while (true) {
-
-        if (animatableList.size() > 0) {}
-
         synchronized (animatableList) {
           animatableList.addAll(addList);
           addList.clear();
