@@ -135,6 +135,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
                   funcDef.macroName,
                   macroArgs,
                   funcDef.newVariableContext);
+    } catch (ParserException e) {
+      e.addMacro(funcDef.macroName);
+      throw e;
     } finally {
       currentFunction.pop();
     }
