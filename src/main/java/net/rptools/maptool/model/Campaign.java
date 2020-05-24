@@ -31,6 +31,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
+import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
@@ -499,38 +500,19 @@ public class Campaign {
     gmMacroButtonProperties = properties;
   }
 
-  public void saveMacroButtonProperty(MacroButtonProperties properties) {
-    // find the matching property in the array
-    // TODO: hashmap? or equals()? or what?
-    for (MacroButtonProperties prop : macroButtonProperties) {
-      if (prop.getIndex() == properties.getIndex()) {
-        prop.setColorKey(properties.getColorKey());
-        prop.setAutoExecute(properties.getAutoExecute());
-        prop.setCommand(properties.getCommand());
-        prop.setHotKey(properties.getHotKey());
-        prop.setIncludeLabel(properties.getIncludeLabel());
-        prop.setApplyToTokens(properties.getApplyToTokens());
-        prop.setLabel(properties.getLabel());
-        prop.setGroup(properties.getGroup());
-        prop.setSortby(properties.getSortby());
-        prop.setFontColorKey(properties.getFontColorKey());
-        prop.setFontSize(properties.getFontSize());
-        prop.setMinWidth(properties.getMinWidth());
-        prop.setMaxWidth(properties.getMaxWidth());
-        prop.setToolTip(properties.getToolTip());
-        prop.setAllowPlayerEdits(properties.getAllowPlayerEdits());
-        MapTool.getFrame().getCampaignPanel().reset();
-        return;
-      }
-    }
-    macroButtonProperties.add(properties);
-    MapTool.getFrame().getCampaignPanel().reset();
-  }
+  /**
+   * Saves a button in the Campaign or GM panel.
+   *
+   * @param properties the properties of the button to save
+   * @param gmPanel whether the button is in the GM panel.
+   */
+  public void saveMacroButtonProperty(MacroButtonProperties properties, boolean gmPanel) {
+    List<MacroButtonProperties> macroButtonList =
+        gmPanel ? gmMacroButtonProperties : macroButtonProperties;
+    AbstractMacroPanel macroPanel =
+        gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
 
-  public void saveGmMacroButtonProperty(MacroButtonProperties properties) {
-    // find the matching property in the array
-    // TODO: hashmap? or equals()? or what?
-    for (MacroButtonProperties prop : gmMacroButtonProperties) {
+    for (MacroButtonProperties prop : macroButtonList) {
       if (prop.getIndex() == properties.getIndex()) {
         prop.setColorKey(properties.getColorKey());
         prop.setAutoExecute(properties.getAutoExecute());
@@ -547,12 +529,20 @@ public class Campaign {
         prop.setMaxWidth(properties.getMaxWidth());
         prop.setToolTip(properties.getToolTip());
         prop.setAllowPlayerEdits(properties.getAllowPlayerEdits());
-        MapTool.getFrame().getGmPanel().reset();
+        prop.setDisplayHotKey(properties.getDisplayHotKey());
+        prop.setCompareIncludeLabel(properties.getCompareIncludeLabel());
+        prop.setCompareAutoExecute(properties.getCompareAutoExecute());
+        prop.setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
+        prop.setCompareGroup(properties.getCompareGroup());
+        prop.setCompareSortPrefix(properties.getCompareSortPrefix());
+        prop.setCompareCommand(properties.getCompareCommand());
+
+        macroPanel.reset();
         return;
       }
     }
-    gmMacroButtonProperties.add(properties);
-    MapTool.getFrame().getGmPanel().reset();
+    macroButtonList.add(properties);
+    macroPanel.reset();
   }
 
   public int getMacroButtonNextIndex() {
