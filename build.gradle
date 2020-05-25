@@ -225,7 +225,7 @@ dependencies {
     implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.6.0'
-    implementation 'com.github.RPTools:dicelib:1.6.0'
+    implementation 'com.github.RPTools:dicelib:1.6.2'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -305,13 +305,6 @@ dependencies {
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
-
-    // sourceControl gitRepository currently not producing classpath for Eclipse
-    // using jitpack.io for now
-    // compile ('net.rptools.dicelib:dicelib:1.5.2')
-    implementation 'com.github.RPTools:dicelib:1.6.1'
-
-
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
