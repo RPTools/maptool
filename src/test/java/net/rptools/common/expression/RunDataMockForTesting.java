@@ -14,8 +14,8 @@
  */
 package net.rptools.common.expression;
 
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 /**
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class RunDataMockForTesting extends RunData {
   private static final Logger log = Logger.getLogger(RunDataMockForTesting.class.getName());
-  private final Queue<Integer> toRoll = new LinkedList<>();
+  private Queue<Integer> toRoll = new ConcurrentLinkedQueue<>();
 
   /**
    * Construct the RunData with desired sequence of values to return as "roll" results.
@@ -36,6 +36,30 @@ public class RunDataMockForTesting extends RunData {
   public RunDataMockForTesting(Result result, int[] rolls) {
     super(result);
     for (int i : rolls) toRoll.add(i);
+  }
+
+  /**
+   * Private constructor to create a new instance with an existing pre-configured queue.
+   *
+   * @param result the Result object, required by {@link RunData}
+   * @param rolls the pre-configured queue of rolls
+   */
+  private RunDataMockForTesting(Result result, Queue<Integer> rolls) {
+    super(result);
+    toRoll = rolls;
+  }
+
+  /**
+   * Create a child RunData instance, sharing the queue of pre-configured rolls. This allows child
+   * execution contexts (such as UDFs) to continue operating from the same pre-configured queue of
+   * rolls.
+   *
+   * @param childResult the Result object for the new RunData
+   * @return the child RunData
+   */
+  @Override
+  public RunData createChildRunData(Result childResult) {
+    return new RunDataMockForTesting(childResult, toRoll);
   }
 
   /**
