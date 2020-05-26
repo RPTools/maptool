@@ -300,7 +300,7 @@ public class Token extends BaseModel implements Cloneable {
   private CaseInsensitiveHashMap<Object> propertyMapCI;
 
   private Map<String, String> macroMap;
-  private Map<Integer, Object> macroPropertiesMap;
+  private Map<Integer, MacroButtonProperties> macroPropertiesMap;
 
   private Map<String, String> speechMap;
 
@@ -415,11 +415,10 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().putAll(token.propertyMapCI);
     }
     if (token.macroPropertiesMap != null) { // Deep copy of the macros
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      macroPropertiesMap = new HashMap<>(token.macroPropertiesMap.size());
       token.macroPropertiesMap.forEach(
           (key, value) ->
-              macroPropertiesMap.put(
-                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
+              macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -1818,7 +1817,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public int getMacroNextIndex() {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<Integer, MacroButtonProperties>();
     }
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
@@ -1836,22 +1835,22 @@ public class Token extends BaseModel implements Cloneable {
    * @param secure whether there should be a check for player ownership
    * @return the map
    */
-  public Map<Integer, Object> getMacroPropertiesMap(boolean secure) {
+  public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<>();
     }
     if (macroMap != null) {
       loadOldMacros();
     }
     if (secure && !AppUtil.playerOwns(this)) {
-      return new HashMap<Integer, Object>(); // blank map
+      return new HashMap<>(); // blank map
     } else {
       return macroPropertiesMap;
     }
   }
 
   public MacroButtonProperties getMacro(int index, boolean secure) {
-    return (MacroButtonProperties) getMacroPropertiesMap(secure).get(index);
+    return getMacroPropertiesMap(secure).get(index);
   }
 
   // avoid this; it loads the first macro with this label, but there could be more than one macro
@@ -1859,7 +1858,7 @@ public class Token extends BaseModel implements Cloneable {
   public MacroButtonProperties getMacro(String label, boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       if (prop.getLabel().equals(label)) {
         return prop;
       }
@@ -1867,11 +1866,17 @@ public class Token extends BaseModel implements Cloneable {
     return null;
   }
 
+  /**
+   * Gets the list of macros on the token.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the list
+   */
   public List<MacroButtonProperties> getMacroList(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<MacroButtonProperties> list = new ArrayList<MacroButtonProperties>();
     for (int key : keys) {
-      list.add((MacroButtonProperties) macroPropertiesMap.get(key));
+      list.add(macroPropertiesMap.get(key));
     }
     return list;
   }
@@ -1918,7 +1923,7 @@ public class Token extends BaseModel implements Cloneable {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<String> list = new ArrayList<String>();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       list.add(prop.getLabel());
     }
     return list;
