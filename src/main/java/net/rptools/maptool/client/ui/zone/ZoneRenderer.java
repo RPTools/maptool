@@ -119,6 +119,7 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
@@ -4689,6 +4690,16 @@ public class ZoneRenderer extends JComponent
         }
         MapToolUtil.uploadAsset(asset);
       }
+      // Set all macros to "Allow players to edit macro", because the macros are not trusted
+      if (!isGM) {
+        Map<Integer, MacroButtonProperties> mbpMap = token.getMacroPropertiesMap(false);
+        for (MacroButtonProperties mbp : mbpMap.values()) {
+          if (!mbp.getAllowPlayerEdits()) {
+            mbp.setAllowPlayerEdits(true);
+          }
+        }
+      }
+
       // Save the token and tell everybody about it
       MapTool.serverCommand().putToken(zone.getId(), token);
       selectThese.add(token.getId());
