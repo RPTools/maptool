@@ -125,11 +125,10 @@ public class TestFunctions extends AbstractFunction {
   }
 
   private void runTests(Token token) {
-    Map<Integer, Object> macroPropertiesMap =
+    Map<Integer, MacroButtonProperties> macroPropertiesMap =
         token.getMacroPropertiesMap(MapTool.getParser().isMacroTrusted());
 
-    for (Object o : macroPropertiesMap.values()) {
-      MacroButtonProperties mbp = (MacroButtonProperties) o;
+    for (MacroButtonProperties mbp : macroPropertiesMap.values()) {
       if (mbp.getLabel().toLowerCase().startsWith("test:")) {
 
         failures = 0;
