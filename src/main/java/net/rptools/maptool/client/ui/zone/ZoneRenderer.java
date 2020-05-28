@@ -119,6 +119,7 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
@@ -620,7 +621,7 @@ public class ZoneRenderer extends JComponent
           Token token = zone.getToken(tokenGUID);
           tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
 
-          if (tmc != null && tmc == BigDecimal.ONE) {
+          if (BigDecimal.ONE.equals(tmc)) {
             denyMovement(token);
           }
         }
@@ -634,7 +635,7 @@ public class ZoneRenderer extends JComponent
         tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
-        if (tmc != null && tmc == BigDecimal.ONE) {
+        if (BigDecimal.ONE.equals(tmc)) {
           for (GUID tokenGUID : filteredTokens) {
             Token token = zone.getToken(tokenGUID);
             denyMovement(token);
@@ -1504,7 +1505,7 @@ public class ZoneRenderer extends JComponent
       // Organize
       Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
       List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
-      for (DrawableLight light : zoneView.getDrawableLights()) {
+      for (DrawableLight light : zoneView.getDrawableLights(view)) {
         // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
         if (light.getType() == LightSource.Type.NORMAL) {
           if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
@@ -1550,7 +1551,7 @@ public class ZoneRenderer extends JComponent
         // Cut out the bright light
         if (areaList.size() > 0) {
           for (Area area : areaList) {
-            for (Area brightArea : zoneView.getBrightLights()) {
+            for (Area brightArea : zoneView.getBrightLights(view)) {
               area.subtract(brightArea);
             }
           }
@@ -3252,7 +3253,7 @@ public class ZoneRenderer extends JComponent
       double iso_ho = 0;
       Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
       if (token.getShape() == TokenShape.FIGURE) {
-        double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+        double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
         iso_ho = footprintBounds.height - th;
         footprintBounds =
             new Rectangle(
@@ -3657,7 +3658,7 @@ public class ZoneRenderer extends JComponent
             int labelWidth =
                 SwingUtilities.computeStringWidth(fm, token.getLabel())
                     + GraphicsUtil.BOX_PADDINGX * 2;
-            width = (width > labelWidth) ? width : labelWidth;
+            width = Math.max(width, labelWidth);
           }
 
           // Set up the image
@@ -4689,6 +4690,16 @@ public class ZoneRenderer extends JComponent
         }
         MapToolUtil.uploadAsset(asset);
       }
+      // Set all macros to "Allow players to edit macro", because the macros are not trusted
+      if (!isGM) {
+        Map<Integer, MacroButtonProperties> mbpMap = token.getMacroPropertiesMap(false);
+        for (MacroButtonProperties mbp : mbpMap.values()) {
+          if (!mbp.getAllowPlayerEdits()) {
+            mbp.setAllowPlayerEdits(true);
+          }
+        }
+      }
+
       // Save the token and tell everybody about it
       MapTool.serverCommand().putToken(zone.getId(), token);
       selectThese.add(token.getId());

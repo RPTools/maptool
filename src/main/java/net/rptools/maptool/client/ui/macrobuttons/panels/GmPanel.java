@@ -59,7 +59,7 @@ public class GmPanel extends AbstractMacroPanel {
     campProps.clear();
     for (MacroButtonProperties nextProp : startingProps) {
       if (!macroGroup.equals(nextProp.getGroup())) {
-        MapTool.getCampaign().saveGmMacroButtonProperty(nextProp);
+        MapTool.getCampaign().saveMacroButtonProperty(nextProp, true);
       }
     }
     getGmPanel().reset();

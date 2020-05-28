@@ -721,11 +721,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           .getSelectionPanel()
           .getCommonMacros()
           .contains(button.getProperties())) {
-        Boolean changeAllowPlayerEdits = false;
-        Boolean endingAllowPlayerEdits = false;
+        boolean changeAllowPlayerEdits = false;
+        boolean endingAllowPlayerEdits = false;
         if (startingAllowPlayerEdits) {
           if (!properties.getAllowPlayerEdits()) {
-            Boolean confirmDisallowPlayerEdits =
+            boolean confirmDisallowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.disallowPlayerEdits"));
             if (confirmDisallowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -736,7 +736,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           }
         } else {
           if (properties.getAllowPlayerEdits()) {
-            Boolean confirmAllowPlayerEdits =
+            boolean confirmAllowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.allowPlayerEdits"));
             if (confirmAllowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -746,17 +746,13 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             }
           }
         }
-        Boolean trusted = true;
+        boolean trusted = true;
         for (Token nextToken :
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-          if (AppUtil.playerOwns(nextToken)) {
-            trusted = true;
-          } else {
-            trusted = false;
-          }
+          trusted = AppUtil.playerOwns(nextToken);
           boolean isGM = MapTool.getPlayer().isGM();
           for (MacroButtonProperties nextMacro : nextToken.getMacroList(trusted)) {
-            if (isGM || (!isGM && nextMacro.getApplyToTokens())) {
+            if (isGM || nextMacro.getApplyToTokens()) {
               if (nextMacro.hashCodeForComparison() == oldHashCode) {
                 nextMacro.setLabel(properties.getLabel());
                 if (properties.getCompareGroup() && startingCompareGroup) {

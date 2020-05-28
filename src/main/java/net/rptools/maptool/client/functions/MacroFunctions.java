@@ -481,6 +481,11 @@ public class MacroFunctions extends AbstractFunction {
       setMacroProps(mbp, prop, delim);
     }
 
+    // Untrusted macros are set to be editable by players
+    if (!MapTool.getParser().isMacroTrusted()) {
+      mbp.setAllowPlayerEdits(true);
+    }
+
     mbp.setLabel(label);
     mbp.setSaveLocation("Token");
     mbp.setTokenId(token);

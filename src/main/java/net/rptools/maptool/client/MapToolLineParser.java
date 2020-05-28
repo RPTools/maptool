@@ -1413,6 +1413,9 @@ public class MapToolLineParser {
                   if (!catchAssert) throw assertEx;
                   MapTool.addLocalMessage(assertEx.getMessage());
                   output_text = "";
+                } catch (ParserException e) {
+                  e.addMacro(callName);
+                  throw e;
                 }
 
                 if (output != Output.NONE) {
@@ -1533,12 +1536,8 @@ public class MapToolLineParser {
     try {
       parserRecurseDepth++;
       if (log.isDebugEnabled()) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 1; i < parserRecurseDepth; i++) {
-          b.append(' ');
-        }
-        b.append(expression);
-        log.debug(b.toString());
+        String b = " ".repeat(Math.max(0, parserRecurseDepth - 1)) + expression;
+        log.debug(b);
       }
       Result res = createParser(resolver, tokenInContext != null).evaluate(expression);
       rolled.addAll(res.getRolled());
@@ -1668,15 +1667,17 @@ public class MapToolLineParser {
       // Unqualified names are not allowed.
       throw new ParserException(I18N.getText("lineParser.invalidMacroLoc", macroName));
     } else if (macroLocation.equalsIgnoreCase("TOKEN")) {
-      macroContext = new MapToolMacroContext(macroName, "token", MapTool.getPlayer().isGM());
-      // Search token for the macro
+      boolean trusted = false;
       if (tokenInContext != null) {
-        MacroButtonProperties buttonProps = tokenInContext.getMacro(macroName, false);
-        if (buttonProps == null) {
+        // Search token for the macro
+        MacroButtonProperties mbp = tokenInContext.getMacro(macroName, false);
+        if (mbp == null) {
           throw new ParserException(I18N.getText("lineParser.atTokenNotFound", macroName));
         }
-        macroBody = buttonProps.getCommand();
+        macroBody = mbp.getCommand();
+        trusted = !mbp.getAllowPlayerEdits();
       }
+      macroContext = new MapToolMacroContext(macroName, "token", trusted);
     } else if (macroLocation.equalsIgnoreCase("CAMPAIGN")) {
       MacroButtonProperties mbp = null;
       for (MacroButtonProperties m : MapTool.getCampaign().getMacroButtonPropertiesArray()) {

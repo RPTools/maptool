@@ -130,6 +130,10 @@ public class MacroManager {
   public static void executeMacro(String command, MapToolMacroContext macroExecutionContext) {
     MacroContext context = new MacroContext();
     context.addTransform(command);
+    String macroButtonName =
+        macroExecutionContext == null
+            ? "chat"
+            : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
 
     try {
       command = preprocess(command);
@@ -158,12 +162,7 @@ public class MacroManager {
         Macro macro = getRegisteredMacro(key);
         MacroDefinition def = macro.getClass().getAnnotation(MacroDefinition.class);
 
-        boolean trustedPath =
-            macroExecutionContext == null ? false : macroExecutionContext.isTrusted();
-        String macroButtonName =
-            macroExecutionContext == null
-                ? "<chat>"
-                : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
+        boolean trustedPath = macroExecutionContext != null && macroExecutionContext.isTrusted();
 
         // Preprocess line if required.
         if (def == null || def.expandRolls()) {
@@ -206,7 +205,8 @@ public class MacroManager {
       MapTool.addLocalMessage(afe.getMessage());
       return;
     } catch (ParserException e) {
-      MapTool.addLocalMessage(e.getMessage());
+      e.addMacro(macroButtonName);
+      MapTool.addErrorMessage(e);
       // These are not errors to worry about as they are usually user input errors so no need to log
       // them.
       return;
