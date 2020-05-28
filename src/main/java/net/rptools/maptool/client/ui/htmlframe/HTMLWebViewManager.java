@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.Scene;
@@ -631,8 +632,50 @@ public class HTMLWebViewManager {
       } else continue; // skip elements not containing data
       addToObject(jObj, name, value);
     }
-    String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
+
+    // Find the link data
+    Matcher m = MacroLinkFunction.LINK_DATA_PATTERN.matcher(action);
+    JsonElement linkData = null;
+    if (m.matches()) {
+      // Separate the action from the data
+      action = m.group(1);
+      linkData = MacroLinkFunction.getInstance().getLinkDataAsJson(m.group(2));
+    }
+
+    // Combines and encodes the form data with the link data
+    String data = getEncodedCombinedData(jObj, linkData);
+
     doSubmit("json", action, data);
+  }
+
+  /**
+   * Combines and encodes the form data with the link data. If there is no link data, uses the form
+   * data only. If the link data is a json, adds the form data as the "form" property. Otherwise,
+   * only uses the link data.
+   *
+   * @param formData the JsonObject containing the form data
+   * @param linkData the JsonElement containing the link data
+   * @return the encoded data
+   */
+  private String getEncodedCombinedData(JsonObject formData, JsonElement linkData) {
+    JsonObject jobjLinkData = null;
+    if (linkData != null && linkData.isJsonObject()) {
+      jobjLinkData = linkData.getAsJsonObject();
+    }
+
+    String combinedData;
+    if (linkData == null) {
+      // Returns the encoded json of the form data if there is no link data
+      combinedData = formData.toString();
+    } else if (jobjLinkData == null || jobjLinkData.has("form")) {
+      // Ignores the form data if the link data is not a json object or already has "form" field
+      combinedData = linkData.toString();
+    } else {
+      // Adds the form data to the json object link data
+      jobjLinkData.add("form", formData);
+      combinedData = jobjLinkData.toString();
+    }
+    return URLEncoder.encode(combinedData, StandardCharsets.UTF_8);
   }
 
   /**
