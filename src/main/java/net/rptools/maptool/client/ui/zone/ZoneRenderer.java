@@ -119,6 +119,7 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
@@ -937,8 +938,21 @@ public class ZoneRenderer extends JComponent
    * @return the player view
    */
   public PlayerView getPlayerView(Player.Role role) {
+    return getPlayerView(role, true);
+  }
+
+  /**
+   * The returned {@link PlayerView} contains a list of tokens that includes either all selected
+   * tokens that this player owns and that have their <code>HasSight</code> checkbox enabled, or all
+   * owned tokens that have <code>HasSight</code> enabled.
+   *
+   * @param role the player role
+   * @param selected whether to get the view of selected tokens, or all owned
+   * @return the player view
+   */
+  public PlayerView getPlayerView(Player.Role role, boolean selected) {
     List<Token> selectedTokens = null;
-    if (getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
+    if (selected && getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
       selectedTokens = getSelectedTokensList();
       selectedTokens.removeIf(token -> !token.getHasSight() || !AppUtil.playerOwns(token));
     }
@@ -4689,6 +4703,16 @@ public class ZoneRenderer extends JComponent
         }
         MapToolUtil.uploadAsset(asset);
       }
+      // Set all macros to "Allow players to edit macro", because the macros are not trusted
+      if (!isGM) {
+        Map<Integer, MacroButtonProperties> mbpMap = token.getMacroPropertiesMap(false);
+        for (MacroButtonProperties mbp : mbpMap.values()) {
+          if (!mbp.getAllowPlayerEdits()) {
+            mbp.setAllowPlayerEdits(true);
+          }
+        }
+      }
+
       // Save the token and tell everybody about it
       MapTool.serverCommand().putToken(zone.getId(), token);
       selectThese.add(token.getId());
