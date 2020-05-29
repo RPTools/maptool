@@ -45,7 +45,7 @@ public class TokenNameFunction extends AbstractFunction {
       throws ParserException {
     Token token;
 
-    if (functionName.equals("getName")) {
+    if (functionName.equalsIgnoreCase("getName")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
     } else {
