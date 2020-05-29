@@ -839,9 +839,15 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
     }
 
+    // Rescale the bounds to match the view scale
+    double scale = renderer.getScale();
+    extents.setLocation((int) (extents.x * scale), (int) (extents.y * scale));
+    extents.setSize((int) (extents.width * scale), (int) (extents.height * scale));
+
     // Setup the renderer to use the new extents
     Scale s = new Scale();
     s.setOffset(-extents.x, -extents.y);
+    s.setScale(scale);
     renderer.setZoneScale(s);
     renderer.setBounds(extents);
 
