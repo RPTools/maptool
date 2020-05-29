@@ -938,8 +938,21 @@ public class ZoneRenderer extends JComponent
    * @return the player view
    */
   public PlayerView getPlayerView(Player.Role role) {
+    return getPlayerView(role, true);
+  }
+
+  /**
+   * The returned {@link PlayerView} contains a list of tokens that includes either all selected
+   * tokens that this player owns and that have their <code>HasSight</code> checkbox enabled, or all
+   * owned tokens that have <code>HasSight</code> enabled.
+   *
+   * @param role the player role
+   * @param selected whether to get the view of selected tokens, or all owned
+   * @return the player view
+   */
+  public PlayerView getPlayerView(Player.Role role, boolean selected) {
     List<Token> selectedTokens = null;
-    if (getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
+    if (selected && getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
       selectedTokens = getSelectedTokensList();
       selectedTokens.removeIf(token -> !token.getHasSight() || !AppUtil.playerOwns(token));
     }
