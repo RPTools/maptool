@@ -94,9 +94,9 @@ public class TokenMoveFunctions extends AbstractFunction {
               I18N.getText("macro.function.general.argumentTypeN", functionName, 1));
         }
         val = (BigDecimal) parameters.get(0);
-        useDistancePerCell = val != null && val.equals(BigDecimal.ZERO) ? false : true;
+        useDistancePerCell = val == null || !val.equals(BigDecimal.ZERO);
       }
-      Path<?> path = tokenInContext.getLastPath();
+      Path<? extends AbstractPoint> path = tokenInContext.getLastPath();
 
       List<Map<String, Integer>> pathPoints = getLastPathList(path, useDistancePerCell);
       return pathPointsToJSONArray(pathPoints);
@@ -136,18 +136,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       if (parameters.size() == 1) {
         BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
-        useFractionOnly =
-            fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+        useFractionOnly = fractionOnly == null || !fractionOnly.equals(BigDecimal.ZERO);
       }
 
       if (parameters.size() == 2) {
         BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
-        useFractionOnly =
-            fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+        useFractionOnly = fractionOnly == null || !fractionOnly.equals(BigDecimal.ZERO);
 
         BigDecimal terrainModifiers = (BigDecimal) parameters.get(1);
-        useTerrainModifiers =
-            terrainModifiers != null && terrainModifiers.equals(BigDecimal.ZERO) ? false : true;
+        useTerrainModifiers = terrainModifiers == null || !terrainModifiers.equals(BigDecimal.ZERO);
       }
 
       if (useFractionOnly) {
@@ -356,6 +353,9 @@ public class TokenMoveFunctions extends AbstractFunction {
         pointObj = new JsonObject();
         pointObj.addProperty("x", entry.get("x"));
         pointObj.addProperty("y", entry.get("y"));
+        if (entry.containsKey("fail")) {
+          pointObj.addProperty("fail", entry.get("fail"));
+        }
         jsonArr.add(pointObj);
       }
     else
@@ -374,7 +374,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private List<Map<String, Integer>> getLastPathList(
-      final Path<?> path, final boolean useDistancePerCell) {
+      final Path<? extends AbstractPoint> path, final boolean useDistancePerCell) {
     List<Map<String, Integer>> points = new ArrayList<Map<String, Integer>>();
     if (path != null) {
       Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
@@ -382,26 +382,31 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       log.debug("...in getLastPathList.  Loop over each path elements");
 
-      for (Object pathCells : path.getCellPath()) {
+      for (AbstractPoint pathCell : path.getCellPath()) {
         log.debug(
             "...in getLastPathList.  Converting each path item to a cell point or zone point.");
 
-        if (pathCells instanceof CellPoint) {
-          CellPoint cp = (CellPoint) pathCells;
+        if (pathCell instanceof CellPoint) {
+          CellPoint cp = (CellPoint) pathCell;
           if (useDistancePerCell) {
-            zp = zone.getGrid().convert((CellPoint) pathCells);
+            zp = zone.getGrid().convert((CellPoint) pathCell);
           } else {
             zp = cp;
           }
         } else {
-          zp = (ZonePoint) pathCells;
+          zp = pathCell;
         }
         if (zp != null) {
           log.debug("...in getLastPathList.  Got a point, adding to list.");
 
-          Map<String, Integer> tokenLocationPoint = new HashMap<String, Integer>();
-          tokenLocationPoint.put("x", Integer.valueOf(zp.x));
-          tokenLocationPoint.put("y", Integer.valueOf(zp.y));
+          Map<String, Integer> tokenLocationPoint = new HashMap<>();
+          if (pathCell.isAStarCanceled()) {
+            tokenLocationPoint.put("fail", 1);
+          }
+
+          tokenLocationPoint.put("x", zp.x);
+          tokenLocationPoint.put("y", zp.y);
+
           points.add(tokenLocationPoint);
         }
       }

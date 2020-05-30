@@ -31,6 +31,7 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
   double h;
   double f;
   double terrainModifier;
+  boolean isAStarCanceled = false;
   TerrainModifierOperation terrainModifierOperation;
 
   // Store if it's valid to move from Point2D to this cell.
@@ -38,6 +39,20 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
 
   public AStarCellPoint() {
     super(0, 0);
+  }
+
+  @Override
+  public boolean isAStarCanceled() {
+    return isAStarCanceled;
+  }
+
+  /**
+   * Sets the A* cancellation status to the cell.
+   *
+   * @param aStarCanceled whether A* couldn't find a path to the cell
+   */
+  public void setAStarCanceled(boolean aStarCanceled) {
+    isAStarCanceled = aStarCanceled;
   }
 
   public AStarCellPoint(int x, int y) {
