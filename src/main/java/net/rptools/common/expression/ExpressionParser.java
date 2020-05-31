@@ -220,6 +220,10 @@ public class ExpressionParser {
   }
 
   public Result evaluate(String expression) throws ParserException {
+    return evaluate(expression, true);
+  }
+
+  public Result evaluate(String expression, boolean makeDeterministic) throws ParserException {
     Result ret = new Result(expression);
     RunData oldData = RunData.hasCurrent() ? RunData.getCurrent() : null;
     try {
@@ -233,9 +237,12 @@ public class ExpressionParser {
 
       synchronized (parser) {
         Expression xp = parser.parseExpression(expression);
-        Expression dxp = xp.getDeterministicExpression();
-        ret.setDetailExpression(dxp.format());
-        ret.setValue(dxp.evaluate());
+
+        if (makeDeterministic) {
+          xp = xp.getDeterministicExpression();
+        }
+        ret.setDetailExpression(xp.format());
+        ret.setValue(xp.evaluate());
         ret.setRolled(newRunData.getRolled());
       }
     } finally {
