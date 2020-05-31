@@ -266,6 +266,42 @@ public class ExpressionParserTest extends TestCase {
     evaluateExpression(parser, "food10 + 10", new BigDecimal(20));
   }
 
+  public void testNonDetailedExpression() throws ParserException {
+    ExpressionParser parser = new ExpressionParser();
+
+    int[] flattenings = new int[] {0};
+
+    parser
+        .getParser()
+        .setVariable(
+            "anumber",
+            new BigDecimal(3) {
+              @Override
+              public String toString() {
+                flattenings[0]++;
+                return super.toString();
+              }
+            });
+
+    // one evaluation with detailed expression (the default)
+    Result result = parser.evaluate("anumber + 1", true);
+    assertEquals("anumber + 1", result.getExpression());
+    assertEquals("3 + 1", result.getDetailExpression());
+    assertEquals(new BigDecimal(4), result.getValue());
+
+    // one evaluation without detailed expression (this makes dicelib not go through a deterministic
+    // expression)
+    result = parser.evaluate("anumber + 1", false);
+    assertEquals("anumber + 1", result.getExpression());
+    assertEquals("anumber + 1", result.getDetailExpression());
+    assertEquals(new BigDecimal(4), result.getValue());
+
+    // expecting one flattening only for the former, not for the latter
+    // this makes json arrays not being flattened/coerced on every macro
+    // line *unless* the result is printed out
+    assertEquals(flattenings[0], 1);
+  }
+
   private void evaluateExpression(ExpressionParser p, String expression, BigDecimal answer)
       throws ParserException {
     Result result = p.evaluate(expression);
