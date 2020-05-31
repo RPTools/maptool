@@ -33,6 +33,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 /** Class used to implement Json related functions in MT script. */
 public class JSONMacroFunctions extends AbstractFunction {
@@ -281,7 +282,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
           // Special case if first argument is empty string it represents an empty array
           JsonArray jsonArray;
-          if (args.get(0).toString().length() == 0) {
+          Object arg = args.get(0);
+          if (arg instanceof String && StringUtils.isEmpty(((String) arg))) {
             jsonArray = new JsonArray();
           } else {
             jsonArray = jsonArrayFunctions.coerceToJsonArray(args.get(0));
