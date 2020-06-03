@@ -87,9 +87,9 @@ public class StrListFunctions extends AbstractFunction {
 
   private static Pattern PATTERN_FOR_EMPTY_SEPARATOR = Pattern.compile("(.)()", Pattern.DOTALL);
   private static Pattern PATTERN_FOR_COMMA_SEPARATOR =
-      Pattern.compile("\\s*(\\S*?)\\s*\\,|\\s*(\\S*)\\s*", Pattern.DOTALL);
+      Pattern.compile("\\s*(.*?)\\s*\\,|\\s*(.*?)\\s*$", Pattern.DOTALL);
   private static Pattern PATTERN_FOR_SEMICOLON_SEPARATOR =
-      Pattern.compile("\\s*(\\S*?)\\s*\\;|\\s*(\\S*)\\s*", Pattern.DOTALL);
+      Pattern.compile("\\s*(.*?)\\s*\\;|\\s*(.*?)\\s*$", Pattern.DOTALL);
 
   /**
    * Parses a list.
@@ -114,7 +114,7 @@ public class StrListFunctions extends AbstractFunction {
       // This pattern needs to be compiled with the DOTALL flag or line terminators might
       // cause premature termination of the matcher.find() operations...
       String escDelim = fullyQuoteString(delim);
-      pattern = Pattern.compile("\\s*(\\S*?)\\s*" + escDelim + "|\\s*(\\S*)\\s*", Pattern.DOTALL);
+      pattern = Pattern.compile("\\s*(.*?)\\s*" + escDelim + "|\\s*(.*?)\\s*$", Pattern.DOTALL);
     }
 
     Matcher matcher = pattern.matcher(listStr);

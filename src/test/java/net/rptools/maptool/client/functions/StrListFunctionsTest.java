@@ -52,6 +52,12 @@ public class StrListFunctionsTest {
   public void testListGet() throws ParameterException {
 
     setDelim(",");
+    assertEquals("Wild Magic Surge", listGet(0, "Wild Magic Surge"));
+    setDelim(";");
+    assertEquals("Sild Wagic Murge", listGet(1, "Wild Magic Surge;   Sild Wagic Murge"));
+    assertEquals("", listGet(2, "Wild Magic Surge;   Sild Wagic Murge;"));
+
+    setDelim(",");
     assertEquals("one", listGet(0, "one,two,three"));
     assertEquals("two", listGet(1, "    one,two,three  "));
     assertEquals("three", listGet(2, "one,   two,three   "));
@@ -112,6 +118,13 @@ public class StrListFunctionsTest {
   public void testListAppend() throws ParameterException {
 
     setDelim(",");
+    assertEquals(
+        "one or the other, something with space",
+        listAppend("one or the other", "something with space"));
+    assertEquals(
+        "one or the other,, something with space",
+        listAppend("one or the other,", "something with space"));
+
     assertEquals("one", listAppend("", "one"));
     assertEquals("one, two", listAppend("one", "two"));
     assertEquals("one,   two, three", listAppend("one,   two", "three"));
@@ -152,6 +165,9 @@ public class StrListFunctionsTest {
   public void testListCount() throws ParameterException {
 
     setDelim(",");
+    assertEquals(big(4), listCount("one, two, three and four, five"));
+    assertEquals(big(5), listCount("one, two, three and four, five,"));
+
     assertEquals(big(0), listCount(""));
     assertEquals(big(1), listCount("one"));
     assertEquals(big(2), listCount("one,   two"));
@@ -170,6 +186,9 @@ public class StrListFunctionsTest {
 
   @Test
   public void testListFind() throws ParameterException {
+
+    setDelim(",");
+    assertEquals(big(1), listFind("one,     two with spaces , three", "two with spaces"));
 
     setDelim(",");
     assertEquals(big(-1), listFind("", "foo"));
@@ -298,6 +317,11 @@ public class StrListFunctionsTest {
 
   @Test
   public void testListSort() throws ParameterException {
+
+    setDelim(",");
+    assertEquals(
+        "a and 1, b and 2, c and 3, d and 4", listSort(" d and 4, a and 1,  b and 2  ,c and 3"));
+
     setDelim(",");
     assertEquals("", listSort(""));
     assertEquals("a, b, c, d", listSort("d,a,b,c"));
