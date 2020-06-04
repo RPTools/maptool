@@ -1,5 +1,5 @@
 ---
-name: zenhub_epic.md
+name: ZenHub Epic
 about: This template is for creating ZenHub Epics
 title: 'Epic: '
 labels: ''
@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-This is a [ZenHub](https://www.zenhub.com/)Epic
+This is a [ZenHub](https://www.zenhub.com/) Epic
 
 **Summary of the Epic.**
 Add Summary of the Epic.
