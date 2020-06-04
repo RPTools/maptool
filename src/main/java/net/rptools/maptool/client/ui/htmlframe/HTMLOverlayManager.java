@@ -17,8 +17,8 @@ package net.rptools.maptool.client.ui.htmlframe;
 import com.sun.webkit.WebPage;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.web.WebEngine;
@@ -51,10 +51,20 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private static final String SCRIPT_GET_POINTERMAP =
       "window.getComputedStyle(this).getPropertyValue('--pointermap')";
 
-  /** The "page" field of class WebEngine. */
-  private static Field pageField;
-  /** The "setBackgroundColor" method of class WebPage. */
-  private static Method pageColorMethod;
+  /** Getter handle for the "page" field of class WebEngine. Used to make the WebView invisible. */
+  private static final MethodHandle getPageHandle;
+
+  /* Initialize the MethodHandle. */
+  static {
+    try {
+      MethodHandles.Lookup lookup = MethodHandles.lookup();
+      lookup = MethodHandles.privateLookupIn(WebEngine.class, lookup);
+      getPageHandle = lookup.findGetter(WebEngine.class, "page", WebPage.class);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /** The RGB value for a fully invisible color (alpha = 0). */
   private static final int COLOR_INVISIBLE = new Color(0, 0, 0, 0).getRGB();
   /** The RGB value for a nearly invisible color (alpha = 1). */
@@ -155,18 +165,10 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
    */
   private void setPageBackgroundColor(int rgb) {
     try {
-      if (pageField == null) {
-        pageField = WebEngine.class.getDeclaredField("page");
-        pageField.setAccessible(true);
-      }
-      if (pageColorMethod == null) {
-        pageColorMethod = WebPage.class.getDeclaredMethod("setBackgroundColor", int.class);
-        pageColorMethod.setAccessible(true);
-      }
-      WebPage page = (WebPage) pageField.get(getWebEngine());
-      pageColorMethod.invoke(page, rgb);
-    } catch (ReflectiveOperationException | NullPointerException e) {
-      e.printStackTrace();
+      WebPage page = (WebPage) getPageHandle.invokeExact(getWebEngine());
+      page.setBackgroundColor(rgb);
+    } catch (Throwable throwable) {
+      throwable.printStackTrace();
     }
   }
 
