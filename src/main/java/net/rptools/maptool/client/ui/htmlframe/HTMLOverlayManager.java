@@ -14,15 +14,15 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.sun.webkit.WebPage;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -51,6 +51,15 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private static final String SCRIPT_GET_POINTERMAP =
       "window.getComputedStyle(this).getPropertyValue('--pointermap')";
 
+  /** The "page" field of class WebEngine. */
+  private static Field pageField;
+  /** The "setBackgroundColor" method of class WebPage. */
+  private static Method pageColorMethod;
+  /** The RGB value for a fully invisible color (alpha = 0). */
+  private static final int COLOR_INVISIBLE = new Color(0, 0, 0, 0).getRGB();
+  /** The RGB value for a nearly invisible color (alpha = 1). */
+  private static final int COLOR_VISIBLE = new Color(128, 128, 128, 1).getRGB();
+
   /** The ZOrder of the overlay. */
   private int zOrder;
 
@@ -61,7 +70,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private Object value;
 
   /** The map of the macro callbacks. */
-  private final Map<String, String> macroCallbacks = new HashMap<String, String>();
+  private final Map<String, String> macroCallbacks = new HashMap<>();
 
   HTMLOverlayManager(String name, int zOrder) {
     addActionListener(this); // add the action listeners for form events
@@ -96,11 +105,18 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   @Override
   void handlePage() {
     super.handlePage();
-    makeWebEngineTransparent(); // transparent WebView
+    setPageBackgroundColor(COLOR_INVISIBLE); // transparent WebView
 
     getWebView()
         .cursorProperty()
         .addListener((obs, oldCursor, newCursor) -> updateOverlayCursor(newCursor));
+  }
+
+  @Override
+  public void updateContents(final String html, boolean scrollReset) {
+    // Sets the background to be barely visible. Workaround to fix #1976.
+    setPageBackgroundColor(COLOR_VISIBLE);
+    super.updateContents(html, scrollReset);
   }
 
   /**
@@ -132,19 +148,24 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
         + CSS_POINTERMAP;
   }
 
-  /** Makes the webEngine transparent through reflection. */
-  private void makeWebEngineTransparent() {
+  /**
+   * Sets the page background of the WebEngine page through reflection.
+   *
+   * @param rgb the integer corresponding to the color
+   */
+  private void setPageBackgroundColor(int rgb) {
     try {
-      Field f = getWebEngine().getClass().getDeclaredField("page");
-      f.setAccessible(true);
-      Object page = f.get(getWebEngine());
-      Method m = page.getClass().getMethod("setBackgroundColor", int.class);
-      m.setAccessible(true);
-      m.invoke(page, (new Color(0, 0, 0, 0)).getRGB());
-    } catch (NoSuchFieldException
-        | IllegalAccessException
-        | NoSuchMethodException
-        | InvocationTargetException e) {
+      if (pageField == null) {
+        pageField = WebEngine.class.getDeclaredField("page");
+        pageField.setAccessible(true);
+      }
+      if (pageColorMethod == null) {
+        pageColorMethod = WebPage.class.getDeclaredMethod("setBackgroundColor", int.class);
+        pageColorMethod.setAccessible(true);
+      }
+      WebPage page = (WebPage) pageField.get(getWebEngine());
+      pageColorMethod.invoke(page, rgb);
+    } catch (ReflectiveOperationException | NullPointerException e) {
       e.printStackTrace();
     }
   }
