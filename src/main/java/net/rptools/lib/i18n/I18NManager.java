@@ -20,13 +20,16 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class I18NManager {
+public final class I18NManager {
 
   private static List<String> bundleNameList = new CopyOnWriteArrayList<String>();
   private static List<ResourceBundle> bundleList = new ArrayList<ResourceBundle>();
   private static Locale locale = Locale.US;
   private static List<LocaleChangeListener> localeListenerList =
       new CopyOnWriteArrayList<LocaleChangeListener>();
+
+  private I18NManager() {
+  }
 
   public static void addBundle(String bundleName) {
     bundleNameList.add(bundleName);
@@ -46,15 +49,10 @@ public class I18NManager {
 
   public static String getText(String key) {
 
-    for (ResourceBundle bundle : bundleList) {
+    return bundleList.stream()
+            .findFirst().map(bundle -> bundle.getString(key))
+            .orElse(key);
 
-      String value = bundle.getString(key);
-      if (value != null) {
-        return value;
-      }
-    }
-
-    return key;
   }
 
   private static synchronized void fireLocaleChanged() {
