@@ -20,21 +20,23 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class I18NManager {
+public final class I18NManager {
 
-  private static List<String> bundleNameList = new CopyOnWriteArrayList<String>();
-  private static List<ResourceBundle> bundleList = new ArrayList<ResourceBundle>();
+  private static final List<String> BUNDLE_NAME_LIST = new CopyOnWriteArrayList<String>();
+  private static final List<ResourceBundle> BUNDLE_LIST = new ArrayList<ResourceBundle>();
   private static Locale locale = Locale.US;
-  private static List<LocaleChangeListener> localeListenerList =
+  private static final List<LocaleChangeListener> LOCALE_LISTENER_LIST =
       new CopyOnWriteArrayList<LocaleChangeListener>();
 
+  private I18NManager() {}
+
   public static void addBundle(String bundleName) {
-    bundleNameList.add(bundleName);
+    BUNDLE_NAME_LIST.add(bundleName);
     updateBundles();
   }
 
   public static void removeBundle(String bundleName) {
-    bundleNameList.remove(bundleName);
+    BUNDLE_NAME_LIST.remove(bundleName);
     updateBundles();
   }
 
@@ -46,31 +48,22 @@ public class I18NManager {
 
   public static String getText(String key) {
 
-    for (ResourceBundle bundle : bundleList) {
-
-      String value = bundle.getString(key);
-      if (value != null) {
-        return value;
-      }
-    }
-
-    return key;
+    return BUNDLE_LIST.stream().findFirst().map(bundle -> bundle.getString(key)).orElse(key);
   }
 
   private static synchronized void fireLocaleChanged() {
 
-    for (LocaleChangeListener listener : localeListenerList) {
+    for (LocaleChangeListener listener : LOCALE_LISTENER_LIST) {
       listener.localeChanged(locale);
     }
   }
 
   private static synchronized void updateBundles() {
 
-    bundleList.clear();
+    BUNDLE_LIST.clear();
 
-    for (String bundleName : bundleNameList) {
-
-      bundleList.add(ResourceBundle.getBundle(bundleName, locale));
+    for (String bundleName : BUNDLE_NAME_LIST) {
+      BUNDLE_LIST.add(ResourceBundle.getBundle(bundleName, locale));
     }
   }
 }
