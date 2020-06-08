@@ -87,7 +87,9 @@ public class SoundManager {
   public static void configure(String configPath) throws IOException {
     Properties props = new Properties();
     InputStream clipList = SoundManager.class.getClassLoader().getResourceAsStream(configPath);
-    if (clipList == null) throw new IOException();
+    if (clipList == null) {
+      throw new IOException();
+    }
     props.load(clipList);
     configure(props);
   }
@@ -114,7 +116,9 @@ public class SoundManager {
    * @param path the path to the sound
    */
   public static void registerSound(String name, String path) {
-    if (path != null && path.trim().length() == 0) path = null;
+    if (path != null && path.trim().length() == 0) {
+      path = null;
+    }
 
     URL url = path != null ? SoundManager.class.getClassLoader().getResource(path) : null;
     AudioClip clip = url != null ? new AudioClip(url.toExternalForm()) : null;
@@ -229,11 +233,17 @@ public class SoundManager {
             for (SoundManager manager : userSounds.values()) {
               manager.clip.stop();
             }
-            if (remove) userSounds.clear();
+            if (remove) {
+              userSounds.clear();
+            }
           } else {
             SoundManager manager = userSounds.get(strUri);
-            if (manager != null) manager.clip.stop();
-            if (remove) userSounds.remove(strUri);
+            if (manager != null) {
+              manager.clip.stop();
+            }
+            if (remove) {
+              userSounds.remove(strUri);
+            }
           }
         });
   }
@@ -250,15 +260,19 @@ public class SoundManager {
       JsonArray infoArray = new JsonArray();
       for (SoundManager manager : userSounds.values()) {
         info = manager.getInfo();
-        if (info != null) infoArray.add(info);
+        if (info != null) {
+          infoArray.add(info);
+        }
       }
       return infoArray;
     } else {
       SoundManager manager = userSounds.get(strUri);
-      if (manager == null) return "";
-      else info = manager.getInfo();
-      if (info == null) return "";
-      else return info;
+      if (manager == null) {
+        return "";
+      } else {
+        info = manager.getInfo();
+        return info != null ? info : "";
+      }
     }
   }
 
