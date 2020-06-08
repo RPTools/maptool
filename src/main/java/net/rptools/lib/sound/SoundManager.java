@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javafx.application.Platform;
 import javafx.scene.media.AudioClip;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
@@ -32,55 +33,48 @@ import net.rptools.parser.ParserException;
  * the playSoundEvent method.
  */
 public class SoundManager {
+  /** Maps a registered system AudioClip to its name. */
   private static final Map<String, AudioClip> registeredSoundMap = new HashMap<>();
+  /** Maps a registered system AudioClip to its event. */
   private static final Map<String, AudioClip> soundEventMap = new HashMap<>();
-  private static final Map<String, SoundManager> userSounds = new HashMap<>();
+  /** Maps a SoundManager to the string of its URI. */
+  private static final Map<String, SoundManager> userSounds = new ConcurrentHashMap<>();
 
+  /** String of the URI of the sound. */
   private final String strUri;
+  /** AudioClip that can play the sound. */
   private final AudioClip clip;
-  private int cycleCount; // store to remember last cycleCount used. Never 0.
-  private double volume; // store because player volume also depends on global volume.
+  /** Last cycleCount used. */
+  private int cycleCount;
+  /** Volume specific to the sound, independently of global sound. */
+  private double volume;
 
+  /**
+   * Initializes the SoundManager.
+   *
+   * @param strUri the URI of the sound
+   * @param cycleCount the number of times to play the sound (-1: loop, default: 1)
+   * @param volume the volume of the sound (0-1, default: 1)
+   */
   private SoundManager(String strUri, Integer cycleCount, Double volume) {
     this.strUri = strUri;
     this.clip = new AudioClip(strUri);
-
-    editClip(cycleCount, volume, true);
+    this.cycleCount = cycleCount != null ? cycleCount : 1;
+    this.volume = volume != null ? volume : 1.0;
   }
 
   /**
-   * Edit the SoundManager values, and update the AudioClip. Should be accessed from JavaFX app
-   * thread. If a parameter is null and useDefault is false, no change * to that value. If null and
-   * useDefault is true, change to the defaults.
+   * Edit the SoundManager values. If a parameter is null, no change to that value.
    *
-   * @param cycleCount how many times should the clip play (-1: infinite, default: 1)
-   * @param volume the volume level of the clip (0-1, default: 1)
+   * @param cycleCount how many times should the clip play (-1: infinite)
+   * @param volume the volume level of the clip (0-1)
    */
-  private void editClip(Integer cycleCount, Double volume, boolean useDefault) {
-    if (cycleCount != null && cycleCount != 0) {
+  private void editClip(Integer cycleCount, Double volume) {
+    if (cycleCount != null) {
       this.cycleCount = cycleCount;
-    } else if (useDefault) {
-      this.cycleCount = 1;
     }
     if (volume != null) {
       this.volume = volume;
-    } else if (useDefault) {
-      this.volume = 1.0;
-    }
-    updateClip(cycleCount != null && cycleCount == 0);
-  }
-
-  /**
-   * Update the clip with the values in the adapter
-   *
-   * @param stopPlay should the clip be stopped
-   */
-  private void updateClip(boolean stopPlay) {
-    this.clip.setCycleCount(this.cycleCount);
-    this.clip.setVolume(this.volume * MediaPlayerAdapter.getGlobalVolume());
-
-    if (stopPlay) {
-      this.clip.stop();
     }
   }
 
@@ -93,7 +87,9 @@ public class SoundManager {
   public static void configure(String configPath) throws IOException {
     Properties props = new Properties();
     InputStream clipList = SoundManager.class.getClassLoader().getResourceAsStream(configPath);
-    if (clipList == null) throw new IOException();
+    if (clipList == null) {
+      throw new IOException();
+    }
     props.load(clipList);
     configure(props);
   }
@@ -120,7 +116,9 @@ public class SoundManager {
    * @param path the path to the sound
    */
   public static void registerSound(String name, String path) {
-    if (path != null && path.trim().length() == 0) path = null;
+    if (path != null && path.trim().length() == 0) {
+      path = null;
+    }
 
     URL url = path != null ? SoundManager.class.getClassLoader().getResource(path) : null;
     AudioClip clip = url != null ? new AudioClip(url.toExternalForm()) : null;
@@ -154,15 +152,6 @@ public class SoundManager {
   }
 
   /**
-   * Associate a blank sound with an eventId.
-   *
-   * @param eventId a string for the eventId
-   */
-  public static void registerSoundEvent(String eventId) {
-    registerSoundEvent(eventId, null);
-  }
-
-  /**
    * Play the sound associated with the eventId.
    *
    * @param eventId a string for the eventId
@@ -172,14 +161,8 @@ public class SoundManager {
     double volume = MediaPlayerAdapter.getGlobalVolume();
 
     if (clip != null && !MediaPlayerAdapter.getGlobalMute() && volume > 0) {
-      Platform.runLater(
-          // Run on the JavaFX app thread
-          new Runnable() {
-            @Override
-            public void run() {
-              clip.play(volume);
-            }
-          });
+      // Run on the JavaFX app thread
+      Platform.runLater(() -> clip.play(volume));
     }
   }
 
@@ -196,46 +179,45 @@ public class SoundManager {
   public static boolean playClip(
       String strUri, Integer cycleCount, Double volume, boolean preloadOnly)
       throws ParserException {
-    if (!userSounds.containsKey(strUri)) {
+    final SoundManager manager = userSounds.get(strUri);
+
+    // Verify the uri and return an error if uri is incorrect
+    if (manager == null) {
       try {
-        if (!SoundFunctions.uriExists(strUri))
-          return false; // leave without error message if uri ok but no file
+        if (!SoundFunctions.uriExists(strUri)) {
+          // leave without error message if uri ok but no file
+          return false;
+        }
       } catch (Exception e) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.sound.illegalargument",
-                "playClip",
-                strUri,
-                e.getLocalizedMessage()));
+        String key = "macro.function.sound.illegalargument";
+        throw new ParserException(I18N.getText(key, "playClip", strUri, e.getMessage()));
+      }
+      new Thread(
+              () -> {
+                // Creates a SoundManager on another thread, as it can be slow.
+                SoundManager newManager = new SoundManager(strUri, cycleCount, volume);
+                userSounds.put(strUri, newManager);
+                if (!preloadOnly) {
+                  Platform.runLater(newManager::playClip);
+                }
+              })
+          .start();
+    } else {
+      manager.editClip(cycleCount, volume);
+      if (!preloadOnly) {
+        Platform.runLater(manager::playClip);
       }
     }
-
-    // run this on the JavaFX thread
-    Platform.runLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            SoundManager manager = userSounds.get(strUri);
-            if (manager != null) {
-              manager.editClip(cycleCount, volume, false);
-            } else {
-              manager = new SoundManager(strUri, cycleCount, volume);
-              userSounds.put(strUri, manager);
-            }
-            AudioClip clip = manager.clip;
-
-            double playVolume = manager.volume * MediaPlayerAdapter.getGlobalVolume();
-            boolean play =
-                (cycleCount == null || cycleCount != 0)
-                    && playVolume > 0
-                    && !MediaPlayerAdapter.getGlobalMute()
-                    && !preloadOnly;
-            if (play) {
-              clip.play(playVolume);
-            }
-          }
-        });
     return true;
+  }
+
+  /** Play the clip with appropriate volume and cycleCount. To be ran on the JavaFX App thread. */
+  private void playClip() {
+    double playVolume = this.volume * MediaPlayerAdapter.getGlobalVolume();
+    if (cycleCount != 0 && playVolume > 0 && !MediaPlayerAdapter.getGlobalMute()) {
+      clip.setCycleCount(this.cycleCount);
+      clip.play(playVolume);
+    }
   }
 
   /**
@@ -246,18 +228,21 @@ public class SoundManager {
    */
   public static void stopClip(String strUri, boolean remove) {
     Platform.runLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            if (strUri.equals("*")) {
-              for (HashMap.Entry mapElement : userSounds.entrySet()) {
-                ((SoundManager) mapElement.getValue()).clip.stop();
-              }
-              if (remove) userSounds.clear();
-            } else {
-              SoundManager manager = userSounds.get(strUri);
-              if (manager != null) manager.clip.stop();
-              if (remove) userSounds.remove(strUri);
+        () -> {
+          if (strUri.equals("*")) {
+            for (SoundManager manager : userSounds.values()) {
+              manager.clip.stop();
+            }
+            if (remove) {
+              userSounds.clear();
+            }
+          } else {
+            SoundManager manager = userSounds.get(strUri);
+            if (manager != null) {
+              manager.clip.stop();
+            }
+            if (remove) {
+              userSounds.remove(strUri);
             }
           }
         });
@@ -273,17 +258,21 @@ public class SoundManager {
     JsonObject info;
     if (strUri.equals("*")) {
       JsonArray infoArray = new JsonArray();
-      for (HashMap.Entry mapElement : userSounds.entrySet()) {
-        info = ((SoundManager) mapElement.getValue()).getInfo();
-        if (info != null) infoArray.add(info);
+      for (SoundManager manager : userSounds.values()) {
+        info = manager.getInfo();
+        if (info != null) {
+          infoArray.add(info);
+        }
       }
       return infoArray;
     } else {
       SoundManager manager = userSounds.get(strUri);
-      if (manager == null) return "";
-      else info = manager.getInfo();
-      if (info == null) return "";
-      else return info;
+      if (manager == null) {
+        return "";
+      } else {
+        info = manager.getInfo();
+        return info != null ? info : "";
+      }
     }
   }
 
