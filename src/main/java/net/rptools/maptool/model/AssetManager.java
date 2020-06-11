@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,9 +106,23 @@ public class AssetManager {
    * campaign.
    */
   public static void updateRepositoryList() {
+    List<String> invalidRepos = new ArrayList<>();
     assetLoader.removeAllRepositories();
     for (String repo : MapTool.getCampaign().getRemoteRepositoryList()) {
-      assetLoader.addRepository(repo);
+      if (!assetLoader.addRepository(repo)) {
+        invalidRepos.add(repo);
+      }
+    }
+
+    if (!invalidRepos.isEmpty()) {
+      if (MapTool.isHostingServer()) {
+        String tab = "    ";
+        String repos = tab + String.join("\n" + tab, invalidRepos);
+        MapTool.showError(I18N.getText("msg.error.host.inaccessibleRepo", repos));
+      } else {
+        invalidRepos.forEach(
+            repo -> MapTool.addLocalMessage(I18N.getText("msg.error.inaccessibleRepo", repo)));
+      }
     }
   }
 
