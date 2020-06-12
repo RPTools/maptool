@@ -1204,10 +1204,12 @@ public class MapTool {
     return conn;
   }
 
+  /** returns whether the player is using a personal server. */
   public static boolean isPersonalServer() {
     return server != null && server.getConfig().isPersonalServer();
   }
 
+  /** returns whether the player is hosting a server - personal servers do not count. */
   public static boolean isHostingServer() {
     return server != null && !server.getConfig().isPersonalServer();
   }
