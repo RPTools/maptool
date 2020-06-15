@@ -108,7 +108,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private static final String READY = I18N.getText("Label.ready");
   private static final String SAVED = I18N.getText("Label.saved");
 
-  private static HashSet<String> openMacroList = new HashSet<String>(4);
+  private static final HashSet<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);
@@ -205,6 +205,14 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   @Override
   public String getSelectedText() {
     return macroEditorRSyntaxTextArea.getSelectedText();
+  }
+
+  /**
+   * @param id the id to look for
+   * @return whether the macro dialog is already opened.
+   */
+  public static boolean isMacroDialogOpen(String id) {
+    return openMacroList.contains(id);
   }
 
   private void installHotKeyCombo() {
@@ -713,11 +721,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           .getSelectionPanel()
           .getCommonMacros()
           .contains(button.getProperties())) {
-        Boolean changeAllowPlayerEdits = false;
-        Boolean endingAllowPlayerEdits = false;
+        boolean changeAllowPlayerEdits = false;
+        boolean endingAllowPlayerEdits = false;
         if (startingAllowPlayerEdits) {
           if (!properties.getAllowPlayerEdits()) {
-            Boolean confirmDisallowPlayerEdits =
+            boolean confirmDisallowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.disallowPlayerEdits"));
             if (confirmDisallowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -728,7 +736,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           }
         } else {
           if (properties.getAllowPlayerEdits()) {
-            Boolean confirmAllowPlayerEdits =
+            boolean confirmAllowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.allowPlayerEdits"));
             if (confirmAllowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -738,17 +746,13 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             }
           }
         }
-        Boolean trusted = true;
+        boolean trusted = true;
         for (Token nextToken :
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-          if (AppUtil.playerOwns(nextToken)) {
-            trusted = true;
-          } else {
-            trusted = false;
-          }
+          trusted = AppUtil.playerOwns(nextToken);
           boolean isGM = MapTool.getPlayer().isGM();
           for (MacroButtonProperties nextMacro : nextToken.getMacroList(trusted)) {
-            if (isGM || (!isGM && nextMacro.getApplyToTokens())) {
+            if (isGM || nextMacro.getApplyToTokens()) {
               if (nextMacro.hashCodeForComparison() == oldHashCode) {
                 nextMacro.setLabel(properties.getLabel());
                 if (properties.getCompareGroup() && startingCompareGroup) {

@@ -14,27 +14,25 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.sun.webkit.WebPage;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.geometry.Rectangle2D;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /** The manager for the HTMLWebView of an overlay. */
-public class HTMLOverlayManager extends HTMLWebViewManager
-    implements Comparable<HTMLOverlayManager>, HTMLPanelContainer {
+public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelContainer {
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
@@ -53,6 +51,25 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   private static final String SCRIPT_GET_POINTERMAP =
       "window.getComputedStyle(this).getPropertyValue('--pointermap')";
 
+  /** Getter handle for the "page" field of class WebEngine. Used to make the WebView invisible. */
+  private static final MethodHandle getPageHandle;
+
+  /* Initialize the MethodHandle. */
+  static {
+    try {
+      MethodHandles.Lookup lookup = MethodHandles.lookup();
+      lookup = MethodHandles.privateLookupIn(WebEngine.class, lookup);
+      getPageHandle = lookup.findGetter(WebEngine.class, "page", WebPage.class);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /** The RGB value for a fully invisible color (alpha = 0). */
+  private static final int COLOR_INVISIBLE = new Color(0, 0, 0, 0).getRGB();
+  /** The RGB value for a nearly invisible color (alpha = 1). */
+  private static final int COLOR_VISIBLE = new Color(128, 128, 128, 1).getRGB();
+
   /** The ZOrder of the overlay. */
   private int zOrder;
 
@@ -63,7 +80,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   private Object value;
 
   /** The map of the macro callbacks. */
-  private final Map<String, String> macroCallbacks = new HashMap<String, String>();
+  private final Map<String, String> macroCallbacks = new HashMap<>();
 
   HTMLOverlayManager(String name, int zOrder) {
     addActionListener(this); // add the action listeners for form events
@@ -77,7 +94,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   }
 
   /** @return the zOrder of the overlay. */
-  int getZOrder() {
+  public int getZOrder() {
     return zOrder;
   }
 
@@ -96,18 +113,20 @@ public class HTMLOverlayManager extends HTMLWebViewManager
   }
 
   @Override
-  public int compareTo(@NotNull HTMLOverlayManager o) {
-    return getZOrder() - o.getZOrder();
-  }
-
-  @Override
   void handlePage() {
     super.handlePage();
-    makeWebEngineTransparent(); // transparent WebView
+    setPageBackgroundColor(COLOR_INVISIBLE); // transparent WebView
 
     getWebView()
         .cursorProperty()
         .addListener((obs, oldCursor, newCursor) -> updateOverlayCursor(newCursor));
+  }
+
+  @Override
+  public void updateContents(final String html, boolean scrollReset) {
+    // Sets the background to be barely visible. Workaround to fix #1976.
+    setPageBackgroundColor(COLOR_VISIBLE);
+    super.updateContents(html, scrollReset);
   }
 
   /**
@@ -119,8 +138,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager
     if (newCursor != null && "DEFAULT".equals(newCursor.toString())) {
       // Only changes to the default cursor if all WebViews have the default cursor
       if (MapTool.getFrame().getOverlayPanel().areWebViewCursorsDefault()) {
-        Cursor cursor = MapTool.getFrame().getCurrentZoneRenderer().getCursor();
-        MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
+        ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+        if (zr != null) {
+          Cursor cursor = zr.getCursor();
+          MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
+        }
       }
     } else if (newCursor != null) {
       MapTool.getFrame().getOverlayPanel().setOverlayCursor(newCursor);
@@ -136,20 +158,17 @@ public class HTMLOverlayManager extends HTMLWebViewManager
         + CSS_POINTERMAP;
   }
 
-  /** Makes the webEngine transparent through reflection. */
-  private void makeWebEngineTransparent() {
+  /**
+   * Sets the page background of the WebEngine page through reflection.
+   *
+   * @param rgb the integer corresponding to the color
+   */
+  private void setPageBackgroundColor(int rgb) {
     try {
-      Field f = getWebEngine().getClass().getDeclaredField("page");
-      f.setAccessible(true);
-      Object page = f.get(getWebEngine());
-      Method m = page.getClass().getMethod("setBackgroundColor", int.class);
-      m.setAccessible(true);
-      m.invoke(page, (new Color(0, 0, 0, 0)).getRGB());
-    } catch (NoSuchFieldException
-        | IllegalAccessException
-        | NoSuchMethodException
-        | InvocationTargetException e) {
-      e.printStackTrace();
+      WebPage page = (WebPage) getPageHandle.invokeExact(getWebEngine());
+      page.setBackgroundColor(rgb);
+    } catch (Throwable throwable) {
+      throwable.printStackTrace();
     }
   }
 
@@ -175,8 +194,6 @@ public class HTMLOverlayManager extends HTMLWebViewManager
       return HTMLOverlayPanel.mousePassResult.PASS;
     }
   }
-
-  private static Rectangle2D onePixel = new Rectangle2D(0, 0, 1, 1);
 
   @Override
   public boolean isVisible() {

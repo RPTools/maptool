@@ -28,8 +28,7 @@ import net.rptools.maptool.model.Zone;
 
 public abstract class AbstractZoneWalker implements ZoneWalker {
 
-  protected List<PartialPath> partialPaths =
-      Collections.synchronizedList(new ArrayList<PartialPath>());
+  protected final List<PartialPath> partialPaths = Collections.synchronizedList(new ArrayList<>());
   protected final Zone zone;
   protected boolean restrictMovement = false;
   protected Set<TerrainModifierOperation> terrainModifiersIgnored;
@@ -106,21 +105,18 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public Path<CellPoint> getPath() {
-    Path<CellPoint> path = new Path<CellPoint>();
-
-    PartialPath last = null;
+    Path<CellPoint> path = new Path<>();
 
     synchronized (partialPaths) {
-      for (PartialPath partial : partialPaths) {
-        if (partial.path != null && partial.path.size() > 1) {
-          path.addAllPathCells(partial.path.subList(0, partial.path.size() - 1));
+      if (!partialPaths.isEmpty()) {
+        path.addPathCell(partialPaths.get(0).start);
+        for (PartialPath partial : partialPaths) {
+          if (partial.path.size() > 1) {
+            // Remove duplicated cells (end of a path = start of next path)
+            path.addAllPathCells(partial.path.subList(1, partial.path.size()));
+          }
         }
-        last = partial;
       }
-    }
-
-    if (last != null) {
-      path.addPathCell(last.end);
     }
 
     for (CellPoint cp : path.getCellPath()) {

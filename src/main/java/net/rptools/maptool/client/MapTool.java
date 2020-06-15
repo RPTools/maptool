@@ -83,6 +83,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -98,6 +99,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
+import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -165,7 +167,7 @@ public class MapTool {
 
   private static ObservableList<Player> playerList;
   private static ObservableList<TextMessage> messageList;
-  private static Player player;
+  private static LocalPlayer player;
 
   private static ClientConnection conn;
   private static ClientMethodHandler handler;
@@ -735,7 +737,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new Player("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, "");
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -918,6 +920,21 @@ public class MapTool {
    */
   public static void addLocalMessage(String message) {
     addMessage(TextMessage.me(null, message));
+  }
+
+  /**
+   * Adds an error message that includes the macro stack trace.
+   *
+   * @param e the ParserException to display the error of
+   */
+  public static void addErrorMessage(ParserException e) {
+    MapTool.addLocalMessage(e.getMessage());
+
+    String[] macroStackTrace = e.getMacroStackTrace();
+    if (macroStackTrace.length > 0) {
+      MapTool.addLocalMessage(
+          I18N.getText("msg.error.trace", String.join(" &lt;&lt;&lt; ", macroStackTrace)));
+    }
   }
 
   /**
@@ -1185,7 +1202,7 @@ public class MapTool {
     }
   }
 
-  public static Player getPlayer() {
+  public static LocalPlayer getPlayer() {
     return player;
   }
 
@@ -1197,15 +1214,16 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new Player(username, Player.Role.GM, null));
+        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player) throws IOException {
+  public static void createConnection(String host, int port, LocalPlayer player)
+      throws IOException {
     MapTool.player = player;
-    MapTool.getFrame().getCommandPanel().setIdentityName(null);
+    MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     ClientConnection clientConn = new MapToolConnection(host, port, player);
 
@@ -1233,10 +1251,12 @@ public class MapTool {
     return conn;
   }
 
+  /** returns whether the player is using a personal server. */
   public static boolean isPersonalServer() {
     return server != null && server.getConfig().isPersonalServer();
   }
 
+  /** returns whether the player is hosting a server - personal servers do not count. */
   public static boolean isHostingServer() {
     return server != null && !server.getConfig().isPersonalServer();
   }

@@ -102,6 +102,7 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -2220,7 +2221,7 @@ public class AppActions {
                       MapTool.createConnection(
                           "localhost",
                           serverProps.getPort(),
-                          new Player(
+                          new LocalPlayer(
                               dialog.getUsernameTextField().getText(),
                               serverProps.getRole(),
                               serverProps.getGMPassword()));
@@ -2228,7 +2229,7 @@ public class AppActions {
                       MapTool.createConnection(
                           "localhost",
                           serverProps.getPort(),
-                          new Player(
+                          new LocalPlayer(
                               dialog.getUsernameTextField().getText(),
                               serverProps.getRole(),
                               serverProps.getPlayerPassword()));
@@ -2312,7 +2313,7 @@ public class AppActions {
                     MapTool.createConnection(
                         dialog.getServer(),
                         dialog.getPort(),
-                        new Player(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+                        new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
 
                     MapTool.getFrame().hideGlassPane();
                     MapTool.getFrame()
@@ -2498,7 +2499,7 @@ public class AppActions {
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
-        MapTool.getFrame().getCommandPanel().setIdentityName(null);
+        MapTool.getFrame().getCommandPanel().clearAllIdentities();
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {

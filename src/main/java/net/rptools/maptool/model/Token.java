@@ -300,7 +300,7 @@ public class Token extends BaseModel implements Cloneable {
   private CaseInsensitiveHashMap<Object> propertyMapCI;
 
   private Map<String, String> macroMap;
-  private Map<Integer, Object> macroPropertiesMap;
+  private Map<Integer, MacroButtonProperties> macroPropertiesMap;
 
   private Map<String, String> speechMap;
 
@@ -415,11 +415,10 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().putAll(token.propertyMapCI);
     }
     if (token.macroPropertiesMap != null) { // Deep copy of the macros
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      macroPropertiesMap = new HashMap<>(token.macroPropertiesMap.size());
       token.macroPropertiesMap.forEach(
           (key, value) ->
-              macroPropertiesMap.put(
-                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
+              macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -1006,7 +1005,7 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
-  /** Return false if lightSourceList is null or empty, and true otherwise */
+  /** @return false if lightSourceList is null or empty, and true otherwise */
   public boolean hasLightSources() {
     return lightSourceList != null && !lightSourceList.isEmpty();
   }
@@ -1232,7 +1231,7 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOrigin;
   }
 
-  /**
+  /*
    * Lee: changing this to apply new X and Y values (as end point) for the token BEFORE its path is
    * computed. Path to be saved will be computed here instead of in ZoneRenderer
    */
@@ -1364,7 +1363,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  /** Return the vbl area of the token */
+  /**
+   * Return the vbl area of the token
+   *
+   * @return the current VBL of the token
+   */
   public Area getVBL() {
     return vbl;
   }
@@ -1377,7 +1380,8 @@ public class Token extends BaseModel implements Cloneable {
    * This method returns the vbl stored on the token with AffineTransformations applied for scale,
    * position, rotation, &amp; flipping.
    *
-   * @return
+   * @param areaToTransform transformations to apply to the VBL
+   * @return the transformed VBL for the token
    * @author Jamz
    * @since 1.4.1.5
    */
@@ -1632,7 +1636,12 @@ public class Token extends BaseModel implements Cloneable {
     this.sightType = sightType;
   }
 
-  /** @return Returns the size. */
+  /**
+   * Calculate the foot print of a grid
+   *
+   * @param grid the grid to get foot print of
+   * @return Returns the size.
+   */
   public TokenFootprint getFootprint(Grid grid) {
     return grid.getFootprint(getSizeMap().get(grid.getClass()));
   }
@@ -1740,13 +1749,6 @@ public class Token extends BaseModel implements Cloneable {
     if (val == null) {
       return "";
     }
-    // First we try convert it to a JSON object.
-    if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonObject() || json.isJsonArray()) {
-        return json;
-      }
-    }
     try {
       if (log.isDebugEnabled()) {
         log.debug(
@@ -1765,24 +1767,24 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (val == null) {
       val = "";
+    } else {
+      // Finally we try convert it to a JSON object. Fixes #1560.
+      if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+        if (json.isJsonObject() || json.isJsonArray()) {
+          return json;
+        }
+      }
     }
     return val;
   }
 
-  /**
-   * Returns all property names, all in lowercase.
-   *
-   * @return
-   */
+  /** @return all property names, all in lowercase. */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /**
-   * Returns all property names, preserving their case.
-   *
-   * @return
-   */
+  /** @return all property names, preserving their case. */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }
@@ -1815,7 +1817,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public int getMacroNextIndex() {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<Integer, MacroButtonProperties>();
     }
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
@@ -1833,22 +1835,22 @@ public class Token extends BaseModel implements Cloneable {
    * @param secure whether there should be a check for player ownership
    * @return the map
    */
-  public Map<Integer, Object> getMacroPropertiesMap(boolean secure) {
+  public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<>();
     }
     if (macroMap != null) {
       loadOldMacros();
     }
     if (secure && !AppUtil.playerOwns(this)) {
-      return new HashMap<Integer, Object>(); // blank map
+      return new HashMap<>(); // blank map
     } else {
       return macroPropertiesMap;
     }
   }
 
   public MacroButtonProperties getMacro(int index, boolean secure) {
-    return (MacroButtonProperties) getMacroPropertiesMap(secure).get(index);
+    return getMacroPropertiesMap(secure).get(index);
   }
 
   // avoid this; it loads the first macro with this label, but there could be more than one macro
@@ -1856,7 +1858,7 @@ public class Token extends BaseModel implements Cloneable {
   public MacroButtonProperties getMacro(String label, boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       if (prop.getLabel().equals(label)) {
         return prop;
       }
@@ -1864,11 +1866,17 @@ public class Token extends BaseModel implements Cloneable {
     return null;
   }
 
+  /**
+   * Gets the list of macros on the token.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the list
+   */
   public List<MacroButtonProperties> getMacroList(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<MacroButtonProperties> list = new ArrayList<MacroButtonProperties>();
     for (int key : keys) {
-      list.add((MacroButtonProperties) macroPropertiesMap.get(key));
+      list.add(macroPropertiesMap.get(key));
     }
     return list;
   }
@@ -1915,7 +1923,7 @@ public class Token extends BaseModel implements Cloneable {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<String> list = new ArrayList<String>();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       list.add(prop.getLabel());
     }
     return list;
@@ -1964,6 +1972,7 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Get a set containing the names of all the states that match the passed value.
    *
+   * @param value the value to look for
    * @return The set of state property names that match the passed value.
    */
   public Set<String> getStatePropertyNames(Object value) {

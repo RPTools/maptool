@@ -1031,8 +1031,7 @@ public class InputFunction extends AbstractFunction {
         continue;
       }
       // Multiple vars can be packed into a string, separated by "##"
-      List<String> substrings = new ArrayList<String>();
-      StrListFunctions.parse(paramStr, substrings, "##");
+      List<String> substrings = StrListFunctions.toList(paramStr, "##");
       for (String varString : substrings) {
         if (StringUtils.isEmpty(paramStr)) {
           continue;

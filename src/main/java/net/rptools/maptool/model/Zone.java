@@ -86,6 +86,7 @@ public class Zone extends BaseModel {
     TOPOLOGY_CHANGED,
     INITIATIVE_LIST_CHANGED,
     BOARD_CHANGED,
+    TOKEN_EDITED, // the token was edited
     TOKEN_MACRO_CHANGED, // a token macro changed
     TOKEN_PANEL_CHANGED // the panel appearance changed
   }
@@ -422,8 +423,7 @@ public class Zone extends BaseModel {
         }
         putToken(token);
         List<Integer> list = zone.initiativeList.indexOf(old);
-        for (Integer integer : list) {
-          int index = integer.intValue();
+        for (Integer index : list) {
           saveInitiative[index][0] = token;
           saveInitiative[index][1] = zone.initiativeList.getTokenInitiative(index);
         }
@@ -750,6 +750,7 @@ public class Zone extends BaseModel {
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
@@ -776,6 +777,7 @@ public class Zone extends BaseModel {
    * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
+   * @param topologyMode the mode of the topology
    */
   public void removeTopology(Area area, TopologyMode topologyMode) {
     switch (topologyMode) {
@@ -938,9 +940,8 @@ public class Zone extends BaseModel {
           MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
       String playerId = MapTool.getPlayer().getName();
       MapToolFrame frame = MapTool.getFrame();
-      ZoneRenderer zr =
-          frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen? Fix is to
-      // use getId() instead of 'this'
+      // FIXME 'zr' was null -- how can this happen? Fix is to use getId() instead of 'this'
+      ZoneRenderer zr = frame.getZoneRenderer(getId());
       ZoneView zoneView = zr.getZoneView();
       ExposedAreaMetaData meta = null;
 
@@ -958,11 +959,6 @@ public class Zone extends BaseModel {
           }
           meta.addToExposedAreaHistory(area);
         }
-      }
-      // If 'meta' is not null, it means at least one token's TEA was modified so we need to flush
-      // the ZoneView
-      if (meta != null) {
-        zoneView.flush();
       }
     } else {
       // Not using IF so add the EA to the GEA instead of a TEA.
@@ -1344,6 +1340,15 @@ public class Zone extends BaseModel {
   }
 
   /**
+   * Put the token, and also fires the token edited event.
+   *
+   * @param token the token that was edited
+   */
+  public void editToken(Token token) {
+    putToken(token);
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_EDITED, token));
+  }
+  /**
    * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
    * that this method fires a single <code>ModelChangeEvent</code> using <code> Event.TOKEN_ADDED
    * </code> and passes the list of added tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED
@@ -1425,10 +1430,7 @@ public class Zone extends BaseModel {
    */
   public Token getTokenByName(String name) {
     for (Token token : getAllTokens()) {
-      if (StringUtil.isEmpty(token.getName())) {
-        continue;
-      }
-      if (token.getName().equalsIgnoreCase(name)) {
+      if (name.equalsIgnoreCase(token.getName())) {
         return token;
       }
     }
@@ -1442,18 +1444,20 @@ public class Zone extends BaseModel {
    * @return token that matches the identifier or <code>null</code>
    */
   public Token resolveToken(String identifier) {
-    Token token = getTokenByName(identifier);
 
-    if (token == null) {
-      token = getTokenByGMName(identifier);
+    // try fast lookup first for an identifier that might be a GUID len=16
+    if (!GUID.isNotGUID(identifier)) {
+      try {
+        return getToken(GUID.valueOf(identifier));
+      } catch (Exception e) {
+        // wasn't a GUID afterall, OK to ignore
+      }
     }
 
+    // look at (GM)name
+    Token token = getTokenByName(identifier);
     if (token == null) {
-      try {
-        token = getToken(GUID.valueOf(identifier));
-      } catch (Exception e) {
-        // indication of not a GUID, OK to ignore
-      }
+      token = getTokenByGMName(identifier);
     }
     return token;
   }

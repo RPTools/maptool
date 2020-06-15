@@ -317,8 +317,18 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
   }
 
   /**
-   * Accepts only tokens that are PCs and are owned by the current player (takes
-   * useStrictTokenManagement() into account).
+   * Accepts only PC tokens (for GM) or PC tokens owned by the current player (takes {@link
+   * ServerPolicy#useStrictTokenManagement()} into account). Here's the selection process:
+   *
+   * <ol>
+   *   <li>If the token is not a PC, return <code>false</code>.
+   *   <li>If the current player is the GM, return <code>true</code>.
+   *   <li>If individualized view is on or the token is visible only to owner, and the token is not
+   *       owned by the current player, return <code>false</code>. (Takes into account
+   *       StrictTokenManagement and the AllPlayers ownership flag).
+   *   <li>If the token is not visible to players or is on the hidden layer, returns false.
+   *   <li>Otherwise, return true.
+   * </ol>
    */
   private class PlayerTokenFilter extends TokenFilter {
     /** Accepts only PCs tokens owned by the current player. */
@@ -328,13 +338,18 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     @Override
     protected boolean accept(Token token) {
-      if (token.getType() != Token.Type.PC) return false;
-      if (MapTool.getServerPolicy().isUseIndividualViews()) {
-        if (AppUtil.playerOwns(token)) {
-          return true;
-        } else return false;
+      if (token.getType() != Token.Type.PC) {
+        return false;
       }
-      return token.isVisible();
+      if (MapTool.getPlayer().isGM()) {
+        return true;
+      }
+      if (MapTool.getServerPolicy().isUseIndividualViews() || token.isVisibleOnlyToOwner()) {
+        if (!AppUtil.playerOwns(token)) {
+          return false;
+        }
+      }
+      return token.isVisible() && !token.isGMStamp();
     }
   }
 
@@ -391,17 +406,17 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
   }
 
   /**
-   * Accepts only NPC tokens (for GM) or tokens owned by the current player (takes {@link
+   * Accepts only NPC tokens (for GM) or NPC tokens owned by the current player (takes {@link
    * ServerPolicy#useStrictTokenManagement()} into account). Here's the selection process:
    *
    * <ol>
    *   <li>If the token is not on the Token layer, return <code>false</code>.
    *   <li>If the token has type PC, return <code>false</code>.
    *   <li>If the current player is the GM, return <code>true</code>.
-   *   <li>If the token is owned by the current player, return <code>true</code>. (Takes into
-   *       account StrictTokenManagement and the AllPlayers ownership flag).
-   *   <li>If the token is visible only to the owner, return <code>false</code>. (It's already been
-   *       determined that we're not an owner.)
+   *   <li>If individualized view is on or the token is visible only to owner, and the token is not
+   *       owned by the current player, return <code>false</code>. (Takes into account
+   *       StrictTokenManagement and the AllPlayers ownership flag).
+   *   <li>If the token is not visible to players, returns false.
    *   <li>Otherwise, return true.
    * </ol>
    */
@@ -420,13 +435,15 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
       if (token.isStamp() || token.getType() == Token.Type.PC) {
         return false;
       }
-      if (MapTool.getPlayer().isGM()) return true;
-      if (AppUtil.playerOwns(token)) { // returns true if useStrictTokenManagement()==false
+      if (MapTool.getPlayer().isGM()) {
         return true;
       }
-      // if (token.isVisibleOnlyToOwner())
-      // return false;
-      return false;
+      if (MapTool.getServerPolicy().isUseIndividualViews() || token.isVisibleOnlyToOwner()) {
+        if (!AppUtil.playerOwns(token)) {
+          return false;
+        }
+      }
+      return token.isVisible();
     }
   }
 

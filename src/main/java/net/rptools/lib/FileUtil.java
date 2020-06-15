@@ -54,9 +54,9 @@ public class FileUtil {
    * Reads the entire content of the given file into a byte array.
    *
    * @deprecated use {@link FileUtils#readFileToByteArray(File)} instead.
-   * @param file
+   * @param file the file
    * @return byte contents of the file
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static byte[] loadFile(File file) throws IOException {
@@ -67,9 +67,9 @@ public class FileUtil {
    * Reads the entire content of the given file into a byte array.
    *
    * @deprecated use {@link FileUtils#readFileToByteArray(File)} instead.
-   * @param file
-   * @return
-   * @throws IOException
+   * @param file the file
+   * @return byte contents of the file
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static byte[] getBytes(File file) throws IOException {
@@ -171,8 +171,11 @@ public class FileUtil {
    * appropriate since the file could've been produced on a different platform. The only safe thing
    * to do is use UTF-8 and hope that everyone uses it by default when they edit text files. :-/
    *
+   * @param is stream to get string from
    * @deprecated This is not in use, and {@link IOUtils#toCharArray(InputStream, String)} should be
    *     used directly anyways
+   * @return the requested String
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static String getString(InputStream is) throws IOException {
@@ -187,7 +190,7 @@ public class FileUtil {
    *     used directly anyways
    * @param file file to retrieve contents from
    * @return String representing the contents
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static String getString(File file) throws IOException {
@@ -249,7 +252,7 @@ public class FileUtil {
    *
    * @param file the input data source
    * @return a String representing the data
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   public static BufferedReader getFileAsReader(File file) throws IOException {
     return new BufferedReader(
@@ -262,7 +265,7 @@ public class FileUtil {
    *
    * @param url the source of the data stream
    * @return String representing the data
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   public static Reader getURLAsReader(URL url) throws IOException {
     InputStreamReader isr = null;
@@ -290,7 +293,7 @@ public class FileUtil {
    *
    * @param url the source of the data stream
    * @return InputStream representing the data
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   public static InputStream getURLAsInputStream(URL url) throws IOException {
     InputStream is = null;
@@ -313,9 +316,9 @@ public class FileUtil {
    * existing file at that location, and will create any sub-directories required.
    *
    * @deprecated use {@link FileUtils#writeByteArrayToFile(File, byte[])} instead.
-   * @param file
-   * @param data
-   * @throws IOException
+   * @param file file to store data in
+   * @param data the data to store in file
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static void writeBytes(File file, byte[] data) throws IOException {
@@ -327,9 +330,9 @@ public class FileUtil {
    * preserving the source file's last modified time. The destination directory is created if it
    * does not exist, and if the destination file exists, it is overwritten.
    *
-   * @param sourceFile
-   * @param destFile
-   * @throws IOException
+   * @param sourceFile the source file
+   * @param destFile the destination file
+   * @throws IOException in case of an I/O error
    */
   public static void copyFile(File sourceFile, File destFile) throws IOException {
     FileUtils.copyFile(sourceFile, destFile, false);
@@ -339,9 +342,9 @@ public class FileUtil {
    * Unzips the indicated file from the <code>classpathFile</code> location into the indicated
    * <code>destDir</code>.
    *
-   * @param classpathFile
-   * @param destDir
-   * @throws IOException
+   * @param classpathFile The resource name
+   * @param destDir the destination directory
+   * @throws IOException in case of an I/O error
    */
   public static void unzip(String classpathFile, File destDir) throws IOException {
     try {
@@ -354,9 +357,9 @@ public class FileUtil {
   /**
    * Loads the given {@link URL}, and unzips the URL's contents into the given <code>destDir</code>.
    *
-   * @param url
-   * @param destDir
-   * @throws IOException
+   * @param url the url to load
+   * @param destDir the destination directory to save the files in
+   * @throws IOException in case of an I/O error
    */
   public static void unzip(URL url, File destDir) throws IOException {
     if (url == null) throw new IOException("URL cannot be null");
@@ -417,9 +420,9 @@ public class FileUtil {
    * Copies all bytes from InputStream to OutputStream without closing either stream.
    *
    * @deprecated not in use. Use {@link IOUtils#copy(InputStream, OutputStream)} instead.
-   * @param is
-   * @param os
-   * @throws IOException
+   * @param is the InputStream to read from
+   * @param os the OutputStream to write to
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static void copyWithoutClose(InputStream is, OutputStream os) throws IOException {
@@ -433,7 +436,7 @@ public class FileUtil {
    *     try-with-resources
    * @param is input stream to read data from.
    * @param os output stream to write data to.
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   @Deprecated
   public static void copyWithClose(InputStream is, OutputStream os) throws IOException {

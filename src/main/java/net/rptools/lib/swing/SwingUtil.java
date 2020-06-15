@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.*;
@@ -63,6 +64,7 @@ public class SwingUtil {
   /**
    * Tell the Graphics2D to use anti-aliased drawing and text.
    *
+   * @param g the Graphics to be affected
    * @return old AA
    */
   public static Object useAntiAliasing(Graphics2D g) {
@@ -74,6 +76,7 @@ public class SwingUtil {
   /**
    * Used after useAntiAliasing
    *
+   * @param g the Graphics to be affected
    * @param oldAA the value returned from useAntiAliasing
    */
   public static void restoreAntiAliasing(Graphics2D g, Object oldAA) {
@@ -171,7 +174,7 @@ public class SwingUtil {
   /**
    * Don't show the mouse pointer for this component
    *
-   * @param component
+   * @param component the component to hide mouse pointer inside
    */
   public static void hidePointer(Component component) {
     component.setCursor(emptyCursor);
@@ -180,7 +183,7 @@ public class SwingUtil {
   /**
    * Set the mouse pointer for this component to the default system cursor
    *
-   * @param component
+   * @param component the component to show mouse pointer inside
    */
   public static void showPointer(Component component) {
     component.setCursor(Cursor.getDefaultCursor());
@@ -355,13 +358,23 @@ public class SwingUtil {
    *
    * @param button the button to use as trigger
    * @param menu the popup menu to show
+   * @param rightAligned set to true to make the button right aligned
    * @return the button
    */
-  public static JButton makePopupMenuButton(JButton button, final JPopupMenu menu) {
+  public static JButton makePopupMenuButton(
+      JButton button, Supplier<JPopupMenu> menu, boolean rightAligned) {
     button.addMouseListener(
         new MouseAdapter() {
           public void mousePressed(MouseEvent e) {
-            menu.show(button, 0, button.getSize().height);
+            JPopupMenu popup = menu.get();
+            // make popup at least as wide as the button
+            Dimension buttonDim = button.getSize();
+            popup.setMinimumSize(new Dimension(buttonDim.width, 0));
+            int x = 0;
+            if (rightAligned) {
+              x += Math.min(0, buttonDim.width - popup.getPreferredSize().width);
+            }
+            popup.show(button, x, button.getSize().height);
           }
         });
     return button;

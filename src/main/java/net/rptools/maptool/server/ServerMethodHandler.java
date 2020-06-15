@@ -15,7 +15,6 @@
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
@@ -149,6 +148,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
+          break;
+        case editToken:
+          editToken(context.getGUID(0), (Token) context.get(1));
           break;
         case putZone:
           putZone((Zone) context.get(0));
@@ -421,16 +423,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone =
-        server
-            .getCampaign()
-            .getZone(
-                zoneGUID); // this can return a zone that's not in MapToolFrame.zoneRenderList???
+    Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.exposeArea(area, selectedToks);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.exposeFoW.name(), RPCContext.getCurrent().parameters);
+    forwardToClients();
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -461,16 +456,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               producer.getHeader());
       server.addAssetProducer(RPCContext.getCurrent().id, producer);
 
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-
-      // Old fashioned way
-      server
-          .getConnection()
-          .callMethod(
-              RPCContext.getCurrent().id,
-              ClientCommand.COMMAND.putAsset.name(),
-              AssetManager.getAsset(assetID));
     } catch (IllegalArgumentException iae) {
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken
@@ -576,6 +561,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.putLabel(label);
     forwardToClients();
+  }
+
+  public void editToken(GUID zoneGUID, Token token) {
+    putToken(zoneGUID, token);
   }
 
   public void putToken(GUID zoneGUID, Token token) {

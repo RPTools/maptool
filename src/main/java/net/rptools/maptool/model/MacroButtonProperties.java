@@ -356,9 +356,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     } else if (saveLocation.equals("GlobalPanel")) {
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
-      MapTool.getCampaign().saveMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, false);
     } else if (saveLocation.equals("GmPanel")) {
-      MapTool.getCampaign().saveGmMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, true);
     }
   }
 
@@ -372,7 +372,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
    * for the duration of the macro barring any use of the <b>token()</b> or <b>switchToken()</b>
    * roll options inside the macro itself.
    *
-   * @param tokenList
+   * @param tokenList tokens to execute macro on
    */
   public void executeMacro(Collection<Token> tokenList) {
     if (tokenList == null || tokenList.size() == 0) {
@@ -380,10 +380,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     } else if (commonMacro) {
       executeCommonMacro(tokenList);
     } else {
-      if (tokenList.size() > 0) {
-        for (Token token : tokenList) {
-          executeCommand(token.getId());
-        }
+      for (Token token : tokenList) {
+        executeCommand(token.getId());
       }
     }
   }

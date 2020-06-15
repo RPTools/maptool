@@ -56,8 +56,10 @@ public class FTPTransferObject {
    * Construct an <code>FTPTransferObject</code> using the local object and the specified remote
    * filename.
    *
-   * @param l
-   * @param r
+   * @param updown the direction of the transfer
+   * @param l the local object either a {@link InputStream} or a {@link OutputStream} depending on
+   *     updown
+   * @param r the remote filename
    */
   public FTPTransferObject(Direction updown, Object l, String r) {
     this(updown, l, null, r);
@@ -67,8 +69,11 @@ public class FTPTransferObject {
    * Construct an <code>FTPTransferObject</code> using the local object, the specified remote
    * directory, and the specified remote filename.
    *
-   * @param l
-   * @param r
+   * @param updown the direction of the transfer
+   * @param l the local object either a {@link InputStream} or a {@link OutputStream} depending on
+   *     updown
+   * @param d remote directory name
+   * @param r the remote filename
    */
   public FTPTransferObject(Direction updown, Object l, File d, String r) {
     local = l;

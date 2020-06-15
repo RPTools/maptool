@@ -170,12 +170,8 @@ public class MacroFunctions extends AbstractFunction {
       props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
       props.addProperty("command", mbp.getCommand());
       props.addProperty("maxWith", mbp.getMaxWidth());
-      if (mbp.getToolTip() != null) {
-        props.addProperty("tooltip", mbp.getToolTip());
-      } else {
-        props.addProperty("tooltooltip", "");
-      }
-      props.addProperty("toolapplyToSelected", mbp.getApplyToTokens());
+      props.addProperty("tooltip", mbp.getToolTip() == null ? "" : mbp.getToolTip());
+      props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
       JsonArray compare = new JsonArray();
 
@@ -224,11 +220,7 @@ public class MacroFunctions extends AbstractFunction {
       sb.append("minWidth=").append(mbp.getMinWidth()).append(delim);
       sb.append("playerEditable=").append(mbp.getAllowPlayerEdits()).append(delim);
       sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
-      if (mbp.getToolTip() != null) {
-        sb.append("tooltip=").append(mbp.getToolTip()).append(delim);
-      } else {
-        sb.append("tooltip=").append("").append(delim);
-      }
+      sb.append("tooltip=").append(mbp.getToolTip() == null ? "" : mbp.getToolTip()).append(delim);
       sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
       return sb.toString();
     }
@@ -484,14 +476,23 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     MacroButtonProperties mbp = new MacroButtonProperties(token.getMacroNextIndex());
+
+    mbp.setLabel(label);
+    mbp.setSaveLocation("Token");
     mbp.setCommand(command);
+
+    // Token Id is used in the exception messages of setMacroProps
+    mbp.setTokenId(token);
+
+    // Sets the props, if any
     if (prop != null) {
       setMacroProps(mbp, prop, delim);
     }
 
-    mbp.setLabel(label);
-    mbp.setSaveLocation("Token");
-    mbp.setTokenId(token);
+    // Untrusted macros are set to be editable by players
+    if (!MapTool.getParser().isMacroTrusted()) {
+      mbp.setAllowPlayerEdits(true);
+    }
 
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
     return BigDecimal.valueOf(mbp.getIndex());

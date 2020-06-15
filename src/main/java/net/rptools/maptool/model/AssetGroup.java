@@ -129,13 +129,11 @@ public class AssetGroup {
     return assetGroupList.indexOf(group);
   }
 
-  /** */
   public List<AssetGroup> getChildGroups() {
     loadGroupData();
     return Collections.unmodifiableList(assetGroupList);
   }
 
-  /** */
   public List<Asset> getAssets() {
     loadFileData();
     return Collections.unmodifiableList(assetList);

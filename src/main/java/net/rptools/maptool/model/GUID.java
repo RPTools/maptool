@@ -44,9 +44,10 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
   }
 
   /**
-   * Creates a new GUID based on the specified GUID value
+   * Creates a new GUID based on the specified GUID value.
    *
-   * @param baGUID the id value.
+   * @param baGUID the new GUID
+   * @throws InvalidGUIDException if the GUID is invalid
    */
   public GUID(byte[] baGUID) throws InvalidGUIDException {
     this.baGUID = baGUID.clone();
@@ -56,7 +57,8 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
   /**
    * Creates a new GUID based on the specified hexadecimal-code string.
    *
-   * @param strGUID a {@code String} representing the id value.
+   * @param strGUID the guid as a hexadecimal-code string
+   * @throws InvalidGUIDException if the GUID is invalid
    */
   public GUID(String strGUID) {
     if (strGUID == null) {
@@ -67,7 +69,11 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
     validateGUID();
   }
 
-  /** Ensures the GUID is legal. */
+  /**
+   * Ensures the GUID is legal.
+   *
+   * @throws InvalidGUIDException if the GUID is invalid
+   */
   private void validateGUID() throws InvalidGUIDException {
     if (baGUID == null) {
       throw new InvalidGUIDException("GUID is null");
@@ -80,7 +86,8 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
   /**
    * Returns the GUID representation of the {@link byte} array argument.
    *
-   * @param bits the id value.
+   * @param bits the {@link byte} array of the GUID
+   * @return a new GUID instance
    */
   public static GUID valueOf(byte[] bits) {
     if (bits == null) {
@@ -92,7 +99,8 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
   /**
    * Returns the GUID representation of the {@link String} argument.
    *
-   * @param s The {@code String} value of the id.
+   * @param s the guid as a hexadecimal-code string
+   * @return a new GUID instance
    */
   public static GUID valueOf(String s) {
     if (s == null) {
@@ -174,6 +182,16 @@ public final class GUID extends Object implements Serializable, Comparable<GUID>
     }
 
     return new GUID(newGUID).getBytes();
+  }
+
+  /**
+   * A fast check for whether a given argument is not a GUID.
+   *
+   * @param arg
+   * @return whether arg is not GUID (returning false != isGUID)
+   */
+  public static boolean isNotGUID(String arg) {
+    return arg.length() != GUID.GUID_LENGTH * 2;
   }
 
   public static void main(String[] args) throws Exception {

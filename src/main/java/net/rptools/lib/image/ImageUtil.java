@@ -60,14 +60,23 @@ public class ImageUtil {
   // graphicsConfig = config;
   // }
   //
-
-  /** Load the image. Does not create a graphics configuration compatible version. */
+  /**
+   * Load the image. Does not create a graphics configuration compatible version.
+   *
+   * @param file the file with the image in it
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
+   */
   public static Image getImage(File file) throws IOException {
     return bytesToImage(FileUtils.readFileToByteArray(file), file.getCanonicalPath());
   }
 
   /**
    * Load the image in the classpath. Does not create a graphics configuration compatible version.
+   *
+   * @param image the resource name of the image file
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
    */
   public static Image getImage(String image) throws IOException {
     ByteArrayOutputStream dataStream = new ByteArrayOutputStream(8192);
@@ -121,6 +130,13 @@ public class ImageUtil {
   /**
    * Create a copy of the image that is compatible with the current graphics context and scaled to
    * the supplied size
+   *
+   * @param img the image to copy
+   * @param width width of the created image
+   * @param height height of the created image
+   * @param hints a {@link Map} that may contain the key HINT_TRANSPARENCY to define a the
+   *     transparency color
+   * @return a {@link BufferedImage} with a copy of img
    */
   public static BufferedImage createCompatibleImage(
       Image img, int width, int height, Map<String, Object> hints) {
@@ -376,6 +392,7 @@ public class ImageUtil {
   /**
    * Flip the image and return a new image
    *
+   * @param image the image to flip
    * @param direction 0-nothing, 1-horizontal, 2-vertical, 3-both
    * @return flipped BufferedImage
    */

@@ -33,7 +33,7 @@ public class StaticMessageDialog extends MessageDialog {
    * RootPane and then adds the 'status' message as an overlay. The problem is that the RootPane
    * snapshot includes the previous image that might have been displayed previously.
    *
-   * @param s
+   * @param s the new status message
    */
   public void setStatus(String s) {
     this.status = s;

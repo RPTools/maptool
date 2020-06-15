@@ -196,7 +196,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
                 continue;
               }
               token.setFlippedX(!token.isFlippedX());
-              renderer.flush(token);
               MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
             }
             MapTool.getFrame().refresh();
@@ -215,7 +214,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
                 continue;
               }
               token.setFlippedY(!token.isFlippedY());
-              renderer.flush(token);
               MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
             }
             MapTool.getFrame().refresh();
@@ -234,7 +232,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
                 continue;
               }
               token.setFlippedIso(!token.isFlippedIso());
-              renderer.flush(token);
               MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
             }
             MapTool.getFrame().refresh();
@@ -391,7 +388,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
             }
             break;
         }
-        renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();
@@ -482,11 +478,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         } else {
           token.addLightSource(lightSource, Direction.CENTER);
         }
-        // Cache clearing
-        renderer.flush(token);
-
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-        renderer.getZone().putToken(token);
 
         renderer.repaint();
       }
@@ -683,7 +675,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
         token.setFacing(null);
-        renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();
@@ -702,9 +693,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token.hasLightSourceType(LightSource.Type.NORMAL)) {
           token.removeLightSourceType(LightSource.Type.NORMAL);
         }
-        renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-        renderer.getZone().putToken(token);
       }
       renderer.repaint();
     }
@@ -722,9 +711,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token.hasLightSourceType(LightSource.Type.AURA)) {
           token.removeLightSourceType(LightSource.Type.AURA);
         }
-        renderer.flush(token);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-        renderer.getZone().putToken(token);
       }
       renderer.repaint();
     }
@@ -987,7 +974,11 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       MapTool.getFrame().showTokenPropertiesDialog(getTokenUnderMouse(), getRenderer());
     }
 
-    /** Converts the action to a JMenuItem, and adds a tooltip if the action is blocked. */
+    /**
+     * Converts the action to a JMenuItem, and adds a tooltip if the action is blocked.
+     *
+     * @return the new {@link JMenuItem}
+     */
     public JMenuItem asJMenuItem() {
       JMenuItem jMenuItem = new JMenuItem(this);
       if (selectedTokenSet.size() > 1) {
