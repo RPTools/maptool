@@ -224,8 +224,8 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
-    implementation 'com.github.RPTools:parser:1.7.1'
-    implementation 'com.github.RPTools:dicelib:1.6.2'
+    implementation 'com.github.RPTools:parser:1.8.0'
+    implementation 'com.github.RPTools:dicelib:1.6.3'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
