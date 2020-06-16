@@ -13,11 +13,18 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - Several Export Screenshot bugs fixed.
 
 ## Enhancements
+- [#1958][i1958] Moving a token into a unreachable location adds a `fail` key/value pair to the last object in the array of location objects returned by `getLastPath()` or to `onTokenMove`.
 - [#1890][i1890] Map name parameter added to `removeToken()` function. `copyToken()` function cleaned up internally.
 - [#1882][i1882] NullPointerException messages now include more information about _why_ the error occured.
 - [#1861][i1861] Macro errors now produce a _call stack_ showing the macro calls leading to the error.
 
 ## Bug Fixes
+- [#1996][i1996] Error message for missing remote repository was missing closing quote. Fixed. 
+- [#1988][i1988] Audio funciton `playClip()` was hogging the JavaFX application thread. Fixed. 
+- [#1976][i1976] Calling `overlay()` with new content was not erasing previous content. Fixed.
+- [#1974][i1974] Disabling deterministic expression building was causing NPEs. Not in released builds. Fixed.
+- [#1972][i1972] Using `listGet()` on lists where elements had spaces in the name would fail. Fixed.
+- [#1962][i1962] Selecting colors in Drawing tool color palette could fail if mouse was moved between click and release. Fixed. 
 - [#1950][i1950] Calling `getname()` instead of `getName()` was calling `setName() instead. Fixed.
 - [#1948][i1948] Multiple fixes to Exporting Screenshots.
   - Uninitialized variables if attempting to do an Entire Map export would cause NPE. Fixed.
@@ -43,14 +50,21 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1874][i1874] Macro function `getMacroProps()` was returning a misnamed property (`toolapplyToSelected`). Fixed.
 - [#1867][i1867] Macro links to macros with no output would produce an empty line in chat. Fixed.
 - [#1863][i1863] HTML5 form submit was not allowed at document load. Fixed.
+- [#715][i715] Bad or missing remote repository would produce a Null Pointer Exception in the log but not inform the user. Fixed.
 
 ## Other
+- [#2019][i2019] Updated to Parse 1.8.0 which added support for logical operators to Expression.format()/InlineTreeFormatter..  
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.  
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
-- [#][i] 
-- [#][i] 
-- [#][i] 
 
+[i2019]: https://github.com/RPTools/maptool/issues/2019
+[i1996]: https://github.com/RPTools/maptool/issues/1996
+[i1988]: https://github.com/RPTools/maptool/issues/1988
+[i1976]: https://github.com/RPTools/maptool/issues/1976
+[i1974]: https://github.com/RPTools/maptool/issues/1974
+[i1972]: https://github.com/RPTools/maptool/issues/1972
+[i1962]: https://github.com/RPTools/maptool/issues/1962
+[i1958]: https://github.com/RPTools/maptool/issues/1958
 [i1950]: https://github.com/RPTools/maptool/issues/1950
 [i1948]: https://github.com/RPTools/maptool/issues/1948
 [i1943]: https://github.com/RPTools/maptool/issues/1943
@@ -58,6 +72,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1935]: https://github.com/RPTools/maptool/issues/1935
 [i1926]: https://github.com/RPTools/maptool/issues/1926
 [i1921]: https://github.com/RPTools/maptool/issues/1921
+[i1907]: https://github.com/RPTools/maptool/issues/1907
 [i1896]: https://github.com/RPTools/maptool/issues/1896
 [i1894]: https://github.com/RPTools/maptool/issues/1894
 [i1893]: https://github.com/RPTools/maptool/issues/1893
@@ -74,6 +89,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1867]: https://github.com/RPTools/maptool/issues/1867
 [i1863]: https://github.com/RPTools/maptool/issues/1863
 [i1861]: https://github.com/RPTools/maptool/issues/1861
+[i715]: https://github.com/RPTools/maptool/issues/715
 
 ---
 # Maptool 1.7.0
