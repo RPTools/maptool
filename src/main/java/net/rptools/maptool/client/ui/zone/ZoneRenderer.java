@@ -3779,7 +3779,8 @@ public class ZoneRenderer extends JComponent
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
     if (tokenSet != null) {
       for (GUID guid : tokenSet) {
-        if (!AppUtil.playerOwns(zone.getToken(guid))) {
+        Token token = zone.getToken(guid);
+        if (token == null || !AppUtil.playerOwns(token)) {
           continue;
         }
         ownedTokens.add(guid);

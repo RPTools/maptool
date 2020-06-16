@@ -873,7 +873,7 @@ public class AppActions {
       // add tokens to delete to the list
       for (GUID tokenGUID : tokenSet) {
         Token token = zone.getToken(tokenGUID);
-        if (AppUtil.playerOwns(token)) {
+        if (token != null && AppUtil.playerOwns(token)) {
           tokensToRemove.add(tokenGUID);
         }
       }
