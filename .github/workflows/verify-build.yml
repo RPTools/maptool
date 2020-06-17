@@ -6,13 +6,13 @@ name: Build Verification
 on:
   push:
     branches:
-      - master
+      - main
       - develop
       - feature*
       - release*
   pull_request:
     branches:
-      - master
+      - main
       - develop
       - feature*
       - release*
