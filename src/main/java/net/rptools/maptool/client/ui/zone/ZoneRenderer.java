@@ -2910,15 +2910,19 @@ public class ZoneRenderer extends JComponent
     return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
   }
 
+  /**
+   * Sets the active layer. If keepSelectedTokenSet is true, also clears the selected token list.
+   *
+   * @param layer the layer to set active
+   */
   public void setActiveLayer(Zone.Layer layer) {
     activeLayer = layer;
 
-    if (!keepSelectedTokenSet) {
+    if (!keepSelectedTokenSet && !selectedTokenSet.isEmpty()) {
       selectedTokenSet.clear();
       updateAfterSelection();
-    } else {
-      keepSelectedTokenSet = false; // Always reset it back, temp boolean only
     }
+    keepSelectedTokenSet = false; // Always reset it back, temp boolean only
 
     repaintDebouncer.dispatch();
   }
@@ -2928,12 +2932,7 @@ public class ZoneRenderer extends JComponent
    * for the given layer
    */
   private List<TokenLocation> getTokenLocations(Zone.Layer layer) {
-    List<TokenLocation> list = tokenLocationMap.get(layer);
-    if (list == null) {
-      list = new LinkedList<TokenLocation>();
-      tokenLocationMap.put(layer, list);
-    }
-    return list;
+    return tokenLocationMap.computeIfAbsent(layer, k -> new LinkedList<>());
   }
 
   // TODO: I don't like this hardwiring
@@ -3779,7 +3778,8 @@ public class ZoneRenderer extends JComponent
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
     if (tokenSet != null) {
       for (GUID guid : tokenSet) {
-        if (!AppUtil.playerOwns(zone.getToken(guid))) {
+        Token token = zone.getToken(guid);
+        if (token == null || !AppUtil.playerOwns(token)) {
           continue;
         }
         ownedTokens.add(guid);
