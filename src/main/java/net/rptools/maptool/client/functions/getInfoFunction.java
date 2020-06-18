@@ -171,6 +171,10 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
     cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
     cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
+    cinfo.addProperty("show avatar in chat", AppPreferences.getShowAvatarInChat());
+    cinfo.addProperty(
+        "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
+    cinfo.addProperty("use tooltips for inline rolls", AppPreferences.getUseToolTipForInlineRoll());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
         "isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
