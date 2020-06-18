@@ -18,13 +18,13 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
@@ -34,6 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ImageLoaderCache {
+
   private static final Logger log = LogManager.getLogger(ImageLoaderCache.class);
 
   private final Map<String, Image> imageMap = new HashMap<String, Image>();
@@ -93,8 +94,11 @@ public class ImageLoaderCache {
         }
         return image;
       } else {
-        // Normal method
-        image = Toolkit.getDefaultToolkit().createImage(url);
+        try {
+          image = ImageIO.read(url);
+        } catch (IOException e) {
+          log.error("Unable to load image " + url, e);
+        }
       }
       imageMap.put(url.toString(), image);
     }
