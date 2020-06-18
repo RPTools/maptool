@@ -170,6 +170,16 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     return new GUID(newGUID).getBytes();
   }
 
+  /**
+   * A fast check for whether a given argument is not a GUID.
+   *
+   * @param arg
+   * @return whether arg is not GUID (returning false != isGUID)
+   */
+  public static boolean isNotGUID(String arg) {
+    return arg.length() != GUID.GUID_LENGTH * 2;
+  }
+
   public static void main(String[] args) throws Exception {
     for (int i = 0; i < 10; i++) {
       GUID guid = new GUID();

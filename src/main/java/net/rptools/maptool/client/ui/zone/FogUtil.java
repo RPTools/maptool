@@ -195,7 +195,6 @@ public class FogUtil {
           if (tokenVision != null) {
             Set<GUID> filteredToks = new HashSet<GUID>();
             filteredToks.add(tokenClone.getId());
-            zone.exposeArea(tokenVision, tokenClone);
             MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
           }
         }
@@ -207,7 +206,6 @@ public class FogUtil {
         if (tokenVision != null) {
           Set<GUID> filteredToks = new HashSet<GUID>();
           filteredToks.add(token.getId());
-          zone.exposeArea(tokenVision, filteredToks);
           MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
         }
       }
@@ -239,7 +237,6 @@ public class FogUtil {
       if (tokenVision != null) {
         Set<GUID> filteredToks = new HashSet<GUID>();
         filteredToks.add(token.getId());
-        zone.exposeArea(tokenVision, token);
         MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
       }
 
@@ -410,9 +407,6 @@ public class FogUtil {
 
       timer.stop("exposeLastPath-" + token.getName());
       renderer.flush(tokenClone);
-      renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
-
-      zone.exposeArea(visionArea, token);
 
       filteredToks.clear();
       filteredToks.add(token.getId());

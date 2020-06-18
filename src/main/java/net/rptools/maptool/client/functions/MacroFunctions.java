@@ -476,14 +476,23 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     MacroButtonProperties mbp = new MacroButtonProperties(token.getMacroNextIndex());
+
+    mbp.setLabel(label);
+    mbp.setSaveLocation("Token");
     mbp.setCommand(command);
+
+    // Token Id is used in the exception messages of setMacroProps
+    mbp.setTokenId(token);
+
+    // Sets the props, if any
     if (prop != null) {
       setMacroProps(mbp, prop, delim);
     }
 
-    mbp.setLabel(label);
-    mbp.setSaveLocation("Token");
-    mbp.setTokenId(token);
+    // Untrusted macros are set to be editable by players
+    if (!MapTool.getParser().isMacroTrusted()) {
+      mbp.setAllowPlayerEdits(true);
+    }
 
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, mbp);
     return BigDecimal.valueOf(mbp.getIndex());

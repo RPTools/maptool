@@ -631,7 +631,7 @@ public class MapToolLineParser {
       Object retval = params[index];
       // No parsing is done if the param isn't a String (e.g. it's already a BigDecimal)
       if (params[index] instanceof String) {
-        Result result = parseExpression(res, tokenInContext, (String) params[index]);
+        Result result = parseExpression(res, tokenInContext, (String) params[index], true);
         retval = result.getValue();
       }
       return retval;
@@ -854,7 +854,7 @@ public class MapToolLineParser {
                   outputOpts.add("w");
                   for (int i = 0; i < option.getParamCount(); i++) {
                     String arg =
-                        parseExpression(resolver, tokenInContext, option.getStringParam(i))
+                        parseExpression(resolver, tokenInContext, option.getStringParam(i), true)
                             .getValue()
                             .toString();
                     if (arg.trim().startsWith("[")) {
@@ -952,7 +952,7 @@ public class MapToolLineParser {
                     String listDelim = option.getStringParam(3);
                     if (listDelim.trim().startsWith("\"")) {
                       listDelim =
-                          parseExpression(resolver, tokenInContext, listDelim)
+                          parseExpression(resolver, tokenInContext, listDelim, true)
                               .getValue()
                               .toString();
                     }
@@ -973,8 +973,7 @@ public class MapToolLineParser {
 
                     // If we still dont have a list treat it list a string list
                     if (foreachList == null) {
-                      foreachList = new ArrayList<String>();
-                      StrListFunctions.parse(listString, foreachList, listDelim);
+                      foreachList = StrListFunctions.toList(listString, listDelim);
                     }
                     loopCount = foreachList.size();
 
@@ -1148,7 +1147,7 @@ public class MapToolLineParser {
                     (loopCondition == null) ? null : String.format("if(%s, 1, 0)", loopCondition);
                 // Stop loop if the while condition is false
                 try {
-                  Result result = parseExpression(resolver, tokenInContext, hackCondition);
+                  Result result = parseExpression(resolver, tokenInContext, hackCondition, true);
                   loopConditionValue = ((Number) result.getValue()).intValue();
                   if (loopConditionValue == 0) {
                     doLoop = false;
@@ -1162,7 +1161,7 @@ public class MapToolLineParser {
             // Output the loop separator
             if (doLoop && iteration != 0 && output != Output.NONE) {
               expressionBuilder.append(
-                  parseExpression(resolver, tokenInContext, loopSep).getValue());
+                  parseExpression(resolver, tokenInContext, loopSep, true).getValue());
             }
 
             if (!doLoop) {
@@ -1183,7 +1182,7 @@ public class MapToolLineParser {
               }
               Result result = null;
               try {
-                result = parseExpression(resolver, tokenInContext, hackCondition);
+                result = parseExpression(resolver, tokenInContext, hackCondition, true);
               } catch (Exception e) {
                 throw doError(
                     I18N.getText(
@@ -1329,10 +1328,10 @@ public class MapToolLineParser {
                      * TODO: If you're adding a new formatting option, add a new case to build the output
                      */
                   case NONE:
-                    parseExpression(resolver, tokenInContext, rollBranch);
+                    parseExpression(resolver, tokenInContext, rollBranch, true);
                     break;
                   case RESULT:
-                    result = parseExpression(resolver, tokenInContext, rollBranch);
+                    result = parseExpression(resolver, tokenInContext, rollBranch, true);
                     output_text = result != null ? result.getValue().toString() : "";
                     if (!this.isMacroTrusted()) {
                       output_text =
@@ -1350,7 +1349,7 @@ public class MapToolLineParser {
                   case TOOLTIP:
                     String tooltip = rollBranch + " = ";
                     output_text = null;
-                    result = parseExpression(resolver, tokenInContext, rollBranch);
+                    result = parseExpression(resolver, tokenInContext, rollBranch, true);
                     tooltip += result.getDetailExpression();
                     if (text == null) {
                       output_text = result.getValue().toString();
@@ -1360,7 +1359,9 @@ public class MapToolLineParser {
                       }
                       resolver.setVariable("roll.result", result.getValue());
                       output_text =
-                          parseExpression(resolver, tokenInContext, text).getValue().toString();
+                          parseExpression(resolver, tokenInContext, text, true)
+                              .getValue()
+                              .toString();
                     }
                     tooltip = tooltip.replaceAll("'", "&#39;");
                     expressionBuilder.append(
@@ -1388,9 +1389,9 @@ public class MapToolLineParser {
                  */
               case MACRO:
                 // [MACRO("macroName@location"): args]
-                result = parseExpression(resolver, tokenInContext, macroName);
+                result = parseExpression(resolver, tokenInContext, macroName, true);
                 String callName = result.getValue().toString();
-                result = parseExpression(resolver, tokenInContext, rollBranch);
+                result = parseExpression(resolver, tokenInContext, rollBranch, true);
                 String macroArgs = result.getValue().toString();
 
                 try {
@@ -1414,6 +1415,9 @@ public class MapToolLineParser {
                   if (!catchAssert) throw assertEx;
                   MapTool.addLocalMessage(assertEx.getMessage());
                   output_text = "";
+                } catch (ParserException e) {
+                  e.addMacro(callName);
+                  throw e;
                 }
 
                 if (output != Output.NONE) {
@@ -1469,7 +1473,7 @@ public class MapToolLineParser {
           }
         } else if (match.getMatch().startsWith("{")) {
           roll = match.getRoll();
-          Result result = parseExpression(resolver, tokenInContext, roll);
+          Result result = parseExpression(resolver, tokenInContext, roll, true);
           if (isMacroTrusted()) {
             builder.append(result != null ? result.getValue().toString() : "");
           } else {
@@ -1516,15 +1520,19 @@ public class MapToolLineParser {
     }
   }
 
-  public Result parseExpression(String expression) throws ParserException {
-    return parseExpression(null, expression);
+  public Result parseExpression(String expression, boolean makeDeterministic)
+      throws ParserException {
+    return parseExpression(null, expression, makeDeterministic);
   }
 
-  public Result parseExpression(Token tokenInContext, String expression) throws ParserException {
-    return parseExpression(new MapToolVariableResolver(tokenInContext), tokenInContext, expression);
+  public Result parseExpression(Token tokenInContext, String expression, boolean makeDeterministic)
+      throws ParserException {
+    return parseExpression(
+        new MapToolVariableResolver(tokenInContext), tokenInContext, expression, makeDeterministic);
   }
 
-  public Result parseExpression(VariableResolver resolver, Token tokenInContext, String expression)
+  public Result parseExpression(
+      VariableResolver resolver, Token tokenInContext, String expression, boolean makeDeterministic)
       throws ParserException {
     if (parserRecurseDepth > maxRecursionDepth) {
       parserRecurseDepth = 0;
@@ -1534,14 +1542,11 @@ public class MapToolLineParser {
     try {
       parserRecurseDepth++;
       if (log.isDebugEnabled()) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 1; i < parserRecurseDepth; i++) {
-          b.append(' ');
-        }
-        b.append(expression);
-        log.debug(b.toString());
+        String b = " ".repeat(Math.max(0, parserRecurseDepth - 1)) + expression;
+        log.debug(b);
       }
-      Result res = createParser(resolver, tokenInContext != null).evaluate(expression);
+      Result res =
+          createParser(resolver, tokenInContext != null).evaluate(expression, makeDeterministic);
       rolled.addAll(res.getRolled());
       newRolls.addAll(res.getRolled());
 
@@ -1597,7 +1602,7 @@ public class MapToolLineParser {
   public String expandRoll(MapToolVariableResolver resolver, Token tokenInContext, String roll)
       throws ParserException {
     try {
-      Result result = parseExpression(resolver, tokenInContext, roll);
+      Result result = parseExpression(resolver, tokenInContext, roll, true);
       StringBuilder sb = new StringBuilder();
 
       if (result.getDetailExpression().equals(result.getValue().toString())) {
@@ -1669,15 +1674,17 @@ public class MapToolLineParser {
       // Unqualified names are not allowed.
       throw new ParserException(I18N.getText("lineParser.invalidMacroLoc", macroName));
     } else if (macroLocation.equalsIgnoreCase("TOKEN")) {
-      macroContext = new MapToolMacroContext(macroName, "token", MapTool.getPlayer().isGM());
-      // Search token for the macro
+      boolean trusted = false;
       if (tokenInContext != null) {
-        MacroButtonProperties buttonProps = tokenInContext.getMacro(macroName, false);
-        if (buttonProps == null) {
+        // Search token for the macro
+        MacroButtonProperties mbp = tokenInContext.getMacro(macroName, false);
+        if (mbp == null) {
           throw new ParserException(I18N.getText("lineParser.atTokenNotFound", macroName));
         }
-        macroBody = buttonProps.getCommand();
+        macroBody = mbp.getCommand();
+        trusted = !mbp.getAllowPlayerEdits();
       }
+      macroContext = new MapToolMacroContext(macroName, "token", trusted);
     } else if (macroLocation.equalsIgnoreCase("CAMPAIGN")) {
       MacroButtonProperties mbp = null;
       for (MacroButtonProperties m : MapTool.getCampaign().getMacroButtonPropertiesArray()) {
@@ -1703,7 +1710,8 @@ public class MapToolLineParser {
         throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
       }
       macroBody = mbp.getCommand();
-      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getParser().isMacroTrusted());
+      // GM macros can't be edited by players, so they are always trusted.
+      macroContext = new MapToolMacroContext(macroName, "Gm", true);
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;

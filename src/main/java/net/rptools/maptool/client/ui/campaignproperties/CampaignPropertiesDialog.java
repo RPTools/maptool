@@ -483,7 +483,6 @@ public class CampaignPropertiesDialog extends JDialog {
         int offset = 0;
         double pLightRange = 0;
 
-        personalLight = new LightSource();
         for (String arg : args) {
           assert arg.length() > 0; // The split() uses "one or more spaces", removing empty strings
           try {

@@ -119,6 +119,7 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
@@ -620,7 +621,7 @@ public class ZoneRenderer extends JComponent
           Token token = zone.getToken(tokenGUID);
           tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
 
-          if (tmc != null && tmc == BigDecimal.ONE) {
+          if (BigDecimal.ONE.equals(tmc)) {
             denyMovement(token);
           }
         }
@@ -634,7 +635,7 @@ public class ZoneRenderer extends JComponent
         tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
-        if (tmc != null && tmc == BigDecimal.ONE) {
+        if (BigDecimal.ONE.equals(tmc)) {
           for (GUID tokenGUID : filteredTokens) {
             Token token = zone.getToken(tokenGUID);
             denyMovement(token);
@@ -937,15 +938,23 @@ public class ZoneRenderer extends JComponent
    * @return the player view
    */
   public PlayerView getPlayerView(Player.Role role) {
+    return getPlayerView(role, true);
+  }
+
+  /**
+   * The returned {@link PlayerView} contains a list of tokens that includes either all selected
+   * tokens that this player owns and that have their <code>HasSight</code> checkbox enabled, or all
+   * owned tokens that have <code>HasSight</code> enabled.
+   *
+   * @param role the player role
+   * @param selected whether to get the view of selected tokens, or all owned
+   * @return the player view
+   */
+  public PlayerView getPlayerView(Player.Role role, boolean selected) {
     List<Token> selectedTokens = null;
-    if (getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
+    if (selected && getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
       selectedTokens = getSelectedTokensList();
-      for (ListIterator<Token> iter = selectedTokens.listIterator(); iter.hasNext(); ) {
-        Token token = iter.next();
-        if (!token.getHasSight() || !AppUtil.playerOwns(token)) {
-          iter.remove();
-        }
-      }
+      selectedTokens.removeIf(token -> !token.getHasSight() || !AppUtil.playerOwns(token));
     }
     if (selectedTokens == null || selectedTokens.isEmpty()) {
       // if no selected token qualifying for view, use owned tokens or player tokens with sight
@@ -1384,7 +1393,7 @@ public class ZoneRenderer extends JComponent
       // and figure tokens need sorting via alternative logic.
       List<Token> tokens = zone.getFigureTokens();
       List<Token> sortedTokens = new ArrayList<Token>(tokens);
-      Collections.sort(sortedTokens, zone.getFigureZOrderComparator());
+      sortedTokens.sort(zone.getFigureZOrderComparator());
       if (!tokens.isEmpty()) {
         timer.start("tokens - figures");
         renderTokens(g2d, sortedTokens, view, true);
@@ -1417,9 +1426,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("visionOverlayPlayer");
     }
     timer.start("overlays");
-    for (int i = 0; i < overlayList.size(); i++) {
+    for (ZoneOverlay overlay : overlayList) {
       String msg = null;
-      ZoneOverlay overlay = overlayList.get(i);
       if (timer.isEnabled()) {
         msg = "overlays:" + overlay.getClass().getSimpleName();
         timer.start(msg);
@@ -1510,15 +1518,12 @@ public class ZoneRenderer extends JComponent
       // Organize
       Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
       List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
-      for (DrawableLight light : zoneView.getDrawableLights()) {
+      for (DrawableLight light : zoneView.getDrawableLights(view)) {
         // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
         if (light.getType() == LightSource.Type.NORMAL) {
           if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
-            List<Area> areaList = colorMap.get(light.getPaint().getPaint());
-            if (areaList == null) {
-              areaList = new ArrayList<Area>();
-              colorMap.put(light.getPaint().getPaint(), areaList);
-            }
+            List<Area> areaList =
+                colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
             areaList.add(new Area(light.getArea()));
           }
         } else {
@@ -1559,7 +1564,7 @@ public class ZoneRenderer extends JComponent
         // Cut out the bright light
         if (areaList.size() > 0) {
           for (Area area : areaList) {
-            for (Area brightArea : zoneView.getBrightLights()) {
+            for (Area brightArea : zoneView.getBrightLights(view)) {
               area.subtract(brightArea);
             }
           }
@@ -1710,9 +1715,7 @@ public class ZoneRenderer extends JComponent
     boolean isOwner = AppUtil.playerOwns(tokenUnderMouse);
     boolean tokenIsPC = tokenUnderMouse.getType() == Token.Type.PC;
     boolean strictOwnership =
-        MapTool.getServerPolicy() == null
-            ? false
-            : MapTool.getServerPolicy().useStrictTokenManagement();
+        MapTool.getServerPolicy() != null && MapTool.getServerPolicy().useStrictTokenManagement();
     boolean showVisionAndHalo = isOwner || view.isGMView() || (tokenIsPC && !strictOwnership);
     // String player = MapTool.getPlayer().getName();
     // System.err.print("tokenUnderMouse.ownedBy(" + player + "): " + isOwner);
@@ -2314,7 +2317,7 @@ public class ZoneRenderer extends JComponent
         double iso_ho = 0;
         Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
         if (token.getShape() == TokenShape.FIGURE) {
-          double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+          double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
           iso_ho = footprintBounds.height - th;
           footprintBounds =
               new Rectangle(
@@ -2907,15 +2910,19 @@ public class ZoneRenderer extends JComponent
     return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
   }
 
+  /**
+   * Sets the active layer. If keepSelectedTokenSet is true, also clears the selected token list.
+   *
+   * @param layer the layer to set active
+   */
   public void setActiveLayer(Zone.Layer layer) {
     activeLayer = layer;
 
-    if (!keepSelectedTokenSet) {
+    if (!keepSelectedTokenSet && !selectedTokenSet.isEmpty()) {
       selectedTokenSet.clear();
       updateAfterSelection();
-    } else {
-      keepSelectedTokenSet = false; // Always reset it back, temp boolean only
     }
+    keepSelectedTokenSet = false; // Always reset it back, temp boolean only
 
     repaintDebouncer.dispatch();
   }
@@ -2925,12 +2932,7 @@ public class ZoneRenderer extends JComponent
    * for the given layer
    */
   private List<TokenLocation> getTokenLocations(Zone.Layer layer) {
-    List<TokenLocation> list = tokenLocationMap.get(layer);
-    if (list == null) {
-      list = new LinkedList<TokenLocation>();
-      tokenLocationMap.put(layer, list);
-    }
-    return list;
+    return tokenLocationMap.computeIfAbsent(layer, k -> new LinkedList<>());
   }
 
   // TODO: I don't like this hardwiring
@@ -3263,7 +3265,7 @@ public class ZoneRenderer extends JComponent
       double iso_ho = 0;
       Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
       if (token.getShape() == TokenShape.FIGURE) {
-        double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+        double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
         iso_ho = footprintBounds.height - th;
         footprintBounds =
             new Rectangle(
@@ -3668,7 +3670,7 @@ public class ZoneRenderer extends JComponent
             int labelWidth =
                 SwingUtilities.computeStringWidth(fm, token.getLabel())
                     + GraphicsUtil.BOX_PADDINGX * 2;
-            width = (width > labelWidth) ? width : labelWidth;
+            width = Math.max(width, labelWidth);
           }
 
           // Set up the image
@@ -3776,7 +3778,8 @@ public class ZoneRenderer extends JComponent
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
     if (tokenSet != null) {
       for (GUID guid : tokenSet) {
-        if (!AppUtil.playerOwns(zone.getToken(guid))) {
+        Token token = zone.getToken(guid);
+        if (token == null || !AppUtil.playerOwns(token)) {
           continue;
         }
         ownedTokens.add(guid);
@@ -4700,6 +4703,16 @@ public class ZoneRenderer extends JComponent
         }
         MapToolUtil.uploadAsset(asset);
       }
+      // Set all macros to "Allow players to edit macro", because the macros are not trusted
+      if (!isGM) {
+        Map<Integer, MacroButtonProperties> mbpMap = token.getMacroPropertiesMap(false);
+        for (MacroButtonProperties mbp : mbpMap.values()) {
+          if (!mbp.getAllowPlayerEdits()) {
+            mbp.setAllowPlayerEdits(true);
+          }
+        }
+      }
+
       // Save the token and tell everybody about it
       MapTool.serverCommand().putToken(zone.getId(), token);
       selectThese.add(token.getId());
