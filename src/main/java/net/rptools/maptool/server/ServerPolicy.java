@@ -258,6 +258,9 @@ public class ServerPolicy {
     sinfo.addProperty(
         "hosting server", MapTool.isHostingServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
+    sinfo.addProperty(
+        "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
+
     return sinfo;
   }
 }
