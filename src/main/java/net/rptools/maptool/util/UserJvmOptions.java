@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.util;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -66,17 +67,22 @@ public class UserJvmOptions {
     setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, "");
   }
 
-  public static void loadAppCfg() {
+  public static boolean loadAppCfg() {
     Configurations configurations = new Configurations();
     INIConfiguration iniConfiguration;
 
-    configurationBuilder = configurations.iniBuilder(AppUtil.getAppCfgFile());
+    File cfgFile = AppUtil.getAppCfgFile();
+    if(!cfgFile.exists()) {
+      return false;
+    }
+
+    configurationBuilder = configurations.iniBuilder(cfgFile);
 
     try {
       iniConfiguration = configurationBuilder.getConfiguration();
     } catch (ConfigurationException e) {
       log.error("Error loading JVM cfg file.", e);
-      return;
+      return false;
     }
 
     // Default is " = " which breaks launcher
@@ -105,10 +111,13 @@ public class UserJvmOptions {
                 log.debug("Updating on load {}:{}", key, jvmNodeConfiguration.getString(key));
               }
             });
+
+    return true;
   }
 
   public static void saveAppCfg() {
-    // Special handling of -X memory parameters
+    // Special handling of -X memory parameters and parms that don't follow key=value notation
+    // e.g. -XSS and -XX:+ShowCodeDetailsInExceptionMessages
     jvmNodeConfiguration
         .getKeys()
         .forEachRemaining(
@@ -120,7 +129,14 @@ public class UserJvmOptions {
                 String newKey = key + jvmNodeConfiguration.getString(key);
                 jvmNodeConfiguration.setProperty(newKey, value);
                 jvmNodeConfiguration.clearProperty(key);
-                log.debug("Updating before save {}:{}", key, jvmNodeConfiguration.getString(key));
+                log.debug("Updating {}={} to {}={}", key, jvmNodeConfiguration.getString(key), newKey, value);
+              } else if (key.startsWith("-XX")) {
+                String value = "";
+                String newKey = key + ":" + jvmNodeConfiguration.getString(key).replaceAll("\\=","");
+                jvmNodeConfiguration.setProperty(newKey, value);
+                jvmNodeConfiguration.clearProperty(key);
+
+                log.debug("Updating {}={} to {}={}", key, jvmNodeConfiguration.getString(key), newKey, value);
               }
             });
 
@@ -211,7 +227,7 @@ public class UserJvmOptions {
     Reflections reflections = new Reflections(I18N_RESOURCE_PATH, new ResourcesScanner());
     Set<String> resourcePathSet =
         reflections.getResources(Pattern.compile(I18N_RESOURCE_PREFIX + ".*\\.properties"));
-    log.info("resourcePathSet: " + resourcePathSet.toString());
+    log.debug("getResourceBundles() resourcePathSet: " + resourcePathSet.toString());
 
     for (String resourcePath : resourcePathSet) {
       int index = I18N_RESOURCE_PATH.length() + I18N_RESOURCE_PREFIX.length() + 1;
