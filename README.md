@@ -1,6 +1,6 @@
 | Current Development Status | Localization |
 | :---                 |   :--:       |
-| ![Build Verification](../../workflows/Build%20Verification/badge.svg?branch=develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
+| ![Build Verification](../../workflows/Build%20Verification/badge.svg) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
 
 
 
