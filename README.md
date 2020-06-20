@@ -1,7 +1,6 @@
-| Branch  | Travis | AppVeyor | Localization |
-| :---    |  :--:  |  :--:    |   :--:       |
-| main    | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=main)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/main?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/main)
-| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
+| Current Development Status | Localization |
+| :--:                       |   :--:       |
+| ![Build Verification](../../workflows/Build%20Verification/badge.svg?branch=develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
 
 
 
