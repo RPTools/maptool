@@ -28,7 +28,6 @@ import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -264,6 +263,10 @@ public class TokenBarController
     ((JSlider) panel.getComponentByName(TESTER)).setValue(100);
     enableDataComponents();
     changedUpdate(null);
+    // Initially no bar is selected, so these start disabled
+    panel.getButton(MOVE_UP).setEnabled(false);
+    panel.getButton(MOVE_DOWN).setEnabled(false);
+    panel.getButton(DELETE).setEnabled(false);
   }
 
   /**
@@ -280,13 +283,14 @@ public class TokenBarController
    *
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
+  @Override
   public void actionPerformed(ActionEvent e) {
     String name = ((JComponent) e.getSource()).getName();
-    JList list = formPanel.getList(BARS);
-    DefaultListModel model = (DefaultListModel) list.getModel();
+    JList<BarTokenOverlay> list = formPanel.getList(BARS);
+    DefaultListModel<BarTokenOverlay> model = (DefaultListModel<BarTokenOverlay>) list.getModel();
     int selected = list.getSelectedIndex();
-    JList imageList = formPanel.getList(IMAGES);
-    DefaultListModel imageModel = (DefaultListModel) imageList.getModel();
+    JList<MD5Key> imageList = formPanel.getList(IMAGES);
+    DefaultListModel<MD5Key> imageModel = (DefaultListModel<MD5Key>) imageList.getModel();
     int imageSelected = imageList.getSelectedIndex();
 
     // Add a new bar
@@ -297,11 +301,11 @@ public class TokenBarController
         getNames().add(overlay.getName());
         formPanel.setText(NAME, "");
         formPanel.setSelected(MOUSEOVER, false);
-        formPanel.getSpinner(OPACITY).setValue(new Integer(100));
+        formPanel.getSpinner(OPACITY).setValue(100);
         formPanel.setSelected(SHOW_GM, true);
         formPanel.setSelected(SHOW_OWNER, true);
         formPanel.setSelected(SHOW_OTHERS, true);
-        formPanel.getList(IMAGES).setModel(new DefaultListModel());
+        formPanel.getList(IMAGES).setModel(new DefaultListModel<>());
         formPanel.getList(BARS).clearSelection();
       } // endif
 
@@ -309,7 +313,7 @@ public class TokenBarController
     } else if (DELETE.equals(name)) {
       int[] selectedElements = list.getSelectedIndices();
       for (int j = selectedElements.length - 1; j >= 0; j--) {
-        BarTokenOverlay overlay = (BarTokenOverlay) model.remove(selectedElements[j]);
+        BarTokenOverlay overlay = model.remove(selectedElements[j]);
         getNames().remove(overlay.getName());
       } // endfor
       changedUpdate(null);
@@ -367,7 +371,7 @@ public class TokenBarController
       if (imageSelected < 0) {
         return; // We really should disable the MOVE_UP button unless an image is selected...
       }
-      Object element = imageModel.remove(imageSelected);
+      MD5Key element = imageModel.remove(imageSelected);
       imageModel.add(imageSelected - 1, element);
       imageList.setSelectedIndex(imageSelected - 1);
       imageList.scrollRectToVisible(imageList.getCellBounds(imageSelected - 1, imageSelected - 1));
@@ -377,7 +381,7 @@ public class TokenBarController
       if (imageSelected < 0) {
         return; // We really should disable the MOVE_DOWN button unless an image is selected...
       }
-      Object element = imageModel.remove(imageSelected);
+      MD5Key element = imageModel.remove(imageSelected);
       imageModel.add(imageSelected + 1, element);
       imageList.setSelectedIndex(imageSelected + 1);
       imageList.scrollRectToVisible(imageList.getCellBounds(imageSelected + 1, imageSelected + 1));
@@ -394,14 +398,14 @@ public class TokenBarController
 
       // Move an item up one row
     } else if (MOVE_UP.equals(name)) {
-      Object element = model.remove(selected);
+      BarTokenOverlay element = model.remove(selected);
       model.add(selected - 1, element);
       list.setSelectedIndex(selected - 1);
       list.scrollRectToVisible(list.getCellBounds(selected - 1, selected - 1));
 
       // Move an item down one row
     } else if (MOVE_DOWN.equals(name)) {
-      Object element = model.remove(selected);
+      BarTokenOverlay element = model.remove(selected);
       model.add(selected + 1, element);
       list.setSelectedIndex(selected + 1);
       list.scrollRectToVisible(list.getCellBounds(selected + 1, selected + 1));
@@ -411,14 +415,27 @@ public class TokenBarController
   /** Enable the data components needed by the selected type of overlay. Disable the rest. */
   private void enableDataComponents() {
     int selected = formPanel.getComboBox(TYPE).getSelectedIndex();
+    int selectedImg = formPanel.getList(IMAGES).getSelectedIndex();
+    int size = formPanel.getList(IMAGES).getModel().getSize();
+
     for (int i = 0; i < DATA_ENTRY_COMPONENTS.length; i++) {
-      formPanel
-          .getComponentByName(DATA_ENTRY_COMPONENTS[i])
-          .setEnabled(NEEDED_COMPONENTS[selected][i]);
-      if (i < DATA_ENTRY_COMPONENT_LABELS.length)
-        formPanel
-            .getComponentByName(DATA_ENTRY_COMPONENT_LABELS[i])
-            .setEnabled(NEEDED_COMPONENTS[selected][i]);
+      String name = DATA_ENTRY_COMPONENTS[i];
+      boolean enabled = NEEDED_COMPONENTS[selected][i];
+      if (enabled) {
+        // These buttons can be disabled depending on which image is selected
+        if (name.equals(IMAGE_DELETE) || name.equals(IMAGE_UPDATE)) {
+          enabled = selectedImg >= 0;
+        } else if (name.equals(IMAGE_MOVE_UP)) {
+          enabled = selectedImg >= 1;
+        } else if (name.equals(IMAGE_MOVE_DOWN)) {
+          enabled = selectedImg >= 0 && selectedImg <= size - 2;
+        }
+      }
+
+      formPanel.getComponentByName(DATA_ENTRY_COMPONENTS[i]).setEnabled(enabled);
+      if (i < DATA_ENTRY_COMPONENT_LABELS.length) {
+        formPanel.getComponentByName(DATA_ENTRY_COMPONENT_LABELS[i]).setEnabled(enabled);
+      }
     } // endfor
     changedUpdate(null);
   }
@@ -449,10 +466,11 @@ public class TokenBarController
   }
 
   /**
-   * Enable/disable the buttons as needed.
+   * Enable/disable the ADD and UPDATE buttons as needed.
    *
    * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
    */
+  @Override
   public void changedUpdate(DocumentEvent e) {
     int type = formPanel.getComboBox(TYPE).getSelectedIndex();
     int size = NEEDED_IMAGES[type] == null ? -1 : NEEDED_IMAGES[type].length;
@@ -495,35 +513,32 @@ public class TokenBarController
    *
    * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
    */
+  @Override
   public void valueChanged(ListSelectionEvent e) {
     if (e.getValueIsAdjusting()) return;
     if (e.getSource() == formPanel.getList(BARS)) {
       int selected = formPanel.getList(BARS).getSelectedIndex();
+      int size = formPanel.getList(BARS).getModel().getSize();
       formPanel.getButton(DELETE).setEnabled(selected >= 0);
       changedUpdate(null); // Makes sure update is selected
       formPanel.getButton(MOVE_UP).setEnabled(selected >= 1);
-      formPanel
-          .getButton(MOVE_DOWN)
-          .setEnabled(selected <= formPanel.getList(BARS).getModel().getSize() - 2);
+      formPanel.getButton(MOVE_DOWN).setEnabled(selected >= 0 && selected <= size - 2);
       if (selected >= 0) {
-
         // Set common stuff
         BarTokenOverlay bar = (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
         formPanel.setText(NAME, bar.getName());
         formPanel.setSelected(MOUSEOVER, bar.isMouseover());
-        formPanel.getSpinner(OPACITY).setValue(new Integer(bar.getOpacity()));
+        formPanel.getSpinner(OPACITY).setValue(bar.getOpacity());
         formPanel.setSelected(SHOW_GM, bar.isShowGM());
         formPanel.setSelected(SHOW_OWNER, bar.isShowOwner());
         formPanel.setSelected(SHOW_OTHERS, bar.isShowOthers());
-        formPanel.getSpinner(INCREMENTS).setValue(Integer.valueOf(bar.getIncrements()));
+        formPanel.getSpinner(INCREMENTS).setValue(bar.getIncrements());
         formPanel.getComboBox(SIDE).setSelectedIndex(bar.getSide().ordinal());
 
         // Handle the drawn overlays
         int type = -1;
         if (bar instanceof DrawnBarTokenOverlay) {
-          formPanel
-              .getSpinner(THICKNESS)
-              .setValue(Integer.valueOf(((DrawnBarTokenOverlay) bar).getThickness()));
+          formPanel.getSpinner(THICKNESS).setValue(((DrawnBarTokenOverlay) bar).getThickness());
           ((JETAColorWell) formPanel.getComponentByName(COLOR))
               .setColor(((DrawnBarTokenOverlay) bar).getBarColor());
           type = 3;
@@ -550,7 +565,7 @@ public class TokenBarController
           assetIds = ((MultipleImageBarTokenOverlay) bar).getAssetIds();
           type = 2;
         }
-        DefaultListModel model = new DefaultListModel();
+        DefaultListModel<MD5Key> model = new DefaultListModel<>();
         if (assetIds != null) for (MD5Key key : assetIds) model.addElement(key);
         formPanel.getList(IMAGES).setModel(model);
         formPanel.getList(IMAGES).repaint();
@@ -561,12 +576,11 @@ public class TokenBarController
       }
     } else {
       int selected = formPanel.getList(IMAGES).getSelectedIndex();
+      int size = formPanel.getList(IMAGES).getModel().getSize();
       formPanel.getButton(IMAGE_DELETE).setEnabled(selected >= 0);
       formPanel.getButton(IMAGE_UPDATE).setEnabled(selected >= 0);
       formPanel.getButton(IMAGE_MOVE_UP).setEnabled(selected >= 1);
-      formPanel
-          .getButton(IMAGE_MOVE_DOWN)
-          .setEnabled(selected <= formPanel.getList(IMAGES).getModel().getSize() - 2);
+      formPanel.getButton(IMAGE_MOVE_DOWN).setEnabled(selected >= 0 && selected <= size - 2);
     } // endif
   }
 
@@ -584,7 +598,7 @@ public class TokenBarController
     MD5Key key;
 
     /** Cached images */
-    private transient Map<MD5Key, BufferedImage> imageCache = new HashMap<MD5Key, BufferedImage>();
+    private transient Map<MD5Key, BufferedImage> imageCache = new HashMap<>();
 
     /** Create an icon from the token bar. */
     Icon icon =
@@ -649,10 +663,9 @@ public class TokenBarController
    * @param campaign Place the states in these properties in the form panel
    */
   public void copyCampaignToUI(CampaignProperties campaign) {
-    DefaultListModel model = new DefaultListModel();
-    List<BarTokenOverlay> overlays =
-        new ArrayList<BarTokenOverlay>(campaign.getTokenBarsMap().values());
-    Collections.sort(overlays, BarTokenOverlay.COMPARATOR);
+    DefaultListModel<BarTokenOverlay> model = new DefaultListModel<>();
+    List<BarTokenOverlay> overlays = new ArrayList<>(campaign.getTokenBarsMap().values());
+    overlays.sort(BarTokenOverlay.COMPARATOR);
     for (BarTokenOverlay overlay : overlays) {
       model.addElement(overlay);
       getNames().add(overlay.getName());
@@ -666,10 +679,10 @@ public class TokenBarController
    * @param campaign Campaign containing the properties being updated
    */
   public void copyUIToCampaign(Campaign campaign) {
-    ListModel model = formPanel.getList(BARS).getModel();
-    Map<String, BarTokenOverlay> states = new LinkedHashMap<String, BarTokenOverlay>();
+    ListModel<BarTokenOverlay> model = formPanel.getList(BARS).getModel();
+    Map<String, BarTokenOverlay> states = new LinkedHashMap<>();
     for (int i = 0; i < model.getSize(); i++) {
-      BarTokenOverlay overlay = (BarTokenOverlay) model.getElementAt(i);
+      BarTokenOverlay overlay = model.getElementAt(i);
       overlay.setOrder(i);
       states.put(overlay.getName(), overlay);
     }
@@ -707,7 +720,8 @@ public class TokenBarController
     } else {
 
       // Get all of the assets
-      DefaultListModel model = (DefaultListModel) formPanel.getList(IMAGES).getModel();
+      DefaultListModel<MD5Key> model =
+          (DefaultListModel<MD5Key>) formPanel.getList(IMAGES).getModel();
       MD5Key[] assetIds = new MD5Key[model.getSize()];
       model.copyInto(assetIds);
 
@@ -742,8 +756,7 @@ public class TokenBarController
   /** @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent) */
   public void stateChanged(ChangeEvent e) {
     if (e.getSource() == formPanel.getComponentByName(TESTER)) {
-      renderer.value =
-          new Double(((JSlider) formPanel.getComponentByName(TESTER)).getValue() / 100.0);
+      renderer.value = ((JSlider) formPanel.getComponentByName(TESTER)).getValue() / 100.0;
       formPanel.getList(BARS).repaint();
     } else {
       changedUpdate(null);
