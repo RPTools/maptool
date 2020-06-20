@@ -72,7 +72,7 @@ public class UserJvmOptions {
     INIConfiguration iniConfiguration;
 
     File cfgFile = AppUtil.getAppCfgFile();
-    if(!cfgFile.exists()) {
+    if (!cfgFile.exists()) {
       return false;
     }
 
@@ -129,14 +129,25 @@ public class UserJvmOptions {
                 String newKey = key + jvmNodeConfiguration.getString(key);
                 jvmNodeConfiguration.setProperty(newKey, value);
                 jvmNodeConfiguration.clearProperty(key);
-                log.debug("Updating {}={} to {}={}", key, jvmNodeConfiguration.getString(key), newKey, value);
+                log.debug(
+                    "Updating {}={} to {}={}",
+                    key,
+                    jvmNodeConfiguration.getString(key),
+                    newKey,
+                    value);
               } else if (key.startsWith("-XX")) {
                 String value = "";
-                String newKey = key + ":" + jvmNodeConfiguration.getString(key).replaceAll("\\=","");
+                String newKey =
+                    key + ":" + jvmNodeConfiguration.getString(key).replaceAll("\\=", "");
                 jvmNodeConfiguration.setProperty(newKey, value);
                 jvmNodeConfiguration.clearProperty(key);
 
-                log.debug("Updating {}={} to {}={}", key, jvmNodeConfiguration.getString(key), newKey, value);
+                log.debug(
+                    "Updating {}={} to {}={}",
+                    key,
+                    jvmNodeConfiguration.getString(key),
+                    newKey,
+                    value);
               }
             });
 
