@@ -24,10 +24,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.commons.lang.WordUtils;
 
 public class StringFunctions extends AbstractFunction {
   private int matchNo = 0;
@@ -381,12 +383,13 @@ public class StringFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
     }
     if (functionName.equals("capitalize")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      boolean treatNumbersSymbolsAsBoundaries = true;
+      if (parameters.size() == 2) {
+        treatNumbersSymbolsAsBoundaries =
+            FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
       }
-      return capitalize(parameters.get(0).toString());
+      return capitalize(parameters.get(0).toString(), treatNumbersSymbolsAsBoundaries);
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
@@ -397,21 +400,28 @@ public class StringFunctions extends AbstractFunction {
    * title case.
    *
    * @param str The string converted to title case.
+   * @param treatNumbersSymbolsAsBoundaries whether to count numbers and symbols such as ' as a word
+   *     boundary
    * @return The string converted to title case.
    */
-  private String capitalize(String str) {
-    Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
-    Matcher matcher = pattern.matcher(str);
+  private String capitalize(String str, boolean treatNumbersSymbolsAsBoundaries) {
+    if (treatNumbersSymbolsAsBoundaries) {
+      Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
+      Matcher matcher = pattern.matcher(str);
 
-    StringBuffer result = new StringBuffer();
-    while (matcher.find()) {
-      String word = matcher.group();
-      matcher.appendReplacement(result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      StringBuffer result = new StringBuffer();
+      while (matcher.find()) {
+        String word = matcher.group();
+        matcher.appendReplacement(
+            result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      }
+
+      matcher.appendTail(result);
+
+      return result.toString();
+    } else {
+      return WordUtils.capitalize(str);
     }
-
-    matcher.appendTail(result);
-
-    return result.toString();
   }
 
   /**
