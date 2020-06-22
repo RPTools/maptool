@@ -128,12 +128,6 @@ public class MapTool {
 
   public static final String SND_INVALID_OPERATION = "invalidOperation";
 
-  /**
-   * Version of Java being used. Note that this is the "specification version" , so expect numbers
-   * like 1.4, 1.5, and 1.6.
-   */
-  public static Double JAVA_VERSION;
-
   private static String clientId = AppUtil.readClientId();
 
   public enum ZoneEvent {
@@ -1320,36 +1314,6 @@ public class MapTool {
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
   }
 
-  /**
-   * Check to see if we're running on Java 6+.
-   *
-   * <p>While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen
-   * third-party libraries and a search of those JAR files indicate that <i>they DO use</i> Java 6.
-   * So it's best if we warn users that they might be going along happily and suddenly hit a Java
-   * runtime error! It might even be something they do every time they run the program, but some
-   * piece of data was different and the library took a different path and the Java 6-only method
-   * was invoked...
-   *
-   * <p>This method uses the system property <b>java.specification.version</b> as it seemed the
-   * easiest thing to test. :)
-   */
-  private static void verifyJavaVersion() {
-    String version = System.getProperty("java.specification.version");
-    boolean keepgoing = true;
-    if (version == null) {
-      keepgoing = confirm("msg.error.unknownJavaVersion");
-      JAVA_VERSION = 1.5;
-    } else {
-      JAVA_VERSION = Double.valueOf(version);
-      if (JAVA_VERSION < 1.8) {
-        keepgoing = confirm("msg.error.wrongJavaVersion", version);
-      }
-    }
-    if (!keepgoing) {
-      System.exit(1);
-    }
-  }
-
   private static void postInitialize() {
     // Check to see if there is an autosave file from MT crashing
     getAutoSaveManager().check();
@@ -1700,9 +1664,6 @@ public class MapTool {
       MapTool.showError("Error creating data directory", t);
       System.exit(1);
     }
-
-    // XXX Should we even be doing this now that we ship with our own JRE?
-    verifyJavaVersion();
 
     // System properties
     System.setProperty("swing.aatext", "true");
