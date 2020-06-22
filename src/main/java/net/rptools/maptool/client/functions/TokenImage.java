@@ -192,11 +192,15 @@ public class TokenImage extends AbstractFunction {
         return "";
       }
       assetId.append(token.getImageAssetId().toString());
-    } else { // getTokenHandout, or different capitalization
+    } else if ("getTokenHandout"
+        .equalsIgnoreCase(functionName)) { // getTokenHandout, or different capitalization
       if (token.getCharsheetImage() == null) {
         return "";
       }
       assetId.append(token.getCharsheetImage().toString());
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     if (indexSize >= 0

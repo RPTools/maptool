@@ -60,12 +60,13 @@ public class TokenInitFunction extends AbstractFunction {
       String state = args.size() > 1 && !"".equals(args.get(1)) ? args.get(1).toString() : null;
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3);
       return addToInitiative(allowDuplicates, state, token);
-    } else { // setInitiative
+    } else if ("setInitiative".equalsIgnoreCase(functionName)) { // setInitiative
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String value = args.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return setInitiative(token, value);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
