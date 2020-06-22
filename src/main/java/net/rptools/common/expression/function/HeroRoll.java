@@ -64,7 +64,7 @@ public class HeroRoll extends AbstractNumberFunction {
       if (times == lastTimes && sides == lastSides) return new BigDecimal(lastBody);
 
       return new BigDecimal(-1); // Should this be -1?  Perhaps it should return null.
-    } else {
+    } else if ("hero".equalsIgnoreCase(functionName) || "herostun".equalsIgnoreCase(functionName)) {
       // assume stun
 
       double lastTimes = times;
@@ -110,5 +110,6 @@ public class HeroRoll extends AbstractNumberFunction {
 
       return new BigDecimal(stun);
     }
+    throw new ParserException("Unknown function name: " + functionName);
   }
 }

@@ -35,9 +35,10 @@ public class ArsMagicaStress extends AbstractNumberFunction {
 
     if ("arsMagicaStressNum".equals(functionName)) {
       return arsMagicaStress(botchDice, bonus);
-    } else {
+    } else if ("arsMagicaStress".equalsIgnoreCase(functionName)) {
       return arsMagicaStressAsString(botchDice, bonus);
     }
+    throw new ParserException("Unknown function name: " + functionName);
   }
 
   private String arsMagicaStressAsString(int botchDice, int bonus) {
