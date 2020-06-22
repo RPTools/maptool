@@ -61,9 +61,10 @@ public class TokenLabelFunction extends AbstractFunction {
       throws ParserException {
     if (functionName.equals("getLabel")) {
       return getLabel(parser, args);
-    } else {
+    } else if ("setLabel".equalsIgnoreCase(functionName)) {
       return setLabel(parser, args);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

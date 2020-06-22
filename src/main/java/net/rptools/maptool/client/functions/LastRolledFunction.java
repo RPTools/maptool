@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -43,8 +44,11 @@ public class LastRolledFunction extends AbstractFunction {
       MapTool.getParser().getRolled().forEach(r -> jarr.add(new JsonPrimitive(r)));
     } else if (functionName.equalsIgnoreCase("clearRolls")) {
       MapTool.getParser().clearRolls();
-    } else {
+    } else if ("getNewRolls".equalsIgnoreCase(functionName)) {
       MapTool.getParser().getNewRolls().forEach(r -> jarr.add(new JsonPrimitive(r)));
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     return jarr;

@@ -67,9 +67,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
     if (functionName.equals("removeAllFromInitiative")) {
       count = list.getSize();
       list.clearModel();
-    } else {
+    } else if ("removeAllNPCsFromInitiative".equalsIgnoreCase(functionName)
+        || "removeAllPCsFromInitiative".equalsIgnoreCase(functionName)) {
       list.startUnitOfWork();
-      boolean pcs = functionName.equals("removeAllPCsFromInitiative");
+      boolean pcs = functionName.equalsIgnoreCase("removeAllPCsFromInitiative");
       for (int i = list.getSize() - 1; i >= 0; i--) {
         Token token = list.getTokenInitiative(i).getToken();
         if (token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs) {
@@ -80,7 +81,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
       list.setRound(-1);
       list.setCurrent(-1);
       list.finishUnitOfWork();
-    } // endif
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
     return new BigDecimal(count);
   }
 }
