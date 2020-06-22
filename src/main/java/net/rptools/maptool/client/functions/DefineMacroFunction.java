@@ -99,7 +99,7 @@ public class DefineMacroFunction extends AbstractFunction {
         showFullLocations = FunctionUtil.paramAsBoolean(functionName, parameters, 1, false);
       }
       return UserDefinedMacroFunctions.getInstance().getDefinedFunctions(delim, showFullLocations);
-    } else { // isFunctionDefined
+    } else if ("isFunctionDefined".equalsIgnoreCase(functionName)) {
 
       if (UserDefinedMacroFunctions.getInstance().isFunctionDefined(parameters.get(0).toString())) {
         return BigDecimal.ONE;
@@ -111,5 +111,6 @@ public class DefineMacroFunction extends AbstractFunction {
 
       return BigDecimal.ZERO;
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

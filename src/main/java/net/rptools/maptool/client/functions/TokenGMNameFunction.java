@@ -49,12 +49,13 @@ public class TokenGMNameFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getGMName", args, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
       return getGMName(token);
-    } else {
+    } else if ("setGMName".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam("setGMName", args, 1, 3);
       String gmName = args.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return setGMName(token, gmName);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

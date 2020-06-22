@@ -403,7 +403,9 @@ public class LookupTableFunction extends AbstractFunction {
         } catch (NumberFormatException nfe) {
           return val;
         }
-      } else { // We want the image URI through tblImage or tableImage
+      } else if ("tableImage".equalsIgnoreCase(function)
+          || "tblImage"
+              .equalsIgnoreCase(function)) { // We want the image URI through tblImage or tableImage
 
         if (result.getImageId() == null) {
           return ""; // empty string if no image is found (#538)
@@ -427,6 +429,8 @@ public class LookupTableFunction extends AbstractFunction {
           assetId.append(i);
         }
         return assetId.toString();
+      } else {
+        throw new ParserException(I18N.getText("macro.function.general.unknownFunction", function));
       }
     }
   }

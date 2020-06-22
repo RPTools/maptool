@@ -45,23 +45,25 @@ public class MacroArgsFunctions extends AbstractFunction {
 
     if (functionName.equals("argCount")) {
       return BigDecimal.valueOf(argCount);
+    } else if ("arg".equalsIgnoreCase(functionName)) {
+
+      if (parameters.size() != 1 || !(parameters.get(0) instanceof BigDecimal)) {
+        throw new ParserException(I18N.getText("macro.function.args.incorrectParam", "arg"));
+      }
+
+      int argNo = ((BigDecimal) parameters.get(0)).intValue();
+
+      if (argCount == 0 && argNo == 0) {
+        return parser.getVariable("macro.args");
+      }
+
+      if (argNo < 0 || argNo >= argCount) {
+        throw new ParserException(
+            I18N.getText("macro.function.args.outOfRange", "arg", argNo, argCount - 1));
+      }
+
+      return parser.getVariable("macro.args." + argNo);
     }
-
-    if (parameters.size() != 1 || !(parameters.get(0) instanceof BigDecimal)) {
-      throw new ParserException(I18N.getText("macro.function.args.incorrectParam", "arg"));
-    }
-
-    int argNo = ((BigDecimal) parameters.get(0)).intValue();
-
-    if (argCount == 0 && argNo == 0) {
-      return parser.getVariable("macro.args");
-    }
-
-    if (argNo < 0 || argNo >= argCount) {
-      throw new ParserException(
-          I18N.getText("macro.function.args.outOfRange", "arg", argNo, argCount - 1));
-    }
-
-    return parser.getVariable("macro.args." + argNo);
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

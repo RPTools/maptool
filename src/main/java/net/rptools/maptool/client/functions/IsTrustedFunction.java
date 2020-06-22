@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -43,8 +44,7 @@ public class IsTrustedFunction extends AbstractFunction {
       return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("isExternalMacroAccessAllowed")) {
       return AppPreferences.getAllowExternalMacroAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
-    } else {
-      // functionName is isGM
+    } else if ("isGM".equalsIgnoreCase(functionName)) {
       if (parameters.isEmpty())
         return MapTool.getPlayer().isGM() ? BigDecimal.ONE : BigDecimal.ZERO;
       else {
@@ -52,6 +52,7 @@ public class IsTrustedFunction extends AbstractFunction {
         return getGMs().contains(parameters.get(0)) ? BigDecimal.ONE : BigDecimal.ZERO;
       }
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

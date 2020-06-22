@@ -48,7 +48,7 @@ public class TokenNameFunction extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getName")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
-    } else {
+    } else if ("setName".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String name = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
@@ -58,6 +58,9 @@ public class TokenNameFunction extends AbstractFunction {
             I18N.getText("macro.function.tokenName.emptyTokenNameForbidden", "setName"));
       }
       setName(token, name);
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
     return token.getName();
   }

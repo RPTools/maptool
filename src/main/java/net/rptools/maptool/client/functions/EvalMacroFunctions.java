@@ -58,9 +58,10 @@ public class EvalMacroFunctions extends AbstractFunction {
     // execMacro has new variable scope where as evalMacro does not.
     if (functionName.equals("execMacro")) {
       return execMacro(tokenInContext, parameters.get(0).toString());
-    } else {
+    } else if ("evalMacro".equalsIgnoreCase(functionName)) {
       return evalMacro(resolver, tokenInContext, parameters.get(0).toString());
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

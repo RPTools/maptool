@@ -62,9 +62,10 @@ public class CurrentInitiativeFunction extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.initiative.oneParam", functionName));
       setCurrentInitiative(args.get(0));
       return args.get(0);
-    } else {
+    } else if (functionName.equalsIgnoreCase("getInitiativeToken")) {
       return getInitiativeToken();
     } // endif
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
