@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
@@ -42,7 +43,7 @@ public class PlayerFunctions extends AbstractFunction {
       throws ParserException {
     if (functionName.equals("getPlayerName")) {
       return MapTool.getPlayer().getName();
-    } else {
+    } else if ("getAllPlayerNames".equalsIgnoreCase(functionName)) {
       ObservableList<Player> players = MapTool.getPlayerList();
       String[] playerArray = new String[players.size()];
       Iterator<Player> iter = players.iterator();
@@ -61,5 +62,6 @@ public class PlayerFunctions extends AbstractFunction {
         return StringFunctions.getInstance().join(playerArray, delim);
       }
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

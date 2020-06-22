@@ -111,9 +111,10 @@ public class MapFunctions extends AbstractFunction {
       MapTool.serverCommand().putZone(newMap);
       return newMap.getName();
 
-    } else {
+    } else if ("getVisibleMapNames".equalsIgnoreCase(functionName)
+        || "getAllMapNames".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
-      boolean allMaps = functionName.equals("getAllMapNames");
+      boolean allMaps = functionName.equalsIgnoreCase("getAllMapNames");
 
       if (allMaps) checkTrusted(functionName);
 
@@ -132,6 +133,7 @@ public class MapFunctions extends AbstractFunction {
         return StringFunctions.getInstance().join(mapNames, delim);
       }
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

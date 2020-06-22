@@ -50,9 +50,10 @@ public class TokenHaloFunction extends AbstractFunction {
 
     if (functionName.equals("getHalo")) {
       return getHalo(parser, args);
-    } else {
+    } else if ("setHalo".equalsIgnoreCase(functionName)) {
       return setHalo(parser, args);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
