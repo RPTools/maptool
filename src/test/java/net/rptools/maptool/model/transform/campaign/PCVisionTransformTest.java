@@ -16,14 +16,17 @@ package net.rptools.maptool.model.transform.campaign;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
 class PCVisionTransformTest {
 
+  @Test
   void testIt() {
 
     String str =
         "one two three <tokenType>PC</tokenType>blah blah blah<hasSight>false</hasSight>something something";
     assertEquals(
-        "one two three <tokenType>PC</tokenType>blah blah blah<hasSight>true</hasSight>something something",
-        new PCVisionTransform().transform(str));
+        new PCVisionTransform().transform(str),
+        "one two three <tokenType>PC</tokenType>blah blah blah<hasSight>true</hasSight>something something");
   }
 }
