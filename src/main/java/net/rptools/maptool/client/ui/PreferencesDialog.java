@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
-import java.util.ServiceConfigurationError;
 import java.util.stream.Stream;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -943,8 +942,12 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
     // get JVM User Defaults/User override preferences
+    loadUserCfg:
     try {
-      UserJvmOptions.loadAppCfg();
+      if (!UserJvmOptions.loadAppCfg()) {
+        tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+        break loadUserCfg;
+      }
 
       jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
       jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
@@ -958,15 +961,8 @@ public class PreferencesDialog extends JDialog {
 
       jamLanguageOverrideComboBox.setSelectedItem(
           UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-    } catch (UnsatisfiedLinkError | NoClassDefFoundError | ServiceConfigurationError e) {
-      log.warn(
-          "Warning, unable to get JVM options from preferences. Most likely cause, manual launch of JAR.");
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
     } catch (Exception e) {
-      log.error(
-          "Error getting JVM options from preferences. Most likely cause, manual launch of JAR.",
-          e);
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+      log.error("Unable to retrieve JVM user options!", e);
     }
 
     Integer rawVal = AppPreferences.getTypingNotificationDuration();
