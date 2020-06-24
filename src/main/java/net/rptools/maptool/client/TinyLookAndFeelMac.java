@@ -19,6 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.text.DefaultEditorKit;
 
+// Called by AppUtil through setLookAndFeel.
+@SuppressWarnings("unused")
 public class TinyLookAndFeelMac extends TinyLookAndFeel {
   private static final long serialVersionUID = 1L;
 
