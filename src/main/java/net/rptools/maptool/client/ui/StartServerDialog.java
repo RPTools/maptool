@@ -14,29 +14,23 @@
  */
 package net.rptools.maptool.client.ui;
 
-import com.caucho.hessian.client.HessianRuntimeException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
-import java.net.ConnectException;
 import java.text.DecimalFormat;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import net.rptools.lib.service.EchoServer;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UPnPUtil;
 import yasb.Binder;
 
 /** @author trevor */
@@ -196,78 +190,14 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
             });
   }
 
+  @SuppressWarnings("unused")
   public void initTestConnectionButton() {
     getNetworkingHelpButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                // We don't have a good, server-side way of testing any more.
-                boolean ok;
-                ok = MapTool.confirm("msg.info.server.networkingHelp");
-                if (ok) MapTool.showDocument(I18N.getString("msg.info.server.forumNFAQ_URL"));
-              }
-
-              public void actionPerformed_original(ActionEvent e) {
-                dialog.setVisible(false); // FJE Added modal dialog to TestConnection button
-                final StaticMessageDialog smdSettingUp =
-                    new StaticMessageDialog("ServerDialog.msg.test1");
-                final StaticMessageDialog smdTesting =
-                    new StaticMessageDialog("ServerDialog.msg.test2");
-                MapTool.getFrame().showFilledGlassPane(smdSettingUp);
-                new Thread(
-                        new Runnable() {
-                          public void run() {
-                            EchoServer server = null;
-                            int port;
-                            try {
-                              port = Integer.parseInt(getPortTextField().getText());
-                            } catch (NumberFormatException nfe) {
-                              MapTool.showError("ServerDialog.error.port");
-                              return;
-                            }
-                            try {
-                              // Create a temporary server that will listen on the port we
-                              // want to start MapTool on. This provides two things: First
-                              // it tells us we can open that port, second it creates a way
-                              // for the connection test service to call back and verify it is
-                              // the type of service we want.
-                              // LATER: Extend EchoServer to do something more than just parrot the
-                              // input
-                              server = new EchoServer(port);
-                              server.start();
-
-                              if (getUseUPnPCheckbox().isSelected()) {
-                                UPnPUtil.openPort(port);
-                              }
-                              MapTool.getFrame().hideGlassPane();
-                              MapTool.getFrame().showFilledGlassPane(smdTesting);
-                              if (MapToolRegistry.testConnection(port)) {
-                                MapTool.showInformation("ServerDialog.msg.test3");
-                              } else {
-                                MapTool.showError("ServerDialog.msg.test4");
-                              }
-                            } catch (ConnectException e) {
-                              MapTool.showError("ServerDialog.msg.test5");
-                            } catch (HessianRuntimeException e) {
-                              MapTool.showError("ServerDialog.msg.test6", e);
-                            } catch (IOException e) {
-                              MapTool.showError("ServerDialog.msg.test7", e);
-                            } finally {
-                              if (getUseUPnPCheckbox().isSelected()) {
-                                UPnPUtil.closePort(port);
-                              }
-                              MapTool.getFrame().hideGlassPane();
-                              dialog.setVisible(true);
-                              // Need to make sure it dies so that it doesn't keep the port open ...
-                              // we're going to need it very soon !
-                              if (server != null) {
-                                server.stop();
-                              }
-                            }
-                          }
-                        })
-                    .start();
-              }
+            e -> {
+              // We don't have a good, server-side way of testing any more.
+              boolean ok = MapTool.confirm("msg.info.server.networkingHelp");
+              if (ok) MapTool.showDocument(I18N.getString("msg.info.server.forumNFAQ_URL"));
             });
   }
 }

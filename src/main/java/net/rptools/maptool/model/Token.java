@@ -304,13 +304,6 @@ public class Token extends BaseModel implements Cloneable {
 
   private Map<String, String> speechMap;
 
-  // Deprecated, here to allow deserialization
-  @SuppressWarnings("unused")
-  private transient int size; // 1.3b16
-
-  @SuppressWarnings("unused")
-  private transient List<Vision> visionList; // 1.3b18
-
   private HeroLabData heroLabData;
 
   /**
@@ -515,9 +508,6 @@ public class Token extends BaseModel implements Cloneable {
       sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
       e.printStackTrace();
     }
-
-    // state = null;
-    visionList = null;
   }
 
   public void setHasSight(boolean hasSight) {
