@@ -188,7 +188,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
     }
-    return null;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   private List<Map<String, Integer>> crossedToken(

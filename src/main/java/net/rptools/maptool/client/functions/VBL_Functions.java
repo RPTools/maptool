@@ -129,9 +129,7 @@ public class VBL_Functions extends AbstractFunction {
             break;
         }
       }
-    }
-
-    if (functionName.equals("getVBL")) {
+    } else if (functionName.equals("getVBL")) {
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
@@ -180,9 +178,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       return getAreaPoints(vblArea, simpleJSON);
-    }
-
-    if (functionName.equals("getTokenVBL")) {
+    } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
@@ -213,9 +209,7 @@ public class VBL_Functions extends AbstractFunction {
       } else {
         return "";
       }
-    }
-
-    if (functionName.equals("setTokenVBL")) {
+    } else if (functionName.equals("setTokenVBL")) {
       Token token = null;
 
       if (parameters.size() > 2) {
@@ -301,9 +295,7 @@ public class VBL_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    }
-
-    if (functionName.equals("transferVBL")) {
+    } else if (functionName.equals("transferVBL")) {
       Token token = null;
 
       if (parameters.size() > 3) {
@@ -376,6 +368,9 @@ public class VBL_Functions extends AbstractFunction {
           TokenVBL.renderVBL(renderer, vbl, true);
         }
       }
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     if (results >= 0) {
