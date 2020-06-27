@@ -340,9 +340,6 @@ public class MathFunctions extends AbstractFunction {
     } else if ("math.toRadians".equals(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
       return BigDecimal.valueOf(Math.toRadians(nparam.get(0).doubleValue()));
-    } else if ("math.toRadians".equals(functionName)) {
-      List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-      return BigDecimal.valueOf(Math.toRadians(nparam.get(0).doubleValue()));
     } else if ("math.toDegrees".equals(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
       return BigDecimal.valueOf(Math.toDegrees(nparam.get(0).doubleValue()));
@@ -415,7 +412,7 @@ public class MathFunctions extends AbstractFunction {
       return getMedian(theValues);
     }
 
-    return "";
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
