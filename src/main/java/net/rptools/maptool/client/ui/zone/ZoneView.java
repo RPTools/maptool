@@ -762,8 +762,10 @@ public class ZoneView implements ModelChangeListener {
         }
       } else {
         // If we're viewing the map as a player and the token is not a PC, then skip it.
-        if (!isGMview && (token.getType() != Token.Type.PC)) {
-          continue;
+        if (!isGMview && token.getType() != Token.Type.PC) {
+          if (!AppUtil.ownedByOnePlayer(token)) {
+            continue;
+          }
         }
       }
       // player ownership permission

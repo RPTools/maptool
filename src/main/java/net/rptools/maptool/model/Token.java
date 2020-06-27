@@ -1039,8 +1039,9 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** @return the set of owner names of the token. */
   public Set<String> getOwners() {
-    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<String>();
+    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
   }
 
   public boolean isOwnedByAll() {
