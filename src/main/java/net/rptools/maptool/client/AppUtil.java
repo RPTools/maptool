@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -259,6 +260,25 @@ public class AppUtil {
       return true;
     }
     return token.isOwner(player.getName());
+  }
+
+  /**
+   * Returns whether the token is owned by a non-gm player.
+   *
+   * @param token the token
+   * @return true if owned by all, or one of the owners is online and not a gm.
+   */
+  public static boolean ownedByOnePlayer(Token token) {
+    if (token.isOwnedByAll()) {
+      return true;
+    }
+    List<String> players = MapTool.getNonGMs();
+    for (String owner : token.getOwners()) {
+      if (players.contains(owner)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
