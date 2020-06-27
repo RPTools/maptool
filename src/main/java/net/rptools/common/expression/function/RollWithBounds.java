@@ -72,6 +72,8 @@ public class RollWithBounds extends AbstractNumberFunction {
         mod = ((BigDecimal) parameters.get(2)).intValue();
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
+      default:
+        throw new ParserException("Unknown function name: " + functionName);
     }
     return DiceHelper.rollModWithBounds(times, sides, mod, lower, upper);
   }
