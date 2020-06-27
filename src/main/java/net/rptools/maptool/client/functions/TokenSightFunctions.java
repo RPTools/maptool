@@ -22,6 +22,7 @@ import java.util.List;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -56,10 +57,11 @@ public class TokenSightFunctions extends AbstractFunction {
       throws ParserException {
     Token token;
     // For functions no parameters except option tokenID and mapname
-    if (functionName.equals("hasSight") || functionName.equals("getSightType")) {
+    if (functionName.equalsIgnoreCase("hasSight")
+        || functionName.equalsIgnoreCase("getSightType")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
-      if (functionName.equals("hasSight"))
+      if (functionName.equalsIgnoreCase("hasSight"))
         return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
 
       // if (functionName.equals("getSightType"))
@@ -156,6 +158,6 @@ public class TokenSightFunctions extends AbstractFunction {
       return sb.toString();
     }
 
-    return "";
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

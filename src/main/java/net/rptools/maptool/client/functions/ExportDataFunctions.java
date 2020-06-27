@@ -112,6 +112,6 @@ public class ExportDataFunctions extends AbstractFunction {
       }
     }
 
-    return BigDecimal.ZERO;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }
