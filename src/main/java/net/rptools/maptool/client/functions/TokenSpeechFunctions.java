@@ -77,6 +77,6 @@ public class TokenSpeechFunctions extends AbstractFunction {
         return StringFunctions.getInstance().join(token.getSpeechNames().toArray(speech), delim);
       }
     }
-    return null;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

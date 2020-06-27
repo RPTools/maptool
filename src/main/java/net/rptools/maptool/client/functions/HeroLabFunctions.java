@@ -373,6 +373,6 @@ public class HeroLabFunctions extends AbstractFunction {
       return token.getHeroLabData().getMinionMasterName();
     }
 
-    return "<ERROR>";
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }
