@@ -1721,6 +1721,13 @@ public class Token extends BaseModel implements Cloneable {
     return getEvaluatedProperty(null, key);
   }
 
+  /**
+   * Returns the evaluated property corresponding to the key.
+   *
+   * @param resolver the variable resolver to parse code inside the property
+   * @param key the key of the value
+   * @return the value
+   */
   public Object getEvaluatedProperty(MapToolVariableResolver resolver, String key) {
     Object val = getProperty(key);
     if (val == null) {
@@ -1738,6 +1745,13 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (val == null) {
       return "";
+    }
+    // First we try convert it to a JSON array. Fixes #2057.
+    if (val.toString().trim().startsWith("[")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonArray()) {
+        return json;
+      }
     }
     try {
       if (log.isDebugEnabled()) {
@@ -1759,9 +1773,9 @@ public class Token extends BaseModel implements Cloneable {
       val = "";
     } else {
       // Finally we try convert it to a JSON object. Fixes #1560.
-      if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+      if (val.toString().trim().startsWith("{")) {
         JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-        if (json.isJsonObject() || json.isJsonArray()) {
+        if (json.isJsonObject()) {
           return json;
         }
       }
