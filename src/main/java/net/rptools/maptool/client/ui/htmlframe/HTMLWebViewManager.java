@@ -645,7 +645,9 @@ public class HTMLWebViewManager {
     // Combines and encodes the form data with the link data
     String data = getEncodedCombinedData(jObj, linkData);
 
-    doSubmit("json", action, data);
+    // Form submit should be ran on EDT. Fixes #2056.
+    final String finalAction = action;
+    SwingUtilities.invokeLater(() -> doSubmit("json", finalAction, data));
   }
 
   /**
