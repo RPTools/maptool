@@ -1382,7 +1382,7 @@ public class MapTool {
   }
 
   public static boolean useToolTipsForUnformatedRolls() {
-    if (isPersonalServer()) {
+    if (isPersonalServer() || getServerPolicy() == null) {
       return AppPreferences.getUseToolTipForInlineRoll();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();
