@@ -631,7 +631,7 @@ public class MapToolLineParser {
       Object retval = params[index];
       // No parsing is done if the param isn't a String (e.g. it's already a BigDecimal)
       if (params[index] instanceof String) {
-        Result result = parseExpression(res, tokenInContext, (String) params[index], true);
+        Result result = parseExpression(res, tokenInContext, (String) params[index], false);
         retval = result.getValue();
       }
       return retval;
@@ -737,7 +737,6 @@ public class MapToolLineParser {
   public String parseLine(
       MapToolVariableResolver res, Token tokenInContext, String line, MapToolMacroContext context)
       throws ParserException {
-
     // copy previous rolls and clear out for new rolls.
     if (parserRecurseDepth == 0 && macroRecurseDepth == 0) {
       lastRolled.clear();
@@ -854,7 +853,7 @@ public class MapToolLineParser {
                   outputOpts.add("w");
                   for (int i = 0; i < option.getParamCount(); i++) {
                     String arg =
-                        parseExpression(resolver, tokenInContext, option.getStringParam(i), true)
+                        parseExpression(resolver, tokenInContext, option.getStringParam(i), false)
                             .getValue()
                             .toString();
                     if (arg.trim().startsWith("[")) {
@@ -952,7 +951,7 @@ public class MapToolLineParser {
                     String listDelim = option.getStringParam(3);
                     if (listDelim.trim().startsWith("\"")) {
                       listDelim =
-                          parseExpression(resolver, tokenInContext, listDelim, true)
+                          parseExpression(resolver, tokenInContext, listDelim, false)
                               .getValue()
                               .toString();
                     }
@@ -1147,7 +1146,7 @@ public class MapToolLineParser {
                     (loopCondition == null) ? null : String.format("if(%s, 1, 0)", loopCondition);
                 // Stop loop if the while condition is false
                 try {
-                  Result result = parseExpression(resolver, tokenInContext, hackCondition, true);
+                  Result result = parseExpression(resolver, tokenInContext, hackCondition, false);
                   loopConditionValue = ((Number) result.getValue()).intValue();
                   if (loopConditionValue == 0) {
                     doLoop = false;
@@ -1161,7 +1160,7 @@ public class MapToolLineParser {
             // Output the loop separator
             if (doLoop && iteration != 0 && output != Output.NONE) {
               expressionBuilder.append(
-                  parseExpression(resolver, tokenInContext, loopSep, true).getValue());
+                  parseExpression(resolver, tokenInContext, loopSep, false).getValue());
             }
 
             if (!doLoop) {
@@ -1182,7 +1181,7 @@ public class MapToolLineParser {
               }
               Result result = null;
               try {
-                result = parseExpression(resolver, tokenInContext, hackCondition, true);
+                result = parseExpression(resolver, tokenInContext, hackCondition, false);
               } catch (Exception e) {
                 throw doError(
                     I18N.getText(
@@ -1328,10 +1327,10 @@ public class MapToolLineParser {
                      * TODO: If you're adding a new formatting option, add a new case to build the output
                      */
                   case NONE:
-                    parseExpression(resolver, tokenInContext, rollBranch, true);
+                    parseExpression(resolver, tokenInContext, rollBranch, false);
                     break;
                   case RESULT:
-                    result = parseExpression(resolver, tokenInContext, rollBranch, true);
+                    result = parseExpression(resolver, tokenInContext, rollBranch, false);
                     output_text = result != null ? result.getValue().toString() : "";
                     if (!this.isMacroTrusted()) {
                       output_text =
@@ -1359,7 +1358,7 @@ public class MapToolLineParser {
                       }
                       resolver.setVariable("roll.result", result.getValue());
                       output_text =
-                          parseExpression(resolver, tokenInContext, text, true)
+                          parseExpression(resolver, tokenInContext, text, false)
                               .getValue()
                               .toString();
                     }
@@ -1389,9 +1388,9 @@ public class MapToolLineParser {
                  */
               case MACRO:
                 // [MACRO("macroName@location"): args]
-                result = parseExpression(resolver, tokenInContext, macroName, true);
+                result = parseExpression(resolver, tokenInContext, macroName, false);
                 String callName = result.getValue().toString();
-                result = parseExpression(resolver, tokenInContext, rollBranch, true);
+                result = parseExpression(resolver, tokenInContext, rollBranch, false);
                 String macroArgs = result.getValue().toString();
 
                 try {
@@ -1473,7 +1472,7 @@ public class MapToolLineParser {
           }
         } else if (match.getMatch().startsWith("{")) {
           roll = match.getRoll();
-          Result result = parseExpression(resolver, tokenInContext, roll, true);
+          Result result = parseExpression(resolver, tokenInContext, roll, false);
           if (isMacroTrusted()) {
             builder.append(result != null ? result.getValue().toString() : "");
           } else {
@@ -1511,12 +1510,15 @@ public class MapToolLineParser {
         // This is the top level call, time to clean up
         resolver.flush();
       }
-      // If we have exited the last context let the html frame we have (potentially)
-      // updated a token.
-      if (contextStackEmpty()) {
-        HTMLFrameFactory.tokenChanged(tokenInContext);
+      if (MapTool.getFrame() != null) {
+        // If we have exited the last context let the html frame we have (potentially)
+        // updated a token.
+        if (contextStackEmpty() && tokenInContext != null) {
+          HTMLFrameFactory.tokenChanged(tokenInContext);
+        }
+        // Repaint incase macros changed anything.
+        MapTool.getFrame().refresh();
       }
-      MapTool.getFrame().refresh(); // Repaint incase macros changed anything.
     }
   }
 
