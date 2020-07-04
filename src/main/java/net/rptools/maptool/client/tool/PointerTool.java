@@ -43,7 +43,6 @@ import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListen
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Player.Role;
@@ -62,7 +61,7 @@ import org.apache.logging.log4j.Logger;
  * the NumPad keys, and it handles positioning the Speech and Thought bubbles when the Spacebar is
  * held down (possibly in combination with Shift or Ctrl).
  */
-public class PointerTool extends DefaultTool implements ZoneOverlay {
+public class PointerTool extends DefaultTool {
   private static final long serialVersionUID = 8606021718606275084L;
   private static final Logger log = LogManager.getLogger(PointerTool.class);
 
@@ -1523,14 +1522,16 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   // String[] firstPass = text.split('\n');
   // }
 
-  // //
-  // ZoneOverlay
-  /*
-   * (non-Javadoc)
+  /**
+   * Draws the PointerTool overlay. Includes selection box, token stack popup, statsheet, and
+   * notes/gm notes.
    *
-   * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
+   * @param g – the Graphics object
    */
-  public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
+  public void paintOverlay(Graphics2D g) {
+    if (renderer == null) {
+      return;
+    }
     Dimension viewSize = renderer.getSize();
     FontRenderContext fontRenderContext = g.getFontRenderContext();
 

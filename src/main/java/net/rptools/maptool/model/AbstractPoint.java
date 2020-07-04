@@ -19,6 +19,15 @@ public abstract class AbstractPoint implements Cloneable {
   public int x;
   public int y;
 
+  /**
+   * Only populated by AStarWalker classes to be used upstream.
+   *
+   * @return whether A* couldn't find a path to the cell.
+   */
+  public boolean isAStarCanceled() {
+    return false;
+  }
+
   public AbstractPoint(int x, int y) {
     this.x = x;
     this.y = y;

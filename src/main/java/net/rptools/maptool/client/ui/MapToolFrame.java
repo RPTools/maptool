@@ -101,6 +101,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
+import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -161,7 +162,11 @@ public class MapToolFrame extends DefaultDockableHolder
   private final Toolbox toolbox;
   private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
+  /** Contains the zoneRenderer, as well as all overlays. */
   private final JPanel zoneRendererPanel;
+  /** Contains the overlays that should be displayed in front of everything else. */
+  private final PointerToolOverlay pointerToolOverlay;
+
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
   private final JPanel rendererBorderPanel;
@@ -443,6 +448,9 @@ public class MapToolFrame extends DefaultDockableHolder
 
     zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
     overlayPanel.setVisible(false); // disabled by default
+
+    pointerToolOverlay = new PointerToolOverlay();
+    zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
 
     // Put it all together
     setJMenuBar(menuBar);

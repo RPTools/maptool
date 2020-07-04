@@ -97,6 +97,9 @@ public class ParserPropertyFunctions extends AbstractFunction {
     } else if (functionName.equals("setMaxLoopIterations")) {
       mtlParser.setMaxLoopIterations(argVal);
       returnVal = mtlParser.getMaxLoopIterations();
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     return BigDecimal.valueOf(returnVal);

@@ -116,7 +116,7 @@ public class MacroLinkFunction extends AbstractFunction {
       linkArgs = args.size() > 2 ? args.get(2).toString() : "";
       linkTarget = args.size() > 3 ? args.get(3).toString() : "Impersonated";
 
-    } else { // execLink
+    } else if ("execLink".equalsIgnoreCase(functionName)) {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
@@ -145,6 +145,9 @@ public class MacroLinkFunction extends AbstractFunction {
       }
       sendExecLink(link, defer, targets);
       return "";
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     StringBuilder sb = new StringBuilder();

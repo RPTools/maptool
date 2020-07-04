@@ -36,7 +36,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-@SuppressWarnings("serial")
 public class ColorPicker extends JPanel {
   private final JFrame owner;
 
@@ -55,7 +54,7 @@ public class ColorPicker extends JPanel {
 
   private final PaintedPanel foregroundColor;
   private final PaintedPanel backgroundColor;
-  private final List<PaintedPanel> recentColors = new ArrayList<PaintedPanel>(16);
+  private final List<PaintedPanel> recentColors = new ArrayList<>(16);
   private final JToggleButton snapToggle;
   private final JToggleButton eraseToggle;
   private final JToggleButton squareCapToggle;
@@ -267,7 +266,7 @@ public class ColorPicker extends JPanel {
     }
 
     @Override
-    public void mouseClicked(MouseEvent evt) {
+    public void mouseReleased(MouseEvent evt) {
       PaintedPanel comp = (PaintedPanel) evt.getSource();
 
       if (evt.getClickCount() == clickCount) {

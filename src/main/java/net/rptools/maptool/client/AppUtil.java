@@ -17,14 +17,18 @@ package net.rptools.maptool.client;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +49,7 @@ public class AppUtil {
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
   private static final Logger log = LogManager.getLogger(AppUtil.class);
   private static final String CLIENT_ID_FILE = "client-id";
-  private static final String PACKAGER_CFG_FILENAME = AppConstants.APP_NAME + ".cfg";
+
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
       (System.getProperty("os.name").toLowerCase().startsWith("windows"));
@@ -57,10 +61,14 @@ public class AppUtil {
       MAC_OS_X
           ? "net.rptools.maptool.client.TinyLookAndFeelMac"
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
+
   private static File dataDirPath;
+  private static String packagerCfgFileName;
 
   static {
     System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
+    packagerCfgFileName =
+        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg";
   }
 
   /**
@@ -192,8 +200,7 @@ public class AppUtil {
     try {
       CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
       File jarFile = new File(codeSource.getLocation().toURI().getPath());
-      String cfgFilepath =
-          jarFile.getParentFile().getPath() + File.separator + PACKAGER_CFG_FILENAME;
+      String cfgFilepath = jarFile.getParentFile().getPath() + File.separator + packagerCfgFileName;
 
       cfgFile = new File(cfgFilepath);
 
@@ -203,6 +210,27 @@ public class AppUtil {
     }
 
     return cfgFile;
+  }
+
+  /**
+   * Get the an attribute value from MANIFEST.MF
+   *
+   * @return the String value or empty string if not found
+   */
+  public static String getAttributeFromJarManifest(String attributeName, String defaultValue) {
+    ClassLoader cl = MapTool.class.getClassLoader();
+
+    try {
+      URL url = cl.getResource("META-INF/MANIFEST.MF");
+      Manifest manifest = new Manifest(url.openStream());
+
+      Attributes attr = manifest.getMainAttributes();
+      return attr.getValue(attributeName);
+    } catch (IOException e) {
+      log.error("No {} attribute found in MANIFEST.MF...", attributeName, e);
+    }
+
+    return defaultValue;
   }
 
   /**
@@ -232,6 +260,25 @@ public class AppUtil {
       return true;
     }
     return token.isOwner(player.getName());
+  }
+
+  /**
+   * Returns whether the token is owned by a non-gm player.
+   *
+   * @param token the token
+   * @return true if owned by all, or one of the owners is online and not a gm.
+   */
+  public static boolean ownedByOnePlayer(Token token) {
+    if (token.isOwnedByAll()) {
+      return true;
+    }
+    List<String> players = MapTool.getNonGMs();
+    for (String owner : token.getOwners()) {
+      if (players.contains(owner)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

@@ -62,12 +62,13 @@ public class TokenBarFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       return isVisible(token, bar);
-    } else { // setBarVisible
+    } else if ("setBarVisible".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
       boolean visible = FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
       return setVisible(token, bar, visible);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
