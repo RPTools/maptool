@@ -304,13 +304,6 @@ public class Token extends BaseModel implements Cloneable {
 
   private Map<String, String> speechMap;
 
-  // Deprecated, here to allow deserialization
-  @SuppressWarnings("unused")
-  private transient int size; // 1.3b16
-
-  @SuppressWarnings("unused")
-  private transient List<Vision> visionList; // 1.3b18
-
   private HeroLabData heroLabData;
 
   /**
@@ -515,9 +508,6 @@ public class Token extends BaseModel implements Cloneable {
       sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
       e.printStackTrace();
     }
-
-    // state = null;
-    visionList = null;
   }
 
   public void setHasSight(boolean hasSight) {
@@ -1049,8 +1039,9 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** @return the set of owner names of the token. */
   public Set<String> getOwners() {
-    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<String>();
+    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
   }
 
   public boolean isOwnedByAll() {
@@ -1731,6 +1722,13 @@ public class Token extends BaseModel implements Cloneable {
     return getEvaluatedProperty(null, key);
   }
 
+  /**
+   * Returns the evaluated property corresponding to the key.
+   *
+   * @param resolver the variable resolver to parse code inside the property
+   * @param key the key of the value
+   * @return the value
+   */
   public Object getEvaluatedProperty(MapToolVariableResolver resolver, String key) {
     Object val = getProperty(key);
     if (val == null) {
@@ -1748,6 +1746,13 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (val == null) {
       return "";
+    }
+    // First we try convert it to a JSON array. Fixes #2057.
+    if (val.toString().trim().startsWith("[")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonArray()) {
+        return json;
+      }
     }
     try {
       if (log.isDebugEnabled()) {
@@ -1769,9 +1774,9 @@ public class Token extends BaseModel implements Cloneable {
       val = "";
     } else {
       // Finally we try convert it to a JSON object. Fixes #1560.
-      if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+      if (val.toString().trim().startsWith("{")) {
         JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-        if (json.isJsonObject() || json.isJsonArray()) {
+        if (json.isJsonObject()) {
           return json;
         }
       }

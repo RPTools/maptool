@@ -68,8 +68,8 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
 
     // Handle the All functions
     List<Token> tokens = new ArrayList<Token>();
-    boolean all = functionName.equals("addAllToInitiative");
-    boolean pcs = functionName.equals("addAllPCsToInitiative");
+    boolean all = functionName.equalsIgnoreCase("addAllToInitiative");
+    boolean pcs = functionName.equalsIgnoreCase("addAllPCsToInitiative");
     for (Token token : list.getZone().getTokens())
       if ((all || token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs)
           && (allowDuplicates || list.indexOf(token).isEmpty())) {

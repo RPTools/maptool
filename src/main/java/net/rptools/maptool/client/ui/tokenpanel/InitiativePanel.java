@@ -758,37 +758,22 @@ public class InitiativePanel extends JPanel
 
       if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
         SwingUtilities.invokeLater(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (displayList.getSelectedValue() != null) {
-                  // Show the selected token on the map.
-                  Token token = displayList.getSelectedValue().getToken();
-                  ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-                  if (renderer == null
-                      || token == null
-                      || (!token.isToken() && !MapTool.getPlayer().isGM())
-                      || !AppUtil.playerOwns(token)) {
-                    return;
-                  }
-
-                  renderer.centerOn(token);
-                  renderer.maybeForcePlayersView();
-
-                  if (MapTool.getPlayer().isGM()) {
-                    // If the user is a GM, recenter on the token.
-                    renderer.centerOn(token);
-
-                    // Update player view if necessary
-                    if (token.isToken() && token.isVisible()) {
-                      renderer.maybeForcePlayersView();
-                    }
-                  } else if (renderer.getZone().isTokenVisible(token)) {
-                    // Not the GM, but the token is visible to the
-                    // ... what?
-                    renderer.centerOn(token);
-                  }
+            () -> {
+              if (displayList.getSelectedValue() != null) {
+                // Show the selected token on the map.
+                Token token = displayList.getSelectedValue().getToken();
+                ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+                if (renderer == null
+                    || token == null
+                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || !AppUtil.playerOwns(token)) {
+                  return;
                 }
+
+                renderer.clearSelectedTokens();
+                renderer.centerOn(token);
+                renderer.updateAfterSelection();
+                renderer.maybeForcePlayersView();
               }
             });
       } else if (SwingUtilities.isRightMouseButton(e)) {

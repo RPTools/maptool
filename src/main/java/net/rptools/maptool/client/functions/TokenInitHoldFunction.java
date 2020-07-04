@@ -52,12 +52,13 @@ public class TokenInitHoldFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
       return getInitiativeHold(token);
-    } else {
+    } else if ("setInitiativeHold".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       boolean set = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return setInitiativeHold(token, set);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

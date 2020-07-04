@@ -48,7 +48,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
       throws ParserException {
     if (functionName.equals("getInitiativeRound")) {
       return getInitiativeRound();
-    } else {
+    } else if ("setInitiativeRound".equalsIgnoreCase(functionName)) {
       if (args.size() != 1)
         throw new ParserException(I18N.getText("macro.function.setinitiativeRound.oneParam"));
       if (MapTool.getParser().isMacroTrusted()
@@ -59,6 +59,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.initiative.mustBeGM", functionName));
       } // endif
     } // endif
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

@@ -225,7 +225,7 @@ dependencies {
     implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.0'
-    implementation 'com.github.RPTools:dicelib:1.6.3'
+    implementation 'com.github.RPTools:dicelib:1.6.4'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -267,7 +267,8 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.18'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.20'
+    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.20'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.64'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
