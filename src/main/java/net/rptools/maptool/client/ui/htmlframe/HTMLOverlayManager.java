@@ -126,6 +126,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   public void updateContents(final String html, boolean scrollReset) {
     // Sets the background to be barely visible. Workaround to fix #1976.
     setPageBackgroundColor(COLOR_VISIBLE);
+    macroCallbacks.clear();
     super.updateContents(html, scrollReset);
   }
 
