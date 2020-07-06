@@ -3204,7 +3204,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderTokens:OnscreenCheck");
 
       // create a per token Graphics object
-      Graphics2D tokenG = (Graphics2D) g.create();
+      Graphics2D tokenG = (Graphics2D) clippedG.create();
 
       // Previous path
       timer.start("renderTokens:ShowPath");
@@ -3376,6 +3376,7 @@ public class ZoneRenderer extends JComponent
           }
         }
       } else {
+        // fallthrough normal token rendered against visible area
         tokenG.drawImage(workImage, at, this);
       }
       timer.stop("tokenlist-7");
