@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -1091,15 +1090,27 @@ public class MapTool {
     return playerList;
   }
 
+  /** Returns the list of non-gm names. */
+  public static List<String> getNonGMs() {
+    List<String> nonGMs = new ArrayList<>(playerList.size());
+    playerList.forEach(
+        player -> {
+          if (!player.isGM()) {
+            nonGMs.add(player.getName());
+          }
+        });
+    return nonGMs;
+  }
+
+  /** Returns the list of gm names. */
   public static List<String> getGMs() {
-    Iterator<Player> pliter = playerList.iterator();
-    List<String> gms = new ArrayList<String>(playerList.size());
-    while (pliter.hasNext()) {
-      Player plr = pliter.next();
-      if (plr.isGM()) {
-        gms.add(plr.getName());
-      }
-    }
+    List<String> gms = new ArrayList<>(playerList.size());
+    playerList.forEach(
+        player -> {
+          if (player.isGM()) {
+            gms.add(player.getName());
+          }
+        });
     return gms;
   }
 
@@ -1371,7 +1382,7 @@ public class MapTool {
   }
 
   public static boolean useToolTipsForUnformatedRolls() {
-    if (isPersonalServer()) {
+    if (isPersonalServer() || getServerPolicy() == null) {
       return AppPreferences.getUseToolTipForInlineRoll();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();

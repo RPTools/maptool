@@ -58,6 +58,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /** Is the panel HTML5 or HTML3.2. */
   private boolean isHTML5;
 
+  /**
+   * Runs a javascript on a frame.
+   *
+   * @param name the name of the frame
+   * @param script the script to run
+   * @return true if the frame exists and can run the script, false otherwise
+   */
+  public static boolean runScript(String name, String script) {
+    HTMLFrame frame = frames.get(name);
+    return frame != null && frame.panel.runJavascript(script);
+  }
+
   @Override
   public Map<String, String> macroCallbacks() {
     return macroCallbacks;
