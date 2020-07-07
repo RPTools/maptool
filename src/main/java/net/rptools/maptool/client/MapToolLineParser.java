@@ -1511,12 +1511,7 @@ public class MapToolLineParser {
         resolver.flush();
       }
       if (MapTool.getFrame() != null) {
-        // If we have exited the last context let the html frame we have (potentially)
-        // updated a token.
-        if (contextStackEmpty() && tokenInContext != null) {
-          HTMLFrameFactory.tokenChanged(tokenInContext);
-        }
-        // Repaint incase macros changed anything.
+        // Repaint in case macros changed anything.
         MapTool.getFrame().refresh();
       }
     }
