@@ -14,25 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.TexturePaint;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -3041,6 +3023,7 @@ public class ZoneRenderer extends JComponent
           && !token.isAlwaysVisible()) {
         continue;
       }
+
       timer.start("tokenlist-1");
       try {
         if (token.isStamp() && isTokenMoving(token)) {
@@ -3203,8 +3186,13 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("renderTokens:OnscreenCheck");
 
-      // create a per token Graphics object
-      Graphics2D tokenG = (Graphics2D) clippedG.create();
+      // create a per token Graphics object - normally clipped, unless always visible
+      Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);
+      Graphics2D tokenG =
+          (Graphics2D)
+              (isTokenInNeedOfClipping(token, tokenCellArea, isGMView)
+                  ? clippedG.create()
+                  : g.create());
 
       // Previous path
       timer.start("renderTokens:ShowPath");
@@ -3212,15 +3200,6 @@ public class ZoneRenderer extends JComponent
         renderPath(g, token.getLastPath(), token.getFootprint(zone.getGrid()));
       }
       timer.stop("renderTokens:ShowPath");
-
-      timer.start("tokenlist-4");
-      // Halo
-      if (token.hasHalo()) {
-        tokenG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-        tokenG.setColor(token.getHaloColor());
-        tokenG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
-      }
-      timer.stop("tokenlist-4");
 
       timer.start("tokenlist-5");
       // handle flipping
@@ -3311,7 +3290,7 @@ public class ZoneRenderer extends JComponent
             location.scaledHeight / 2 - (token.getAnchor().y * scale) - offsety);
         // facing defaults to down, or -90 degrees
       }
-      // Draw the token
+      // Snap
       if (token.isSnapToScale()) {
         at.scale(
             ((double) imgSize.width) / workImage.getWidth(),
@@ -3330,55 +3309,24 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("tokenlist-6");
 
-      // Apply Alpha Transparency from token and use opacity for indicating that token is moving
-      float opacity = token.getTokenOpacity();
+      // Render Halo
+      if (token.hasHalo()) {
+        tokenG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+        tokenG.setColor(token.getHaloColor());
+        tokenG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
+      }
 
+      // Calculate alpha Transparency from token and use opacity for indicating that token is moving
+      float opacity = token.getTokenOpacity();
       if (isTokenMoving(token)) opacity = opacity / 2.0f;
 
-      if (opacity < 1.0f) {
-        tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-      }
-
+      // Finally render the token image
       timer.start("tokenlist-7");
-      // If the token is a figure and if its visible, draw all of it.
-      if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
-        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
-        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-          // the cell intersects visible area so
-          if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
-            // if we can see the centre, draw the whole token
-            tokenG.drawImage(workImage, at, this);
-            // g.draw(cb); // debugging
-          } else {
-            // else draw the clipped token
-            Area cellArea = new Area(visibleScreenArea);
-            cellArea.intersect(cb);
-            tokenG.setClip(cellArea);
-            tokenG.drawImage(workImage, at, this);
-          }
-        }
-      } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
-        // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
-        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
-        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-          // if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
-          if (zone.getGrid()
-              .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
-            tokenG.drawImage(workImage, at, this);
-          } else {
-            // else draw the clipped stamp/token
-            // This will only show the part of the token that does not have VBL on it
-            // as any VBL on the token will block LOS, affecting the clipping.
-            Area cellArea = new Area(visibleScreenArea);
-            cellArea.intersect(cb);
-            tokenG.setClip(cellArea);
-            tokenG.drawImage(workImage, at, this);
-          }
-        }
-      } else {
-        // fallthrough normal token rendered against visible area
-        tokenG.drawImage(workImage, at, this);
-      }
+      Composite oldComposite = tokenG.getComposite();
+      if (opacity < 1.0f)
+        tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+      tokenG.drawImage(workImage, at, this);
+      tokenG.setComposite(oldComposite);
       timer.stop("tokenlist-7");
 
       timer.start("tokenlist-8");
@@ -3755,6 +3703,30 @@ public class ZoneRenderer extends JComponent
     }
 
     visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
+  }
+
+  private boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
+
+    // can view everything or zone is not using vision = no clipping needed
+    if (isGMView || !zoneView.isUsingVision()) return false;
+
+    // If the token is a figure and its center is visible then no clipping
+    if (token.getShape() == Token.TokenShape.FIGURE
+        && zone.getGrid().checkCenterRegion(tokenCellArea.getBounds(), visibleScreenArea)) {
+      return false;
+    }
+
+    // Jamz: Always Visible tokens will get rendered fully to place on top of FoW
+    // if we can see a portion of the stamp/token, defaults to 2/9ths, don't clip at all
+    if (token.isAlwaysVisible()
+        && zone.getGrid()
+            .checkRegion(
+                tokenCellArea.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+      return false;
+    }
+
+    // clipping needed
+    return true;
   }
 
   private boolean canSeeMarker(Token token) {
