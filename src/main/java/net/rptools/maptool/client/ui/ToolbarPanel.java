@@ -344,7 +344,6 @@ public class ToolbarPanel extends JToolBar {
     panel.add(Box.createHorizontalStrut(5));
     panel.add(topologySelectionPanel);
 
-    // panel.add(FillTopologyTool.class);
     return panel;
   }
 
