@@ -91,7 +91,8 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     if (functionName.equals("json.fromList")) {
@@ -218,7 +219,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
           varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
           if (!varName.equals("")) {
-            parser.setVariable(varName, jsonObject.get(keyStr));
+            resolver.setVariable(varName, jsonObject.get(keyStr));
             jsonNames.add(varName);
           }
         }
@@ -234,7 +235,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
 
         if (!varName.equals("")) {
           for (int i = 0; i < jsonArray.size(); i++) {
-            parser.setVariable(varName + i, jsonArray.get(i));
+            resolver.setVariable(varName + i, jsonArray.get(i));
             jsonNames.add(varName + i);
           }
         }
@@ -384,7 +385,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       } else {
         json = JSONArray.fromObject(j);
       }
-      return JSONEvaluate((MapToolVariableResolver) parser.getVariableResolver(), json);
+      return JSONEvaluate((MapToolVariableResolver) resolver, json);
     }
 
     if (functionName.equals("json.isEmpty")) {
@@ -1899,7 +1900,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       dim2 = ((BigDecimal) param.get(2)).intValue();
     }
 
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
 
     if (dim2 == 1) {
       Object[] rollArr = new Object[dim1];
@@ -1963,7 +1964,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
     }
 
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
     JSONObject jobj = new JSONObject();
     for (Object name : names) {
       JSONObject jstatObj = new JSONObject();

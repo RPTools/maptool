@@ -35,6 +35,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenCopyDeleteFunctions extends AbstractFunction {
@@ -53,7 +54,8 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
     int psize = parameters.size();
@@ -61,19 +63,18 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     if (functionName.equals(COPY_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
 
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
       int nCopies = psize > 1 ? FunctionUtil.paramAsInteger(functionName, parameters, 1, false) : 1;
       JsonObject newVals;
       if (psize > 3) newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
       else newVals = new JsonObject();
 
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      return copyTokens(res, token, nCopies, newVals);
+      return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
 
     if (functionName.equals(REMOVE_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
       return deleteToken(token);
     }

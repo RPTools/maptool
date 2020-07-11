@@ -29,6 +29,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenLightFunctions extends AbstractFunction {
@@ -43,20 +44,21 @@ public class TokenLightFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equalsIgnoreCase("hasLightSource")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 4);
 
       String type = (parameters.size() > 0) ? parameters.get(0).toString() : "*";
       String name = (parameters.size() > 1) ? parameters.get(1).toString() : "*";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return hasLightSource(token, type, name) ? BigDecimal.ONE : BigDecimal.ZERO;
     }
     if (functionName.equalsIgnoreCase("clearLights")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearLightSources);
       return "";
     }
@@ -66,7 +68,7 @@ public class TokenLightFunctions extends AbstractFunction {
       String type = parameters.get(0).toString();
       String name = parameters.get(1).toString();
       BigDecimal value = FunctionUtil.paramAsBigDecimal(functionName, parameters, 2, false);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 3, 4);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 3, 4);
       return setLight(token, type, name, value);
     }
     if (functionName.equalsIgnoreCase("getLights")) {
@@ -74,7 +76,7 @@ public class TokenLightFunctions extends AbstractFunction {
 
       String type = parameters.size() > 0 ? parameters.get(0).toString() : "*";
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return getLights(token, type, delim);
     }
     return null;

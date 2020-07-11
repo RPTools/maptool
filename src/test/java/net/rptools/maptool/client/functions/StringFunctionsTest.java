@@ -27,7 +27,7 @@ public class StringFunctionsTest {
 
   private Object submitStringFunction(String functionName, Object... params)
       throws ParserException {
-    return funcs.childEvaluate(null, functionName, Arrays.asList(params));
+    return funcs.childEvaluate(null, null, functionName, Arrays.asList(params));
   }
 
   @Test

@@ -170,7 +170,7 @@ public class MapToolEventQueue extends EventQueue {
       campaign =
           getInfoFunction
               .getInstance()
-              .childEvaluate(null, null, Collections.singletonList(command));
+              .childEvaluate(null, null, null, Collections.singletonList(command));
       MapTool.getParser().exitContext();
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();

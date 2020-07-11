@@ -20,13 +20,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -53,9 +53,9 @@ public class ChatFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver resolver = ((MapToolVariableResolver) parser.getVariableResolver());
 
     if (functionName.equals("broadcast")) {
       return broadcast(resolver, parameters);
@@ -69,8 +69,7 @@ public class ChatFunction extends AbstractFunction {
    *
    * @return empty string
    */
-  private Object broadcast(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
+  private Object broadcast(VariableResolver resolver, List<Object> param) throws ParserException {
     // broadcast shall be trusted
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", "broadcast"));

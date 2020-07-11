@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.syntax;
 
 import java.util.ResourceBundle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.AdditionalFunctionDescription;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.language.I18N;
@@ -67,7 +68,7 @@ public class MapToolScriptAutoComplete {
           new BasicCompletion(
               provider, reservedWord, getShortDescription(reservedWord), getSummary(reservedWord)));
 
-    for (Function function : MapTool.getParser().getMacroFunctions()) {
+    for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof DefinesSpecialVariables) {
         for (String specialVariable : ((DefinesSpecialVariables) function).getSpecialVariables()) {
           provider.addCompletion(
@@ -144,7 +145,7 @@ public class MapToolScriptAutoComplete {
 
     // if there is no shortDesc try if one of the functions has one
     if (shortDesc == null) {
-      for (Function function : MapTool.getParser().getMacroFunctions()) {
+      for (Function function : MapToolExpressionParser.getMacroFunctions()) {
         if (function instanceof AdditionalFunctionDescription) {
           final AdditionalFunctionDescription functionExtended =
               (AdditionalFunctionDescription) function;
@@ -167,7 +168,7 @@ public class MapToolScriptAutoComplete {
 
     // if there is no summary try if one of the functions has one
     if (summary == null) {
-      for (final Function function : MapTool.getParser().getMacroFunctions()) {
+      for (final Function function : MapToolExpressionParser.getMacroFunctions()) {
         if (function instanceof AdditionalFunctionDescription) {
           final AdditionalFunctionDescription functionExtended =
               (AdditionalFunctionDescription) function;

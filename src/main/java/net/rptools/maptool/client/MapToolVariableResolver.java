@@ -20,9 +20,9 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import javax.swing.JOptionPane;
+import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -30,13 +30,13 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.util.FunctionUtil;
-import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
+import net.rptools.parser.VariableResolver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MapToolVariableResolver extends MapVariableResolver {
+public class MapToolVariableResolver implements VariableResolver {
 
   // Logger for this class.
   private static final Logger LOGGER = LogManager.getLogger(MapToolVariableResolver.class);
@@ -77,6 +77,8 @@ public class MapToolVariableResolver extends MapVariableResolver {
   private static final String JSON_NULL = "json.null";
   private static final String JSON_TRUE = "json.true";
   private static final String JSON_FALSE = "json.false";
+
+  private final Map<String, Object> variables = new CaseInsensitiveHashMap<Object>();
 
   private List<Runnable> delayedActionList;
 
@@ -140,6 +142,16 @@ public class MapToolVariableResolver extends MapVariableResolver {
   }
 
   @Override
+  public void setVariable(String name, Object value) throws ParserException {
+    variables.put(name, value);
+  }
+
+  @Override
+  public boolean containsVariable(String name) throws ParserException {
+    return containsVariable(name, VariableModifiers.None);
+  }
+
+  @Override
   public boolean containsVariable(String name, VariableModifiers mods) {
 
     // If we don't have the value then we'll prompt for it
@@ -153,6 +165,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
    */
   public Token getTokenInContext() {
     return tokenInContext;
+  }
+
+  @Override
+  public Object getVariable(String name) throws ParserException {
+    return getVariable(name, VariableModifiers.None);
   }
 
   @Override
@@ -237,7 +254,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
     // Default
     if (result == null) {
-      result = super.getVariable(name, mods);
+      result = variables.get(name);
     }
 
     // Prompt
@@ -307,6 +324,16 @@ public class MapToolVariableResolver extends MapVariableResolver {
   }
 
   @Override
+  public Set<String> getVariables() {
+    return Collections.unmodifiableSet(variables.keySet());
+  }
+
+  public void setVariables(MapToolVariableResolver other) {
+    variables.clear();
+    variables.putAll(other.variables);
+  }
+
+  @Override
   public void setVariable(String varname, VariableModifiers modifiers, Object value)
       throws ParserException {
     if (tokenInContext != null) {
@@ -362,7 +389,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
       InitiativeRoundFunction.setInitiativeRound(value);
       return;
     }
-    super.setVariable(varname, modifiers, value);
+    variables.put(varname, value);
   }
 
   /**
