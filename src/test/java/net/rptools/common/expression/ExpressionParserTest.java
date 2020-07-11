@@ -19,7 +19,9 @@ import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
+import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.EvaluationException;
 
 public class ExpressionParserTest extends TestCase {
@@ -156,21 +158,29 @@ public class ExpressionParserTest extends TestCase {
   public void testEvaluate_HeroRoll() throws ParserException {
     RunData.setSeed(10423L);
     ExpressionParser parser = new ExpressionParser();
+    VariableResolver resolver = new MapVariableResolver();
 
-    Result result = parser.evaluate("4.5d6h");
+    Result result = parser.evaluate("4.5d6h", resolver);
     assertEquals(new BigDecimal(18), result.getValue());
 
-    result = parser.evaluate("4.5d6b");
+    result = parser.evaluate("4.5d6b", resolver);
     assertEquals(new BigDecimal(5), result.getValue());
 
     RunData.setSeed(10423L);
     parser = new ExpressionParser();
+    resolver = new MapVariableResolver();
 
-    result = parser.evaluate("4d6h");
+    result = parser.evaluate("4d6h", resolver);
     assertEquals(new BigDecimal(15), result.getValue());
 
-    result = parser.evaluate("4d6b");
+    result = parser.evaluate("4d6b", resolver);
     assertEquals(new BigDecimal(4), result.getValue());
+  }
+
+  private VariableResolver initVar(String name, Object value) throws ParserException {
+    VariableResolver result = new MapVariableResolver();
+    result.setVariable(name, value);
+    return result;
   }
 
   public void testEvaluate_FudgeRoll() throws ParserException {
@@ -184,8 +194,7 @@ public class ExpressionParserTest extends TestCase {
     assertEquals(new BigDecimal(0), result.getValue());
 
     // Don't parse df in the middle of things
-    parser.getParser().getVariableResolver().setVariable("asdfg", new BigDecimal(10));
-    result = parser.evaluate("asdfg");
+    result = parser.evaluate("asdfg", initVar("asdfg", new BigDecimal(10)));
     assertEquals(new BigDecimal(10), result.getValue());
   }
 
@@ -200,8 +209,7 @@ public class ExpressionParserTest extends TestCase {
     assertEquals(new BigDecimal(4), result.getValue());
 
     // Don't parse a uf in the middle of other things
-    parser.getParser().getVariableResolver().setVariable("asufg", new BigDecimal(10));
-    result = parser.evaluate("asufg");
+    result = parser.evaluate("asufg", initVar("asufg", new BigDecimal(10)));
     assertEquals(new BigDecimal(10), result.getValue());
   }
 
@@ -261,9 +269,8 @@ public class ExpressionParserTest extends TestCase {
 
   public void testVariableRegexOverlaps() throws ParserException {
     ExpressionParser parser = new ExpressionParser();
-    parser.getParser().setVariable("food10", new BigDecimal(10));
-
-    evaluateExpression(parser, "food10 + 10", new BigDecimal(20));
+    Result result = parser.evaluate("food10 + 10", initVar("food10", new BigDecimal(10)));
+    assertEquals(new BigDecimal(20), result.getValue());
   }
 
   public void testNonDetailedExpression() throws ParserException {
@@ -271,27 +278,26 @@ public class ExpressionParserTest extends TestCase {
 
     int[] flattenings = new int[] {0};
 
-    parser
-        .getParser()
-        .setVariable(
-            "anumber",
-            new BigDecimal(3) {
-              @Override
-              public String toString() {
-                flattenings[0]++;
-                return super.toString();
-              }
-            });
+    MapVariableResolver resolver = new MapVariableResolver();
+    resolver.setVariable(
+        "anumber",
+        new BigDecimal(3) {
+          @Override
+          public String toString() {
+            flattenings[0]++;
+            return super.toString();
+          }
+        });
 
     // one evaluation with detailed expression (the default)
-    Result result = parser.evaluate("anumber + 1", true);
+    Result result = parser.evaluate("anumber + 1", resolver, true);
     assertEquals("anumber + 1", result.getExpression());
     assertEquals("3 + 1", result.getDetailExpression());
     assertEquals(new BigDecimal(4), result.getValue());
 
     // one evaluation without detailed expression (this makes dicelib not go through a deterministic
     // expression)
-    result = parser.evaluate("anumber + 1", false);
+    result = parser.evaluate("anumber + 1", resolver, false);
     assertEquals("anumber + 1", result.getExpression());
     assertEquals("anumber + 1", result.getDetailExpression());
     assertEquals(new BigDecimal(4), result.getValue());

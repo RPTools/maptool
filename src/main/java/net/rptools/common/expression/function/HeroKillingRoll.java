@@ -37,7 +37,8 @@ public class HeroKillingRoll extends AbstractNumberFunction {
   private static String lastKillingBodyVar = "#Hero-LastKillingBodyVar";
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver vr, String functionName, List<Object> parameters)
       throws ParserException {
     int n = 0;
 
@@ -47,7 +48,6 @@ public class HeroKillingRoll extends AbstractNumberFunction {
     int extra = 0;
     if (parameters.size() > 2) extra = ((BigDecimal) parameters.get(n++)).intValue();
 
-    VariableResolver vr = parser.getVariableResolver();
     RunData runData = RunData.getCurrent();
 
     if (functionName.equalsIgnoreCase("herokilling")) {
@@ -70,7 +70,7 @@ public class HeroKillingRoll extends AbstractNumberFunction {
         body++;
       }
 
-      parser.setVariable(lastKillingBodyVar, new BigDecimal(body));
+      vr.setVariable(lastKillingBodyVar, new BigDecimal(body));
       return new BigDecimal(body);
     } else if (functionName.equalsIgnoreCase("herokilling2")) {
 
@@ -93,7 +93,7 @@ public class HeroKillingRoll extends AbstractNumberFunction {
         body++;
       }
 
-      parser.setVariable(lastKillingBodyVar, new BigDecimal(body));
+      vr.setVariable(lastKillingBodyVar, new BigDecimal(body));
       return new BigDecimal(body);
     } else {
       int multi = DiceHelper.rollDice((int) times, sides);
