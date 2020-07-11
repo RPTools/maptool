@@ -73,7 +73,8 @@ public class StringFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     try {
       if (functionName.equals("replace")) {
@@ -229,12 +230,9 @@ public class StringFunctions extends AbstractFunction {
       if (functionName.equals("strformat")) {
         int size = parameters.size();
         if (size > 1) {
-          return format(
-              parameters.get(0).toString(),
-              parser.getVariableResolver(),
-              parameters.subList(1, size));
+          return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
         } else {
-          return format(parameters.get(0).toString(), parser.getVariableResolver(), null);
+          return format(parameters.get(0).toString(), resolver, null);
         }
       }
       if (functionName.equals("matches")) {
@@ -293,8 +291,7 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
       }
-      return stringFind(
-          parser.getVariableResolver(), parameters.get(0).toString(), parameters.get(1).toString());
+      return stringFind(resolver, parameters.get(0).toString(), parameters.get(1).toString());
     }
     if (functionName.equals("getGroupCount")) {
       if (parameters.size() < 1) {
@@ -302,7 +299,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".groupCount");
       return resolver.getVariable(sb.toString());
@@ -313,7 +309,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 3, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0));
       sb.append(".m").append(parameters.get(1));
@@ -331,7 +326,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".matchCount");
       return resolver.getVariable(sb.toString());

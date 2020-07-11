@@ -1020,7 +1020,8 @@ public class InputFunction extends AbstractFunction {
 
   // The function that does all the work
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
@@ -1061,7 +1062,7 @@ public class InputFunction extends AbstractFunction {
       return BigDecimal.ONE; // No work to do, so treat it as a successful invocation.
 
     // UI step 1 - First, see if a token is in context.
-    VariableResolver varRes = parser.getVariableResolver();
+    VariableResolver varRes = resolver;
     Token tokenInContext = null;
     if (varRes instanceof MapToolVariableResolver) {
       tokenInContext = ((MapToolVariableResolver) varRes).getTokenInContext();
@@ -1201,10 +1202,10 @@ public class InputFunction extends AbstractFunction {
                     // Do nothing
                     break;
                   case 1:
-                    parser.setVariable(key + "_", value);
+                    resolver.setVariable(key + "_", value);
                     break;
                   case 2:
-                    parser.setVariable(key, value);
+                    resolver.setVariable(key, value);
                     break;
                 }
               }
@@ -1219,15 +1220,15 @@ public class InputFunction extends AbstractFunction {
         // Set the variable to the value we got from the dialog box.
         if (newValue != null) {
           if (vs.optionValues.optionEquals("TYPE", "JSON")) {
-            parser.setVariable(vs.name, jsonObject);
+            resolver.setVariable(vs.name, jsonObject);
           } else {
-            parser.setVariable(vs.name, newValue.trim());
+            resolver.setVariable(vs.name, newValue.trim());
           }
           allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
         }
       }
       if (cp.tabVarSpec != null) {
-        parser.setVariable(cp.tabVarSpec.name, allAssignments.toString());
+        resolver.setVariable(cp.tabVarSpec.name, allAssignments.toString());
       }
     }
 

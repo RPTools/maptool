@@ -31,7 +31,7 @@ public class GetInfoFunctionTest {
     getInfoFunction function = getInfoFunction.getInstance();
     List<Object> params = Collections.singletonList("debug");
 
-    JsonObject json = (JsonObject) function.childEvaluate(null, "ignored", params);
+    JsonObject json = (JsonObject) function.childEvaluate(null, null, "ignored", params);
 
     assertNotNull(json);
 
@@ -63,7 +63,7 @@ public class GetInfoFunctionTest {
 
     function.setSysInfoProvider(getDummyProvider());
 
-    assertNull(function.childEvaluate(null, "ignored", Collections.singletonList("debug")));
+    assertNull(function.childEvaluate(null, null, "ignored", Collections.singletonList("debug")));
   }
 
   @NotNull

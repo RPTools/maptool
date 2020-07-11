@@ -29,6 +29,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 
@@ -224,7 +225,8 @@ public class MathFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> param)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
     if ("math.abs".equals(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
