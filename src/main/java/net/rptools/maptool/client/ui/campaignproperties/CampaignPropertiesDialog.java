@@ -317,6 +317,10 @@ public class CampaignPropertiesDialog extends JDialog {
             builder.append(' ');
           }
         }
+
+        if (source.getLumens() != 0) {
+          builder.append("lumens=").append(source.getLumens()).append(' ');
+        }
       }
       builder.append('\n');
     }
@@ -523,6 +527,14 @@ public class CampaignPropertiesDialog extends JDialog {
                   personalLightColor != null ? new DrawableColorPaint(personalLightColor) : null;
               personalLight.add(new Light(shape, 0, pLightRange, arc, personalLightPaint));
               personalLight.setScaleWithToken(scaleWithToken);
+            } else if (arg.toUpperCase().startsWith("LUMENS=")) {
+              if (personalLight != null) {
+                personalLight.setLumens(Integer.parseInt(arg.substring(7)));
+              } else {
+                errlog.add(
+                    I18N.getText(
+                        "msg.error.mtprops.sight.lumensWithoutLight", reader.getLineNumber()));
+              }
             } else if (arg.startsWith("arc=") && arg.length() > 4) {
               toBeParsed = arg.substring(4);
               errmsg = "msg.error.mtprops.sight.arc";

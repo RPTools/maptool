@@ -440,10 +440,14 @@ public class ZoneView implements ModelChangeListener {
             calculatePersonalLightSourceArea(
                 sight.getPersonalLightSource(), token, sight, Direction.CENTER);
         if (lightArea != null) {
-          if (allLightAreaMap.containsKey(LUMEN_VISION)) {
-            allLightAreaMap.get(LUMEN_VISION).add(lightArea);
+          double lumens = sight.getPersonalLightSource().getLumens();
+          lumens = (lumens == 0) ? LUMEN_VISION : lumens;
+          // maybe some kind of imposed blindness?  Anyway, make sure to handle personal darkness..
+          if (lumens < 0) lumens = Math.abs(lumens) + .5;
+          if (allLightAreaMap.containsKey(lumens)) {
+            allLightAreaMap.get(lumens).add(lightArea);
           } else {
-            allLightAreaMap.put(LUMEN_VISION, lightArea);
+            allLightAreaMap.put(lumens, lightArea);
           }
         }
       }
