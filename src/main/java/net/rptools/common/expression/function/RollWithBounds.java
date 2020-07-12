@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 
 public class RollWithBounds extends AbstractNumberFunction {
@@ -35,7 +36,8 @@ public class RollWithBounds extends AbstractNumberFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     int times = 0;
     int sides = 0;
@@ -72,6 +74,8 @@ public class RollWithBounds extends AbstractNumberFunction {
         mod = ((BigDecimal) parameters.get(2)).intValue();
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
+      default:
+        throw new ParserException("Unknown function name: " + functionName);
     }
     return DiceHelper.rollModWithBounds(times, sides, mod, lower, upper);
   }

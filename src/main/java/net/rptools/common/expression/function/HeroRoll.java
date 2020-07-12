@@ -39,14 +39,13 @@ public class HeroRoll extends AbstractNumberFunction {
   private static String lastBodyVar = "#Hero-LastBodyVar";
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver vr, String functionName, List<Object> parameters)
       throws ParserException {
     int n = 0;
 
     double times = ((BigDecimal) parameters.get(n++)).doubleValue();
     int sides = ((BigDecimal) parameters.get(n++)).intValue();
-
-    VariableResolver vr = parser.getVariableResolver();
 
     if (functionName.equalsIgnoreCase("herobody")) {
       double lastTimes = 0;
@@ -64,7 +63,7 @@ public class HeroRoll extends AbstractNumberFunction {
       if (times == lastTimes && sides == lastSides) return new BigDecimal(lastBody);
 
       return new BigDecimal(-1); // Should this be -1?  Perhaps it should return null.
-    } else {
+    } else if ("hero".equalsIgnoreCase(functionName) || "herostun".equalsIgnoreCase(functionName)) {
       // assume stun
 
       double lastTimes = times;
@@ -104,11 +103,12 @@ public class HeroRoll extends AbstractNumberFunction {
         stun += (die + 1) / 2;
       }
 
-      parser.setVariable(lastTimesVar, new BigDecimal(lastTimes));
-      parser.setVariable(lastSidesVar, new BigDecimal(lastSides));
-      parser.setVariable(lastBodyVar, new BigDecimal(lastBody));
+      vr.setVariable(lastTimesVar, new BigDecimal(lastTimes));
+      vr.setVariable(lastSidesVar, new BigDecimal(lastSides));
+      vr.setVariable(lastBodyVar, new BigDecimal(lastBody));
 
       return new BigDecimal(stun);
     }
+    throw new ParserException("Unknown function name: " + functionName);
   }
 }

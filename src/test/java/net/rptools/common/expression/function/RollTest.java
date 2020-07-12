@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import junit.framework.TestCase;
 import net.rptools.common.expression.RunData;
 import net.rptools.parser.Expression;
+import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.EvaluationException;
@@ -52,7 +53,7 @@ public class RollTest extends TestCase {
       RunData.setCurrent(new RunData(null));
 
       Expression xp = p.parseExpression("roll(10, 6) + 10");
-      Expression dxp = xp.getDeterministicExpression();
+      Expression dxp = xp.getDeterministicExpression(new MapVariableResolver());
 
       assertTrue(dxp.format().matches("\\d+ \\+ 10"));
     } finally {
