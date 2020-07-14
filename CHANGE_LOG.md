@@ -22,6 +22,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 
 ## Bug Fixes
 - [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed. 
+- [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed. 
 - [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed. 
 - [#2069][i2069] Tokens partially out of line-of-sight were fully shown on player clients. Fixed. 
 - [#2057][i2057] Token properties with a single element JSON array returned bad results when accessed. Not in published code. Fixed. 
@@ -79,6 +80,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
 [i2081]: https://github.com/RPTools/maptool/issues/2081
+[i2078]: https://github.com/RPTools/maptool/issues/2078
 [i2074]: https://github.com/RPTools/maptool/issues/2074
 [i2069]: https://github.com/RPTools/maptool/issues/2069
 [i2057]: https://github.com/RPTools/maptool/issues/2057
