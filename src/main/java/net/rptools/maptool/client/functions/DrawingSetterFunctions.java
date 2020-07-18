@@ -22,6 +22,7 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 
 public class DrawingSetterFunctions extends DrawingFunctions {
   private static final DrawingSetterFunctions instance = new DrawingSetterFunctions();
@@ -45,7 +46,8 @@ public class DrawingSetterFunctions extends DrawingFunctions {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     checkTrusted(functionName);
     FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);

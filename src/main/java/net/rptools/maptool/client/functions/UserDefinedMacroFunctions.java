@@ -41,6 +41,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
@@ -95,9 +96,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     // Do nothing as we do not know what we will need.
   }
 
-  public Object evaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object evaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     MapToolVariableResolver newResolver;
     JsonArray jarr = new JsonArray();
 
@@ -120,9 +121,10 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
 
     if (funcDef.newVariableContext) {
-      newResolver = new MapToolVariableResolver(resolver.getTokenInContext());
+      newResolver =
+          new MapToolVariableResolver(((MapToolVariableResolver) resolver).getTokenInContext());
     } else {
-      newResolver = resolver;
+      newResolver = (MapToolVariableResolver) resolver;
     }
 
     try {
@@ -130,7 +132,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output =
           MapTool.getParser()
               .runMacro(
-                  resolver,
+                  (MapToolVariableResolver) resolver,
                   newResolver.getTokenInContext(),
                   funcDef.macroName,
                   macroArgs,
@@ -219,7 +221,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     MapToolScriptSyntax.resetScriptSyntax();
   }
 
-  public Object executeOldFunction(Parser parser, List<Object> parameters) throws ParserException {
+  public Object executeOldFunction(
+      Parser parser, VariableResolver resolver, List<Object> parameters) throws ParserException {
     String functionName = currentFunction.peek();
     FunctionRedefinition functionRedef = redefinedFunctions.get(functionName);
     if (functionRedef == null) {
@@ -227,7 +230,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
     Function function = functionRedef.function;
     function.checkParameters(functionName, parameters);
-    return function.evaluate(parser, functionRedef.functionName, parameters);
+    return function.evaluate(parser, resolver, functionRedef.functionName, parameters);
   }
 
   public boolean isFunctionDefined(String name) {

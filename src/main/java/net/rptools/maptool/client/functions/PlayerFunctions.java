@@ -25,6 +25,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class PlayerFunctions extends AbstractFunction {
@@ -39,7 +40,8 @@ public class PlayerFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equals("getPlayerName")) {
       return MapTool.getPlayer().getName();

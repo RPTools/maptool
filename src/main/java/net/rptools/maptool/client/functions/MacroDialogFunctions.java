@@ -29,6 +29,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class MacroDialogFunctions extends AbstractFunction {
@@ -56,7 +57,8 @@ public class MacroDialogFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equals("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);

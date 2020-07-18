@@ -17,21 +17,9 @@ package net.rptools.maptool.client;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
@@ -48,7 +36,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -58,82 +45,6 @@ public class MapToolLineParser {
 
   // Logger for this class.
   private static final Logger log = LogManager.getLogger(MapToolLineParser.class);
-
-  /** MapTool functions to add to the parser. */
-  private static final List<Function> mapToolParserFunctions =
-      Stream.of(
-              AbortFunction.getInstance(),
-              AssertFunction.getInstance(),
-              AddAllToInitiativeFunction.getInstance(),
-              ChatFunction.getInstance(),
-              CurrentInitiativeFunction.getInstance(),
-              DefineMacroFunction.getInstance(),
-              EvalMacroFunctions.getInstance(),
-              ExecFunction.getInstance(),
-              FindTokenFunctions.getInstance(),
-              HasImpersonated.getInstance(),
-              InitiativeRoundFunction.getInstance(),
-              InputFunction.getInstance(),
-              IsTrustedFunction.getInstance(),
-              JSONMacroFunctions.getInstance(),
-              LookupTableFunction.getInstance(),
-              MacroArgsFunctions.getInstance(),
-              MacroDialogFunctions.getInstance(),
-              MacroFunctions.getInstance(),
-              MacroLinkFunction.getInstance(),
-              MapFunctions.getInstance(),
-              MiscInitiativeFunction.getInstance(),
-              PlayerFunctions.getInstance(),
-              RemoveAllFromInitiativeFunction.getInstance(),
-              ReturnFunction.getInstance(),
-              SoundFunctions.getInstance(),
-              StateImageFunction.getInstance(),
-              StringFunctions.getInstance(),
-              StrListFunctions.getInstance(),
-              StrPropFunctions.getInstance(),
-              SwitchTokenFunction.getInstance(),
-              TokenBarFunction.getInstance(),
-              TokenCopyDeleteFunctions.getInstance(),
-              TokenGMNameFunction.getInstance(),
-              TokenHaloFunction.getInstance(),
-              TokenImage.getInstance(),
-              TokenInitFunction.getInstance(),
-              TokenInitHoldFunction.getInstance(),
-              TokenLabelFunction.getInstance(),
-              TokenLightFunctions.getInstance(),
-              TokenLocationFunctions.getInstance(),
-              TokenNameFunction.getInstance(),
-              TokenPropertyFunctions.getInstance(),
-              TokenRemoveFromInitiativeFunction.getInstance(),
-              TokenSelectionFunctions.getInstance(),
-              TokenSightFunctions.getInstance(),
-              TokenSpeechFunctions.getInstance(),
-              TokenStateFunction.getInstance(),
-              TokenVisibleFunction.getInstance(),
-              UserDefinedMacroFunctions.getInstance(),
-              isVisibleFunction.getInstance(),
-              getInfoFunction.getInstance(),
-              TokenMoveFunctions.getInstance(),
-              FogOfWarFunctions.getInstance(),
-              VBL_Functions.getInstance(),
-              ZoomFunctions.getInstance(),
-              ParserPropertyFunctions.getInstance(),
-              MathFunctions.getInstance(),
-              MacroJavaScriptBridge.getInstance(),
-              DrawingGetterFunctions.getInstance(),
-              DrawingSetterFunctions.getInstance(),
-              DrawingMiscFunctions.getInstance(),
-              ExportDataFunctions.getInstance(),
-              RESTfulFunctions.getInstance(),
-              HeroLabFunctions.getInstance(),
-              LogFunctions.getInstance(),
-              LastRolledFunction.getInstance(),
-              Base64Functions.getInstance(),
-              TokenTerrainModifierFunctions.getInstance(),
-              TestFunctions.getInstance(),
-              TextLabelFunctions.getInstance(),
-              new MarkDownFunctions())
-          .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
   public static final String CHAT_INPUT = "chat";
@@ -224,14 +135,10 @@ public class MapToolLineParser {
     SKIP_NEXT_CHAR
   }
 
-  public List<Function> getMacroFunctions() {
-    return mapToolParserFunctions;
-  }
-
   public Map<String, String> listAllMacroFunctions() {
     Map<String, String> functionList = new HashMap<String, String>();
 
-    for (Function function : getMacroFunctions()) {
+    for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof AdditionalFunctionDescription) {
         for (String alias : Arrays.asList(function.getAliases())) {
           functionList.put(alias, function.getClass().getName());
@@ -1529,7 +1436,10 @@ public class MapToolLineParser {
   }
 
   public Result parseExpression(
-      VariableResolver resolver, Token tokenInContext, String expression, boolean makeDeterministic)
+      MapToolVariableResolver resolver,
+      Token tokenInContext,
+      String expression,
+      boolean makeDeterministic)
       throws ParserException {
     if (parserRecurseDepth > maxRecursionDepth) {
       parserRecurseDepth = 0;
@@ -1542,8 +1452,7 @@ public class MapToolLineParser {
         String b = " ".repeat(Math.max(0, parserRecurseDepth - 1)) + expression;
         log.debug(b);
       }
-      Result res =
-          createParser(resolver, tokenInContext != null).evaluate(expression, makeDeterministic);
+      Result res = expressionParser.evaluate(expression, resolver, makeDeterministic);
       rolled.addAll(res.getRolled());
       newRolls.addAll(res.getRolled());
 
@@ -1556,7 +1465,6 @@ public class MapToolLineParser {
       // return an empty result to not collide with tooltips
       // when catching an abort
       Result result = new Result("");
-      result.setDetailExpression("");
       result.setValue("");
       return result;
     } catch (AssertFunctionException e) {
@@ -1568,7 +1476,6 @@ public class MapToolLineParser {
       // return an empty result to not collide with tooltips
       // when catching an assert`
       Result result = new Result("");
-      result.setDetailExpression("");
       result.setValue("");
       return result;
     } catch (Exception e) {
@@ -2033,12 +1940,7 @@ public class MapToolLineParser {
     return retval;
   }
 
-  public static ExpressionParser createParser(
-      VariableResolver resolver, boolean hasTokenInContext) {
-    ExpressionParser parser = new ExpressionParser(resolver);
-    parser.getParser().addFunctions(mapToolParserFunctions);
-    return parser;
-  }
+  public static final MapToolExpressionParser expressionParser = new MapToolExpressionParser();
 
   private String rollString(Collection<String> options, String text) {
     return rollString(options, null, text);

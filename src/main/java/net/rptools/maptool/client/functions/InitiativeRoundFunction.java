@@ -21,6 +21,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -44,7 +45,8 @@ public class InitiativeRoundFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (functionName.equals("getInitiativeRound")) {
       return getInitiativeRound();

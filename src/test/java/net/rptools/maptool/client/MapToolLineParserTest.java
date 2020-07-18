@@ -23,7 +23,6 @@ import net.rptools.common.expression.Result;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableResolver;
 import org.junit.jupiter.api.Test;
 
 public class MapToolLineParserTest {
@@ -31,7 +30,10 @@ public class MapToolLineParserTest {
   private static final MapToolLineParser parser = MapTool.getParser();
 
   private Result parseExpression(
-      String expression, boolean makeDeterministic, Token tokenInContext, VariableResolver resolver)
+      String expression,
+      boolean makeDeterministic,
+      Token tokenInContext,
+      MapToolVariableResolver resolver)
       throws ParserException {
     return parser.parseExpression(
         resolver == null ? new MapToolVariableResolver(null) : resolver,
@@ -79,6 +81,7 @@ public class MapToolLineParserTest {
         "a hidden evaluation gives nothing",
         parseLine("a hidden evaluation gives nothing[h: if(1 == 1, 1, 0)]", null, null));
     // expanded rolls contain MessagePanel's ASCII control characters that mark of roll information
+    // (line 182)
     assertMatches(
         "expanded roll shows ...if(1 == 1, 1, 0) = 1.",
         parseLine("expanded roll shows [if(1 == 1, 1, 0)]", null, null));

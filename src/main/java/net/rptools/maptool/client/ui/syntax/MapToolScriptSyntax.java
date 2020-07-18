@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.syntax;
 
 import java.util.Map;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.parser.function.Function;
@@ -115,7 +116,7 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     for (String operators : OPERATORS) macroFunctionTokenMap.put(operators, Token.OPERATOR);
 
     // Add "highlights defined by functions like Special Variables" as Data Type
-    for (Function function : MapTool.getParser().getMacroFunctions()) {
+    for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof DefinesSpecialVariables) {
         for (String specialVariable : ((DefinesSpecialVariables) function).getSpecialVariables()) {
           macroFunctionTokenMap.put(specialVariable, Token.DATA_TYPE);

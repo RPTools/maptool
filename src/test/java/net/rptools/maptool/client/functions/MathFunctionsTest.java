@@ -42,7 +42,7 @@ public class MathFunctionsTest {
 
   /** Helper to call childEvaluate */
   private Object eval(String functionName, Object... params) throws ParserException {
-    return mathFunctions.childEvaluate(null, functionName, Arrays.asList(params));
+    return mathFunctions.childEvaluate(null, null, functionName, Arrays.asList(params));
   }
 
   @Test

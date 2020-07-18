@@ -27,6 +27,7 @@ import net.rptools.maptool.model.LookupTable.LookupEntry;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.commons.lang.StringUtils;
 
@@ -76,7 +77,8 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String function, List<Object> params)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String function, List<Object> params)
       throws ParserException {
 
     if ("getTableNames".equalsIgnoreCase(function)) {

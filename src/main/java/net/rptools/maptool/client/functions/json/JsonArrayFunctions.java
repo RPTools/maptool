@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
-import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 
 /** Class used to implement MT Script related Json functions / utilities for JsonArrays. */
 public class JsonArrayFunctions {
@@ -169,11 +169,8 @@ public class JsonArrayFunctions {
   public JsonArray concatenate(List<JsonArray> arrays) {
     JsonArray result = new JsonArray();
     for (JsonArray array : arrays) {
-      for (int i = 0; i < array.size(); i++) {
-        result.add(array.get(i));
-      }
+      result.addAll(array);
     }
-
     return result;
   }
 
@@ -186,11 +183,11 @@ public class JsonArrayFunctions {
    */
   public JsonArray concatenate(JsonArray array, List<?> values) {
     JsonArray array2 = new JsonArray();
+    array2.addAll(array);
     for (Object value : values) {
       array2.add(typeConversion.asJsonElement(value));
     }
-
-    return concatenate(List.of(array, array2));
+    return array2;
   }
 
   /**
@@ -829,13 +826,13 @@ public class JsonArrayFunctions {
   /**
    * Creates variables from a JsonArray.
    *
-   * @param parser The parser used to set the variables.
+   * @param resolver variable map
    * @param jsonArray The array containing the values to set.
    * @param varName The name of the variable to append the index to and set.
    * @return A JsonArray of variables that have been set.
    * @throws ParserException if an error occurs setting the variables.
    */
-  public JsonArray toVars(Parser parser, JsonArray jsonArray, String varName)
+  public JsonArray toVars(VariableResolver resolver, JsonArray jsonArray, String varName)
       throws ParserException {
 
     JsonArray setVars = new JsonArray();
@@ -846,7 +843,7 @@ public class JsonArrayFunctions {
 
     if (!varName.equals("")) {
       for (int i = 0; i < jsonArray.size(); i++) {
-        parser.setVariable(name + i, typeConversion.asScriptType(jsonArray.get(i)));
+        resolver.setVariable(name + i, typeConversion.asScriptType(jsonArray.get(i)));
         setVars.add(varName + i);
       }
     }
