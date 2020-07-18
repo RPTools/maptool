@@ -55,7 +55,12 @@ public class MapFunctions extends AbstractFunction {
       throws ParserException {
     if (functionName.equals("getCurrentMapName")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-      return MapTool.getFrame().getCurrentZoneRenderer().getZone().getName();
+      ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+      if (currentZR == null) {
+        throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+      } else {
+        return currentZR.getZone().getName();
+      }
     } else if (functionName.equals("setCurrentMap")) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
@@ -70,17 +75,28 @@ public class MapFunctions extends AbstractFunction {
         return getNamedMap(functionName, mapName).getZone().isVisible() ? "1" : "0";
       } else {
         // Return the visibility of the current map/zone
-        return MapTool.getFrame().getCurrentZoneRenderer().getZone().isVisible() ? "1" : "0";
+        ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+        if (currentZR == null) {
+          throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+        } else {
+          return currentZR.getZone().isVisible() ? "1" : "0";
+        }
       }
-
     } else if ("setMapVisible".equalsIgnoreCase(functionName)) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       boolean visible = FunctionUtil.getBooleanValue(parameters.get(0).toString());
-      Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+      Zone zone;
       if (parameters.size() > 1) {
         String mapName = parameters.get(1).toString();
         zone = getNamedMap(functionName, mapName).getZone();
+      } else {
+        ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+        if (currentZR == null) {
+          throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+        } else {
+          zone = currentZR.getZone();
+        }
       }
       // Set the zone and return the visibility of the current map/zone
       zone.setVisible(visible);
