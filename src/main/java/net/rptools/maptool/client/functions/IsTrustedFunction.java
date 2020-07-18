@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class IsTrustedFunction extends AbstractFunction {
@@ -38,7 +39,8 @@ public class IsTrustedFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equalsIgnoreCase("isTrusted")) {
       return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO;

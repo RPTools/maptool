@@ -47,6 +47,7 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,7 +84,8 @@ public class MacroLinkFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
     boolean formatted;

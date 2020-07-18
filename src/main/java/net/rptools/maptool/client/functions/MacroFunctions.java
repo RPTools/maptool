@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -30,6 +31,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,38 +74,39 @@ public class MacroFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equalsIgnoreCase("hasMacro")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String label = parameters.get(0).toString();
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return token.getMacroNames(false).contains(label) ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("createMacro")) {
-      return createMacro(parser, parameters);
+      return createMacro((MapToolVariableResolver) resolver, parameters);
     } else if (functionName.equalsIgnoreCase("getMacros")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getMacros(delim, token);
     } else if (functionName.equalsIgnoreCase("getMacroProps")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ";";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return getMacroButtonProps(token, index, delim);
     } else if (functionName.equalsIgnoreCase("setMacroProps")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
       Object value = parameters.get(0);
       String props = parameters.get(1).toString();
       String delim = parameters.size() > 2 ? parameters.get(2).toString() : ";";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 3, 4);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 3, 4);
       return setMacroProps(value, props, delim, token);
     } else if (functionName.equalsIgnoreCase("getMacroIndexes")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       String label = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return getMacroIndexes(label, delim, token);
     } else if (functionName.equalsIgnoreCase("getMacroName")) {
       return MapTool.getParser().getMacroName();
@@ -114,25 +117,25 @@ public class MacroFunctions extends AbstractFunction {
       FunctionUtil.blockUntrustedMacro(functionName);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       String command = FunctionUtil.paramAsString(functionName, parameters, 1, true);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return setMacroCommand(index, command, token);
     } else if (functionName.equalsIgnoreCase("getMacroCommand")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getMacroCommand(index, token);
     } else if (functionName.equalsIgnoreCase("getMacroButtonIndex")) {
       return BigDecimal.valueOf(MapTool.getParser().getMacroButtonIndex());
     } else if (functionName.equalsIgnoreCase("removeMacro")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return removeMacro(index, token);
     } else if (functionName.equalsIgnoreCase("getMacroGroup")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       String group = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return getMacroGroup(group, delim, token);
     } else { // should never happen, hopefully ;)
       throw new ParserException(I18N.getText(KEY_UNKNOWN_MACRO, functionName));
@@ -430,12 +433,12 @@ public class MacroFunctions extends AbstractFunction {
    * ';' if not specified). The fifth argument is the token to create the macro button on, if no
    * token is specified it is created on the token in context.
    *
-   * @param parser The parser.
    * @param param The arguments passed to the function.
    * @return the index of the newly created button.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal createMacro(Parser parser, List<Object> param) throws ParserException {
+  private BigDecimal createMacro(MapToolVariableResolver resolver, List<Object> param)
+      throws ParserException {
     FunctionUtil.checkNumberParam("createMacro", param, 1, 6);
 
     String label;
@@ -465,14 +468,14 @@ public class MacroFunctions extends AbstractFunction {
       command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
       prop = param.get(0).toString();
       delim = "json";
-      token = FunctionUtil.getTokenFromParam(parser, "createMacro", param, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, "createMacro", param, 1, 2);
     } else {
       FunctionUtil.checkNumberParam("createMacro", param, 2, 6);
       label = param.get(0).toString();
       command = param.get(1).toString();
       prop = param.size() > 2 ? param.get(2).toString() : null;
       delim = param.size() > 3 ? param.get(3).toString() : ";";
-      token = FunctionUtil.getTokenFromParam(parser, "createMacro", param, 4, 5);
+      token = FunctionUtil.getTokenFromParam(resolver, "createMacro", param, 4, 5);
     }
 
     MacroButtonProperties mbp = new MacroButtonProperties(token.getMacroNextIndex());

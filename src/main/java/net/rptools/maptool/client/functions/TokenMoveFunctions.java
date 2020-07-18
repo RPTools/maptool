@@ -51,6 +51,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,10 +76,10 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    final Token tokenInContext =
-        ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+    final Token tokenInContext = ((MapToolVariableResolver) resolver).getTokenInContext();
     if (tokenInContext == null) {
       throw new ParserException(
           I18N.getText("macro.function.general.noImpersonated", functionName));

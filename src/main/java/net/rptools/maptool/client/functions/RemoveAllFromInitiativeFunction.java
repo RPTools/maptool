@@ -23,6 +23,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -51,12 +52,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
+  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     int count = 0;

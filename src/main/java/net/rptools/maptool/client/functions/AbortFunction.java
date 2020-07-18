@@ -19,6 +19,7 @@ import java.util.List;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 
 /**
@@ -44,7 +45,8 @@ public class AbortFunction extends AbstractNumberFunction implements DefinesSpec
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     BigDecimal value = (BigDecimal) parameters.get(0);
     if (value.intValue() == 0)
