@@ -148,7 +148,8 @@ runtime {
                     '--win-per-user-install',
                     '--win-shortcut',
                     '--win-menu',
-                    '--win-menu-group', vendor
+                    '--win-menu-group', vendor,
+                    '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
             ]
         }
 
