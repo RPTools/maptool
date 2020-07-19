@@ -80,7 +80,6 @@ public class MapToolExpressionParser extends ExpressionParser {
               TokenSpeechFunctions.getInstance(),
               TokenStateFunction.getInstance(),
               TokenVisibleFunction.getInstance(),
-              UserDefinedMacroFunctions.getInstance(),
               isVisibleFunction.getInstance(),
               getInfoFunction.getInstance(),
               TokenMoveFunctions.getInstance(),
@@ -138,6 +137,24 @@ public class MapToolExpressionParser extends ExpressionParser {
         expressionCache.put(expression, exp);
       }
       return exp;
+    }
+
+    /**
+     * Functions are only passed to the parser once, on initial create User defined functions are
+     * injected here if defined in UserDefinedMacroFunctions
+     *
+     * @param functionName the name of the function
+     * @return Either user defined function or function known to parser
+     */
+    @Override
+    public Function getFunction(String functionName) {
+
+      // check user defined functions first
+      UserDefinedMacroFunctions userFunctions = UserDefinedMacroFunctions.getInstance();
+      if (userFunctions.isFunctionDefined(functionName)) return userFunctions;
+
+      // let parser do its thing
+      return super.getFunction(functionName);
     }
   }
 }
