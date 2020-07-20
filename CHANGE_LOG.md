@@ -4,6 +4,7 @@
 Lots of enhancements, bug fixes and improvements to the code base.
 
 ## Highlights
+- Significant improvements in macro run times giving a 4x to 10x (and sometimes more) reduction in run times.
 - Macro errors now produce a _call stack_ showing the macro calls leading to the error.
   ```
   Function "setTokenDrawOrder" requires at least 1 parameters; 0 were provided.
@@ -16,9 +17,11 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#2032][i2032] Added various Preferences settings to output of `getInfo("client")`.  Added _personal server_ status to `getInfo("server")`.
 - [#1986][i1986] Stat sheets and token notes now appear above Overlays.
 - [#1958][i1958] Moving a token into a unreachable location adds a `fail` key/value pair to the last object in the array of location objects returned by `getLastPath()` or to `onTokenMove`.
+- [#1898][i1898] A number of improvements to macro performance resulting in as much as 10x or more reduction in run time.
 - [#1890][i1890] Map name parameter added to `removeToken()` function. `copyToken()` function cleaned up internally.
 - [#1882][i1882] NullPointerException messages now include more information about _why_ the error occured.
 - [#1861][i1861] Macro errors now produce a _call stack_ showing the macro calls leading to the error.
+- [#1726][i1726] Lumens value added to Personal Lights in Sight definitions. This allows Sight definitions that will see into areas of darkness. 
 
 ## Bug Fixes
 - [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed. 
@@ -114,6 +117,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1926]: https://github.com/RPTools/maptool/issues/1926
 [i1921]: https://github.com/RPTools/maptool/issues/1921
 [i1907]: https://github.com/RPTools/maptool/issues/1907
+[i1898]: https://github.com/RPTools/maptool/issues/1898
 [i1896]: https://github.com/RPTools/maptool/issues/1896
 [i1894]: https://github.com/RPTools/maptool/issues/1894
 [i1893]: https://github.com/RPTools/maptool/issues/1893
@@ -131,6 +135,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1863]: https://github.com/RPTools/maptool/issues/1863
 [i1861]: https://github.com/RPTools/maptool/issues/1861
 [i1737]: https://github.com/RPTools/maptool/issues/1737
+[i1726]: https://github.com/RPTools/maptool/issues/1726
 [i1705]: https://github.com/RPTools/maptool/issues/1705
 [i1560]: https://github.com/RPTools/maptool/issues/1560
 [i715]: https://github.com/RPTools/maptool/issues/715
