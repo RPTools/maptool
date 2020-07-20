@@ -29,6 +29,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /** This class handles functions to play, stop, and edit audio clips and streams. */
@@ -61,7 +62,8 @@ public class SoundFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     int psize = args.size();
     if (functionName.equalsIgnoreCase("playStream")) {

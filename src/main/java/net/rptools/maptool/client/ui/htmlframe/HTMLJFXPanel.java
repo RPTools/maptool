@@ -122,4 +122,16 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   public void updateContents(final String html, boolean scrollReset) {
     Platform.runLater(() -> webViewManager.updateContents(html, scrollReset));
   }
+
+  /**
+   * Runs a javascript on the webView.
+   *
+   * @param script the script to run
+   * @return true
+   */
+  @Override
+  public boolean runJavascript(String script) {
+    Platform.runLater(() -> webViewManager.getWebEngine().executeScript(script));
+    return true;
+  }
 }

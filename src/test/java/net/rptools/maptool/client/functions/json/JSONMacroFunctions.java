@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.functions.JSONMacroFunctionsOld;
+import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
@@ -49,7 +50,8 @@ class TestJSONMacroFunctions {
     List<Object> fparams = new ArrayList<Object>();
     fparams.add(json);
     fparams.addAll(keys);
-    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, function_name, fparams);
+    return JSONMacroFunctionsOld.getInstance()
+        .childEvaluate(parser, new MapVariableResolver(), function_name, fparams);
   }
 
   /**
@@ -62,7 +64,7 @@ class TestJSONMacroFunctions {
    */
   Object run(String functionName, Object... objs) throws ParserException {
     List<Object> params = new ArrayList<>(Arrays.asList(objs));
-    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, functionName, params);
+    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, null, functionName, params);
   }
 
   // @BeforeAll

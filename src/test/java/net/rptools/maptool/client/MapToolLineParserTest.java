@@ -23,7 +23,6 @@ import net.rptools.common.expression.Result;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableResolver;
 import org.junit.jupiter.api.Test;
 
 public class MapToolLineParserTest {
@@ -31,7 +30,10 @@ public class MapToolLineParserTest {
   private static final MapToolLineParser parser = MapTool.getParser();
 
   private Result parseExpression(
-      String expression, boolean makeDeterministic, Token tokenInContext, VariableResolver resolver)
+      String expression,
+      boolean makeDeterministic,
+      Token tokenInContext,
+      MapToolVariableResolver resolver)
       throws ParserException {
     return parser.parseExpression(
         resolver == null ? new MapToolVariableResolver(null) : resolver,
@@ -79,6 +81,7 @@ public class MapToolLineParserTest {
         "a hidden evaluation gives nothing",
         parseLine("a hidden evaluation gives nothing[h: if(1 == 1, 1, 0)]", null, null));
     // expanded rolls contain MessagePanel's ASCII control characters that mark of roll information
+    // (line 182)
     assertMatches(
         "expanded roll shows ...if(1 == 1, 1, 0) = 1.",
         parseLine("expanded roll shows [if(1 == 1, 1, 0)]", null, null));
@@ -109,6 +112,33 @@ public class MapToolLineParserTest {
 
     assertEquals(
         "hello world", parseLine("hello [MACRO(\"testMacro@TOKEN\"): \"world\"]", token, null));
+  }
+
+  @Test
+  public void testMacroChangesTokenProperty() throws ParserException {
+
+    Token token = new Token();
+    token.setProperty("Strength", "1");
+
+    MapToolVariableResolver res =
+        new MapToolVariableResolver(token) {
+          @Override
+          protected void updateTokenProperty(
+              Token tokenToUpdate, String varToUpdate, String valueToSet) {
+            // variable resolver will try to send a server command which will fail in unittest
+            // catch the event and do not delegate to super implementation. Fake a set here instead
+            assertEquals(token, tokenToUpdate);
+            assertEquals("1", token.getProperty("Strength"));
+            assertEquals("Strength", varToUpdate);
+            assertEquals("6", valueToSet);
+            token.setProperty("Strength", "6");
+          }
+        };
+
+    Result result = parseExpression("Strength = 6", false, token, res);
+
+    assertEquals(new BigDecimal(6), result.getValue());
+    assertEquals("6", token.getProperty("Strength"));
   }
 
   @Test

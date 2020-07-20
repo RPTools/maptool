@@ -148,7 +148,8 @@ runtime {
                     '--win-per-user-install',
                     '--win-shortcut',
                     '--win-menu',
-                    '--win-menu-group', vendor
+                    '--win-menu-group', vendor,
+                    '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
             ]
         }
 
@@ -224,8 +225,8 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
-    implementation 'com.github.RPTools:parser:1.8.0'
-    implementation 'com.github.RPTools:dicelib:1.6.4'
+    implementation 'com.github.RPTools:parser:1.8.2'
+    implementation 'com.github.RPTools:dicelib:1.6.6'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'

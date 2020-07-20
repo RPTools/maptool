@@ -37,6 +37,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 
 public class DrawingMiscFunctions extends DrawingFunctions {
   private static final DrawingMiscFunctions instance = new DrawingMiscFunctions();
@@ -57,7 +58,8 @@ public class DrawingMiscFunctions extends DrawingFunctions {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     checkTrusted(functionName);
     String mapName = parameters.get(0).toString();

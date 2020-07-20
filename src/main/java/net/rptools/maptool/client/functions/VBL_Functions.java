@@ -37,6 +37,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -67,7 +68,8 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
@@ -191,7 +193,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -247,7 +249,7 @@ public class VBL_Functions extends AbstractFunction {
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
       } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
       }
       if (token == null) {
@@ -328,7 +330,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
