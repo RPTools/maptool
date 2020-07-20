@@ -115,6 +115,33 @@ public class MapToolLineParserTest {
   }
 
   @Test
+  public void testMacroChangesTokenProperty() throws ParserException {
+
+    Token token = new Token();
+    token.setProperty("Strength", "1");
+
+    MapToolVariableResolver res =
+        new MapToolVariableResolver(token) {
+          @Override
+          protected void updateTokenProperty(
+              Token tokenToUpdate, String varToUpdate, String valueToSet) {
+            // variable resolver will try to send a server command which will fail in unittest
+            // catch the event and do not delegate to super implementation. Fake a set here instead
+            assertEquals(token, tokenToUpdate);
+            assertEquals("1", token.getProperty("Strength"));
+            assertEquals("Strength", varToUpdate);
+            assertEquals("6", valueToSet);
+            token.setProperty("Strength", "6");
+          }
+        };
+
+    Result result = parseExpression("Strength = 6", false, token, res);
+
+    assertEquals(new BigDecimal(6), result.getValue());
+    assertEquals("6", token.getProperty("Strength"));
+  }
+
+  @Test
   public void testConditional() throws ParserException {
 
     // if , deterministic
