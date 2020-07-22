@@ -58,10 +58,11 @@ ext {
     def foundTags = (tagVersion =~ /\d+\.\d+\.\d+/).findAll()
 
     // If no semver exists, like in dev environment use a defaultVersion from gradle.properties
-    if (appSemVer.isEmpty()) {
+    if (foundTags.isEmpty()) {
         appSemVer = defaultVersion
     } else {
         appSemVer = foundTags[0]
+        developerRelease = ""
     }
 
     // vendor, tagVersion, appSemVer, and DSN's defaults are set in gradle.properties
