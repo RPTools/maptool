@@ -2489,7 +2489,7 @@ public class AppActions {
       } catch (Throwable t) {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException)
           MapTool.showError("msg.error.failedLoadCampaignLock");
-        else MapTool.showError("msg.error.failedSaveCampaign", t.getCause());
+        else MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
       }
     }
   }
