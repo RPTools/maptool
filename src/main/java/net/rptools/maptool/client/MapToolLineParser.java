@@ -209,420 +209,6 @@ public class MapToolLineParser {
     }
   }
 
-  /**
-   * *************************************************************************** OptionType -
-   * defines roll options, including values for default parameters.
-   * ***************************************************************************
-   */
-  // These items are only used in the enum below, but have to be declared out here
-  // because they must appear before being used in the enum definitions.
-  private static final String defaultLoopSep = "\", \"";
-
-  private static final Object nullParam = null;
-
-  /*
-   * In order to add a new roll option, follow the instructions in the "todo" comments in this file.
-   */
-  private enum OptionType {
-    /*
-     * TODO: If you're adding a new option, make an entry in this table
-     */
-
-    // The format is:
-    // NAME (nameRegex, minParams, maxParams, defaultValues...)
-    //
-    // You must provide (maxParams - minParams) default values (BigDecimal or String types).
-    //
-    // If maxParams is -1, unlimited params may be passed in.
-    NO_OPTION("", 0, 0),
-    // output formats
-    EXPANDED("e|expanded", 0, 0),
-    HIDDEN("h|hidden|hide", 0, 0),
-    RESULT("r|result", 0, 0),
-    UNFORMATTED("u|unformatted", 0, 0),
-    TOOLTIP("t|tooltip", 0, 1, nullParam),
-    // visibility
-    GM("g|gm", 0, 0),
-    SELF("s|self", 0, 0),
-    WHISPER("w|whisper", 1, -1),
-    // tooltip visibility
-    GMTT("gt|gmtt", 0, 0),
-    SELFTT("st|selftt", 0, 0),
-    // WHISPER ("wt|whispertt", 1, -1),
-    // loops
-    COUNT("c|count", 1, 2, defaultLoopSep),
-    FOR("for", 3, 5, BigDecimal.ONE, defaultLoopSep),
-    FOREACH("foreach", 2, 4, defaultLoopSep, ","),
-    WHILE("while", 1, 2, defaultLoopSep),
-    // branches
-    IF("if", 1, 1),
-    SWITCH("switch", 1, 1),
-    // code
-    CODE("code", 0, 0),
-    MACRO("macro", 1, 1),
-    // HTML Dockable Frame
-    FRAME("frame", 1, 2, "\"\""),
-    // HTML Dialog
-    DIALOG("dialog", 1, 2, "\"\""),
-    DIALOG5("dialog5", 1, 2, "\"\""),
-    // HTML webView
-    FRAME5("frame5", 1, 2, "\"\""),
-    // HTML overlay
-    OVERLAY("overlay", 1, 2, "\"\""),
-    // Run for another token
-    TOKEN("token", 1, 1);
-
-    protected final String nameRegex;
-    protected final int minParams, maxParams;
-    protected final Object[] defaultParams;
-
-    OptionType(String nameRegex, int minParams, int maxParams, Object... defaultParams) {
-      this.nameRegex = nameRegex;
-      this.minParams = minParams;
-      this.maxParams = maxParams;
-      if (defaultParams == null) {
-        // The Java 5 varargs facility has a small hack which we must work around.
-        // If you pass a single null argument, Java doesn't know whether you wanted a single
-        // variable arg of null,
-        // or if you meant to say that the variable argument array itself should be null.
-        // Java chooses the latter, but we want the former.
-        this.defaultParams = new Object[1];
-        this.defaultParams[0] = null;
-      } else {
-        this.defaultParams = defaultParams;
-      }
-      if (maxParams != -1 && this.defaultParams.length != (maxParams - minParams)) {
-        log.error(
-            String.format(
-                "Internal error: roll option %s specifies wrong number of default parameters",
-                name()));
-      }
-    }
-
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
-    protected static OptionType optionTypeFromName(String strName) {
-      for (OptionType rot : OptionType.values()) {
-        if (Pattern.compile("^\\s*" + rot.getNameRegex() + "\\s*$", Pattern.CASE_INSENSITIVE)
-            .matcher(strName)
-            .matches()) {
-          return rot;
-        }
-      }
-      return null;
-    }
-
-    /** Returns the regex that matches all valid names for this option. */
-    public String getNameRegex() {
-      return nameRegex;
-    }
-
-    public int getMinParams() {
-      return minParams;
-    }
-
-    public int getMaxParams() {
-      return maxParams;
-    }
-
-    /** Returns a copy of the default params array for this option type. */
-    public Object[] getDefaultParams() {
-      if (maxParams == -1) return null;
-
-      Object[] retval = new Object[maxParams];
-      for (int i = minParams; i < maxParams; i++) {
-        retval[i] = defaultParams[i - minParams];
-      }
-      return retval;
-    }
-
-    @Override
-    public String toString() {
-      String retval = name() + ", default params: [";
-      boolean first = true;
-      for (Object p : defaultParams) {
-        if (first) {
-          first = false;
-        } else {
-          retval += ", ";
-        }
-        if (p == null) retval += "null";
-        else if (p instanceof String) retval += "\"" + p + "\"";
-        else retval += p.toString();
-      }
-      retval += "]";
-      return retval;
-    }
-  }
-
-  /**
-   * ******************************************************************************** OptionInfo
-   * class - holds extracted name and parameters for a roll option.
-   * ********************************************************************************
-   */
-  private class OptionInfo {
-    private OptionType optionType;
-    private String optionName;
-    private final int optionStart;
-    private int optionEnd;
-    private final String srcString;
-    private Object[] params;
-
-    /**
-     * Attempts to create an OptionInfo object by parsing the text in <code>optionString</code>
-     * beginning at position <code>start</code>.
-     */
-    public OptionInfo(String optionString, int start) throws RollOptionException {
-      srcString = optionString;
-      optionStart = start;
-      parseOptionString(optionString, start);
-    }
-
-    /**
-     * Parses a roll option and sets the RollOptionType and parameters. <br>
-     * Missing optional parameters are set to the default for the type.
-     *
-     * @param optionString The string containing the option
-     * @param start Where in the string to begin parsing from
-     * @throws RollOptionException if the option string can't be parsed.
-     */
-    private void parseOptionString(String optionString, int start) throws RollOptionException {
-      boolean paramsFound; // does the option string have a "(" after the name?
-      int endOfString = optionString.length();
-
-      // Find the name
-      Pattern pattern =
-          Pattern.compile("^\\s*(?:(\\w+)\\s*\\(|(\\w+))"); // matches "abcd(" or "abcd"
-      Matcher matcher = pattern.matcher(optionString);
-      matcher.region(start, endOfString);
-      if (!matcher.find()) {
-        throw new RollOptionException(I18N.getText("lineParser.badRollOpt", optionString));
-      }
-      paramsFound = (matcher.group(1) != null);
-      String name = paramsFound ? matcher.group(1).trim() : matcher.group(2).trim();
-      start = matcher.end();
-      matcher.region(start, endOfString);
-
-      // Get the option type and default params from the name
-      optionType = OptionType.optionTypeFromName(name);
-      if (optionType == null) {
-        throw new RollOptionException(I18N.getText("lineParser.unknownOptionName", name));
-      }
-      optionName = name;
-      params = optionType.getDefaultParams(); // begin with default values for optional params
-
-      // If no params found (i.e. no "(" after option name), we're done
-      if (!paramsFound) {
-        if (optionType.getMinParams() == 0) {
-          optionEnd = start;
-          return;
-        } else {
-          throw new RollOptionException(
-              I18N.getText("lineParser.optRequiresParam", optionName, optionType.getMaxParams()));
-        }
-      }
-
-      // Otherwise, match the individual parameters one at a time
-      pattern =
-          Pattern.compile(
-              "^(?:((?:[^()\"',]|\"[^\"]*\"|'[^']*'|\\((?:[^()\"']|\"[^\"]*\"|'[^']*')*\\))+)(,|\\))){1}?");
-      matcher = pattern.matcher(optionString);
-      matcher.region(start, endOfString);
-      List<String> paramList = new ArrayList<String>();
-      boolean lastItem = false; // true if last match ended in ")"
-      if (")".equals(optionString.substring(start))) {
-        lastItem = true;
-        start += 1;
-      }
-
-      while (!lastItem) {
-        if (matcher.find()) {
-          String param = matcher.group(1).trim();
-          paramList.add(param);
-          lastItem = matcher.group(2).equalsIgnoreCase(")");
-          start = matcher.end();
-          matcher.region(start, endOfString);
-        } else {
-          throw new RollOptionException(
-              I18N.getText("lineParser.optBadParam", optionName, optionType.getMaxParams()));
-        }
-      }
-
-      // Error checking
-      int min = optionType.getMinParams(), max = optionType.getMaxParams();
-      int numParamsFound = paramList.size();
-      if (numParamsFound < min || (max != -1 && numParamsFound > max)) {
-        throw new RollOptionException(
-            I18N.getText(
-                "lineParser.optWrongParam", optionName, min, max, numParamsFound, srcString));
-      }
-
-      // Fill in the found parameters, converting to BigDecimal if possible.
-      if (params == null) params = new Object[numParamsFound];
-
-      for (int i = 0; i < numParamsFound; i++) {
-        params[i] = toNumIfPossible(paramList.get(i));
-      }
-
-      optionEnd = start;
-      return;
-    }
-
-    /** Converts a String to a BigDecimal if possible, otherwise returns original String. */
-    private Object toNumIfPossible(String s) {
-      Object retval = s;
-      try {
-        retval = new BigDecimal(Integer.decode(s));
-      } catch (NumberFormatException nfe) {
-        // Do nothing
-      }
-      return retval;
-    }
-
-    @SuppressWarnings("unused")
-    public String getName() {
-      return optionName;
-    }
-
-    @SuppressWarnings("unused")
-    public int getStart() {
-      return optionStart;
-    }
-
-    public int getEnd() {
-      return optionEnd;
-    }
-
-    /** Returns the number of options passed in */
-    public int getParamCount() {
-      return params.length;
-    }
-
-    /** Gets a parameter (Object type). */
-    public Object getObjectParam(int index) {
-      return params[index];
-    }
-
-    /** Gets the text of a parameter. */
-    public String getStringParam(int index) {
-      Object o = params[index];
-      return (o == null) ? null : o.toString();
-    }
-
-    /**
-     * Gets the text of a parameter if it is a valid identifier.
-     *
-     * @throws ParserException if the parameter text is not a valid identifier.
-     */
-    public String getIdentifierParam(int index) throws ParserException {
-      String s = params[index].toString();
-      if (!s.matches("[a-zA-Z]\\w*")) { // MapTool doesn't allow variable names to start with '_'
-        throw new ParserException(I18N.getText("lineParser.notValidVariableName", s));
-      }
-      return s;
-    }
-
-    /** Gets a parameter, casting it to BigDecimal. */
-    public BigDecimal getNumericParam(int index) {
-      return (BigDecimal) params[index];
-    }
-
-    /** Gets the integer value of a parameter. */
-    @SuppressWarnings("unused")
-    public int getIntParam(int index) {
-      return getNumericParam(index).intValue();
-    }
-
-    /** Returns a param, parsing it as an expression if it is a string. */
-    public Object getParsedParam(int index, MapToolVariableResolver res, Token tokenInContext)
-        throws ParserException {
-      Object retval = params[index];
-      // No parsing is done if the param isn't a String (e.g. it's already a BigDecimal)
-      if (params[index] instanceof String) {
-        Result result = parseExpression(res, tokenInContext, (String) params[index], false);
-        retval = result.getValue();
-      }
-      return retval;
-    }
-
-    /** Returns a param as int, parsing it as an expression if it is a string. */
-    public int getParsedIntParam(int index, MapToolVariableResolver res, Token tokenInContext)
-        throws ParserException {
-      Object retval = getParsedParam(index, res, tokenInContext);
-      if (!(retval instanceof BigDecimal))
-        throw new ParserException(I18N.getText("lineParser.notValidNumber", retval.toString()));
-      return ((BigDecimal) retval).intValue();
-    }
-
-    @Override
-    public String toString() {
-      String retval = optionName + ": params: (";
-      boolean first = true;
-      for (Object p : params) {
-        if (first) {
-          first = false;
-        } else {
-          retval += ", ";
-        }
-        if (p == null) retval += "null";
-        else if (p instanceof String) retval += "\"" + p + "\"";
-        else retval += p.toString();
-      }
-      retval += ")";
-      return retval;
-    }
-  } ///////////////////// end of OptionInfo class
-
-  /** Thrown when a roll option can't be parsed. */
-  @SuppressWarnings("serial")
-  public class RollOptionException extends Exception {
-    public String msg;
-
-    public RollOptionException(String msg) {
-      this.msg = msg;
-    }
-  }
-
-  /**
-   * Scans a string of options and builds OptionInfo objects for each option found.
-   *
-   * @param optionString A string containing a comma-delimited list of roll options.
-   * @throws RollOptionException if any of the options are unknown or don't match the template for
-   *     that option type.
-   */
-  private List<OptionInfo> getRollOptionList(String optionString) throws RollOptionException {
-    if (optionString == null) return null;
-
-    List<OptionInfo> list = new ArrayList<OptionInfo>();
-    optionString = optionString.trim();
-    int start = 0;
-    int endOfString = optionString.length();
-    boolean atEnd = false;
-    Pattern commaPattern = Pattern.compile("^\\s*,\\s*(?!$)");
-
-    while (start < endOfString) {
-      OptionInfo roi;
-      if (atEnd) {
-        // If last param didn't end with ",", there shouldn't have been another option
-        throw new RollOptionException(I18N.getText("lineParser.rollOptionComma"));
-      }
-      // Eat the next option from string, and add parsed option to list
-      roi = new OptionInfo(optionString, start);
-      list.add(roi);
-      start = roi.getEnd();
-      // Eat any "," sitting between options
-      Matcher matcher = commaPattern.matcher(optionString);
-      matcher.region(start, endOfString);
-      if (matcher.find()) {
-        start = matcher.end();
-        atEnd = false;
-      } else {
-        atEnd = true;
-      }
-    }
-
-    return list;
-  }
-
   public String parseLine(String line) throws ParserException {
     return parseLine(null, line);
   }
@@ -660,7 +246,7 @@ public class MapToolLineParser {
       return "";
     }
     Stack<Token> contextTokenStack = new Stack<Token>();
-    enterContext(context);
+    context = enterContext(context);
     MapToolVariableResolver resolver = null;
     boolean resolverInitialized = false;
     String opts = null;
@@ -678,12 +264,11 @@ public class MapToolLineParser {
 
         start = match.getEnd() + 1;
         // These variables will hold data extracted from the roll options.
-        Output output;
-        if (MapTool.useToolTipsForUnformatedRolls()) {
-          output = Output.TOOLTIP;
-        } else {
-          output = Output.EXPANDED;
-        }
+        Output output =
+            context.isUseToolTipsForUnformatedRolls()
+                ? MapToolLineParser.Output.TOOLTIP
+                : MapToolLineParser.Output.EXPANDED;
+
         String text = null; // used by the T option
         HashSet<String> outputOpts = new HashSet<String>();
         OutputLoc outputTo = OutputLoc.CHAT;
@@ -711,19 +296,19 @@ public class MapToolLineParser {
             // Turn the opts string into a list of OptionInfo objects.
             List<OptionInfo> optionList = null;
             try {
-              optionList = getRollOptionList(opts);
-            } catch (RollOptionException roe) {
+              optionList = OptionInfo.getRollOptionList(opts);
+            } catch (OptionInfo.RollOptionException roe) {
               throw doError(roe.msg, opts, roll);
             }
 
             // Scan the roll options and prepare variables for later use
             for (OptionInfo option : optionList) {
-              String error = null;
+              String error;
               /*
                * TODO: If you're adding a new option, add a new case here to collect info from the parameters. If your option uses parameters, use the option.getXxxParam() methods to get
                * the text or parsed values of the parameters.
                */
-              switch (option.optionType) {
+              switch (option.getOptionType()) {
 
                   ///////////////////////////////////////////////////
                   // OUTPUT FORMAT OPTIONS
@@ -794,7 +379,7 @@ public class MapToolLineParser {
                   loopType = LoopType.COUNT;
                   error = null;
                   try {
-                    loopCount = option.getParsedIntParam(0, resolver, tokenInContext);
+                    loopCount = option.getParsedIntParam(0, resolver, tokenInContext, this);
                     if (loopCount < 0) error = I18N.getText("lineParser.countNonNeg", loopCount);
 
                   } catch (ParserException pe) {
@@ -812,10 +397,10 @@ public class MapToolLineParser {
                   error = null;
                   try {
                     loopVar = option.getIdentifierParam(0);
-                    loopStart = option.getParsedIntParam(1, resolver, tokenInContext);
-                    loopEnd = option.getParsedIntParam(2, resolver, tokenInContext);
+                    loopStart = option.getParsedIntParam(1, resolver, tokenInContext, this);
+                    loopEnd = option.getParsedIntParam(2, resolver, tokenInContext, this);
                     try {
-                      loopStep = option.getParsedIntParam(3, resolver, tokenInContext);
+                      loopStep = option.getParsedIntParam(3, resolver, tokenInContext, this);
                     } catch (ParserException pe) {
                       // Build a more informative error message for this common mistake
                       String msg = pe.getMessage();
@@ -853,7 +438,7 @@ public class MapToolLineParser {
                   try {
                     loopVar = option.getIdentifierParam(0);
                     String listString =
-                        option.getParsedParam(1, resolver, tokenInContext).toString();
+                        option.getParsedParam(1, resolver, tokenInContext, this).toString();
                     loopSep = option.getStringParam(2);
                     String listDelim = option.getStringParam(3);
                     if (listDelim.trim().startsWith("\"")) {
@@ -920,32 +505,32 @@ public class MapToolLineParser {
                   ///////////////////////////////////////////////////
                 case FRAME:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
                   outputTo = OutputLoc.FRAME;
                   break;
                 case DIALOG:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
                   outputTo = OutputLoc.DIALOG;
                   break;
                 case DIALOG5:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
                   outputTo = OutputLoc.DIALOG5;
                   break;
                 case FRAME5:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
                   outputTo = OutputLoc.FRAME5;
                   break;
                 case OVERLAY:
                   codeType = CodeType.CODEBLOCK;
-                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
-                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  frameName = option.getParsedParam(0, resolver, tokenInContext, this).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext, this).toString();
                   outputTo = OutputLoc.OVERLAY;
                   break;
                   ///////////////////////////////////////////////////
@@ -971,7 +556,7 @@ public class MapToolLineParser {
                           .getCurrentZoneRenderer()
                           .getZone()
                           .resolveToken(
-                              option.getParsedParam(0, resolver, tokenInContext).toString());
+                              option.getParsedParam(0, resolver, tokenInContext, this).toString());
                   if (newToken != null) {
                     contextTokenStack.push(resolver.getTokenInContext());
                     resolver.setTokenIncontext(newToken);
@@ -1086,7 +671,7 @@ public class MapToolLineParser {
                 hackCondition =
                     (hackCondition == null) ? null : String.format("if(%s, 1, 0)", hackCondition);
               }
-              Result result = null;
+              Result result;
               try {
                 result = parseExpression(resolver, tokenInContext, hackCondition, false);
               } catch (Exception e) {
@@ -1965,7 +1550,7 @@ public class MapToolLineParser {
    *     is reentered. If context is null and there is no current context then a new top level
    *     context is created.
    */
-  public void enterContext(MapToolMacroContext context) {
+  public MapToolMacroContext enterContext(MapToolMacroContext context) {
     // First time through set our trusted path to same as first context.
     // Any subsequent trips through we only change trusted path if context
     // is not trusted (if context == null on subsequent calls we dont change
@@ -1991,6 +1576,7 @@ public class MapToolLineParser {
       }
     }
     contextStack.push(context);
+    return context;
   }
 
   /**
