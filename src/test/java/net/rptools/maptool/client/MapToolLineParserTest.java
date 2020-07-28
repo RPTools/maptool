@@ -142,6 +142,62 @@ public class MapToolLineParserTest {
   }
 
   @Test
+  public void testRollBranching() throws ParserException {
+
+    // no branch
+    String macro = "[r: 1]";
+    assertEquals("1", parseLine(macro, null, null));
+
+    // no branch code
+    macro = "[r, code: {  1 }]";
+    assertEquals("1", parseLine(macro, null, null));
+
+    // if
+    macro = "[r, if(1 == 1): \"true\"; \"false\"]";
+    assertEquals("true", parseLine(macro, null, null));
+
+    // if CODE
+    macro =
+        "[r, if(1 == 1), code: {"
+            + "  [r:\"still\"] [r:\"true\"]"
+            + "};"
+            + "{"
+            + "  [\"always false\"]"
+            + "}]";
+    assertEquals("still true", parseLine(macro, null, null));
+
+    // switch
+    MapToolVariableResolver res = new MapToolVariableResolver(null);
+    res.setVariable("a", "2");
+    macro =
+        "[r, switch(a):"
+            + "case 1: \"one\";"
+            + "case 2: \"two\";"
+            + "case 3: \"three\";"
+            + "default: \"default\"]";
+    assertEquals("two", parseLine(macro, null, res));
+    res.setVariable("a", "100");
+    macro =
+        "[r, switch(a):"
+            + "case 1: \"one\";"
+            + "case 2: \"two\";"
+            + "case 3: \"three\";"
+            + "default: \"default\"]";
+    assertEquals("default", parseLine(macro, null, res));
+
+    // switch CODE
+    res.setVariable("a", "3");
+    macro =
+        "[h, switch(a), code:"
+            + "case 1: { [a = \"one\"] };"
+            + "case 2: { [a = \"two\"] };"
+            + "case 3: { [a = \"three\"] };"
+            + "default: { [a = \"default\"] }]";
+    parseLine(macro, null, res);
+    assertEquals("three", res.getVariable("a"));
+  }
+
+  @Test
   public void testConditional() throws ParserException {
 
     // if , deterministic
