@@ -191,8 +191,29 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     save();
   }
 
-  // constructor for creating a new copy of an existing button, auto-saves
+  /**
+   * Creates a copy of an existing button on the designated panel. Auto-saves.
+   *
+   * @param panelClass the panel name where the new button is being created
+   * @param index the next index to use on the panel
+   * @param properties the properties from which to copy
+   */
   public MacroButtonProperties(String panelClass, int index, MacroButtonProperties properties) {
+    this(panelClass, index, properties, true);
+  }
+
+  /**
+   * Creates a copy of an existing button on the designated panel. Optionally auto-saves. Auto-save
+   * should be requested unless multiple buttons are being created at once, and the intention is to
+   * save in bulk.
+   *
+   * @param panelClass the panel name where the new button is being created
+   * @param index the next index to use on the panel
+   * @param properties the properties from which to copy
+   * @param autoSave whether to automatically call {@link #save()}
+   */
+  public MacroButtonProperties(
+      String panelClass, int index, MacroButtonProperties properties, boolean autoSave) {
     this(index);
     setSaveLocation(panelClass);
     setColorKey(properties.getColorKey());
@@ -218,7 +239,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setCompareCommand(properties.getCompareCommand());
     String tt = properties.getToolTip();
     setToolTip(tt);
-    save();
+    if (autoSave) {
+      save();
+    }
   }
 
   /**
