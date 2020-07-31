@@ -501,6 +501,43 @@ public class Campaign {
   }
 
   /**
+   * Adds multiple MacroButtonProperties to the GM or Campaign macro panel, starting at the next
+   * appropriate index.
+   *
+   * @param toSave the list of button properties to add
+   * @param gmPanel true for the GM panel, false for the Campaign panel.
+   */
+  public void addMacroButtonPropertiesAtNextIndex(
+      List<MacroButtonProperties> toSave, boolean gmPanel) {
+    List<MacroButtonProperties> macroButtonList =
+        gmPanel ? gmMacroButtonProperties : macroButtonProperties;
+    int lastIndex = gmPanel ? gmMacroButtonLastIndex : macroButtonLastIndex;
+    // populate the lookup table and confirm lastIndex
+    for (MacroButtonProperties prop : macroButtonList) {
+      int curIndex = prop.getIndex();
+      if (curIndex > lastIndex) {
+        lastIndex = curIndex;
+      }
+    }
+    // set the indexes and add to list
+    for (MacroButtonProperties newProp : toSave) {
+      newProp.setIndex(++lastIndex);
+    }
+    macroButtonList.addAll(toSave);
+
+    // update the ButtonLastIndex prop as appropriate
+    if (gmPanel) {
+      gmMacroButtonLastIndex = lastIndex;
+    } else {
+      macroButtonLastIndex = lastIndex;
+    }
+
+    AbstractMacroPanel macroPanel =
+        gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+    macroPanel.reset();
+  }
+
+  /**
    * Saves a button in the Campaign or GM panel.
    *
    * @param properties the properties of the button to save
