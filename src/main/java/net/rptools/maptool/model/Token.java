@@ -2230,7 +2230,7 @@ public class Token extends BaseModel implements Cloneable {
     if (integer == null) {
       return defaultValue;
     }
-    return integer.intValue();
+    return integer;
   }
 
   /**
@@ -2247,7 +2247,7 @@ public class Token extends BaseModel implements Cloneable {
     if (bool == null) {
       return defaultValue;
     }
-    return bool.booleanValue();
+    return bool;
   }
 
   /**

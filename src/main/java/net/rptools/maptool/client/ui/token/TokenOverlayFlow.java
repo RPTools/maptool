@@ -118,7 +118,7 @@ public class TokenOverlayFlow {
           i.remove();
         } else if (stateValue instanceof Boolean) {
           Boolean b = (Boolean) stateValue;
-          if (b.booleanValue() == false) i.remove();
+          if (b == false) i.remove();
         } else if (stateValue instanceof BigDecimal) {
           BigDecimal bd = (BigDecimal) stateValue;
           if (bd.compareTo(BigDecimal.ZERO) == 0) i.remove();

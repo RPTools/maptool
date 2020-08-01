@@ -771,7 +771,7 @@ public class TokenStatesController
     JSpinner spinner = formPanel.getSpinner(name);
     try {
       spinner.commitEdit();
-      width = ((Integer) spinner.getValue()).intValue();
+      width = (Integer) spinner.getValue();
     } catch (ParseException e) {
       JOptionPane.showMessageDialog(
           spinner,

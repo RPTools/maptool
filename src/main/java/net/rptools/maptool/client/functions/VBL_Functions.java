@@ -347,9 +347,9 @@ public class VBL_Functions extends AbstractFunction {
       boolean vblFromToken;
 
       if (val instanceof Integer) {
-        vblFromToken = ((Integer) val).intValue() != 0;
+        vblFromToken = (Integer) val != 0;
       } else if (val instanceof Boolean) {
-        vblFromToken = ((Boolean) val).booleanValue();
+        vblFromToken = (Boolean) val;
       } else {
         try {
           vblFromToken = Integer.parseInt(val.toString()) != 0;

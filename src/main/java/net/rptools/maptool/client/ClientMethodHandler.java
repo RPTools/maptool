@@ -373,10 +373,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
               case setZoneGridSize:
                 zoneGUID = (GUID) parameters[0];
-                int xOffset = ((Integer) parameters[1]).intValue();
-                int yOffset = ((Integer) parameters[2]).intValue();
-                int size = ((Integer) parameters[3]).intValue();
-                int color = ((Integer) parameters[4]).intValue();
+                int xOffset = (Integer) parameters[1];
+                int yOffset = (Integer) parameters[2];
+                int size = (Integer) parameters[3];
+                int color = (Integer) parameters[4];
 
                 zone = MapTool.getCampaign().getZone(zoneGUID);
                 zone.getGrid().setSize(size);
@@ -448,8 +448,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 zoneGUID = (GUID) parameters[0];
                 keyToken = (GUID) parameters[1];
 
-                x = ((Integer) parameters[2]).intValue();
-                y = ((Integer) parameters[3]).intValue();
+                x = (Integer) parameters[2];
+                y = (Integer) parameters[3];
 
                 renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
                 renderer.updateMoveSelectionSet(keyToken, new ZonePoint(x, y));
@@ -464,8 +464,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   // This X,Y is the where the center of the token needs to be placed in
                   // relation to the screen. So 0,0 would be top left which means only 1/4
                   // of token would be drawn. 1024,768 would be lower right (on my table).
-                  x = ((Integer) parameters[2]).intValue();
-                  y = ((Integer) parameters[3]).intValue();
+                  x = (Integer) parameters[2];
+                  y = (Integer) parameters[3];
 
                   // Get the zone
                   zone = MapTool.getCampaign().getZone(zoneGUID);
@@ -576,7 +576,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 if (ownerPermission != null) {
                   MapTool.getFrame()
                       .getInitiativePanel()
-                      .setOwnerPermissions(ownerPermission.booleanValue());
+                      .setOwnerPermissions(ownerPermission);
                 }
                 return;
 
