@@ -138,7 +138,7 @@ public abstract class DataTemplate {
    * @param path the <code>String</code> representation of the TreePath
    * @param data the <code>Map</code> to add to the UI
    */
-  protected final void addDataObjects(String path, Map<String, ? extends Object> data) {
+  protected final void addDataObjects(String path, Map<String, ?> data) {
     String[] sorted = new String[data.size()];
     data.keySet().toArray(sorted);
     Arrays.sort(sorted);
@@ -155,7 +155,7 @@ public abstract class DataTemplate {
    *
    * @param data the <code>Map</code> to add to the UI
    */
-  protected final void addDataObjects(Map<String, ? extends Object> data) {
+  protected final void addDataObjects(Map<String, ?> data) {
     addDataObjects(getTreePath(), data);
   }
 
@@ -170,9 +170,9 @@ public abstract class DataTemplate {
    * @param path the <code>String</code> representation of the TreePath
    * @param data the <code>Collection</code> to add to the UI (usually a <code>List</code>)
    */
-  protected final void addDataObjects(String path, Collection<? extends Object> data) {
+  protected final void addDataObjects(String path, Collection<?> data) {
     Map<String, Object> mymapping = new HashMap<String, Object>(data.size());
-    Iterator<? extends Object> iter = data.iterator();
+    Iterator<?> iter = data.iterator();
     while (iter.hasNext()) {
       Object o = iter.next();
       mymapping.put(o.toString(), o);
@@ -186,7 +186,7 @@ public abstract class DataTemplate {
    *
    * @param data the <code>Collection</code> to add to the UI (usually a <code>List</code>)
    */
-  protected final void addDataObjects(Collection<? extends Object> data) {
+  protected final void addDataObjects(Collection<?> data) {
     addDataObjects(getTreePath(), data);
   }
 }

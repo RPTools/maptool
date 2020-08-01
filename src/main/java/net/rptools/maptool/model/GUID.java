@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 
 /** Global unique identificator object. */
-public class GUID extends Object implements Serializable, Comparable<GUID> {
+public class GUID implements Serializable, Comparable<GUID> {
   /** Serial version unique identifier. */
   private static final long serialVersionUID = 6361057925697403643L;
 
@@ -104,7 +104,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     if (object == null) {
       return false;
     }
-    Class<? extends Object> objClass = object.getClass();
+    Class<?> objClass = object.getClass();
 
     GUID guid;
     try {
