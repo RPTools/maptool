@@ -371,8 +371,7 @@ public class InputFunction extends AbstractFunction {
       this.value = value;
       this.prompt = prompt;
       this.inputType = inputType;
-      if (inputType != null)
-        this.optionValues = inputType.parseOptionString(options);
+      if (inputType != null) this.optionValues = inputType.parseOptionString(options);
 
       if (inputType != null && inputType.isValueComposite)
         this.valueList = parseStringList(this.value, this.optionValues.get("DELIMITER"));
