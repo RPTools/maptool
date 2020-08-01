@@ -346,8 +346,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
                     o == null ? "NULL" : o.toString(),
                     functionName));
         }
-        return JSONSort(
-            asJSON(parameters.get(0)), parameters.get(1).toString(), fields);
+        return JSONSort(asJSON(parameters.get(0)), parameters.get(1).toString(), fields);
       } else {
         return JSONSort(
             asJSON(parameters.get(0)),
@@ -611,10 +610,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
         subset.addAll(((JSONObject) o2).keySet());
       } else {
         throw new ParserException(
-            I18N.getText(
-                "macro.function.json.onlyJSON",
-                o1.toString(),
-                "json.isSubset"));
+            I18N.getText("macro.function.json.onlyJSON", o1.toString(), "json.isSubset"));
       }
 
       if (!set.containsAll(subset)) {
@@ -1257,10 +1253,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return jarr;
     } else {
       throw new ParserException(
-          I18N.getText(
-              "macro.function.json.append.onlyArray",
-              obj.toString(),
-              "json.append"));
+          I18N.getText("macro.function.json.append.onlyArray", obj.toString(), "json.append"));
     }
   }
 
@@ -1528,10 +1521,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return jarr;
     } else {
       throw new ParserException(
-          I18N.getText(
-              "macro.function.json.unknownType",
-              obj.toString(),
-              "json.set"));
+          I18N.getText("macro.function.json.unknownType", obj.toString(), "json.set"));
     }
   }
 

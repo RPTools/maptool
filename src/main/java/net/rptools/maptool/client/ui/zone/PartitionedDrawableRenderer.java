@@ -26,7 +26,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
-
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.drawing.Drawable;
