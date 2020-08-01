@@ -100,7 +100,7 @@ public class Zone extends BaseModel {
 
     private String displayName;
 
-    private Layer(String displayName) {
+    Layer(String displayName) {
       this.displayName = displayName;
     }
 
