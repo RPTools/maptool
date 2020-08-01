@@ -16,7 +16,6 @@ package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
