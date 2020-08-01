@@ -768,9 +768,11 @@ public class AssetManager {
     }
 
     // Now create the aggregate of all repositories.
-    Set<String> aggregate = new HashSet<String>(size);
+    Set<MD5Key> aggregate = new HashSet<>(size);
     for (String repo : repos) {
-      aggregate.addAll(assetLoader.getRepositoryMap(repo).keySet());
+      for (String key : assetLoader.getRepositoryMap(repo).keySet()) {
+        aggregate.add(new MD5Key(key));
+      }
     }
 
     /*
@@ -782,6 +784,7 @@ public class AssetManager {
      */
     Map<MD5Key, Asset> missing =
         new HashMap<MD5Key, Asset>(Math.min(assetMap.size(), aggregate.size()));
+
     for (MD5Key key : assetMap.keySet()) {
       if (aggregate.contains(key) == false) // Not in any repository so add it.
       missing.put(key, assetMap.get(key));
