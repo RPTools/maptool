@@ -141,7 +141,7 @@ class TestJSONMacroFunctions {
         // however calling jsonify on MT values should make it match the internal java type
         // there's a limitation of MT not able to encode properly "true", "false", and "null"
         String[] blacklist = {"true", "false", "null"};
-        if (!Arrays.stream(blacklist).anyMatch(java_value::equals)) {
+        if (Arrays.asList(blacklist).contains(java_value)) {
           assertEquals(sanitize(java_value), jsonify(mt_value));
         }
       }
