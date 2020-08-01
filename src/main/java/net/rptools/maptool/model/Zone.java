@@ -1510,7 +1510,7 @@ public class Zone extends BaseModel {
   }
 
   public List<Token> getAllTokens() {
-    return Collections.unmodifiableList(new ArrayList<Token>(tokenOrderedList));
+    return List.copyOf(tokenOrderedList);
   }
 
   public Set<MD5Key> getAllAssetIds() {
