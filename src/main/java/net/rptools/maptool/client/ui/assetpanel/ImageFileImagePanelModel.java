@@ -194,14 +194,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     File file = fileList.get(index);
     if (file.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
 
-      try {
-        Token token = PersistenceUtil.loadToken(file);
+      Token token = PersistenceUtil.loadToken(file);
 
-        return new TransferableToken(token);
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load that token: ", ioe);
-        return null;
-      }
+      return new TransferableToken(token);
     }
 
     if (dir instanceof AssetDirectory || dir instanceof PdfAsDirectory) {
@@ -323,18 +318,14 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       return null;
     }
 
-    try {
-      Asset asset = AssetManager.createAsset(fileList.get(index));
+    Asset asset = AssetManager.createAsset(fileList.get(index));
 
-      // I don't like having to do this, but the ImageManager api only allows assets that
-      // the assetmanager knows about (by design). So there isn't an "immediate" mode
-      // for assets anymore.
-      AssetManager.putAsset(asset);
+    // I don't like having to do this, but the ImageManager api only allows assets that
+    // the assetmanager knows about (by design). So there isn't an "immediate" mode
+    // for assets anymore.
+    AssetManager.putAsset(asset);
 
-      return asset;
-    } catch (IOException ioe) {
-      return null;
-    }
+    return asset;
   }
 
   /**
@@ -390,13 +381,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       pdfExtractIsRunning = true;
       this.forceRescan = forceRescan;
 
-      try {
-        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
-
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
 
       pageCount = extractor.getPageCount();
       extractThreadPool = Executors.newScheduledThreadPool(numThreads);
@@ -405,25 +390,20 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     @Override
     protected Void doInBackground() throws Exception {
-      try {
-        // 0 page count means it's already been processed (or PDF if empty)
-        if (pageCount > 0 || forceRescan) {
-          assetPanel.showImagePanelProgress(true);
+      // 0 page count means it's already been processed (or PDF if empty)
+      if (pageCount > 0 || forceRescan) {
+        assetPanel.showImagePanelProgress(true);
 
-          for (int pageNumber = 1; pageNumber < pageCount + 1; pageNumber++) {
-            ExtractImagesTask task = new ExtractImagesTask(pageNumber, pageCount, dir, forceRescan);
-            // When the PDF get to the larger modules (50-100 pages) it can overload the pool...
-            extractThreadPool.schedule(task, 100 * pageNumber, TimeUnit.MILLISECONDS);
-          }
-
-          extractThreadPool.shutdown();
-          extractThreadPool.awaitTermination(3, TimeUnit.MINUTES);
-        } else {
-          dir = new PdfAsDirectory(extractor.getTempDir(), AppConstants.IMAGE_FILE_FILTER);
+        for (int pageNumber = 1; pageNumber < pageCount + 1; pageNumber++) {
+          ExtractImagesTask task = new ExtractImagesTask(pageNumber, pageCount, dir, forceRescan);
+          // When the PDF get to the larger modules (50-100 pages) it can overload the pool...
+          extractThreadPool.schedule(task, 100 * pageNumber, TimeUnit.MILLISECONDS);
         }
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+
+        extractThreadPool.shutdown();
+        extractThreadPool.awaitTermination(3, TimeUnit.MINUTES);
+      } else {
+        dir = new PdfAsDirectory(extractor.getTempDir(), AppConstants.IMAGE_FILE_FILTER);
       }
 
       return null;

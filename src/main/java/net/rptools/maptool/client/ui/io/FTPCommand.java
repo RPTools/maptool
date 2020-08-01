@@ -40,7 +40,7 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 public class FTPCommand extends FTPClient {
   private final String host;
 
-  public FTPCommand(String h) {
+  public FTPCommand(String h) throws IOException {
     host = h;
     FTPClientConfig config = new FTPClientConfig();
     // Nothing to configure just yet but maybe in the future...
@@ -79,7 +79,7 @@ public class FTPCommand extends FTPClient {
     return result;
   }
 
-  public boolean closeServer() {
+  public boolean closeServer() throws IOException {
     boolean result = this.logout();
     this.disconnect();
     return result;

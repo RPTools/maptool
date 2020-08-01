@@ -461,11 +461,7 @@ public class MapTool {
    */
   public static BackupManager getBackupManager() {
     if (backupManager == null) {
-      try {
-        backupManager = new BackupManager(AppUtil.getAppHome("backup"));
-      } catch (IOException ioe) {
-        showError(I18N.getText("msg.error.creatingBackupManager"), ioe);
-      }
+      backupManager = new BackupManager(AppUtil.getAppHome("backup"));
     }
     return backupManager;
   }
@@ -1167,7 +1163,7 @@ public class MapTool {
     return player;
   }
 
-  public static void startPersonalServer(Campaign campaign) {
+  public static void startPersonalServer(Campaign campaign) throws IOException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
@@ -1181,7 +1177,7 @@ public class MapTool {
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, LocalPlayer player) {
+  public static void createConnection(String host, int port, LocalPlayer player) throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
@@ -1201,7 +1197,7 @@ public class MapTool {
     clientFrame.getInitiativePanel().updateView();
   }
 
-  public static void closeConnection() {
+  public static void closeConnection() throws IOException {
     if (conn != null) {
       conn.close();
     }

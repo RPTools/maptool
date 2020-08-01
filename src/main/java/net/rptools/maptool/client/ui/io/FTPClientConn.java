@@ -119,22 +119,22 @@ class FTPClientConn {
             + TYPE_IMAGE);
   }
 
-  protected InputStream openDownloadStream(String targetfile) {
+  protected InputStream openDownloadStream(String targetfile) throws IOException {
     return openDownloadStream(null, targetfile);
   }
 
-  protected InputStream openDownloadStream(String dir, String targetfile) {
+  protected InputStream openDownloadStream(String dir, String targetfile) throws IOException {
     FTPCommand cmd = new FTPCommand(host);
     cmd.login(user, password);
     InputStream is = cmd.retrieveFileStream((dir == null ? "" : dir + "/") + targetfile);
     return is;
   }
 
-  protected OutputStream openUploadStream(String targetfile) {
+  protected OutputStream openUploadStream(String targetfile) throws IOException {
     return openUploadStream(null, targetfile);
   }
 
-  protected OutputStream openUploadStream(String dir, String targetfile) {
+  protected OutputStream openUploadStream(String dir, String targetfile) throws IOException {
     FTPCommand cmd = new FTPCommand(host);
     cmd.login(user, password);
     OutputStream os = cmd.storeFileStream((dir == null ? "" : dir + "/") + targetfile);

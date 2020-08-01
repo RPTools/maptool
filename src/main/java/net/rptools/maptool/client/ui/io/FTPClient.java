@@ -221,7 +221,7 @@ public class FTPClient {
 
   private static final int BLOCKSIZE = 4 * 1024;
 
-  protected InputStream prepareInputStream(FTPTransferObject data) {
+  protected InputStream prepareInputStream(FTPTransferObject data) throws IOException {
     InputStream is = null;
     if (data.getput == Direction.FTP_PUT) {
       /*
@@ -254,17 +254,12 @@ public class FTPClient {
       /*
        * In this situation, "data.remote" is the InputStream.
        */
-      try {
-        is = cconn.openDownloadStream(data.remoteDir.getPath(), data.remote);
-      } catch (IOException e) {
-        File file = new File(data.remoteDir, data.remote);
-        log.error("Attempting to open remote file " + file.getPath(), e);
-      }
+      is = cconn.openDownloadStream(data.remoteDir.getPath(), data.remote);
     }
     return is;
   }
 
-  protected OutputStream prepareOutputStream(FTPTransferObject data) {
+  protected OutputStream prepareOutputStream(FTPTransferObject data) throws IOException {
     OutputStream os = null;
     if (data.getput == Direction.FTP_PUT) {
       /*

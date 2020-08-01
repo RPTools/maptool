@@ -2171,7 +2171,6 @@ public class AppActions {
                   Campaign campaign = MapTool.getCampaign();
 
                   boolean failed = false;
-                  try {
                     ServerDisconnectHandler.disconnectExpected = true;
                     MapTool.stopServer();
 
@@ -2226,20 +2225,9 @@ public class AppActions {
                         "<span style='color:blue'><i>"
                             + I18N.getText("msg.info.startServer")
                             + "</i></span>");
-                  } catch (UnknownHostException uh) {
-                    MapTool.showError("msg.error.invalidLocalhost", uh);
-                    failed = true;
-                  } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedConnect", ioe);
-                    failed = true;
-                  }
 
-                  if (failed) {
-                    try {
+                    if (failed) {
                       MapTool.startPersonalServer(campaign);
-                    } catch (IOException ioe) {
-                      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
-                    }
                   }
                 }
               });
@@ -2291,7 +2279,6 @@ public class AppActions {
                 @Override
                 public void run() {
                   boolean failed = false;
-                  try {
                     ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
                     MapTool.createConnection(
                         dialog.getServer(),
@@ -2302,21 +2289,10 @@ public class AppActions {
                     MapTool.getFrame()
                         .showFilledGlassPane(
                             new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
-                  } catch (UnknownHostException e1) {
-                    MapTool.showError("msg.error.unknownHost", e1);
-                    failed = true;
-                  } catch (IOException e1) {
-                    MapTool.showError("msg.error.failedLoadCampaign", e1);
-                    failed = true;
-                  }
-                  if (failed || MapTool.getConnection() == null) {
+                    if (failed || MapTool.getConnection() == null) {
                     MapTool.getFrame().hideGlassPane();
-                    try {
-                      MapTool.startPersonalServer(oldCampaign);
-                    } catch (IOException ioe) {
-                      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+                        MapTool.startPersonalServer(oldCampaign);
                     }
-                  }
                 }
               });
         }
@@ -2348,11 +2324,7 @@ public class AppActions {
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();
     MapTool.disconnect();
-    try {
       MapTool.startPersonalServer(campaign);
-    } catch (IOException ioe) {
-      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
-    }
   }
 
   public static final Action LOAD_CAMPAIGN =
