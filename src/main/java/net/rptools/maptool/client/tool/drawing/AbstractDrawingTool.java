@@ -93,8 +93,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     int y1 = ((oy + ny) / 2) - ((nx - ox) / 4);
     int x2 = ox + (ny - oy) + ((nx - ox) / 2);
     int y2 = ((oy + ny) / 2) + ((nx - ox) / 4);
-    int x[] = {originPoint.x, x1, nx, x2};
-    int y[] = {originPoint.y, y1, ny, y2};
+    int[] x = {originPoint.x, x1, nx, x2};
+    int[] y = {originPoint.y, y1, ny, y2};
     return new Polygon(x, y, 4);
   }
 
@@ -107,8 +107,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     int y1 = ((oy + ny) / 2) - ((nx - ox) / 4);
     int x2 = ox + (ny - oy) + ((nx - ox) / 2);
     int y2 = ((oy + ny) / 2) + ((nx - ox) / 4);
-    int x[] = {originPoint.x, x1, nx, x2, originPoint.x};
-    int y[] = {originPoint.y, y1, ny, y2, originPoint.y};
+    int[] x = {originPoint.x, x1, nx, x2, originPoint.x};
+    int[] y = {originPoint.y, y1, ny, y2, originPoint.y};
 
     BasicStroke stroke =
         new BasicStroke(pen.getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);

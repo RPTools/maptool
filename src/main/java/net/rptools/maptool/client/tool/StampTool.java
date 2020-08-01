@@ -1179,7 +1179,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     if (selectionBoundBox != null) {
       if (renderer.isAutoResizeStamp()) {
         Stroke stroke = g.getStroke();
-        final float dash1[] = {10.0f, 5.0f};
+        final float[] dash1 = {10.0f, 5.0f};
         final BasicStroke dashed =
             new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
         g.setStroke(dashed);

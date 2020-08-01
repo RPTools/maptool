@@ -32,7 +32,7 @@ public class TokenImageHandler extends AbstractHandler {
       String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
 
-    String args[] = target.replaceAll("^/", "").split("/");
+    String[] args = target.replaceAll("^/", "").split("/");
 
     for (String s : args) {
       System.out.println("DEBUG: ARGS: " + s);

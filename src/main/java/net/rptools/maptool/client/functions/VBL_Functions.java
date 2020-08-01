@@ -502,7 +502,7 @@ public class VBL_Functions extends AbstractFunction {
       int ry = area.getBounds().y + (area.getBounds().height / 2);
 
       // Override rx,ry coords if supplied
-      String rParms[] = {"rx", "ry"};
+      String[] rParms = {"rx", "ry"};
       if (jsonKeysExist(vblObject, rParms, funcname)) {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
@@ -554,7 +554,7 @@ public class VBL_Functions extends AbstractFunction {
   private Area drawPolygonVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
       throws ParserException {
     String funcname = "drawVBL[Polygon]";
-    String requiredParms[] = {"points"};
+    String[] requiredParms = {"points"};
     if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeA", "points", funcname));
@@ -589,7 +589,7 @@ public class VBL_Functions extends AbstractFunction {
       for (int i = 0; i < points.size(); i++) {
         JsonObject point = points.get(i).getAsJsonObject();
 
-        String requiredPointParms[] = {"x", "y"};
+        String[] requiredPointParms = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
               I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
@@ -617,7 +617,7 @@ public class VBL_Functions extends AbstractFunction {
       for (int i = 0; i < points.size(); i++) {
         JsonObject point = points.get(i).getAsJsonObject();
 
-        String requiredPointParms[] = {"x", "y"};
+        String[] requiredPointParms = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
               I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
@@ -647,7 +647,7 @@ public class VBL_Functions extends AbstractFunction {
       int ry = area.getBounds().y + (area.getBounds().height / 2);
 
       // Override rx,ry coords if supplied
-      String rParms[] = {"rx", "ry"};
+      String[] rParms = {"rx", "ry"};
       if (jsonKeysExist(vblObject, rParms, funcname)) {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
@@ -683,7 +683,7 @@ public class VBL_Functions extends AbstractFunction {
       throws ParserException {
     String funcname = "drawVBL[Cross]";
     // Required Parameters
-    String requiredParms[] = {"x", "y", "w", "h"};
+    String[] requiredParms = {"x", "y", "w", "h"};
     if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
@@ -735,7 +735,7 @@ public class VBL_Functions extends AbstractFunction {
       int ry = area.getBounds().y + (area.getBounds().height / 2);
 
       // Override rx,ry coords if supplied
-      String rParms[] = {"rx", "ry"};
+      String[] rParms = {"rx", "ry"};
       if (jsonKeysExist(vblObject, rParms, funcname)) {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
@@ -770,7 +770,7 @@ public class VBL_Functions extends AbstractFunction {
       throws ParserException {
     String funcname = "drawVBL[Circle]";
     // Required Parameters
-    String requiredParms[] = {"x", "y", "radius", "sides"};
+    String[] requiredParms = {"x", "y", "radius", "sides"};
     if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,radius,sides}", funcname));
@@ -836,7 +836,7 @@ public class VBL_Functions extends AbstractFunction {
       int ry = area.getBounds().y + (area.getBounds().height / 2);
 
       // Override rx,ry coords if supplied
-      String rParms[] = {"rx", "ry"};
+      String[] rParms = {"rx", "ry"};
       if (jsonKeysExist(vblObject, rParms, funcname)) {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
@@ -868,7 +868,7 @@ public class VBL_Functions extends AbstractFunction {
   private Area getVBL(ZoneRenderer renderer, JsonObject vblObject) throws ParserException {
     String funcname = "getVBL[Rectangle]";
     // Required Parameters
-    String requiredParms[] = {"x", "y", "w", "h"};
+    String[] requiredParms = {"x", "y", "w", "h"};
     if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));

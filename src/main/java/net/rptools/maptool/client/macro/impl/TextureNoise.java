@@ -44,7 +44,7 @@ public class TextureNoise implements Macro {
       }
       MapTool.addLocalMessage(I18N.getText("texturenoise.usage"));
     } else {
-      String args[] = macro.split("\\s+");
+      String[] args = macro.split("\\s+");
 
       if ("off".equalsIgnoreCase(args[0])) {
         zr.setBgTextureNoiseFilterOn(false);

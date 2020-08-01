@@ -588,7 +588,7 @@ public class InputFunction extends AbstractFunction {
           // You're not supposed to mess with the internals like this.
           // But the resulting behavior is so much nicer with this fix in place, that I'm keeping it
           // in.
-          Component list[] = c.getComponents();
+          Component[] list = c.getComponents();
           for (int i = 0; i < list.length; i++)
             if (list[i] instanceof TinyComboBoxButton) list[i].setFocusable(false); // HACK!
           // } else if (c instanceof JTextField) {

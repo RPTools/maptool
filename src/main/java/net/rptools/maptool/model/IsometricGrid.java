@@ -252,8 +252,8 @@ public class IsometricGrid extends Grid {
 
   @Override
   protected Area createCellShape(int size) {
-    int x[] = {(int) size, (int) size * 2, (int) size, 0};
-    int y[] = {0, (int) size / 2, (int) size, (int) size / 2};
+    int[] x = {(int) size, (int) size * 2, (int) size, 0};
+    int[] y = {0, (int) size / 2, (int) size, (int) size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 
@@ -351,8 +351,8 @@ public class IsometricGrid extends Grid {
                 -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
         break;
       case SQUARE:
-        int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
+        int[] x = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
+        int[] y = {(int) -visionRange, 0, (int) visionRange, 0};
         visibleArea = new Area(new Polygon(x, y, 4));
         break;
       case CONE:

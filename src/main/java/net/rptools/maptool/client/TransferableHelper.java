@@ -159,7 +159,7 @@ public class TransferableHelper extends TransferHandler {
 
   private static String findNameInThisPiece(String text) {
     if (extensionPattern == null) {
-      String extensions[] = ImageIO.getReaderFileSuffixes();
+      String[] extensions = ImageIO.getReaderFileSuffixes();
       String list = Arrays.deepToString(extensions);
       // Final result is something like: (\w+\.(jpeg|jpg|png|gif|tiff))
       String pattern =
@@ -550,7 +550,7 @@ public class TransferableHelper extends TransferHandler {
   // System.setOut(old);
   // }
 
-  private static final Class<?> validTypes[] = {
+  private static final Class<?>[] validTypes = {
     java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class,
   };
 

@@ -459,7 +459,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
         MapTool.getFrame().getCommandPanel().commitCommand();
       }
 
-      String commandsToExecute[] = parseMultiLineCommand(getCommand());
+      String[] commandsToExecute = parseMultiLineCommand(getCommand());
 
       ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
       Zone zone = (zr == null ? null : zr.getZone());

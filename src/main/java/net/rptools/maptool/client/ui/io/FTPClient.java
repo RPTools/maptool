@@ -348,7 +348,7 @@ public class FTPClient {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     JFrame frame = new JFrame("FTP Test");
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.setLayout(new BorderLayout());

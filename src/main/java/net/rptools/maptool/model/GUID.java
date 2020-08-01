@@ -146,7 +146,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   public int hashCode() {
     int h = hash;
     if (h == 0) {
-      byte val[] = baGUID;
+      byte[] val = baGUID;
       int len = GUID_LENGTH;
 
       for (int i = 0; i < len; i++) h = 31 * h + val[i];
