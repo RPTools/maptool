@@ -172,9 +172,7 @@ public abstract class DataTemplate {
    */
   protected final void addDataObjects(String path, Collection<?> data) {
     Map<String, Object> mymapping = new HashMap<String, Object>(data.size());
-    Iterator<?> iter = data.iterator();
-    while (iter.hasNext()) {
-      Object o = iter.next();
+    for (Object o : data) {
       mymapping.put(o.toString(), o);
     }
     addDataObjects(path, mymapping);

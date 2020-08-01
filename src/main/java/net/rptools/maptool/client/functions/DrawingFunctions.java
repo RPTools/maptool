@@ -67,33 +67,29 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected void bringToFront(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
-      if (de.getDrawable().getId().equals(guid)) {
-        map.removeDrawable(de.getDrawable().getId());
-        MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
-        map.addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
-        MapTool.serverCommand().draw(map.getId(), de.getPen(), de.getDrawable());
+      for (DrawnElement de : drawableList) {
+          if (de.getDrawable().getId().equals(guid)) {
+              map.removeDrawable(de.getDrawable().getId());
+              MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
+              map.addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
+              MapTool.serverCommand().draw(map.getId(), de.getPen(), de.getDrawable());
+          }
       }
-    }
     MapTool.getFrame().updateDrawTree();
     MapTool.getFrame().refresh();
   }
 
   protected Layer changeLayer(Zone map, Layer layer, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
-      if (de.getDrawable().getLayer() != layer && de.getDrawable().getId().equals(guid)) {
-        map.removeDrawable(de.getDrawable().getId());
-        MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
-        de.getDrawable().setLayer(layer);
-        map.addDrawable(de);
-        MapTool.serverCommand().draw(map.getId(), de.getPen(), de.getDrawable());
+      for (DrawnElement de : drawableList) {
+          if (de.getDrawable().getLayer() != layer && de.getDrawable().getId().equals(guid)) {
+              map.removeDrawable(de.getDrawable().getId());
+              MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
+              de.getDrawable().setLayer(layer);
+              map.addDrawable(de);
+              MapTool.serverCommand().draw(map.getId(), de.getPen(), de.getDrawable());
+          }
       }
-    }
     MapTool.getFrame().updateDrawTree();
     MapTool.getFrame().refresh();
     return layer;
@@ -135,18 +131,16 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
-      if (de.getDrawable().getId().equals(guid)) {
-        return de;
+      for (DrawnElement de : drawableList) {
+          if (de.getDrawable().getId().equals(guid)) {
+              return de;
+          }
+          if (de.getDrawable() instanceof DrawablesGroup) {
+              DrawnElement result =
+                      findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
+              if (result != null) return result;
+          }
       }
-      if (de.getDrawable() instanceof DrawablesGroup) {
-        DrawnElement result =
-            findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
-        if (result != null) return result;
-      }
-    }
     return null;
   }
 
@@ -396,14 +390,12 @@ public class DrawingFunctions extends AbstractFunction {
 
   protected void sendToBack(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
-      if (de.getDrawable().getId().equals(guid)) {
-        map.removeDrawable(de.getDrawable().getId());
-        map.addDrawableRear(de);
+      for (DrawnElement de : drawableList) {
+          if (de.getDrawable().getId().equals(guid)) {
+              map.removeDrawable(de.getDrawable().getId());
+              map.addDrawableRear(de);
+          }
       }
-    }
     // horrid kludge needed to redraw zone :(
     for (DrawnElement de : map.getAllDrawnElements()) {
       MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
