@@ -92,7 +92,7 @@ public class MessagePanel extends JPanel {
                 Matcher m = URL_PATTERN.matcher(e.getDescription());
                 if (m.matches()) {
                   if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.getInstance().runMacroLink(e.getDescription());
+                    MacroLinkFunction.runMacroLink(e.getDescription());
                   }
                 }
               }
