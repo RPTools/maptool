@@ -1384,7 +1384,7 @@ public class Token extends BaseModel implements Cloneable {
     // Lets account for ISO images
     double iso_ho = 0;
     if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * Double.valueOf(footprintBounds.width) / getWidth();
+      double th = getHeight() * (double) footprintBounds.width / getWidth();
       iso_ho = footprintBounds.height - th;
       footprintBounds =
           new Rectangle(

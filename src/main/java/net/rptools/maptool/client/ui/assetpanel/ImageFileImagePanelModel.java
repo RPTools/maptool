@@ -311,7 +311,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   public Object getID(int index) {
-    return Integer.valueOf(index);
+    return index;
   }
 
   public Image getImage(Object ID) {

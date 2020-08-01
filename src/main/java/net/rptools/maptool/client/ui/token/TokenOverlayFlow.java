@@ -183,7 +183,7 @@ public class TokenOverlayFlow {
    * @return The flow for the passed grid size
    */
   public static TokenOverlayFlow getInstance(int grid) {
-    Integer key = Integer.valueOf(grid);
+    Integer key = grid;
     TokenOverlayFlow instance = instances.get(key);
     if (instance == null) {
       instance = new TokenOverlayFlow(grid);

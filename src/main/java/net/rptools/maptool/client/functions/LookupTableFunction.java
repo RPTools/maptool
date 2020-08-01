@@ -180,7 +180,7 @@ public class LookupTableFunction extends AbstractFunction {
         asset = getAssetFromString(params.get(4).toString());
       }
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.addEntry(Integer.valueOf(min), Integer.valueOf(max), value, asset);
+      lookupTable.addEntry(Integer.parseInt(min), Integer.parseInt(max), value, asset);
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
@@ -283,7 +283,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       LookupEntry entry = lookupTable.getLookup(roll);
       if (entry == null) return 0; // no entry was found
-      int rollInt = Integer.valueOf(roll);
+      int rollInt = Integer.parseInt(roll);
       if (rollInt < entry.getMin() || rollInt > entry.getMax())
         return 0; // entry was found but doesn't match
       List<LookupEntry> oldlist = new ArrayList<>(lookupTable.getEntryList());

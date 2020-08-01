@@ -463,8 +463,7 @@ public class AppPreferences {
 
   public static Integer getTypingNotificationDuration() {
     Integer value =
-        Integer.valueOf(
-            prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION));
+            prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION);
     return value;
   }
 
