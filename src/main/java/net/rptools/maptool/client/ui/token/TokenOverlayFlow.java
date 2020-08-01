@@ -102,13 +102,10 @@ public class TokenOverlayFlow {
   public Rectangle2D getStateBounds2D(Rectangle bounds, Token token, String state) {
 
     // Find the list of states already drawn on the token
-    List<String> states = savedStates.get(token.getId());
-    if (states == null) {
-      states = new LinkedList<String>();
-      savedStates.put(token.getId(), states);
-    } // endif
+      List<String> states = savedStates.computeIfAbsent(token.getId(), k -> new LinkedList<String>());
+      // endif
 
-    // Find the state in the list, make sure that all the states before it still exist.
+      // Find the state in the list, make sure that all the states before it still exist.
     ListIterator<String> i = states.listIterator();
     boolean found = false;
     while (i.hasNext()) {
