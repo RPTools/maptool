@@ -347,9 +347,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
                     functionName));
         }
         return JSONSort(
-            asJSON(parameters.get(0)),
-            parameters.size() > 1 ? parameters.get(1).toString() : "ascending",
-            fields);
+            asJSON(parameters.get(0)), parameters.get(1).toString(), fields);
       } else {
         return JSONSort(
             asJSON(parameters.get(0)),

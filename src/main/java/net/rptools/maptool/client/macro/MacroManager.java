@@ -144,7 +144,7 @@ public class MacroManager {
         recurseCount++;
 
         command = command.trim();
-        if (command == null || command.length() == 0) {
+        if (command.length() == 0) {
           return;
         }
         if (command.charAt(0) == '/') {

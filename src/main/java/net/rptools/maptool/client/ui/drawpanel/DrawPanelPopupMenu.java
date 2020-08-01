@@ -337,7 +337,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
                   null,
                   null,
                   group.getName());
-      group.setName(groupName == "" ? null : groupName);
+      group.setName(groupName.isEmpty() ? null : groupName);
       MapTool.getFrame().updateDrawTree();
     }
   }

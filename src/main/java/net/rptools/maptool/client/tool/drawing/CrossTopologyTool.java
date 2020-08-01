@@ -135,10 +135,8 @@ public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotio
 
     ZonePoint p = getPoint(e);
     if (cross != null) {
-      if (cross != null) {
-        cross.getEndPoint().x = p.x;
-        cross.getEndPoint().y = p.y;
-      }
+      cross.getEndPoint().x = p.x;
+      cross.getEndPoint().y = p.y;
       renderer.repaint();
     }
   }

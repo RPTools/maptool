@@ -328,9 +328,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     updateOpenMacroList(true);
     this.isTokenMacro = button.getToken() == null ? false : true;
     this.properties = button.getProperties();
-    oldHashCode = properties.hashCodeForComparison();
 
     if (properties != null) {
+      oldHashCode = properties.hashCodeForComparison();
       Boolean playerCanEdit = !MapTool.getPlayer().isGM() && properties.getAllowPlayerEdits();
       Boolean onGlobalPanel = properties.getSaveLocation().equals("Global");
       Boolean allowEdits = onGlobalPanel || MapTool.getPlayer().isGM() || playerCanEdit;

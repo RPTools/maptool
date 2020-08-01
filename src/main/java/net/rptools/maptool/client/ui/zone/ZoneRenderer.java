@@ -3018,7 +3018,7 @@ public class ZoneRenderer extends JComponent
 
     List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
     for (Token token : tokenList) {
-      if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE)
+      if (token.getShape() != Token.TokenShape.FIGURE
           && figuresOnly
           && !token.isAlwaysVisible()) {
         continue;
