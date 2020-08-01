@@ -617,7 +617,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     JMenuItem item = new JMenuItem(new ChangeBarAction(bar));
     Object value = token.getState(bar);
     int percent = (int) (TokenBarFunction.getBigDecimalValue(value).doubleValue() * 100);
-    item.setText(bar + " (" + Integer.toString(percent) + "%)");
+    item.setText(bar + " (" + percent + "%)");
     menu.add(item);
     return item;
   }
