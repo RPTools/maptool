@@ -264,7 +264,7 @@ public class FTPClient {
     return is;
   }
 
-  protected OutputStream prepareOutputStream(FTPTransferObject data) throws IOException {
+  protected OutputStream prepareOutputStream(FTPTransferObject data) {
     OutputStream os = null;
     if (data.getput == Direction.FTP_PUT) {
       /*

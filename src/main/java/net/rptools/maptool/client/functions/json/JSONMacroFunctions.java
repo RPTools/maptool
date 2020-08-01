@@ -908,8 +908,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param info The information to be added.
    * @return a copy of the json with the new information added.
    */
-  private JsonElement jsonPathAdd(JsonElement json, String path, Object info)
-      throws ParserException {
+  private JsonElement jsonPathAdd(JsonElement json, String path, Object info) {
     JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 

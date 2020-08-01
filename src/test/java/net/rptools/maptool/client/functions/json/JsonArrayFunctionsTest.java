@@ -102,7 +102,7 @@ class JsonArrayFunctionsTest {
   }
 
   @Test
-  void coerceToJsonArray() throws ParserException {
+  void coerceToJsonArray() {
     JsonArray arr = jsonArrayFunctions.coerceToJsonArray("hello");
     assertEquals(1, arr.size());
     assertTrue(arr.get(0).isJsonPrimitive());
@@ -162,7 +162,7 @@ class JsonArrayFunctionsTest {
   }
 
   @Test
-  void concatenateList() throws ParserException {
+  void concatenateList() {
     List<Integer> l1 = new ArrayList<>();
     List<Integer> l2 = new ArrayList<>();
 
@@ -317,7 +317,7 @@ class JsonArrayFunctionsTest {
   }
 
   @Test
-  void contains() throws ParserException {
+  void contains() {
     var intList = new ArrayList<Integer>();
     JsonArray jarr = new JsonArray();
     for (int i = 0; i < 100; i++) {

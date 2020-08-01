@@ -29,8 +29,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 public class TokenImageHandler extends AbstractHandler {
   @Override
   public void handle(
-      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-      throws ServletException {
+      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
 
     String[] args = target.replaceAll("^/", "").split("/");
 

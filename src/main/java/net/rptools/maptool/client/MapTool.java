@@ -1023,8 +1023,7 @@ public class MapTool {
    * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
-      String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign)
-      throws IOException {
+      String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign) {
     if (server != null) {
       Thread.dumpStack();
       showError("msg.error.alreadyRunningServer");
@@ -1164,7 +1163,7 @@ public class MapTool {
     return player;
   }
 
-  public static void startPersonalServer(Campaign campaign) throws IOException {
+  public static void startPersonalServer(Campaign campaign) {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 

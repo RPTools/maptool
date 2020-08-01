@@ -127,7 +127,7 @@ class JsonMTSTypeConversion {
    * @param json the object tp convert to a {@link JsonElement}.
    * @return a {@link JsonElement} version of the object.
    */
-  JsonElement asClonedJsonElement(Object json) throws ParserException {
+  JsonElement asClonedJsonElement(Object json) {
     if (json instanceof JsonElement) {
       JsonElement jsonElement = (JsonElement) json;
       return jsonElement.deepCopy();

@@ -119,7 +119,7 @@ class FTPClientConn {
             + TYPE_IMAGE);
   }
 
-  protected InputStream openDownloadStream(String targetfile) throws IOException {
+  protected InputStream openDownloadStream(String targetfile) {
     return openDownloadStream(null, targetfile);
   }
 
@@ -130,7 +130,7 @@ class FTPClientConn {
     return is;
   }
 
-  protected OutputStream openUploadStream(String targetfile) throws IOException {
+  protected OutputStream openUploadStream(String targetfile) {
     return openUploadStream(null, targetfile);
   }
 

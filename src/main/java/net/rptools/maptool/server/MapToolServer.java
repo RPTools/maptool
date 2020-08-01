@@ -307,7 +307,7 @@ public class MapToolServer {
 
   ////
   // STANDALONE SERVER
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     // This starts the server thread.
     MapToolServer server = new MapToolServer(new ServerConfig(), new ServerPolicy());
   }

@@ -115,7 +115,7 @@ class JsonMTSTypeConversionTest {
   }
 
   @Test
-  void asClonedJsonElement() throws ParserException {
+  void asClonedJsonElement() {
     JsonObject jsonObject = new JsonObject();
     JsonElement jsonElement = typeConversion.asClonedJsonElement(jsonObject.toString());
     assertEquals(jsonObject, jsonElement);
