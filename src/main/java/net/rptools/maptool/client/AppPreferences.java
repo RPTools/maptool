@@ -981,7 +981,7 @@ public class AppPreferences {
       // Add the new one and then remove all duplicates.
       list += ";" + root.getPath();
       String[] roots = list.split(";");
-      StringBuffer result = new StringBuffer(list.length() + root.getPath().length() + 10);
+      StringBuilder result = new StringBuilder(list.length() + root.getPath().length() + 10);
       Set<String> rootList = new HashSet<String>(roots.length);
 
       // This loop ensures that each path only appears once. If there are currently
@@ -1023,7 +1023,7 @@ public class AppPreferences {
     if (!list.isEmpty()) {
       // Add the new one and then remove all duplicates.
       String[] roots = list.split(";");
-      StringBuffer result = new StringBuffer(list.length());
+      StringBuilder result = new StringBuilder(list.length());
       Set<String> rootList = new HashSet<String>(roots.length);
       String rootPath = root.getPath();
 
