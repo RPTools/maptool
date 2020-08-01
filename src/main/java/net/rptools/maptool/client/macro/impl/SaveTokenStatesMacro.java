@@ -59,7 +59,7 @@ public class SaveTokenStatesMacro implements Macro {
     } // endif
 
     // Make it an XML file if type isn't set, check for overwrite
-    if (aliasFile.getName().indexOf(".") < 0)
+    if (!aliasFile.getName().contains("."))
       aliasFile = new File(aliasFile.getAbsolutePath() + "-tokenStates.xml");
     if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) return;
 
