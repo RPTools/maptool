@@ -163,9 +163,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
    */
   private List<String> findDrawings(List<DrawnElement> drawableList, String name) {
     List<String> drawingList = new LinkedList<String>();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable() instanceof AbstractDrawing) {
         if (name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
           drawingList.add(de.getDrawable().getId().toString());

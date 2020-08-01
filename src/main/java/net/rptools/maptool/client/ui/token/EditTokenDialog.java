@@ -699,9 +699,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         boolean hasPlayer = false;
         Set<String> owners = token.getOwners();
         if (owners != null) {
-          Iterator<Player> playerIter = MapTool.getPlayerList().iterator();
-          while (playerIter.hasNext()) {
-            Player pl = playerIter.next();
+          for (Player pl : MapTool.getPlayerList()) {
             if (!pl.isGM() && owners.contains(pl.getName())) {
               hasPlayer = true;
             }
