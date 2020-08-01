@@ -29,7 +29,7 @@ public class TransferableToken implements Transferable {
     this.token = token;
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return token;
   }
 
