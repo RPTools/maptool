@@ -258,7 +258,7 @@ public class Token extends BaseModel implements Cloneable {
   private double terrainModifier = 0.0d;
   private TerrainModifierOperation terrainModifierOperation = TerrainModifierOperation.NONE;
   private Set<TerrainModifierOperation> terrainModifiersIgnored =
-      new HashSet<>(Arrays.asList(TerrainModifierOperation.NONE));
+      new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
 
   private boolean isFlippedX;
   private boolean isFlippedY;
