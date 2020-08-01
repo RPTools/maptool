@@ -426,7 +426,7 @@ public class AssetManager {
    * @return Asset associated with the file
    * @throws IOException in case of an I/O error
    */
-  public static Asset createAsset(File file) throws IOException {
+  public static Asset createAsset(File file) {
     return new Asset(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
   }
 

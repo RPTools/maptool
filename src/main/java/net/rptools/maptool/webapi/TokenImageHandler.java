@@ -55,7 +55,7 @@ public class TokenImageHandler extends AbstractHandler {
      */
   }
 
-  private boolean sendImage(HttpServletResponse response, String tokenId) throws IOException {
+  private boolean sendImage(HttpServletResponse response, String tokenId) {
     System.out.println("DEBUG: Here (> 0) as well");
     Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
     if (token == null) {
@@ -80,7 +80,7 @@ public class TokenImageHandler extends AbstractHandler {
     return true;
   }
 
-  private boolean sendPortrait(HttpServletResponse response, String tokenId) throws IOException {
+  private boolean sendPortrait(HttpServletResponse response, String tokenId) {
 
     System.out.println("DEBUG: Here (> 0) as well");
     Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
@@ -106,8 +106,7 @@ public class TokenImageHandler extends AbstractHandler {
     return true;
   }
 
-  private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId)
-      throws IOException {
+  private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId) {
 
     System.out.println("DEBUG: Here (> 0) as well");
     Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);

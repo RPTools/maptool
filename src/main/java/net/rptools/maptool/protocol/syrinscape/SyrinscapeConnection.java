@@ -29,7 +29,7 @@ public class SyrinscapeConnection extends URLConnection {
   }
 
   @Override
-  public void connect() throws IOException {
+  public void connect() {
     // TODO Auto-generated method stub
   }
 }

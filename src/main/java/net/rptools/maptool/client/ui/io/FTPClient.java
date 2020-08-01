@@ -221,7 +221,7 @@ public class FTPClient {
 
   private static final int BLOCKSIZE = 4 * 1024;
 
-  protected InputStream prepareInputStream(FTPTransferObject data) throws IOException {
+  protected InputStream prepareInputStream(FTPTransferObject data) {
     InputStream is = null;
     if (data.getput == Direction.FTP_PUT) {
       /*

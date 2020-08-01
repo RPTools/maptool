@@ -31,7 +31,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
   private final MapToolServer server;
 
-  public MapToolServerConnection(MapToolServer server, int port) throws IOException {
+  public MapToolServerConnection(MapToolServer server, int port) {
     super(port);
     this.server = server;
     addObserver(this);

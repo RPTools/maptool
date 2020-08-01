@@ -84,7 +84,7 @@ public class InitiativeTransferable implements Transferable {
    *-------------------------------------------------------------------------------------------*/
 
   /** @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor) */
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
     if (INIT_TOKEN_FLAVOR.equals(flavor)) {
       return this;
     }

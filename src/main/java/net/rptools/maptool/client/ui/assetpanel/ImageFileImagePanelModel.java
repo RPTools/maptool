@@ -456,7 +456,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
       try {
         fileList.addAll(extractor.extractPage(pageNumber));
       } catch (Exception e) {
@@ -602,7 +602,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
+    protected Void doInBackground() {
       assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       listFilesInSubDirectories();
       publish(fileList.size());

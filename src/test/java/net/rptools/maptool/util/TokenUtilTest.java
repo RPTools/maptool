@@ -29,7 +29,7 @@ class TokenUtilTest {
 
   @Test
   @DisplayName("Test Guess Token Type")
-  void testGuessTokenType() throws Exception {
+  void testGuessTokenType() {
 
     // SQUARE
     BufferedImage img = new BufferedImage(100, 100, Transparency.BITMASK);

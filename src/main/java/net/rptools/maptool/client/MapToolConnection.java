@@ -24,12 +24,12 @@ import net.rptools.maptool.server.Handshake;
 public class MapToolConnection extends ClientConnection {
   private final Player player;
 
-  public MapToolConnection(String host, int port, Player player) throws IOException {
+  public MapToolConnection(String host, int port, Player player) {
     super(host, port, null);
     this.player = player;
   }
 
-  public MapToolConnection(Socket socket, Player player) throws IOException {
+  public MapToolConnection(Socket socket, Player player) {
     super(socket, null);
     this.player = player;
   }

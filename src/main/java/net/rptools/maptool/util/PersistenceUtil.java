@@ -583,7 +583,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static Token loadToken(File file) throws IOException {
+  public static Token loadToken(File file) {
     Token token = null;
     try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setModelVersionManager(tokenVersionManager);
@@ -997,7 +997,7 @@ public class PersistenceUtil {
     return table;
   }
 
-  public static LookupTable loadTable(File file) throws IOException {
+  public static LookupTable loadTable(File file) {
 
     try {
       try (PackedFile pakFile = new PackedFile(file)) {

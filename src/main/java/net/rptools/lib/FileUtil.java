@@ -59,7 +59,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static byte[] loadFile(File file) throws IOException {
+  public static byte[] loadFile(File file) {
     return FileUtils.readFileToByteArray(file);
   }
 
@@ -72,7 +72,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static byte[] getBytes(File file) throws IOException {
+  public static byte[] getBytes(File file) {
     return FileUtils.readFileToByteArray(file);
   }
 
@@ -178,7 +178,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static String getString(InputStream is) throws IOException {
+  public static String getString(InputStream is) {
     if (is == null) throw new IllegalArgumentException("InputStream cannot be null");
     return IOUtils.toString(is, StandardCharsets.UTF_8);
   }
@@ -193,7 +193,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static String getString(File file) throws IOException {
+  public static String getString(File file) {
     if (file == null) {
       throw new IllegalArgumentException("file cannot be null");
     }
@@ -321,7 +321,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static void writeBytes(File file, byte[] data) throws IOException {
+  public static void writeBytes(File file, byte[] data) {
     FileUtils.writeByteArrayToFile(file, data);
   }
 
@@ -334,7 +334,7 @@ public class FileUtil {
    * @param destFile the destination file
    * @throws IOException in case of an I/O error
    */
-  public static void copyFile(File sourceFile, File destFile) throws IOException {
+  public static void copyFile(File sourceFile, File destFile) {
     FileUtils.copyFile(sourceFile, destFile, false);
   }
 
@@ -425,7 +425,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static void copyWithoutClose(InputStream is, OutputStream os) throws IOException {
+  public static void copyWithoutClose(InputStream is, OutputStream os) {
     IOUtils.copy(is, os);
   }
 
@@ -439,7 +439,7 @@ public class FileUtil {
    * @throws IOException in case of an I/O error
    */
   @Deprecated
-  public static void copyWithClose(InputStream is, OutputStream os) throws IOException {
+  public static void copyWithClose(InputStream is, OutputStream os) {
     try {
       IOUtils.copy(is, os);
     } finally {

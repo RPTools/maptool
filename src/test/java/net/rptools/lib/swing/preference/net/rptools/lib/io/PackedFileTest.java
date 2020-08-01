@@ -31,7 +31,7 @@ public class PackedFileTest {
   private static int counter = 1;
 
   @Test
-  public void emptySave(@TempDir File tempDir) throws IOException {
+  public void emptySave(@TempDir File tempDir) {
     File f = new File(tempDir, PACKED_TEST_FILE);
     PackedFile pf = new PackedFile(f);
     pf.save();

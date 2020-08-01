@@ -31,12 +31,12 @@ class RandomSuffixFactoryTest {
   RandomSuffixFactory rsf;
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() {
     rsf = new RandomSuffixFactory();
   }
 
   @AfterEach
-  void tearDown() throws Exception {
+  void tearDown() {
     rsf = null;
   }
 

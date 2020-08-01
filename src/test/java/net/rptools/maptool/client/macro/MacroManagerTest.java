@@ -24,7 +24,7 @@ class MacroManagerTest {
 
   @Test
   @DisplayName("Test Split function in StringUtil")
-  void testSplit() throws Exception {
+  void testSplit() {
 
     assertEquals(0, MacroManager.split("").size());
 
@@ -46,7 +46,7 @@ class MacroManagerTest {
 
   @Test
   @DisplayName("Test Perform Substitution in StringUtil.")
-  void testPerformSubstitution() throws Exception {
+  void testPerformSubstitution() {
 
     compare("", "", "");
     compare("one", "one", "one");

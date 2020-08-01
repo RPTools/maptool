@@ -132,7 +132,7 @@ public class AppSetup {
     installLibrary(libraryName, unzipDir);
   }
 
-  public static void installLibrary(final String libraryName, final File root) throws IOException {
+  public static void installLibrary(final String libraryName, final File root) {
     // Add as a resource root
     AppPreferences.addAssetRoot(root);
     if (MapTool.getFrame() != null) {
@@ -167,7 +167,7 @@ public class AppSetup {
     }
     new SwingWorker<Object, Object>() {
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         AssetManager.searchForImageReferences(root, AppConstants.IMAGE_FILE_FILTER);
         return null;
       }

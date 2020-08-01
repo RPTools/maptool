@@ -23,7 +23,7 @@ class RegularExpressionTranslationRuleTest {
 
   @Test
   @DisplayName("Test Chat Regular Expression Translation Rule.")
-  void testIt() throws Exception {
+  void testIt() {
 
     ChatTranslationRule rule = new RegularExpressionTranslationRule("one", "two");
     assertEquals("two two three", rule.translate("one two three"));

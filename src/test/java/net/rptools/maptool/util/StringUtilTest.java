@@ -23,7 +23,7 @@ class StringUtilTest {
 
   @Test
   @DisplayName("Test of countOccurances in StringUtil")
-  void testCountOccurances() throws Exception {
+  void testCountOccurances() {
 
     String str = "<div>";
 

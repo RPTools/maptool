@@ -334,7 +334,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
     new SwingWorker<Object, Object>() {
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         for (LibraryRow row : rowList) {
           try {
             RemoteFileDownloader downloader = new RemoteFileDownloader(new URL(row.path));

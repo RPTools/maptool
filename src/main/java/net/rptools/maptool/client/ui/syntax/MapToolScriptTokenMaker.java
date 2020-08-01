@@ -565,7 +565,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
    * @return the next token
    * @exception java.io.IOException if any I/O-Error occurs
    */
-  public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
+  public org.fife.ui.rsyntaxtextarea.Token yylex() {
     int zzInput;
     int zzAction;
 

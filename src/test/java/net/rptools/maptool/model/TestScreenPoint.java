@@ -26,7 +26,7 @@ class TestScreenPoint {
 
   @Test
   @DisplayName("Test Conversion of Screen Points")
-  void testConversion() throws Exception {
+  void testConversion() {
     ZoneRenderer renderer = ZoneRendererFactory.newRenderer(new Zone());
     renderer.moveViewBy(-100, -100);
 

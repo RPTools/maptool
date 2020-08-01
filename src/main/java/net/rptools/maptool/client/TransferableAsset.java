@@ -35,7 +35,7 @@ public class TransferableAsset implements Transferable {
     return asset;
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return asset;
   }
 

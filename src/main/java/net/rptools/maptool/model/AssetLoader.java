@@ -205,7 +205,7 @@ public class AssetLoader {
     return bout.toByteArray();
   }
 
-  protected void storeIndexFile(String repository, byte[] data) throws IOException {
+  protected void storeIndexFile(String repository, byte[] data) {
     File file = getRepoIndexFile(repository);
     FileUtils.writeByteArrayToFile(file, data);
   }

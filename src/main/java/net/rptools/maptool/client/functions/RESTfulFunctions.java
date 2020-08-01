@@ -341,7 +341,7 @@ public class RESTfulFunctions extends AbstractFunction {
     private final Map<String, List<String>> headers;
     private final JsonElement body;
 
-    public RestResponseObj(Response response) throws IOException {
+    public RestResponseObj(Response response) {
       this.status = response.code();
       this.headers = response.headers().toMultimap();
 

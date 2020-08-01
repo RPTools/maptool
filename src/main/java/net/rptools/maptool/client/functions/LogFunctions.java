@@ -247,7 +247,7 @@ public class LogFunctions extends AbstractFunction {
     private final String name;
     private final String level;
 
-    public LoggerResponse(String name, String level) throws IOException {
+    public LoggerResponse(String name, String level) {
       this.name = name;
       this.level = level;
     }

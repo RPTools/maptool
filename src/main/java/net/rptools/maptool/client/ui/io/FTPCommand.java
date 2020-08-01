@@ -40,7 +40,7 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 public class FTPCommand extends FTPClient {
   private final String host;
 
-  public FTPCommand(String h) throws IOException {
+  public FTPCommand(String h) {
     host = h;
     FTPClientConfig config = new FTPClientConfig();
     // Nothing to configure just yet but maybe in the future...
@@ -48,7 +48,7 @@ public class FTPCommand extends FTPClient {
     this.connect(host);
   }
 
-  public int mkdir(String dir) throws IOException {
+  public int mkdir(String dir) {
     int result = 0;
     try {
       mkd(dir);
@@ -64,7 +64,7 @@ public class FTPCommand extends FTPClient {
     return result;
   }
 
-  public int remove(String filename) throws IOException {
+  public int remove(String filename) {
     int result = 0;
     try {
       dele(filename);
@@ -79,7 +79,7 @@ public class FTPCommand extends FTPClient {
     return result;
   }
 
-  public boolean closeServer() throws IOException {
+  public boolean closeServer() {
     boolean result = this.logout();
     this.disconnect();
     return result;

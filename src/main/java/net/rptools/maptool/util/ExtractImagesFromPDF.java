@@ -87,8 +87,7 @@ public final class ExtractImagesFromPDF {
   private PDDocument document = null;
   private PDFRenderer renderer = null;
 
-  public ExtractImagesFromPDF(File pdfFile, boolean forceRescan, boolean extractRenderedPages)
-      throws IOException {
+  public ExtractImagesFromPDF(File pdfFile, boolean forceRescan, boolean extractRenderedPages) {
     prefix = FileUtil.getNameWithoutExtension(pdfFile.getName());
     outDir = tmpDir + "/" + prefix + "/";
     pdfFileHash = outDir + "hash_" + pdfFile.hashCode() + ".txt";
@@ -268,8 +267,7 @@ public final class ExtractImagesFromPDF {
     }
   }
 
-  private void extractAnnotationImages(PDAnnotation annotation, String annotationFormat)
-      throws IOException {
+  private void extractAnnotationImages(PDAnnotation annotation, String annotationFormat) {
     PDAppearanceDictionary appearance = annotation.getAppearance();
 
     if (appearance == null) {

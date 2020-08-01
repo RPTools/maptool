@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 public class ImageUtilTest {
 
   @Test
-  void testPickTransparencyNoShortcut() throws IOException {
+  void testPickTransparencyNoShortcut() {
     BufferedImage bufferedImage =
         ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squareToken.gif");
     Image img = bufferedImage.getScaledInstance(10, 10, Image.SCALE_FAST);
@@ -41,7 +41,7 @@ public class ImageUtilTest {
   }
 
   @Test
-  void testPickTransparencyShortcut() throws IOException {
+  void testPickTransparencyShortcut() {
     Image img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squareToken.gif");
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.OPAQUE);
 

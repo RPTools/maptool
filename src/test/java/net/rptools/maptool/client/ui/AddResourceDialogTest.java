@@ -154,7 +154,7 @@ public class AddResourceDialogTest {
   private WebDownloader createDownloaderReturning(String lines) throws MalformedURLException {
     return new WebDownloader(new URL("http://localhost/something")) {
       @Override
-      public String read() throws IOException {
+      public String read() {
         return lines;
       }
     };

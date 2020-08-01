@@ -1199,7 +1199,7 @@ public class MapTool {
     clientFrame.getInitiativePanel().updateView();
   }
 
-  public static void closeConnection() throws IOException {
+  public static void closeConnection() {
     if (conn != null) {
       conn.close();
     }

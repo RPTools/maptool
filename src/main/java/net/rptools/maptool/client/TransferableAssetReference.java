@@ -33,7 +33,7 @@ public class TransferableAssetReference implements Transferable {
     this.assetID = asset.getId();
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return assetID;
   }
 
