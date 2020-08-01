@@ -686,7 +686,7 @@ public class AppActions {
             return;
           }
           File saveFile = chooser.getSelectedFile();
-          if (saveFile.getName().indexOf(".") < 0) {
+          if (!saveFile.getName().contains(".")) {
             saveFile = new File(saveFile.getAbsolutePath() + ".html");
           }
           if (saveFile.exists() && !MapTool.confirm("msg.confirm.fileExists")) {
