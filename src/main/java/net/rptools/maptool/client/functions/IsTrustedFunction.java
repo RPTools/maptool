@@ -65,13 +65,11 @@ public class IsTrustedFunction extends AbstractFunction {
   private List<String> getGMs() {
     List<String> gms = new ArrayList<String>();
 
-    Iterator<Player> pliter = MapTool.getPlayerList().iterator();
-    while (pliter.hasNext()) {
-      Player plr = pliter.next();
-      if (plr.isGM()) {
-        gms.add(plr.getName());
+      for (Player plr : MapTool.getPlayerList()) {
+          if (plr.isGM()) {
+              gms.add(plr.getName());
+          }
       }
-    }
     return gms;
   }
 }
