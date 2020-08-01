@@ -302,7 +302,7 @@ public class TokenStatesController
         formPanel.setText(NAME, "");
         formPanel.setText(GROUP, "");
         formPanel.setSelected(MOUSEOVER, false);
-        formPanel.getSpinner(OPACITY).setValue(new Integer(100));
+        formPanel.getSpinner(OPACITY).setValue(Integer.valueOf(100));
         formPanel.getSpinner(INDEX).setValue(selected);
         formPanel.setSelected(SHOW_GM, true);
         formPanel.setSelected(SHOW_OWNER, true);
@@ -480,7 +480,7 @@ public class TokenStatesController
       formPanel.setText(GROUP, s.getGroup());
       formPanel.setText(IMAGE, "");
       formPanel.setSelected(MOUSEOVER, s.isMouseover());
-      formPanel.getSpinner(OPACITY).setValue(new Integer(s.getOpacity()));
+      formPanel.getSpinner(OPACITY).setValue(Integer.valueOf(s.getOpacity()));
       formPanel.getSpinner(INDEX).setValue(selected);
       formPanel.setSelected(SHOW_GM, s.isShowGM());
       formPanel.setSelected(SHOW_OWNER, s.isShowOwner());
