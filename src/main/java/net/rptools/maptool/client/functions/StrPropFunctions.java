@@ -509,7 +509,7 @@ public class StrPropFunctions extends AbstractFunction {
       sb.append(value);
       i += 1;
       if (i < varListSize) {
-        sb.append(" " + delim + " ");
+        sb.append(" ").append(delim).append(" ");
       }
     }
     retval = sb.toString();
