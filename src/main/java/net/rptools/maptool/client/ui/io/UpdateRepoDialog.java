@@ -177,8 +177,7 @@ public class UpdateRepoDialog extends JDialog {
   public List<String> getSelectedRepositories() {
     Object[] objects = list.getSelectedObjects();
     List<String> repoList = new ArrayList<String>(objects.length);
-    for (int i = 0; i < objects.length; i++) {
-      Object s = objects[i];
+    for (Object s : objects) {
       // System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
       // s.getClass().getCanonicalName());
       repoList.add(s.toString());

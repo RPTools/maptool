@@ -103,9 +103,9 @@ public class GraphicsUtil {
     int rows = stringByLine.length;
 
     String longestRow = new String();
-    for (int i = 0; i < rows; i++) {
-      if (longestRow.length() < stringByLine[i].length()) {
-        longestRow = stringByLine[i];
+    for (String s : stringByLine) {
+      if (longestRow.length() < s.length()) {
+        longestRow = s;
       }
     }
     int strPixelHeight = fm.getHeight();

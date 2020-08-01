@@ -87,11 +87,11 @@ public class MapToolUtil {
       "black", "white", "fuchsia", "aqua", "silver", "red", "lime", "blue", "yellow", "gray",
       "purple", "maroon", "navy", "olive", "green", "teal"
     };
-    for (int i = 0; i < html.length; i++) {
-      Color c = COLOR_MAP.get(html[i]);
-      assert c != null : "HTML color not in predefined list?";
-      COLOR_MAP_HTML.put(html[i], c);
-    }
+      for (String s : html) {
+          Color c = COLOR_MAP.get(s);
+          assert c != null : "HTML color not in predefined list?";
+          COLOR_MAP_HTML.put(s, c);
+      }
   }
 
   public static int getRandomNumber(int max) {
