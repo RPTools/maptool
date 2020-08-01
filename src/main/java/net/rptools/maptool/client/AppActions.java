@@ -911,7 +911,7 @@ public class AppActions {
    * @param tokenSet the set of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(Set<GUID> tokenSet) {
+  public static void copyTokens(Set<GUID> tokenSet) {
     List<Token> tokenList = null;
     boolean anythingCopied = false;
     if (!tokenSet.isEmpty()) {
@@ -988,7 +988,7 @@ public class AppActions {
    * @param tokenList the list of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(List<Token> tokenList) {
+  public static void copyTokens(List<Token> tokenList) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (!tokenList.isEmpty()) {

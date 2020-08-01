@@ -90,7 +90,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
    * @param value Convert this value
    * @return The integer value or 0 if no value could be determined.
    */
-  public static final int getInt(Object value) {
+  public static int getInt(Object value) {
     if (value == null) return 0;
     if (value instanceof Number) {
       return ((Number) value).intValue();
