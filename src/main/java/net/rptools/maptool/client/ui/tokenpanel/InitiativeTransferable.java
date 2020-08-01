@@ -21,6 +21,7 @@ import java.io.IOException;
 import net.rptools.maptool.model.GUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Transferable for token identifiers.
@@ -84,7 +85,7 @@ public class InitiativeTransferable implements Transferable {
    *-------------------------------------------------------------------------------------------*/
 
   /** @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor) */
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+  public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
     if (INIT_TOKEN_FLAVOR.equals(flavor)) {
       return this;
     }

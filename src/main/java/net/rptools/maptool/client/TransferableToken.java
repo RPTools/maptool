@@ -19,6 +19,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import net.rptools.maptool.model.Token;
+import org.jetbrains.annotations.NotNull;
 
 public class TransferableToken implements Transferable {
   public static final DataFlavor dataFlavor = new DataFlavor(Token.class, "Token");
@@ -29,7 +30,7 @@ public class TransferableToken implements Transferable {
     this.token = token;
   }
 
-  public Object getTransferData(DataFlavor flavor) {
+  public @NotNull Object getTransferData(DataFlavor flavor) {
     return token;
   }
 

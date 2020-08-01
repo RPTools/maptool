@@ -14,6 +14,8 @@
  */
 package net.rptools.lib.swing;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -72,7 +74,7 @@ public class TaskPanelGroup extends JPanel {
   }
 
   @Override
-  public void add(Component comp, Object title) {
+  public void add(@NotNull Component comp, Object title) {
     if (!(title instanceof String)) {
       // LATER: Title should be able to handle any component
       throw new IllegalArgumentException("Must supply a string title");

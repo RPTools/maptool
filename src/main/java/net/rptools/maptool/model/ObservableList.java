@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -121,7 +123,7 @@ public class ObservableList<K> extends Observable implements Iterable<K> {
    *
    * @return An iterator over the displayed list.
    */
-  public Iterator<K> iterator() {
+  public @NotNull Iterator<K> iterator() {
     return list.iterator();
   }
 }

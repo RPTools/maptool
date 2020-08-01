@@ -21,6 +21,7 @@ import java.io.IOException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
+import org.jetbrains.annotations.NotNull;
 
 /** */
 public class TransferableAssetReference implements Transferable {
@@ -33,7 +34,7 @@ public class TransferableAssetReference implements Transferable {
     this.assetID = asset.getId();
   }
 
-  public Object getTransferData(DataFlavor flavor) {
+  public @NotNull Object getTransferData(DataFlavor flavor) {
     return assetID;
   }
 
