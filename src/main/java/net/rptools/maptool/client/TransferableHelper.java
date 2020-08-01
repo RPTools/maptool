@@ -483,9 +483,9 @@ public class TransferableHelper extends TransferHandler {
    */
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] transferFlavors) {
-    for (int j = 0; j < SUPPORTED_FLAVORS.length; j++) {
-      for (int i = 0; i < transferFlavors.length; i++) {
-        if (SUPPORTED_FLAVORS[j].equals(transferFlavors[i])) return true;
+    for (DataFlavor supportedFlavor : SUPPORTED_FLAVORS) {
+      for (DataFlavor transferFlavor : transferFlavors) {
+        if (supportedFlavor.equals(transferFlavor)) return true;
       }
     }
     return false;

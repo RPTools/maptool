@@ -77,11 +77,10 @@ public class LoadSaveImpl {
             addDataObjects("Campaign/Maps", cmpgn.getZones());
           }
         });
-    for (Iterator<String> iter = registry.keySet().iterator(); iter.hasNext(); ) {
-      String name = (String) iter.next();
-      DataTemplate dt = (DataTemplate) registry.get(name);
-      dt.populateModel(model);
-    }
+      for (String name : registry.keySet()) {
+          DataTemplate dt = (DataTemplate) registry.get(name);
+          dt.populateModel(model);
+      }
     form.expandAndSelectAll(true);
     form.pack();
     form.setVisible(true);
@@ -117,9 +116,9 @@ public class LoadSaveImpl {
     set.toArray(names);
     Arrays.sort(names);
 
-    for (int index = 0; index < names.length; index++) {
-      MacroButtonProperties macro = map.get(names[index]);
-      model.addNode(where, new MaptoolNode(names[index], macro));
-    }
+      for (String name : names) {
+          MacroButtonProperties macro = map.get(name);
+          model.addNode(where, new MaptoolNode(name, macro));
+      }
   }
 }

@@ -911,8 +911,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasOwnerOnlyAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -929,8 +928,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasGMAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -947,8 +945,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null && lightSource.getType() == lightType) {
           return true;
@@ -984,11 +981,10 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return false;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
+    for (AttachedLightSource als : lightSourceList) {
       if (als != null
-          && als.getLightSourceId() != null
-          && als.getLightSourceId().equals(source.getId())) {
+              && als.getLightSourceId() != null
+              && als.getLightSourceId().equals(source.getId())) {
         return true;
       }
     }
