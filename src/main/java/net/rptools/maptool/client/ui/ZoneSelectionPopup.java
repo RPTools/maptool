@@ -48,12 +48,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
     if (!MapTool.getPlayer().isGM()) {
-      for (ListIterator<ZoneRenderer> iter = rendererList.listIterator(); iter.hasNext(); ) {
-        ZoneRenderer renderer = iter.next();
-        if (!renderer.getZone().isVisible()) {
-          iter.remove();
-        }
-      }
+      rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
     }
 
     rendererList.sort(new Comparator<ZoneRenderer>() {

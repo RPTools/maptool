@@ -252,12 +252,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     }
 
     // Clear out any view without any tokens
-    for (ListIterator<View> viewIter = currentViewList.listIterator(); viewIter.hasNext(); ) {
-      View view = viewIter.next();
-      if (!view.isRequired() && (viewMap.get(view) == null || viewMap.get(view).size() == 0)) {
-        viewIter.remove();
-      }
-    }
+    currentViewList.removeIf(view -> !view.isRequired() && (viewMap.get(view) == null || viewMap.get(view).size() == 0));
 
     // Sort
     for (List<Token> tokens : viewMap.values()) {
