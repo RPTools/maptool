@@ -464,7 +464,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       return null;
     }
     JMenu stateMenu = I18N.createMenu("defaultTool.barMenu");
-    Collections.sort(overlays, BarTokenOverlay.COMPARATOR);
+    overlays.sort(BarTokenOverlay.COMPARATOR);
     for (BarTokenOverlay overlay : overlays) {
       createBarItem(overlay.getName(), stateMenu, getTokenUnderMouse());
     } // endfor
@@ -478,7 +478,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     stateMenu.addSeparator();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(MapTool.getCampaign().getTokenStatesMap().values());
-    Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
+    overlays.sort(BooleanTokenOverlay.COMPARATOR);
 
     // Create the group menus first so that they can be placed at the top of the state menu
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();

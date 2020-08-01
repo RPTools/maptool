@@ -384,7 +384,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     public RemoteServerTableModel(List<String> encodedData) {
       // Simple but sufficient
-      Collections.sort(encodedData, String.CASE_INSENSITIVE_ORDER);
+      encodedData.sort(String.CASE_INSENSITIVE_ORDER);
 
       data = new ArrayList<String[]>(encodedData.size());
       for (String line : encodedData) {

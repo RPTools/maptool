@@ -244,7 +244,7 @@ class JsonArrayFunctionsTest {
       arr.add(rand);
     }
 
-    Collections.sort(list, Collections.reverseOrder());
+    list.sort(Collections.reverseOrder());
     JsonArray arr2 = jsonArrayFunctions.sortDescending(arr);
 
     assertEquals(list.size(), arr2.size());

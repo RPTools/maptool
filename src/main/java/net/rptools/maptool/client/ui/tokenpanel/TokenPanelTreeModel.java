@@ -261,7 +261,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     // Sort
     for (List<Token> tokens : viewMap.values()) {
-      Collections.sort(tokens, NAME_AND_STATE_COMPARATOR);
+      tokens.sort(NAME_AND_STATE_COMPARATOR);
     }
 
     // Keep the expanded branches consistent

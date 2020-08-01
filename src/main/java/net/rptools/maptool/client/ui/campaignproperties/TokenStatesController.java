@@ -624,7 +624,7 @@ public class TokenStatesController
     DefaultListModel<Object> model = new DefaultListModel<Object>();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(campaign.getTokenStatesMap().values());
-    Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
+    overlays.sort(BooleanTokenOverlay.COMPARATOR);
     for (BooleanTokenOverlay overlay : overlays) {
       model.addElement(overlay);
       getNames().add(overlay.getName());

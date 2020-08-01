@@ -557,7 +557,7 @@ public class StrListFunctions extends AbstractFunction {
     ArrayList<String> list = toList(listStr, delim);
 
     // Sort the list appropriately and construct the new list string
-    Collections.sort(list, new strComp(sortStr));
+    list.sort(new strComp(sortStr));
 
     StringBuilder retVal = new StringBuilder();
     int size = list.size();

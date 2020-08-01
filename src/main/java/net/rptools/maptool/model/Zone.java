@@ -1121,7 +1121,7 @@ public class Zone extends BaseModel {
 
   /** Sort the tokens by their ZOrder */
   public void sortZOrder() {
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
   }
 
   ///////////////////////////////////////////////////////////////////////////

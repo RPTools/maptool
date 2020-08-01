@@ -56,17 +56,15 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
       }
     }
 
-    Collections.sort(
-        rendererList,
-        new Comparator<ZoneRenderer>() {
-          public int compare(ZoneRenderer o1, ZoneRenderer o2) {
+    rendererList.sort(new Comparator<ZoneRenderer>() {
+        public int compare(ZoneRenderer o1, ZoneRenderer o2) {
 
             String name1 = o1.getZone().getName();
             String name2 = o2.getZone().getName();
 
             return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-          }
-        });
+        }
+    });
 
     JMenuItem selection = null;
     for (ZoneRenderer renderer : rendererList) {

@@ -1103,7 +1103,7 @@ public class AppActions {
       }
     }
     List<Token> tokenList = new ArrayList<Token>(tokenCopySet);
-    Collections.sort(tokenList, Token.COMPARE_BY_ZORDER);
+    tokenList.sort(Token.COMPARE_BY_ZORDER);
     List<String> failedPaste = new ArrayList<String>(tokenList.size());
 
     for (Token origToken : tokenList) {
