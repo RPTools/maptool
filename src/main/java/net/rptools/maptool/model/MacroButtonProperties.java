@@ -1028,28 +1028,28 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   public static void fixOldMacroCompare(MacroButtonProperties oldMacro) {
     if (oldMacro.getCommonMacro() == null) {
-      oldMacro.setCommonMacro(new Boolean(true));
+      oldMacro.setCommonMacro(Boolean.TRUE);
     }
     if (oldMacro.getAllowPlayerEdits() == null) {
-      oldMacro.setAllowPlayerEdits(new Boolean(true));
+      oldMacro.setAllowPlayerEdits(Boolean.TRUE);
     }
     if (oldMacro.getCompareApplyToSelectedTokens() == null) {
-      oldMacro.setCompareApplyToSelectedTokens(new Boolean(true));
+      oldMacro.setCompareApplyToSelectedTokens(Boolean.TRUE);
     }
     if (oldMacro.getCompareAutoExecute() == null) {
-      oldMacro.setCompareAutoExecute(new Boolean(true));
+      oldMacro.setCompareAutoExecute(Boolean.TRUE);
     }
     if (oldMacro.getCompareCommand() == null) {
-      oldMacro.setCompareCommand(new Boolean(true));
+      oldMacro.setCompareCommand(Boolean.TRUE);
     }
     if (oldMacro.getCompareGroup() == null) {
-      oldMacro.setCompareGroup(new Boolean(true));
+      oldMacro.setCompareGroup(Boolean.TRUE);
     }
     if (oldMacro.getCompareIncludeLabel() == null) {
-      oldMacro.setCompareIncludeLabel(new Boolean(true));
+      oldMacro.setCompareIncludeLabel(Boolean.TRUE);
     }
     if (oldMacro.getCompareSortPrefix() == null) {
-      oldMacro.setCompareSortPrefix(new Boolean(true));
+      oldMacro.setCompareSortPrefix(Boolean.TRUE);
     }
   }
 

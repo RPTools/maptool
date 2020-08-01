@@ -22,6 +22,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -152,12 +153,12 @@ public class AppActions {
   private static boolean keepIdsOnPaste = false;
 
   private static int getMenuShortcutKeyMask() {
-    int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
     String prop = System.getProperty("os.name", "unknown");
     if ("darwin".equalsIgnoreCase(prop)) {
       // TODO Should we install our own AWTKeyStroke class? If we do it should only be if menu
       // shortcut is CTRL...
-      if (key == Event.CTRL_MASK) key = Event.META_MASK;
+      if (key == InputEvent.CTRL_DOWN_MASK) key = InputEvent.META_DOWN_MASK;
       /*
        * In order for OpenJDK to work on Mac OS X, the user must have the X11 package installed unless they're running headless. However, in order for the Command key to work, the X11
        * Preferences must be set to "Enable the Meta Key" in X11 applications. Essentially, if this option is turned on, the Command key (called Meta in X11) will be intercepted by the X11

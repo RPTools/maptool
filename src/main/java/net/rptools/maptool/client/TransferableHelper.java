@@ -600,7 +600,7 @@ public class TransferableHelper extends TransferHandler {
               Collections.singletonList(
                   new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
           // A token from the Resource Library is already fully configured.
-          configureTokens = Collections.singletonList(new Boolean(false));
+          configureTokens = Collections.singletonList(Boolean.FALSE);
         } catch (Exception e) {
           log.error("while using TransferableToken.dataFlavor", e); // $NON-NLS-1$
         }
