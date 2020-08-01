@@ -466,19 +466,19 @@ public class AppPreferences {
     return value;
   }
 
-  public static final void setUseToolTipForInlineRoll(boolean tooltip) {
+  public static void setUseToolTipForInlineRoll(boolean tooltip) {
     prefs.putBoolean(KEY_TOOLTIP_FOR_INLINE_ROLLS, tooltip);
   }
 
-  public static final boolean getUseToolTipForInlineRoll() {
+  public static boolean getUseToolTipForInlineRoll() {
     return prefs.getBoolean(KEY_TOOLTIP_FOR_INLINE_ROLLS, DEFAULT_TOOLTIP_FOR_INLINE_ROLLS);
   }
 
-  public static final void setSuppressToolTipsForMacroLinks(boolean tooltip) {
+  public static void setSuppressToolTipsForMacroLinks(boolean tooltip) {
     prefs.putBoolean(KEY_SUPPRESS_TOOLTIPS_FOR_MACROLINKS, tooltip);
   }
 
-  public static final boolean getSuppressToolTipsForMacroLinks() {
+  public static boolean getSuppressToolTipsForMacroLinks() {
     return prefs.getBoolean(
         KEY_SUPPRESS_TOOLTIPS_FOR_MACROLINKS, DEFAULT_SUPPRESS_TOOLTIPS_FOR_MACROLINKS);
   }
