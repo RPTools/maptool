@@ -47,7 +47,7 @@ public class LoadAliasesMacro implements Macro {
       }
       aliasFile = chooser.getSelectedFile();
     }
-    if (aliasFile.getName().indexOf(".") < 0) {
+    if (!aliasFile.getName().contains(".")) {
       aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
     }
     if (!aliasFile.exists()) {

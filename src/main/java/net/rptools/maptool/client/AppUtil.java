@@ -133,7 +133,7 @@ public class AppUtil {
       if (StringUtils.isEmpty(path)) {
         path = DEFAULT_DATADIR_NAME;
       }
-      if (path.indexOf("/") < 0 && path.indexOf("\\") < 0) {
+      if (!path.contains("/") && !path.contains("\\")) {
         path = getUserHome() + "/" + path;
       }
       // Now we need to check for characters that are known to cause problems in

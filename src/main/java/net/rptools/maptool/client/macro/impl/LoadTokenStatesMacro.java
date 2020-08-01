@@ -59,7 +59,7 @@ public class LoadTokenStatesMacro implements Macro {
     } // endif
 
     // Make it an XML file if type isn't set, check for existance
-    if (aliasFile.getName().indexOf(".") < 0)
+    if (!aliasFile.getName().contains("."))
       aliasFile = new File(aliasFile.getAbsolutePath() + "-tokenStates.xml");
     if (!aliasFile.exists()) {
       MapTool.addLocalMessage(I18N.getText("loadtokenstates.cantFindFile", aliasFile));
