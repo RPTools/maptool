@@ -97,7 +97,7 @@ public class Token extends BaseModel implements Cloneable {
 
     private String displayName;
 
-    private TokenShape(String displayName) {
+    TokenShape(String displayName) {
       this.displayName = displayName;
     }
 

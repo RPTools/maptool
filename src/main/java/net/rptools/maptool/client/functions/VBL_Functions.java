@@ -1170,7 +1170,7 @@ public class VBL_Functions extends AbstractFunction {
     return value;
   }
 
-  private static enum Shape {
+  private enum Shape {
     RECTANGLE,
     POLYGON,
     CROSS,
