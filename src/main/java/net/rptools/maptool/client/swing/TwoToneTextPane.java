@@ -159,7 +159,7 @@ public class TwoToneTextPane extends JTextPane {
         // Save the current text first
         String styledText = text.substring(textStart, match.start());
         textStart = match.end() + 1;
-        if (style != null && styledText != null) {
+        if (style != null) {
           doc.insertString(doc.getLength(), styledText, style);
         } // endif
 

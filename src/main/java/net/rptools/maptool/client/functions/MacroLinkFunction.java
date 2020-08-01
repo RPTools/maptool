@@ -680,22 +680,20 @@ public class MacroLinkFunction extends AbstractFunction {
               // a secure context as players can not modify the
               // macro so GM can specify what
               // ever they want.
-              if (token != null) {
-                if (token.isOwnedByAll()) {
-                  trusted = false;
-                } else {
-                  Set<String> gmPlayers = new HashSet<>();
-                  for (Object o : MapTool.getPlayerList()) {
-                    Player p = (Player) o;
-                    if (p.isGM()) {
-                      gmPlayers.add(p.getName());
-                    }
+              if (token.isOwnedByAll()) {
+                trusted = false;
+              } else {
+                Set<String> gmPlayers = new HashSet<>();
+                for (Object o : MapTool.getPlayerList()) {
+                  Player p = (Player) o;
+                  if (p.isGM()) {
+                    gmPlayers.add(p.getName());
                   }
-                  for (String owner : token.getOwners()) {
-                    if (!gmPlayers.contains(owner)) {
-                      trusted = false;
-                      break;
-                    }
+                }
+                for (String owner : token.getOwners()) {
+                  if (!gmPlayers.contains(owner)) {
+                    trusted = false;
+                    break;
                   }
                 }
               }

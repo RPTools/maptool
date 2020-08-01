@@ -78,9 +78,7 @@ public class AssetManager {
 
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
-    if (cacheDir != null) {
-      usePersistentCache = true;
-    }
+    usePersistentCache = true;
   }
 
   /**
@@ -275,7 +273,7 @@ public class AssetManager {
 
             // Let's get it from the server
             // As a last resort we request the asset from the server
-            if (asset == null && !isAssetRequested(id)) {
+            if (!isAssetRequested(id)) {
               requestAssetFromServer(id, listeners);
             }
           }

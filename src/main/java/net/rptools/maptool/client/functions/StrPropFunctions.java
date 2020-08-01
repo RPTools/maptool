@@ -405,7 +405,6 @@ public class StrPropFunctions extends AbstractFunction {
       option = -1;
       String setVars = (String) parameters.get(1);
       if (setVars.equalsIgnoreCase("NONE")) {
-        option = 0;
         return BigDecimal.ZERO;
       } else if (setVars.equalsIgnoreCase("SUFFIXED")) {
         option = 1;

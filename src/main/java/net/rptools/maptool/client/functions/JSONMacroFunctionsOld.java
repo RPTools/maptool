@@ -613,7 +613,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
         throw new ParserException(
             I18N.getText(
                 "macro.function.json.onlyJSON",
-                o1 == null ? "NULL" : o1.toString(),
+                o1.toString(),
                 "json.isSubset"));
       }
 
@@ -1259,7 +1259,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       throw new ParserException(
           I18N.getText(
               "macro.function.json.append.onlyArray",
-              obj == null ? "NULL" : obj.toString(),
+              obj.toString(),
               "json.append"));
     }
   }
@@ -1530,7 +1530,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       throw new ParserException(
           I18N.getText(
               "macro.function.json.unknownType",
-              obj == null ? "NULL" : obj.toString(),
+              obj.toString(),
               "json.set"));
     }
   }
