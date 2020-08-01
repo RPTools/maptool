@@ -146,7 +146,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
     FunctionUtil.checkNumberParam("setTerrainModifier", args, 1, 3);
 
     Token token = FunctionUtil.getTokenFromParam(resolver, "setTerrainModifier", args, 1, 2);
-    Double terrainModifier = token.getTerrainModifier();
+    double terrainModifier = token.getTerrainModifier();
 
     if (args.get(0) instanceof BigDecimal) {
       terrainModifier = FunctionUtil.paramAsDouble("setTerrainModifier", args, 0, false);

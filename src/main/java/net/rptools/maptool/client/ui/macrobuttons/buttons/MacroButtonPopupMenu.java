@@ -209,8 +209,8 @@ public class MacroButtonPopupMenu extends JPopupMenu {
                 MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
               if (AppUtil.playerOwns(nextToken)) {
                 List<MacroButtonProperties> workingMacros = new ArrayList<MacroButtonProperties>();
-                Boolean hashCodesMatch = false;
-                Boolean allowDelete = false;
+                boolean hashCodesMatch = false;
+                boolean allowDelete = false;
                 for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
                   hashCodesMatch =
                       nextMacro.hashCodeForComparison()
@@ -376,7 +376,7 @@ public class MacroButtonPopupMenu extends JPopupMenu {
   }
 
   private Boolean confirmCommonExport(MacroButtonProperties buttonMacro) {
-    Boolean failComparison = false;
+    boolean failComparison = false;
     String comparisonResults = "";
     if (!buttonMacro.getCompareGroup()) {
       failComparison = true;

@@ -531,13 +531,13 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     if (areaGroup
                         .getGroupLabel()
                         .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
-                      Boolean checkComparisons = MapTool.confirm("confirm.macro.checkComparisons");
+                      boolean checkComparisons = MapTool.confirm("confirm.macro.checkComparisons");
                       List<MacroButtonProperties> commonMacros =
                           MapTool.getFrame().getSelectionPanel().getCommonMacros();
                       List<MacroButtonProperties> exportList =
                           new ArrayList<MacroButtonProperties>();
                       Boolean trusted = true;
-                      Boolean allowExport = true;
+                      boolean allowExport = true;
                       for (MacroButtonProperties nextMacro : commonMacros) {
                         trusted = true;
                         allowExport = true;
@@ -586,7 +586,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       PersistenceUtil.saveMacroSet(exportList, selectedFile);
                     } else if (tokenId != null) {
                       Token token = getToken();
-                      Boolean trusted = AppUtil.playerOwns(token);
+                      boolean trusted = AppUtil.playerOwns(token);
                       List<MacroButtonProperties> exportList =
                           new ArrayList<MacroButtonProperties>();
                       for (MacroButtonProperties nextMacro : token.getMacroList(trusted)) {
@@ -697,7 +697,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
   }
 
   private Boolean confirmCommonExport(MacroButtonProperties buttonMacro) {
-    Boolean failComparison = false;
+    boolean failComparison = false;
     String comparisonResults = "";
     if (!buttonMacro.getCompareGroup()) {
       failComparison = true;

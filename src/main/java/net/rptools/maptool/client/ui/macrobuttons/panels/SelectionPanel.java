@@ -160,7 +160,7 @@ public class SelectionPanel extends AbstractMacroPanel {
         MacroButtonProperties copiedMacro =
             new MacroButtonProperties(nextMacro.getIndex(), nextMacro);
         int macroKey = copiedMacro.hashCodeForComparison();
-        Boolean macroIsInUnique = uniqueMacros.containsKey(copiedMacro.hashCodeForComparison());
+        boolean macroIsInUnique = uniqueMacros.containsKey(copiedMacro.hashCodeForComparison());
         Boolean macroIsInCommon = commonMacros.containsKey(copiedMacro.hashCodeForComparison());
         if (!macroIsInUnique && !macroIsInCommon) {
           uniqueMacros.put(macroKey, copiedMacro);

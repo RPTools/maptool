@@ -599,7 +599,7 @@ public class FindTokenFunctions extends AbstractFunction {
       }
       List<Token> inrange = new LinkedList<Token>();
       for (Token targetToken : tokenList) {
-        Double distance = instance.getDistance(token, targetToken, useDistancePerCell, metric);
+        double distance = instance.getDistance(token, targetToken, useDistancePerCell, metric);
         if (distance <= upto && distance >= from && token != targetToken) {
           inrange.add(targetToken);
         }

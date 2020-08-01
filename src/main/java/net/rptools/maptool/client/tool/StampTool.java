@@ -1259,7 +1259,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         }
         // Resize
         if (!token.isSnapToScale()) {
-          Double scale = renderer.getScale();
+          double scale = renderer.getScale();
           Rectangle footprintBounds = token.getBounds(renderer.getZone());
 
           double scaledWidth = (footprintBounds.width * scale);

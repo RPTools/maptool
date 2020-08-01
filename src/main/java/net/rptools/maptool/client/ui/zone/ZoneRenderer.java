@@ -1042,7 +1042,7 @@ public class ZoneRenderer extends JComponent
         if (element.hasFacing()) {
           // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
           // reason
-          Integer facing = element.getFacing() + 90;
+          int facing = element.getFacing() + 90;
           if (facing > 180) {
             facing -= 360;
           }
@@ -1060,11 +1060,11 @@ public class ZoneRenderer extends JComponent
             // shift by 1/2 of the length.
             // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
             if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-              Integer size = Math.max(drawnBounds.width, drawnBounds.height);
-              Integer x = drawnBounds.x - (int) (0.21 * size);
-              Integer y = drawnBounds.y - (int) (0.21 * size);
-              Integer w = drawnBounds.width + (int) (0.42 * size);
-              Integer h = drawnBounds.height + (int) (0.42 * size);
+              int size = Math.max(drawnBounds.width, drawnBounds.height);
+              int x = drawnBounds.x - (int) (0.21 * size);
+              int y = drawnBounds.y - (int) (0.21 * size);
+              int w = drawnBounds.width + (int) (0.42 * size);
+              int h = drawnBounds.height + (int) (0.42 * size);
               drawnBounds.setBounds(x, y, w, h);
             }
           }

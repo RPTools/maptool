@@ -247,7 +247,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                           Map<String, LookupTable> lookupTables =
                               MapTool.getCampaign().getLookupTableMap();
                           LookupTable newTable = PersistenceUtil.loadTable(selectedFile);
-                          Boolean alreadyExists =
+                          boolean alreadyExists =
                               lookupTables.keySet().contains(newTable.getName());
                           if (alreadyExists) {
                             if (MapTool.confirm(

@@ -154,7 +154,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected float getFloatPercent(String functionName, String f) throws ParserException {
     try {
-      Float per = Float.parseFloat(f);
+      float per = Float.parseFloat(f);
       while (per > 1) per = per / 100;
       return per;
     } catch (Exception e) {
@@ -173,7 +173,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected float getFloat(String functionName, String f) throws ParserException {
     try {
-      Float per = Float.parseFloat(f);
+      float per = Float.parseFloat(f);
       return per;
     } catch (Exception e) {
       throw new ParserException(
