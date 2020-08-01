@@ -19,6 +19,8 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -240,12 +242,8 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       MD5Key img = lookupTable.getTableImage();
-      if (img == null) {
-        // Returning null causes an NPE when output is dumped to chat.
-        return "";
-      } else {
-        return img;
-      }
+      // Returning null causes an NPE when output is dumped to chat.
+      return Objects.requireNonNullElse(img, "");
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
