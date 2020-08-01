@@ -278,7 +278,7 @@ public class InitiativePanel extends JPanel
 
   private void updateRound() {
     if (list.getRound() > 0)
-      round.setText(I18N.getText("initPanel.round") + " " + Integer.toString(list.getRound()));
+      round.setText(I18N.getText("initPanel.round") + " " + list.getRound());
     else round.setText("");
   }
 
