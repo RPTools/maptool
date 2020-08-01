@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.tokenpanel;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import net.rptools.maptool.model.GUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

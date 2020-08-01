@@ -213,19 +213,19 @@ public class MapToolFrame extends DefaultDockableHolder
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
-          new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
+      new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
   private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
   private final FileFilter propertiesFilter =
-          new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
+      new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
   private final FileFilter macroFilter =
-          new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
+      new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
   private final FileFilter macroSetFilter =
-          new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
+      new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
   private final FileFilter tableFilter =
-          new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
+      new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
 
   private final FileFilter dungeonDraftFilter =
-          new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();

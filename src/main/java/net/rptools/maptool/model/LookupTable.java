@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.util.*;
-
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;

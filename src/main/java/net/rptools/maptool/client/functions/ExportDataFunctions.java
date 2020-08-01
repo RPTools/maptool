@@ -20,7 +20,6 @@ import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;

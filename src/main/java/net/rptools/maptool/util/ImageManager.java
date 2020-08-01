@@ -256,7 +256,8 @@ public class ImageManager {
     if (observers == null || observers.length == 0) {
       return;
     }
-      Set<ImageObserver> observerSet = imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
+    Set<ImageObserver> observerSet =
+        imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
     observerSet.addAll(Arrays.asList(observers));
   }
 

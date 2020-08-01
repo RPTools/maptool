@@ -16,7 +16,6 @@ package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -35,7 +34,6 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;

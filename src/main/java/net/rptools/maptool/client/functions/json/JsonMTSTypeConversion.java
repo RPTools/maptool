@@ -19,7 +19,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import java.math.BigDecimal;
-import net.rptools.parser.ParserException;
 
 /** Class used to convert between json and MT Script types. */
 class JsonMTSTypeConversion {

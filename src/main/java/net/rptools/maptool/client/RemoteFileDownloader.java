@@ -68,7 +68,8 @@ public class RemoteFileDownloader {
 
     ProgressMonitor monitor =
         new ProgressMonitor(parentComponent, "Downloading " + url, null, 0, length);
-    try (InputStream in = conn.getInputStream(); OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile))) {
+    try (InputStream in = conn.getInputStream();
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile))) {
 
       int buflen = 1024 * 30;
       int bytesRead = 0;

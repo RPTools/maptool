@@ -29,7 +29,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -959,9 +958,11 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return;
     }
-    lightSourceList.removeIf(als -> als != null
-            && als.getLightSourceId() != null
-            && als.getLightSourceId().equals(source.getId()));
+    lightSourceList.removeIf(
+        als ->
+            als != null
+                && als.getLightSourceId() != null
+                && als.getLightSourceId().equals(source.getId()));
   }
 
   /** Clear the lightSourceList */
@@ -978,8 +979,8 @@ public class Token extends BaseModel implements Cloneable {
     }
     for (AttachedLightSource als : lightSourceList) {
       if (als != null
-              && als.getLightSourceId() != null
-              && als.getLightSourceId().equals(source.getId())) {
+          && als.getLightSourceId() != null
+          && als.getLightSourceId().equals(source.getId())) {
         return true;
       }
     }

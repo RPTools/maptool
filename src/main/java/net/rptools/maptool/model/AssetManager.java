@@ -149,7 +149,8 @@ public class AssetManager {
       return;
     }
 
-    List<AssetAvailableListener> listenerList = assetListenerListMap.computeIfAbsent(key, k -> new LinkedList<AssetAvailableListener>());
+    List<AssetAvailableListener> listenerList =
+        assetListenerListMap.computeIfAbsent(key, k -> new LinkedList<AssetAvailableListener>());
 
     for (AssetAvailableListener listener : listeners) {
       if (!listenerList.contains(listener)) {

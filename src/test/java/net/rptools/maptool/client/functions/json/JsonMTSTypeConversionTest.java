@@ -23,7 +23,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.Random;
-import net.rptools.parser.ParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

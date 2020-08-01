@@ -16,8 +16,6 @@ package net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import net.rptools.maptool.model.Token;
 import org.jetbrains.annotations.NotNull;
 

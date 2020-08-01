@@ -2860,23 +2860,25 @@ public class ZoneRenderer extends JComponent
     List<Token> list = new ArrayList<Token>();
 
     // Always assume tokens, for now
-      List<TokenLocation> tokenLocationListCopy = new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> tokenLocationListCopy =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     for (TokenLocation location : tokenLocationListCopy) {
       list.add(location.token);
     }
 
     // Sort by location on screen, top left to bottom right
-    list.sort(new Comparator<Token>() {
-      public int compare(Token o1, Token o2) {
-        if (o1.getY() < o2.getY()) {
-          return -1;
-        }
-        if (o1.getY() > o2.getY()) {
-          return 1;
-        }
-        return Integer.compare(o1.getX(), o2.getX());
-      }
-    });
+    list.sort(
+        new Comparator<Token>() {
+          public int compare(Token o1, Token o2) {
+            if (o1.getY() < o2.getY()) {
+              return -1;
+            }
+            if (o1.getY() > o2.getY()) {
+              return 1;
+            }
+            return Integer.compare(o1.getX(), o2.getX());
+          }
+        });
     return list;
   }
 
@@ -4021,7 +4023,8 @@ public class ZoneRenderer extends JComponent
    * @return the token
    */
   public Token getTokenAt(int x, int y) {
-      List<TokenLocation> locationList = new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> locationList =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4032,7 +4035,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public Token getMarkerAt(int x, int y) {
-      List<TokenLocation> locationList = new ArrayList<TokenLocation>(markerLocationList);
+    List<TokenLocation> locationList = new ArrayList<TokenLocation>(markerLocationList);
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4061,7 +4064,7 @@ public class ZoneRenderer extends JComponent
    * @return the Label
    */
   public Label getLabelAt(int x, int y) {
-      List<LabelLocation> labelList = new ArrayList<LabelLocation>(labelLocationList);
+    List<LabelLocation> labelList = new ArrayList<LabelLocation>(labelLocationList);
     Collections.reverse(labelList);
     for (LabelLocation location : labelList) {
       if (location.bounds.contains(x, y)) {

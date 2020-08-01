@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -137,7 +136,7 @@ public class DrawingFunctions extends AbstractFunction {
       }
       if (de.getDrawable() instanceof DrawablesGroup) {
         DrawnElement result =
-                findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
+            findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
         if (result != null) return result;
       }
     }

@@ -14,12 +14,9 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 public class TransferableMacroButton implements Transferable {
 

@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.protocol.syrinscape;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;

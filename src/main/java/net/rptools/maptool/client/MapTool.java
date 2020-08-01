@@ -1023,7 +1023,11 @@ public class MapTool {
    * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
-      String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign) {
+      String id,
+      ServerConfig config,
+      ServerPolicy policy,
+      Campaign campaign,
+      boolean copyCampaign) {
     if (server != null) {
       Thread.dumpStack();
       showError("msg.error.alreadyRunningServer");

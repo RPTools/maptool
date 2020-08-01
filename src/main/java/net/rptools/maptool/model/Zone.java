@@ -19,7 +19,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;

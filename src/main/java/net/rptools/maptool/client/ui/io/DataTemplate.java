@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.io;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -143,10 +142,10 @@ public abstract class DataTemplate {
     data.keySet().toArray(sorted);
     Arrays.sort(sorted);
 
-      for (String s : sorted) {
-          Object one = data.get(s);
-          model.addNode(path, new MaptoolNode(s, one));
-      }
+    for (String s : sorted) {
+      Object one = data.get(s);
+      model.addNode(path, new MaptoolNode(s, one));
+    }
   }
 
   /**

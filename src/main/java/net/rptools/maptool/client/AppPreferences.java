@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -463,7 +462,7 @@ public class AppPreferences {
 
   public static Integer getTypingNotificationDuration() {
     Integer value =
-            prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION);
+        prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION);
     return value;
   }
 
@@ -1041,24 +1040,24 @@ public class AppPreferences {
 
   public static void setMruCampaigns(List<File> mruCampaigns) {
     StringBuilder combined = new StringBuilder("");
-      for (File file : mruCampaigns) {
-          String path = null;
-          try {
-              path = file.getCanonicalPath();
-          } catch (IOException e) {
-              // Probably pretty rare, but we want to know about it
-              if (log.isInfoEnabled()) {
-                  log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
-              }
-              path = file.getPath();
-          }
-          // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
-          // the current platform, but it doesn't matter since it will be reconverted when read back in
-          // again.
-          // THink of the '%3A' as a symbol of the separator, not an encoding of the character.
-          combined.append(path.replaceAll("%", "%25").replaceAll(File.pathSeparator, "%3A"));
-          combined.append(File.pathSeparator);
+    for (File file : mruCampaigns) {
+      String path = null;
+      try {
+        path = file.getCanonicalPath();
+      } catch (IOException e) {
+        // Probably pretty rare, but we want to know about it
+        if (log.isInfoEnabled()) {
+          log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
+        }
+        path = file.getPath();
       }
+      // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
+      // the current platform, but it doesn't matter since it will be reconverted when read back in
+      // again.
+      // THink of the '%3A' as a symbol of the separator, not an encoding of the character.
+      combined.append(path.replaceAll("%", "%25").replaceAll(File.pathSeparator, "%3A"));
+      combined.append(File.pathSeparator);
+    }
     prefs.put(KEY_MRU_CAMPAIGNS, combined.toString());
   }
 
@@ -1069,19 +1068,19 @@ public class AppPreferences {
       // It's important that '%3A' is done first
       combined = combined.replaceAll("%3A", File.pathSeparator).replaceAll("%25", "%");
       String[] all = combined.split(File.pathSeparator);
-        for (String s : all) {
-            mruCampaigns.add(new File(s));
-        }
+      for (String s : all) {
+        mruCampaigns.add(new File(s));
+      }
     }
     return mruCampaigns;
   }
 
   public static void setSavedPaintTextures(List<File> savedTextures) {
     StringBuilder combined = new StringBuilder("");
-      for (File savedTexture : savedTextures) {
-          combined.append(savedTexture.getPath());
-          combined.append(File.pathSeparator);
-      }
+    for (File savedTexture : savedTextures) {
+      combined.append(savedTexture.getPath());
+      combined.append(File.pathSeparator);
+    }
     prefs.put(KEY_SAVED_PAINT_TEXTURES, combined.toString());
   }
 
@@ -1090,9 +1089,9 @@ public class AppPreferences {
     String combined = prefs.get(KEY_SAVED_PAINT_TEXTURES, null);
     if (combined != null) {
       String[] all = combined.split(File.pathSeparator);
-        for (String s : all) {
-            savedTextures.add(new File(s));
-        }
+      for (String s : all) {
+        savedTextures.add(new File(s));
+      }
     }
     return savedTextures;
   }

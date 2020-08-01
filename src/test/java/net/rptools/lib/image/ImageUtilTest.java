@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 public class ImageUtilTest {

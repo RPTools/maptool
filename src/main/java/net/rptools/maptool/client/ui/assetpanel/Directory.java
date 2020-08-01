@@ -21,7 +21,6 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -138,30 +137,31 @@ public class Directory {
         newDir.parent = this;
         subdirs.add(newDir);
       }
-      subdirs.sort(new Comparator<Directory>() {
-        public int compare(Directory d1, Directory d2) {
-          // Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's
-          String name1 = d1.getPath().getName();
-          String name2 = d2.getPath().getName();
+      subdirs.sort(
+          new Comparator<Directory>() {
+            public int compare(Directory d1, Directory d2) {
+              // Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's
+              String name1 = d1.getPath().getName();
+              String name2 = d2.getPath().getName();
 
-          if (d1.isDir() && d2.isDir()) {
-            return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-          } else if (!d1.isDir() && !d2.isDir()) {
-            if ((d1.isPDF() && d2.isPDF())
+              if (d1.isDir() && d2.isDir()) {
+                return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+              } else if (!d1.isDir() && !d2.isDir()) {
+                if ((d1.isPDF() && d2.isPDF())
                     || (d1.isHeroLabPortfolio() && d2.isHeroLabPortfolio())) {
-              return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-            } else if (d1.isPDF()) {
-              return 1;
-            } else {
-              return -1;
+                  return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+                } else if (d1.isPDF()) {
+                  return 1;
+                } else {
+                  return -1;
+                }
+              } else if (d1.isDir()) {
+                return -1;
+              } else {
+                return 1;
+              }
             }
-          } else if (d1.isDir()) {
-            return -1;
-          } else {
-            return 1;
-          }
-        }
-      });
+          });
       subdirs = Collections.unmodifiableList(subdirs);
     }
   }

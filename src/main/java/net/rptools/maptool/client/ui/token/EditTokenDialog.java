@@ -216,17 +216,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     Component barPanel = null;
     updateStatesPanel();
     Component[] statePanels = getStatesPanel().getComponents();
-      for (Component statePanel : statePanels) {
-          if ("bar".equals(statePanel.getName())) {
-              barPanel = statePanel;
-              continue;
-          }
-          Component[] states = ((Container) statePanel).getComponents();
-          for (Component component : states) {
-              JCheckBox state = (JCheckBox) component;
-              state.setSelected(FunctionUtil.getBooleanValue(token.getState(state.getText())));
-          }
+    for (Component statePanel : statePanels) {
+      if ("bar".equals(statePanel.getName())) {
+        barPanel = statePanel;
+        continue;
       }
+      Component[] states = ((Container) statePanel).getComponents();
+      for (Component component : states) {
+        JCheckBox state = (JCheckBox) component;
+        state.setSelected(FunctionUtil.getBooleanValue(token.getState(state.getText())));
+      }
+    }
 
     // BARS
     if (barPanel != null) {
@@ -647,23 +647,23 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         (TerrainModifierOperation) getTerrainModifierOperationComboBox().getSelectedItem());
 
     token.setTerrainModifiersIgnored(
-            new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
+        new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
     Component barPanel = null;
-      for (Component stateComponent : stateComponents) {
-          if ("bar".equals(stateComponent.getName())) {
-              barPanel = stateComponent;
-              continue;
-          }
-          Component[] components = ((Container) stateComponent).getComponents();
-          for (Component component : components) {
-              JCheckBox cb = (JCheckBox) component;
-              String state = cb.getText();
-              token.setState(state, cb.isSelected() ? Boolean.TRUE : Boolean.FALSE);
-          }
-      } // endfor
+    for (Component stateComponent : stateComponents) {
+      if ("bar".equals(stateComponent.getName())) {
+        barPanel = stateComponent;
+        continue;
+      }
+      Component[] components = ((Container) stateComponent).getComponents();
+      for (Component component : components) {
+        JCheckBox cb = (JCheckBox) component;
+        String state = cb.getText();
+        token.setState(state, cb.isSelected() ? Boolean.TRUE : Boolean.FALSE);
+      }
+    } // endfor
 
     // BARS
     if (barPanel != null) {
@@ -1523,11 +1523,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       for (String speechName : token.getSpeechNames()) {
         rowList.add(new Association<String, String>(speechName, token.getSpeech(speechName)));
       }
-      rowList.sort(new Comparator<Association<String, String>>() {
-        public int compare(Association<String, String> o1, Association<String, String> o2) {
-          return o1.getLeft().compareToIgnoreCase(o2.getLeft());
-        }
-      });
+      rowList.sort(
+          new Comparator<Association<String, String>>() {
+            public int compare(Association<String, String> o1, Association<String, String> o2) {
+              return o1.getLeft().compareToIgnoreCase(o2.getLeft());
+            }
+          });
       init(rowList);
     }
 
@@ -2016,8 +2017,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     List<Selectable> ownerList = new ArrayList<Selectable>();
 
     public OwnerListModel() {
-        Set<String> ownerSet = getModel().getOwners();
-        List<String> list = new ArrayList<String>(ownerSet);
+      Set<String> ownerSet = getModel().getOwners();
+      List<String> list = new ArrayList<String>(ownerSet);
 
       ObservableList<Player> playerList = MapTool.getPlayerList();
       for (Object item : playerList) {

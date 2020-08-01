@@ -445,10 +445,10 @@ public class MessagePanelImageView extends View {
    */
   @Override
   public float getAlignment(int axis) {
-      if (axis == View.Y_AXIS) {
-          return vAlign;
-      }
-      return super.getAlignment(axis);
+    if (axis == View.Y_AXIS) {
+      return vAlign;
+    }
+    return super.getAlignment(axis);
   }
 
   /**
