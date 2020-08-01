@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.io;
 
+import java.util.Objects;
+
 /**
  * This class represents a single node in the tree used for import/export operations.
  *
@@ -108,6 +110,11 @@ public class MaptoolNode {
       if (mtn.object != null && this.object != null && mtn.object.equals(this.object)) return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, object);
   }
 
   /**

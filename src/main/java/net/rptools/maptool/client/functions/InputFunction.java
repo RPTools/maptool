@@ -371,7 +371,7 @@ public class InputFunction extends AbstractFunction {
       this.value = value;
       this.prompt = prompt;
       this.inputType = inputType;
-      this.optionValues = inputType.parseOptionString(options);
+      if (inputType != null) this.optionValues = inputType.parseOptionString(options);
 
       if (inputType != null && inputType.isValueComposite)
         this.valueList = parseStringList(this.value, this.optionValues.get("DELIMITER"));
@@ -1034,7 +1034,7 @@ public class InputFunction extends AbstractFunction {
       // Multiple vars can be packed into a string, separated by "##"
       List<String> substrings = StrListFunctions.toList(paramStr, "##");
       for (String varString : substrings) {
-        if (StringUtils.isEmpty(paramStr)) {
+        if (StringUtils.isEmpty(varString)) {
           continue;
         }
         varStrings.add(varString);

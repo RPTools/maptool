@@ -25,11 +25,7 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -318,6 +314,11 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     @Override
     public boolean equals(Object obj) {
       return key.equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(key);
     }
   }
 }

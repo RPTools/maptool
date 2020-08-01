@@ -148,7 +148,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
       return currentViewList.indexOf(child);
     }
     if (parent instanceof View) {
-      getViewList((View) parent).indexOf(child);
+      return getViewList((View) parent).indexOf(child);
     }
     if (parent instanceof DrawnElement) {
       if (((DrawnElement) parent).getDrawable() instanceof DrawablesGroup) {

@@ -186,7 +186,7 @@ public class TransferableHelper extends TransferHandler {
       // This *really* should be done using either the Strategy or Template patterns. Sigh.
 
       // EXISTING ASSET
-      if (o == null && transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
+      if (transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
         if (log.isInfoEnabled()) log.info("Selected: " + TransferableAsset.dataFlavor);
         o = handleTransferableAsset(transferable);
       }

@@ -613,7 +613,7 @@ public class ZoneRenderer extends JComponent
       moveTimer.start("onMultipleTokensMove");
       // Multiple tokens, the list of tokens and call
       // onMultipleTokensMove() macro function.
-      if (filteredTokens != null && filteredTokens.size() > 1) {
+      if (filteredTokens.size() > 1) {
         tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
@@ -3018,9 +3018,7 @@ public class ZoneRenderer extends JComponent
 
     List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
     for (Token token : tokenList) {
-      if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE)
-          && figuresOnly
-          && !token.isAlwaysVisible()) {
+      if (token.getShape() != Token.TokenShape.FIGURE && figuresOnly && !token.isAlwaysVisible()) {
         continue;
       }
 

@@ -1457,7 +1457,7 @@ public class PointerTool extends DefaultTool {
         Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
         // Jamz test move clients to view when using point (for GM only)...
         // TODO: Snap player view back when done?
-        if (MapTool.getPlayer().isGM() & type.equals(Pointer.Type.LOOK_HERE)) {
+        if (MapTool.getPlayer().isGM() && type.equals(Pointer.Type.LOOK_HERE)) {
           MapTool.serverCommand()
               .enforceZoneView(
                   renderer.getZone().getId(),

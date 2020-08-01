@@ -474,7 +474,7 @@ public class AppActions {
 
             for (Map.Entry<MD5Key, Asset> entry : missing.entrySet()) {
               String remote = entry.getKey().toString();
-              repoEntries.put(remote, dir == null ? remote : new File(dir, remote).getPath());
+              repoEntries.put(remote, new File(dir, remote).getPath());
               ftp.addToQueue(
                   new FTPTransferObject(
                       Direction.FTP_PUT, entry.getValue().getImage(), dir, remote));

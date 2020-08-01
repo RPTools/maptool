@@ -187,7 +187,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
       return currentViewList.indexOf(child);
     }
     if (parent instanceof View) {
-      getViewList((View) parent).indexOf(child);
+      return getViewList((View) parent).indexOf(child);
     }
     return -1;
   }

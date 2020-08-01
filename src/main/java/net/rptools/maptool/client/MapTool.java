@@ -1404,7 +1404,7 @@ public class MapTool {
             }
           };
 
-      webAppThread.run();
+      webAppThread.start();
     } catch (Exception e) { // TODO: This needs to be logged
       System.out.println("Unable to start web server");
       e.printStackTrace();
