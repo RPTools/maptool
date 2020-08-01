@@ -229,10 +229,8 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("deleteTable", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      if (lookupTable != null) {
-        MapTool.getCampaign().getLookupTableMap().remove(name);
-        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      }
+      MapTool.getCampaign().getLookupTableMap().remove(name);
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
     } else if ("getTableImage".equalsIgnoreCase(function)) {
@@ -267,12 +265,10 @@ public class LookupTableFunction extends AbstractFunction {
       String oldName = params.get(0).toString();
       String newName = params.get(1).toString();
       LookupTable oldTable = getMaptoolTable(oldName, function);
-      if (oldTable != null) {
-        LookupTable newTable = new LookupTable(oldTable);
-        newTable.setName(newName);
-        MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
-        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      }
+      LookupTable newTable = new LookupTable(oldTable);
+      newTable.setName(newName);
+      MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
     } else if ("setTableEntry".equalsIgnoreCase(function)) {
