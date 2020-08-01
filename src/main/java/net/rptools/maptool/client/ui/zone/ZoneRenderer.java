@@ -2876,13 +2876,7 @@ public class ZoneRenderer extends JComponent
             if (o1.getY() > o2.getY()) {
               return 1;
             }
-            if (o1.getX() < o2.getX()) {
-              return -1;
-            }
-            if (o1.getX() > o2.getX()) {
-              return 1;
-            }
-            return 0;
+            return Integer.compare(o1.getX(), o2.getX());
           }
         });
     return list;

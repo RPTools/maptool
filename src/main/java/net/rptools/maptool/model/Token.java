@@ -2363,7 +2363,7 @@ public class Token extends BaseModel implements Cloneable {
           if (o1 == null || o2 == null) {
             return 0;
           }
-          return o1.z < o2.z ? -1 : o1.z == o2.z ? 0 : 1;
+          return Integer.compare(o1.z, o2.z);
         }
       };
 
