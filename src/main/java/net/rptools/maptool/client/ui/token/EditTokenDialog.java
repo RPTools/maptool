@@ -227,14 +227,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     Component barPanel = null;
     updateStatesPanel();
     Component[] statePanels = getStatesPanel().getComponents();
-    for (int j = 0; j < statePanels.length; j++) {
-      if ("bar".equals(statePanels[j].getName())) {
-        barPanel = statePanels[j];
+    for (Component statePanel : statePanels) {
+      if ("bar".equals(statePanel.getName())) {
+        barPanel = statePanel;
         continue;
       }
-      Component[] states = ((Container) statePanels[j]).getComponents();
-      for (int i = 0; i < states.length; i++) {
-        JCheckBox state = (JCheckBox) states[i];
+      Component[] states = ((Container) statePanel).getComponents();
+      for (Component component : states) {
+        JCheckBox state = (JCheckBox) component;
         state.setSelected(FunctionUtil.getBooleanValue(token.getState(state.getText())));
       }
     }
@@ -664,14 +664,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
     Component barPanel = null;
-    for (int j = 0; j < stateComponents.length; j++) {
-      if ("bar".equals(stateComponents[j].getName())) {
-        barPanel = stateComponents[j];
+    for (Component stateComponent : stateComponents) {
+      if ("bar".equals(stateComponent.getName())) {
+        barPanel = stateComponent;
         continue;
       }
-      Component[] components = ((Container) stateComponents[j]).getComponents();
-      for (int i = 0; i < components.length; i++) {
-        JCheckBox cb = (JCheckBox) components[i];
+      Component[] components = ((Container) stateComponent).getComponents();
+      for (Component component : components) {
+        JCheckBox cb = (JCheckBox) component;
         String state = cb.getText();
         token.setState(state, cb.isSelected() ? Boolean.TRUE : Boolean.FALSE);
       }

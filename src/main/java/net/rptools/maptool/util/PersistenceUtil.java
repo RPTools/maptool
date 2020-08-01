@@ -202,8 +202,7 @@ public class PersistenceUtil {
         // destroy all properties and macros. Keep some fields, though. Since that type
         // of object editing doesn't belong here, we just call Token.imported() and let
         // that method Do The Right Thing.
-        for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext(); ) {
-          Token token = iter.next();
+        for (Token token : persistedMap.zone.getAllTokens()) {
           token.imported();
         }
         // XXX FJE This doesn't work the way I want it to. But doing this the Right Way

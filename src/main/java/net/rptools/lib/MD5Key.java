@@ -149,16 +149,16 @@ public final class MD5Key implements Serializable {
    */
   private String encodeToHex(byte[] data) {
     StringBuilder strbuild = new StringBuilder();
-    for (int i = 0; i < data.length; i++) {
-      String hex = Integer.toHexString(data[i]);
-      if (hex.length() < 2) {
-        strbuild.append("0");
+      for (byte datum : data) {
+          String hex = Integer.toHexString(datum);
+          if (hex.length() < 2) {
+              strbuild.append("0");
+          }
+          if (hex.length() > 2) {
+              hex = hex.substring(hex.length() - 2);
+          }
+          strbuild.append(hex);
       }
-      if (hex.length() > 2) {
-        hex = hex.substring(hex.length() - 2);
-      }
-      strbuild.append(hex);
-    }
     return strbuild.toString();
   }
 }

@@ -1042,8 +1042,7 @@ public class AppPreferences {
 
   public static void setMruCampaigns(List<File> mruCampaigns) {
     StringBuilder combined = new StringBuilder("");
-    for (ListIterator<File> iter = mruCampaigns.listIterator(); iter.hasNext(); ) {
-      File file = iter.next();
+    for (File file : mruCampaigns) {
       String path = null;
       try {
         path = file.getCanonicalPath();
@@ -1071,8 +1070,8 @@ public class AppPreferences {
       // It's important that '%3A' is done first
       combined = combined.replaceAll("%3A", File.pathSeparator).replaceAll("%25", "%");
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) {
-        mruCampaigns.add(new File(all[i]));
+      for (String s : all) {
+        mruCampaigns.add(new File(s));
       }
     }
     return mruCampaigns;
@@ -1080,8 +1079,8 @@ public class AppPreferences {
 
   public static void setSavedPaintTextures(List<File> savedTextures) {
     StringBuilder combined = new StringBuilder("");
-    for (ListIterator<File> iter = savedTextures.listIterator(); iter.hasNext(); ) {
-      combined.append(iter.next().getPath());
+    for (File savedTexture : savedTextures) {
+      combined.append(savedTexture.getPath());
       combined.append(File.pathSeparator);
     }
     prefs.put(KEY_SAVED_PAINT_TEXTURES, combined.toString());
@@ -1092,8 +1091,8 @@ public class AppPreferences {
     String combined = prefs.get(KEY_SAVED_PAINT_TEXTURES, null);
     if (combined != null) {
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) {
-        savedTextures.add(new File(all[i]));
+      for (String s : all) {
+        savedTextures.add(new File(s));
       }
     }
     return savedTextures;

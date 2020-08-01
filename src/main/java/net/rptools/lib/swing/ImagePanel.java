@@ -354,8 +354,8 @@ public class ImagePanel extends JComponent
 
   protected void fireSelectionEvent() {
     List<Object> selectionList = Collections.unmodifiableList(selectedIDList);
-    for (int i = 0; i < selectionListenerList.size(); i++) {
-      selectionListenerList.get(i).selectionPerformed(selectionList);
+    for (SelectionListener selectionListener : selectionListenerList) {
+      selectionListener.selectionPerformed(selectionList);
     }
   }
 

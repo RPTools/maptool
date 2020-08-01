@@ -143,9 +143,9 @@ public abstract class DataTemplate {
     data.keySet().toArray(sorted);
     Arrays.sort(sorted);
 
-    for (int i = 0; i < sorted.length; i++) {
-      Object one = data.get(sorted[i]);
-      model.addNode(path, new MaptoolNode(sorted[i], one));
+    for (String s : sorted) {
+      Object one = data.get(s);
+      model.addNode(path, new MaptoolNode(s, one));
     }
   }
 

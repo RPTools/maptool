@@ -133,11 +133,11 @@ public class Directory {
       files = Collections.unmodifiableList(Arrays.asList(listFiles));
       File[] subdirList = directory.listFiles(DIRECTORY_FILTER);
       subdirs = new ArrayList<Directory>();
-      for (int i = 0; i < subdirList.length; i++) {
-        Directory newDir = newDirectory(subdirList[i], fileFilter);
-        newDir.parent = this;
-        subdirs.add(newDir);
-      }
+        for (File file : subdirList) {
+            Directory newDir = newDirectory(file, fileFilter);
+            newDir.parent = this;
+            subdirs.add(newDir);
+        }
       Collections.sort(
           subdirs,
           new Comparator<Directory>() {
