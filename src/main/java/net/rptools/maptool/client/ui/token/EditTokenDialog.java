@@ -2016,9 +2016,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     List<Selectable> ownerList = new ArrayList<Selectable>();
 
     public OwnerListModel() {
-      List<String> list = new ArrayList<String>();
-      Set<String> ownerSet = getModel().getOwners();
-      list.addAll(ownerSet);
+        Set<String> ownerSet = getModel().getOwners();
+        List<String> list = new ArrayList<String>(ownerSet);
 
       ObservableList<Player> playerList = MapTool.getPlayerList();
       for (Object item : playerList) {

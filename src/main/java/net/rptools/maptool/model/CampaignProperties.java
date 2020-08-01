@@ -73,8 +73,7 @@ public class CampaignProperties {
   public CampaignProperties(CampaignProperties properties) {
     tokenTypeMap = new HashMap<String, List<TokenProperty>>();
     for (Entry<String, List<TokenProperty>> entry : properties.tokenTypeMap.entrySet()) {
-      List<TokenProperty> typeList = new ArrayList<TokenProperty>();
-      typeList.addAll(properties.tokenTypeMap.get(entry.getKey()));
+        List<TokenProperty> typeList = new ArrayList<TokenProperty>(properties.tokenTypeMap.get(entry.getKey()));
 
       tokenTypeMap.put(entry.getKey(), typeList);
     }
