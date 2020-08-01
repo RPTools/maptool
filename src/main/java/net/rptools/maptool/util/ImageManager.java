@@ -221,9 +221,7 @@ public class ImageManager {
 
       // Force a load of the asset, this will trigger a transfer if the
       // asset is not available locally
-      if (image == null) {
-        AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
-      }
+      AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
       return TRANSFERING_IMAGE;
     }
   }

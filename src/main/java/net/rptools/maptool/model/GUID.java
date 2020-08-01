@@ -102,7 +102,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   @Override
   public boolean equals(Object object) {
     if (object == null) {
-      return this == null;
+      return false;
     }
     Class<? extends Object> objClass = object.getClass();
 

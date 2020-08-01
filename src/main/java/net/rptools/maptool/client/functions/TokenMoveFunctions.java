@@ -95,7 +95,7 @@ public class TokenMoveFunctions extends AbstractFunction {
               I18N.getText("macro.function.general.argumentTypeN", functionName, 1));
         }
         val = (BigDecimal) parameters.get(0);
-        useDistancePerCell = val == null || !val.equals(BigDecimal.ZERO);
+        useDistancePerCell = !val.equals(BigDecimal.ZERO);
       }
       Path<? extends AbstractPoint> path = tokenInContext.getLastPath();
 

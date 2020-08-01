@@ -61,7 +61,6 @@ public class ConeTemplate extends RadiusTemplate {
    */
   public void setDirection(Direction direction) {
     if (direction != null) this.direction = direction.name();
-    else direction = null;
   }
 
   /**

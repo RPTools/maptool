@@ -839,7 +839,7 @@ public class FindTokenFunctions extends AbstractFunction {
     List<Token> tokens =
         getTokenList(resolver, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
 
-    if (tokens != null && !tokens.isEmpty()) {
+    if (!tokens.isEmpty()) {
       for (Token token : tokens) {
         if (nameOnly) {
           values.add(token.getName());
