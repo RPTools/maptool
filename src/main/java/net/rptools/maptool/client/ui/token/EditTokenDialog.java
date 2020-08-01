@@ -647,7 +647,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         (TerrainModifierOperation) getTerrainModifierOperationComboBox().getSelectedItem());
 
     token.setTerrainModifiersIgnored(
-            new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
+        new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();

@@ -100,14 +100,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class BringToFrontAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-        for (DrawnElement de : drawableList) {
-            if (selectedDrawSet.contains(de.getDrawable().getId())) {
-                renderer.getZone().removeDrawable(de.getDrawable().getId());
-                MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
-                renderer.getZone().addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
-                MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
-            }
+      for (DrawnElement de : drawableList) {
+        if (selectedDrawSet.contains(de.getDrawable().getId())) {
+          renderer.getZone().removeDrawable(de.getDrawable().getId());
+          MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+          renderer.getZone().addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
+          MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
         }
+      }
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();
     }
@@ -123,16 +123,16 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-        for (DrawnElement de : drawableList) {
-            if (de.getDrawable().getLayer() != this.layer
-                    && selectedDrawSet.contains(de.getDrawable().getId())) {
-                renderer.getZone().removeDrawable(de.getDrawable().getId());
-                MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
-                de.getDrawable().setLayer(this.layer);
-                renderer.getZone().addDrawable(de);
-                MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
-            }
+      for (DrawnElement de : drawableList) {
+        if (de.getDrawable().getLayer() != this.layer
+            && selectedDrawSet.contains(de.getDrawable().getId())) {
+          renderer.getZone().removeDrawable(de.getDrawable().getId());
+          MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+          de.getDrawable().setLayer(this.layer);
+          renderer.getZone().addDrawable(de);
+          MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
         }
+      }
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();
     }
@@ -296,12 +296,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class SendToBackAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-        for (DrawnElement de : drawableList) {
-            if (selectedDrawSet.contains(de.getDrawable().getId())) {
-                renderer.getZone().removeDrawable(de.getDrawable().getId());
-                renderer.getZone().addDrawableRear(de);
-            }
+      for (DrawnElement de : drawableList) {
+        if (selectedDrawSet.contains(de.getDrawable().getId())) {
+          renderer.getZone().removeDrawable(de.getDrawable().getId());
+          renderer.getZone().addDrawableRear(de);
         }
+      }
       // horrid kludge needed to redraw zone :(
       for (DrawnElement de : renderer.getZone().getAllDrawnElements()) {
         MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
@@ -410,16 +410,16 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
-      for (DrawnElement de : drawableList) {
-          if (de.getDrawable().getId().equals(guid)) {
-              return de;
-          }
-          if (de.getDrawable() instanceof DrawablesGroup) {
-              DrawnElement result =
-                      findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
-              if (result != null) return result;
-          }
+    for (DrawnElement de : drawableList) {
+      if (de.getDrawable().getId().equals(guid)) {
+        return de;
       }
+      if (de.getDrawable() instanceof DrawablesGroup) {
+        DrawnElement result =
+            findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
+        if (result != null) return result;
+      }
+    }
     return null;
   }
 

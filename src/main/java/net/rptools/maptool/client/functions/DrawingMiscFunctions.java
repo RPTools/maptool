@@ -23,7 +23,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -163,17 +162,17 @@ public class DrawingMiscFunctions extends DrawingFunctions {
    */
   private List<String> findDrawings(List<DrawnElement> drawableList, String name) {
     List<String> drawingList = new LinkedList<String>();
-      for (DrawnElement de : drawableList) {
-          if (de.getDrawable() instanceof AbstractDrawing) {
-              if (name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
-                  drawingList.add(de.getDrawable().getId().toString());
-              }
-          }
-          if (de.getDrawable() instanceof DrawablesGroup) {
-              List<DrawnElement> glist = ((DrawablesGroup) de.getDrawable()).getDrawableList();
-              drawingList.addAll(findDrawings(glist, name));
-          }
+    for (DrawnElement de : drawableList) {
+      if (de.getDrawable() instanceof AbstractDrawing) {
+        if (name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
+          drawingList.add(de.getDrawable().getId().toString());
+        }
       }
+      if (de.getDrawable() instanceof DrawablesGroup) {
+        List<DrawnElement> glist = ((DrawablesGroup) de.getDrawable()).getDrawableList();
+        drawingList.addAll(findDrawings(glist, name));
+      }
+    }
     return drawingList;
   }
 }
