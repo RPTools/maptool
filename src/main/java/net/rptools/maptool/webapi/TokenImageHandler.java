@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.webapi;
 
+import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,15 +25,11 @@ import net.rptools.maptool.util.ImageManager;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import java.io.IOException;
-
 public class TokenImageHandler extends AbstractHandler {
   @Override
   public void handle(
-      String target,
-      Request baseRequest,
-      HttpServletRequest request,
-      HttpServletResponse response) throws IOException {
+      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
 
     String[] args = target.replaceAll("^/", "").split("/");
 
@@ -108,7 +105,8 @@ public class TokenImageHandler extends AbstractHandler {
     return true;
   }
 
-  private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId) throws IOException {
+  private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId)
+      throws IOException {
 
     System.out.println("DEBUG: Here (> 0) as well");
     Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);

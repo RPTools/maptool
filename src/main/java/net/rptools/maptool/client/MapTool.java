@@ -1177,7 +1177,8 @@ public class MapTool {
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, LocalPlayer player) throws IOException {
+  public static void createConnection(String host, int port, LocalPlayer player)
+      throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 

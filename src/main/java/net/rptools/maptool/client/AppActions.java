@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2171,63 +2170,63 @@ public class AppActions {
                   Campaign campaign = MapTool.getCampaign();
 
                   boolean failed = false;
-                    ServerDisconnectHandler.disconnectExpected = true;
-                    MapTool.stopServer();
+                  ServerDisconnectHandler.disconnectExpected = true;
+                  MapTool.stopServer();
 
-                    // Use UPnP to open port in router
-                    if (serverProps.getUseUPnP()) {
-                      UPnPUtil.openPort(serverProps.getPort());
-                    }
-                    // Right now set this is set to whatever the last server settings were. If we
-                    // wanted to turn it on and
-                    // leave it turned on, the line would change to:
-                    // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
-                    campaign.setHasUsedFogToolbar(useIF);
+                  // Use UPnP to open port in router
+                  if (serverProps.getUseUPnP()) {
+                    UPnPUtil.openPort(serverProps.getPort());
+                  }
+                  // Right now set this is set to whatever the last server settings were. If we
+                  // wanted to turn it on and
+                  // leave it turned on, the line would change to:
+                  // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
+                  campaign.setHasUsedFogToolbar(useIF);
 
-                    // Make a copy of the campaign since we don't coordinate local changes well ...
-                    // yet
+                  // Make a copy of the campaign since we don't coordinate local changes well ...
+                  // yet
 
-                    /*
-                     * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
-                     * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
-                     * instance.
-                     *
-                     * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
-                     */
-                    MapTool.startServer(
-                        dialog.getUsernameTextField().getText(), config, policy, campaign, true);
+                  /*
+                   * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
+                   * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
+                   * instance.
+                   *
+                   * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
+                   */
+                  MapTool.startServer(
+                      dialog.getUsernameTextField().getText(), config, policy, campaign, true);
 
-                    // Connect to server
-                    String playerType = dialog.getRoleCombo().getSelectedItem().toString();
-                    if (playerType.equals("GM")) {
-                      MapTool.createConnection(
-                          "localhost",
-                          serverProps.getPort(),
-                          new LocalPlayer(
-                              dialog.getUsernameTextField().getText(),
-                              serverProps.getRole(),
-                              serverProps.getGMPassword()));
-                    } else {
-                      MapTool.createConnection(
-                          "localhost",
-                          serverProps.getPort(),
-                          new LocalPlayer(
-                              dialog.getUsernameTextField().getText(),
-                              serverProps.getRole(),
-                              serverProps.getPlayerPassword()));
-                    }
+                  // Connect to server
+                  String playerType = dialog.getRoleCombo().getSelectedItem().toString();
+                  if (playerType.equals("GM")) {
+                    MapTool.createConnection(
+                        "localhost",
+                        serverProps.getPort(),
+                        new LocalPlayer(
+                            dialog.getUsernameTextField().getText(),
+                            serverProps.getRole(),
+                            serverProps.getGMPassword()));
+                  } else {
+                    MapTool.createConnection(
+                        "localhost",
+                        serverProps.getPort(),
+                        new LocalPlayer(
+                            dialog.getUsernameTextField().getText(),
+                            serverProps.getRole(),
+                            serverProps.getPlayerPassword()));
+                  }
 
-                    // connecting
-                    MapTool.getFrame()
-                        .getConnectionStatusPanel()
-                        .setStatus(ConnectionStatusPanel.Status.server);
-                    MapTool.addLocalMessage(
-                        "<span style='color:blue'><i>"
-                            + I18N.getText("msg.info.startServer")
-                            + "</i></span>");
+                  // connecting
+                  MapTool.getFrame()
+                      .getConnectionStatusPanel()
+                      .setStatus(ConnectionStatusPanel.Status.server);
+                  MapTool.addLocalMessage(
+                      "<span style='color:blue'><i>"
+                          + I18N.getText("msg.info.startServer")
+                          + "</i></span>");
 
-                    if (failed) {
-                      MapTool.startPersonalServer(campaign);
+                  if (failed) {
+                    MapTool.startPersonalServer(campaign);
                   }
                 }
               });
@@ -2279,20 +2278,20 @@ public class AppActions {
                 @Override
                 public void run() {
                   boolean failed = false;
-                    ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
-                    MapTool.createConnection(
-                        dialog.getServer(),
-                        dialog.getPort(),
-                        new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+                  ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
+                  MapTool.createConnection(
+                      dialog.getServer(),
+                      dialog.getPort(),
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
 
+                  MapTool.getFrame().hideGlassPane();
+                  MapTool.getFrame()
+                      .showFilledGlassPane(
+                          new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                  if (failed || MapTool.getConnection() == null) {
                     MapTool.getFrame().hideGlassPane();
-                    MapTool.getFrame()
-                        .showFilledGlassPane(
-                            new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
-                    if (failed || MapTool.getConnection() == null) {
-                    MapTool.getFrame().hideGlassPane();
-                        MapTool.startPersonalServer(oldCampaign);
-                    }
+                    MapTool.startPersonalServer(oldCampaign);
+                  }
                 }
               });
         }
@@ -2324,7 +2323,7 @@ public class AppActions {
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();
     MapTool.disconnect();
-      MapTool.startPersonalServer(campaign);
+    MapTool.startPersonalServer(campaign);
   }
 
   public static final Action LOAD_CAMPAIGN =
