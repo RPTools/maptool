@@ -138,7 +138,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  public static enum ExportRadioButtons {
+  public enum ExportRadioButtons {
     // Format of enum declaration:
     // [Abeille Forms Designer button name] (default checked, default enabled)
     // Button Group 1 (not that it matters for this controller)
@@ -237,7 +237,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  private static enum ExportLayers {
+  private enum ExportLayers {
     // enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
     LAYER_TOKEN(true),
     LAYER_HIDDEN(false),

@@ -38,7 +38,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
-  public static enum COMMAND {
+  public enum COMMAND {
     // @formatter:off
     bootPlayer,
     setCampaign,
