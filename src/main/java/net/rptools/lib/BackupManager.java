@@ -29,7 +29,7 @@ public class BackupManager {
   private File backupDir;
   private long maxBackupSize;
 
-  public BackupManager(File backupDir) throws IOException {
+  public BackupManager(File backupDir) {
     this(backupDir, DEFAULT_MAX_BACKUP_SIZE);
   }
 
@@ -49,7 +49,7 @@ public class BackupManager {
     maxBackupSize = size;
   }
 
-  public void backup(File file) throws IOException {
+  public void backup(File file) {
 
     // Active ?
     if (maxBackupSize < 1) {

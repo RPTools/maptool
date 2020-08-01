@@ -56,7 +56,7 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy) throws IOException {
+  public MapToolServer(ServerConfig config, ServerPolicy policy) {
     handler = new ServerMethodHandler(this);
     conn = new MapToolServerConnection(this, config.getPort());
     conn.addMessageHandler(handler);

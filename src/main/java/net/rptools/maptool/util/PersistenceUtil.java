@@ -602,7 +602,7 @@ public class PersistenceUtil {
     return token;
   }
 
-  public static Token loadToken(URL url) throws IOException {
+  public static Token loadToken(URL url) {
     // Create a temporary file from the downloaded URL
     File newFile = new File(PackedFile.getTmpDir(), new GUID() + ".url");
     FileUtils.copyURLToFile(url, newFile);

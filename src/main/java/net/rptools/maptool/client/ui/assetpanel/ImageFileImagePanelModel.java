@@ -449,8 +449,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     private final int pageNumber;
     private final ExtractImagesFromPDF extractor;
 
-    public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan)
-        throws IOException {
+    public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan) {
       this.pageNumber = pageNumber;
       this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
     }

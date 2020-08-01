@@ -249,8 +249,7 @@ public final class ExtractImagesFromPDF {
    * This is the REAL beauty of this function as currently no other tools outside of Full Acrobat extracts these raw images!
    *
    */
-  private void extractAnnotationImages(PDPage page, int pageNumber, String pageFormat)
-      throws IOException {
+  private void extractAnnotationImages(PDPage page, int pageNumber, String pageFormat) {
     int imgCount = 1;
     String pageNumberFormatted = String.format(pageNumberFormat, pageNumber);
 

@@ -123,7 +123,7 @@ class FTPClientConn {
     return openDownloadStream(null, targetfile);
   }
 
-  protected InputStream openDownloadStream(String dir, String targetfile) throws IOException {
+  protected InputStream openDownloadStream(String dir, String targetfile) {
     FTPCommand cmd = new FTPCommand(host);
     cmd.login(user, password);
     InputStream is = cmd.retrieveFileStream((dir == null ? "" : dir + "/") + targetfile);
@@ -134,7 +134,7 @@ class FTPClientConn {
     return openUploadStream(null, targetfile);
   }
 
-  protected OutputStream openUploadStream(String dir, String targetfile) throws IOException {
+  protected OutputStream openUploadStream(String dir, String targetfile) {
     FTPCommand cmd = new FTPCommand(host);
     cmd.login(user, password);
     OutputStream os = cmd.storeFileStream((dir == null ? "" : dir + "/") + targetfile);
