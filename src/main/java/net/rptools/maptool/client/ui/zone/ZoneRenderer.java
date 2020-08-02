@@ -3546,7 +3546,7 @@ public class ZoneRenderer extends JComponent
           selectedBorder.paintAround(clippedG, (int) sp.x, (int) sp.y, (int) width, (int) height);
         }
         // Remove labels from the cache if the corresponding tokens are deselected
-      } else if (!AppState.isShowTokenNames() && labelRenderingCache.containsKey(token.getId())) {
+      } else if (!AppState.isShowTokenNames()) {
         labelRenderingCache.remove(token.getId());
       }
 

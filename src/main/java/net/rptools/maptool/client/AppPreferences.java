@@ -1009,9 +1009,7 @@ public class AppPreferences {
       if (!file.exists()) {
         continue;
       }
-      if (!rootList.contains(file)) {
-        rootList.add(file);
-      }
+      rootList.add(file);
     }
     return rootList;
   }

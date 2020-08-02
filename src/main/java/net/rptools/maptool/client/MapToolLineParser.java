@@ -140,12 +140,12 @@ public class MapToolLineParser {
 
     for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof AdditionalFunctionDescription) {
-        for (String alias : Arrays.asList(function.getAliases())) {
+        for (String alias : function.getAliases()) {
           functionList.put(alias, function.getClass().getName());
           //          log.info(alias + " : " + function.getClass().getName());
         }
       } else {
-        for (String alias : Arrays.asList(function.getAliases()))
+        for (String alias : function.getAliases())
           functionList.put(alias, function.getClass().getName());
       }
     }
