@@ -16,8 +16,6 @@ package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.Serializable;
 import java.text.NumberFormat;
@@ -75,27 +73,19 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
   }
 
   public void initCloseButton() {
-    getCloseButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                dialog.closeDialog();
-              }
-            });
+    getCloseButton().addActionListener(e -> dialog.closeDialog());
   }
 
   private void updateTransferTable() {
 
     final TransferTableModel model = new TransferTableModel();
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            getTransferTable().setModel(model);
+        () -> {
+          getTransferTable().setModel(model);
 
-            TableColumnModel colModel = getTransferTable().getColumnModel();
-            colModel.getColumn(1).setMaxWidth(100);
-            colModel.getColumn(2).setMaxWidth(75);
-          }
+          TableColumnModel colModel = getTransferTable().getColumnModel();
+          colModel.getColumn(1).setMaxWidth(100);
+          colModel.getColumn(2).setMaxWidth(75);
         });
   }
 

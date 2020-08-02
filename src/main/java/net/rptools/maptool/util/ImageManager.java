@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
@@ -149,15 +148,12 @@ public class ImageManager {
     image =
         getImage(
             assetId,
-            new ImageObserver() {
-              public boolean imageUpdate(
-                  Image img, int infoflags, int x, int y, int width, int height) {
-                // If we're here then the image has just finished loading
-                // release the blocked thread
-                log.debug("Countdown: " + assetId);
-                loadLatch.countDown();
-                return false;
-              }
+            (img, infoflags, x, y, width, height) -> {
+              // If we're here then the image has just finished loading
+              // release the blocked thread
+              log.debug("Countdown: " + assetId);
+              loadLatch.countDown();
+              return false;
             });
     if (image == TRANSFERING_IMAGE) {
       try {

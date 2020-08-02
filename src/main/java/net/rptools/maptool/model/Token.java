@@ -168,11 +168,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
-      };
+      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 
   private final Map<String, MD5Key> imageAssetMap;
   private String currentImageAsset;
@@ -2341,22 +2337,18 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public static final Comparator<Token> COMPARE_BY_NAME =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          if (o1 == null || o2 == null) {
-            return 0;
-          }
-          return o1.getName().compareTo(o2.getName());
+      (o1, o2) -> {
+        if (o1 == null || o2 == null) {
+          return 0;
         }
+        return o1.getName().compareTo(o2.getName());
       };
   public static final Comparator<Token> COMPARE_BY_ZORDER =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          if (o1 == null || o2 == null) {
-            return 0;
-          }
-          return Integer.compare(o1.z, o2.z);
+      (o1, o2) -> {
+        if (o1 == null || o2 == null) {
+          return 0;
         }
+        return Integer.compare(o1.z, o2.z);
       };
 
   @Override

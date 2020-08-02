@@ -38,7 +38,6 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -243,13 +242,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zr : zrenderers) {
       List<Token> tokenList =
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getName().toLowerCase().startsWith("lib:");
-                    }
-                  });
+          zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
 
       for (Token token : tokenList) {
         // If the token is not owned by everyone and all owners are GMs then we are in its a trusted

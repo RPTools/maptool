@@ -254,25 +254,22 @@ public class AssetManager {
       final MD5Key id, final AssetAvailableListener... listeners) {
 
     assetLoaderThreadPool.submit(
-        new Runnable() {
-          public void run() {
+        () -> {
+          Asset asset = getAsset(id);
 
-            Asset asset = getAsset(id);
-
-            // Simplest case, we already have it
-            if (asset != null) {
-              for (AssetAvailableListener listener : listeners) {
-                listener.assetAvailable(id);
-              }
-
-              return;
+          // Simplest case, we already have it
+          if (asset != null) {
+            for (AssetAvailableListener listener : listeners) {
+              listener.assetAvailable(id);
             }
 
-            // Let's get it from the server
-            // As a last resort we request the asset from the server
-            if (!isAssetRequested(id)) {
-              requestAssetFromServer(id, listeners);
-            }
+            return;
+          }
+
+          // Let's get it from the server
+          // As a last resort we request the asset from the server
+          if (!isAssetRequested(id)) {
+            requestAssetFromServer(id, listeners);
           }
         });
   }
@@ -485,25 +482,23 @@ public class AssetManager {
 
       final File assetFile = getAssetCacheFile(asset);
 
-      new Thread() {
-        @Override
-        public void run() {
-
-          try {
-            assetFile.getParentFile().mkdirs();
-            // Image
-            OutputStream out = new FileOutputStream(assetFile);
-            out.write(asset.getImage());
-            out.close();
-          } catch (IOException ioe) {
-            log.error("Could not persist asset while writing image data", ioe);
-            return;
-          } catch (NullPointerException npe) {
-            // Not an issue, will update once th frame is finished loading...
-            log.warn("Could not update statusbar while MapTool frame is loading.", npe);
-          }
-        }
-      }.start();
+      new Thread(
+              () -> {
+                try {
+                  assetFile.getParentFile().mkdirs();
+                  // Image
+                  OutputStream out = new FileOutputStream(assetFile);
+                  out.write(asset.getImage());
+                  out.close();
+                } catch (IOException ioe) {
+                  log.error("Could not persist asset while writing image data", ioe);
+                  return;
+                } catch (NullPointerException npe) {
+                  // Not an issue, will update once th frame is finished loading...
+                  log.warn("Could not update statusbar while MapTool frame is loading.", npe);
+                }
+              })
+          .start();
     }
     if (!assetInfoIsInPersistentCache(asset)) {
 

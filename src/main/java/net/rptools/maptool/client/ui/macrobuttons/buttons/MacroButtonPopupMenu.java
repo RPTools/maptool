@@ -337,39 +337,37 @@ public class MacroButtonPopupMenu extends JPopupMenu {
           FileUtil.getFileWithExtension(
               chooser.getSelectedFile(), AppConstants.MACRO_FILE_EXTENSION);
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              if (!selectedFile.exists()) {
-                if (!MapTool.confirm(
-                    I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
-                  return;
-                }
-              } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+          () -> {
+            if (!selectedFile.exists()) {
+              if (!MapTool.confirm(
+                  I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
                 return;
               }
+            } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+              return;
+            }
 
-              try {
-                if (panelClass.equals("SelectionPanel")) {
-                  if (MapTool.getFrame()
-                      .getSelectionPanel()
-                      .getCommonMacros()
-                      .contains(button.getProperties())) {
-                    if (confirmCommonExport(button.getProperties())) {
-                      PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
-                    } else {
-                      MapTool.showInformation(I18N.getText("msg.info.macro.exportCancel"));
-                      return;
-                    }
-                  } else {
+            try {
+              if (panelClass.equals("SelectionPanel")) {
+                if (MapTool.getFrame()
+                    .getSelectionPanel()
+                    .getCommonMacros()
+                    .contains(button.getProperties())) {
+                  if (confirmCommonExport(button.getProperties())) {
                     PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
+                  } else {
+                    MapTool.showInformation(I18N.getText("msg.info.macro.exportCancel"));
+                    return;
                   }
+                } else {
+                  PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
                 }
-                PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
-                MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-                MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
               }
+              PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
+              MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
             }
           });
     }
