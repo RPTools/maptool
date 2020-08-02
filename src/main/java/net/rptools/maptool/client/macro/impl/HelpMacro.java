@@ -46,7 +46,7 @@ public class HelpMacro implements Macro {
     StringBuilder builder = new StringBuilder();
 
     List<Macro> macros = new ArrayList<Macro>(MacroManager.getRegisteredMacros());
-    Collections.sort(macros, MACRO_NAME_COMPARATOR);
+    macros.sort(MACRO_NAME_COMPARATOR);
 
     builder.append("<table border='1'>");
     builder

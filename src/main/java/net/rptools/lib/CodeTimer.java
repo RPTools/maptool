@@ -118,13 +118,11 @@ public class CodeTimer {
         .append(" elements)\n");
 
     List<String> idSet = new ArrayList<String>(timeMap.keySet());
-    Collections.sort(
-        idSet,
-        new Comparator<String>() {
-          public int compare(String arg0, String arg1) {
-            return orderMap.get(arg0) - orderMap.get(arg1);
-          }
-        });
+    idSet.sort(new Comparator<String>() {
+      public int compare(String arg0, String arg1) {
+        return orderMap.get(arg0) - orderMap.get(arg1);
+      }
+    });
     for (String id : idSet) {
       long elapsed = timeMap.get(id).getElapsed();
       if (elapsed < threshold) {
