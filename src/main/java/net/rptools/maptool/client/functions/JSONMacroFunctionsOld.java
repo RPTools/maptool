@@ -1125,9 +1125,9 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
     }
 
     if (sortAsNumber) {
-      Collections.sort(jarr, new JSONNumberComparator(ascending));
+      jarr.sort(new JSONNumberComparator(ascending));
     } else {
-      Collections.sort(jarr, new JSONStringComparator(ascending));
+      jarr.sort(new JSONStringComparator(ascending));
     }
     return jarr;
   }
@@ -1180,7 +1180,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    Collections.sort(jsonArray, new JSONObjectComparator(ascending, fields, comparatorList));
+    jsonArray.sort(new JSONObjectComparator(ascending, fields, comparatorList));
 
     return jsonArray;
   }
@@ -1402,11 +1402,11 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return sb.toString();
     } else if (obj instanceof JSONArray) {
       JSONArray jarr = (JSONArray) obj;
-      for (int i = 0; i < jarr.size(); i++) {
+      for (Object o : jarr) {
         if (sb.length() > 0) {
           sb.append(delim);
         }
-        sb.append(jarr.get(i));
+        sb.append(o);
       }
       return sb.toString();
     } else if (obj instanceof String && ((String) obj).trim().length() == 0) {

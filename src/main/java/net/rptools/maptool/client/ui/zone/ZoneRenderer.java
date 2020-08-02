@@ -2866,8 +2866,7 @@ public class ZoneRenderer extends JComponent
     }
 
     // Sort by location on screen, top left to bottom right
-    Collections.sort(
-        list,
+    list.sort(
         new Comparator<Token>() {
           public int compare(Token o1, Token o2) {
             if (o1.getY() < o2.getY()) {
@@ -4052,7 +4051,7 @@ public class ZoneRenderer extends JComponent
       return null;
     }
     List<Token> tokenList = new ArrayList<Token>(tokenStackMap.get(token));
-    Collections.sort(tokenList, Token.COMPARE_BY_NAME);
+    tokenList.sort(Token.COMPARE_BY_NAME);
     return tokenList;
   }
 

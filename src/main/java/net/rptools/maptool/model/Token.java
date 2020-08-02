@@ -911,8 +911,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasOwnerOnlyAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -929,8 +928,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasGMAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -947,8 +945,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null && lightSource.getType() == lightType) {
           return true;
@@ -962,14 +959,11 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
-      if (als != null
-          && als.getLightSourceId() != null
-          && als.getLightSourceId().equals(source.getId())) {
-        i.remove();
-      }
-    }
+    lightSourceList.removeIf(
+        als ->
+            als != null
+                && als.getLightSourceId() != null
+                && als.getLightSourceId().equals(source.getId()));
   }
 
   /** Clear the lightSourceList */
@@ -984,8 +978,7 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return false;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
+    for (AttachedLightSource als : lightSourceList) {
       if (als != null
           && als.getLightSourceId() != null
           && als.getLightSourceId().equals(source.getId())) {
@@ -1388,7 +1381,7 @@ public class Token extends BaseModel implements Cloneable {
     // Lets account for ISO images
     double iso_ho = 0;
     if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * Double.valueOf(footprintBounds.width) / getWidth();
+      double th = getHeight() * (double) footprintBounds.width / getWidth();
       iso_ho = footprintBounds.height - th;
       footprintBounds =
           new Rectangle(
@@ -2234,7 +2227,7 @@ public class Token extends BaseModel implements Cloneable {
     if (integer == null) {
       return defaultValue;
     }
-    return integer.intValue();
+    return integer;
   }
 
   /**
@@ -2251,7 +2244,7 @@ public class Token extends BaseModel implements Cloneable {
     if (bool == null) {
       return defaultValue;
     }
-    return bool.booleanValue();
+    return bool;
   }
 
   /**

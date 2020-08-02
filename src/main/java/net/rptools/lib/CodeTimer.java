@@ -16,7 +16,6 @@ package net.rptools.lib;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -118,8 +117,7 @@ public class CodeTimer {
         .append(" elements)\n");
 
     List<String> idSet = new ArrayList<String>(timeMap.keySet());
-    Collections.sort(
-        idSet,
+    idSet.sort(
         new Comparator<String>() {
           public int compare(String arg0, String arg1) {
             return orderMap.get(arg0) - orderMap.get(arg1);

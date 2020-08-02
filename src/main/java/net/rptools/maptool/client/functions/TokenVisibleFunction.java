@@ -88,9 +88,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;
@@ -108,9 +108,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;
@@ -296,9 +296,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;

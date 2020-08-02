@@ -23,7 +23,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -384,7 +383,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     public RemoteServerTableModel(List<String> encodedData) {
       // Simple but sufficient
-      Collections.sort(encodedData, String.CASE_INSENSITIVE_ORDER);
+      encodedData.sort(String.CASE_INSENSITIVE_ORDER);
 
       data = new ArrayList<String[]>(encodedData.size());
       for (String line : encodedData) {

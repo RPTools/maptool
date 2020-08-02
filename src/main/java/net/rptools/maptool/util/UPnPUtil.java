@@ -157,9 +157,7 @@ public class UPnPUtil {
             localHostIP = ni.getInterfaceAddresses().get(0).getAddress().getHostAddress();
             break;
           default:
-            for (Iterator<InterfaceAddress> iter = ni.getInterfaceAddresses().iterator();
-                iter.hasNext(); ) {
-              InterfaceAddress ifAddr = iter.next();
+            for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
               if (ifAddr.getAddress() instanceof Inet4Address) {
                 localHostIP = ifAddr.getAddress().getHostAddress();
                 if (log.isInfoEnabled())

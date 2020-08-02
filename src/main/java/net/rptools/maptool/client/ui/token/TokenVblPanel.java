@@ -215,7 +215,7 @@ public class TokenVblPanel extends JPanel {
     // If figure we need to calculate an additional offset for the token height
     double iso_ho = 0;
     if (token.getShape() == TokenShape.FIGURE) {
-      double th = token.getHeight() * Double.valueOf(tokenSize.width) / token.getWidth();
+      double th = token.getHeight() * (double) tokenSize.width / token.getWidth();
       iso_ho = tokenSize.height - th;
       tokenSize =
           new java.awt.Rectangle(

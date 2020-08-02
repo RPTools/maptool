@@ -220,7 +220,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g,
-          Double.valueOf(template.getRadius() * renderer.getZone().getUnitsPerCell()),
+          template.getRadius() * renderer.getZone().getUnitsPerCell(),
           (int) centerText.x,
           (int) centerText.y);
     } // endif

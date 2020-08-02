@@ -128,7 +128,7 @@ public class AssetGroup {
     assetGroupTSMap.put(group.location, group);
 
     // Keeps the groups ordered
-    Collections.sort(assetGroupList, GROUP_COMPARATOR);
+    assetGroupList.sort(GROUP_COMPARATOR);
   }
 
   public void remove(AssetGroup group) {
@@ -180,7 +180,7 @@ public class AssetGroup {
           assetGroupTSMap.put(subdir, subgroup);
           assetGroupList.add(subgroup);
         }
-        Collections.sort(assetGroupList, GROUP_COMPARATOR);
+        assetGroupList.sort(GROUP_COMPARATOR);
       } finally {
         // Cleanup
         for (AssetGroup group : tempAssetGroupFiles.values()) {

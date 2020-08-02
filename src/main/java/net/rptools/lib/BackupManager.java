@@ -17,7 +17,6 @@ package net.rptools.lib;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,8 +78,7 @@ public class BackupManager {
   private List<File> getFiles() {
 
     List<File> fileList = new LinkedList<File>(Arrays.asList(backupDir.listFiles()));
-    Collections.sort(
-        fileList,
+    fileList.sort(
         new Comparator<File>() {
           public int compare(File o1, File o2) {
 

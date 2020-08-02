@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
@@ -252,16 +251,12 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     }
 
     // Clear out any view without any tokens
-    for (ListIterator<View> viewIter = currentViewList.listIterator(); viewIter.hasNext(); ) {
-      View view = viewIter.next();
-      if (!view.isRequired() && (viewMap.get(view) == null || viewMap.get(view).size() == 0)) {
-        viewIter.remove();
-      }
-    }
+    currentViewList.removeIf(
+        view -> !view.isRequired() && (viewMap.get(view) == null || viewMap.get(view).size() == 0));
 
     // Sort
     for (List<Token> tokens : viewMap.values()) {
-      Collections.sort(tokens, NAME_AND_STATE_COMPARATOR);
+      tokens.sort(NAME_AND_STATE_COMPARATOR);
     }
 
     // Keep the expanded branches consistent
@@ -304,11 +299,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     private void filter(Token token) {
       if (accept(token)) {
-        List<Token> tokenList = viewMap.get(view);
-        if (tokenList == null) {
-          tokenList = new ArrayList<Token>();
-          viewMap.put(view, tokenList);
-        }
+        List<Token> tokenList = viewMap.computeIfAbsent(view, k -> new ArrayList<Token>());
         tokenList.add(token);
       }
     }

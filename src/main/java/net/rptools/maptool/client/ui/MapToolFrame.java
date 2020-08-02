@@ -1098,8 +1098,8 @@ public class MapToolFrame extends DefaultDockableHolder
             int[] treeRows = tree.getSelectionRows();
             java.util.Arrays.sort(treeRows);
             drawablesPanel.clearSelectedIds();
-            for (int i = 0; i < treeRows.length; i++) {
-              TreePath p = tree.getPathForRow(treeRows[i]);
+            for (int treeRow : treeRows) {
+              TreePath p = tree.getPathForRow(treeRow);
               if (p.getLastPathComponent() instanceof DrawnElement) {
                 DrawnElement de = (DrawnElement) p.getLastPathComponent();
                 drawablesPanel.addSelectedId(de.getDrawable().getId());

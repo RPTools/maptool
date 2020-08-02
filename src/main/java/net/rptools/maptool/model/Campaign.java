@@ -431,11 +431,11 @@ public class Campaign {
    * @return <code>true</code> if IF feature has ever been used; <code>false</code> otherwise
    */
   public boolean hasUsedFogToolbar() {
-    return hasUsedFogToolbar == null ? false : hasUsedFogToolbar.booleanValue();
+    return hasUsedFogToolbar == null ? false : hasUsedFogToolbar;
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = Boolean.valueOf(b);
+    hasUsedFogToolbar = b;
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {

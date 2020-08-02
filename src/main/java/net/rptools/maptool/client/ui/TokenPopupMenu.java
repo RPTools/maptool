@@ -464,7 +464,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       return null;
     }
     JMenu stateMenu = I18N.createMenu("defaultTool.barMenu");
-    Collections.sort(overlays, BarTokenOverlay.COMPARATOR);
+    overlays.sort(BarTokenOverlay.COMPARATOR);
     for (BarTokenOverlay overlay : overlays) {
       createBarItem(overlay.getName(), stateMenu, getTokenUnderMouse());
     } // endfor
@@ -478,7 +478,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     stateMenu.addSeparator();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(MapTool.getCampaign().getTokenStatesMap().values());
-    Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
+    overlays.sort(BooleanTokenOverlay.COMPARATOR);
 
     // Create the group menus first so that they can be placed at the top of the state menu
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();
@@ -525,7 +525,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     if (selectedTokenSet.size() == 1) {
       List<Integer> list =
           MapTool.getFrame().getInitiativePanel().getList().indexOf(getTokenUnderMouse());
-      int index = list.isEmpty() ? -1 : list.get(0).intValue();
+      int index = list.isEmpty() ? -1 : list.get(0);
       if (index >= 0) {
         if (isOwner) initiativeMenu.getMenuComponent(0).setEnabled(false);
         boolean hold =
@@ -892,7 +892,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
           init.insertToken(-1, token);
         } else {
           for (int i = list.length - 1; i >= 0; i--) {
-            int index = list[i].intValue();
+            int index = list[i];
             if (name.equals("initiative.menu.remove")) {
               if (index != -1) init.removeToken(index);
             } else if (name.equals("initiative.menu.hold")) {

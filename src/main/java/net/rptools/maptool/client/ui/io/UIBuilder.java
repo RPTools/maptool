@@ -110,7 +110,7 @@ public class UIBuilder extends JDialog {
         last_start = start;
         String[] elems = dir.split("/");
         OuterLoop:
-        for (int i = 0; i < elems.length; i++) {
+        for (String elem : elems) {
           _Searching(start);
           Enumeration children = start.children();
           InnerLoop:
@@ -118,17 +118,17 @@ public class UIBuilder extends JDialog {
             DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
             _Checking(next);
             MaptoolNode tmp = (MaptoolNode) next.getUserObject();
-            if (elems[i].equals(tmp.getName())) {
+            if (elem.equals(tmp.getName())) {
               start = next;
               _Found(start);
               continue OuterLoop;
             }
           }
 
-          log.debug("Warning: adding element \"" + elems[i] + "\" of \"" + dir + "\".");
+          log.debug("Warning: adding element \"" + elem + "\" of \"" + dir + "\".");
           // Since the element doesn't exist, create one... It must be
           // a folder, so create it that way.
-          DefaultMutableTreeNode newchild = new DefaultMutableTreeNode(new MaptoolNode(elems[i]));
+          DefaultMutableTreeNode newchild = new DefaultMutableTreeNode(new MaptoolNode(elem));
           start.insert(newchild, start.getChildCount());
           if (firstChangedNode == null) firstChangedNode = start;
           start = newchild;
@@ -182,15 +182,15 @@ public class UIBuilder extends JDialog {
       if (start == null || dir.charAt(0) == '/') start = (MutableTreeNode) this.root;
       String[] elems = dir.split("/");
       OuterLoop:
-      for (int i = 0; i < elems.length; i++) {
-        if (elems[i].length() == 0) // Skip empty elements, such as "//" or leading "/"
+      for (String elem : elems) {
+        if (elem.length() == 0) // Skip empty elements, such as "//" or leading "/"
         continue;
         if (MapTool.isDevelopment()) _Searching(start);
         Enumeration<?> children = start.children();
         while (children.hasMoreElements()) {
           DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
           if (MapTool.isDevelopment()) _Checking(next);
-          if (((MaptoolNode) next.getUserObject()).hashCode() == elems[i].hashCode()) {
+          if (((MaptoolNode) next.getUserObject()).hashCode() == elem.hashCode()) {
             start = next;
             _Found(start);
             continue OuterLoop;
@@ -357,8 +357,8 @@ public class UIBuilder extends JDialog {
    */
   private void buildTree() {
     String[] predefined_dirs = {"Properties", "Maps", "Macros", "Images"};
-    for (int i = 0; i < predefined_dirs.length; i++) {
-      dtm.addNode("Campaign/" + predefined_dirs[i], new MaptoolNode(predefined_dirs[i]));
+    for (String predefined_dir : predefined_dirs) {
+      dtm.addNode("Campaign/" + predefined_dir, new MaptoolNode(predefined_dir));
     }
   }
 }

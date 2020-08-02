@@ -17,11 +17,9 @@ package net.rptools.maptool.client.ui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import javax.swing.*;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
@@ -48,16 +46,10 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
     if (!MapTool.getPlayer().isGM()) {
-      for (ListIterator<ZoneRenderer> iter = rendererList.listIterator(); iter.hasNext(); ) {
-        ZoneRenderer renderer = iter.next();
-        if (!renderer.getZone().isVisible()) {
-          iter.remove();
-        }
-      }
+      rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
     }
 
-    Collections.sort(
-        rendererList,
+    rendererList.sort(
         new Comparator<ZoneRenderer>() {
           public int compare(ZoneRenderer o1, ZoneRenderer o2) {
 

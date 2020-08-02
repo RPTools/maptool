@@ -18,11 +18,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -425,8 +421,7 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     TokenInitiative currentInitiative =
         getTokenInitiative(getCurrent()); // Save the currently selected initiative
-    Collections.sort(
-        tokens,
+    tokens.sort(
         new Comparator<TokenInitiative>() {
           public int compare(TokenInitiative o1, TokenInitiative o2) {
 
@@ -453,7 +448,7 @@ public class InitiativeList implements Serializable {
             } // endif
 
             // Do the comparison
-            if (one == two || (one != null && one.equals(two))) return 0;
+            if (Objects.equals(one, two)) return 0;
             if (one == null) return 1; // Null is always the smallest value
             if (two == null) return -1;
             if (one instanceof Double & two instanceof Double)
@@ -661,7 +656,7 @@ public class InitiativeList implements Serializable {
      * @param aState state to set
      */
     public void setState(String aState) {
-      if (state == aState || (state != null && state.equals(aState))) return;
+      if (Objects.equals(state, aState)) return;
       startUnitOfWork();
       String old = state;
       state = aState;

@@ -133,13 +133,12 @@ public class Directory {
       files = Collections.unmodifiableList(Arrays.asList(listFiles));
       File[] subdirList = directory.listFiles(DIRECTORY_FILTER);
       subdirs = new ArrayList<Directory>();
-      for (int i = 0; i < subdirList.length; i++) {
-        Directory newDir = newDirectory(subdirList[i], fileFilter);
+      for (File file : subdirList) {
+        Directory newDir = newDirectory(file, fileFilter);
         newDir.parent = this;
         subdirs.add(newDir);
       }
-      Collections.sort(
-          subdirs,
+      subdirs.sort(
           new Comparator<Directory>() {
             public int compare(Directory d1, Directory d2) {
               // Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's

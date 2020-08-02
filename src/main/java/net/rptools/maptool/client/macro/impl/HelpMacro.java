@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.macro.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -46,7 +45,7 @@ public class HelpMacro implements Macro {
     StringBuilder builder = new StringBuilder();
 
     List<Macro> macros = new ArrayList<Macro>(MacroManager.getRegisteredMacros());
-    Collections.sort(macros, MACRO_NAME_COMPARATOR);
+    macros.sort(MACRO_NAME_COMPARATOR);
 
     builder.append("<table border='1'>");
     builder

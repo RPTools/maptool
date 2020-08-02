@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui.assetpanel;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -56,7 +55,7 @@ public class ImageFileTreeModel implements TreeModel {
 
   public void addRootGroup(Directory directory) {
     rootDirectories.add(directory);
-    Collections.sort(rootDirectories, Directory.COMPARATOR);
+    rootDirectories.sort(Directory.COMPARATOR);
     fireStructureChangedEvent(
         new TreeModelEvent(
             this,
