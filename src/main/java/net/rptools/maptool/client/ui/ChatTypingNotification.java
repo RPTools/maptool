@@ -48,7 +48,7 @@ public class ChatTypingNotification extends JPanel {
     if (chatTypers == null || chatTypers.isEmpty()) {
       return;
     }
-    Boolean showBackground = AppPreferences.getChatNotificationShowBackground();
+    boolean showBackground = AppPreferences.getChatNotificationShowBackground();
 
     Graphics2D statsG = (Graphics2D) g.create();
 
