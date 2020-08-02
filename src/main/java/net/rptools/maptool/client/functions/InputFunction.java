@@ -303,7 +303,7 @@ public class InputFunction extends AbstractFunction {
 
     /** Thrown when an option value is invalid. */
     @SuppressWarnings("serial")
-    public class OptionException extends Exception {
+    public static class OptionException extends Exception {
       public String key, value, type;
 
       public OptionException(InputType it, String key, String value) {
@@ -316,7 +316,7 @@ public class InputFunction extends AbstractFunction {
   } ///////////////////// end of InputType enum
 
   /** Variable Specifier structure - holds extracted bits of info for a variable. */
-  final class VarSpec {
+  static final class VarSpec {
     public String name, value, prompt;
     public InputType inputType;
     public InputType.OptionMap optionValues;
@@ -1296,7 +1296,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** JLabel variant that listens for new image data, and redraws its icon. */
-  public class UpdatingLabel extends JLabel {
+  public static class UpdatingLabel extends JLabel {
     private String macroLink;
 
     @Override
@@ -1333,7 +1333,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Custom renderer to display icons and text inside a combo box */
-  private class ComboBoxRenderer implements ListCellRenderer {
+  private static class ComboBoxRenderer implements ListCellRenderer {
     public Component getListCellRendererComponent(
         JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       JLabel label = null;
@@ -1367,7 +1367,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Class found on web to work around a STUPID SWING BUG with JComboBox */
-  public class NoEqualString {
+  public static class NoEqualString {
     private final String text;
 
     public NoEqualString(String txt) {

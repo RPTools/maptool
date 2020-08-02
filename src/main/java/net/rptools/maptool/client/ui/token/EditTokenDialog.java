@@ -1805,7 +1805,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // //
   // HANDLER
-  public class MouseHandler extends MouseAdapter {
+  public static class MouseHandler extends MouseAdapter {
 
     JTextArea source;
 

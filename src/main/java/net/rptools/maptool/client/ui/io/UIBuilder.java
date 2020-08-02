@@ -51,7 +51,7 @@ public class UIBuilder extends JDialog {
   private static final Logger log = LogManager.getLogger(UIBuilder.class);
 
   /** @author crash */
-  public class TreeModel extends DefaultTreeModel {
+  public static class TreeModel extends DefaultTreeModel {
     /**
      * @param root the top-level node for the tree
      * @param asksAllowsChildren <code>false</code> means all nodes are leaf nodes unless they have

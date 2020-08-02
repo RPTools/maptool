@@ -210,19 +210,19 @@ public class MapToolFrame extends DefaultDockableHolder
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
-      new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
+          new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
   private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
   private final FileFilter propertiesFilter =
-      new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
+          new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
   private final FileFilter macroFilter =
-      new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
+          new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
   private final FileFilter macroSetFilter =
-      new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
+          new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
   private final FileFilter tableFilter =
-      new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
+          new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
 
   private final FileFilter dungeonDraftFilter =
-      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+          new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -316,7 +316,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public class ChatNotificationTimers extends Observable {
+  public static class ChatNotificationTimers extends Observable {
     private final LinkedMap chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
@@ -746,7 +746,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  private class MTFileFilter extends FileFilter {
+  private static class MTFileFilter extends FileFilter {
     private final String extension;
     private final String description;
 
@@ -1727,7 +1727,7 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenFrame = null;
   }
 
-  public class FullScreenFrame extends JFrame {
+  public static class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
       setUndecorated(true);
     }
