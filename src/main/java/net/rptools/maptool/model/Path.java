@@ -139,8 +139,7 @@ public class Path<T extends AbstractPoint> {
         indexCheck++;
       }
 
-      if (waypointCheck.isEmpty()) {
-      } else {
+      if (!waypointCheck.isEmpty()) {
         for (T p : waypointCheck) {
           if (p instanceof ZonePoint) convPoint = grid.convert((ZonePoint) p);
           else convPoint = (CellPoint) p;
