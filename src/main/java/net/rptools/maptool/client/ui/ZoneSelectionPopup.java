@@ -76,7 +76,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
     return selection;
   }
 
-  private class ZoneItem extends JCheckBoxMenuItem implements ActionListener {
+  private static class ZoneItem extends JCheckBoxMenuItem implements ActionListener {
 
     private ZoneRenderer renderer;
 

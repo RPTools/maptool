@@ -325,7 +325,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public class ChatNotificationTimers extends Observable {
+  public static class ChatNotificationTimers extends Observable {
     private final LinkedMap chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
@@ -758,7 +758,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  private class MTFileFilter extends FileFilter {
+  private static class MTFileFilter extends FileFilter {
     private final String extension;
     private final String description;
 
@@ -1739,7 +1739,7 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenFrame = null;
   }
 
-  public class FullScreenFrame extends JFrame {
+  public static class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
       setUndecorated(true);
     }

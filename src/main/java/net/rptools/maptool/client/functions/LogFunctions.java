@@ -242,7 +242,7 @@ public class LogFunctions extends AbstractFunction {
   /*
    * A POJO to hold an Logger Config to marshal as a nice JSON object
    */
-  private final class LoggerResponse {
+  private static final class LoggerResponse {
 
     private final String name;
     private final String level;

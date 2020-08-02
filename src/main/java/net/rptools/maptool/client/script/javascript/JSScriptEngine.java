@@ -32,7 +32,7 @@ public class JSScriptEngine {
   private ScriptEngine engine;
   private ScriptContext anonymousContext;
 
-  public class JSClassFilter implements ClassFilter {
+  public static class JSClassFilter implements ClassFilter {
 
     @Override
     public boolean exposeToScripts(String jclass) {
