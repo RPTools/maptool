@@ -640,14 +640,13 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   MapTool.getFrame()
                       .getChatNotificationTimers()
                       .setChatTyper(parameters[0].toString());
-                  return;
                 } else {
                   // remove typer from list
                   MapTool.getFrame()
                       .getChatNotificationTimers()
                       .removeChatTyper(parameters[0].toString());
-                  return;
                 }
+                return;
 
               case exposePCArea:
                 if (parameters[0] != null && parameters[0] instanceof GUID) {

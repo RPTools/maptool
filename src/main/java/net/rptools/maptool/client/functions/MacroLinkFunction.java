@@ -252,12 +252,10 @@ public class MacroLinkFunction extends AbstractFunction {
 
     for (String s : vals) {
       String decoded = URLDecoder.decode(s, StandardCharsets.UTF_8);
-      if (propList.length() == 0) {
-        propList.append(decoded);
-      } else {
+      if (propList.length() != 0) {
         propList.append(" ; ");
-        propList.append(decoded);
       }
+      propList.append(decoded);
     }
     return propList.toString();
   }
@@ -274,12 +272,10 @@ public class MacroLinkFunction extends AbstractFunction {
     for (String s : vals) {
       s = s.trim();
       String encoded = URLEncoder.encode(s, StandardCharsets.UTF_8);
-      if (args.length() == 0) {
-        args.append(encoded);
-      } else {
+      if (args.length() != 0) {
         args.append("&");
-        args.append(encoded);
       }
+      args.append(encoded);
     }
 
     return args.toString();

@@ -243,7 +243,6 @@ public class TokenLocationFunctions extends AbstractFunction {
       Rectangle tokenBounds = token.getBounds(token.getZoneRenderer().getZone());
       loc.x = tokenBounds.x;
       loc.y = tokenBounds.y;
-      loc.z = token.getZOrder();
     } else {
       CellPoint cellPoint = getTokenCell(token);
       int x = cellPoint.x;
@@ -251,8 +250,8 @@ public class TokenLocationFunctions extends AbstractFunction {
 
       loc.x = x;
       loc.y = y;
-      loc.z = token.getZOrder();
     }
+    loc.z = token.getZOrder();
 
     return loc;
   }
