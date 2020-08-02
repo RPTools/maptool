@@ -1026,7 +1026,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       }
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();
-        namesList.forEach(n -> jarr.add(n));
+        namesList.forEach(jarr::add);
         return jarr.toString();
       } else {
         return StringFunctions.getInstance().join(namesList, delim);

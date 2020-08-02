@@ -90,11 +90,7 @@ public class LookupTableFunction extends AbstractFunction {
       }
       if ("json".equalsIgnoreCase(delim)) {
         JsonArray jsonArray = new JsonArray();
-        getTableList(MapTool.getPlayer().isGM())
-            .forEach(
-                (table) -> {
-                  jsonArray.add(table);
-                });
+        getTableList(MapTool.getPlayer().isGM()).forEach(jsonArray::add);
         return jsonArray;
       }
       return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
@@ -456,7 +452,7 @@ public class LookupTableFunction extends AbstractFunction {
     if (isGm) tables.addAll(MapTool.getCampaign().getLookupTableMap().keySet());
     else
       MapTool.getCampaign().getLookupTableMap().values().stream()
-          .filter((lt) -> (lt.getVisible()))
+          .filter(LookupTable::getVisible)
           .forEachOrdered(
               (lt) -> {
                 tables.add(lt.getName());
