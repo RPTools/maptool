@@ -130,7 +130,7 @@ public class Directory {
       File[] listFiles = directory.listFiles(fileFilter);
       if (listFiles == null)
         throw new FileNotFoundException("Invalid directory name: '" + directory.getPath() + "'");
-      files = Collections.unmodifiableList(Arrays.asList(listFiles));
+      files = List.of(listFiles);
       File[] subdirList = directory.listFiles(DIRECTORY_FILTER);
       subdirs = new ArrayList<Directory>();
       for (int i = 0; i < subdirList.length; i++) {
