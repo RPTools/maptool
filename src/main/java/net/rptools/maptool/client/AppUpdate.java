@@ -251,25 +251,22 @@ public class AppUpdate {
     log.info("assetDownloadSize: " + assetDownloadSize);
 
     Runnable updatethread =
-        new Runnable() {
-          @Override
-          public void run() {
-            try (InputStream stream = assetDownloadURL.openStream()) {
-              ProgressMonitorInputStream pmis =
-                  new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);
-              UIManager.put("ProgressMonitor.progressText", "New Update");
+        () -> {
+          try (InputStream stream = assetDownloadURL.openStream()) {
+            ProgressMonitorInputStream pmis =
+                new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);
+            UIManager.put("ProgressMonitor.progressText", "New Update");
 
-              ProgressMonitor pm = pmis.getProgressMonitor();
-              pm.setMillisToDecideToPopup(500);
-              pm.setMillisToPopup(500);
-              pm.setNote(assetDownloadURL.toString());
-              pm.setMinimum(0);
-              pm.setMaximum((int) assetDownloadSize);
+            ProgressMonitor pm = pmis.getProgressMonitor();
+            pm.setMillisToDecideToPopup(500);
+            pm.setMillisToPopup(500);
+            pm.setNote(assetDownloadURL.toString());
+            pm.setMinimum(0);
+            pm.setMaximum((int) assetDownloadSize);
 
-              FileUtils.copyInputStreamToFile(pmis, saveLocation);
-            } catch (IOException ioe) {
-              MapTool.showError("msg.error.failedSavingNewVersion", ioe);
-            }
+            FileUtils.copyInputStreamToFile(pmis, saveLocation);
+          } catch (IOException ioe) {
+            MapTool.showError("msg.error.failedSavingNewVersion", ioe);
           }
         };
 

@@ -145,19 +145,19 @@ public class AppSetup {
       if (licenseFile.exists()) {
         final File licenseFileFinal = licenseFile;
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                try {
-                  JTextPane pane = new JTextPane();
-                  pane.setPage(licenseFileFinal.toURI().toURL());
-                  JOptionPane.showMessageDialog(
-                      MapTool.getFrame(),
-                      pane,
-                      "License for " + libraryName,
-                      JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException e) {
-                  log.error("Could not load license file: " + licenseFileFinal, e);
-                }
+            () -> {
+              try {
+                JTextPane pane = new JTextPane();
+                pane.setPage(licenseFileFinal.toURI().toURL());
+                JOptionPane.showMessageDialog(
+                    MapTool.getFrame(),
+                    pane,
+                    "License for " + libraryName,
+                    JOptionPane.INFORMATION_MESSAGE);
+              } catch (MalformedURLException e) {
+                log.error("Could not load license file: " + licenseFileFinal, e);
+              } catch (IOException e) {
+                log.error("Could not load license file: " + licenseFileFinal, e);
               }
             });
       }

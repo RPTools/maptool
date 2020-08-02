@@ -1415,13 +1415,7 @@ public class MapToolLineParser {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
-            zr.getZone()
-                .getTokensFiltered(
-                    new Zone.Filter() {
-                      public boolean matchToken(Token t) {
-                        return t.getName().equalsIgnoreCase(libTokenName);
-                      }
-                    });
+            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(libTokenName));
 
         for (Token token : tokenList) {
           // If we are not the GM and the token is not visible to players then we don't
@@ -1459,13 +1453,7 @@ public class MapToolLineParser {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
-            zr.getZone()
-                .getTokensFiltered(
-                    new Zone.Filter() {
-                      public boolean matchToken(Token t) {
-                        return t.getName().equalsIgnoreCase(libTokenName);
-                      }
-                    });
+            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(libTokenName));
 
         for (Token token : tokenList) {
           // If we are not the GM and the token is not visible to players then we don't

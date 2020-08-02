@@ -17,15 +17,7 @@ package net.rptools.maptool.client.ui;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
-import java.awt.desktop.AboutEvent;
-import java.awt.desktop.AboutHandler;
-import java.awt.desktop.PreferencesEvent;
-import java.awt.desktop.PreferencesHandler;
-import java.awt.desktop.QuitEvent;
-import java.awt.desktop.QuitHandler;
-import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -47,8 +39,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -250,30 +240,28 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyReleased(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_DELETE) {
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                TreePath[] selection = tree.getSelectionPaths();
-                Set<GUID> selectedDrawSet = new HashSet<GUID>();
-                if (selection != null) {
-                  for (TreePath path : selection) {
-                    if (path.getLastPathComponent() instanceof DrawnElement) {
-                      DrawnElement de = (DrawnElement) path.getLastPathComponent();
-                      selectedDrawSet.add(de.getDrawable().getId());
-                    }
+            () -> {
+              TreePath[] selection = tree.getSelectionPaths();
+              Set<GUID> selectedDrawSet = new HashSet<GUID>();
+              if (selection != null) {
+                for (TreePath path : selection) {
+                  if (path.getLastPathComponent() instanceof DrawnElement) {
+                    DrawnElement de = (DrawnElement) path.getLastPathComponent();
+                    selectedDrawSet.add(de.getDrawable().getId());
                   }
                 }
-                if (selectedDrawSet.isEmpty()) return;
-                // check to see if this is the required action
-                if (!MapTool.confirmDrawDelete()) {
-                  return;
-                }
-                for (GUID id : selectedDrawSet) {
-                  MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
-                }
-                getCurrentZoneRenderer().repaint();
-                MapTool.getFrame().updateDrawTree();
-                MapTool.getFrame().refresh();
               }
+              if (selectedDrawSet.isEmpty()) return;
+              // check to see if this is the required action
+              if (!MapTool.confirmDrawDelete()) {
+                return;
+              }
+              for (GUID id : selectedDrawSet) {
+                MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
+              }
+              getCurrentZoneRenderer().repaint();
+              MapTool.getFrame().updateDrawTree();
+              MapTool.getFrame().refresh();
             });
       }
     }
@@ -296,15 +284,13 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyReleased(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_DELETE) {
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                // check to see if this is the required action
-                if (!MapTool.confirmTokenDelete()) {
-                  return;
-                }
-                ZoneRenderer zr = getCurrentZoneRenderer();
-                AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
+            () -> {
+              // check to see if this is the required action
+              if (!MapTool.confirmTokenDelete()) {
+                return;
               }
+              ZoneRenderer zr = getCurrentZoneRenderer();
+              AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
             });
       }
     }
@@ -316,11 +302,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private class ChatTyperObserver implements Observer {
     public void update(Observable o, Object arg) {
       SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              chatTypingPanel.invalidate();
-              chatTypingPanel.repaint();
-            }
+          () -> {
+            chatTypingPanel.invalidate();
+            chatTypingPanel.repaint();
           });
     }
   }
@@ -501,34 +485,20 @@ public class MapToolFrame extends DefaultDockableHolder
     try {
       Desktop.getDesktop()
           .setQuitHandler(
-              new QuitHandler() {
-                @Override
-                public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
-                  ((ClientAction) AppActions.EXIT).execute(null);
-                  /*
-                   * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
-                   * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
-                   * out to be the best option in the long run.
-                   */
-                  arg1.cancelQuit();
-                }
+              (arg0, arg1) -> {
+                ((ClientAction) AppActions.EXIT).execute(null);
+                /*
+                 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
+                 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
+                 * out to be the best option in the long run.
+                 */
+                arg1.cancelQuit();
               });
       Desktop.getDesktop()
-          .setAboutHandler(
-              new AboutHandler() {
-                @Override
-                public void handleAbout(AboutEvent arg0) {
-                  ((ClientAction) AppActions.SHOW_ABOUT).execute(null);
-                }
-              });
+          .setAboutHandler(arg0 -> ((ClientAction) AppActions.SHOW_ABOUT).execute(null));
       Desktop.getDesktop()
           .setPreferencesHandler(
-              new PreferencesHandler() {
-                @Override
-                public void handlePreferences(PreferencesEvent arg0) {
-                  ((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
-                }
-              });
+              arg0 -> ((ClientAction) AppActions.SHOW_PREFERENCES).execute(null));
     } catch (Exception e) {
       String msg = "Error while configuring Desktop interaction";
       log.error(msg, e);
@@ -1088,22 +1058,19 @@ public class MapToolFrame extends DefaultDockableHolder
     splitPane.setDividerLocation(100);
     // Add tree selection listener
     tree.addTreeSelectionListener(
-        new TreeSelectionListener() {
-          @Override
-          public void valueChanged(TreeSelectionEvent e) {
-            TreePath path = e.getPath();
-            if (path == null) {
-              return;
-            }
-            int[] treeRows = tree.getSelectionRows();
-            java.util.Arrays.sort(treeRows);
-            drawablesPanel.clearSelectedIds();
-            for (int treeRow : treeRows) {
-              TreePath p = tree.getPathForRow(treeRow);
-              if (p.getLastPathComponent() instanceof DrawnElement) {
-                DrawnElement de = (DrawnElement) p.getLastPathComponent();
-                drawablesPanel.addSelectedId(de.getDrawable().getId());
-              }
+        e -> {
+          TreePath path = e.getPath();
+          if (path == null) {
+            return;
+          }
+          int[] treeRows = tree.getSelectionRows();
+          java.util.Arrays.sort(treeRows);
+          drawablesPanel.clearSelectedIds();
+          for (int treeRow : treeRows) {
+            TreePath p = tree.getPathForRow(treeRow);
+            if (p.getLastPathComponent() instanceof DrawnElement) {
+              DrawnElement de = (DrawnElement) p.getLastPathComponent();
+              drawablesPanel.addSelectedId(de.getDrawable().getId());
             }
           }
         });
@@ -1151,34 +1118,32 @@ public class MapToolFrame extends DefaultDockableHolder
               final int x = e.getX();
               final int y = e.getY();
               EventQueue.invokeLater(
-                  new Runnable() {
-                    public void run() {
-                      DrawnElement firstElement = null;
-                      Set<GUID> selectedDrawSet = new HashSet<GUID>();
-                      boolean topLevelOnly = true;
-                      for (TreePath path : tree.getSelectionPaths()) {
-                        if (path.getPathCount() != 3) topLevelOnly = false;
-                        if (path.getLastPathComponent() instanceof DrawnElement) {
-                          DrawnElement de = (DrawnElement) path.getLastPathComponent();
-                          if (firstElement == null) {
-                            firstElement = de;
-                          }
-                          selectedDrawSet.add(de.getDrawable().getId());
+                  () -> {
+                    DrawnElement firstElement = null;
+                    Set<GUID> selectedDrawSet = new HashSet<GUID>();
+                    boolean topLevelOnly = true;
+                    for (TreePath path1 : tree.getSelectionPaths()) {
+                      if (path1.getPathCount() != 3) topLevelOnly = false;
+                      if (path1.getLastPathComponent() instanceof DrawnElement) {
+                        DrawnElement de = (DrawnElement) path1.getLastPathComponent();
+                        if (firstElement == null) {
+                          firstElement = de;
                         }
+                        selectedDrawSet.add(de.getDrawable().getId());
                       }
-                      if (!selectedDrawSet.isEmpty()) {
-                        try {
-                          new DrawPanelPopupMenu(
-                                  selectedDrawSet,
-                                  x,
-                                  y,
-                                  getCurrentZoneRenderer(),
-                                  firstElement,
-                                  topLevelOnly)
-                              .showPopup(tree);
-                        } catch (IllegalComponentStateException icse) {
-                          log.info(tree.toString(), icse);
-                        }
+                    }
+                    if (!selectedDrawSet.isEmpty()) {
+                      try {
+                        new DrawPanelPopupMenu(
+                                selectedDrawSet,
+                                x,
+                                y,
+                                getCurrentZoneRenderer(),
+                                firstElement,
+                                topLevelOnly)
+                            .showPopup(tree);
+                      } catch (IllegalComponentStateException icse) {
+                        log.info(tree.toString(), icse);
                       }
                     }
                   });
@@ -1188,11 +1153,7 @@ public class MapToolFrame extends DefaultDockableHolder
     // Add Zone Change event
     MapTool.getEventDispatcher()
         .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                drawPanelTreeModel.setZone((Zone) event.getNewValue());
-              }
-            },
+            event -> drawPanelTreeModel.setZone((Zone) event.getNewValue()),
             MapTool.ZoneEvent.Activated);
     return splitPane;
   }
@@ -1252,35 +1213,33 @@ public class MapToolFrame extends DefaultDockableHolder
               final int x = e.getX();
               final int y = e.getY();
               EventQueue.invokeLater(
-                  new Runnable() {
-                    public void run() {
-                      Token firstToken = null;
-                      Set<GUID> selectedTokenSet = new HashSet<GUID>();
-                      for (TreePath path : tree.getSelectionPaths()) {
-                        if (path.getLastPathComponent() instanceof Token) {
-                          Token token = (Token) path.getLastPathComponent();
-                          if (firstToken == null) {
-                            firstToken = token;
-                          }
-                          if (AppUtil.playerOwns(token)) {
-                            selectedTokenSet.add(token.getId());
-                          }
+                  () -> {
+                    Token firstToken = null;
+                    Set<GUID> selectedTokenSet = new HashSet<GUID>();
+                    for (TreePath path1 : tree.getSelectionPaths()) {
+                      if (path1.getLastPathComponent() instanceof Token) {
+                        Token token = (Token) path1.getLastPathComponent();
+                        if (firstToken == null) {
+                          firstToken = token;
+                        }
+                        if (AppUtil.playerOwns(token)) {
+                          selectedTokenSet.add(token.getId());
                         }
                       }
-                      if (!selectedTokenSet.isEmpty()) {
-                        try {
-                          if (firstToken.isStamp()) {
-                            new StampPopupMenu(
-                                    selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
-                                .showPopup(tree);
-                          } else {
-                            new TokenPopupMenu(
-                                    selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
-                                .showPopup(tree);
-                          }
-                        } catch (IllegalComponentStateException icse) {
-                          log.info(tree.toString(), icse);
+                    }
+                    if (!selectedTokenSet.isEmpty()) {
+                      try {
+                        if (firstToken.isStamp()) {
+                          new StampPopupMenu(
+                                  selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
+                              .showPopup(tree);
+                        } else {
+                          new TokenPopupMenu(
+                                  selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
+                              .showPopup(tree);
                         }
+                      } catch (IllegalComponentStateException icse) {
+                        log.info(tree.toString(), icse);
                       }
                     }
                   });
@@ -1289,11 +1248,7 @@ public class MapToolFrame extends DefaultDockableHolder
         });
     MapTool.getEventDispatcher()
         .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                tokenPanelTreeModel.setZone((Zone) event.getNewValue());
-              }
-            },
+            event -> tokenPanelTreeModel.setZone((Zone) event.getNewValue()),
             MapTool.ZoneEvent.Activated);
     return tree;
   }
@@ -1334,11 +1289,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private InitiativePanel createInitiativePanel() {
     MapTool.getEventDispatcher()
         .addListener(
-            new AppEventListener() {
-              public void handleAppEvent(AppEvent event) {
-                initiativePanel.setZone((Zone) event.getNewValue());
-              }
-            },
+            event -> initiativePanel.setZone((Zone) event.getNewValue()),
             MapTool.ZoneEvent.Activated);
     return new InitiativePanel();
   }
@@ -1416,12 +1367,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public void setStatusMessage(final String message) {
     statusMessage = message;
-    SwingUtilities.invokeLater(
-        new Runnable() {
-          public void run() {
-            statusPanel.setStatus("  " + message);
-          }
-        });
+    SwingUtilities.invokeLater(() -> statusPanel.setStatus("  " + message));
   }
 
   public String getStatusMessage() {
@@ -1835,12 +1781,7 @@ public class MapToolFrame extends DefaultDockableHolder
     MapTool.getAutoSaveManager().purge();
     setVisible(false);
 
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            dispose();
-          }
-        });
+    EventQueue.invokeLater(this::dispose);
   }
 
   public void windowClosed(WindowEvent e) {
@@ -1898,24 +1839,22 @@ public class MapToolFrame extends DefaultDockableHolder
     Timer tm =
         new Timer(
             500,
-            new ActionListener() {
-              public void actionPerformed(ActionEvent ae) {
-                long currentTime = System.currentTimeMillis();
-                LinkedMap chatTimers = chatTyperTimers.getChatTypers();
-                List<String> removeThese = new ArrayList<String>(chatTimers.size());
+            ae -> {
+              long currentTime = System.currentTimeMillis();
+              LinkedMap chatTimers = chatTyperTimers.getChatTypers();
+              List<String> removeThese = new ArrayList<String>(chatTimers.size());
 
-                @SuppressWarnings("unchecked")
-                Set<String> playerTimers = chatTimers.keySet();
-                for (String player : playerTimers) {
-                  long playerTime = (Long) chatTimers.get(player);
-                  if (currentTime - playerTime >= (chatNotifyDuration * 1000)) {
-                    // set up a temp place and remove them after the loop
-                    removeThese.add(player);
-                  }
+              @SuppressWarnings("unchecked")
+              Set<String> playerTimers = chatTimers.keySet();
+              for (String player : playerTimers) {
+                long playerTime = (Long) chatTimers.get(player);
+                if (currentTime - playerTime >= (chatNotifyDuration * 1000)) {
+                  // set up a temp place and remove them after the loop
+                  removeThese.add(player);
                 }
-                for (String remove : removeThese) {
-                  chatTyperTimers.removeChatTyper(remove);
-                }
+              }
+              for (String remove : removeThese) {
+                chatTyperTimers.removeChatTyper(remove);
               }
             });
     tm.start();
