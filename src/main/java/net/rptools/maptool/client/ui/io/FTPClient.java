@@ -81,7 +81,7 @@ public class FTPClient {
   public void setEnabled(boolean b) {
     boolean old = running;
     running = b;
-    if (old != b && b == true) {
+    if (old != b && b) {
       // We just enabled this object from a disabled state, so start the first transfer
       startNextTransfer();
     }
