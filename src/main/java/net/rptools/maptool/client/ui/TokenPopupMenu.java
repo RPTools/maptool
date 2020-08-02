@@ -401,25 +401,19 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     try {
       Constructor<SetHaloAction> standardColorActionConstructor =
           standardColorActionClass.getConstructor(
-              new Class[] {
-                TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class
-              });
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class);
       Constructor<SetColorChooserAction> customColorActionConstructor =
           customColorActionClass.getConstructor(
-              new Class[] {TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class});
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
 
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
               standardColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")
-                  }));
+                  this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")));
       JCheckBoxMenuItem customMenu =
           new JCheckBoxMenuItem(
               customColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")
-                  }));
+                  this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")));
 
       if (selectedColor == null) {
         noneMenu.setSelected(true);
@@ -441,7 +435,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         JCheckBoxMenuItem item =
             new JCheckBoxMenuItem(
                 standardColorActionConstructor.newInstance(
-                    new Object[] {this, getRenderer(), selectedTokenSet, bgColor, displayName}));
+                    this, getRenderer(), selectedTokenSet, bgColor, displayName));
         item.setBackground(bgColor);
         item.setForeground(fgColor);
 
