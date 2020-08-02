@@ -158,8 +158,19 @@ public class AppSetup {
                       JOptionPane.INFORMATION_MESSAGE);
                 } catch (MalformedURLException e) {
                   log.error("Could not load license file: " + licenseFileFinal, e);
+                  log.error("Bad path url: " + root.getPath(), e);
+                  MapTool.showMessage(
+                      "dialog.addresource.warn.badpath",
+                      "Error",
+                      JOptionPane.ERROR_MESSAGE,
+                      root.getPath());
                 } catch (IOException e) {
                   log.error("Could not load license file: " + licenseFileFinal, e);
+                  MapTool.showMessage(
+                      "dialog.addresource.warn.badpath",
+                      "Error",
+                      JOptionPane.ERROR_MESSAGE,
+                      root.getPath());
                 }
               }
             });
