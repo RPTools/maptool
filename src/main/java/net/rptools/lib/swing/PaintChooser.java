@@ -20,7 +20,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Paint;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
@@ -30,8 +29,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import net.rptools.maptool.language.I18N;
 
 @SuppressWarnings("serial")
@@ -119,23 +116,16 @@ public class PaintChooser extends JPanel {
 
   private JButton createOKButton(final JDialog dialog) {
     JButton button = new JButton(I18N.getText("Button.ok"));
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            dialog.setVisible(false);
-          }
-        });
+    button.addActionListener(e -> dialog.setVisible(false));
     return button;
   }
 
   private JButton createCancelButton(final JDialog dialog) {
     JButton button = new JButton(I18N.getText("Button.cancel"));
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            paint = null;
-            dialog.setVisible(false);
-          }
+        e -> {
+          paint = null;
+          dialog.setVisible(false);
         });
     return button;
   }
@@ -154,12 +144,10 @@ public class PaintChooser extends JPanel {
     chooser
         .getSelectionModel()
         .addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                setPaint(chooser.getColor());
-                hueColorChooser.setColor(chooser.getColor());
-                rgbColorChooser.setColor(chooser.getColor());
-              }
+            e -> {
+              setPaint(chooser.getColor());
+              hueColorChooser.setColor(chooser.getColor());
+              rgbColorChooser.setColor(chooser.getColor());
             });
     return chooser;
   }
@@ -179,12 +167,10 @@ public class PaintChooser extends JPanel {
     chooser
         .getSelectionModel()
         .addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                setPaint(chooser.getColor());
-                swatchColorChooser.setColor(chooser.getColor());
-                rgbColorChooser.setColor(chooser.getColor());
-              }
+            e -> {
+              setPaint(chooser.getColor());
+              swatchColorChooser.setColor(chooser.getColor());
+              rgbColorChooser.setColor(chooser.getColor());
             });
     return chooser;
   }
@@ -209,12 +195,10 @@ public class PaintChooser extends JPanel {
     chooser
         .getSelectionModel()
         .addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                setPaint(chooser.getColor());
-                swatchColorChooser.setColor(chooser.getColor());
-                hueColorChooser.setColor(chooser.getColor());
-              }
+            e -> {
+              setPaint(chooser.getColor());
+              swatchColorChooser.setColor(chooser.getColor());
+              hueColorChooser.setColor(chooser.getColor());
             });
     return chooser;
   }
