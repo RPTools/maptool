@@ -468,19 +468,19 @@ public class AppPreferences {
     return value;
   }
 
-  public static final void setUseToolTipForInlineRoll(boolean tooltip) {
+  public static void setUseToolTipForInlineRoll(boolean tooltip) {
     prefs.putBoolean(KEY_TOOLTIP_FOR_INLINE_ROLLS, tooltip);
   }
 
-  public static final boolean getUseToolTipForInlineRoll() {
+  public static boolean getUseToolTipForInlineRoll() {
     return prefs.getBoolean(KEY_TOOLTIP_FOR_INLINE_ROLLS, DEFAULT_TOOLTIP_FOR_INLINE_ROLLS);
   }
 
-  public static final void setSuppressToolTipsForMacroLinks(boolean tooltip) {
+  public static void setSuppressToolTipsForMacroLinks(boolean tooltip) {
     prefs.putBoolean(KEY_SUPPRESS_TOOLTIPS_FOR_MACROLINKS, tooltip);
   }
 
-  public static final boolean getSuppressToolTipsForMacroLinks() {
+  public static boolean getSuppressToolTipsForMacroLinks() {
     return prefs.getBoolean(
         KEY_SUPPRESS_TOOLTIPS_FOR_MACROLINKS, DEFAULT_SUPPRESS_TOOLTIPS_FOR_MACROLINKS);
   }
@@ -981,7 +981,7 @@ public class AppPreferences {
       // Add the new one and then remove all duplicates.
       list += ";" + root.getPath();
       String[] roots = list.split(";");
-      StringBuffer result = new StringBuffer(list.length() + root.getPath().length() + 10);
+      StringBuilder result = new StringBuilder(list.length() + root.getPath().length() + 10);
       Set<String> rootList = new HashSet<String>(roots.length);
 
       // This loop ensures that each path only appears once. If there are currently
@@ -1023,7 +1023,7 @@ public class AppPreferences {
     if (!list.isEmpty()) {
       // Add the new one and then remove all duplicates.
       String[] roots = list.split(";");
-      StringBuffer result = new StringBuffer(list.length());
+      StringBuilder result = new StringBuilder(list.length());
       Set<String> rootList = new HashSet<String>(roots.length);
       String rootPath = root.getPath();
 

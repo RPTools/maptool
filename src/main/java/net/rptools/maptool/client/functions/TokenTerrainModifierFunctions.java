@@ -177,7 +177,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
                 "macro.function.parse.enum.illegalArgumentType",
                 "setTerrainModifier",
                 terrainModifierOperationPrimitive.getAsString(),
-                Arrays.asList(TerrainModifierOperation.values()).stream()
+                Arrays.stream(TerrainModifierOperation.values())
                     .map(value -> value.toString())
                     .collect(Collectors.joining(", "))));
       }

@@ -306,7 +306,7 @@ public class BoardTool extends DefaultTool {
   }
 
   /** A simple enum for correlating keys with directions */
-  private static enum Direction {
+  private enum Direction {
     Left,
     Right,
     Up,

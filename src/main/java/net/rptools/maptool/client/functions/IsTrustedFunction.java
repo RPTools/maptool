@@ -16,7 +16,6 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -65,9 +64,7 @@ public class IsTrustedFunction extends AbstractFunction {
   private List<String> getGMs() {
     List<String> gms = new ArrayList<String>();
 
-    Iterator<Player> pliter = MapTool.getPlayerList().iterator();
-    while (pliter.hasNext()) {
-      Player plr = pliter.next();
+    for (Player plr : MapTool.getPlayerList()) {
       if (plr.isGM()) {
         gms.add(plr.getName());
       }

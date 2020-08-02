@@ -435,7 +435,7 @@ public class Campaign {
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = new Boolean(b);
+    hasUsedFogToolbar = Boolean.valueOf(b);
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {

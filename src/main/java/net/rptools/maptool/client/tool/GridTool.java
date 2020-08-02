@@ -61,7 +61,7 @@ public class GridTool extends DefaultTool {
   private static final long serialVersionUID = 3760846783148208951L;
   private static final int zoomSliderStopCount = 100;
 
-  private static enum Size {
+  private enum Size {
     Increase,
     Decrease
   }
@@ -421,7 +421,7 @@ public class GridTool extends DefaultTool {
     }
   }
 
-  private static enum Direction {
+  private enum Direction {
     Left,
     Right,
     Up,

@@ -573,7 +573,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
     private String displayName;
 
-    private MTFrame(String dispName) {
+    MTFrame(String dispName) {
       displayName = dispName;
     }
 

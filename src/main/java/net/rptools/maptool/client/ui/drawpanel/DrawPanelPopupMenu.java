@@ -100,9 +100,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class BringToFrontAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-      Iterator<DrawnElement> iter = drawableList.iterator();
-      while (iter.hasNext()) {
-        DrawnElement de = iter.next();
+      for (DrawnElement de : drawableList) {
         if (selectedDrawSet.contains(de.getDrawable().getId())) {
           renderer.getZone().removeDrawable(de.getDrawable().getId());
           MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
@@ -125,9 +123,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-      Iterator<DrawnElement> iter = drawableList.iterator();
-      while (iter.hasNext()) {
-        DrawnElement de = iter.next();
+      for (DrawnElement de : drawableList) {
         if (de.getDrawable().getLayer() != this.layer
             && selectedDrawSet.contains(de.getDrawable().getId())) {
           renderer.getZone().removeDrawable(de.getDrawable().getId());
@@ -300,9 +296,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class SendToBackAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-      Iterator<DrawnElement> iter = drawableList.iterator();
-      while (iter.hasNext()) {
-        DrawnElement de = iter.next();
+      for (DrawnElement de : drawableList) {
         if (selectedDrawSet.contains(de.getDrawable().getId())) {
           renderer.getZone().removeDrawable(de.getDrawable().getId());
           renderer.getZone().addDrawableRear(de);
@@ -416,9 +410,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         return de;
       }

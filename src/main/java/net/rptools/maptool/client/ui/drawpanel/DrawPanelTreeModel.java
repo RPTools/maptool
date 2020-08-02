@@ -52,7 +52,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
     OBJECT_DRAWINGS("panel.DrawExplorer.View.OBJECT", Zone.Layer.OBJECT),
     BACKGROUND_DRAWINGS("panel.DrawExplorer.View.BACKGROUND", Zone.Layer.BACKGROUND);
 
-    private View(String key, Zone.Layer layer) {
+    View(String key, Zone.Layer layer) {
       this.displayName = I18N.getText(key);
       this.layer = layer;
     }

@@ -16,12 +16,12 @@ package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -152,12 +152,12 @@ public class AppActions {
   private static boolean keepIdsOnPaste = false;
 
   private static int getMenuShortcutKeyMask() {
-    int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
     String prop = System.getProperty("os.name", "unknown");
     if ("darwin".equalsIgnoreCase(prop)) {
       // TODO Should we install our own AWTKeyStroke class? If we do it should only be if menu
       // shortcut is CTRL...
-      if (key == Event.CTRL_MASK) key = Event.META_MASK;
+      if (key == InputEvent.CTRL_DOWN_MASK) key = InputEvent.META_DOWN_MASK;
       /*
        * In order for OpenJDK to work on Mac OS X, the user must have the X11 package installed unless they're running headless. However, in order for the Command key to work, the X11
        * Preferences must be set to "Enable the Meta Key" in X11 applications. Essentially, if this option is turned on, the Command key (called Meta in X11) will be intercepted by the X11
@@ -686,7 +686,7 @@ public class AppActions {
             return;
           }
           File saveFile = chooser.getSelectedFile();
-          if (saveFile.getName().indexOf(".") < 0) {
+          if (!saveFile.getName().contains(".")) {
             saveFile = new File(saveFile.getAbsolutePath() + ".html");
           }
           if (saveFile.exists() && !MapTool.confirm("msg.confirm.fileExists")) {
@@ -911,7 +911,7 @@ public class AppActions {
    * @param tokenSet the set of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(Set<GUID> tokenSet) {
+  public static void copyTokens(Set<GUID> tokenSet) {
     List<Token> tokenList = null;
     boolean anythingCopied = false;
     if (!tokenSet.isEmpty()) {
@@ -988,7 +988,7 @@ public class AppActions {
    * @param tokenList the list of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(List<Token> tokenList) {
+  public static void copyTokens(List<Token> tokenList) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (!tokenList.isEmpty()) {

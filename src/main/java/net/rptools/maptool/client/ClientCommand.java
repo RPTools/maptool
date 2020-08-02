@@ -16,7 +16,7 @@ package net.rptools.maptool.client;
 
 public class ClientCommand {
 
-  public static enum COMMAND {
+  public enum COMMAND {
     // @formatter:off
     startAssetTransfer,
     updateAssetTransfer,
