@@ -59,33 +59,30 @@ public class JTextAreaAppender extends AbstractAppender {
     // Append formatted message to text area using the Thread.
     try {
       SwingUtilities.invokeLater(
-          new Runnable() {
-            @Override
-            public void run() {
-              for (JTextArea jTA : jTextAreaList) {
-                try {
-                  if (jTA != null) {
-                    if (jTA.getText().length() == 0) {
-                      jTA.setText(message);
-                    } else {
-                      jTA.append("\n" + message);
-                      if (maxLines > 0 & jTA.getLineCount() > maxLines + 1) {
-                        int endIdx =
-                            jTA.getDocument()
-                                .getText(0, jTA.getDocument().getLength())
-                                .indexOf("\n", 0);
-                        jTA.getDocument().remove(0, endIdx + 1);
+              () -> {
+                for (JTextArea jTA : jTextAreaList) {
+                  try {
+                    if (jTA != null) {
+                      if (jTA.getText().length() == 0) {
+                        jTA.setText(message);
+                      } else {
+                        jTA.append("\n" + message);
+                        if (maxLines > 0 & jTA.getLineCount() > maxLines + 1) {
+                          int endIdx =
+                              jTA.getDocument()
+                                  .getText(0, jTA.getDocument().getLength())
+                                  .indexOf("\n", 0);
+                          jTA.getDocument().remove(0, endIdx + 1);
+                        }
                       }
+                      String content = jTA.getText();
+                      jTA.setText(content.substring(0, content.length() - 1));
                     }
-                    String content = jTA.getText();
-                    jTA.setText(content.substring(0, content.length() - 1));
+                  } catch (final Throwable t) {
+                    System.out.println("Unable to append log to text area: " + t.getMessage());
                   }
-                } catch (final Throwable t) {
-                  System.out.println("Unable to append log to text area: " + t.getMessage());
                 }
-              }
-            }
-          });
+              });
     } catch (final IllegalStateException e) {
       // ignore case when the platform hasn't yet been initialized
     }

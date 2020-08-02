@@ -299,15 +299,12 @@ public class InitiativePanel extends JPanel
       updateRound();
     }
     EventQueue.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            model.setList(list);
-            NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
-            if (list.getCurrent() >= 0) {
-              int index = model.getDisplayIndex(list.getCurrent());
-              if (index >= 0) displayList.ensureIndexIsVisible(index);
-            }
+        () -> {
+          model.setList(list);
+          NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
+          if (list.getCurrent() >= 0) {
+            int index = model.getDisplayIndex(list.getCurrent());
+            if (index >= 0) displayList.ensureIndexIsVisible(index);
           }
         });
   }
