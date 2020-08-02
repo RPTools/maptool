@@ -1037,7 +1037,7 @@ public class AppPreferences {
   }
 
   public static void setMruCampaigns(List<File> mruCampaigns) {
-    StringBuilder combined = new StringBuilder("");
+    StringBuilder combined = new StringBuilder();
     for (File file : mruCampaigns) {
       String path = null;
       try {
@@ -1074,7 +1074,7 @@ public class AppPreferences {
   }
 
   public static void setSavedPaintTextures(List<File> savedTextures) {
-    StringBuilder combined = new StringBuilder("");
+    StringBuilder combined = new StringBuilder();
     for (File savedTexture : savedTextures) {
       combined.append(savedTexture.getPath());
       combined.append(File.pathSeparator);

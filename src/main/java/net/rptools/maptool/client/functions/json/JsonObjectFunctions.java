@@ -244,7 +244,7 @@ public class JsonObjectFunctions {
     JsonArray setVars = new JsonArray();
     for (String key : jsonObject.keySet()) {
       // add prefix and suffix
-      String varName = prefix + key.toString().trim() + suffix;
+      String varName = prefix + key.trim() + suffix;
       // replace spaces by underscores
       varName = varName.replaceAll("\\s", "_");
       // delete special characters other than "." & "_" in var name

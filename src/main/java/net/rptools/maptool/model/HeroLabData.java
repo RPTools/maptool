@@ -296,7 +296,7 @@ public class HeroLabData {
         portfolioPath = "";
       }
     } else {
-      portfolioPath = portfolioFile.getPath().toString();
+      portfolioPath = portfolioFile.getPath();
     }
   }
 

@@ -174,7 +174,7 @@ public class StringUtil {
           newlinePos = wrapLength - 1; // -1 because of 0 start point of position
         }
       }
-      wrappedString.append(subString.substring(0, newlinePos));
+      wrappedString.append(subString, 0, newlinePos);
       wrappedString.append(wrapChar);
       startPosition += newlinePos + 1;
     }

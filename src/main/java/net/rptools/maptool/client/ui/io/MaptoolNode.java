@@ -124,6 +124,6 @@ public class MaptoolNode {
    * that idea. I think it should be kept separately.
    */
   public String toString() {
-    return name.toString();
+    return name;
   }
 }

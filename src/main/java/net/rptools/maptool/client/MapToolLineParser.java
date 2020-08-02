@@ -260,7 +260,7 @@ public class MapToolLineParser {
       List<InlineRollMatch> matches = this.locateInlineRolls(line);
 
       for (InlineRollMatch match : matches) {
-        builder.append(line.substring(start, match.getStart())); // add everything before the roll
+        builder.append(line, start, match.getStart()); // add everything before the roll
 
         start = match.getEnd() + 1;
         // These variables will hold data extracted from the roll options.
