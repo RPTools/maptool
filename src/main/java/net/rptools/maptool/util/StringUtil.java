@@ -272,8 +272,6 @@ public class StringUtil {
       builder.append(c);
     }
     return Arrays.asList(
-        new String[] {
-          line.substring(start, end), line.substring(Math.min(end + 1, line.length()))
-        });
+        line.substring(start, end), line.substring(Math.min(end + 1, line.length())));
   }
 }
