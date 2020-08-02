@@ -546,7 +546,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         chooser.addPropertyChangeListener(
             new PropertyChangeListener() {
               public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY
+                if (JFileChooser.FILE_FILTER_CHANGED_PROPERTY.equals(evt.getPropertyName())
                     && showSaveDialog) {
                   if (chooser.getFileFilter() != tokenFilter) {
                     File newFileName = new File(chooser.getCurrentDirectory(), tokenNameGM);
