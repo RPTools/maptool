@@ -192,8 +192,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
-    ((JTextArea) getComponent("@GMNotes")).setEnabled(MapTool.getPlayer().isGM());
-    ((JTextField) getComponent("@GMName")).setEnabled(MapTool.getPlayer().isGM());
+    getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
+    getComponent("@GMName").setEnabled(MapTool.getPlayer().isGM());
 
     getTokenVblPanel().reset(token);
 
@@ -367,9 +367,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       ((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
 
       if (heroLabData.getPortfolioFile().exists()) {
-        ((JLabel) getComponent("portfolioLocation")).setForeground(Color.BLACK);
+        getComponent("portfolioLocation").setForeground(Color.BLACK);
       } else {
-        ((JLabel) getComponent("portfolioLocation")).setForeground(Color.RED);
+        getComponent("portfolioLocation").setForeground(Color.RED);
       }
 
       ((JLabel) getComponent("portfolioLocation"))

@@ -252,8 +252,8 @@ public class IsometricGrid extends Grid {
 
   @Override
   protected Area createCellShape(int size) {
-    int x[] = {(int) size, (int) size * 2, (int) size, 0};
-    int y[] = {0, (int) size / 2, (int) size, (int) size / 2};
+    int x[] = {size, size * 2, size, 0};
+    int y[] = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 

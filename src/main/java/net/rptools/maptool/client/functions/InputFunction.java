@@ -1149,7 +1149,7 @@ public class InputFunction extends AbstractFunction {
             {
               // This code assumes that the Box container returns components
               // in the same order that they were added.
-              Component[] comps = ((Box) comp).getComponents();
+              Component[] comps = comp.getComponents();
               int componentCount = 0;
               int index = 0;
               for (Component c : comps) {
@@ -1177,7 +1177,7 @@ public class InputFunction extends AbstractFunction {
               // Read out and assign all the subvariables.
               // The overall return value is a property string (as in StrPropFunctions.java) with
               // all the new settings.
-              Component[] comps = ((JPanel) comp).getComponents();
+              Component[] comps = comp.getComponents();
               StringBuilder sb = new StringBuilder();
               jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made

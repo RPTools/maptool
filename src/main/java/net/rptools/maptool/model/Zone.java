@@ -370,23 +370,22 @@ public class Zone extends BaseModel {
     // library that use a Transformer and that seemed like a lot more work. :-/
     if (zone.drawables != null && !zone.drawables.isEmpty()) {
       drawables = new LinkedList<DrawnElement>();
-      drawables.addAll(Collections.nCopies(zone.drawables.size(), (DrawnElement) null));
+      drawables.addAll(Collections.nCopies(zone.drawables.size(), null));
       Collections.copy(drawables, zone.drawables);
     }
     if (zone.objectDrawables != null && !zone.objectDrawables.isEmpty()) {
       objectDrawables = new LinkedList<DrawnElement>();
-      objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), (DrawnElement) null));
+      objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), null));
       Collections.copy(objectDrawables, zone.objectDrawables);
     }
     if (zone.backgroundDrawables != null && !zone.backgroundDrawables.isEmpty()) {
       backgroundDrawables = new LinkedList<DrawnElement>();
-      backgroundDrawables.addAll(
-          Collections.nCopies(zone.backgroundDrawables.size(), (DrawnElement) null));
+      backgroundDrawables.addAll(Collections.nCopies(zone.backgroundDrawables.size(), null));
       Collections.copy(backgroundDrawables, zone.backgroundDrawables);
     }
     if (zone.gmDrawables != null && !zone.gmDrawables.isEmpty()) {
       gmDrawables = new LinkedList<DrawnElement>();
-      gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), (DrawnElement) null));
+      gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), null));
       Collections.copy(gmDrawables, zone.gmDrawables);
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {

@@ -579,7 +579,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         Token token = zone.getToken(guid);
 
         if (selected) {
-          for (Player player : (Iterable<Player>) MapTool.getPlayerList()) {
+          for (Player player : MapTool.getPlayerList()) {
             token.addOwner(player.getName());
           }
           token.removeOwner(name);
