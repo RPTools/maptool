@@ -15,10 +15,7 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.text.JTextComponent;
@@ -831,36 +828,34 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (index != that.index) {
       return false;
     }
-    if (colorKey != null ? !colorKey.equals(that.colorKey) : that.colorKey != null) {
+    if (!Objects.equals(colorKey, that.colorKey)) {
       return false;
     }
-    if (command != null ? !command.equals(that.command) : that.command != null) {
+    if (!Objects.equals(command, that.command)) {
       return false;
     }
-    if (hotKey != null ? !hotKey.equals(that.hotKey) : that.hotKey != null) {
+    if (!Objects.equals(hotKey, that.hotKey)) {
       return false;
     }
-    if (label != null ? !label.equals(that.label) : that.label != null) {
+    if (!Objects.equals(label, that.label)) {
       return false;
     }
-    if (group != null ? !group.equals(that.group) : that.group != null) {
+    if (!Objects.equals(group, that.group)) {
       return false;
     }
-    if (sortby != null ? !sortby.equals(that.sortby) : that.sortby != null) {
+    if (!Objects.equals(sortby, that.sortby)) {
       return false;
     }
-    if (fontColorKey != null
-        ? !fontColorKey.equals(that.fontColorKey)
-        : that.fontColorKey != null) {
+    if (!Objects.equals(fontColorKey, that.fontColorKey)) {
       return false;
     }
-    if (fontSize != null ? !fontSize.equals(that.fontSize) : that.fontSize != null) {
+    if (!Objects.equals(fontSize, that.fontSize)) {
       return false;
     }
-    if (minWidth != null ? !minWidth.equals(that.minWidth) : that.minWidth != null) {
+    if (!Objects.equals(minWidth, that.minWidth)) {
       return false;
     }
-    if (maxWidth != null ? !maxWidth.equals(that.maxWidth) : that.maxWidth != null) {
+    if (!Objects.equals(maxWidth, that.maxWidth)) {
       return false;
     }
 
