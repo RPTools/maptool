@@ -959,14 +959,9 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
-      if (als != null
-          && als.getLightSourceId() != null
-          && als.getLightSourceId().equals(source.getId())) {
-        i.remove();
-      }
-    }
+    lightSourceList.removeIf(als -> als != null
+            && als.getLightSourceId() != null
+            && als.getLightSourceId().equals(source.getId()));
   }
 
   /** Clear the lightSourceList */
