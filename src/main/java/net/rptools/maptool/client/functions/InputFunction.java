@@ -1224,7 +1224,7 @@ public class InputFunction extends AbstractFunction {
           } else {
             resolver.setVariable(vs.name, newValue.trim());
           }
-          allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
+          allAssignments.append(vs.name).append("=").append(newValue.trim()).append(" ## ");
         }
       }
       if (cp.tabVarSpec != null) {
