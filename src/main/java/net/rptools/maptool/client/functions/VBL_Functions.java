@@ -607,7 +607,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       BasicStroke stroke =
-          new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+          new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
     } else {
       // User requests for polygon to be closed, so a Polygon is used which is automatically
@@ -631,7 +631,7 @@ public class VBL_Functions extends AbstractFunction {
       // A strokedShape will not be filled in and have a defined thickness.
       if (fill == 0) {
         BasicStroke stroke =
-            new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         area = new Area(stroke.createStrokedShape(poly));
       } else {
         area = new Area(poly);
