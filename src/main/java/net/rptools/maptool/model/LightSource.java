@@ -230,8 +230,8 @@ public class LightSource implements Comparable<LightSource> {
    */
   public int compareTo(LightSource o) {
     if (o != this) {
-      Integer nameLong = NumberUtils.toInt(name, Integer.MIN_VALUE);
-      Integer onameLong = NumberUtils.toInt(o.name, Integer.MIN_VALUE);
+      int nameLong = NumberUtils.toInt(name, Integer.MIN_VALUE);
+      int onameLong = NumberUtils.toInt(o.name, Integer.MIN_VALUE);
       if (nameLong != Integer.MIN_VALUE && onameLong != Integer.MIN_VALUE)
         return nameLong - onameLong;
       return name.compareTo(o.name);
