@@ -82,7 +82,7 @@ public class BackupManager {
         new Comparator<File>() {
           public int compare(File o1, File o2) {
 
-            return o1.lastModified() < o2.lastModified() ? -1 : 1;
+            return Long.compare(o1.lastModified(), o2.lastModified());
           }
         });
 
