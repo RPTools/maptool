@@ -297,7 +297,7 @@ public class GraphicsUtil {
   }
 
   public static Area createLineSegmentEllipse(int x1, int y1, int x2, int y2, int steps) {
-    return createLineSegmentEllipse((double) x1, (double) y1, (double) x2, (double) y2, steps);
+    return createLineSegmentEllipse(x1, y1, x2, (double) y2, steps);
   }
 
   public static Area createLineSegmentEllipse(

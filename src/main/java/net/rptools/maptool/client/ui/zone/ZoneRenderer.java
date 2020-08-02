@@ -3283,13 +3283,9 @@ public class ZoneRenderer extends JComponent
         at.scale(getScale(), getScale());
       } else {
         if (token.getShape() == TokenShape.FIGURE) {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledWidth / workImage.getWidth());
+          at.scale(scaledWidth / workImage.getWidth(), scaledWidth / workImage.getWidth());
         } else {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledHeight / workImage.getHeight());
+          at.scale(scaledWidth / workImage.getWidth(), scaledHeight / workImage.getHeight());
         }
       }
       timer.stop("tokenlist-6");

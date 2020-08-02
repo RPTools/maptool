@@ -485,7 +485,7 @@ public class InitiativePanel extends JPanel
   @Override
   public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if ((Zone) event.getModel() == zone) {
+      if (event.getModel() == zone) {
         int oldSize = model.getSize();
         setList(((Zone) event.getModel()).getInitiativeList());
         if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();

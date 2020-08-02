@@ -258,8 +258,7 @@ public class ImagePanel extends JComponent
       // Selected
       if (selectedIDList.contains(model.getID(i))) {
         // TODO: Let the user pick the border
-        ImageBorder.RED.paintAround(
-            (Graphics2D) g, bounds.x, bounds.y, bounds.width, bounds.height);
+        ImageBorder.RED.paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
       }
       // Decorations
       Image[] decorations = model.getDecorations(i);

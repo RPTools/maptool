@@ -793,7 +793,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setTokenSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      Boolean toGrid = FunctionUtil.getBooleanValue((Object) parameters.get(0));
+      Boolean toGrid = FunctionUtil.getBooleanValue(parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToGrid, toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }

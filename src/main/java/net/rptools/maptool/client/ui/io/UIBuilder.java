@@ -188,7 +188,7 @@ public class UIBuilder extends JDialog {
         while (children.hasMoreElements()) {
           DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
           if (MapTool.isDevelopment()) _Checking(next);
-          if (((MaptoolNode) next.getUserObject()).hashCode() == elem.hashCode()) {
+          if (next.getUserObject().hashCode() == elem.hashCode()) {
             start = next;
             _Found(start);
             continue OuterLoop;
