@@ -123,6 +123,7 @@ import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /** */
 public class ZoneRenderer extends JComponent
@@ -4807,7 +4808,7 @@ public class ZoneRenderer extends JComponent
 
   //
   // COMPARABLE
-  public int compareTo(ZoneRenderer o) {
+  public int compareTo(@NotNull ZoneRenderer o) {
     if (o != this) {
       return (int) (zone.getCreationTime() - o.zone.getCreationTime());
     }

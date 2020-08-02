@@ -18,6 +18,7 @@ import com.withay.util.HexCode;
 import java.io.Serializable;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /** Global unique identificator object. */
 public class GUID extends Object implements Serializable, Comparable<GUID> {
@@ -187,7 +188,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     }
   }
 
-  public int compareTo(GUID o) {
+  public int compareTo(@NotNull GUID o) {
     if (o != this) {
       for (int i = 0; i < GUID_LENGTH; i++) {
         if (this.baGUID[i] != o.baGUID[i]) return this.baGUID[i] - o.baGUID[i];
