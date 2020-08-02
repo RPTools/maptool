@@ -161,8 +161,7 @@ public class ImagePanel extends JComponent
   }
 
   public List<Object> getSelectedIds() {
-    List<Object> list = new ArrayList<Object>();
-    list.addAll(selectedIDList);
+    List<Object> list = new ArrayList<Object>(selectedIDList);
     return list;
   }
 
