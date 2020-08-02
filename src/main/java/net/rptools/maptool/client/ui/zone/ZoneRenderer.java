@@ -3786,10 +3786,7 @@ public class ZoneRenderer extends JComponent
       return false; // doesn't exist
     }
     if (!zone.isTokenVisible(token)) {
-      if (AppUtil.playerOwns(token)) {
-        return true;
-      }
-      return false; // can't own or see
+      return AppUtil.playerOwns(token); // can't own or see
     }
     return true;
   }

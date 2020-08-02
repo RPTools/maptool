@@ -126,11 +126,7 @@ public final class ExtractHeroLab {
   }
 
   private boolean isExtracted() {
-    if (extractComplete.exists()) {
-      return true;
-    } else {
-      return false;
-    }
+    return extractComplete.exists();
   }
 
   private void markComplete() {

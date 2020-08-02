@@ -1001,11 +1001,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       return false;
     }
 
-    if (StringUtil.isEmpty(val.toString())) {
-      return false;
-    }
-
-    return true;
+    return !StringUtil.isEmpty(val.toString());
   }
 
   /**
