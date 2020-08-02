@@ -3218,12 +3218,10 @@ public class AppActions {
 
     static {
       String prop = System.getProperty("os.name");
-      if ("Mac OS X".equals(prop)) {
-        NEEDS_GUARD =
-            true; // MapTool doesnt run on version 8 or less of JDK so no need to check that
-      } else {
-        NEEDS_GUARD = false;
-      }
+      NEEDS_GUARD =
+          "Mac OS X"
+              .equals(
+                  prop); // MapTool doesnt run on version 8 or less of JDK so no need to check that
     }
 
     /**
