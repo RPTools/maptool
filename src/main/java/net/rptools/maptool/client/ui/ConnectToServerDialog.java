@@ -180,7 +180,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       RemoteServerTableModel model = null;
 
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         model = new RemoteServerTableModel(MapToolRegistry.findAllInstances());
         return null;
       }

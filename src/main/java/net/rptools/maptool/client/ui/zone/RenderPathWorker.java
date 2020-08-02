@@ -47,7 +47,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
   }
 
   @Override
-  protected Void doInBackground() throws Exception {
+  protected Void doInBackground() {
     walker.replaceLastWaypoint(endPoint, restrictMovement, terrainModifiersIgnored, tokenVBL);
     return null;
   }

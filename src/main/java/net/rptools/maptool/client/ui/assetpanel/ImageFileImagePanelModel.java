@@ -193,15 +193,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     File file = fileList.get(index);
     if (file.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
-
-      try {
-        Token token = PersistenceUtil.loadToken(file);
-
-        return new TransferableToken(token);
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load that token: ", ioe);
-        return null;
-      }
+      Token token = PersistenceUtil.loadToken(file);
+      return new TransferableToken(token);
     }
 
     if (dir instanceof AssetDirectory || dir instanceof PdfAsDirectory) {
@@ -456,7 +449,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
       try {
         fileList.addAll(extractor.extractPage(pageNumber));
       } catch (Exception e) {
@@ -602,7 +595,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
+    protected Void doInBackground() {
       assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       listFilesInSubDirectories();
       publish(fileList.size());
