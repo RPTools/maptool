@@ -44,7 +44,6 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -567,13 +566,7 @@ public class MapTool {
     // using a renderer that's on screen
     if (!EventQueue.isDispatchThread()) {
       try {
-        EventQueue.invokeAndWait(
-            new Runnable() {
-              @Override
-              public void run() {
-                renderer.renderZone(g, view);
-              }
-            });
+        EventQueue.invokeAndWait(() -> renderer.renderZone(g, view));
       } catch (InterruptedException | InvocationTargetException ie) {
         MapTool.showError("While creating snapshot", ie);
       }
@@ -773,13 +766,7 @@ public class MapTool {
       playerList.add(player);
 
       // LATER: Make this non-anonymous
-      playerList.sort(
-          new Comparator<Player>() {
-            @Override
-            public int compare(Player arg0, Player arg1) {
-              return arg0.getName().compareToIgnoreCase(arg1.getName());
-            }
-          });
+      playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
 
       if (!player.equals(MapTool.getPlayer())) {
         String msg =
@@ -1268,59 +1255,55 @@ public class MapTool {
 
   private static void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
-        new LookAndFeelFactory.UIDefaultsCustomizer() {
-          @Override
-          public void customize(UIDefaults defaults) {
-            ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
-            defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
+        defaults -> {
+          ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
+          defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
-            defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
-            // is true
-            defaults.put(
-                "OptionPane.bannerIcon",
-                new ImageIcon(
-                    MapTool.class
-                        .getClassLoader()
-                        .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
-            defaults.put("OptionPane.bannerFontSize", 13);
-            defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
-            defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-            defaults.put(
-                "OptionPane.bannerForeground",
-                painter != null ? painter.getOptionPaneBannerForeground() : null); // you
-            // should
-            // adjust
-            // this
-            // if
-            // banner
-            // background
-            // is
-            // not
-            // the
-            // default
-            // gradient paint
-            defaults.put("OptionPane.bannerBorder", null); // use default border
+          defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
+          // is true
+          defaults.put(
+              "OptionPane.bannerIcon",
+              new ImageIcon(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+          defaults.put("OptionPane.bannerFontSize", 13);
+          defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
+          defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
+          defaults.put(
+              "OptionPane.bannerForeground",
+              painter != null ? painter.getOptionPaneBannerForeground() : null); // you
+          // should
+          // adjust
+          // this
+          // if
+          // banner
+          // background
+          // is
+          // not
+          // the
+          // default
+          // gradient paint
+          defaults.put("OptionPane.bannerBorder", null); // use default border
 
-            // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
-            // gradient
-            defaults.put(
-                "OptionPane.bannerBackgroundDk",
-                painter != null ? painter.getOptionPaneBannerDk() : null);
-            defaults.put(
-                "OptionPane.bannerBackgroundLt",
-                painter != null ? painter.getOptionPaneBannerLt() : null);
-            defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
-            // true
+          // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
+          // gradient
+          defaults.put(
+              "OptionPane.bannerBackgroundDk",
+              painter != null ? painter.getOptionPaneBannerDk() : null);
+          defaults.put(
+              "OptionPane.bannerBackgroundLt",
+              painter != null ? painter.getOptionPaneBannerLt() : null);
+          defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
+          // true
 
-            // optionally, you can set a Paint object for BannerPanel. If so, the three
-            // UIDefaults
-            // related to banner background above will be ignored.
-            defaults.put("OptionPane.bannerBackgroundPaint", null);
+          // optionally, you can set a Paint object for BannerPanel. If so, the three
+          // UIDefaults
+          // related to banner background above will be ignored.
+          defaults.put("OptionPane.bannerBackgroundPaint", null);
 
-            defaults.put(
-                "OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
-            defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
-          }
+          defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
+          defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
         };
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
   }
@@ -1729,12 +1712,9 @@ public class MapTool {
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
       LookAndFeelFactory.addUIDefaultsCustomizer(
-          new LookAndFeelFactory.UIDefaultsCustomizer() {
-            @Override
-            public void customize(UIDefaults defaults) {
-              // Remove red border around menus
-              defaults.put("PopupMenu.foreground", Color.lightGray);
-            }
+          defaults -> {
+            // Remove red border around menus
+            defaults.put("PopupMenu.foreground", Color.lightGray);
           });
       LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
@@ -1769,20 +1749,14 @@ public class MapTool {
     tk.setDynamicLayout(true);
 
     EventQueue.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            initialize();
-            EventQueue.invokeLater(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    clientFrame.setVisible(true);
-                    splash.hideSplashScreen();
-                    EventQueue.invokeLater(MapTool::postInitialize);
-                  }
-                });
-          }
+        () -> {
+          initialize();
+          EventQueue.invokeLater(
+              () -> {
+                clientFrame.setVisible(true);
+                splash.hideSplashScreen();
+                EventQueue.invokeLater(MapTool::postInitialize);
+              });
         });
     // new Thread(new HeapSpy()).start();
   }

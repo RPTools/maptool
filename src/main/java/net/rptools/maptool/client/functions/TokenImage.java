@@ -25,7 +25,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -280,13 +279,7 @@ public class TokenImage extends AbstractFunction {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
-            zr.getZone()
-                .getTokensFiltered(
-                    new Zone.Filter() {
-                      public boolean matchToken(Token t) {
-                        return t.getName().equalsIgnoreCase(name);
-                      }
-                    });
+            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(name));
         for (Token token : tokenList) {
           // If we are not the GM and the token is not visible to players then we don't
           // let them get functions from it.

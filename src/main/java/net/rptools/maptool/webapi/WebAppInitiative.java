@@ -90,14 +90,10 @@ public class WebAppInitiative {
   private WebAppInitiative() {
     initiativeListener = new InitiativeListener();
     SwingUtilities.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            MapTool.getEventDispatcher()
-                .addListener(initiativeListener, MapTool.ZoneEvent.Activated);
-            initiativeListener.updateListeners();
-            System.out.println("Here...");
-          }
+        () -> {
+          MapTool.getEventDispatcher().addListener(initiativeListener, MapTool.ZoneEvent.Activated);
+          initiativeListener.updateListeners();
+          System.out.println("Here...");
         });
   }
 

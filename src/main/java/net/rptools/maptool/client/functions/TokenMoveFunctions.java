@@ -467,13 +467,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zr : zrenderers) {
       List<Token> tokenList =
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getName().toLowerCase().startsWith("lib:");
-                    }
-                  });
+          zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
       for (Token token : tokenList) {
         // If the token is not owned by everyone and all owners are GMs
         // then we are in

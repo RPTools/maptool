@@ -19,8 +19,6 @@ import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Enumeration;
 import javax.swing.AbstractButton;
 import javax.swing.JDialog;
@@ -250,19 +248,15 @@ public class UIBuilder extends JDialog {
     final JDialog dialog = this;
     AbstractButton btn = form.getButton("ok");
     btn.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            status = JOptionPane.OK_OPTION;
-            dialog.setVisible(false);
-          }
+        e -> {
+          status = JOptionPane.OK_OPTION;
+          dialog.setVisible(false);
         });
     btn = form.getButton("cancel");
     btn.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            status = JOptionPane.CANCEL_OPTION;
-            dialog.setVisible(false);
-          }
+        e -> {
+          status = JOptionPane.CANCEL_OPTION;
+          dialog.setVisible(false);
         });
     SwingUtil.centerOver(this, frame);
   }
