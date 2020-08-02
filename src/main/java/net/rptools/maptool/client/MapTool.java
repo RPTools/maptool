@@ -1781,13 +1781,7 @@ public class MapTool {
                   public void run() {
                     clientFrame.setVisible(true);
                     splash.hideSplashScreen();
-                    EventQueue.invokeLater(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            postInitialize();
-                          }
-                        });
+                    EventQueue.invokeLater(MapTool::postInitialize);
                   }
                 });
           }

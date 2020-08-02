@@ -378,12 +378,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       ((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModifiedDateString());
 
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              loadHeroLabImageList();
-            }
-          });
+      EventQueue.invokeLater(this::loadHeroLabImageList);
 
       // loadHeroLabImageList();
     } else {

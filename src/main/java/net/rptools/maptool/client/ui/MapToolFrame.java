@@ -1835,12 +1835,7 @@ public class MapToolFrame extends DefaultDockableHolder
     MapTool.getAutoSaveManager().purge();
     setVisible(false);
 
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            dispose();
-          }
-        });
+    EventQueue.invokeLater(this::dispose);
   }
 
   public void windowClosed(WindowEvent e) {
