@@ -738,12 +738,7 @@ public class MessagePanelImageView extends View {
         ((AbstractDocument) doc).readUnlock();
       }
     } else {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              safePreferenceChanged();
-            }
-          });
+      SwingUtilities.invokeLater(this::safePreferenceChanged);
     }
   }
 

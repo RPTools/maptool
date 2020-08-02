@@ -140,12 +140,7 @@ public class HTMLPane extends JEditorPane {
 
   /** Flushes any caching for the panel. */
   public void flush() {
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            editorKit.flush();
-          }
-        });
+    EventQueue.invokeLater(editorKit::flush);
   }
 
   /**

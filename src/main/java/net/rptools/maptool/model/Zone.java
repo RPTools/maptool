@@ -1657,23 +1657,11 @@ public class Zone extends BaseModel {
   }
 
   public List<Token> getTokensAlwaysVisible() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.isAlwaysVisible();
-          }
-        });
+    return getTokensFiltered(Token::isAlwaysVisible);
   }
 
   public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.hasVBL();
-          }
-        });
+    return getTokensFiltered(Token::hasVBL);
   }
 
   public List<Token> getTokensWithTerrainModifiers() {
@@ -2010,15 +1998,7 @@ public class Zone extends BaseModel {
 
     // 1.3b47 -> 1.3b48
     if (visionType == null) {
-      if (getTokensFiltered(
-                  new Filter() {
-                    @Override
-                    public boolean matchToken(Token token) {
-                      return token.hasLightSources();
-                    }
-                  })
-              .size()
-          > 0) {
+      if (getTokensFiltered(Token::hasLightSources).size() > 0) {
         visionType = VisionType.NIGHT;
       } else if (topology != null && !topology.isEmpty()) {
         visionType = VisionType.DAY;
