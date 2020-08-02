@@ -392,7 +392,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     @Override
     protected boolean accept(Token token) {
-      return token.getLightSources().isEmpty() ? false : AppUtil.playerOwns(token);
+      return !token.getLightSources().isEmpty() && AppUtil.playerOwns(token);
     }
   }
 
