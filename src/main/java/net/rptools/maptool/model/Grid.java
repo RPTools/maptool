@@ -94,7 +94,7 @@ public abstract class Grid implements Cloneable {
     final double gridScale = (double) MAX_GRID_SIZE / getSize();
     at.scale(gridScale, gridScale);
 
-    getGridShapeCache().put(Integer.valueOf(gridRadius), newGridArea.createTransformedArea(at));
+    getGridShapeCache().put(gridRadius, newGridArea.createTransformedArea(at));
 
     // Verify combined Area is a single union of polygons
     if (!newGridArea.isSingular()) {
@@ -910,7 +910,7 @@ public abstract class Grid implements Cloneable {
   protected Area getGridAreaFromCache(int gridRadius) {
     // If not already in cache, create and cache it
     // Or if debug is enabled recreate cache
-    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(Integer.valueOf(gridRadius))) {
+    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(gridRadius)) {
       createGridArea(gridRadius);
     }
 
@@ -918,7 +918,7 @@ public abstract class Grid implements Cloneable {
     final AffineTransform at = new AffineTransform();
     at.scale(rescale, rescale);
 
-    return getGridShapeCache().get(Integer.valueOf(gridRadius)).createTransformedArea(at);
+    return getGridShapeCache().get(gridRadius).createTransformedArea(at);
   }
 
   static class DirectionCalculator {

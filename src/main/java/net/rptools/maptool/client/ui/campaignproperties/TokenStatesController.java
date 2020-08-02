@@ -480,7 +480,7 @@ public class TokenStatesController
       formPanel.setText(GROUP, s.getGroup());
       formPanel.setText(IMAGE, "");
       formPanel.setSelected(MOUSEOVER, s.isMouseover());
-      formPanel.getSpinner(OPACITY).setValue(new Integer(s.getOpacity()));
+      formPanel.getSpinner(OPACITY).setValue(s.getOpacity());
       formPanel.getSpinner(INDEX).setValue(selected);
       formPanel.setSelected(SHOW_GM, s.isShowGM());
       formPanel.setSelected(SHOW_OWNER, s.isShowOwner());
@@ -490,7 +490,7 @@ public class TokenStatesController
       int type = -1;
       if (s instanceof XTokenOverlay) {
         type = 7;
-        formPanel.getSpinner(WIDTH).setValue(Integer.valueOf(((XTokenOverlay) s).getWidth()));
+        formPanel.getSpinner(WIDTH).setValue(((XTokenOverlay) s).getWidth());
         ((JETAColorWell) formPanel.getComponentByName(COLOR))
             .setColor(((XTokenOverlay) s).getColor());
       } // endif
@@ -563,7 +563,7 @@ public class TokenStatesController
     Token token = new Token("name", null);
 
     /** Value passed to the overlay painter. */
-    Double value = Double.valueOf(1);
+    Double value = 1d;
 
     /** Overlay being painted by the icon */
     AbstractTokenOverlay overlay;
@@ -771,7 +771,7 @@ public class TokenStatesController
     JSpinner spinner = formPanel.getSpinner(name);
     try {
       spinner.commitEdit();
-      width = ((Integer) spinner.getValue()).intValue();
+      width = (Integer) spinner.getValue();
     } catch (ParseException e) {
       JOptionPane.showMessageDialog(
           spinner,

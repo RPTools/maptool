@@ -509,7 +509,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       Zone zone = server.getCampaign().getZone(list.getZone().getId());
       zone.setInitiativeList(list);
     } else if (ownerPermission != null) {
-      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission.booleanValue());
+      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
     }
     forwardToAllClients();
   }

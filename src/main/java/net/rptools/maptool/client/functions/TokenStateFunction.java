@@ -151,9 +151,9 @@ public class TokenStateFunction extends AbstractFunction {
       return false;
     }
     if (value instanceof Integer) {
-      return ((Integer) value).intValue() != 0;
+      return (Integer) value != 0;
     } else if (value instanceof Boolean) {
-      return ((Boolean) value).booleanValue();
+      return (Boolean) value;
     } else {
       try {
         return Integer.parseInt(value.toString()) != 0;
