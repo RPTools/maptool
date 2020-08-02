@@ -290,7 +290,7 @@ public class AppPreferences {
   }
 
   private static int range0to255(int value) {
-    return value < 1 ? 0 : value > 255 ? 255 : value;
+    return value < 1 ? 0 : Math.min(value, 255);
   }
 
   public static void setHaloOverlayOpacity(int size) {
