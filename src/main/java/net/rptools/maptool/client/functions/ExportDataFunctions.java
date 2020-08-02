@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -105,13 +106,9 @@ public class ExportDataFunctions extends AbstractFunction {
       String envName = parameters.get(0).toString();
       String value = System.getenv(envName);
 
-      if (value != null) {
-        // System.out.format("%s=%s%n", envName, value);
-        return value;
-      } else {
-        // System.out.format("%s is not assigned.%n", envName);
-        return "";
-      }
+      // System.out.format("%s=%s%n", envName, value);
+      // System.out.format("%s is not assigned.%n", envName);
+      return Objects.requireNonNullElse(value, "");
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
