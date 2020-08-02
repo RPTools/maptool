@@ -254,25 +254,22 @@ public class AssetManager {
       final MD5Key id, final AssetAvailableListener... listeners) {
 
     assetLoaderThreadPool.submit(
-        new Runnable() {
-          public void run() {
+        () -> {
+          Asset asset = getAsset(id);
 
-            Asset asset = getAsset(id);
-
-            // Simplest case, we already have it
-            if (asset != null) {
-              for (AssetAvailableListener listener : listeners) {
-                listener.assetAvailable(id);
-              }
-
-              return;
+          // Simplest case, we already have it
+          if (asset != null) {
+            for (AssetAvailableListener listener : listeners) {
+              listener.assetAvailable(id);
             }
 
-            // Let's get it from the server
-            // As a last resort we request the asset from the server
-            if (!isAssetRequested(id)) {
-              requestAssetFromServer(id, listeners);
-            }
+            return;
+          }
+
+          // Let's get it from the server
+          // As a last resort we request the asset from the server
+          if (!isAssetRequested(id)) {
+            requestAssetFromServer(id, listeners);
           }
         });
   }

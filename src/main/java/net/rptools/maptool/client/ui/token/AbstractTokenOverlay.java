@@ -66,11 +66,7 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 
   /** This comparator is used to order the states. */
   public static final Comparator<AbstractTokenOverlay> COMPARATOR =
-      new Comparator<AbstractTokenOverlay>() {
-        public int compare(AbstractTokenOverlay o1, AbstractTokenOverlay o2) {
-          return o1.getOrder() - o2.getOrder();
-        }
-      };
+      (o1, o2) -> o1.getOrder() - o2.getOrder();
 
   /*---------------------------------------------------------------------------------------------
    * Constructors

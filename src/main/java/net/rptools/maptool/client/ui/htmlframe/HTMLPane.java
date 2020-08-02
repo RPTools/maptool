@@ -25,7 +25,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
@@ -67,26 +66,24 @@ public class HTMLPane extends JEditorPane {
     setEditable(false);
 
     addHyperlinkListener(
-        new HyperlinkListener() {
-          public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: "
-                      + e.getEventType().toString()
-                      + " "
-                      + e.toString());
-            }
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-              if (e.getURL() != null) {
-                MapTool.showDocument(e.getURL().toString());
-              } else if (e.getDescription().startsWith("#")) {
-                scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
-              } else {
-                Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
-                if (m.matches()) {
-                  if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.runMacroLink(e.getDescription());
-                  }
+        e -> {
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "Responding to hyperlink event: "
+                    + e.getEventType().toString()
+                    + " "
+                    + e.toString());
+          }
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (e.getURL() != null) {
+              MapTool.showDocument(e.getURL().toString());
+            } else if (e.getDescription().startsWith("#")) {
+              scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+            } else {
+              Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
+              if (m.matches()) {
+                if (m.group(1).equalsIgnoreCase("macro")) {
+                  MacroLinkFunction.runMacroLink(e.getDescription());
                 }
               }
             }

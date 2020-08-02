@@ -17,8 +17,6 @@ package net.rptools.maptool.client.ui;
 import com.jidesoft.swing.FolderChooser;
 import io.sentry.Sentry;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -40,8 +38,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppSetup;
@@ -130,21 +126,19 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     tabPane
         .getModel()
         .addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                // Hmmm, this is fragile (breaks if the order changes) rethink this later
-                switch (tabPane.getSelectedIndex()) {
-                  case 0:
-                    model.tab = Tab.LOCAL;
-                    break;
-                  case 1:
-                    model.tab = Tab.WEB;
-                    break;
-                  case 2:
-                    model.tab = Tab.RPTOOLS;
-                    downloadLibraryList();
-                    break;
-                }
+            e -> {
+              // Hmmm, this is fragile (breaks if the order changes) rethink this later
+              switch (tabPane.getSelectedIndex()) {
+                case 0:
+                  model.tab = Tab.LOCAL;
+                  break;
+                case 1:
+                  model.tab = Tab.WEB;
+                  break;
+                case 2:
+                  model.tab = Tab.RPTOOLS;
+                  downloadLibraryList();
+                  break;
               }
             });
   }
@@ -152,21 +146,18 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   public void initLocalDirectoryButton() {
     final JButton button = (JButton) getComponent("localDirectoryButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+        e -> {
+          FolderChooser folderChooser = new FolderChooser();
+          folderChooser.setCurrentDirectory(
+              MapTool.getFrame().getLoadFileChooser().getCurrentDirectory());
+          folderChooser.setRecentListVisible(false);
+          folderChooser.setFileHidingEnabled(true);
+          folderChooser.setDialogTitle(I18N.getText("msg.title.loadAssetTree"));
 
-            FolderChooser folderChooser = new FolderChooser();
-            folderChooser.setCurrentDirectory(
-                MapTool.getFrame().getLoadFileChooser().getCurrentDirectory());
-            folderChooser.setRecentListVisible(false);
-            folderChooser.setFileHidingEnabled(true);
-            folderChooser.setDialogTitle(I18N.getText("msg.title.loadAssetTree"));
-
-            int result = folderChooser.showOpenDialog(button.getTopLevelAncestor());
-            if (result == FolderChooser.APPROVE_OPTION) {
-              File root = folderChooser.getSelectedFolder();
-              getBrowseTextField().setText(root.getAbsolutePath());
-            }
+          int result = folderChooser.showOpenDialog(button.getTopLevelAncestor());
+          if (result == FolderChooser.APPROVE_OPTION) {
+            File root = folderChooser.getSelectedFolder();
+            getBrowseTextField().setText(root.getAbsolutePath());
           }
         });
   }
@@ -174,24 +165,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   public void initInstallButton() {
     JButton button = (JButton) getComponent("installButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            install = true;
-            if (commit()) {
-              close();
-            }
+        e -> {
+          install = true;
+          if (commit()) {
+            close();
           }
         });
   }
 
   public void initCancelButton() {
     JButton button = (JButton) getComponent("cancelButton");
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            close();
-          }
-        });
+    button.addActionListener(e -> close());
   }
 
   private void downloadLibraryList() {
