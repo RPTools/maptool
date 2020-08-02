@@ -29,7 +29,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -258,7 +257,7 @@ public class Token extends BaseModel implements Cloneable {
   private double terrainModifier = 0.0d;
   private TerrainModifierOperation terrainModifierOperation = TerrainModifierOperation.NONE;
   private Set<TerrainModifierOperation> terrainModifiersIgnored =
-      new HashSet<>(Arrays.asList(TerrainModifierOperation.NONE));
+      new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
 
   private boolean isFlippedX;
   private boolean isFlippedY;
