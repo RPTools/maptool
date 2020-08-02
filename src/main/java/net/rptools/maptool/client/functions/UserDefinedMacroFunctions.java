@@ -43,7 +43,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
-import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,8 +90,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   private UserDefinedMacroFunctions() {}
 
   @Override
-  public void checkParameters(String functionName, List<Object> parameters)
-      throws ParameterException {
+  public void checkParameters(String functionName, List<Object> parameters) {
     // Do nothing as we do not know what we will need.
   }
 
