@@ -205,7 +205,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
-        if (userDefinedFunctions.get(name).equals(macro)) {
+        if (userDefinedFunctions.get(name).macroName.equals(macro)) {
           return;
         }
         // We have to rename the old function

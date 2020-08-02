@@ -194,7 +194,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     ListIterator<Tuple> iter = list.listIterator();
     while (iter.hasNext()) {
       Tuple tuple = iter.next();
-      if (tuple.equals(key)) {
+      if (tuple.key.equals(key)) {
         iter.remove();
         return tuple;
       }
