@@ -18,18 +18,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -1734,11 +1723,7 @@ public class Zone extends BaseModel {
 
     int lastUsed;
 
-    if (_lastUsed == null) {
-      lastUsed = 0;
-    } else {
-      lastUsed = _lastUsed;
-    }
+    lastUsed = Objects.requireNonNullElse(_lastUsed, 0);
     boolean repeat;
     do {
       lastUsed++;
