@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import java.awt.*;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 import java.util.regex.Pattern;
