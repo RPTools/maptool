@@ -192,9 +192,7 @@ public class LookupTableFunction extends AbstractFunction {
         oldlist.stream()
             .filter((e) -> (e != entry))
             .forEachOrdered(
-                (e) -> {
-                  lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
-                });
+                (e) -> lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId()));
       }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
@@ -453,10 +451,7 @@ public class LookupTableFunction extends AbstractFunction {
     else
       MapTool.getCampaign().getLookupTableMap().values().stream()
           .filter(LookupTable::getVisible)
-          .forEachOrdered(
-              (lt) -> {
-                tables.add(lt.getName());
-              });
+          .forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
   }
 

@@ -1253,9 +1253,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     getVblIgnoreColorWell()
         .addActionListener(
-            e -> {
-              getTokenVblPanel().setVblColorPick(getVblIgnoreColorWell().getColor());
-            });
+            e -> getTokenVblPanel().setVblColorPick(getVblIgnoreColorWell().getColor()));
 
     getVblColorPickerToggleButton()
         .addActionListener(
