@@ -485,25 +485,23 @@ public class AssetManager {
 
       final File assetFile = getAssetCacheFile(asset);
 
-      new Thread() {
-        @Override
-        public void run() {
-
-          try {
-            assetFile.getParentFile().mkdirs();
-            // Image
-            OutputStream out = new FileOutputStream(assetFile);
-            out.write(asset.getImage());
-            out.close();
-          } catch (IOException ioe) {
-            log.error("Could not persist asset while writing image data", ioe);
-            return;
-          } catch (NullPointerException npe) {
-            // Not an issue, will update once th frame is finished loading...
-            log.warn("Could not update statusbar while MapTool frame is loading.", npe);
-          }
-        }
-      }.start();
+      new Thread(
+              () -> {
+                try {
+                  assetFile.getParentFile().mkdirs();
+                  // Image
+                  OutputStream out = new FileOutputStream(assetFile);
+                  out.write(asset.getImage());
+                  out.close();
+                } catch (IOException ioe) {
+                  log.error("Could not persist asset while writing image data", ioe);
+                  return;
+                } catch (NullPointerException npe) {
+                  // Not an issue, will update once th frame is finished loading...
+                  log.warn("Could not update statusbar while MapTool frame is loading.", npe);
+                }
+              })
+          .start();
     }
     if (!assetInfoIsInPersistentCache(asset)) {
 

@@ -1396,13 +1396,11 @@ public class MapTool {
   public static void startWebAppServer(final int port) {
     try {
       Thread webAppThread =
-          new Thread() {
-            @Override
-            public void run() {
-              webAppServer.setPort(port);
-              webAppServer.startServer();
-            }
-          };
+          new Thread(
+              () -> {
+                webAppServer.setPort(port);
+                webAppServer.startServer();
+              });
 
       webAppThread.start();
     } catch (Exception e) { // TODO: This needs to be logged

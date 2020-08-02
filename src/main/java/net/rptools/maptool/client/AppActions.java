@@ -3283,14 +3283,13 @@ public class AppActions {
     protected abstract void executeAction();
 
     public void runBackground(final Runnable r) {
-      new Thread() {
-        @Override
-        public void run() {
-          r.run();
+      new Thread(
+              () -> {
+                r.run();
 
-          updateActions();
-        }
-      }.start();
+                updateActions();
+              })
+          .start();
     }
   }
 
