@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui.io;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,10 +76,10 @@ public class LoadSaveImpl {
             addDataObjects("Campaign/Maps", cmpgn.getZones());
           }
         });
-      for (String name : registry.keySet()) {
-          DataTemplate dt = (DataTemplate) registry.get(name);
-          dt.populateModel(model);
-      }
+    for (String name : registry.keySet()) {
+      DataTemplate dt = (DataTemplate) registry.get(name);
+      dt.populateModel(model);
+    }
     form.expandAndSelectAll(true);
     form.pack();
     form.setVisible(true);
@@ -116,9 +115,9 @@ public class LoadSaveImpl {
     set.toArray(names);
     Arrays.sort(names);
 
-      for (String name : names) {
-          MacroButtonProperties macro = map.get(name);
-          model.addNode(where, new MaptoolNode(name, macro));
-      }
+    for (String name : names) {
+      MacroButtonProperties macro = map.get(name);
+      model.addNode(where, new MaptoolNode(name, macro));
+    }
   }
 }

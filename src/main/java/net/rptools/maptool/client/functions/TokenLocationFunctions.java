@@ -444,15 +444,15 @@ public class TokenLocationFunctions extends AbstractFunction {
       for (CellPoint cell : tokenCells) {
         cellx = cell.x;
         celly = cell.y;
-          for (Point point : points) {
-              if (cellx == point.x && celly == point.y) return true;
-          }
+        for (Point point : points) {
+          if (cellx == point.x && celly == point.y) return true;
+        }
       }
     } else {
       Rectangle bounds = token.getBounds(zone);
-        for (Point point : points) {
-            if (bounds.contains(point)) return true;
-        }
+      for (Point point : points) {
+        if (bounds.contains(point)) return true;
+      }
     }
     return false;
   }

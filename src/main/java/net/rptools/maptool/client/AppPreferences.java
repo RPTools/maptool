@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -463,7 +462,7 @@ public class AppPreferences {
 
   public static Integer getTypingNotificationDuration() {
     Integer value =
-            prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION);
+        prefs.getInt(KEY_TYPING_NOTIFICATION_DURATION, DEFAULT_TYPING_NOTIFICATION_DURATION);
     return value;
   }
 

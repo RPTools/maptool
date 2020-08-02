@@ -406,7 +406,7 @@ public class HeroLabData {
   }
 
   public MD5Key getHandoutImage() {
-      return heroImageAssets.getOrDefault(DefaultAssetKey.HANDOUT_KEY, null);
+    return heroImageAssets.getOrDefault(DefaultAssetKey.HANDOUT_KEY, null);
   }
 
   public void setHandoutImage(MD5Key imageAsset) {

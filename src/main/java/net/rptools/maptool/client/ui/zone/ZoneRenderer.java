@@ -2866,23 +2866,24 @@ public class ZoneRenderer extends JComponent
     }
 
     // Sort by location on screen, top left to bottom right
-    list.sort(new Comparator<Token>() {
-      public int compare(Token o1, Token o2) {
-        if (o1.getY() < o2.getY()) {
-          return -1;
-        }
-        if (o1.getY() > o2.getY()) {
-          return 1;
-        }
-        if (o1.getX() < o2.getX()) {
-          return -1;
-        }
-        if (o1.getX() > o2.getX()) {
-          return 1;
-        }
-        return 0;
-      }
-    });
+    list.sort(
+        new Comparator<Token>() {
+          public int compare(Token o1, Token o2) {
+            if (o1.getY() < o2.getY()) {
+              return -1;
+            }
+            if (o1.getY() > o2.getY()) {
+              return 1;
+            }
+            if (o1.getX() < o2.getX()) {
+              return -1;
+            }
+            if (o1.getX() > o2.getX()) {
+              return 1;
+            }
+            return 0;
+          }
+        });
     return list;
   }
 

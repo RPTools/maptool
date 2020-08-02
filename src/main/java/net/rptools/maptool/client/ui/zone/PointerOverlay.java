@@ -57,77 +57,77 @@ public class PointerOverlay implements ZoneOverlay {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();
 
-      for (PointerPair p : pointerList) {
-          if (p.pointer.getZoneGUID().equals(zone.getId())) {
-              ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
-              ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
+    for (PointerPair p : pointerList) {
+      if (p.pointer.getZoneGUID().equals(zone.getId())) {
+        ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
+        ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
 
-              int offX = 0;
-              int offY = 0;
-              int centX = 0;
-              int centY = 0;
-              BufferedImage image = null;
-              switch (p.pointer.getType()) {
-                  case ARROW:
-                      offX = 2;
-                      offY = -36;
-                      image = POINTER_IMAGE;
-                      break;
-                  case SPEECH_BUBBLE:
-                      offX = -19;
-                      offY = -61;
-                      centX = 36;
-                      centY = 23;
-                      image = SPEECH_IMAGE;
-                      break;
-                  case THOUGHT_BUBBLE:
-                      offX = -13;
-                      offY = -65;
-                      centX = 36;
-                      centY = 23;
-                      image = THOUGHT_IMAGE;
-                      break;
-                  case LOOK_HERE:
-                      offX = 0;
-                      offY = -52;
-                      image = LOOK_HERE_IMAGE;
-                      break;
-              }
-              g.drawImage(image, (int) sPoint.x + offX, (int) sPoint.y + offY, null);
+        int offX = 0;
+        int offY = 0;
+        int centX = 0;
+        int centY = 0;
+        BufferedImage image = null;
+        switch (p.pointer.getType()) {
+          case ARROW:
+            offX = 2;
+            offY = -36;
+            image = POINTER_IMAGE;
+            break;
+          case SPEECH_BUBBLE:
+            offX = -19;
+            offY = -61;
+            centX = 36;
+            centY = 23;
+            image = SPEECH_IMAGE;
+            break;
+          case THOUGHT_BUBBLE:
+            offX = -13;
+            offY = -65;
+            centX = 36;
+            centY = 23;
+            image = THOUGHT_IMAGE;
+            break;
+          case LOOK_HERE:
+            offX = 0;
+            offY = -52;
+            image = LOOK_HERE_IMAGE;
+            break;
+        }
+        g.drawImage(image, (int) sPoint.x + offX, (int) sPoint.y + offY, null);
 
-              switch (p.pointer.getType()) {
-                  case ARROW:
-                      GraphicsUtil.drawBoxedString(
-                              g,
-                              p.player,
-                              (int) sPoint.x + POINTER_IMAGE.getWidth() - 10,
-                              (int) sPoint.y - POINTER_IMAGE.getHeight() + 15,
-                              SwingUtilities.LEFT);
-                      break;
-                  case THOUGHT_BUBBLE:
-                  case SPEECH_BUBBLE:
-                      FontMetrics fm = renderer.getFontMetrics(renderer.getFont());
-                      String name = p.player;
-                      int len = SwingUtilities.computeStringWidth(fm, name);
+        switch (p.pointer.getType()) {
+          case ARROW:
+            GraphicsUtil.drawBoxedString(
+                g,
+                p.player,
+                (int) sPoint.x + POINTER_IMAGE.getWidth() - 10,
+                (int) sPoint.y - POINTER_IMAGE.getHeight() + 15,
+                SwingUtilities.LEFT);
+            break;
+          case THOUGHT_BUBBLE:
+          case SPEECH_BUBBLE:
+            FontMetrics fm = renderer.getFontMetrics(renderer.getFont());
+            String name = p.player;
+            int len = SwingUtilities.computeStringWidth(fm, name);
 
-                      g.setColor(Color.black);
-                      int x = (int) sPoint.x + centX + offX + 5;
-                      int y = (int) sPoint.y + offY + centY + fm.getHeight() / 2;
-                      g.drawString(name, x - len / 2, y);
-                      break;
-                  case LOOK_HERE:
-                      GraphicsUtil.drawBoxedString(
-                              g,
-                              p.player,
-                              (int) sPoint.x + LOOK_HERE_IMAGE.getWidth() - 22,
-                              (int) sPoint.y + 2,
-                              SwingUtilities.LEFT);
-                      break;
-                  default:
-                      break;
-              }
-          }
+            g.setColor(Color.black);
+            int x = (int) sPoint.x + centX + offX + 5;
+            int y = (int) sPoint.y + offY + centY + fm.getHeight() / 2;
+            g.drawString(name, x - len / 2, y);
+            break;
+          case LOOK_HERE:
+            GraphicsUtil.drawBoxedString(
+                g,
+                p.player,
+                (int) sPoint.x + LOOK_HERE_IMAGE.getWidth() - 22,
+                (int) sPoint.y + 2,
+                SwingUtilities.LEFT);
+            break;
+          default:
+            break;
+        }
       }
+    }
   }
 
   public void addPointer(String player, Pointer pointer) {
@@ -143,11 +143,11 @@ public class PointerOverlay implements ZoneOverlay {
   }
 
   public Pointer getPointer(String player) {
-      for (PointerPair pointerPair : pointerList) {
-          if (pointerPair.player.equals(player)) {
-              return pointerPair.pointer;
-          }
+    for (PointerPair pointerPair : pointerList) {
+      if (pointerPair.player.equals(player)) {
+        return pointerPair.pointer;
       }
+    }
     return null;
   }
 

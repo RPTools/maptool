@@ -96,8 +96,9 @@ public class ModelVersionManager {
       String version, ModelVersionTransformation... transforms) {
     version = cleanVersionNumber(version);
 
-      List<ModelVersionTransformation> transformList = transformMap.computeIfAbsent(version, k -> new LinkedList<ModelVersionTransformation>());
-      for (ModelVersionTransformation transform : transforms) {
+    List<ModelVersionTransformation> transformList =
+        transformMap.computeIfAbsent(version, k -> new LinkedList<ModelVersionTransformation>());
+    for (ModelVersionTransformation transform : transforms) {
       transformList.add(transform);
     }
   }
