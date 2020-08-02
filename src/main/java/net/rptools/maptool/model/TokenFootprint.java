@@ -42,7 +42,7 @@ public class TokenFootprint {
     id = new GUID();
     this.isDefault = isDefault;
     this.scale = scale;
-      cellSet.addAll(Arrays.asList(points));
+    cellSet.addAll(Arrays.asList(points));
   }
 
   @Override

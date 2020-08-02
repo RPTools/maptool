@@ -288,7 +288,7 @@ public class SwingUtil {
         return (JComponent) c;
       }
       if (c instanceof Container) {
-          componentQueue.addAll(Arrays.asList(((Container) c).getComponents()));
+        componentQueue.addAll(Arrays.asList(((Container) c).getComponents()));
       }
     }
     return null;

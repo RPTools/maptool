@@ -14,8 +14,6 @@
  */
 package net.rptools.lib.swing;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -30,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.NotNull;
 
 /*
  * $Id: TaskPanelGroup.java 5381 2010-09-07 17:17:26Z azhrei_fje $

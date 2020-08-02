@@ -101,7 +101,7 @@ public class MacroManager {
   }
 
   public static Set<Macro> getRegisteredMacros() {
-      Set<Macro> ret = new HashSet<Macro>(MACROS.values());
+    Set<Macro> ret = new HashSet<Macro>(MACROS.values());
     return ret;
   }
 

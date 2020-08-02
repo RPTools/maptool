@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.util.*;
-
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
@@ -44,7 +43,7 @@ public class LookupTable {
     name = table.name;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
-      pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
+    pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
 
     if (table.entryList != null) {
       getInternalEntryList().addAll(table.entryList);

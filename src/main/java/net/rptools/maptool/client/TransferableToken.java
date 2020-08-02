@@ -30,7 +30,8 @@ public class TransferableToken implements Transferable {
     this.token = token;
   }
 
-  public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public @NotNull Object getTransferData(DataFlavor flavor)
+      throws UnsupportedFlavorException, IOException {
     return token;
   }
 

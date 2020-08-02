@@ -14,13 +14,12 @@
  */
 package net.rptools.maptool.model;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
+import org.jetbrains.annotations.NotNull;
 
 // TODO: Make this class implement 'List'
 public class ObservableList<K> extends Observable implements Iterable<K> {
