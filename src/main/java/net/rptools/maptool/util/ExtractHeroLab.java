@@ -458,7 +458,6 @@ public final class ExtractHeroLab {
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
 
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       } else {
         // We only need the <character> node for this minion, so lets find it and clone
         // it...
@@ -495,9 +494,8 @@ public final class ExtractHeroLab {
         transformer.transform(source, result);
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
-
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       }
+      statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
 
     } catch (IOException
         | SAXException

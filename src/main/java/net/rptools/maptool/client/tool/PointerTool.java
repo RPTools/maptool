@@ -296,11 +296,11 @@ public class PointerTool extends DefaultTool {
       }
 
       // Lee: fog exposure according to reveal type
-      if (zone.getWaypointExposureToggle()) FogUtil.exposeVisibleArea(renderer, exposeSet, false);
-      else {
+      if (zone.getWaypointExposureToggle()) {
+      } else {
         FogUtil.exposeLastPath(renderer, exposeSet);
-        FogUtil.exposeVisibleArea(renderer, exposeSet, false);
       }
+      FogUtil.exposeVisibleArea(renderer, exposeSet, false);
     }
   }
 
