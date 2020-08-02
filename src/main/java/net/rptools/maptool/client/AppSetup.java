@@ -16,7 +16,6 @@ package net.rptools.maptool.client;
 
 import java.awt.*;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -156,8 +155,6 @@ public class AppSetup {
                       pane,
                       "License for " + libraryName,
                       JOptionPane.INFORMATION_MESSAGE);
-                } catch (MalformedURLException e) {
-                  log.error("Could not load license file: " + licenseFileFinal, e);
                 } catch (IOException e) {
                   log.error("Could not load license file: " + licenseFileFinal, e);
                 }

@@ -95,11 +95,7 @@ public class AbeillePanel<T> extends JPanel {
       if (method.getName().startsWith("init")) {
         try {
           method.invoke(this, new Object[] {});
-        } catch (IllegalArgumentException e) {
-          log.error("Could not init method: " + method.getName(), e);
-        } catch (IllegalAccessException e) {
-          log.error("Could not init method: " + method.getName(), e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
           log.error("Could not init method: " + method.getName(), e);
         }
       }

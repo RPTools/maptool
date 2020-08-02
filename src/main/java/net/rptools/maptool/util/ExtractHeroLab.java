@@ -270,11 +270,7 @@ public final class ExtractHeroLab {
         heroes.add(heroFile);
         markComplete(new XMLDocument(portfolioIndex).toString());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -347,11 +343,7 @@ public final class ExtractHeroLab {
       }
 
       markComplete(new XMLDocument(portfolioIndex).toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -547,8 +539,6 @@ public final class ExtractHeroLab {
       }
 
       por.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     } catch (NullPointerException e) {
       e.printStackTrace();
     } catch (Exception e) {
