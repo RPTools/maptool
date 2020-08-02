@@ -72,7 +72,7 @@ public class ImageManager {
 
   private static ExecutorService largeImageLoader = Executors.newFixedThreadPool(1);
 
-  private static Object imageLoaderMutex = new Object();
+  private static final Object imageLoaderMutex = new Object();
 
   /**
    * A Map containing sets of observers for each asset id. Observers are notified when the image is

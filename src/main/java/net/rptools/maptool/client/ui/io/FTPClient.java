@@ -47,8 +47,8 @@ public class FTPClient {
   protected FTPClientConn cconn;
 
   protected List<Object> fifoQueue;
-  protected Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
-  protected Map<Object, FTPTransferObject> transferringMap; // Currently in process...
+  protected final Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
+  protected final Map<Object, FTPTransferObject> transferringMap; // Currently in process...
 
   private int numThreads = 1;
   private List<ChangeListener> changeListeners;
