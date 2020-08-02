@@ -53,15 +53,13 @@ public class AreaData {
   public List<AreaMeta> getAreaList(final Point centerPoint) {
     List<AreaMeta> areaMetaList = new ArrayList<AreaMeta>(metaList);
 
-    Collections.sort(
-        areaMetaList,
-        new Comparator<AreaMeta>() {
-          public int compare(AreaMeta o1, AreaMeta o2) {
+    areaMetaList.sort(new Comparator<AreaMeta>() {
+        public int compare(AreaMeta o1, AreaMeta o2) {
             Double d1 = centerPoint.distance(o1.getCenterPoint());
             Double d2 = centerPoint.distance(o2.getCenterPoint());
             return d1.compareTo(d2);
-          }
-        });
+        }
+    });
     return areaMetaList;
   }
 

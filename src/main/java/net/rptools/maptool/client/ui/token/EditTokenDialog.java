@@ -1537,13 +1537,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       for (String speechName : token.getSpeechNames()) {
         rowList.add(new Association<String, String>(speechName, token.getSpeech(speechName)));
       }
-      Collections.sort(
-          rowList,
-          new Comparator<Association<String, String>>() {
-            public int compare(Association<String, String> o1, Association<String, String> o2) {
-              return o1.getLeft().compareToIgnoreCase(o2.getLeft());
-            }
-          });
+      rowList.sort(new Comparator<Association<String, String>>() {
+        public int compare(Association<String, String> o1, Association<String, String> o2) {
+          return o1.getLeft().compareToIgnoreCase(o2.getLeft());
+        }
+      });
       init(rowList);
     }
 

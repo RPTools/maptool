@@ -79,14 +79,12 @@ public class BackupManager {
   private List<File> getFiles() {
 
     List<File> fileList = new LinkedList<File>(Arrays.asList(backupDir.listFiles()));
-    Collections.sort(
-        fileList,
-        new Comparator<File>() {
-          public int compare(File o1, File o2) {
+    fileList.sort(new Comparator<File>() {
+      public int compare(File o1, File o2) {
 
-            return o1.lastModified() < o2.lastModified() ? -1 : 1;
-          }
-        });
+        return o1.lastModified() < o2.lastModified() ? -1 : 1;
+      }
+    });
 
     return fileList;
   }

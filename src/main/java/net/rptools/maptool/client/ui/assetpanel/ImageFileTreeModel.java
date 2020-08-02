@@ -56,7 +56,7 @@ public class ImageFileTreeModel implements TreeModel {
 
   public void addRootGroup(Directory directory) {
     rootDirectories.add(directory);
-    Collections.sort(rootDirectories, Directory.COMPARATOR);
+    rootDirectories.sort(Directory.COMPARATOR);
     fireStructureChangedEvent(
         new TreeModelEvent(
             this,
