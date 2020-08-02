@@ -25,6 +25,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
@@ -178,7 +179,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
                 "setTerrainModifier",
                 terrainModifierOperationPrimitive.getAsString(),
                 Arrays.stream(TerrainModifierOperation.values())
-                    .map(value -> value.toString())
+                    .map(Enum::toString)
                     .collect(Collectors.joining(", "))));
       }
 
@@ -192,9 +193,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
         List<TerrainModifierOperation> ignoredTerrainOperationsList =
             gson.fromJson(jsonArray, type);
         Set<TerrainModifierOperation> ignoredTerrainOperationsSet =
-            ignoredTerrainOperationsList.stream()
-                .filter(operation -> operation != null)
-                .collect(toSet());
+            ignoredTerrainOperationsList.stream().filter(Objects::nonNull).collect(toSet());
 
         MapTool.serverCommand()
             .updateTokenProperty(
