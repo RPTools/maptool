@@ -70,8 +70,7 @@ public class SaveAliasesMacro implements Macro {
           .append("\n\n");
 
       Map<String, String> aliasMap = MacroManager.getAliasMap();
-      List<String> aliasList = new ArrayList<String>();
-      aliasList.addAll(aliasMap.keySet());
+      List<String> aliasList = new ArrayList<String>(aliasMap.keySet());
       Collections.sort(aliasList);
       for (String key : aliasList) {
         String value = aliasMap.get(key);

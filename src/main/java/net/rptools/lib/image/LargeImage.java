@@ -136,8 +136,7 @@ public class LargeImage {
   }
 
   private void flushChunkCache() {
-    Set<Integer> keySet = new HashSet<Integer>();
-    keySet.addAll(loadedChunkMap.keySet());
+    Set<Integer> keySet = new HashSet<Integer>(loadedChunkMap.keySet());
     for (Integer num : keySet) {
       if (!usedChunkList.contains(num)) {
         loadedChunkMap.remove(num);
