@@ -2921,7 +2921,7 @@ public class AppActions {
       final RemoteFileDownloader downloader = new RemoteFileDownloader(url, MapTool.getFrame());
       new SwingWorker<Object, Object>() {
         @Override
-        protected Object doInBackground() throws Exception {
+        protected Object doInBackground() {
           try {
             File dataFile = downloader.read();
             if (dataFile == null) {

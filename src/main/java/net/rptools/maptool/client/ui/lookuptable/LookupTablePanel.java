@@ -243,28 +243,23 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                 EventQueue.invokeLater(
                     new Runnable() {
                       public void run() {
-                        try {
-                          Map<String, LookupTable> lookupTables =
-                              MapTool.getCampaign().getLookupTableMap();
-                          LookupTable newTable = PersistenceUtil.loadTable(selectedFile);
-                          Boolean alreadyExists =
-                              lookupTables.keySet().contains(newTable.getName());
-                          if (alreadyExists) {
-                            if (MapTool.confirm(
-                                "LookupTablePanel.confirm.import", newTable.getName())) {
-                              lookupTables.remove(newTable.getName());
-                            } else {
-                              return;
-                            }
+                        Map<String, LookupTable> lookupTables =
+                            MapTool.getCampaign().getLookupTableMap();
+                        LookupTable newTable = PersistenceUtil.loadTable(selectedFile);
+                        Boolean alreadyExists = lookupTables.keySet().contains(newTable.getName());
+                        if (alreadyExists) {
+                          if (MapTool.confirm(
+                              "LookupTablePanel.confirm.import", newTable.getName())) {
+                            lookupTables.remove(newTable.getName());
+                          } else {
+                            return;
                           }
-                          lookupTables.put(newTable.getName(), newTable);
-                          imagePanel.clearSelection();
-                          imagePanel.repaint();
-                          MapTool.serverCommand()
-                              .updateCampaign(MapTool.getCampaign().getCampaignProperties());
-                        } catch (IOException ioe) {
-                          MapTool.showError("LookupTablePanel.error.loadFailed", ioe);
                         }
+                        lookupTables.put(newTable.getName(), newTable);
+                        imagePanel.clearSelection();
+                        imagePanel.repaint();
+                        MapTool.serverCommand()
+                            .updateCampaign(MapTool.getCampaign().getCampaignProperties());
                       }
                     });
               }
