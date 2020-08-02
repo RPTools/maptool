@@ -21,7 +21,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -164,12 +163,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           if (form.getRadioButton(button.toString()) == null) {
             throw new Exception("Export Dialog has a mis-matched enum: " + button.toString());
           }
-          button.addActionListener(
-              new ActionListener() {
-                public void actionPerformed(ActionEvent evt) {
-                  enforceButtonRules();
-                }
-              });
+          button.addActionListener(evt -> enforceButtonRules());
         } catch (Exception ex) {
           MapTool.showError("dialog.screenshot.radio.button.uiImplementationError", ex);
         }
@@ -404,30 +398,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     ExportRadioButtons.setForm(interactPanel);
     ExportLayers.setForm(interactPanel);
 
-    interactPanel
-        .getButton("exportButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                exportButtonAction();
-              }
-            });
-    interactPanel
-        .getButton("cancelButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                dispose();
-              }
-            });
-    interactPanel
-        .getButton("browseButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                browseButtonAction();
-              }
-            });
+    interactPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
+    interactPanel.getButton("cancelButton").addActionListener(evt -> dispose());
+    interactPanel.getButton("browseButton").addActionListener(evt -> browseButtonAction());
 
     // Run this once to make sure the dialog is in a good starting state.
     ExportLayers.setDefaultChecked();

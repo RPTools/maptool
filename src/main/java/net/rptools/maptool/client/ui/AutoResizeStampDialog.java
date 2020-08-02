@@ -17,8 +17,6 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -104,19 +102,11 @@ public class AutoResizeStampDialog extends JDialog {
     JLabel lblPx2 = new JLabel(I18N.getText("dialog.resizeStamp.label.px"));
 
     chckbxAdjustHorizontalAnchor.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent arg0) {
-            spinnerPixelWidthAnchor.setEnabled(chckbxAdjustHorizontalAnchor.isSelected());
-          }
-        });
+        arg0 -> spinnerPixelWidthAnchor.setEnabled(chckbxAdjustHorizontalAnchor.isSelected()));
     chckbxAdjustHorizontalAnchor.setSelected(true);
 
     chckbxAdjustVerticalAnchor.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            spinnerPixelHeightAnchor.setEnabled(chckbxAdjustVerticalAnchor.isSelected());
-          }
-        });
+        e -> spinnerPixelHeightAnchor.setEnabled(chckbxAdjustVerticalAnchor.isSelected()));
     chckbxAdjustVerticalAnchor.setSelected(true);
 
     spinnerPixelWidthAnchor.setModel(new SpinnerNumberModel(anchorX, -500, 500, 1));
@@ -341,20 +331,17 @@ public class AutoResizeStampDialog extends JDialog {
       {
         JButton okButton = new JButton(I18N.getText("msg.title.messageDialog.ok"));
         okButton.addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                cellWidthSelected =
-                    Integer.parseInt(spinnerCellWidthSelected.getValue().toString());
-                cellHeightSelected =
-                    Integer.parseInt(spinnerCellHeightSelected.getValue().toString());
-                pixelWidthSelected =
-                    Integer.parseInt(spinnerPixelWidthSelected.getValue().toString());
-                pixelHeightSelected =
-                    Integer.parseInt(spinnerPixelHeightSelected.getValue().toString());
+            e -> {
+              cellWidthSelected = Integer.parseInt(spinnerCellWidthSelected.getValue().toString());
+              cellHeightSelected =
+                  Integer.parseInt(spinnerCellHeightSelected.getValue().toString());
+              pixelWidthSelected =
+                  Integer.parseInt(spinnerPixelWidthSelected.getValue().toString());
+              pixelHeightSelected =
+                  Integer.parseInt(spinnerPixelHeightSelected.getValue().toString());
 
-                setVisible(false);
-                dispose();
-              }
+              setVisible(false);
+              dispose();
             });
         okButton.setActionCommand(I18N.getText("msg.title.messageDialog.ok"));
         buttonPane.add(okButton);
@@ -363,11 +350,9 @@ public class AutoResizeStampDialog extends JDialog {
       {
         JButton cancelButton = new JButton(I18N.getText("msg.title.messageDialog.cancel"));
         cancelButton.addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent arg0) {
-                setVisible(false);
-                dispose();
-              }
+            arg0 -> {
+              setVisible(false);
+              dispose();
             });
         cancelButton.setActionCommand(I18N.getText("msg.title.messageDialog.cancel"));
         buttonPane.add(cancelButton);

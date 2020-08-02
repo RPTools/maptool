@@ -22,7 +22,6 @@ import java.awt.Paint;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -645,13 +644,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       // This will filter out any non maptool files, ie show only image file types
       // But it also filters out directories, so we'll just handle them as separate loops.
       File[] files = folderPath.listFiles(AppConstants.IMAGE_FILE_FILTER);
-      File[] folders =
-          folderPath.listFiles(
-              new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                  return new File(dir, name).isDirectory();
-                }
-              });
+      File[] folders = folderPath.listFiles((dir, name) -> new File(dir, name).isDirectory());
 
       for (final File fileEntry : files) {
         if (fileEntry.getName().toUpperCase().contains(filter) && !assetPanel.isLimitReached())
@@ -673,9 +666,5 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   private static Comparator<File> filenameComparator =
-      new Comparator<File>() {
-        public int compare(File o1, File o2) {
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
-      };
+      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 }

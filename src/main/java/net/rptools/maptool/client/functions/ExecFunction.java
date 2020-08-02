@@ -107,12 +107,7 @@ public class ExecFunction extends AbstractFunction {
   private static void sendExecFunction(
       final String execName, List<Object> execArgs, boolean defer, Collection<String> targets) {
     if (defer) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              sendExecFunction(execName, execArgs, targets);
-            }
-          });
+      EventQueue.invokeLater(() -> sendExecFunction(execName, execArgs, targets));
     } else {
       sendExecFunction(execName, execArgs, targets);
     }
