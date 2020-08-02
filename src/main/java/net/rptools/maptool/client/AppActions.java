@@ -2827,7 +2827,7 @@ public class AppActions {
           boolean ok =
               MapTool.confirm(
                   "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-          if (ok == true) {
+          if (ok) {
             // This fires a ModelChangeEvent, but that shouldn't matter
             map.zone.clearExposedArea(false);
           }
