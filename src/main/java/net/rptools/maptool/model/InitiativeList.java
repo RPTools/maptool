@@ -20,7 +20,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import javax.swing.Icon;
@@ -427,42 +426,40 @@ public class InitiativeList implements Serializable {
         getTokenInitiative(getCurrent()); // Save the currently selected initiative
     Collections.sort(
         tokens,
-        new Comparator<TokenInitiative>() {
-          public int compare(TokenInitiative o1, TokenInitiative o2) {
+        (o1, o2) -> {
 
-            // Get a number, string, or null for first parameter
-            Object one = null;
-            if (o1.state != null) {
-              one = o1.state;
-              try {
-                one = Double.valueOf(o1.state);
-              } catch (NumberFormatException e) {
-                // Not a number so ignore
-              } // endtry
-            } // endif
+          // Get a number, string, or null for first parameter
+          Object one = null;
+          if (o1.state != null) {
+            one = o1.state;
+            try {
+              one = Double.valueOf(o1.state);
+            } catch (NumberFormatException e) {
+              // Not a number so ignore
+            } // endtry
+          } // endif
 
-            // Repeat for second param
-            Object two = null;
-            if (o2.state != null) {
-              two = o2.state;
-              try {
-                two = Double.valueOf(o2.state);
-              } catch (NumberFormatException e) {
-                // Not a number so ignore
-              } // endtry
-            } // endif
+          // Repeat for second param
+          Object two = null;
+          if (o2.state != null) {
+            two = o2.state;
+            try {
+              two = Double.valueOf(o2.state);
+            } catch (NumberFormatException e) {
+              // Not a number so ignore
+            } // endtry
+          } // endif
 
-            // Do the comparison
-            if (one == two || (one != null && one.equals(two))) return 0;
-            if (one == null) return 1; // Null is always the smallest value
-            if (two == null) return -1;
-            if (one instanceof Double & two instanceof Double)
-              return ((Double) two).compareTo((Double) one);
-            if (one instanceof String & two instanceof String)
-              return ((String) two).compareTo((String) one);
-            if (one instanceof Double) return -1; // Integers are bigger than strings
-            return 1;
-          }
+          // Do the comparison
+          if (one == two || (one != null && one.equals(two))) return 0;
+          if (one == null) return 1; // Null is always the smallest value
+          if (two == null) return -1;
+          if (one instanceof Double & two instanceof Double)
+            return ((Double) two).compareTo((Double) one);
+          if (one instanceof String & two instanceof String)
+            return ((String) two).compareTo((String) one);
+          if (one instanceof Double) return -1; // Integers are bigger than strings
+          return 1;
         });
     getPCS().firePropertyChange(TOKENS_PROP, null, tokens);
     setCurrent(indexOf(currentInitiative)); // Restore current initiative

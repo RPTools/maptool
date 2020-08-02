@@ -32,14 +32,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -359,18 +356,16 @@ public class ZoneRenderer extends JComponent
     invalidateCurrentViewCache();
 
     scale.addPropertyChangeListener(
-        new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent evt) {
-            if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
-              tokenLocationCache.clear();
-              flushFog = true;
-            }
-            if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
-              // flushFog = true;
-            }
-            visibleScreenArea = null;
-            repaintDebouncer.dispatch();
+        evt -> {
+          if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
+            tokenLocationCache.clear();
+            flushFog = true;
           }
+          if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
+            // flushFog = true;
+          }
+          visibleScreenArea = null;
+          repaintDebouncer.dispatch();
         });
   }
 
@@ -2868,22 +2863,20 @@ public class ZoneRenderer extends JComponent
     // Sort by location on screen, top left to bottom right
     Collections.sort(
         list,
-        new Comparator<Token>() {
-          public int compare(Token o1, Token o2) {
-            if (o1.getY() < o2.getY()) {
-              return -1;
-            }
-            if (o1.getY() > o2.getY()) {
-              return 1;
-            }
-            if (o1.getX() < o2.getX()) {
-              return -1;
-            }
-            if (o1.getX() > o2.getX()) {
-              return 1;
-            }
-            return 0;
+        (o1, o2) -> {
+          if (o1.getY() < o2.getY()) {
+            return -1;
           }
+          if (o1.getY() > o2.getY()) {
+            return 1;
+          }
+          if (o1.getX() < o2.getX()) {
+            return -1;
+          }
+          if (o1.getX() > o2.getX()) {
+            return 1;
+          }
+          return 0;
         });
     return list;
   }

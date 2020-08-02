@@ -169,11 +169,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
-      };
+      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 
   private final Map<String, MD5Key> imageAssetMap;
   private String currentImageAsset;

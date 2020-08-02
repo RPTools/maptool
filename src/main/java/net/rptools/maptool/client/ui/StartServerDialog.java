@@ -14,10 +14,6 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -66,27 +62,23 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
 
     useIndividualFOW.setEnabled(prefs.getUseIndividualViews());
     useIndividualViews.addItemListener(
-        new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
-            if (!useIndividualViews.isSelected()) {
-              useIndividualFOW.setSelected(false);
-              useIndividualFOW.setEnabled(false);
-            } else {
-              useIndividualFOW.setEnabled(true);
-            }
+        e -> {
+          if (!useIndividualViews.isSelected()) {
+            useIndividualFOW.setSelected(false);
+            useIndividualFOW.setEnabled(false);
+          } else {
+            useIndividualFOW.setEnabled(true);
           }
         });
 
     autoRevealOnMovement.setEnabled(prefs.getPlayersCanRevealVision());
     playersCanRevealVision.addItemListener(
-        new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
-            if (!playersCanRevealVision.isSelected()) {
-              autoRevealOnMovement.setSelected(false);
-              autoRevealOnMovement.setEnabled(false);
-            } else {
-              autoRevealOnMovement.setEnabled(true);
-            }
+        e -> {
+          if (!playersCanRevealVision.isSelected()) {
+            autoRevealOnMovement.setSelected(false);
+            autoRevealOnMovement.setEnabled(false);
+          } else {
+            autoRevealOnMovement.setEnabled(true);
           }
         });
 
@@ -100,11 +92,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
 
     movementMetricCombo.setModel(movementMetricModel);
     movementMetricCombo.addItemListener(
-        new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
-            prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
-          }
-        });
+        e -> prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem()));
     getRootPane().setDefaultButton(getOKButton());
     dialog.showDialog();
   }
@@ -153,28 +141,26 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   public void initOKButton() {
     getOKButton()
         .addActionListener(
-            new java.awt.event.ActionListener() {
-              public void actionPerformed(java.awt.event.ActionEvent e) {
-                if (getPortTextField().getText().length() == 0) {
-                  MapTool.showError("ServerDialog.error.port");
-                  return;
-                }
-                try {
-                  Integer.parseInt(getPortTextField().getText());
-                } catch (NumberFormatException nfe) {
-                  MapTool.showError("ServerDialog.error.port");
-                  return;
-                }
-                if (StringUtil.isEmpty(getUsernameTextField().getText())) {
-                  MapTool.showError("ServerDialog.error.username");
-                  return;
-                }
-                if (commit()) {
-                  prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
-                  prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
-                  accepted = true;
-                  dialog.closeDialog();
-                }
+            e -> {
+              if (getPortTextField().getText().length() == 0) {
+                MapTool.showError("ServerDialog.error.port");
+                return;
+              }
+              try {
+                Integer.parseInt(getPortTextField().getText());
+              } catch (NumberFormatException nfe) {
+                MapTool.showError("ServerDialog.error.port");
+                return;
+              }
+              if (StringUtil.isEmpty(getUsernameTextField().getText())) {
+                MapTool.showError("ServerDialog.error.username");
+                return;
+              }
+              if (commit()) {
+                prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
+                prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
+                accepted = true;
+                dialog.closeDialog();
               }
             });
   }
@@ -182,11 +168,9 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   public void initCancelButton() {
     getCancelButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                accepted = false;
-                dialog.closeDialog();
-              }
+            e -> {
+              accepted = false;
+              dialog.closeDialog();
             });
   }
 

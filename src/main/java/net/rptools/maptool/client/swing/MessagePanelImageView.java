@@ -740,12 +740,7 @@ public class MessagePanelImageView extends View {
         ((AbstractDocument) doc).readUnlock();
       }
     } else {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              safePreferenceChanged();
-            }
-          });
+      SwingUtilities.invokeLater(() -> safePreferenceChanged());
     }
   }
 
@@ -779,12 +774,7 @@ public class MessagePanelImageView extends View {
       } else {
         // Avoids a possible deadlock between us waiting for imageLoaderMutex and it waiting on
         // us...
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                imageUpdate(img, flags, x, y, newWidth, newHeight);
-              }
-            });
+        SwingUtilities.invokeLater(() -> imageUpdate(img, flags, x, y, newWidth, newHeight));
       }
       return ((flags & ALLBITS) == 0);
     }

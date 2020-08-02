@@ -211,11 +211,9 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     if (!updatePending) {
       updatePending = true;
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              updatePending = false;
-              updateInternal();
-            }
+          () -> {
+            updatePending = false;
+            updateInternal();
           });
     }
   }
@@ -456,13 +454,11 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
   ////
   // SORTING
   private static final Comparator<Token> NAME_AND_STATE_COMPARATOR =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          if (o1.isVisible() != o2.isVisible()) {
-            return o1.isVisible() ? -1 : 1;
-          }
-
-          return o1.getName().compareToIgnoreCase(o2.getName());
+      (o1, o2) -> {
+        if (o1.isVisible() != o2.isVisible()) {
+          return o1.isVisible() ? -1 : 1;
         }
+
+        return o1.getName().compareToIgnoreCase(o2.getName());
       };
 }

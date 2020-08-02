@@ -449,12 +449,7 @@ public class TransferableHelper extends TransferHandler {
                 missingTokens);
         // if (EventQueue.isDispatchThread())
         // System.out.println("Yes, we are on the EDT already.");
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                MapTool.showWarning(message);
-              }
-            });
+        SwingUtilities.invokeLater(() -> MapTool.showWarning(message));
       } // endif
     } catch (IOException e) {
       MapTool.showError("TransferableHelper.error.ioException", e); // $NON-NLS-1$

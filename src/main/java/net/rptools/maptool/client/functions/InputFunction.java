@@ -66,8 +66,6 @@ import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -994,19 +992,17 @@ public class InputFunction extends AbstractFunction {
       // so we have to save cp.lastFocus before it's overwritten.)
       if (tabPane != null) {
         tabPane.addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                int newTabIndex = tabPane.getSelectedIndex();
-                ColumnPanel cp = columnPanels.get(newTabIndex);
-                cp.onShowFocus = cp.lastFocus;
+            e -> {
+              int newTabIndex = tabPane.getSelectedIndex();
+              ColumnPanel cp = columnPanels.get(newTabIndex);
+              cp.onShowFocus = cp.lastFocus;
 
-                // // debugging
-                // JComponent foc = cp.onShowFocus;
-                // String s = (foc instanceof JTextField) ?
-                // " (" + ((JTextField)foc).getText() + ")" : "";
-                // String c = (foc!=null) ? foc.getClass().getName() : "";
-                // System.out.println("tabpane foc = " + c + s);
-              }
+              // // debugging
+              // JComponent foc = cp.onShowFocus;
+              // String s = (foc instanceof JTextField) ?
+              // " (" + ((JTextField)foc).getText() + ")" : "";
+              // String c = (foc!=null) ? foc.getClass().getName() : "";
+              // System.out.println("tabpane foc = " + c + s);
             });
       }
     }

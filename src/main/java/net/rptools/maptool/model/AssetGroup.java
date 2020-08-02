@@ -63,11 +63,7 @@ public class AssetGroup {
       };
 
   private static final FilenameFilter DIRECTORY_FILE_FILTER =
-      new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return new File(dir.getPath() + File.separator + name).isDirectory();
-        }
-      };
+      (dir, name) -> new File(dir.getPath() + File.separator + name).isDirectory();
 
   public AssetGroup(File location, String name) {
     assert name != null : "Name cannot be null";

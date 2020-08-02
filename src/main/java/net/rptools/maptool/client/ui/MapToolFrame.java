@@ -21,9 +21,6 @@ import java.awt.desktop.AboutEvent;
 import java.awt.desktop.AboutHandler;
 import java.awt.desktop.PreferencesEvent;
 import java.awt.desktop.PreferencesHandler;
-import java.awt.desktop.QuitEvent;
-import java.awt.desktop.QuitHandler;
-import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -250,30 +247,28 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyReleased(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_DELETE) {
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                TreePath[] selection = tree.getSelectionPaths();
-                Set<GUID> selectedDrawSet = new HashSet<GUID>();
-                if (selection != null) {
-                  for (TreePath path : selection) {
-                    if (path.getLastPathComponent() instanceof DrawnElement) {
-                      DrawnElement de = (DrawnElement) path.getLastPathComponent();
-                      selectedDrawSet.add(de.getDrawable().getId());
-                    }
+            () -> {
+              TreePath[] selection = tree.getSelectionPaths();
+              Set<GUID> selectedDrawSet = new HashSet<GUID>();
+              if (selection != null) {
+                for (TreePath path : selection) {
+                  if (path.getLastPathComponent() instanceof DrawnElement) {
+                    DrawnElement de = (DrawnElement) path.getLastPathComponent();
+                    selectedDrawSet.add(de.getDrawable().getId());
                   }
                 }
-                if (selectedDrawSet.isEmpty()) return;
-                // check to see if this is the required action
-                if (!MapTool.confirmDrawDelete()) {
-                  return;
-                }
-                for (GUID id : selectedDrawSet) {
-                  MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
-                }
-                getCurrentZoneRenderer().repaint();
-                MapTool.getFrame().updateDrawTree();
-                MapTool.getFrame().refresh();
               }
+              if (selectedDrawSet.isEmpty()) return;
+              // check to see if this is the required action
+              if (!MapTool.confirmDrawDelete()) {
+                return;
+              }
+              for (GUID id : selectedDrawSet) {
+                MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
+              }
+              getCurrentZoneRenderer().repaint();
+              MapTool.getFrame().updateDrawTree();
+              MapTool.getFrame().refresh();
             });
       }
     }
@@ -296,15 +291,13 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyReleased(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_DELETE) {
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                // check to see if this is the required action
-                if (!MapTool.confirmTokenDelete()) {
-                  return;
-                }
-                ZoneRenderer zr = getCurrentZoneRenderer();
-                AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
+            () -> {
+              // check to see if this is the required action
+              if (!MapTool.confirmTokenDelete()) {
+                return;
               }
+              ZoneRenderer zr = getCurrentZoneRenderer();
+              AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
             });
       }
     }
@@ -316,11 +309,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private class ChatTyperObserver implements Observer {
     public void update(Observable o, Object arg) {
       SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              chatTypingPanel.invalidate();
-              chatTypingPanel.repaint();
-            }
+          () -> {
+            chatTypingPanel.invalidate();
+            chatTypingPanel.repaint();
           });
     }
   }
@@ -501,17 +492,14 @@ public class MapToolFrame extends DefaultDockableHolder
     try {
       Desktop.getDesktop()
           .setQuitHandler(
-              new QuitHandler() {
-                @Override
-                public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
-                  ((ClientAction) AppActions.EXIT).execute(null);
-                  /*
-                   * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
-                   * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
-                   * out to be the best option in the long run.
-                   */
-                  arg1.cancelQuit();
-                }
+              (arg0, arg1) -> {
+                ((ClientAction) AppActions.EXIT).execute(null);
+                /*
+                 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
+                 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
+                 * out to be the best option in the long run.
+                 */
+                arg1.cancelQuit();
               });
       Desktop.getDesktop()
           .setAboutHandler(

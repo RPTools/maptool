@@ -32,13 +32,11 @@ import net.rptools.maptool.language.I18N;
     description = "help.description")
 public class HelpMacro implements Macro {
   private static Comparator<Macro> MACRO_NAME_COMPARATOR =
-      new Comparator<Macro>() {
-        public int compare(Macro macro1, Macro macro2) {
-          MacroDefinition def1 = macro1.getClass().getAnnotation(MacroDefinition.class);
-          MacroDefinition def2 = macro2.getClass().getAnnotation(MacroDefinition.class);
+      (macro1, macro2) -> {
+        MacroDefinition def1 = macro1.getClass().getAnnotation(MacroDefinition.class);
+        MacroDefinition def2 = macro2.getClass().getAnnotation(MacroDefinition.class);
 
-          return def1.name().compareTo(def2.name());
-        }
+        return def1.name().compareTo(def2.name());
       };
 
   public void execute(

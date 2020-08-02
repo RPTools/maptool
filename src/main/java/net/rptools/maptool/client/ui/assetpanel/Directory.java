@@ -140,28 +140,26 @@ public class Directory {
       }
       Collections.sort(
           subdirs,
-          new Comparator<Directory>() {
-            public int compare(Directory d1, Directory d2) {
-              // Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's
-              String name1 = d1.getPath().getName();
-              String name2 = d2.getPath().getName();
+          (d1, d2) -> {
+            // Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's
+            String name1 = d1.getPath().getName();
+            String name2 = d2.getPath().getName();
 
-              if (d1.isDir() && d2.isDir()) {
+            if (d1.isDir() && d2.isDir()) {
+              return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+            } else if (!d1.isDir() && !d2.isDir()) {
+              if ((d1.isPDF() && d2.isPDF())
+                  || (d1.isHeroLabPortfolio() && d2.isHeroLabPortfolio())) {
                 return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-              } else if (!d1.isDir() && !d2.isDir()) {
-                if ((d1.isPDF() && d2.isPDF())
-                    || (d1.isHeroLabPortfolio() && d2.isHeroLabPortfolio())) {
-                  return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-                } else if (d1.isPDF()) {
-                  return 1;
-                } else {
-                  return -1;
-                }
-              } else if (d1.isDir()) {
-                return -1;
-              } else {
+              } else if (d1.isPDF()) {
                 return 1;
+              } else {
+                return -1;
               }
+            } else if (d1.isDir()) {
+              return -1;
+            } else {
+              return 1;
             }
           });
       subdirs = Collections.unmodifiableList(subdirs);
@@ -211,11 +209,9 @@ public class Directory {
   }
 
   public static final Comparator<Directory> COMPARATOR =
-      new Comparator<Directory>() {
-        public int compare(Directory o1, Directory o2) {
-          String filename1 = o1.getPath().getName();
-          String filename2 = o2.getPath().getName();
-          return filename1.compareToIgnoreCase(filename2);
-        }
+      (o1, o2) -> {
+        String filename1 = o1.getPath().getName();
+        String filename2 = o2.getPath().getName();
+        return filename1.compareToIgnoreCase(filename2);
       };
 }

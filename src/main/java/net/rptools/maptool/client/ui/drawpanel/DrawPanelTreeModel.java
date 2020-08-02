@@ -189,11 +189,9 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
     if (!updatePending) {
       updatePending = true;
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              updatePending = false;
-              updateInternal();
-            }
+          () -> {
+            updatePending = false;
+            updateInternal();
           });
     }
   }
