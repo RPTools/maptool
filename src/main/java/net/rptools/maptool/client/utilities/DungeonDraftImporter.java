@@ -78,7 +78,7 @@ public class DungeonDraftImporter {
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset = new Asset("LightSource", AppStyle.lightSourceIcon);
 
-  {
+  static {
     AssetManager.putAsset(lightSourceAsset);
   }
 
