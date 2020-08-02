@@ -102,7 +102,7 @@ public class GraphicsUtil {
     String[] stringByLine = string.split(pattern);
     int rows = stringByLine.length;
 
-    String longestRow = new String();
+    String longestRow = "";
     for (String s : stringByLine) {
       if (longestRow.length() < s.length()) {
         longestRow = s;
