@@ -210,7 +210,7 @@ public class FTPClient {
   private void uploadDone(FTPTransferObject data, boolean keep) {
     boolean startAnother = false;
     synchronized (transferringMap) {
-      if (transferringMap.containsKey(data.local)) transferringMap.remove(data.local);
+      transferringMap.remove(data.local);
       // TODO Should delete the remote file for uploading, or remove the local
       // file for downloading.
       if (fifoQueue.isEmpty() == false && transferringMap.size() < numThreads) startAnother = true;
