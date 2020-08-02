@@ -222,10 +222,10 @@ public class HeroLabData {
 
     if (getStatBlocks().get(type) == null) return "";
 
-    Object statBlock = getStatBlocks().get(type).get(StatBlockKey.DATA);
+    String statBlock = getStatBlocks().get(type).get(StatBlockKey.DATA);
 
     if (statBlock == null) return "";
-    else return (String) statBlock;
+    else return statBlock;
   }
 
   public String getStatBlock_text() {
