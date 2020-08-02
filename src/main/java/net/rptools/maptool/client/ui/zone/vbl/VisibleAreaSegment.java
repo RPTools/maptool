@@ -22,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.util.GraphicsUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   private final Point2D origin;
@@ -120,7 +121,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 
   ////
   // COMPARABLE
-  public int compareTo(VisibleAreaSegment o) {
+  public int compareTo(@NotNull VisibleAreaSegment o) {
     if (o != this) {
       // Jamz: We're getting the following exception from this compare:
       // java.lang.IllegalArgumentException: Comparison method violates its general contract!
