@@ -111,27 +111,27 @@ public class UIBuilder extends JDialog {
         String[] elems = dir.split("/");
         OuterLoop:
         for (String elem : elems) {
-            _Searching(start);
-            Enumeration children = start.children();
-            InnerLoop:
-            while (children.hasMoreElements()) {
-                DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
-                _Checking(next);
-                MaptoolNode tmp = (MaptoolNode) next.getUserObject();
-                if (elem.equals(tmp.getName())) {
-                    start = next;
-                    _Found(start);
-                    continue OuterLoop;
-                }
+          _Searching(start);
+          Enumeration children = start.children();
+          InnerLoop:
+          while (children.hasMoreElements()) {
+            DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
+            _Checking(next);
+            MaptoolNode tmp = (MaptoolNode) next.getUserObject();
+            if (elem.equals(tmp.getName())) {
+              start = next;
+              _Found(start);
+              continue OuterLoop;
             }
+          }
 
-            log.debug("Warning: adding element \"" + elem + "\" of \"" + dir + "\".");
-            // Since the element doesn't exist, create one... It must be
-            // a folder, so create it that way.
-            DefaultMutableTreeNode newchild = new DefaultMutableTreeNode(new MaptoolNode(elem));
-            start.insert(newchild, start.getChildCount());
-            if (firstChangedNode == null) firstChangedNode = start;
-            start = newchild;
+          log.debug("Warning: adding element \"" + elem + "\" of \"" + dir + "\".");
+          // Since the element doesn't exist, create one... It must be
+          // a folder, so create it that way.
+          DefaultMutableTreeNode newchild = new DefaultMutableTreeNode(new MaptoolNode(elem));
+          start.insert(newchild, start.getChildCount());
+          if (firstChangedNode == null) firstChangedNode = start;
+          start = newchild;
         } // OuterLoop
         last_root = start;
       }
@@ -183,24 +183,24 @@ public class UIBuilder extends JDialog {
       String[] elems = dir.split("/");
       OuterLoop:
       for (String elem : elems) {
-          if (elem.length() == 0) // Skip empty elements, such as "//" or leading "/"
-              continue;
-          if (MapTool.isDevelopment()) _Searching(start);
-          Enumeration<?> children = start.children();
-          while (children.hasMoreElements()) {
-              DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
-              if (MapTool.isDevelopment()) _Checking(next);
-              if (((MaptoolNode) next.getUserObject()).hashCode() == elem.hashCode()) {
-                  start = next;
-                  _Found(start);
-                  continue OuterLoop;
-              }
+        if (elem.length() == 0) // Skip empty elements, such as "//" or leading "/"
+        continue;
+        if (MapTool.isDevelopment()) _Searching(start);
+        Enumeration<?> children = start.children();
+        while (children.hasMoreElements()) {
+          DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
+          if (MapTool.isDevelopment()) _Checking(next);
+          if (((MaptoolNode) next.getUserObject()).hashCode() == elem.hashCode()) {
+            start = next;
+            _Found(start);
+            continue OuterLoop;
           }
-          /*
-           * If we get here it means we've searched the current node and not found any children that match the next element in the path. Return the node that is as deep as we could go before the
-           * search failed. The caller will need to verify that we found what they were looking for.
-           */
-          break OuterLoop;
+        }
+        /*
+         * If we get here it means we've searched the current node and not found any children that match the next element in the path. Return the node that is as deep as we could go before the
+         * search failed. The caller will need to verify that we found what they were looking for.
+         */
+        break OuterLoop;
       } // OuterLoop
       last_search = (DefaultMutableTreeNode) start;
       return last_search;
@@ -357,8 +357,8 @@ public class UIBuilder extends JDialog {
    */
   private void buildTree() {
     String[] predefined_dirs = {"Properties", "Maps", "Macros", "Images"};
-      for (String predefined_dir : predefined_dirs) {
-          dtm.addNode("Campaign/" + predefined_dir, new MaptoolNode(predefined_dir));
-      }
+    for (String predefined_dir : predefined_dirs) {
+      dtm.addNode("Campaign/" + predefined_dir, new MaptoolNode(predefined_dir));
+    }
   }
 }

@@ -368,12 +368,10 @@ public class FTPClient {
     FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
     // ftp.setNumberOfThreads(3);
     File dir = new File("testdir");
-      for (String s : uploadList) {
-          FTPTransferObject fto =
-                  new FTPTransferObject(
-                          Direction.FTP_PUT, s, dir, s);
-          ftp.addToQueue(fto);
-      }
+    for (String s : uploadList) {
+      FTPTransferObject fto = new FTPTransferObject(Direction.FTP_PUT, s, dir, s);
+      ftp.addToQueue(fto);
+    }
     // Need to listen for all progress bars to finish and count down using 'progress'.
   }
 }

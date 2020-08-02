@@ -157,13 +157,13 @@ public class UPnPUtil {
             localHostIP = ni.getInterfaceAddresses().get(0).getAddress().getHostAddress();
             break;
           default:
-              for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
-                  if (ifAddr.getAddress() instanceof Inet4Address) {
-                      localHostIP = ifAddr.getAddress().getHostAddress();
-                      if (log.isInfoEnabled())
-                          log.info("IP address " + localHostIP + " on interface " + ni.getDisplayName());
-                  }
+            for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
+              if (ifAddr.getAddress() instanceof Inet4Address) {
+                localHostIP = ifAddr.getAddress().getHostAddress();
+                if (log.isInfoEnabled())
+                  log.info("IP address " + localHostIP + " on interface " + ni.getDisplayName());
               }
+            }
             break;
         }
         boolean mapped = gd.addPortMapping("MapTool", null, port, port, localHostIP, 0, "TCP");

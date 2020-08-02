@@ -959,9 +959,11 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return;
     }
-    lightSourceList.removeIf(als -> als != null
-            && als.getLightSourceId() != null
-            && als.getLightSourceId().equals(source.getId()));
+    lightSourceList.removeIf(
+        als ->
+            als != null
+                && als.getLightSourceId() != null
+                && als.getLightSourceId().equals(source.getId()));
   }
 
   /** Clear the lightSourceList */
@@ -978,8 +980,8 @@ public class Token extends BaseModel implements Cloneable {
     }
     for (AttachedLightSource als : lightSourceList) {
       if (als != null
-              && als.getLightSourceId() != null
-              && als.getLightSourceId().equals(source.getId())) {
+          && als.getLightSourceId() != null
+          && als.getLightSourceId().equals(source.getId())) {
         return true;
       }
     }

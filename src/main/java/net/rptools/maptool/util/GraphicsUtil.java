@@ -103,11 +103,11 @@ public class GraphicsUtil {
     int rows = stringByLine.length;
 
     String longestRow = new String();
-      for (String s : stringByLine) {
-          if (longestRow.length() < s.length()) {
-              longestRow = s;
-          }
+    for (String s : stringByLine) {
+      if (longestRow.length() < s.length()) {
+        longestRow = s;
       }
+    }
     int strPixelHeight = fm.getHeight();
     int strPixelWidth = SwingUtilities.computeStringWidth(fm, longestRow);
 

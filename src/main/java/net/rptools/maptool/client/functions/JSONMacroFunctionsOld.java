@@ -1402,12 +1402,12 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return sb.toString();
     } else if (obj instanceof JSONArray) {
       JSONArray jarr = (JSONArray) obj;
-        for (Object o : jarr) {
-            if (sb.length() > 0) {
-                sb.append(delim);
-            }
-            sb.append(o);
+      for (Object o : jarr) {
+        if (sb.length() > 0) {
+          sb.append(delim);
         }
+        sb.append(o);
+      }
       return sb.toString();
     } else if (obj instanceof String && ((String) obj).trim().length() == 0) {
       return obj.toString();

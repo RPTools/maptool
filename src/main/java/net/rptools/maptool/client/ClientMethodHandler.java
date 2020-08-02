@@ -574,9 +574,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   zone.setInitiativeList(list);
                 }
                 if (ownerPermission != null) {
-                  MapTool.getFrame()
-                      .getInitiativePanel()
-                      .setOwnerPermissions(ownerPermission);
+                  MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
                 }
                 return;
 

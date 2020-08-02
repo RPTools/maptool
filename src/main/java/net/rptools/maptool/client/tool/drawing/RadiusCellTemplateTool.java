@@ -217,7 +217,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g,
-              template.getRadius() * renderer.getZone().getUnitsPerCell(),
+          template.getRadius() * renderer.getZone().getUnitsPerCell(),
           (int) centerText.x,
           (int) centerText.y);
     } // endif
