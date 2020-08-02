@@ -312,8 +312,11 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return key.equals(obj.toString());
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Tuple tuple = (Tuple) o;
+      return Objects.equals(key, tuple.key);
     }
 
     @Override
