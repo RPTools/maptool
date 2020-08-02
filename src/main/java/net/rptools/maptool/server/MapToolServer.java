@@ -203,13 +203,11 @@ public class MapToolServer {
           if (errors != 0) {
             String msg = I18N.getText("msg.info.heartbeat.registrySuccess", errors);
             SwingUtilities.invokeLater(
-                new Runnable() {
-                  public void run() {
-                    // Write to the GM's console. (Code taken from client.functions.ChatFunction)
-                    MapTool.serverCommand().message(TextMessage.gm(null, msg));
-                    // Write to our console. (Code taken from client.functions.ChatFunction)
-                    MapTool.addServerMessage(TextMessage.me(null, msg));
-                  }
+                () -> {
+                  // Write to the GM's console. (Code taken from client.functions.ChatFunction)
+                  MapTool.serverCommand().message(TextMessage.gm(null, msg));
+                  // Write to our console. (Code taken from client.functions.ChatFunction)
+                  MapTool.addServerMessage(TextMessage.me(null, msg));
                 });
             errors = 0;
             WARNING_TIME = 2;
@@ -234,21 +232,19 @@ public class MapToolServer {
 
             String msg = I18N.getText("msg.info.heartbeat.registryFailure", IP_addr, port, errors);
             SwingUtilities.invokeLater(
-                new Runnable() {
-                  public void run() {
-                    // Write to the GM's console. (Code taken from client.functions.ChatFunction)
-                    MapTool.serverCommand().message(TextMessage.gm(null, msg));
-                    // Write to our console. (Code taken from client.functions.ChatFunction)
-                    MapTool.addServerMessage(TextMessage.me(null, msg));
+                () -> {
+                  // Write to the GM's console. (Code taken from client.functions.ChatFunction)
+                  MapTool.serverCommand().message(TextMessage.gm(null, msg));
+                  // Write to our console. (Code taken from client.functions.ChatFunction)
+                  MapTool.addServerMessage(TextMessage.me(null, msg));
 
-                    // This is the first time the heartbeat has failed in this stretch of time.
-                    // Only writes to the log on the first error. Should it always add an entry?
-                    if (!ever_had_an_error) {
-                      ever_had_an_error = true;
-                      // Uses a popup to tell the user what's going on. Includes a 'Logger.warn()'
-                      // message.
-                      MapTool.showWarning(msg, e);
-                    }
+                  // This is the first time the heartbeat has failed in this stretch of time.
+                  // Only writes to the log on the first error. Should it always add an entry?
+                  if (!ever_had_an_error) {
+                    ever_had_an_error = true;
+                    // Uses a popup to tell the user what's going on. Includes a 'Logger.warn()'
+                    // message.
+                    MapTool.showWarning(msg, e);
                   }
                 });
           }

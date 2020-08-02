@@ -37,12 +37,7 @@ public class TreePreferences implements TreeSelectionListener {
     tree.getSelectionModel().addTreeSelectionListener(this);
 
     // Wait until the UI has been built to do this
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            restorePreferences();
-          }
-        });
+    EventQueue.invokeLater(this::restorePreferences);
   }
 
   private void restorePreferences() {

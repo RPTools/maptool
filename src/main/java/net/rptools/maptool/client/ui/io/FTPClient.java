@@ -108,13 +108,7 @@ public class FTPClient {
    */
   protected void fireStateChanged(final Object data) {
     if (SwingUtilities.isEventDispatchThread()) postAllChangeEvents(data);
-    else
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              postAllChangeEvents(data);
-            }
-          });
+    else SwingUtilities.invokeLater(() -> postAllChangeEvents(data));
   }
 
   private void postAllChangeEvents(Object fto) {
