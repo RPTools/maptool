@@ -1137,8 +1137,8 @@ public class InputFunction extends AbstractFunction {
             }
           case CHECK:
             {
-              Integer value = ((JCheckBox) comp).isSelected() ? 1 : 0;
-              newValue = value.toString();
+              int value = ((JCheckBox) comp).isSelected() ? 1 : 0;
+              newValue = Integer.toString(value);
               break;
             }
           case RADIO:
@@ -1147,7 +1147,7 @@ public class InputFunction extends AbstractFunction {
               // in the same order that they were added.
               Component[] comps = ((Box) comp).getComponents();
               int componentCount = 0;
-              Integer index = 0;
+              int index = 0;
               for (Component c : comps) {
                 if (c instanceof JRadioButton) {
                   JRadioButton radio = (JRadioButton) c;
@@ -1158,7 +1158,7 @@ public class InputFunction extends AbstractFunction {
               if (vs.optionValues.optionEquals("VALUE", "STRING")) {
                 newValue = vs.valueList.get(index);
               } else { // default is "NUMBER"
-                newValue = index.toString();
+                newValue = Integer.toString(index);
               }
               break;
             }
