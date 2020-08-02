@@ -738,7 +738,7 @@ public class CampaignPropertiesDialog extends JDialog {
             gmOnly = false;
             owner = false;
           }
-          owner &= !gmOnly;
+          owner = gmOnly ? false : owner;
           try {
             Light t =
                 new Light(
