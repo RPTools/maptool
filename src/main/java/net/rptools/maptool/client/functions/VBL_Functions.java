@@ -406,7 +406,7 @@ public class VBL_Functions extends AbstractFunction {
             "setTokenVBL[Auto]");
 
     Color color = new Color(r, g, b, a);
-    final boolean inverseVbl = (inverse == 1) ? true : false;
+    final boolean inverseVbl = inverse == 1;
 
     return TokenVBL.createOptimizedVblArea(token, sensitivity, inverseVbl, color, level, method);
   }

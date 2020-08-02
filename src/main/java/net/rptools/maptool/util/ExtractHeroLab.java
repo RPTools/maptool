@@ -236,8 +236,7 @@ public final class ExtractHeroLab {
         heroLabData.setGameSystem(gameSystem);
         heroLabData.setSummary(((Element) hero).getAttribute("summary"));
         heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-        heroLabData.setAlly(
-            ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+        heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
         // Is it a minion?
         if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
@@ -326,8 +325,7 @@ public final class ExtractHeroLab {
       heroLabData.setGameSystem(gameSystem);
       heroLabData.setSummary(((Element) hero).getAttribute("summary"));
       heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-      heroLabData.setAlly(
-          ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+      heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
       // Is it a minion?
       if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
