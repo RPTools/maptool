@@ -304,12 +304,8 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     private void filter(Token token) {
       if (accept(token)) {
-        List<Token> tokenList = viewMap.get(view);
-        if (tokenList == null) {
-          tokenList = new ArrayList<Token>();
-          viewMap.put(view, tokenList);
-        }
-        tokenList.add(token);
+          List<Token> tokenList = viewMap.computeIfAbsent(view, k -> new ArrayList<Token>());
+          tokenList.add(token);
       }
     }
 
