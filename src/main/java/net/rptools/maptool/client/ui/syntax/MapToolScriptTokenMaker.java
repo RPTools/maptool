@@ -378,15 +378,13 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
 
     // Start off in the proper state.
     int state = Token.NULL;
-    switch (initialTokenType) {
-      case Token.COMMENT_MULTILINE:
-        state = MLC;
-        start = text.offset;
-        break;
+    if (initialTokenType == Token.COMMENT_MULTILINE) {
+      state = MLC;
+      start = text.offset;
 
-        /* No documentation comments */
-      default:
-        state = Token.NULL;
+      /* No documentation comments */
+    } else {
+      state = Token.NULL;
     }
 
     s = text;

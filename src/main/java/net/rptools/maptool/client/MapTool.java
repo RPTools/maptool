@@ -1266,7 +1266,7 @@ public class MapTool {
     return clientFrame;
   }
 
-  private static final void configureJide() {
+  private static void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         new LookAndFeelFactory.UIDefaultsCustomizer() {
           @Override

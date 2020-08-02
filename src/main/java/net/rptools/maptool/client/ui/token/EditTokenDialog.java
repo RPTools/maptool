@@ -49,18 +49,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
@@ -658,8 +647,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         (TerrainModifierOperation) getTerrainModifierOperationComboBox().getSelectedItem());
 
     token.setTerrainModifiersIgnored(
-        getTerrainModifiersIgnoredList().getSelectedValuesList().stream()
-            .collect(Collectors.toSet()));
+        new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
@@ -711,9 +699,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         boolean hasPlayer = false;
         Set<String> owners = token.getOwners();
         if (owners != null) {
-          Iterator<Player> playerIter = MapTool.getPlayerList().iterator();
-          while (playerIter.hasNext()) {
-            Player pl = playerIter.next();
+          for (Player pl : MapTool.getPlayerList()) {
             if (!pl.isGM() && owners.contains(pl.getName())) {
               hasPlayer = true;
             }

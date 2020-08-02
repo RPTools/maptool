@@ -960,7 +960,7 @@ public class PersistenceUtil {
   public static void saveMacroSet(List<MacroButtonProperties> macroButtonSet, File file)
       throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.MACROSET_FILE_EXTENSION);
     }
 
@@ -1021,7 +1021,7 @@ public class PersistenceUtil {
 
   public static void saveTable(LookupTable lookupTable, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.TABLE_FILE_EXTENSION);
     }
 

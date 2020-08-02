@@ -53,7 +53,7 @@ public class SaveAliasesMacro implements Macro {
       }
       aliasFile = chooser.getSelectedFile();
     }
-    if (aliasFile.getName().indexOf(".") < 0) {
+    if (!aliasFile.getName().contains(".")) {
       aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
     }
     if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) {

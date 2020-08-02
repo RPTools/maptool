@@ -62,7 +62,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   public static final float DEFAULT_BG_ALPHA = 0.20f;
 
   /** The directions that can be drawn. All is for a radius and the other values are for cones. */
-  public static enum Direction {
+  public enum Direction {
     /** Draw a Radius */
     ALL,
 
@@ -105,7 +105,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   }
 
   /** The quadrants for drawing. */
-  public static enum Quadrant {
+  public enum Quadrant {
     /** Draw in the north east (upper right) quadrant. */
     NORTH_EAST,
     /** Draw in the north west (upper left) quadrant. */

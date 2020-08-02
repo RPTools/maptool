@@ -107,7 +107,7 @@ public class CodeTimer {
 
   @Override
   public String toString() {
-    StringBuffer builder = new StringBuffer(100);
+    StringBuilder builder = new StringBuilder(100);
 
     builder
         .append("Timer ")

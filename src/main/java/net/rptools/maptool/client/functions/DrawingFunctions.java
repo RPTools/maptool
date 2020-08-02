@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -67,9 +66,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected void bringToFront(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
@@ -83,9 +80,7 @@ public class DrawingFunctions extends AbstractFunction {
 
   protected Layer changeLayer(Zone map, Layer layer, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getLayer() != layer && de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
@@ -135,9 +130,7 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         return de;
       }
@@ -396,9 +389,7 @@ public class DrawingFunctions extends AbstractFunction {
 
   protected void sendToBack(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         map.addDrawableRear(de);

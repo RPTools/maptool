@@ -100,7 +100,7 @@ public class Zone extends BaseModel {
 
     private String displayName;
 
-    private Layer(String displayName) {
+    Layer(String displayName) {
       this.displayName = displayName;
     }
 
@@ -1277,9 +1277,7 @@ public class Zone extends BaseModel {
   }
 
   public void clearDrawables(List<DrawnElement> drawableList) {
-    ListIterator<DrawnElement> i = drawableList.listIterator();
-    while (i.hasNext()) {
-      DrawnElement drawable = i.next();
+    for (DrawnElement drawable : drawableList) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_REMOVED, drawable));
     }
     drawableList.clear();
