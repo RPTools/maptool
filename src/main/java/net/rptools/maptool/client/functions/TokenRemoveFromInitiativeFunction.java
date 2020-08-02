@@ -66,7 +66,7 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
     }
     List<Integer> tokens = list.indexOf(token);
     list.startUnitOfWork();
-    for (int i = tokens.size() - 1; i >= 0; i--) list.removeToken(tokens.get(i).intValue());
+    for (int i = tokens.size() - 1; i >= 0; i--) list.removeToken(tokens.get(i));
     list.finishUnitOfWork();
     return new BigDecimal(tokens.size());
   }
