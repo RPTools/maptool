@@ -783,7 +783,7 @@ public class MessagePanelImageView extends View {
    * attribute. It overriden a handle of methods as the text is hardcoded and does not come from the
    * document.
    */
-  private class ImageLabelView extends InlineView {
+  private static class ImageLabelView extends InlineView {
     private Segment segment;
     private Color fg;
 
