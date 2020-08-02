@@ -385,7 +385,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
         }
         if (lightSource.getLumens() != 0) {
-          builder.append(" lumens=" + lightSource.getLumens());
+          builder.append(" lumens=").append(lightSource.getLumens());
         }
         builder.append('\n');
       }
