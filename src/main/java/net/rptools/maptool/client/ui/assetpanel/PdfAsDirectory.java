@@ -79,10 +79,7 @@ public class PdfAsDirectory extends Directory {
       if (future.isDone()) {
         try {
           return future.get() != INVALID_IMAGE ? future.get() : null;
-        } catch (InterruptedException e) {
-          // TODO: need to indicate a broken image
-          return null;
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
           // TODO: need to indicate a broken image
           return null;
         }
