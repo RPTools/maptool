@@ -492,7 +492,7 @@ public class CampaignPropertiesDialog extends JDialog {
             // Expected when not defining a shape
           }
           // Scale with Token
-          if (arg.toUpperCase().equals("SCALE")) {
+          if (arg.equalsIgnoreCase("SCALE")) {
             scaleWithToken = true;
             continue;
           }
