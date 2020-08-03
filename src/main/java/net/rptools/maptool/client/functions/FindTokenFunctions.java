@@ -314,10 +314,9 @@ public class FindTokenFunctions extends AbstractFunction {
     if (!functionName.equals("currentToken")
         && !functionName.startsWith("getImpersonated")
         && !functionName.startsWith("getVisible")
-        && !functionName.startsWith("getSelected")) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
+        && !functionName.startsWith("getSelected")
+        && !MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
     if (functionName.equals("findToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);

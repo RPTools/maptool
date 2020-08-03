@@ -597,10 +597,11 @@ public class ZoneView implements ModelChangeListener {
               if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                 continue;
               }
-              if (light.isOwnerOnly() && lightSource.getType() == LightSource.Type.AURA) {
-                if (!isOwner && !MapTool.getPlayer().isEffectiveGM()) {
-                  continue;
-                }
+              if (light.isOwnerOnly()
+                  && lightSource.getType() == LightSource.Type.AURA
+                  && !isOwner
+                  && !MapTool.getPlayer().isEffectiveGM()) {
+                continue;
               }
               lightList.add(new DrawableLight(type, light.getPaint(), visibleArea));
             }
@@ -763,10 +764,8 @@ public class ZoneView implements ModelChangeListener {
         }
       } else {
         // If we're viewing the map as a player and the token is not a PC, then skip it.
-        if (!isGMview && token.getType() != Token.Type.PC) {
-          if (!AppUtil.ownedByOnePlayer(token)) {
-            continue;
-          }
+        if (!isGMview && token.getType() != Token.Type.PC && !AppUtil.ownedByOnePlayer(token)) {
+          continue;
         }
       }
       // player ownership permission

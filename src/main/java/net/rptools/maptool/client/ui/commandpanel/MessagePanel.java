@@ -88,10 +88,8 @@ public class MessagePanel extends JPanel {
               textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
             } else {
               Matcher m = URL_PATTERN.matcher(e.getDescription());
-              if (m.matches()) {
-                if (m.group(1).equalsIgnoreCase("macro")) {
-                  MacroLinkFunction.runMacroLink(e.getDescription());
-                }
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
