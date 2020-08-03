@@ -460,11 +460,11 @@ public class CampaignPropertiesDialog extends JDialog {
         line = line.trim();
 
         // Blanks
-        if (line.length() == 0 || line.indexOf(":") < 1) {
+        if (line.length() == 0 || line.indexOf(':') < 1) {
           continue;
         }
         // Parse line
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         String label = line.substring(0, split).trim();
         String value = line.substring(split + 1).trim();
 
@@ -506,7 +506,7 @@ public class CampaignPropertiesDialog extends JDialog {
               Color personalLightColor = null;
               toBeParsed = arg.substring(1);
 
-              split = toBeParsed.indexOf("#");
+              split = toBeParsed.indexOf('#');
               if (split > 0) {
                 String colorString = toBeParsed.substring(split); // Keep the '#'
                 toBeParsed = toBeParsed.substring(0, split);
@@ -631,7 +631,7 @@ public class CampaignPropertiesDialog extends JDialog {
           continue;
         }
         // Item
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         if (split < 1) {
           continue;
         }
@@ -722,7 +722,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
           Color color = null;
           distance = arg;
-          split = arg.indexOf("#");
+          split = arg.indexOf('#');
           if (split > 0) {
             String colorString = arg.substring(split); // Keep the '#'
             distance = arg.substring(0, split);

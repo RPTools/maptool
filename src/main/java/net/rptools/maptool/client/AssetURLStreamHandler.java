@@ -63,7 +63,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
       int scaleW = 0, scaleH = 0;
       // If assetId has "-", remove it and resize appropriately.
-      int index = strAssetId.indexOf("-");
+      int index = strAssetId.indexOf('-');
       if (index >= 0) {
         String szStr = strAssetId.substring(index + 1);
         strAssetId = strAssetId.substring(0, index);

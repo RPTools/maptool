@@ -221,7 +221,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
             int max = 0;
 
             int split =
-                range.indexOf("-", range.charAt(0) == '-' ? 1 : 0); // Allow negative numbers
+                range.indexOf('-', range.charAt(0) == '-' ? 1 : 0); // Allow negative numbers
             try {
               if (split < 0) {
                 min = Integer.parseInt(range);
