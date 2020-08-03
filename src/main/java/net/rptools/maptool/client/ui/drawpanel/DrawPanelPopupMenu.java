@@ -403,8 +403,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
       for (GUID guid : selectedDrawSet) {
         DrawnElement de = findDrawnElement(drawableList, guid);
-        if (de.getDrawable() instanceof AbstractTemplate) continue;
-        if (de != null) VblTool(de.getDrawable(), pathOnly, isEraser);
+        if (de == null || de.getDrawable() instanceof AbstractTemplate) continue;
+        VblTool(de.getDrawable(), pathOnly, isEraser);
       }
     }
   }
