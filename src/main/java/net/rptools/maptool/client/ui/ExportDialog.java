@@ -519,6 +519,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     MapTool.getFrame()
         .setStatusMessage(I18N.getString("dialog.screenshot.msg.GeneratingScreenshot"));
     ExportRadioButtons type = ExportRadioButtons.getType();
+    if (type == null) {
+      throw new Exception(I18N.getString("dialog.screenshot.error.invalidDialogSettings"));
+    }
     Player.Role role;
     try {
       switch (type) {

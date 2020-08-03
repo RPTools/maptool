@@ -144,7 +144,7 @@ public class HeroLabData {
     return lastModified != getPortfolioLastModified();
   }
 
-  @SuppressWarnings("unchecked")
+  //@SuppressWarnings("unchecked")
   public HashMap<String, HashMap<String, String>> getStatBlocks() {
     HashMap<String, HashMap<String, String>> statBlocks = new HashMap<>();
 
