@@ -2632,7 +2632,6 @@ public class AppActions {
   public static void doCampaignExport() {
     CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
     dialog.setVisible(true);
-    MapTool.getCampaign().setExportCampaignDialog(dialog);
 
     if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
       saveAndUpdateCampaignName(dialog.getVersionText(), dialog.getCampaignFile(), null);
