@@ -458,7 +458,7 @@ public class AssetManager {
     try (InputStream is = new FileInputStream(infoFile)) {
       props.load(is);
     } catch (IOException ioe) {
-      //do nothing
+      // do nothing
     }
     return props;
   }
