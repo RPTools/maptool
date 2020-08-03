@@ -544,9 +544,7 @@ public abstract class HexGrid extends Grid {
     int u, v;
 
     u = (int) Math.round(cpU * (edgeProjection + edgeLength) + edgeLength) + getOffsetU();
-    v =
-        (int)
-            (cpV * 2 * minorRadius + ((cpU & 1) == 0 ? 1 : 2) * minorRadius + getOffsetV());
+    v = (int) (cpV * 2 * minorRadius + ((cpU & 1) == 0 ? 1 : 2) * minorRadius + getOffsetV());
 
     return new ZonePoint(u, v);
   }
