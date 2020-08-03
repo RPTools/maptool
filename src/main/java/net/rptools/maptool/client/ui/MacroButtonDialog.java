@@ -106,7 +106,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private static final String READY = I18N.getText("Label.ready");
   private static final String SAVED = I18N.getText("Label.saved");
 
-  private static final HashSet<String> openMacroList = new HashSet<String>(4);
+  private static final Set<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);

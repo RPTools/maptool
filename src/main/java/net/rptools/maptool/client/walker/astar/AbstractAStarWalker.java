@@ -152,7 +152,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
 
         // Finally, add the Move Blocking Layer!
-        vbl.add((zone.getTopologyTerrain()));
+        vbl.add(zone.getTopologyTerrain());
       } else {
         vbl = zone.getTopologyTerrain();
       }

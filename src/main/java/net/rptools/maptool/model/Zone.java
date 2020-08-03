@@ -227,7 +227,7 @@ public class Zone extends BaseModel {
   private int height;
   private int width;
 
-  private transient HashMap<String, Integer> tokenNumberCache;
+  private transient Map<String, Integer> tokenNumberCache;
 
   /**
    * Note: When adding new fields to this class, make sure to update all constructors, {@link

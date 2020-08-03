@@ -29,7 +29,7 @@ public class LookupTable {
 
   private static ExpressionParser expressionParser = new ExpressionParser();
 
-  private ArrayList<LookupEntry> entryList;
+  private List<LookupEntry> entryList;
   private String name;
   private String defaultRoll;
   private MD5Key tableImage;
@@ -225,7 +225,7 @@ public class LookupTable {
     }
   }
 
-  private ArrayList<LookupEntry> getInternalEntryList() {
+  private List<LookupEntry> getInternalEntryList() {
     if (entryList == null) {
       entryList = new ArrayList<>();
     }

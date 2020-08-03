@@ -18,7 +18,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 @Plugin(name = "JTextAreaAppender", category = "Core", elementType = "appender", printObject = true)
 public class JTextAreaAppender extends AbstractAppender {
-  private static volatile ArrayList<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
+  private static volatile List<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
 
   private int maxLines = 0;
 
