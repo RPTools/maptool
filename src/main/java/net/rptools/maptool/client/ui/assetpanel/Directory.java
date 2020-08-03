@@ -172,15 +172,9 @@ public class Directory {
     public boolean accept(File file) {
       if (file.isDirectory()) {
         return false;
-      } else {
-        String path = file.getAbsolutePath().toLowerCase();
-
-        if (path.endsWith(".por") && MAGIC_NUMBER.accept(file)) {
-          return true;
-        } else {
-          return false;
-        }
       }
+      String path = file.getAbsolutePath().toLowerCase();
+      return path.endsWith(".por") && MAGIC_NUMBER.accept(file);
     }
   }
 
