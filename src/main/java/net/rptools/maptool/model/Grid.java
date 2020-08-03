@@ -829,7 +829,7 @@ public abstract class Grid implements Cloneable {
    */
   protected Area createGridArea(int gridRadius) {
     final Area cellArea = new Area(createCellShape(getSize()));
-    final HashSet<Point> points = generateRadius(gridRadius);
+    final Set<Point> points = generateRadius(gridRadius);
     Area gridArea = new Area();
 
     for (Point point : points) {

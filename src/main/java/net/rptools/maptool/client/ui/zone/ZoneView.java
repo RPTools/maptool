@@ -521,7 +521,7 @@ public class ZoneView implements ModelChangeListener {
    *     <p>A Callable task add to the ExecutorCompletionService to combine lights as a threaded
    *     task
    */
-  private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
+  private final class CombineLightsTask implements Callable<Map<Double, Area>> {
     private final String sightName;
     private final Token lightSourceToken;
 
@@ -531,8 +531,8 @@ public class ZoneView implements ModelChangeListener {
     }
 
     @Override
-    public TreeMap<Double, Area> call() {
-      TreeMap<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
+    public Map<Double, Area> call() {
+      Map<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
         // Area tempArea = light.getValue();

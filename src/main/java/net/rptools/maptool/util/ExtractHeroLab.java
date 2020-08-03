@@ -355,8 +355,7 @@ public final class ExtractHeroLab {
   }
 
   public HeroLabData refreshHeroLabData(HeroLabData heroData) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
@@ -379,14 +378,13 @@ public final class ExtractHeroLab {
     return heroData;
   }
 
-  private Map<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero) {
+  private Map<String, Map<String, String>> getStatBlocks(XPath xpath, Node hero) {
     return getStatBlocks(xpath, hero, null, null);
   }
 
-  private Map<String, HashMap<String, String>> getStatBlocks(
+  private Map<String, Map<String, String>> getStatBlocks(
       XPath xpath, Node hero, Node master, String minionName) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
