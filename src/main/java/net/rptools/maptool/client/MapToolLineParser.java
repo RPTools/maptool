@@ -1061,14 +1061,13 @@ public class MapToolLineParser {
       Result result = new Result("");
       result.setValue("");
       return result;
+    } catch (ParserException pe) {
+      log.debug(pe);
+      throw pe;
     } catch (Exception e) {
       if (e.getCause() instanceof ParserException) {
         log.debug(e.getCause());
         throw (ParserException) e.getCause();
-      }
-      if (e instanceof ParserException) {
-        log.debug(e);
-        throw (ParserException) e;
       }
       log.debug(e);
       throw new ParserException(
