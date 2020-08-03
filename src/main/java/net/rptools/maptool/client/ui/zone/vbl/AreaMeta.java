@@ -85,7 +85,7 @@ public class AreaMeta {
     return isHole;
   }
 
-  private final int skippedPoints = 0;
+  private final static int skippedPoints = 0;
 
   public void addPoint(float x, float y) {
     // Cut out redundant points

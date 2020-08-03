@@ -374,7 +374,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   private class PdfExtractor extends SwingWorker<Void, Boolean> {
     private ExtractImagesFromPDF extractor;
     private final int pageCount;
-    private final int numThreads = 6;
+    private final static int numThreads = 6;
 
     private final boolean forceRescan;
 
