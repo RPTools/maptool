@@ -746,11 +746,7 @@ public class MapToolFrame extends DefaultDockableHolder
       }
       String ext = getExtension(f);
       if (ext != null) {
-        if (ext.equals(extension)) {
-          return true;
-        } else {
-          return false;
-        }
+        return ext.equals(extension);
       }
       return false;
     }

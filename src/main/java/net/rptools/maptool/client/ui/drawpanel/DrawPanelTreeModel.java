@@ -129,11 +129,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
   @Override
   public boolean isLeaf(Object node) {
-    if (node instanceof DrawnElement) {
-      if (((DrawnElement) node).getDrawable() instanceof DrawablesGroup) return false;
-      else return true;
-    }
-    return false;
+    return node instanceof DrawnElement
+        && ((DrawnElement) node).getDrawable() instanceof DrawablesGroup;
   }
 
   @Override

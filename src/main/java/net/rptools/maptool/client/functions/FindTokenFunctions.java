@@ -689,11 +689,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (jprim.isBoolean()) {
         return jprim.getAsBoolean();
       } else if (jprim.isNumber()) {
-        if (jprim.getAsInt() == 0) {
-          return false;
-        } else {
-          return true;
-        }
+        return jprim.getAsInt() != 0;
       } else {
         // What's the rationale for returning true for other types?
         // Should we be looking at strings for true/false?
