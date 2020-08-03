@@ -512,6 +512,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
    * @return boolean
    */
   private boolean hasPath(DrawnElement drawnElement) {
+    if (drawnElement == null) return false;
     if (drawnElement.getDrawable() instanceof LineSegment) return true;
     if (drawnElement.getDrawable() instanceof ShapeDrawable) {
       ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
