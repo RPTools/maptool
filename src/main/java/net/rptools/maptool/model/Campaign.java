@@ -65,7 +65,7 @@ public class Campaign {
 
   private static ExportDialog
       exportDialog; // this is the new export dialog (different name for upward compatibility)
-  private static CampaignExportDialog campaignExportDialog;
+  private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
@@ -701,18 +701,6 @@ public class Campaign {
   }
 
   public CampaignExportDialog getExportCampaignDialog() {
-    if (campaignExportDialog == null) {
-      try {
-        campaignExportDialog = new CampaignExportDialog();
-      } catch (Exception e) {
-        return null;
-      }
-    }
-
     return campaignExportDialog;
-  }
-
-  public void setExportCampaignDialog(CampaignExportDialog d) {
-    campaignExportDialog = d;
   }
 }
