@@ -614,7 +614,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent event) {
       String newMacroGroupName =
           JOptionPane.showInputDialog(I18N.getText("panel.NewGroupName"), macroGroup);
-      if (!newMacroGroupName.equals(macroGroup)) {
+      if (newMacroGroupName != null && !newMacroGroupName.equals(macroGroup)) {
         if (panelClass.equals("CampaignPanel")
             || panelClass.equals("GlobalPanel")
             || panelClass.equals("GmPanel")) {
