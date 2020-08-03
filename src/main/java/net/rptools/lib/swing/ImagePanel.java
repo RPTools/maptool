@@ -43,7 +43,7 @@ public class ImagePanel extends JComponent
 
   private int gridSize = 50;
   private final Dimension gridPadding = new Dimension(9, 11);
-  private final int captionPadding = 5;
+  private final static int captionPadding = 5;
 
   private final Map<Rectangle, Integer> imageBoundsMap = new HashMap<Rectangle, Integer>();
 

@@ -37,7 +37,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 
 public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
-  private final String root = "Views";
+  private final static String root = "Views";
   private Zone zone;
   private final JTree tree;
   private final Map<View, List<DrawnElement>> viewMap = new HashMap<View, List<DrawnElement>>();
