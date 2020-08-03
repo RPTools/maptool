@@ -29,6 +29,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Set;
+
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
@@ -574,7 +576,7 @@ public abstract class HexGrid extends Grid {
   @Override
   protected Area createGridArea(int gridRadius) {
     final Area cellArea = new Area(createCellShape(getSize()));
-    final HashSet<Point> points = generateRing(gridRadius);
+    final Set<Point> points = generateRing(gridRadius);
     Area gridArea = new Area();
 
     // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap

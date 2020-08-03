@@ -553,7 +553,7 @@ public class StrListFunctions extends AbstractFunction {
     String delim = parameters.size() == maxParams ? lastParam : ",";
     String sortStr = (String) parameters.get(1);
 
-    ArrayList<String> list = toList(listStr, delim);
+    List<String> list = toList(listStr, delim);
 
     // Sort the list appropriately and construct the new list string
     list.sort(new strComp(sortStr));
