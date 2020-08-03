@@ -183,7 +183,7 @@ public class AbeillePanel<T> extends JPanel {
     }
 
     @Override
-    protected Object getValue() throws Exception {
+    protected Object getValue() {
       return button.isSelected() ? selected : null;
     }
 

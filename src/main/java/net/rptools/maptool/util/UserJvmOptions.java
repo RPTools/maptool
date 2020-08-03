@@ -221,11 +221,7 @@ public class UserJvmOptions {
       return false;
     } else {
       // Don't allow values less than 0
-      if (Integer.parseInt(m.group(1)) <= 0) {
-        return false;
-      } else {
-        return true;
-      }
+      return Integer.parseInt(m.group(1)) > 0;
     }
   }
 

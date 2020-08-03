@@ -240,8 +240,7 @@ public class GridTool extends DefaultTool {
 
     Grid grid = renderer.getZone().getGrid();
 
-    boolean showSecond =
-        grid.getCapabilities().isSecondDimensionAdjustmentSupported() ? true : false;
+    boolean showSecond = grid.getCapabilities().isSecondDimensionAdjustmentSupported();
     gridSecondDimension.setVisible(showSecond);
     gridSecondDimensionLabel.setVisible(showSecond);
 

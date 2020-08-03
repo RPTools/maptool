@@ -1923,10 +1923,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public boolean hasMacros(boolean secure) {
-    if (!getMacroPropertiesMap(secure).isEmpty()) {
-      return true;
-    }
-    return false;
+    return !getMacroPropertiesMap(secure).isEmpty();
   }
 
   public void setSpeechMap(Map<String, String> map) {

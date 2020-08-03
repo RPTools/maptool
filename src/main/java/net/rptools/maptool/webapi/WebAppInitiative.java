@@ -211,10 +211,6 @@ public class WebAppInitiative {
 
     InitiativeList ilist = initiativeListener.initiativeList;
 
-    if (ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken())) {
-      return true;
-    }
-
-    return false;
+    return ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken());
   }
 }

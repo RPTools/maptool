@@ -431,7 +431,7 @@ public class Campaign {
    * @return <code>true</code> if IF feature has ever been used; <code>false</code> otherwise
    */
   public boolean hasUsedFogToolbar() {
-    return hasUsedFogToolbar == null ? false : hasUsedFogToolbar;
+    return hasUsedFogToolbar != null && hasUsedFogToolbar;
   }
 
   public void setHasUsedFogToolbar(boolean b) {
@@ -653,7 +653,7 @@ public class Campaign {
 
   /** @return Getter for initiativeOwnerPermissions */
   public boolean isInitiativeOwnerPermissions() {
-    return campaignProperties != null ? campaignProperties.isInitiativeOwnerPermissions() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
   /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
@@ -663,7 +663,7 @@ public class Campaign {
 
   /** @return Getter for initiativeMovementLock */
   public boolean isInitiativeMovementLock() {
-    return campaignProperties != null ? campaignProperties.isInitiativeMovementLock() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
