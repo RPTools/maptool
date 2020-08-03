@@ -888,16 +888,19 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         } else {
           for (int i = list.length - 1; i >= 0; i--) {
             int index = list[i];
+            if (index == -1) {
+              continue;
+            }
             if (name.equals("initiative.menu.remove")) {
-              if (index != -1) init.removeToken(index);
+              init.removeToken(index);
             } else if (name.equals("initiative.menu.hold")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(true);
+              init.getTokenInitiative(index).setHolding(true);
             } else if (name.equals("initiative.menu.resume")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(false);
+              init.getTokenInitiative(index).setHolding(false);
             } else if (name.equals("initiative.menu.setState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(input);
+              init.getTokenInitiative(index).setState(input);
             } else if (name.equals("initiative.menu.clearState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(null);
+              init.getTokenInitiative(index).setState(null);
             } // endif
           } // endif
         } // endfor

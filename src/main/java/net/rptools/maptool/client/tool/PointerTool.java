@@ -1640,16 +1640,14 @@ public class PointerTool extends DefaultTool {
               Object propertyValue =
                   tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
               resolver.flush();
-              if (propertyValue != null) {
-                if (propertyValue.toString().length() > 0) {
-                  String propName = property.getName();
-                  if (property.getShortName() != null) {
-                    propName = property.getShortName();
-                  }
-                  Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                  resolver.flush();
-                  propertyMap.put(propName, value != null ? value.toString() : "");
+              if (propertyValue != null && propertyValue.toString().length() > 0) {
+                String propName = property.getName();
+                if (property.getShortName() != null) {
+                  propName = property.getShortName();
                 }
+                Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                resolver.flush();
+                propertyMap.put(propName, value != null ? value.toString() : "");
               }
             }
           }

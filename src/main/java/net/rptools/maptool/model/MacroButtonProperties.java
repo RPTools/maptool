@@ -411,11 +411,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
      * This is actually one of the "common macro" buttons that are on the selection panel so we need to handle this case a little differently. If apply to all tokens is checked by the user then we
      * need to check that the command is part of the common values otherwise it would cause unexpected things to occur.
      */
-    if (applyToTokens) {
-      if (!compareCommand) {
-        MapTool.showError("msg.error.cantApplyMacroToSelected");
-        return;
-      }
+    if (applyToTokens && (!compareCommand)) {
+      MapTool.showError("msg.error.cantApplyMacroToSelected");
+      return;
     }
 
     if (compareCommand) {

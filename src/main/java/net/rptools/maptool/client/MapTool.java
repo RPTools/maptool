@@ -1774,15 +1774,13 @@ public class MapTool {
     // File f = AppUtil.getAppHome("config");
     // if (f.exists()) {
     // File f2 = new File(f, "Default.theme");
-    if (f2.exists()) {
-      if (Theme.loadTheme(f2)) {
-        // re-install the Tiny Look and Feel
-        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+    if (f2.exists() && Theme.loadTheme(f2)) {
+      // re-install the Tiny Look and Feel
+      UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
-        // Update the ComponentUIs for all Components. This
-        // needs to be invoked for all windows.
-        // SwingUtilities.updateComponentTreeUI(rootWindow);
-      }
+      // Update the ComponentUIs for all Components. This
+      // needs to be invoked for all windows.
+      // SwingUtilities.updateComponentTreeUI(rootWindow);
     }
     // }
   }

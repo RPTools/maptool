@@ -1093,15 +1093,13 @@ public class MapToolFrame extends DefaultDockableHolder
                 tree.clearSelection();
               }
               tree.addSelectionInterval(rowIndex, rowIndex);
-              if (row instanceof DrawnElement) {
-                if (e.getClickCount() == 2) {
-                  DrawnElement de = (DrawnElement) row;
-                  getCurrentZoneRenderer()
-                      .centerOn(
-                          new ZonePoint(
-                              (int) de.getDrawable().getBounds().getCenterX(),
-                              (int) de.getDrawable().getBounds().getCenterY()));
-                }
+              if (row instanceof DrawnElement && e.getClickCount() == 2) {
+                DrawnElement de = (DrawnElement) row;
+                getCurrentZoneRenderer()
+                    .centerOn(
+                        new ZonePoint(
+                            (int) de.getDrawable().getBounds().getCenterX(),
+                            (int) de.getDrawable().getBounds().getCenterY()));
               }
               /*
                * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =
@@ -1194,15 +1192,13 @@ public class MapToolFrame extends DefaultDockableHolder
               }
               tree.addSelectionInterval(rowIndex, rowIndex);
 
-              if (row instanceof Token) {
-                if (e.getClickCount() == 2) {
-                  Token token = (Token) row;
-                  getCurrentZoneRenderer().clearSelectedTokens();
-                  // Pick an appropriate tool
-                  // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
-                  getCurrentZoneRenderer().centerOn(token);
-                  getCurrentZoneRenderer().updateAfterSelection();
-                }
+              if (row instanceof Token && e.getClickCount() == 2) {
+                Token token = (Token) row;
+                getCurrentZoneRenderer().clearSelectedTokens();
+                // Pick an appropriate tool
+                // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
+                getCurrentZoneRenderer().centerOn(token);
+                getCurrentZoneRenderer().updateAfterSelection();
               }
             }
             if (SwingUtilities.isRightMouseButton(e)) {
@@ -1733,12 +1729,10 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public boolean confirmClose() {
-    if (MapTool.isHostingServer()) {
-      if (!MapTool.confirm("msg.confirm.hostingDisconnect")) {
-        return false;
-      }
+    if (!MapTool.isHostingServer()) {
+      return false;
     }
-    return true;
+    return MapTool.confirm("msg.confirm.hostingDisconnect");
   }
 
   public void closingMaintenance() {

@@ -186,10 +186,8 @@ public class TokenLightFunctions extends AbstractFunction {
     if (category.equals("*")) {
       for (String catName : lightSourcesMap.keySet()) {
         for (LightSource ls : lightSourcesMap.get(catName).values()) {
-          if (ls.getName().equals(name) || name.equals("*")) {
-            if (token.hasLightSource(ls)) {
-              return true;
-            }
+          if (ls.getName().equals(name) && token.hasLightSource(ls)) {
+            return true;
           }
         }
       }

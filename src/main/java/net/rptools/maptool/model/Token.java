@@ -1130,10 +1130,8 @@ public class Token extends BaseModel implements Cloneable {
     assetSet.add(charsheetImage);
     assetSet.add(portraitImage);
 
-    if (heroLabData != null) {
-      if (heroLabData.getAllAssetIDs() != null) {
-        assetSet.addAll(heroLabData.getAllAssetIDs());
-      }
+    if (heroLabData != null && heroLabData.getAllAssetIDs() != null) {
+      assetSet.addAll(heroLabData.getAllAssetIDs());
     }
 
     assetSet.remove(null); // Clean up from any null values from above

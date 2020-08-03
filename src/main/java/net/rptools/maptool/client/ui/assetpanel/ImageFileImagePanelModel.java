@@ -139,24 +139,19 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   public Image[] getDecorations(int index) {
+    if (!Token.isTokenFile(fileList.get(index).getName())) {
+      return null;
+    }
     try {
-      if (Token.isTokenFile(fileList.get(index).getName())) {
-
-        PackedFile pakFile = new PackedFile(fileList.get(index));
-        Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
-        if (isHeroLab != null) {
-          if ((boolean) isHeroLab) {
-            return new Image[] {herolabDecorationImage};
-          }
-        }
-
-        return new Image[] {rptokenDecorationImage};
+      PackedFile pakFile = new PackedFile(fileList.get(index));
+      Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
+      if (isHeroLab != null && (boolean) isHeroLab) {
+        return new Image[] {herolabDecorationImage};
       }
-
+      return new Image[] {rptokenDecorationImage};
     } catch (IOException | NullPointerException | IndexOutOfBoundsException e) {
       e.printStackTrace();
     }
-
     return null;
   }
 
