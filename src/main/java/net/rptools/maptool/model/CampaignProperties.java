@@ -264,9 +264,10 @@ public class CampaignProperties {
 
     try {
       Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (String key : map.keySet()) {
+      for (var entry : map.entrySet()) {
+        String key = entry.getKey();
         Map<GUID, LightSource> lightSourceMap = new LinkedHashMap<GUID, LightSource>();
-        for (LightSource source : map.get(key)) {
+        for (LightSource source : entry.getValue()) {
           lightSourceMap.put(source.getId(), source);
         }
         lightSourcesMap.put(key, lightSourceMap);

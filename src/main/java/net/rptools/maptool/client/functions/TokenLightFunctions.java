@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Direction;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -99,8 +96,8 @@ public class TokenLightFunctions extends AbstractFunction {
         MapTool.getCampaign().getLightSourcesMap();
 
     if (category == null || category.equals("*")) {
-      for (String catName : lightSourcesMap.keySet()) {
-        for (LightSource ls : lightSourcesMap.get(catName).values()) {
+      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
+        for (LightSource ls : lsMap.values()) {
           if (token.hasLightSource(ls)) {
             lightList.add(ls.getName());
           }
@@ -184,9 +181,9 @@ public class TokenLightFunctions extends AbstractFunction {
         MapTool.getCampaign().getLightSourcesMap();
 
     if (category.equals("*")) {
-      for (String catName : lightSourcesMap.keySet()) {
-        for (LightSource ls : lightSourcesMap.get(catName).values()) {
-          if (ls.getName().equals(name) || name.equals("*")) {
+      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
+        for (LightSource ls : lsMap.values()) {
+          if (ls.getName().equals(name)) {
             if (token.hasLightSource(ls)) {
               return true;
             }

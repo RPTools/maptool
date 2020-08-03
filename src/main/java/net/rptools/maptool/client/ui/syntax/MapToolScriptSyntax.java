@@ -150,12 +150,13 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
         Map<String, String> macroMap = MapTool.getParser().listAllMacroFunctions();
 
-        for (String macro : macroMap.keySet()) {
-          if (macroMap.get(macro).equals(UserDefinedMacroFunctions.class.getName()))
+        for (var entry : macroMap.entrySet()) {
+          String macro = entry.getKey();
+          if (entry.getValue().equals(UserDefinedMacroFunctions.class.getName()))
             macroFunctionTokenMap.put(macro, Token.ANNOTATION);
           else macroFunctionTokenMap.put(macro, Token.FUNCTION);
 
-          log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
+          log.debug("Adding \"" + entry + "\" macro function to syntax highlighting.");
         }
       }
     }
