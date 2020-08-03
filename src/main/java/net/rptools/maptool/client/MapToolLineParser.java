@@ -980,17 +980,9 @@ public class MapToolLineParser {
       }
       builder.append(line.substring(start));
       return builder.toString();
-    } catch (AbortFunctionException e) {
+    } catch (ParserException e) {
       // do nothing; this exception will never generate any output
       // throw doError("macroExecutionAbort", opts == null ? "" : opts, roll == null ? line : roll);
-      throw e;
-    } catch (AssertFunctionException e) {
-      // do nothing; this exception will never generate any output
-      // throw doError("macroExecutionAssert", opts == null ? "" : opts, roll == null ? line :
-      // roll);
-      throw e;
-    } catch (ParserException e) {
-      // do nothing, jut pass message back up
       throw e;
     } catch (Exception e) {
       log.info(line, e);
@@ -1099,12 +1091,8 @@ public class MapToolLineParser {
         sb.append(result.getDetailExpression()).append(" = ").append(result.getValue());
       }
       return sb.toString();
-    } catch (AbortFunctionException ae) {
-      throw ae;
-    } catch (AssertFunctionException afe) {
-      throw afe;
-    } catch (ParserException e) {
-      throw e;
+    } catch (ParserException pe) {
+      throw pe;
     } catch (Exception e) {
       return I18N.getText("lineParser.invalidExpr", roll);
     }
