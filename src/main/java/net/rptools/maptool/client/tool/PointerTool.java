@@ -159,7 +159,7 @@ public class PointerTool extends DefaultTool {
    */
   @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
-    if (comp != null && comp instanceof ZoneRenderer) {
+    if (comp instanceof ZoneRenderer) {
       Grid grid = ((ZoneRenderer) comp).getZone().getGrid();
       addGridBasedKeys(grid, true);
     }

@@ -1668,7 +1668,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
    */
   private boolean JSONContains(Object obj, String key) throws ParserException {
 
-    if (obj != null && obj instanceof JSONObject) {
+    if (obj instanceof JSONObject) {
       return ((JSONObject) obj).containsKey(key);
     }
 
