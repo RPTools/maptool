@@ -248,7 +248,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         // had to do this here since the short name is not built
         // to take advantage of multiple opening/closing parenthesis
         // in a single property line
-        int indexDefault = line.indexOf(":");
+        int indexDefault = line.indexOf(':');
         if (indexDefault > 0) {
           String defaultVal = line.substring(indexDefault + 1).trim();
           if (defaultVal.length() > 0) {
@@ -260,9 +260,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         }
         // Suffix
         // (Really should handle nested parens here)
-        int index = line.indexOf("(");
+        int index = line.indexOf('(');
         if (index > 0) {
-          int indexClose = line.lastIndexOf(")");
+          int indexClose = line.lastIndexOf(')');
           // Check for unenclosed parentheses. Fix #1575.
           if (indexClose < index) {
             MapTool.showError(I18N.getText("CampaignPropertyDialog.error.parenthesis", line));

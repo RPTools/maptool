@@ -168,7 +168,7 @@ public class StringUtil {
       newlinePos = subString.lastIndexOf(wrapChar);
       if (newlinePos == -1) {
         // if there's no line break, then find the first space to break the line
-        newlinePos = subString.lastIndexOf(" ");
+        newlinePos = subString.lastIndexOf(' ');
         if (newlinePos == -1) {
           // if there are no spaces, then force the line break within the word.
           newlinePos = wrapLength - 1; // -1 because of 0 start point of position
