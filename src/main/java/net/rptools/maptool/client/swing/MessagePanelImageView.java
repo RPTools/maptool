@@ -463,7 +463,7 @@ public class MessagePanelImageView extends View {
    * @see View#modelToView
    */
   @Override
-  public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+  public Shape modelToView(int pos, Shape a, Position.Bias b) {
     int p0 = getStartOffset();
     int p1 = getEndOffset();
     if ((pos >= p0) && (pos <= p1)) {

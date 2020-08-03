@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.protocol.syrinscape;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -29,7 +28,7 @@ public class SyrinscapeConnection extends URLConnection {
   }
 
   @Override
-  public void connect() throws IOException {
+  public void connect() {
     // TODO Auto-generated method stub
   }
 }

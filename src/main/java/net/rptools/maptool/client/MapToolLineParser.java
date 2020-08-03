@@ -1545,7 +1545,7 @@ public class MapToolLineParser {
     // anything as trusted context will remain the same as it was before the call).
     if (contextStack.size() == 0) {
       // The path is untrusted if any typing is involved, including GM's
-      macroPathTrusted = context == null ? false : context.isTrusted();
+      macroPathTrusted = context != null && context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
     } else if (context != null) {
       if (!context.isTrusted()) {

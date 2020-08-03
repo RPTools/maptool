@@ -303,7 +303,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     initI18NSupport();
     this.button = button;
     updateOpenMacroList(true);
-    this.isTokenMacro = button.getToken() == null ? false : true;
+    this.isTokenMacro = button.getToken() != null;
     this.properties = button.getProperties();
 
     if (properties != null) {

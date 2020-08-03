@@ -2821,7 +2821,7 @@ public class AppActions {
           boolean ok =
               MapTool.confirm(
                   "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-          if (ok == true) {
+          if (ok) {
             // This fires a ModelChangeEvent, but that shouldn't matter
             map.zone.clearExposedArea(false);
           }
@@ -2915,7 +2915,7 @@ public class AppActions {
       final RemoteFileDownloader downloader = new RemoteFileDownloader(url, MapTool.getFrame());
       new SwingWorker<Object, Object>() {
         @Override
-        protected Object doInBackground() throws Exception {
+        protected Object doInBackground() {
           try {
             File dataFile = downloader.read();
             if (dataFile == null) {
@@ -3200,12 +3200,10 @@ public class AppActions {
 
     static {
       String prop = System.getProperty("os.name");
-      if ("Mac OS X".equals(prop)) {
-        NEEDS_GUARD =
-            true; // MapTool doesnt run on version 8 or less of JDK so no need to check that
-      } else {
-        NEEDS_GUARD = false;
-      }
+      NEEDS_GUARD =
+          "Mac OS X"
+              .equals(
+                  prop); // MapTool doesnt run on version 8 or less of JDK so no need to check that
     }
 
     /**

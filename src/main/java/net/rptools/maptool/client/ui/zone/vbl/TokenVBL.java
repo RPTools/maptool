@@ -288,13 +288,11 @@ public class TokenVBL {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
       sy = 1 / (imgSize.getHeight() / token.getHeight());
 
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     } else {
       sx = 1 / token.getScaleX();
       sy = 1 / token.getScaleY();
-
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     }
+    atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
