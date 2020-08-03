@@ -64,7 +64,7 @@ public class HeroLabData {
   private String portfolioPath;
   private long lastModified = 0L;
 
-  private final HashMap<String, MD5Key> heroImageAssets = new HashMap<>();
+  private final Map<String, MD5Key> heroImageAssets = new HashMap<>();
 
   private static interface DefaultAssetKey {
     final String PORTRAIT_KEY = "0";
@@ -145,8 +145,8 @@ public class HeroLabData {
   }
 
   @SuppressWarnings("unchecked")
-  public HashMap<String, HashMap<String, String>> getStatBlocks() {
-    HashMap<String, HashMap<String, String>> statBlocks = new HashMap<>();
+  public Map<String, HashMap<String, String>> getStatBlocks() {
+    Map<String, HashMap<String, String>> statBlocks = new HashMap<>();
 
     if (heroLabStatblockAssetID == null) return statBlocks;
 
@@ -183,7 +183,7 @@ public class HeroLabData {
     return statBlocks;
   }
 
-  public void setStatBlocks(HashMap<String, HashMap<String, String>> statBlocks) {
+  public void setStatBlocks(Map<String, Map<String, String>> statBlocks) {
     // Jamz: Since statblocks do not change or accessed often, moved object data to an Asset
     // as heroLabData could be pretty large with XML data causing lag on token transfers
     if (heroLabStatblockAssetID != null) AssetManager.removeAsset(heroLabStatblockAssetID);

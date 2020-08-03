@@ -67,7 +67,7 @@ public class ZoneView implements ModelChangeListener {
   /** Map each token to their current vision, depending on other lights. */
   private final Map<GUID, Area> tokenVisionCache = new HashMap<>();
   /** Map lightSourceToken to the areaBySightMap. */
-  private final Map<GUID, Map<String, TreeMap<Double, Area>>> lightSourceCache = new HashMap<>();
+  private final Map<GUID, Map<String, Map<Double, Area>>> lightSourceCache = new HashMap<>();
   /** Map light source type to all tokens with that type. */
   private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
   /** Map each token to their map between sightType and set of lights. */
@@ -79,7 +79,7 @@ public class ZoneView implements ModelChangeListener {
   /** Hold all of our lights combined by lumens. Used for hard FoW reveal. */
   private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<>();
   /** Map each token to their personal bright light source area. */
-  private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<GUID, Set<Area>>();
+  private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<>();
   /** Map each token to their personal drawable lights. */
   private final Map<GUID, Set<DrawableLight>> personalDrawableLightCache = new HashMap<>();
 
@@ -173,16 +173,16 @@ public class ZoneView implements ModelChangeListener {
    * @param lightSourceToken the token holding the light sources.
    * @return the lightSourceArea.
    */
-  private TreeMap<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
+  private Map<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
     GUID tokenId = lightSourceToken.getId();
-    Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
+    Map<String, Map<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
     if (areaBySightMap != null) {
-      TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
+      Map<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
       if (lightSourceArea != null) {
         return lightSourceArea;
       }
     } else {
-      areaBySightMap = new HashMap<String, TreeMap<Double, Area>>();
+      areaBySightMap = new HashMap<>();
       lightSourceCache.put(lightSourceToken.getId(), areaBySightMap);
     }
 

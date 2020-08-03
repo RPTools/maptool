@@ -4227,7 +4227,7 @@ public class ZoneRenderer extends JComponent
 
     private final Logger log = LogManager.getLogger(ZoneRenderer.SelectionSet.class);
 
-    private final HashSet<GUID> selectionSet = new HashSet<GUID>();
+    private final Set<GUID> selectionSet = new HashSet<GUID>();
     private final GUID keyToken;
     private final String playerId;
     private ZoneWalker walker;

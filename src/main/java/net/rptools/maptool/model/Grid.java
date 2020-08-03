@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Action;
@@ -850,7 +851,7 @@ public abstract class Grid implements Cloneable {
    * @return a {@link HashSet} that includes all cells that only equal in distance to the given
    *     radius
    */
-  protected HashSet<Point> generateRing(int radius) {
+  protected Set<Point> generateRing(int radius) {
     return generateRadius(radius, radius);
   }
 
@@ -860,7 +861,7 @@ public abstract class Grid implements Cloneable {
    * @param radius The maximum radius to generate all cell points within this range
    * @return a {@link HashSet} that includes all cells up to the radius
    */
-  protected HashSet<Point> generateRadius(int radius) {
+  protected Set<Point> generateRadius(int radius) {
     return generateRadius(0, radius);
   }
 
@@ -871,8 +872,8 @@ public abstract class Grid implements Cloneable {
    * @param maxRadius The maximum radius to generate the ring of cell points for this range
    * @return a {@link HashSet} that includes all cells between the minRadius to the maxRadius
    */
-  protected HashSet<Point> generateRadius(int minRadius, int maxRadius) {
-    HashSet<Point> points = new HashSet<>();
+  protected Set<Point> generateRadius(int minRadius, int maxRadius) {
+    Set<Point> points = new HashSet<>();
     CellPoint start = new CellPoint(0, 0);
 
     WalkerMetric metric = getCurrentMetric();

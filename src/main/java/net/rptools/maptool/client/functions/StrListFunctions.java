@@ -70,8 +70,8 @@ public class StrListFunctions extends AbstractFunction {
     public abstract boolean visit(int pos, int start, int end);
   }
 
-  public static ArrayList<String> toList(String listStr, String delim) {
-    ArrayList<String> list = new ArrayList<String>();
+  public static List<String> toList(String listStr, String delim) {
+    List<String> list = new ArrayList<String>();
     parse(
         listStr,
         delim,
