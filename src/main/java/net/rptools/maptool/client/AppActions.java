@@ -2470,9 +2470,12 @@ public class AppActions {
 
         MapTool.setCampaign(campaign.campaign, campaign.currentZoneId);
         ZoneRenderer current = MapTool.getFrame().getCurrentZoneRenderer();
-        if (campaign.currentView != null && current != null)
-          current.setZoneScale(campaign.currentView);
-        current.getZoneScale().reset();
+        if (current != null) {
+            if (campaign.currentView != null) {
+                current.setZoneScale(campaign.currentView);
+            }
+            current.getZoneScale().reset();
+        }
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
