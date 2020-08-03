@@ -4,6 +4,7 @@
 package net.rptools.maptool.client.ui.logger;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.core.Filter;

@@ -174,7 +174,7 @@ public class LookupTable {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      ArrayList<LookupEntry> le = getInternalEntryList();
+      List<LookupEntry> le = getInternalEntryList();
       LookupEntry entry;
       int len = le.size();
       List unpicked = new ArrayList<Integer>();
@@ -226,8 +226,8 @@ public class LookupTable {
 
   /** Sets the picked flag on each table entry to false. */
   public void reset() {
-    ArrayList<LookupEntry> curList = getInternalEntryList();
-    ArrayList<LookupEntry> newList = new ArrayList<>();
+    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
       newList.add(entry);
