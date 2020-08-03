@@ -672,11 +672,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   public void setExportSettings(Map<String, Boolean> settings) {
     resetExportSettings();
     if (settings != null) {
-      for (String iter : settings.keySet()) {
-        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(iter);
+      for (var entry : settings.entrySet()) {
+        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(entry.getKey());
         if (jtb == null) {
-          log.warn("GUI component for export setting '" + iter + "' not found.");
-        } else jtb.setSelected(settings.get(iter));
+          log.warn("GUI component for export setting '" + entry.getKey() + "' not found.");
+        } else jtb.setSelected(entry.getValue());
       }
     }
   }

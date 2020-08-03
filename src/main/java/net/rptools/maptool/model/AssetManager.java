@@ -775,9 +775,9 @@ public class AssetManager {
     Map<MD5Key, Asset> missing =
         new HashMap<MD5Key, Asset>(Math.min(assetMap.size(), aggregate.size()));
 
-    for (MD5Key key : assetMap.keySet()) {
-      if (aggregate.contains(key) == false) // Not in any repository so add it.
-      missing.put(key, assetMap.get(key));
+    for (var entry : assetMap.entrySet()) {
+      if (aggregate.contains(entry.getKey()) == false) // Not in any repository so add it.
+      missing.put(entry.getKey(), entry.getValue());
     }
     return missing;
   }
