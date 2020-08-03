@@ -174,7 +174,8 @@ public class TwoToneTextPane extends JTextPane {
       e.printStackTrace();
       throw new IllegalStateException(
           "This should not happen since I always use the document to "
-              + "determine the location to write. It might be due to synchronization problems though", e);
+              + "determine the location to write. It might be due to synchronization problems though",
+          e);
     }
   }
 
