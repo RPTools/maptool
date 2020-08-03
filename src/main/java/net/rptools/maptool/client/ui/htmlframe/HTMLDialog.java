@@ -58,7 +58,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   private final String name;
 
   /** Can the dialog be resized? */
-  private final static boolean canResize = true;
+  private static final boolean canResize = true;
 
   /** The parent of the dialog */
   private final Frame parent;
