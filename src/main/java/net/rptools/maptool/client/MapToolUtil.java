@@ -36,7 +36,7 @@ import net.rptools.maptool.util.StringUtil;
 public class MapToolUtil {
   private static final Random RAND = new SecureRandom();
 
-  private static RandomSuffixFactory randomSuffixFactory;
+  private static RandomSuffixFactory randomSuffixFactory = new RandomSuffixFactory();
   private static AtomicInteger nextTokenId = new AtomicInteger(1);
 
   /** The map of color names to color values */
@@ -172,9 +172,6 @@ public class MapToolUtil {
     if (newNum != null || random || zone.getTokenByName(newName) != null) {
 
       if (random) {
-        if (randomSuffixFactory == null) {
-          randomSuffixFactory = new RandomSuffixFactory();
-        }
         do {
           newNum = randomSuffixFactory.nextSuffixForToken(newName);
         } while (nameIsDuplicate(zone, newName, newNum, addNumToName, addNumToGM));

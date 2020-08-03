@@ -157,10 +157,8 @@ public class ImageManager {
             });
     if (image == TRANSFERING_IMAGE) {
       try {
-        synchronized (loadLatch) {
-          log.debug("Wait for:  " + assetId);
-          loadLatch.await();
-        }
+        log.debug("Wait for:  " + assetId);
+        loadLatch.await();
         // This time we'll get the cached version
         image = getImage(assetId);
       } catch (InterruptedException ie) {
