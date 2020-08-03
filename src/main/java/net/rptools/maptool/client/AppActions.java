@@ -462,7 +462,7 @@ public class AppActions {
            */
           try {
             File topdir = urd.getDirectory();
-            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : null);
+            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : ".");
 
             Map<String, String> repoEntries = new HashMap<String, String>(missing.size());
             FTPClient ftp = new FTPClient(urd.getHostname(), urd.getUsername(), urd.getPassword());
