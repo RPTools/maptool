@@ -273,8 +273,7 @@ public class TokenImage extends AbstractFunction {
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setCharsheetImage, md5key);
   }
 
-  private static Token findImageToken(final String name, String functionName)
-      throws ParserException {
+  private static Token findImageToken(final String name, String functionName) {
     Token imageToken = null;
     if (name != null && name.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();

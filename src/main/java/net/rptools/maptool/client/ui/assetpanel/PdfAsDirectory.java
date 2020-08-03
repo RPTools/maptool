@@ -117,7 +117,7 @@ public class PdfAsDirectory extends Directory {
       this.imageFile = imageFile;
     }
 
-    public Image call() throws Exception {
+    public Image call() {
       // Have we been orphaned ?
       if (!continueProcessing.get()) {
         return null;

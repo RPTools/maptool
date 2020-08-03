@@ -69,8 +69,7 @@ public class ExportDataFunctions extends AbstractFunction {
 
       File file = new File(parameters.get(0).toString());
       String data = parameters.get(1).toString();
-      boolean appendToFile =
-          (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE) ? true : false);
+      boolean appendToFile = (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE));
 
       try {
         // if file doesn't exists, then create it

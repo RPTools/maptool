@@ -125,11 +125,7 @@ public final class ExtractHeroLab {
   }
 
   private boolean isExtracted() {
-    if (extractComplete.exists()) {
-      return true;
-    } else {
-      return false;
-    }
+    return extractComplete.exists();
   }
 
   private void markComplete() {
@@ -234,8 +230,7 @@ public final class ExtractHeroLab {
         heroLabData.setGameSystem(gameSystem);
         heroLabData.setSummary(((Element) hero).getAttribute("summary"));
         heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-        heroLabData.setAlly(
-            ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+        heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
         // Is it a minion?
         if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
@@ -320,8 +315,7 @@ public final class ExtractHeroLab {
       heroLabData.setGameSystem(gameSystem);
       heroLabData.setSummary(((Element) hero).getAttribute("summary"));
       heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-      heroLabData.setAlly(
-          ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+      heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
       // Is it a minion?
       if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
@@ -444,7 +438,6 @@ public final class ExtractHeroLab {
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
 
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       } else {
         // We only need the <character> node for this minion, so lets find it and clone
         // it...
@@ -481,9 +474,8 @@ public final class ExtractHeroLab {
         transformer.transform(source, result);
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
-
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       }
+      statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
 
     } catch (IOException
         | SAXException
