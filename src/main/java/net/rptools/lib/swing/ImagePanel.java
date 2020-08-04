@@ -406,9 +406,9 @@ public class ImagePanel extends JComponent
   }
 
   protected int getImageIndexAt(int x, int y) {
-    for (Rectangle rect : imageBoundsMap.keySet()) {
-      if (rect.contains(x, y)) {
-        return imageBoundsMap.get(rect);
+    for (var imageBounds : imageBoundsMap.entrySet()) {
+      if (imageBounds.getKey().contains(x, y)) {
+        return imageBounds.getValue();
       }
     }
     return -1;

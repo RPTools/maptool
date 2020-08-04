@@ -1793,11 +1793,10 @@ public class Token extends BaseModel implements Cloneable {
       return;
     }
     MacroButtonProperties prop;
-    Set<String> oldMacros = macroMap.keySet();
-    for (String macro : oldMacros) {
+    for (var macro : macroMap.entrySet()) {
       prop = new MacroButtonProperties(getMacroNextIndex());
-      prop.setLabel(macro);
-      prop.setCommand(macroMap.get(macro));
+      prop.setLabel(macro.getKey());
+      prop.setCommand(macro.getValue());
       prop.setApplyToTokens(true);
       macroPropertiesMap.put(prop.getIndex(), prop);
     }
@@ -2158,8 +2157,9 @@ public class Token extends BaseModel implements Cloneable {
     @SuppressWarnings("unchecked")
     Map<String, Object> macros = (Map<String, Object>) td.get(TokenTransferData.MACROS);
     macroMap = new HashMap<String, String>();
-    for (String macroName : macros.keySet()) {
-      Object macro = macros.get(macroName);
+    for (var entry : macros.entrySet()) {
+      String macroName = entry.getKey();
+      Object macro = entry.getValue();
       if (macro instanceof String) {
         macroMap.put(macroName, (String) macro);
       } else if (macro instanceof Map) {

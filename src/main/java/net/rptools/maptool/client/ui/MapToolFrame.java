@@ -1808,8 +1808,8 @@ public class MapToolFrame extends DefaultDockableHolder
      */
     // updateKeyStrokes(menuBar);
 
-    for (MTFrame frame : frameMap.keySet()) {
-      updateKeyStrokes(frameMap.get(frame));
+    for (DockableFrame frame : frameMap.values()) {
+      updateKeyStrokes(frame);
     }
   }
 
@@ -1866,8 +1866,9 @@ public class MapToolFrame extends DefaultDockableHolder
         }
       }
     }
-    for (KeyStroke keyStroke : keyStrokeMap.keySet()) {
-      final MacroButton button = keyStrokeMap.get(keyStroke);
+    for (var entry : keyStrokeMap.entrySet()) {
+      final KeyStroke keyStroke = entry.getKey();
+      final MacroButton button = entry.getValue();
       if (button != null) {
         c.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, button);
         c.getActionMap().put(button, new MTButtonHotKeyAction(button));
