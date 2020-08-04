@@ -93,7 +93,7 @@ public class FogUtil {
         new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
     Collections.sort(segmentList);
 
-    List<Area> clearedAreaList = new LinkedList<Area>();
+    List<Area> clearedAreaList = new LinkedList<>();
     nextSegment:
     for (VisibleAreaSegment segment : segmentList) {
       Rectangle r = segment.getPath().getBounds();
@@ -507,12 +507,12 @@ public class FogUtil {
                 new MouseMotionAdapter() {
                   @Override
                   public void mouseDragged(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });
@@ -520,12 +520,12 @@ public class FogUtil {
                 new MouseAdapter() {
                   @Override
                   public void mousePressed(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });
