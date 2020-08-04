@@ -290,7 +290,7 @@ public class MacroButton extends JButton implements MouseListener {
     }
   }
 
-  private static class DSListener implements DragSourceListener {
+  private class DSListener implements DragSourceListener {
 
     public void dragEnter(DragSourceDragEvent event) {
       // System.out.println("TMB: drag enter");

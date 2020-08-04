@@ -99,7 +99,7 @@ public class SmileyChatTranslationRuleGroup extends ChatTranslationRuleGroup {
 
   ////
   // EMOTE
-  private static class InsertEmoteAction extends AbstractAction {
+  private class InsertEmoteAction extends AbstractAction {
     private final String insert;
 
     public InsertEmoteAction(String emoteImageSrc, String insert) {

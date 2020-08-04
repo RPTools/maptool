@@ -32,7 +32,7 @@ public class TabPopupMenu extends JPopupMenu {
     add(new AddNewButtonAction());
   }
 
-  private static class AddNewButtonAction extends AbstractAction {
+  private class AddNewButtonAction extends AbstractAction {
     public AddNewButtonAction() {
       putValue(Action.NAME, "New Tab");
     }
