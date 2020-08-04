@@ -46,7 +46,7 @@ public abstract class AbstractPoint implements Cloneable {
   }
 
   public int hashCode() {
-    return new String(x + "-" + y).hashCode();
+    return (x + "-" + y).hashCode();
   }
 
   public String toString() {

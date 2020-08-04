@@ -272,7 +272,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
             if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea());
           }
         }
-        Shape s = (Shape) a;
+        Shape s = a;
         Pen newPen = new Pen(elementUnderMouse.getPen());
         if (elementUnderMouse.getDrawable() instanceof LineSegment) newPen = invertPen(newPen);
         DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
@@ -377,7 +377,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent e) {
       MapTool.serverCommand()
           .undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
-      DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) elementUnderMouse).getDrawable();
+      DrawablesGroup dg = (DrawablesGroup) elementUnderMouse.getDrawable();
       for (DrawnElement de : dg.getDrawableList()) {
         MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
       }

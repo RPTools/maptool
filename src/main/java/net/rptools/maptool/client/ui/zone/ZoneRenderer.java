@@ -123,6 +123,7 @@ import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /** */
 public class ZoneRenderer extends JComponent
@@ -1037,7 +1038,7 @@ public class ZoneRenderer extends JComponent
         if (element.hasFacing()) {
           // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
           // reason
-          Integer facing = element.getFacing() + 90;
+          int facing = element.getFacing() + 90;
           if (facing > 180) {
             facing -= 360;
           }
@@ -1055,11 +1056,11 @@ public class ZoneRenderer extends JComponent
             // shift by 1/2 of the length.
             // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
             if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-              Integer size = Math.max(drawnBounds.width, drawnBounds.height);
-              Integer x = drawnBounds.x - (int) (0.21 * size);
-              Integer y = drawnBounds.y - (int) (0.21 * size);
-              Integer w = drawnBounds.width + (int) (0.42 * size);
-              Integer h = drawnBounds.height + (int) (0.42 * size);
+              int size = Math.max(drawnBounds.width, drawnBounds.height);
+              int x = drawnBounds.x - (int) (0.21 * size);
+              int y = drawnBounds.y - (int) (0.21 * size);
+              int w = drawnBounds.width + (int) (0.42 * size);
+              int h = drawnBounds.height + (int) (0.42 * size);
               drawnBounds.setBounds(x, y, w, h);
             }
           }
@@ -2854,8 +2855,8 @@ public class ZoneRenderer extends JComponent
     List<Token> list = new ArrayList<Token>();
 
     // Always assume tokens, for now
-    List<TokenLocation> tokenLocationListCopy = new ArrayList<TokenLocation>();
-    tokenLocationListCopy.addAll(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> tokenLocationListCopy =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     for (TokenLocation location : tokenLocationListCopy) {
       list.add(location.token);
     }
@@ -3282,13 +3283,9 @@ public class ZoneRenderer extends JComponent
         at.scale(getScale(), getScale());
       } else {
         if (token.getShape() == TokenShape.FIGURE) {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledWidth / workImage.getWidth());
+          at.scale(scaledWidth / workImage.getWidth(), scaledWidth / workImage.getWidth());
         } else {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledHeight / workImage.getHeight());
+          at.scale(scaledWidth / workImage.getWidth(), scaledHeight / workImage.getHeight());
         }
       }
       timer.stop("tokenlist-6");
@@ -3545,7 +3542,7 @@ public class ZoneRenderer extends JComponent
           selectedBorder.paintAround(clippedG, (int) sp.x, (int) sp.y, (int) width, (int) height);
         }
         // Remove labels from the cache if the corresponding tokens are deselected
-      } else if (!AppState.isShowTokenNames() && labelRenderingCache.containsKey(token.getId())) {
+      } else if (!AppState.isShowTokenNames()) {
         labelRenderingCache.remove(token.getId());
       }
 
@@ -4012,8 +4009,8 @@ public class ZoneRenderer extends JComponent
    * @return the token
    */
   public Token getTokenAt(int x, int y) {
-    List<TokenLocation> locationList = new ArrayList<TokenLocation>();
-    locationList.addAll(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> locationList =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4024,8 +4021,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public Token getMarkerAt(int x, int y) {
-    List<TokenLocation> locationList = new ArrayList<TokenLocation>();
-    locationList.addAll(markerLocationList);
+    List<TokenLocation> locationList = new ArrayList<TokenLocation>(markerLocationList);
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4054,8 +4050,7 @@ public class ZoneRenderer extends JComponent
    * @return the Label
    */
   public Label getLabelAt(int x, int y) {
-    List<LabelLocation> labelList = new ArrayList<LabelLocation>();
-    labelList.addAll(labelLocationList);
+    List<LabelLocation> labelList = new ArrayList<LabelLocation>(labelLocationList);
     Collections.reverse(labelList);
     for (LabelLocation location : labelList) {
       if (location.bounds.contains(x, y)) {
@@ -4801,7 +4796,7 @@ public class ZoneRenderer extends JComponent
 
   //
   // COMPARABLE
-  public int compareTo(ZoneRenderer o) {
+  public int compareTo(@NotNull ZoneRenderer o) {
     if (o != this) {
       return (int) (zone.getCreationTime() - o.zone.getCreationTime());
     }

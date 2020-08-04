@@ -102,7 +102,7 @@ public class GraphicsUtil {
     String[] stringByLine = string.split(pattern);
     int rows = stringByLine.length;
 
-    String longestRow = new String();
+    String longestRow = "";
     for (String s : stringByLine) {
       if (longestRow.length() < s.length()) {
         longestRow = s;
@@ -297,7 +297,7 @@ public class GraphicsUtil {
   }
 
   public static Area createLineSegmentEllipse(int x1, int y1, int x2, int y2, int steps) {
-    return createLineSegmentEllipse((double) x1, (double) y1, (double) x2, (double) y2, steps);
+    return createLineSegmentEllipse(x1, y1, x2, (double) y2, steps);
   }
 
   public static Area createLineSegmentEllipse(

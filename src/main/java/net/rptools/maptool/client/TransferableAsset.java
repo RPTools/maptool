@@ -17,6 +17,7 @@ package net.rptools.maptool.client;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import net.rptools.maptool.model.Asset;
+import org.jetbrains.annotations.NotNull;
 
 /** */
 public class TransferableAsset implements Transferable {
@@ -33,7 +34,7 @@ public class TransferableAsset implements Transferable {
     return asset;
   }
 
-  public Object getTransferData(DataFlavor flavor) {
+  public @NotNull Object getTransferData(DataFlavor flavor) {
     return asset;
   }
 

@@ -365,7 +365,7 @@ public class SquareGrid extends Grid {
   }
 
   public static String decimalToAlphaCoord(int value) {
-    String result = new String();
+    String result = "";
     int temp;
     boolean isNegative = false;
 

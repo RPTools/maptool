@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
+import org.jetbrains.annotations.NotNull;
 
 // TODO: Make this class implement 'List'
 public class ObservableList<K> extends Observable implements Iterable<K> {
@@ -121,7 +122,7 @@ public class ObservableList<K> extends Observable implements Iterable<K> {
    *
    * @return An iterator over the displayed list.
    */
-  public Iterator<K> iterator() {
+  public @NotNull Iterator<K> iterator() {
     return list.iterator();
   }
 }

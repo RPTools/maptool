@@ -180,8 +180,8 @@ public class ImageBorder implements Border {
   }
 
   private int max(int i1, int i2, int i3) {
-    int bigger = i1 > i2 ? i1 : i2;
-    return bigger > i3 ? bigger : i3;
+    int bigger = Math.max(i1, i2);
+    return Math.max(bigger, i3);
   }
 
   @Override

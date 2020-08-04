@@ -1137,17 +1137,17 @@ public class InputFunction extends AbstractFunction {
             }
           case CHECK:
             {
-              Integer value = ((JCheckBox) comp).isSelected() ? 1 : 0;
-              newValue = value.toString();
+              int value = ((JCheckBox) comp).isSelected() ? 1 : 0;
+              newValue = Integer.toString(value);
               break;
             }
           case RADIO:
             {
               // This code assumes that the Box container returns components
               // in the same order that they were added.
-              Component[] comps = ((Box) comp).getComponents();
+              Component[] comps = comp.getComponents();
               int componentCount = 0;
-              Integer index = 0;
+              int index = 0;
               for (Component c : comps) {
                 if (c instanceof JRadioButton) {
                   JRadioButton radio = (JRadioButton) c;
@@ -1158,7 +1158,7 @@ public class InputFunction extends AbstractFunction {
               if (vs.optionValues.optionEquals("VALUE", "STRING")) {
                 newValue = vs.valueList.get(index);
               } else { // default is "NUMBER"
-                newValue = index.toString();
+                newValue = Integer.toString(index);
               }
               break;
             }
@@ -1173,7 +1173,7 @@ public class InputFunction extends AbstractFunction {
               // Read out and assign all the subvariables.
               // The overall return value is a property string (as in StrPropFunctions.java) with
               // all the new settings.
-              Component[] comps = ((JPanel) comp).getComponents();
+              Component[] comps = comp.getComponents();
               StringBuilder sb = new StringBuilder();
               jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
@@ -1220,7 +1220,7 @@ public class InputFunction extends AbstractFunction {
           } else {
             resolver.setVariable(vs.name, newValue.trim());
           }
-          allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
+          allAssignments.append(vs.name).append("=").append(newValue.trim()).append(" ## ");
         }
       }
       if (cp.tabVarSpec != null) {
