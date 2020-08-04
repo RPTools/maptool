@@ -37,7 +37,7 @@ public class LaunchInstructions {
       AppUtil.getAppHome();
 
       long mem = Runtime.getRuntime().maxMemory();
-      String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
+      String msg = String.format(USAGE, mem / (1024 * 1024));
 
       /*
        * Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount maxMemory() reports will be 256MB. The actual amount seems to vary from PC to PC. 200MB seems to be a safe value

@@ -290,7 +290,7 @@ public class AppPreferences {
   }
 
   private static int range0to255(int value) {
-    return value < 1 ? 0 : value > 255 ? 255 : value;
+    return value < 1 ? 0 : Math.min(value, 255);
   }
 
   public static void setHaloOverlayOpacity(int size) {
@@ -1009,9 +1009,7 @@ public class AppPreferences {
       if (!file.exists()) {
         continue;
       }
-      if (!rootList.contains(file)) {
-        rootList.add(file);
-      }
+      rootList.add(file);
     }
     return rootList;
   }
@@ -1039,7 +1037,7 @@ public class AppPreferences {
   }
 
   public static void setMruCampaigns(List<File> mruCampaigns) {
-    StringBuilder combined = new StringBuilder("");
+    StringBuilder combined = new StringBuilder();
     for (File file : mruCampaigns) {
       String path = null;
       try {
@@ -1076,7 +1074,7 @@ public class AppPreferences {
   }
 
   public static void setSavedPaintTextures(List<File> savedTextures) {
-    StringBuilder combined = new StringBuilder("");
+    StringBuilder combined = new StringBuilder();
     for (File savedTexture : savedTextures) {
       combined.append(savedTexture.getPath());
       combined.append(File.pathSeparator);

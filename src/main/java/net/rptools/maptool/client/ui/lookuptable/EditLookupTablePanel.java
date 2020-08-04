@@ -278,9 +278,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
         String value = entry.getValue();
         MD5Key imageId = entry.getImageId();
 
-        rows.add(
-            Arrays.asList(
-                new String[] {range, value, imageId != null ? imageId.toString() : null}));
+        rows.add(Arrays.asList(range, value, imageId != null ? imageId.toString() : null));
       }
     }
     return new LookupTableTableModel(

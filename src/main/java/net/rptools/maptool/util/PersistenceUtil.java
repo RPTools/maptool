@@ -237,7 +237,7 @@ public class PersistenceUtil {
     for (Zone zone : zones) {
       if (zone.getName().equals(n)) {
         String count = n.replaceFirst("Import (\\d+) of.*", "$1"); // $NON-NLS-1$
-        Integer next = 1;
+        int next = 1;
         try {
           next = StringUtil.parseInteger(count) + 1;
           n = n.replaceFirst("Import \\d+ of", "Import " + next + " of"); // $NON-NLS-1$

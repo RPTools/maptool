@@ -140,12 +140,12 @@ public class MapToolLineParser {
 
     for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof AdditionalFunctionDescription) {
-        for (String alias : Arrays.asList(function.getAliases())) {
+        for (String alias : function.getAliases()) {
           functionList.put(alias, function.getClass().getName());
           //          log.info(alias + " : " + function.getClass().getName());
         }
       } else {
-        for (String alias : Arrays.asList(function.getAliases()))
+        for (String alias : function.getAliases())
           functionList.put(alias, function.getClass().getName());
       }
     }
@@ -260,7 +260,7 @@ public class MapToolLineParser {
       List<InlineRollMatch> matches = this.locateInlineRolls(line);
 
       for (InlineRollMatch match : matches) {
-        builder.append(line.substring(start, match.getStart())); // add everything before the roll
+        builder.append(line, start, match.getStart()); // add everything before the roll
 
         start = match.getEnd() + 1;
         // These variables will hold data extracted from the roll options.
@@ -1517,13 +1517,15 @@ public class MapToolLineParser {
 
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
-    if (options != null) s.append("\001" + StringUtils.join(options, ",") + "\002");
+    if (options != null) {
+      s.append("\001").append(StringUtils.join(options, ",")).append("\002");
+    }
 
     if (tooltip != null) {
       tooltip = tooltip.replaceAll("'", "&#39;");
-      s.append(tooltip + "\037");
+      s.append(tooltip).append("\037");
     }
-    s.append(text + "\036");
+    s.append(text).append("\036");
     return s.toString();
   }
 

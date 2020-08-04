@@ -150,8 +150,8 @@ public class LookupTable {
   }
 
   private int constrainRoll(int val) {
-    Integer minmin = Integer.MAX_VALUE;
-    Integer maxmax = Integer.MIN_VALUE;
+    int minmin = Integer.MAX_VALUE;
+    int maxmax = Integer.MIN_VALUE;
 
     for (LookupEntry entry : getInternalEntryList()) {
       if (entry.min < minmin) {
