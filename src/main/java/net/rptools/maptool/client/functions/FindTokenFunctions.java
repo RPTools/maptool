@@ -314,10 +314,9 @@ public class FindTokenFunctions extends AbstractFunction {
     if (!functionName.equals("currentToken")
         && !functionName.startsWith("getImpersonated")
         && !functionName.startsWith("getVisible")
-        && !functionName.startsWith("getSelected")) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
+        && !functionName.startsWith("getSelected")
+        && !MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
     if (functionName.equals("findToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
@@ -690,11 +689,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (jprim.isBoolean()) {
         return jprim.getAsBoolean();
       } else if (jprim.isNumber()) {
-        if (jprim.getAsInt() == 0) {
-          return false;
-        } else {
-          return true;
-        }
+        return jprim.getAsInt() != 0;
       } else {
         // What's the rationale for returning true for other types?
         // Should we be looking at strings for true/false?

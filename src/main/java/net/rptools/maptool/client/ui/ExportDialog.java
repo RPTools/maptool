@@ -67,6 +67,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   //
   private static final Logger log = LogManager.getLogger(ExportDialog.class);
 
+  private static final ExportDialog instance = new ExportDialog();
+
   /** the modal panel the user uses to select the screenshot options */
   private static FormPanel interactPanel;
 
@@ -369,13 +371,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  public ExportDialog() throws Exception {
+  public static ExportDialog getInstance() {
+    return instance;
+  }
+
+  private ExportDialog() {
     super(MapTool.getFrame(), I18N.getText("action.exportScreenShot.title"), true);
-    if (instanceCount == 0) {
-      instanceCount++;
-    } else {
-      throw new Exception("Only one instance of ExportDialog allowed!");
-    }
 
     // The window uses about 1MB. Disposing frees this, but repeated uses
     // will cause more memory fragmentation.

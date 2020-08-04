@@ -22,10 +22,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
@@ -358,8 +355,7 @@ public final class ExtractHeroLab {
   }
 
   public HeroLabData refreshHeroLabData(HeroLabData heroData) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
@@ -382,14 +378,13 @@ public final class ExtractHeroLab {
     return heroData;
   }
 
-  private HashMap<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero) {
+  private Map<String, Map<String, String>> getStatBlocks(XPath xpath, Node hero) {
     return getStatBlocks(xpath, hero, null, null);
   }
 
-  private HashMap<String, HashMap<String, String>> getStatBlocks(
+  private Map<String, Map<String, String>> getStatBlocks(
       XPath xpath, Node hero, Node master, String minionName) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
@@ -507,8 +502,8 @@ public final class ExtractHeroLab {
     return path;
   }
 
-  private HashMap<String, String> getStatBlock(String zipPath, String type) {
-    HashMap<String, String> statBlock = new HashMap<String, String>(2);
+  private Map<String, String> getStatBlock(String zipPath, String type) {
+    Map<String, String> statBlock = new HashMap<String, String>(2);
     ZipFile por;
 
     try {

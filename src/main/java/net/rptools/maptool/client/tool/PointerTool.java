@@ -159,7 +159,7 @@ public class PointerTool extends DefaultTool {
    */
   @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
-    if (comp != null && comp instanceof ZoneRenderer) {
+    if (comp instanceof ZoneRenderer) {
       Grid grid = ((ZoneRenderer) comp).getZone().getGrid();
       addGridBasedKeys(grid, true);
     }
@@ -1640,16 +1640,14 @@ public class PointerTool extends DefaultTool {
               Object propertyValue =
                   tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
               resolver.flush();
-              if (propertyValue != null) {
-                if (propertyValue.toString().length() > 0) {
-                  String propName = property.getName();
-                  if (property.getShortName() != null) {
-                    propName = property.getShortName();
-                  }
-                  Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                  resolver.flush();
-                  propertyMap.put(propName, value != null ? value.toString() : "");
+              if (propertyValue != null && propertyValue.toString().length() > 0) {
+                String propName = property.getName();
+                if (property.getShortName() != null) {
+                  propName = property.getShortName();
                 }
+                Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                resolver.flush();
+                propertyMap.put(propName, value != null ? value.toString() : "");
               }
             }
           }

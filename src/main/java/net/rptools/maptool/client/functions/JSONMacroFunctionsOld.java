@@ -425,22 +425,20 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
         return BigDecimal.ZERO;
       }
 
-      if (left instanceof JSONObject) {
-        if (right instanceof JSONObject) {
-          JSONObject lo = (JSONObject) left;
-          JSONObject ro = (JSONObject) right;
+      if (left instanceof JSONObject && right instanceof JSONObject) {
+        JSONObject lo = (JSONObject) left;
+        JSONObject ro = (JSONObject) right;
 
-          if (lo.size() != ro.size()) {
+        if (lo.size() != ro.size()) {
+          return BigDecimal.ZERO;
+        }
+
+        for (Object key : lo.keySet()) {
+          if (!lo.get(key).equals(ro.get(key))) {
             return BigDecimal.ZERO;
           }
-
-          for (Object key : lo.keySet()) {
-            if (!lo.get(key).equals(ro.get(key))) {
-              return BigDecimal.ZERO;
-            }
-          }
-          return BigDecimal.ONE;
         }
+        return BigDecimal.ONE;
       }
 
       if (left instanceof String) {
@@ -1669,7 +1667,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
    */
   private boolean JSONContains(Object obj, String key) throws ParserException {
 
-    if (obj != null && obj instanceof JSONObject) {
+    if (obj instanceof JSONObject) {
       return ((JSONObject) obj).containsKey(key);
     }
 

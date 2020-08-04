@@ -69,7 +69,7 @@ public class AbeillePanel<T> extends JPanel {
 
             // System.out.println("Name:" + name);
             name = name.substring(1).trim(); // cut the "@"
-            int point = name.indexOf(".");
+            int point = name.indexOf('.');
             if (point >= 0) name = name.substring(0, point).trim();
             return new BindingInfo(name);
           }
@@ -212,7 +212,7 @@ public class AbeillePanel<T> extends JPanel {
         super.bind(property, view, updateTime);
 
         String bindVal = button.getName();
-        bindVal = bindVal.substring(bindVal.indexOf(".") + 1);
+        bindVal = bindVal.substring(bindVal.indexOf('.') + 1);
 
         selected = Enum.valueOf(property.getType(), bindVal);
       }

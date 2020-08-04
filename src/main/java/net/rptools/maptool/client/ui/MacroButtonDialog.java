@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -106,7 +107,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private static final String READY = I18N.getText("Label.ready");
   private static final String SAVED = I18N.getText("Label.saved");
 
-  private static final HashSet<String> openMacroList = new HashSet<String>(4);
+  private static final Set<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);

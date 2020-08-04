@@ -980,17 +980,11 @@ public class MapToolLineParser {
       }
       builder.append(line.substring(start));
       return builder.toString();
-    } catch (AssertFunctionException e) {
-      // do nothing; this exception will never generate any output
-      // throw doError("macroExecutionAssert", opts == null ? "" : opts, roll == null ? line :
-      // roll);
-      throw e;
     } catch (ParserException e) {
       // do nothing; this exception will never generate any output
       // throw doError("macroExecutionAbort", opts == null ? "" : opts, roll == null ? line : roll);
       throw e;
-    } // do nothing, jut pass message back up
-    catch (Exception e) {
+    } catch (Exception e) {
       log.info(line, e);
       throw doError(
           "lineParser.errorBodyRoll", opts == null ? "" : opts, roll == null ? line : roll);
@@ -1061,14 +1055,13 @@ public class MapToolLineParser {
       Result result = new Result("");
       result.setValue("");
       return result;
+    } catch (ParserException pe) {
+      log.debug(pe);
+      throw pe;
     } catch (Exception e) {
       if (e.getCause() instanceof ParserException) {
         log.debug(e.getCause());
         throw (ParserException) e.getCause();
-      }
-      if (e instanceof ParserException) {
-        log.debug(e);
-        throw (ParserException) e;
       }
       log.debug(e);
       throw new ParserException(
@@ -1098,10 +1091,8 @@ public class MapToolLineParser {
         sb.append(result.getDetailExpression()).append(" = ").append(result.getValue());
       }
       return sb.toString();
-    } catch (AssertFunctionException afe) {
-      throw afe;
-    } catch (ParserException ae) {
-      throw ae;
+    } catch (ParserException pe) {
+      throw pe;
     } catch (Exception e) {
       return I18N.getText("lineParser.invalidExpr", roll);
     }
@@ -1551,10 +1542,8 @@ public class MapToolLineParser {
       // The path is untrusted if any typing is involved, including GM's
       macroPathTrusted = context != null && context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
-    } else if (context != null) {
-      if (!context.isTrusted()) {
-        macroPathTrusted = false;
-      }
+    } else if (context != null && !context.isTrusted()) {
+      macroPathTrusted = false;
     }
     if (context == null) {
       if (contextStack.size() == 0) {

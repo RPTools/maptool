@@ -20,6 +20,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import net.rptools.maptool.model.CellPoint;
@@ -35,7 +36,7 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
   TerrainModifierOperation terrainModifierOperation;
 
   // Store if it's valid to move from Point2D to this cell.
-  HashMap<Point2D, Boolean> validMoves = new HashMap<Point2D, Boolean>();
+  Map<Point2D, Boolean> validMoves = new HashMap<Point2D, Boolean>();
 
   public AStarCellPoint() {
     super(0, 0);

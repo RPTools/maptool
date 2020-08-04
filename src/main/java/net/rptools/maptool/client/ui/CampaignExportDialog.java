@@ -48,16 +48,14 @@ public class CampaignExportDialog extends JDialog {
   private static File campaignFile;
   private static int saveStatus = -1;
 
-  /** Only doing this because I don't expect more than one instance of this modal dialog */
-  private static int instanceCount = 0;
+  private static final CampaignExportDialog instance = new CampaignExportDialog();
 
-  public CampaignExportDialog() throws Exception {
+  public static CampaignExportDialog getInstance() {
+    return instance;
+  }
+
+  private CampaignExportDialog() {
     super(MapTool.getFrame(), "Export Campaign", true);
-    if (instanceCount == 0) {
-      instanceCount++;
-    } else {
-      throw new Exception("Only one instance of ExportCampaignDialog allowed!");
-    }
 
     setDefaultCloseOperation(HIDE_ON_CLOSE);
 

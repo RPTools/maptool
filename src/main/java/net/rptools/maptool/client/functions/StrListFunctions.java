@@ -70,8 +70,8 @@ public class StrListFunctions extends AbstractFunction {
     public abstract boolean visit(int pos, int start, int end);
   }
 
-  public static ArrayList<String> toList(String listStr, String delim) {
-    ArrayList<String> list = new ArrayList<String>();
+  public static List<String> toList(String listStr, String delim) {
+    List<String> list = new ArrayList<String>();
     parse(
         listStr,
         delim,
@@ -553,7 +553,7 @@ public class StrListFunctions extends AbstractFunction {
     String delim = parameters.size() == maxParams ? lastParam : ",";
     String sortStr = (String) parameters.get(1);
 
-    ArrayList<String> list = toList(listStr, delim);
+    List<String> list = toList(listStr, delim);
 
     // Sort the list appropriately and construct the new list string
     list.sort(new strComp(sortStr));

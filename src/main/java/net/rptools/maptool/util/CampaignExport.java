@@ -153,7 +153,7 @@ public class CampaignExport {
    */
   private static boolean setVersions(String mapToolVersion) {
     String[] mapToolVersions =
-        mapToolVersion.indexOf(".") > 0
+        mapToolVersion.indexOf('.') > 0
             ? mapToolVersion.split("\\.")
             : new String[] {mapToolVersion};
 

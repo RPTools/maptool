@@ -158,10 +158,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               Area area = (Area) parameters[1];
 
-              if (parameters.length > 2) {
-                if (parameters[2] != null) {
-                  selectedToks = (Set<GUID>) parameters[2];
-                }
+              if (parameters.length > 2 && parameters[2] != null) {
+                selectedToks = (Set<GUID>) parameters[2];
               }
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.exposeArea(area, selectedToks);
@@ -172,10 +170,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
 
-              if (parameters.length > 2) {
-                if (parameters[2] != null) {
-                  selectedToks = (Set<GUID>) parameters[2];
-                }
+              if (parameters.length > 2 && parameters[2] != null) {
+                selectedToks = (Set<GUID>) parameters[2];
               }
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.setFogArea(area, selectedToks);
@@ -186,10 +182,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
 
-              if (parameters.length > 2) {
-                if (parameters[2] != null) {
-                  selectedToks = (Set<GUID>) parameters[2];
-                }
+              if (parameters.length > 2 && parameters[2] != null) {
+                selectedToks = (Set<GUID>) parameters[2];
               }
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.hideArea(area, selectedToks);

@@ -462,7 +462,7 @@ public class AppActions {
            */
           try {
             File topdir = urd.getDirectory();
-            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : null);
+            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : ".");
 
             Map<String, String> repoEntries = new HashMap<String, String>(missing.size());
             FTPClient ftp = new FTPClient(urd.getHostname(), urd.getUsername(), urd.getPassword());
@@ -2635,7 +2635,6 @@ public class AppActions {
   public static void doCampaignExport() {
     CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
     dialog.setVisible(true);
-    MapTool.getCampaign().setExportCampaignDialog(dialog);
 
     if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
       saveAndUpdateCampaignName(dialog.getVersionText(), dialog.getCampaignFile(), null);
