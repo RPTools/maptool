@@ -81,7 +81,7 @@ public class FTPClient {
   public void setEnabled(boolean b) {
     boolean old = running;
     running = b;
-    if (old != b && b == true) {
+    if (old != b && b) {
       // We just enabled this object from a disabled state, so start the first transfer
       startNextTransfer();
     }
@@ -108,13 +108,7 @@ public class FTPClient {
    */
   protected void fireStateChanged(final Object data) {
     if (SwingUtilities.isEventDispatchThread()) postAllChangeEvents(data);
-    else
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              postAllChangeEvents(data);
-            }
-          });
+    else SwingUtilities.invokeLater(() -> postAllChangeEvents(data));
   }
 
   private void postAllChangeEvents(Object fto) {
@@ -221,7 +215,7 @@ public class FTPClient {
 
   private static final int BLOCKSIZE = 4 * 1024;
 
-  protected InputStream prepareInputStream(FTPTransferObject data) throws IOException {
+  protected InputStream prepareInputStream(FTPTransferObject data) {
     InputStream is = null;
     if (data.getput == Direction.FTP_PUT) {
       /*

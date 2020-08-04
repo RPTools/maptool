@@ -38,12 +38,10 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
-import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,8 +89,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   private UserDefinedMacroFunctions() {}
 
   @Override
-  public void checkParameters(String functionName, List<Object> parameters)
-      throws ParameterException {
+  public void checkParameters(String functionName, List<Object> parameters) {
     // Do nothing as we do not know what we will need.
   }
 
@@ -243,13 +240,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zr : zrenderers) {
       List<Token> tokenList =
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getName().toLowerCase().startsWith("lib:");
-                    }
-                  });
+          zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
 
       for (Token token : tokenList) {
         // If the token is not owned by everyone and all owners are GMs then we are in its a trusted

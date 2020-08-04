@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -90,11 +91,7 @@ public class LookupTableFunction extends AbstractFunction {
       }
       if ("json".equalsIgnoreCase(delim)) {
         JsonArray jsonArray = new JsonArray();
-        getTableList(MapTool.getPlayer().isGM())
-            .forEach(
-                (table) -> {
-                  jsonArray.add(table);
-                });
+        getTableList(MapTool.getPlayer().isGM()).forEach(jsonArray::add);
         return jsonArray;
       }
       return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
@@ -196,9 +193,7 @@ public class LookupTableFunction extends AbstractFunction {
         oldlist.stream()
             .filter((e) -> (e != entry))
             .forEachOrdered(
-                (e) -> {
-                  lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
-                });
+                (e) -> lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId()));
       }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
@@ -240,12 +235,8 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       MD5Key img = lookupTable.getTableImage();
-      if (img == null) {
-        // Returning null causes an NPE when output is dumped to chat.
-        return "";
-      } else {
-        return img;
-      }
+      // Returning null causes an NPE when output is dumped to chat.
+      return Objects.requireNonNullElse(img, "");
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
@@ -456,11 +447,8 @@ public class LookupTableFunction extends AbstractFunction {
     if (isGm) tables.addAll(MapTool.getCampaign().getLookupTableMap().keySet());
     else
       MapTool.getCampaign().getLookupTableMap().values().stream()
-          .filter((lt) -> (lt.getVisible()))
-          .forEachOrdered(
-              (lt) -> {
-                tables.add(lt.getName());
-              });
+          .filter(LookupTable::getVisible)
+          .forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
   }
 

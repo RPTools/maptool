@@ -18,8 +18,6 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.GridView;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -254,56 +252,35 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private void installRunButton() {
     JButton button = (JButton) panel.getButton("runButton");
     button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(false);
+        e -> {
+          save(false);
 
-            if (properties.getApplyToTokens() || properties.getCommonMacro()) {
-              if (MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() > 0) {
-                properties.executeMacro(
-                    MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList());
-              }
-            } else {
-              properties.executeMacro();
+          if (properties.getApplyToTokens() || properties.getCommonMacro()) {
+            if (MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() > 0) {
+              properties.executeMacro(
+                  MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList());
             }
+          } else {
+            properties.executeMacro();
           }
         });
   }
 
   private void installApplyButton() {
     JButton button = (JButton) panel.getButton("applyButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(false);
-          }
-        });
+    button.addActionListener(e -> save(false));
   }
 
   private void installOKButton() {
     JButton button = (JButton) panel.getButton("okButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(true);
-          }
-        });
+    button.addActionListener(e -> save(true));
 
     // getRootPane().setDefaultButton(button);
   }
 
   private void installCancelButton() {
     JButton button = (JButton) panel.getButton("cancelButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            cancel();
-          }
-        });
+    button.addActionListener(e -> cancel());
   }
 
   private void updateOpenMacroList(boolean addToList) {
@@ -326,7 +303,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     initI18NSupport();
     this.button = button;
     updateOpenMacroList(true);
-    this.isTokenMacro = button.getToken() == null ? false : true;
+    this.isTokenMacro = button.getToken() != null;
     this.properties = button.getProperties();
 
     if (properties != null) {

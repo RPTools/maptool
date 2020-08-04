@@ -147,7 +147,7 @@ public class PointerOverlay implements ZoneOverlay {
     return null;
   }
 
-  private class PointerPair {
+  private static class PointerPair {
     Pointer pointer;
     String player;
 

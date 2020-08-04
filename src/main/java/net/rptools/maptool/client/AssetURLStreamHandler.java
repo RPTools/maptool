@@ -42,7 +42,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
   private static final Logger log = LogManager.getLogger(AssetURLStreamHandler.class);
 
   @Override
-  protected URLConnection openConnection(URL u) throws IOException {
+  protected URLConnection openConnection(URL u) {
     return new AssetURLConnection(u);
   }
 
@@ -53,7 +53,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
     }
 
     @Override
-    public void connect() throws IOException {
+    public void connect() {
       // Nothing to do
     }
 

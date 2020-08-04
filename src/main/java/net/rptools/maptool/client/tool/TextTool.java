@@ -18,7 +18,6 @@ import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -265,23 +264,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     public void initOKButton() {
       getOKButton()
           .addActionListener(
-              new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                  dialog.accepted = true;
-                  commit();
-                  close();
-                }
+              e -> {
+                dialog.accepted = true;
+                commit();
+                close();
               });
     }
 
     public void initCancelButton() {
-      ((JButton) getComponent("cancelButton"))
-          .addActionListener(
-              new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                  close();
-                }
-              });
+      ((JButton) getComponent("cancelButton")).addActionListener(e -> close());
     }
 
     private void close() {

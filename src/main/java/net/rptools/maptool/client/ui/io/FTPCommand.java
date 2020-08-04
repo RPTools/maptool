@@ -48,7 +48,7 @@ public class FTPCommand extends FTPClient {
     this.connect(host);
   }
 
-  public int mkdir(String dir) throws IOException {
+  public int mkdir(String dir) {
     int result = 0;
     try {
       mkd(dir);
@@ -64,7 +64,7 @@ public class FTPCommand extends FTPClient {
     return result;
   }
 
-  public int remove(String filename) throws IOException {
+  public int remove(String filename) {
     int result = 0;
     try {
       dele(filename);

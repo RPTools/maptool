@@ -16,10 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -73,22 +70,13 @@ public class CampaignExportDialog extends JDialog {
     getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));
     pack();
 
-    mainPanel
-        .getButton("exportButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                exportButtonAction();
-              }
-            });
+    mainPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
     mainPanel
         .getButton("cancelButton")
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                saveStatus = -1;
-                dispose();
-              }
+            evt -> {
+              saveStatus = -1;
+              dispose();
             });
 
     versionNotesText = (JEditorPane) mainPanel.getComponentByName("versionNotesText");
@@ -116,13 +104,10 @@ public class CampaignExportDialog extends JDialog {
         I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
 
     selectVersionCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent event) {
-            if (event.getStateChange() == ItemEvent.SELECTED) {
-              versionNotesText.setText(
-                  I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
-            }
+        event -> {
+          if (event.getStateChange() == ItemEvent.SELECTED) {
+            versionNotesText.setText(
+                I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
           }
         });
   }

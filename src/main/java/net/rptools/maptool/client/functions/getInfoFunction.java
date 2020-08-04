@@ -376,7 +376,7 @@ public class getInfoFunction extends AbstractFunction {
    * @return the debug information.
    * @throws ParserException if an error occurs.
    */
-  private JsonObject getDebugInfo() throws ParserException {
+  private JsonObject getDebugInfo() {
     return sysInfoProvider.getSysInfoJSON();
   }
 }

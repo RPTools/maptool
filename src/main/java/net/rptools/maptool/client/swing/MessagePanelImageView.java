@@ -463,7 +463,7 @@ public class MessagePanelImageView extends View {
    * @see View#modelToView
    */
   @Override
-  public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+  public Shape modelToView(int pos, Shape a, Position.Bias b) {
     int p0 = getStartOffset();
     int p1 = getEndOffset();
     if ((pos >= p0) && (pos <= p1)) {
@@ -738,12 +738,7 @@ public class MessagePanelImageView extends View {
         ((AbstractDocument) doc).readUnlock();
       }
     } else {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              safePreferenceChanged();
-            }
-          });
+      SwingUtilities.invokeLater(this::safePreferenceChanged);
     }
   }
 
@@ -777,12 +772,7 @@ public class MessagePanelImageView extends View {
       } else {
         // Avoids a possible deadlock between us waiting for imageLoaderMutex and it waiting on
         // us...
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                imageUpdate(img, flags, x, y, newWidth, newHeight);
-              }
-            });
+        SwingUtilities.invokeLater(() -> imageUpdate(img, flags, x, y, newWidth, newHeight));
       }
       return ((flags & ALLBITS) == 0);
     }
@@ -793,7 +783,7 @@ public class MessagePanelImageView extends View {
    * attribute. It overriden a handle of methods as the text is hardcoded and does not come from the
    * document.
    */
-  private class ImageLabelView extends InlineView {
+  private static class ImageLabelView extends InlineView {
     private Segment segment;
     private Color fg;
 

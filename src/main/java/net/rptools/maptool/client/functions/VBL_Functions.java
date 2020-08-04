@@ -406,7 +406,7 @@ public class VBL_Functions extends AbstractFunction {
             "setTokenVBL[Auto]");
 
     Color color = new Color(r, g, b, a);
-    final boolean inverseVbl = (inverse == 1) ? true : false;
+    final boolean inverseVbl = inverse == 1;
 
     return TokenVBL.createOptimizedVblArea(token, sensitivity, inverseVbl, color, level, method);
   }
@@ -464,23 +464,21 @@ public class VBL_Functions extends AbstractFunction {
     } // Set height to min of 4, as a 2 pixel thick rectangle as to be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults to 2f
     BasicStroke stroke = new BasicStroke(t != 0f ? t : 2f);
 
@@ -901,23 +899,21 @@ public class VBL_Functions extends AbstractFunction {
     // be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults handled above
     BasicStroke stroke = new BasicStroke(t);
 

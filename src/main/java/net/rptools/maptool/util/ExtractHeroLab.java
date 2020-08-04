@@ -17,7 +17,6 @@ package net.rptools.maptool.util;
 import com.jcabi.xml.XMLDocument;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -126,11 +125,7 @@ public final class ExtractHeroLab {
   }
 
   private boolean isExtracted() {
-    if (extractComplete.exists()) {
-      return true;
-    } else {
-      return false;
-    }
+    return extractComplete.exists();
   }
 
   private void markComplete() {
@@ -163,12 +158,7 @@ public final class ExtractHeroLab {
     if (isExtracted() && !forceRescan) {
       heroes.addAll(
           Arrays.asList(
-              finalTempDir.listFiles(
-                  new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                      return name.toLowerCase().endsWith(".rptok");
-                    }
-                  })));
+              finalTempDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".rptok"))));
 
       return heroes;
     }
@@ -240,8 +230,7 @@ public final class ExtractHeroLab {
         heroLabData.setGameSystem(gameSystem);
         heroLabData.setSummary(((Element) hero).getAttribute("summary"));
         heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-        heroLabData.setAlly(
-            ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+        heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
         // Is it a minion?
         if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
@@ -270,11 +259,7 @@ public final class ExtractHeroLab {
         heroes.add(heroFile);
         markComplete(new XMLDocument(portfolioIndex).toString());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -330,8 +315,7 @@ public final class ExtractHeroLab {
       heroLabData.setGameSystem(gameSystem);
       heroLabData.setSummary(((Element) hero).getAttribute("summary"));
       heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
-      heroLabData.setAlly(
-          ((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+      heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
       // Is it a minion?
       if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
@@ -347,11 +331,7 @@ public final class ExtractHeroLab {
       }
 
       markComplete(new XMLDocument(portfolioIndex).toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -458,7 +438,6 @@ public final class ExtractHeroLab {
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
 
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       } else {
         // We only need the <character> node for this minion, so lets find it and clone
         // it...
@@ -495,9 +474,8 @@ public final class ExtractHeroLab {
         transformer.transform(source, result);
 
         xmlStatBlockMap.put("data", result.getWriter().toString());
-
-        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
       }
+      statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
 
     } catch (IOException
         | SAXException
@@ -547,8 +525,6 @@ public final class ExtractHeroLab {
       }
 
       por.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     } catch (NullPointerException e) {
       e.printStackTrace();
     } catch (Exception e) {

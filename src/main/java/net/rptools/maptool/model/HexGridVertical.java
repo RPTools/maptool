@@ -54,11 +54,9 @@ public class HexGridVertical extends HexGrid {
   private static final int[] ALL_ANGLES =
       new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
-      new OffsetTranslator() {
-        public void translate(CellPoint originPoint, CellPoint offsetPoint) {
-          if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
-            offsetPoint.y++;
-          }
+      (originPoint, offsetPoint) -> {
+        if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+          offsetPoint.y++;
         }
       };
   private static int[]

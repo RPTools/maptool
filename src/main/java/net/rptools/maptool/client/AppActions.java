@@ -2113,133 +2113,130 @@ public class AppActions {
         @Override
         protected void executeAction() {
           runBackground(
-              new Runnable() {
-                @Override
-                public void run() {
-                  if (!MapTool.isPersonalServer()) {
-                    MapTool.showError("msg.error.alreadyRunningServer");
-                    return;
-                  }
-
-                  // TODO: Need to shut down the existing server first;
-                  StartServerDialog dialog = new StartServerDialog();
-                  dialog.showDialog();
-
-                  if (!dialog.accepted()) // Results stored in Preferences.userRoot()
+              () -> {
+                if (!MapTool.isPersonalServer()) {
+                  MapTool.showError("msg.error.alreadyRunningServer");
                   return;
+                }
 
-                  StartServerDialogPreferences serverProps =
-                      new StartServerDialogPreferences(); // data retrieved from
-                  // Preferences.userRoot()
-                  if (serverProps.getPort() == 0 || serverProps.getPort() > 65535) {
-                    MapTool.showError("ServerDialog.error.port.outOfRange");
-                    return;
+                // TODO: Need to shut down the existing server first;
+                StartServerDialog dialog = new StartServerDialog();
+                dialog.showDialog();
+
+                if (!dialog.accepted()) // Results stored in Preferences.userRoot()
+                return;
+
+                StartServerDialogPreferences serverProps =
+                    new StartServerDialogPreferences(); // data retrieved from
+                // Preferences.userRoot()
+                if (serverProps.getPort() == 0 || serverProps.getPort() > 65535) {
+                  MapTool.showError("ServerDialog.error.port.outOfRange");
+                  return;
+                }
+
+                ServerPolicy policy = new ServerPolicy();
+                policy.setAutoRevealOnMovement(serverProps.isAutoRevealOnMovement());
+                policy.setUseStrictTokenManagement(serverProps.getUseStrictTokenOwnership());
+                policy.setGmRevealsVisionForUnownedTokens(
+                    serverProps.getGmRevealsVisionForUnownedTokens());
+                policy.setPlayersCanRevealVision(serverProps.getPlayersCanRevealVision());
+                policy.setUseIndividualViews(serverProps.getUseIndividualViews());
+                policy.setPlayersReceiveCampaignMacros(
+                    serverProps.getPlayersReceiveCampaignMacros());
+                policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
+                policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
+
+                // Tool Tips for unformatted inline rolls.
+                policy.setUseToolTipsForDefaultRollFormat(
+                    serverProps.getUseToolTipsForUnformattedRolls());
+
+                // my addition
+                policy.setRestrictedImpersonation(serverProps.getRestrictedImpersonation());
+                policy.setMovementMetric(serverProps.getMovementMetric());
+                boolean useIF =
+                    serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
+                policy.setUseIndividualFOW(useIF);
+
+                ServerConfig config =
+                    new ServerConfig(
+                        serverProps.getUsername(),
+                        serverProps.getGMPassword(),
+                        serverProps.getPlayerPassword(),
+                        serverProps.getPort(),
+                        serverProps.getRPToolsName());
+
+                // Use the existing campaign
+                Campaign campaign = MapTool.getCampaign();
+
+                boolean failed = false;
+                try {
+                  ServerDisconnectHandler.disconnectExpected = true;
+                  MapTool.stopServer();
+
+                  // Use UPnP to open port in router
+                  if (serverProps.getUseUPnP()) {
+                    UPnPUtil.openPort(serverProps.getPort());
+                  }
+                  // Right now set this is set to whatever the last server settings were. If we
+                  // wanted to turn it on and
+                  // leave it turned on, the line would change to:
+                  // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
+                  campaign.setHasUsedFogToolbar(useIF);
+
+                  // Make a copy of the campaign since we don't coordinate local changes well ...
+                  // yet
+
+                  /*
+                   * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
+                   * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
+                   * instance.
+                   *
+                   * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
+                   */
+                  MapTool.startServer(
+                      dialog.getUsernameTextField().getText(), config, policy, campaign, true);
+
+                  // Connect to server
+                  String playerType = dialog.getRoleCombo().getSelectedItem().toString();
+                  if (playerType.equals("GM")) {
+                    MapTool.createConnection(
+                        "localhost",
+                        serverProps.getPort(),
+                        new LocalPlayer(
+                            dialog.getUsernameTextField().getText(),
+                            serverProps.getRole(),
+                            serverProps.getGMPassword()));
+                  } else {
+                    MapTool.createConnection(
+                        "localhost",
+                        serverProps.getPort(),
+                        new LocalPlayer(
+                            dialog.getUsernameTextField().getText(),
+                            serverProps.getRole(),
+                            serverProps.getPlayerPassword()));
                   }
 
-                  ServerPolicy policy = new ServerPolicy();
-                  policy.setAutoRevealOnMovement(serverProps.isAutoRevealOnMovement());
-                  policy.setUseStrictTokenManagement(serverProps.getUseStrictTokenOwnership());
-                  policy.setGmRevealsVisionForUnownedTokens(
-                      serverProps.getGmRevealsVisionForUnownedTokens());
-                  policy.setPlayersCanRevealVision(serverProps.getPlayersCanRevealVision());
-                  policy.setUseIndividualViews(serverProps.getUseIndividualViews());
-                  policy.setPlayersReceiveCampaignMacros(
-                      serverProps.getPlayersReceiveCampaignMacros());
-                  policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
-                  policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
+                  // connecting
+                  MapTool.getFrame()
+                      .getConnectionStatusPanel()
+                      .setStatus(ConnectionStatusPanel.Status.server);
+                  MapTool.addLocalMessage(
+                      "<span style='color:blue'><i>"
+                          + I18N.getText("msg.info.startServer")
+                          + "</i></span>");
+                } catch (UnknownHostException uh) {
+                  MapTool.showError("msg.error.invalidLocalhost", uh);
+                  failed = true;
+                } catch (IOException ioe) {
+                  MapTool.showError("msg.error.failedConnect", ioe);
+                  failed = true;
+                }
 
-                  // Tool Tips for unformatted inline rolls.
-                  policy.setUseToolTipsForDefaultRollFormat(
-                      serverProps.getUseToolTipsForUnformattedRolls());
-
-                  // my addition
-                  policy.setRestrictedImpersonation(serverProps.getRestrictedImpersonation());
-                  policy.setMovementMetric(serverProps.getMovementMetric());
-                  boolean useIF =
-                      serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
-                  policy.setUseIndividualFOW(useIF);
-
-                  ServerConfig config =
-                      new ServerConfig(
-                          serverProps.getUsername(),
-                          serverProps.getGMPassword(),
-                          serverProps.getPlayerPassword(),
-                          serverProps.getPort(),
-                          serverProps.getRPToolsName());
-
-                  // Use the existing campaign
-                  Campaign campaign = MapTool.getCampaign();
-
-                  boolean failed = false;
+                if (failed) {
                   try {
-                    ServerDisconnectHandler.disconnectExpected = true;
-                    MapTool.stopServer();
-
-                    // Use UPnP to open port in router
-                    if (serverProps.getUseUPnP()) {
-                      UPnPUtil.openPort(serverProps.getPort());
-                    }
-                    // Right now set this is set to whatever the last server settings were. If we
-                    // wanted to turn it on and
-                    // leave it turned on, the line would change to:
-                    // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
-                    campaign.setHasUsedFogToolbar(useIF);
-
-                    // Make a copy of the campaign since we don't coordinate local changes well ...
-                    // yet
-
-                    /*
-                     * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
-                     * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
-                     * instance.
-                     *
-                     * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
-                     */
-                    MapTool.startServer(
-                        dialog.getUsernameTextField().getText(), config, policy, campaign, true);
-
-                    // Connect to server
-                    String playerType = dialog.getRoleCombo().getSelectedItem().toString();
-                    if (playerType.equals("GM")) {
-                      MapTool.createConnection(
-                          "localhost",
-                          serverProps.getPort(),
-                          new LocalPlayer(
-                              dialog.getUsernameTextField().getText(),
-                              serverProps.getRole(),
-                              serverProps.getGMPassword()));
-                    } else {
-                      MapTool.createConnection(
-                          "localhost",
-                          serverProps.getPort(),
-                          new LocalPlayer(
-                              dialog.getUsernameTextField().getText(),
-                              serverProps.getRole(),
-                              serverProps.getPlayerPassword()));
-                    }
-
-                    // connecting
-                    MapTool.getFrame()
-                        .getConnectionStatusPanel()
-                        .setStatus(ConnectionStatusPanel.Status.server);
-                    MapTool.addLocalMessage(
-                        "<span style='color:blue'><i>"
-                            + I18N.getText("msg.info.startServer")
-                            + "</i></span>");
-                  } catch (UnknownHostException uh) {
-                    MapTool.showError("msg.error.invalidLocalhost", uh);
-                    failed = true;
+                    MapTool.startPersonalServer(campaign);
                   } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedConnect", ioe);
-                    failed = true;
-                  }
-
-                  if (failed) {
-                    try {
-                      MapTool.startPersonalServer(campaign);
-                    } catch (IOException ioe) {
-                      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
-                    }
+                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
                   }
                 }
               });
@@ -2287,35 +2284,32 @@ public class AppActions {
           MapTool.getFrame().showFilledGlassPane(progressDialog);
 
           runBackground(
-              new Runnable() {
-                @Override
-                public void run() {
-                  boolean failed = false;
-                  try {
-                    ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
-                    MapTool.createConnection(
-                        dialog.getServer(),
-                        dialog.getPort(),
-                        new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+              () -> {
+                boolean failed = false;
+                try {
+                  ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
+                  MapTool.createConnection(
+                      dialog.getServer(),
+                      dialog.getPort(),
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
 
-                    MapTool.getFrame().hideGlassPane();
-                    MapTool.getFrame()
-                        .showFilledGlassPane(
-                            new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
-                  } catch (UnknownHostException e1) {
-                    MapTool.showError("msg.error.unknownHost", e1);
-                    failed = true;
-                  } catch (IOException e1) {
-                    MapTool.showError("msg.error.failedLoadCampaign", e1);
-                    failed = true;
-                  }
-                  if (failed || MapTool.getConnection() == null) {
-                    MapTool.getFrame().hideGlassPane();
-                    try {
-                      MapTool.startPersonalServer(oldCampaign);
-                    } catch (IOException ioe) {
-                      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
-                    }
+                  MapTool.getFrame().hideGlassPane();
+                  MapTool.getFrame()
+                      .showFilledGlassPane(
+                          new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                } catch (UnknownHostException e1) {
+                  MapTool.showError("msg.error.unknownHost", e1);
+                  failed = true;
+                } catch (IOException e1) {
+                  MapTool.showError("msg.error.failedLoadCampaign", e1);
+                  failed = true;
+                }
+                if (failed || MapTool.getConnection() == null) {
+                  MapTool.getFrame().hideGlassPane();
+                  try {
+                    MapTool.startPersonalServer(oldCampaign);
+                  } catch (IOException ioe) {
+                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
                   }
                 }
               });
@@ -2827,7 +2821,7 @@ public class AppActions {
           boolean ok =
               MapTool.confirm(
                   "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-          if (ok == true) {
+          if (ok) {
             // This fires a ModelChangeEvent, but that shouldn't matter
             map.zone.clearExposedArea(false);
           }
@@ -2921,7 +2915,7 @@ public class AppActions {
       final RemoteFileDownloader downloader = new RemoteFileDownloader(url, MapTool.getFrame());
       new SwingWorker<Object, Object>() {
         @Override
-        protected Object doInBackground() throws Exception {
+        protected Object doInBackground() {
           try {
             File dataFile = downloader.read();
             if (dataFile == null) {
@@ -2979,17 +2973,14 @@ public class AppActions {
     @Override
     protected void executeAction() {
       runBackground(
-          new Runnable() {
-            @Override
-            public void run() {
-              Asset asset = AssetManager.getAsset(assetId);
+          () -> {
+            Asset asset = AssetManager.getAsset(assetId);
 
-              Zone zone = ZoneFactory.createZone();
-              zone.setBackgroundPaint(new DrawableTexturePaint(asset.getId()));
-              zone.setName(asset.getName());
+            Zone zone = ZoneFactory.createZone();
+            zone.setBackgroundPaint(new DrawableTexturePaint(asset.getId()));
+            zone.setName(asset.getName());
 
-              MapTool.addZone(zone);
-            }
+            MapTool.addZone(zone);
           });
     }
   }
@@ -3003,19 +2994,16 @@ public class AppActions {
         @Override
         protected void executeAction() {
           runBackground(
-              new Runnable() {
-                @Override
-                public void run() {
-                  Zone zone = ZoneFactory.createZone();
-                  MapPropertiesDialog newMapDialog =
-                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
-                  newMapDialog.setZone(zone);
+              () -> {
+                Zone zone = ZoneFactory.createZone();
+                MapPropertiesDialog newMapDialog =
+                    MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
+                newMapDialog.setZone(zone);
 
-                  newMapDialog.setVisible(true);
+                newMapDialog.setVisible(true);
 
-                  if (newMapDialog.getStatus() == MapPropertiesDialog.Status.OK) {
-                    MapTool.addZone(zone);
-                  }
+                if (newMapDialog.getStatus() == MapPropertiesDialog.Status.OK) {
+                  MapTool.addZone(zone);
                 }
               });
         }
@@ -3030,24 +3018,21 @@ public class AppActions {
         @Override
         protected void executeAction() {
           runBackground(
-              new Runnable() {
-                @Override
-                public void run() {
-                  Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-                  MapPropertiesDialog newMapDialog =
-                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
-                  newMapDialog.setZone(zone);
-                  newMapDialog.setVisible(true);
-                  // Too many things can change to send them 1 by 1 to the client... just resend the
-                  // zone
-                  // MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(),
-                  // zone.getBoardX(), zone.getBoardY());
-                  MapTool.serverCommand().removeZone(zone.getId());
-                  MapTool.serverCommand().putZone(zone);
-                  // MapTool.getFrame().getCurrentZoneRenderer().flush();
-                  MapTool.getFrame()
-                      .setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
-                }
+              () -> {
+                Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+                MapPropertiesDialog newMapDialog =
+                    MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
+                newMapDialog.setZone(zone);
+                newMapDialog.setVisible(true);
+                // Too many things can change to send them 1 by 1 to the client... just resend the
+                // zone
+                // MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(),
+                // zone.getBoardX(), zone.getBoardY());
+                MapTool.serverCommand().removeZone(zone.getId());
+                MapTool.serverCommand().putZone(zone);
+                // MapTool.getFrame().getCurrentZoneRenderer().flush();
+                MapTool.getFrame()
+                    .setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
               });
         }
       };
@@ -3073,12 +3058,9 @@ public class AppActions {
         @Override
         protected void executeAction() {
           runBackground(
-              new Runnable() {
-                @Override
-                public void run() {
-                  AddResourceDialog dialog = new AddResourceDialog();
-                  dialog.showDialog();
-                }
+              () -> {
+                AddResourceDialog dialog = new AddResourceDialog();
+                dialog.showDialog();
               });
         }
       };
@@ -3218,12 +3200,10 @@ public class AppActions {
 
     static {
       String prop = System.getProperty("os.name");
-      if ("Mac OS X".equals(prop)) {
-        NEEDS_GUARD =
-            true; // MapTool doesnt run on version 8 or less of JDK so no need to check that
-      } else {
-        NEEDS_GUARD = false;
-      }
+      NEEDS_GUARD =
+          "Mac OS X"
+              .equals(
+                  prop); // MapTool doesnt run on version 8 or less of JDK so no need to check that
     }
 
     /**
@@ -3283,14 +3263,13 @@ public class AppActions {
     protected abstract void executeAction();
 
     public void runBackground(final Runnable r) {
-      new Thread() {
-        @Override
-        public void run() {
-          r.run();
+      new Thread(
+              () -> {
+                r.run();
 
-          updateActions();
-        }
-      }.start();
+                updateActions();
+              })
+          .start();
     }
   }
 

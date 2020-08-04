@@ -16,16 +16,13 @@ package net.rptools.maptool.client.swing;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -60,24 +57,21 @@ public class ImageChooserDialog extends JDialog {
     SwingUtil.centerOver(this, getOwner());
 
     imageChooser.addImageSelectionListener(
-        new SelectionListener() {
-          @Override
-          public void selectionPerformed(List<Object> selected) {
-            if (selected.isEmpty() || (Integer) selected.get(0) < 0) {
-              return;
-            }
+        selected -> {
+          if (selected.isEmpty() || (Integer) selected.get(0) < 0) {
+            return;
+          }
 
-            // Sometimes asset is coming back null causing an NPE. Could not reproduce but am
-            // putting in a check for it.  On Sentry:  MAPTOOL-11H
-            Asset asset = imageChooser.getAsset((Integer) selected.get(0));
-            if (asset != null) {
-              imageId = asset.getId();
+          // Sometimes asset is coming back null causing an NPE. Could not reproduce but am
+          // putting in a check for it.  On Sentry:  MAPTOOL-11H
+          Asset asset = imageChooser.getAsset((Integer) selected.get(0));
+          if (asset != null) {
+            imageId = asset.getId();
 
-              // Put the asset into the asset manager since we have the asset handy here
-              AssetManager.putAsset(asset);
-            } else {
-              MapTool.showError("msg.asset.error.invalidAsset");
-            }
+            // Put the asset into the asset manager since we have the asset handy here
+            AssetManager.putAsset(asset);
+          } else {
+            MapTool.showError("msg.asset.error.invalidAsset");
           }
         });
   }
@@ -102,13 +96,7 @@ public class ImageChooserDialog extends JDialog {
 
   private JButton createOKButton() {
     JButton button = new JButton(I18N.getText("Button.ok"));
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            setVisible(false);
-          }
-        });
+    button.addActionListener(e -> setVisible(false));
 
     return button;
   }
@@ -116,12 +104,9 @@ public class ImageChooserDialog extends JDialog {
   private JButton createCancelButton() {
     JButton button = new JButton(I18N.getText("Button.cancel"));
     button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            imageId = null;
-            setVisible(false);
-          }
+        e -> {
+          imageId = null;
+          setVisible(false);
         });
 
     return button;

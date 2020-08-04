@@ -177,156 +177,151 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
       final File selectedFile = chooser.getSelectedFile();
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              try {
-                MacroButtonProperties newButtonProps = PersistenceUtil.loadMacro(selectedFile);
-                if (newButtonProps != null) {
-                  Boolean alreadyExists = false;
-                  if (panelClass.equals("GlobalPanel")) {
-                    for (MacroButtonProperties nextMacro : MacroButtonPrefs.getButtonProperties()) {
-                      if (newButtonProps.hashCodeForComparison()
-                          == nextMacro.hashCodeForComparison()) {
-                        alreadyExists = true;
-                      }
+          () -> {
+            try {
+              MacroButtonProperties newButtonProps = PersistenceUtil.loadMacro(selectedFile);
+              if (newButtonProps != null) {
+                Boolean alreadyExists = false;
+                if (panelClass.equals("GlobalPanel")) {
+                  for (MacroButtonProperties nextMacro : MacroButtonPrefs.getButtonProperties()) {
+                    if (newButtonProps.hashCodeForComparison()
+                        == nextMacro.hashCodeForComparison()) {
+                      alreadyExists = true;
                     }
-                    if (alreadyExists) {
-                      alreadyExists =
-                          confirmImport(
-                              newButtonProps,
-                              I18N.getText(
-                                  "confirm.macro.panelLocation", I18N.getText("panel.Global")));
+                  }
+                  if (alreadyExists) {
+                    alreadyExists =
+                        confirmImport(
+                            newButtonProps,
+                            I18N.getText(
+                                "confirm.macro.panelLocation", I18N.getText("panel.Global")));
+                  }
+                  if (!alreadyExists) {
+                    new MacroButtonProperties(
+                        panelClass, MacroButtonPrefs.getNextIndex(), newButtonProps);
+                  }
+                } else if (panelClass.equals("CampaignPanel")) {
+                  for (MacroButtonProperties nextMacro :
+                      MapTool.getCampaign().getMacroButtonPropertiesArray()) {
+                    if (newButtonProps.hashCodeForComparison()
+                        == nextMacro.hashCodeForComparison()) {
+                      alreadyExists = true;
                     }
-                    if (!alreadyExists) {
-                      new MacroButtonProperties(
-                          panelClass, MacroButtonPrefs.getNextIndex(), newButtonProps);
+                  }
+                  if (alreadyExists) {
+                    alreadyExists =
+                        confirmImport(
+                            newButtonProps,
+                            I18N.getText(
+                                "confirm.macro.panelLocation", I18N.getText("panel.Campaign")));
+                  }
+                  if (!alreadyExists) {
+                    new MacroButtonProperties(
+                        panelClass,
+                        MapTool.getCampaign().getMacroButtonNextIndex(),
+                        newButtonProps);
+                  }
+                } else if (panelClass.equals("GmPanel")) {
+                  for (MacroButtonProperties nextMacro :
+                      MapTool.getCampaign().getGmMacroButtonPropertiesArray()) {
+                    if (newButtonProps.hashCodeForComparison()
+                        == nextMacro.hashCodeForComparison()) {
+                      alreadyExists = true;
                     }
-                  } else if (panelClass.equals("CampaignPanel")) {
-                    for (MacroButtonProperties nextMacro :
-                        MapTool.getCampaign().getMacroButtonPropertiesArray()) {
-                      if (newButtonProps.hashCodeForComparison()
-                          == nextMacro.hashCodeForComparison()) {
-                        alreadyExists = true;
-                      }
-                    }
-                    if (alreadyExists) {
-                      alreadyExists =
-                          confirmImport(
-                              newButtonProps,
-                              I18N.getText(
-                                  "confirm.macro.panelLocation", I18N.getText("panel.Campaign")));
-                    }
-                    if (!alreadyExists) {
-                      new MacroButtonProperties(
-                          panelClass,
-                          MapTool.getCampaign().getMacroButtonNextIndex(),
-                          newButtonProps);
-                    }
-                  } else if (panelClass.equals("GmPanel")) {
-                    for (MacroButtonProperties nextMacro :
-                        MapTool.getCampaign().getGmMacroButtonPropertiesArray()) {
-                      if (newButtonProps.hashCodeForComparison()
-                          == nextMacro.hashCodeForComparison()) {
-                        alreadyExists = true;
-                      }
-                    }
-                    if (alreadyExists) {
-                      alreadyExists =
-                          confirmImport(
-                              newButtonProps,
-                              I18N.getText(
-                                  "confirm.macro.panelLocation", I18N.getText("panel.Gm")));
-                    }
-                    if (!alreadyExists) {
-                      new MacroButtonProperties(
-                          panelClass,
-                          MapTool.getCampaign().getGmMacroButtonNextIndex(),
-                          newButtonProps);
-                    }
-                  } else if (panelClass.equals("SelectionPanel")) {
-                    if (areaGroup != null) {
-                      if (areaGroup
-                          .getGroupLabel()
-                          .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
-                        for (Token nextToken :
-                            MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-                          alreadyExists = false;
-                          for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
-                            if (newButtonProps.hashCodeForComparison()
-                                == nextMacro.hashCodeForComparison()) {
-                              alreadyExists = true;
-                            }
-                          }
-                          if (alreadyExists) {
-                            alreadyExists =
-                                confirmImport(
-                                    newButtonProps,
-                                    I18N.getText("confirm.macro.commonSelectionLocation"));
-                          }
-                          if (!alreadyExists) {
-                            new MacroButtonProperties(
-                                nextToken, nextToken.getMacroNextIndex(), newButtonProps);
-                          }
-                        }
-                      } else if (tokenId != null) {
-                        Token token = getToken();
-                        for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
+                  }
+                  if (alreadyExists) {
+                    alreadyExists =
+                        confirmImport(
+                            newButtonProps,
+                            I18N.getText("confirm.macro.panelLocation", I18N.getText("panel.Gm")));
+                  }
+                  if (!alreadyExists) {
+                    new MacroButtonProperties(
+                        panelClass,
+                        MapTool.getCampaign().getGmMacroButtonNextIndex(),
+                        newButtonProps);
+                  }
+                } else if (panelClass.equals("SelectionPanel")) {
+                  if (areaGroup != null) {
+                    if (areaGroup
+                        .getGroupLabel()
+                        .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
+                      for (Token nextToken :
+                          MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
+                        alreadyExists = false;
+                        for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
                           if (newButtonProps.hashCodeForComparison()
                               == nextMacro.hashCodeForComparison()) {
                             alreadyExists = true;
                           }
                         }
                         if (alreadyExists) {
-                          String tokenName = token.getName();
-                          if (MapTool.getPlayer().isGM()) {
-                            if (token.getGMName() != null) {
-                              if (!token.getGMName().equals("")) {
-                                tokenName = tokenName + "(" + token.getGMName() + ")";
-                              }
-                            }
-                          }
                           alreadyExists =
                               confirmImport(
                                   newButtonProps,
-                                  I18N.getText("confirm.macro.tokenLocation", tokenName));
+                                  I18N.getText("confirm.macro.commonSelectionLocation"));
                         }
                         if (!alreadyExists) {
                           new MacroButtonProperties(
-                              token, token.getMacroNextIndex(), newButtonProps);
+                              nextToken, nextToken.getMacroNextIndex(), newButtonProps);
                         }
                       }
-                    }
-                  } else if (tokenId != null) {
-                    Token token = getToken();
-                    for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
-                      if (newButtonProps.hashCodeForComparison()
-                          == nextMacro.hashCodeForComparison()) {
-                        alreadyExists = true;
+                    } else if (tokenId != null) {
+                      Token token = getToken();
+                      for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
+                        if (newButtonProps.hashCodeForComparison()
+                            == nextMacro.hashCodeForComparison()) {
+                          alreadyExists = true;
+                        }
                       }
-                    }
-                    if (alreadyExists) {
-                      String tokenName = token.getName();
-                      if (MapTool.getPlayer().isGM()) {
-                        if (token.getGMName() != null) {
-                          if (!token.getGMName().equals("")) {
-                            tokenName = tokenName + "(" + token.getGMName() + ")";
+                      if (alreadyExists) {
+                        String tokenName = token.getName();
+                        if (MapTool.getPlayer().isGM()) {
+                          if (token.getGMName() != null) {
+                            if (!token.getGMName().equals("")) {
+                              tokenName = tokenName + "(" + token.getGMName() + ")";
+                            }
                           }
                         }
+                        alreadyExists =
+                            confirmImport(
+                                newButtonProps,
+                                I18N.getText("confirm.macro.tokenLocation", tokenName));
                       }
-                      alreadyExists =
-                          confirmImport(
-                              newButtonProps,
-                              I18N.getText("confirm.macro.tokenLocation", tokenName));
-                    }
-                    if (!alreadyExists) {
-                      new MacroButtonProperties(token, token.getMacroNextIndex(), newButtonProps);
+                      if (!alreadyExists) {
+                        new MacroButtonProperties(token, token.getMacroNextIndex(), newButtonProps);
+                      }
                     }
                   }
+                } else if (tokenId != null) {
+                  Token token = getToken();
+                  for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
+                    if (newButtonProps.hashCodeForComparison()
+                        == nextMacro.hashCodeForComparison()) {
+                      alreadyExists = true;
+                    }
+                  }
+                  if (alreadyExists) {
+                    String tokenName = token.getName();
+                    if (MapTool.getPlayer().isGM()) {
+                      if (token.getGMName() != null) {
+                        if (!token.getGMName().equals("")) {
+                          tokenName = tokenName + "(" + token.getGMName() + ")";
+                        }
+                      }
+                    }
+                    alreadyExists =
+                        confirmImport(
+                            newButtonProps, I18N.getText("confirm.macro.tokenLocation", tokenName));
+                  }
+                  if (!alreadyExists) {
+                    new MacroButtonProperties(token, token.getMacroNextIndex(), newButtonProps);
+                  }
                 }
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-                MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
               }
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
     }
@@ -514,66 +509,52 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
       }
 
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              try {
-                if (panelClass.equals("GlobalPanel")) {
-                  PersistenceUtil.saveMacroSet(
-                      MacroButtonPrefs.getButtonProperties(), selectedFile);
-                } else if (panelClass.equals("CampaignPanel")) {
-                  PersistenceUtil.saveMacroSet(
-                      MapTool.getCampaign().getMacroButtonPropertiesArray(), selectedFile);
-                } else if (panelClass.equals("GmPanel")) {
-                  PersistenceUtil.saveMacroSet(
-                      MapTool.getCampaign().getGmMacroButtonPropertiesArray(), selectedFile);
-                } else if (panelClass.equals("SelectionPanel")) {
-                  if (areaGroup != null) {
-                    if (areaGroup
-                        .getGroupLabel()
-                        .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
-                      Boolean checkComparisons = MapTool.confirm("confirm.macro.checkComparisons");
-                      List<MacroButtonProperties> commonMacros =
-                          MapTool.getFrame().getSelectionPanel().getCommonMacros();
-                      List<MacroButtonProperties> exportList =
-                          new ArrayList<MacroButtonProperties>();
-                      Boolean trusted = true;
-                      Boolean allowExport = true;
-                      for (MacroButtonProperties nextMacro : commonMacros) {
-                        trusted = true;
-                        allowExport = true;
-                        for (Token nextToken :
-                            MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-                          if (!AppUtil.playerOwns(nextToken)) {
-                            trusted = false;
-                          }
-                          if (nextToken.getMacroList(trusted).size() > 0) {
-                            for (MacroButtonProperties nextCompMacro :
-                                nextToken.getMacroList(trusted)) {
-                              if (nextCompMacro.hashCodeForComparison()
-                                      == nextMacro.hashCodeForComparison()
-                                  && (!MapTool.getPlayer().isGM()
-                                      || (!MapTool.getPlayer().isGM()
-                                          && !nextCompMacro.getAllowPlayerEdits()))) {
-                                allowExport = false;
-                              }
-                            }
-                          } else {
-                            allowExport = false;
-                          }
+          () -> {
+            try {
+              if (panelClass.equals("GlobalPanel")) {
+                PersistenceUtil.saveMacroSet(MacroButtonPrefs.getButtonProperties(), selectedFile);
+              } else if (panelClass.equals("CampaignPanel")) {
+                PersistenceUtil.saveMacroSet(
+                    MapTool.getCampaign().getMacroButtonPropertiesArray(), selectedFile);
+              } else if (panelClass.equals("GmPanel")) {
+                PersistenceUtil.saveMacroSet(
+                    MapTool.getCampaign().getGmMacroButtonPropertiesArray(), selectedFile);
+              } else if (panelClass.equals("SelectionPanel")) {
+                if (areaGroup != null) {
+                  if (areaGroup
+                      .getGroupLabel()
+                      .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
+                    Boolean checkComparisons = MapTool.confirm("confirm.macro.checkComparisons");
+                    List<MacroButtonProperties> commonMacros =
+                        MapTool.getFrame().getSelectionPanel().getCommonMacros();
+                    List<MacroButtonProperties> exportList = new ArrayList<MacroButtonProperties>();
+                    Boolean trusted = true;
+                    Boolean allowExport = true;
+                    for (MacroButtonProperties nextMacro : commonMacros) {
+                      trusted = true;
+                      allowExport = true;
+                      for (Token nextToken :
+                          MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
+                        if (!AppUtil.playerOwns(nextToken)) {
+                          trusted = false;
                         }
-                        if (checkComparisons) {
-                          if (confirmCommonExport(nextMacro)) {
-                            if (trusted && allowExport) {
-                              exportList.add(nextMacro);
-                            } else {
-                              MapTool.showWarning(
-                                  I18N.getText(
-                                      "msg.warning.macro.willNotExport", nextMacro.getLabel()));
+                        if (nextToken.getMacroList(trusted).size() > 0) {
+                          for (MacroButtonProperties nextCompMacro :
+                              nextToken.getMacroList(trusted)) {
+                            if (nextCompMacro.hashCodeForComparison()
+                                    == nextMacro.hashCodeForComparison()
+                                && (!MapTool.getPlayer().isGM()
+                                    || (!MapTool.getPlayer().isGM()
+                                        && !nextCompMacro.getAllowPlayerEdits()))) {
+                              allowExport = false;
                             }
-                          } else {
-                            return;
                           }
                         } else {
+                          allowExport = false;
+                        }
+                      }
+                      if (checkComparisons) {
+                        if (confirmCommonExport(nextMacro)) {
                           if (trusted && allowExport) {
                             exportList.add(nextMacro);
                           } else {
@@ -581,17 +562,11 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                                 I18N.getText(
                                     "msg.warning.macro.willNotExport", nextMacro.getLabel()));
                           }
+                        } else {
+                          return;
                         }
-                      }
-                      PersistenceUtil.saveMacroSet(exportList, selectedFile);
-                    } else if (tokenId != null) {
-                      Token token = getToken();
-                      Boolean trusted = AppUtil.playerOwns(token);
-                      List<MacroButtonProperties> exportList =
-                          new ArrayList<MacroButtonProperties>();
-                      for (MacroButtonProperties nextMacro : token.getMacroList(trusted)) {
-                        if (MapTool.getPlayer().isGM()
-                            || (!MapTool.getPlayer().isGM() && nextMacro.getAllowPlayerEdits())) {
+                      } else {
+                        if (trusted && allowExport) {
                           exportList.add(nextMacro);
                         } else {
                           MapTool.showWarning(
@@ -599,17 +574,31 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                                   "msg.warning.macro.willNotExport", nextMacro.getLabel()));
                         }
                       }
-                      PersistenceUtil.saveMacroSet(exportList, selectedFile);
                     }
+                    PersistenceUtil.saveMacroSet(exportList, selectedFile);
+                  } else if (tokenId != null) {
+                    Token token = getToken();
+                    Boolean trusted = AppUtil.playerOwns(token);
+                    List<MacroButtonProperties> exportList = new ArrayList<MacroButtonProperties>();
+                    for (MacroButtonProperties nextMacro : token.getMacroList(trusted)) {
+                      if (MapTool.getPlayer().isGM()
+                          || (!MapTool.getPlayer().isGM() && nextMacro.getAllowPlayerEdits())) {
+                        exportList.add(nextMacro);
+                      } else {
+                        MapTool.showWarning(
+                            I18N.getText("msg.warning.macro.willNotExport", nextMacro.getLabel()));
+                      }
+                    }
+                    PersistenceUtil.saveMacroSet(exportList, selectedFile);
                   }
-                } else if (tokenId != null) {
-                  Token token = getToken();
-                  PersistenceUtil.saveMacroSet(token.getMacroList(true), selectedFile);
                 }
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-                MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
+              } else if (tokenId != null) {
+                Token token = getToken();
+                PersistenceUtil.saveMacroSet(token.getMacroList(true), selectedFile);
               }
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
     }
@@ -625,7 +614,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent event) {
       String newMacroGroupName =
           JOptionPane.showInputDialog(I18N.getText("panel.NewGroupName"), macroGroup);
-      if (!newMacroGroupName.equals(macroGroup)) {
+      if (newMacroGroupName != null && !newMacroGroupName.equals(macroGroup)) {
         if (panelClass.equals("CampaignPanel")
             || panelClass.equals("GlobalPanel")
             || panelClass.equals("GmPanel")) {

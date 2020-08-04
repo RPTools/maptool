@@ -43,8 +43,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -616,7 +614,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     return item;
   }
 
-  private class SetHaloAction extends AbstractAction {
+  private static class SetHaloAction extends AbstractAction {
     private static final long serialVersionUID = 936075111485618012L;
 
     protected Color color;
@@ -652,7 +650,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  private class SetColorChooserAction extends AbstractAction {
+  private static class SetColorChooserAction extends AbstractAction {
     private static final long serialVersionUID = 2212977067043864272L;
 
     protected Color currentColor;
@@ -754,12 +752,9 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       JCheckBox hide = new JCheckBox("Hide");
       hide.putClientProperty("JSlider", slider);
       hide.addChangeListener(
-          new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-              JSlider js = (JSlider) ((JCheckBox) e.getSource()).getClientProperty("JSlider");
-              js.setEnabled(!((JCheckBox) e.getSource()).isSelected());
-            }
+          e1 -> {
+            JSlider js = (JSlider) ((JCheckBox) e1.getSource()).getClientProperty("JSlider");
+            js.setEnabled(!((JCheckBox) e1.getSource()).isSelected());
           });
       labelPanel.add(hide, new CellConstraints(1, 3, CellConstraints.RIGHT, CellConstraints.TOP));
       slider.setPaintLabels(true);
