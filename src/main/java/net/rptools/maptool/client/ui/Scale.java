@@ -21,9 +21,9 @@ import java.io.Serializable;
 
 public class Scale implements Serializable {
 
-  private static final double oneToOneScale = 1; // Let this be configurable at some point
+  private final double oneToOneScale = 1; // Let this be configurable at some point
   private double scale = oneToOneScale;
-  private static final double scaleIncrement = .075;
+  private final double scaleIncrement = .075;
 
   private int zoomLevel = 0;
 
