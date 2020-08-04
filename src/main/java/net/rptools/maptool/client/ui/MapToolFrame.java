@@ -1725,10 +1725,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public boolean confirmClose() {
-    if (!MapTool.isHostingServer()) {
-      return false;
-    }
-    return MapTool.confirm("msg.confirm.hostingDisconnect");
+    return !MapTool.isHostingServer() || MapTool.confirm("msg.confirm.hostingDisconnect");
   }
 
   public void closingMaintenance() {
@@ -2004,7 +2001,7 @@ public class MapToolFrame extends DefaultDockableHolder
   // end of Table import/export support
 
   @SuppressWarnings("serial")
-  private static class MTButtonHotKeyAction extends AbstractAction {
+  private class MTButtonHotKeyAction extends AbstractAction {
     private final MacroButton macroButton;
 
     public MTButtonHotKeyAction(MacroButton button) {
