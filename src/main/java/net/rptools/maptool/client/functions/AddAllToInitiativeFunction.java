@@ -73,9 +73,13 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
       if (!allowDuplicates && !list.indexOf(token).isEmpty()) {
         continue;
       }
-      if (all) tokens.add(token);
-      else if (token.getType() == Type.PC && pcs) tokens.add(token);
-      else if (token.getType() == Type.NPC && !pcs) tokens.add(token);
+      if (all) {
+        tokens.add(token);
+      } else if (token.getType() == Type.PC && pcs) {
+        tokens.add(token);
+      } else if (token.getType() == Type.NPC && !pcs) {
+        tokens.add(token);
+      }
     }
     list.insertTokens(tokens);
     return new BigDecimal(tokens.size());
