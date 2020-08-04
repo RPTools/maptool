@@ -37,7 +37,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 
 public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
-  private final String root = "Views";
+  private static final String root = "Views";
   private Zone zone;
   private final JTree tree;
   private final Map<View, List<DrawnElement>> viewMap = new HashMap<View, List<DrawnElement>>();
@@ -129,11 +129,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
   @Override
   public boolean isLeaf(Object node) {
-    if (node instanceof DrawnElement) {
-      if (((DrawnElement) node).getDrawable() instanceof DrawablesGroup) return false;
-      else return true;
-    }
-    return false;
+    return node instanceof DrawnElement
+        && ((DrawnElement) node).getDrawable() instanceof DrawablesGroup;
   }
 
   @Override

@@ -332,10 +332,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 1, UNLIMITED_PARAMETERS);
           JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           boolean sortAscending = true;
-          if (args.size() > 1) {
-            if (args.get(1).toString().startsWith("d")) {
-              sortAscending = false;
-            }
+          if (args.size() > 1 && args.get(1).toString().startsWith("d")) {
+            sortAscending = false;
           }
           if (args.size() < 3) {
             if (sortAscending) {

@@ -47,10 +47,10 @@ public class LineTemplate extends AbstractTemplate {
   private ZonePoint pathVertex;
 
   /** The calculated path for this line. */
-  private ArrayList<CellPoint> path;
+  private List<CellPoint> path;
 
   /** The pool of points. */
-  private ArrayList<CellPoint> pool;
+  private List<CellPoint> pool;
 
   /**
    * The line is drawn in this quadrant. A string is used as a hack to get around the hessian
@@ -352,12 +352,12 @@ public class LineTemplate extends AbstractTemplate {
   }
 
   /** @return Getter for path */
-  public ArrayList<CellPoint> getPath() {
+  public List<CellPoint> getPath() {
     return path;
   }
 
   /** @param path Setter for the path to set */
-  public void setPath(ArrayList<CellPoint> path) {
+  public void setPath(List<CellPoint> path) {
     this.path = path;
   }
 

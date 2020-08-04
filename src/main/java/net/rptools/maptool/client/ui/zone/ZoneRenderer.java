@@ -1296,20 +1296,18 @@ public class ZoneRenderer extends JComponent
       timer.stop("drawableTokens");
       // }
 
-      if (view.isGMView()) {
-        if (Zone.Layer.GM.isEnabled()) {
-          drawables = zone.getGMDrawnElements();
-          // if (!drawables.isEmpty()) {
-          timer.start("drawableGM");
-          renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
-          timer.stop("drawableGM");
-          // }
-          List<Token> stamps = zone.getGMStamps(false);
-          if (!stamps.isEmpty()) {
-            timer.start("tokensGM");
-            renderTokens(g2d, stamps, view);
-            timer.stop("tokensGM");
-          }
+      if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
+        drawables = zone.getGMDrawnElements();
+        // if (!drawables.isEmpty()) {
+        timer.start("drawableGM");
+        renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        timer.stop("drawableGM");
+        // }
+        List<Token> stamps = zone.getGMStamps(false);
+        if (!stamps.isEmpty()) {
+          timer.start("tokensGM");
+          renderTokens(g2d, stamps, view);
+          timer.stop("tokensGM");
         }
       }
       List<Token> tokens = zone.getTokens(false);
@@ -1422,10 +1420,8 @@ public class ZoneRenderer extends JComponent
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
-    if (Zone.Layer.TOKEN.isEnabled()) {
-      if (view.isGMView() && AppState.isShowLightSources()) {
-        lightSourceIconOverlay.paintOverlay(this, g2d);
-      }
+    if (Zone.Layer.TOKEN.isEnabled() && view.isGMView() && AppState.isShowLightSources()) {
+      lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
     // g2d.setColor(Color.red);
@@ -3552,10 +3548,9 @@ public class ZoneRenderer extends JComponent
       // if policy does not auto-reveal FoW, check if fog covers the token (slow)
       if (showCurrentTokenLabel
           && !isGMView
-          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())) {
-        if (!zone.isTokenVisible(token)) {
-          showCurrentTokenLabel = false;
-        }
+          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())
+          && !zone.isTokenVisible(token)) {
+        showCurrentTokenLabel = false;
       }
       if (showCurrentTokenLabel) {
         GUID tokId = token.getId();
@@ -4232,7 +4227,7 @@ public class ZoneRenderer extends JComponent
 
     private final Logger log = LogManager.getLogger(ZoneRenderer.SelectionSet.class);
 
-    private final HashSet<GUID> selectionSet = new HashSet<GUID>();
+    private final Set<GUID> selectionSet = new HashSet<GUID>();
     private final GUID keyToken;
     private final String playerId;
     private ZoneWalker walker;
@@ -4292,16 +4287,14 @@ public class ZoneRenderer extends JComponent
     // timeout
     public void renderFinalPath() {
       if (ZoneRenderer.this.zone.getGrid().getCapabilities().isPathingSupported()
-          && token.isSnapToGrid()) {
-
-        if (renderPathTask != null) {
-          while (!renderPathTask.isDone()) {
-            log.trace("Waiting on Path Rendering... ");
-            try {
-              Thread.sleep(10);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
+          && token.isSnapToGrid()
+          && renderPathTask != null) {
+        while (!renderPathTask.isDone()) {
+          log.trace("Waiting on Path Rendering... ");
+          try {
+            Thread.sleep(10);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
           }
         }
       }
@@ -4696,19 +4689,17 @@ public class ZoneRenderer extends JComponent
   private BufferedImage getTokenImage(Token token) {
     BufferedImage image = null;
     // Get the basic image
-    if (token.getHasImageTable() && token.hasFacing()) {
-      if (token.getImageTableName() != null) {
-        LookupTable lookupTable =
-            MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
-        if (lookupTable != null) {
-          try {
-            LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
-            if (result != null) {
-              image = ImageManager.getImage(result.getImageId(), this);
-            }
-          } catch (ParserException p) {
-            // do nothing
+    if (token.getHasImageTable() && token.hasFacing() && token.getImageTableName() != null) {
+      LookupTable lookupTable =
+          MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+      if (lookupTable != null) {
+        try {
+          LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+          if (result != null) {
+            image = ImageManager.getImage(result.getImageId(), this);
           }
+        } catch (ParserException p) {
+          // do nothing
         }
       }
     }

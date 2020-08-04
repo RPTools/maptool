@@ -52,7 +52,7 @@ public class AliasMacro implements Macro {
     String value = null;
     int split =
         macro.indexOf(
-            " "); // LATER: this character should be externalized and shared with the load alias
+            ' '); // LATER: this character should be externalized and shared with the load alias
     // macro
     if (split > 0) {
       name = macro.substring(0, split);
