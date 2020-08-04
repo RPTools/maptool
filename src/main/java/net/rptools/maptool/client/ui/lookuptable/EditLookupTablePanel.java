@@ -221,7 +221,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
             int max = 0;
 
             int split =
-                range.indexOf("-", range.charAt(0) == '-' ? 1 : 0); // Allow negative numbers
+                range.indexOf('-', range.charAt(0) == '-' ? 1 : 0); // Allow negative numbers
             try {
               if (split < 0) {
                 min = Integer.parseInt(range);
@@ -278,9 +278,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
         String value = entry.getValue();
         MD5Key imageId = entry.getImageId();
 
-        rows.add(
-            Arrays.asList(
-                new String[] {range, value, imageId != null ? imageId.toString() : null}));
+        rows.add(Arrays.asList(range, value, imageId != null ? imageId.toString() : null));
       }
     }
     return new LookupTableTableModel(

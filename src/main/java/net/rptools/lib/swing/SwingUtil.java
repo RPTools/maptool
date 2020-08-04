@@ -30,6 +30,7 @@ import java.awt.Window;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -287,9 +288,7 @@ public class SwingUtil {
         return (JComponent) c;
       }
       if (c instanceof Container) {
-        for (Component child : ((Container) c).getComponents()) {
-          componentQueue.add(child);
-        }
+        componentQueue.addAll(Arrays.asList(((Container) c).getComponents()));
       }
     }
     return null;

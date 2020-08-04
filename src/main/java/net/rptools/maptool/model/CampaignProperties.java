@@ -73,8 +73,8 @@ public class CampaignProperties {
   public CampaignProperties(CampaignProperties properties) {
     tokenTypeMap = new HashMap<String, List<TokenProperty>>();
     for (Entry<String, List<TokenProperty>> entry : properties.tokenTypeMap.entrySet()) {
-      List<TokenProperty> typeList = new ArrayList<TokenProperty>();
-      typeList.addAll(properties.tokenTypeMap.get(entry.getKey()));
+      List<TokenProperty> typeList =
+          new ArrayList<TokenProperty>(properties.tokenTypeMap.get(entry.getKey()));
 
       tokenTypeMap.put(entry.getKey(), typeList);
     }
@@ -264,9 +264,10 @@ public class CampaignProperties {
 
     try {
       Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (String key : map.keySet()) {
+      for (var entry : map.entrySet()) {
+        String key = entry.getKey();
         Map<GUID, LightSource> lightSourceMap = new LinkedHashMap<GUID, LightSource>();
-        for (LightSource source : map.get(key)) {
+        for (LightSource source : entry.getValue()) {
           lightSourceMap.put(source.getId(), source);
         }
         lightSourcesMap.put(key, lightSourceMap);

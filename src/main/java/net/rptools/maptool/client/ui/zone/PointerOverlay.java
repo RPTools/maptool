@@ -135,11 +135,7 @@ public class PointerOverlay implements ZoneOverlay {
   }
 
   public void removePointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        pointerList.remove(i);
-      }
-    }
+    pointerList.removeIf(pair -> pair.player.equals(player));
   }
 
   public Pointer getPointer(String player) {
@@ -151,7 +147,7 @@ public class PointerOverlay implements ZoneOverlay {
     return null;
   }
 
-  private class PointerPair {
+  private static class PointerPair {
     Pointer pointer;
     String player;
 

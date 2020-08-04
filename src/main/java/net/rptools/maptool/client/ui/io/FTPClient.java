@@ -47,8 +47,8 @@ public class FTPClient {
   protected FTPClientConn cconn;
 
   protected List<Object> fifoQueue;
-  protected Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
-  protected Map<Object, FTPTransferObject> transferringMap; // Currently in process...
+  protected final Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
+  protected final Map<Object, FTPTransferObject> transferringMap; // Currently in process...
 
   private int numThreads = 1;
   private List<ChangeListener> changeListeners;
@@ -204,7 +204,7 @@ public class FTPClient {
   private void uploadDone(FTPTransferObject data, boolean keep) {
     boolean startAnother = false;
     synchronized (transferringMap) {
-      if (transferringMap.containsKey(data.local)) transferringMap.remove(data.local);
+      transferringMap.remove(data.local);
       // TODO Should delete the remote file for uploading, or remove the local
       // file for downloading.
       if (fifoQueue.isEmpty() == false && transferringMap.size() < numThreads) startAnother = true;

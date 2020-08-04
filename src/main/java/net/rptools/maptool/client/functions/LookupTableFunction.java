@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -101,7 +102,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTableVisible", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getVisible() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("setTableVisible".equalsIgnoreCase(function)) {
 
@@ -112,7 +113,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getVisible() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTableAccess".equalsIgnoreCase(function)) {
 
@@ -120,7 +121,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTableAccess", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getAllowLookup() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("setTableAccess".equalsIgnoreCase(function)) {
 
@@ -131,7 +132,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(access));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getAllowLookup() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTableRoll".equalsIgnoreCase(function)) {
 
@@ -234,12 +235,8 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       MD5Key img = lookupTable.getTableImage();
-      if (img == null) {
-        // Returning null causes an NPE when output is dumped to chat.
-        return "";
-      } else {
-        return img;
-      }
+      // Returning null causes an NPE when output is dumped to chat.
+      return Objects.requireNonNullElse(img, "");
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
@@ -336,7 +333,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setPickOnce(FunctionUtil.getBooleanValue(pickonce));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getPickOnce() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTablePickOnce".equalsIgnoreCase(function)) {
 
@@ -344,7 +341,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTablePickOnce", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getPickOnce() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTablePicksLeft".equalsIgnoreCase(function)) {
 

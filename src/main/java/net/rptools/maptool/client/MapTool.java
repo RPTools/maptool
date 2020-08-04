@@ -42,12 +42,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
@@ -1736,8 +1731,9 @@ public class MapTool {
       // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
-      for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
-        Object key = keys.nextElement();
+      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
+          iterator.hasNext(); ) {
+        Object key = iterator.next();
         Object value = UIManager.get(key);
         if (value instanceof FontUIResource) {
           UIManager.put(key, fontRes);
@@ -1774,15 +1770,13 @@ public class MapTool {
     // File f = AppUtil.getAppHome("config");
     // if (f.exists()) {
     // File f2 = new File(f, "Default.theme");
-    if (f2.exists()) {
-      if (Theme.loadTheme(f2)) {
-        // re-install the Tiny Look and Feel
-        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+    if (f2.exists() && Theme.loadTheme(f2)) {
+      // re-install the Tiny Look and Feel
+      UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
-        // Update the ComponentUIs for all Components. This
-        // needs to be invoked for all windows.
-        // SwingUtilities.updateComponentTreeUI(rootWindow);
-      }
+      // Update the ComponentUIs for all Components. This
+      // needs to be invoked for all windows.
+      // SwingUtilities.updateComponentTreeUI(rootWindow);
     }
     // }
   }

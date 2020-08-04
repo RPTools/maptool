@@ -161,7 +161,7 @@ public class ConnectionInfoDialog extends JDialog {
                 .filter(s -> !s.startsWith("#"))
                 .collect(Collectors.toList());
       } catch (IOException e) {
-        throw new AssertionError("Unable to read ip-check list."); // Shouldn't happen
+        throw new AssertionError("Unable to read ip-check list.", e); // Shouldn't happen
       }
 
       for (String urlString : ipCheckURLs) {

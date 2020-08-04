@@ -303,7 +303,7 @@ public class InputFunction extends AbstractFunction {
 
     /** Thrown when an option value is invalid. */
     @SuppressWarnings("serial")
-    public class OptionException extends Exception {
+    public static class OptionException extends Exception {
       public String key, value, type;
 
       public OptionException(InputType it, String key, String value) {
@@ -316,7 +316,7 @@ public class InputFunction extends AbstractFunction {
   } ///////////////////// end of InputType enum
 
   /** Variable Specifier structure - holds extracted bits of info for a variable. */
-  final class VarSpec {
+  static final class VarSpec {
     public String name, value, prompt;
     public InputType inputType;
     public InputType.OptionMap optionValues;
@@ -1137,17 +1137,17 @@ public class InputFunction extends AbstractFunction {
             }
           case CHECK:
             {
-              Integer value = ((JCheckBox) comp).isSelected() ? 1 : 0;
-              newValue = value.toString();
+              int value = ((JCheckBox) comp).isSelected() ? 1 : 0;
+              newValue = Integer.toString(value);
               break;
             }
           case RADIO:
             {
               // This code assumes that the Box container returns components
               // in the same order that they were added.
-              Component[] comps = ((Box) comp).getComponents();
+              Component[] comps = comp.getComponents();
               int componentCount = 0;
-              Integer index = 0;
+              int index = 0;
               for (Component c : comps) {
                 if (c instanceof JRadioButton) {
                   JRadioButton radio = (JRadioButton) c;
@@ -1158,7 +1158,7 @@ public class InputFunction extends AbstractFunction {
               if (vs.optionValues.optionEquals("VALUE", "STRING")) {
                 newValue = vs.valueList.get(index);
               } else { // default is "NUMBER"
-                newValue = index.toString();
+                newValue = Integer.toString(index);
               }
               break;
             }
@@ -1173,7 +1173,7 @@ public class InputFunction extends AbstractFunction {
               // Read out and assign all the subvariables.
               // The overall return value is a property string (as in StrPropFunctions.java) with
               // all the new settings.
-              Component[] comps = ((JPanel) comp).getComponents();
+              Component[] comps = comp.getComponents();
               StringBuilder sb = new StringBuilder();
               jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
@@ -1220,7 +1220,7 @@ public class InputFunction extends AbstractFunction {
           } else {
             resolver.setVariable(vs.name, newValue.trim());
           }
-          allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
+          allAssignments.append(vs.name).append("=").append(newValue.trim()).append(" ## ");
         }
       }
       if (cp.tabVarSpec != null) {
@@ -1296,7 +1296,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** JLabel variant that listens for new image data, and redraws its icon. */
-  public class UpdatingLabel extends JLabel {
+  public static class UpdatingLabel extends JLabel {
     private String macroLink;
 
     @Override
@@ -1333,7 +1333,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Custom renderer to display icons and text inside a combo box */
-  private class ComboBoxRenderer implements ListCellRenderer {
+  private static class ComboBoxRenderer implements ListCellRenderer {
     public Component getListCellRendererComponent(
         JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       JLabel label = null;
@@ -1367,7 +1367,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Class found on web to work around a STUPID SWING BUG with JComboBox */
-  public class NoEqualString {
+  public static class NoEqualString {
     private final String text;
 
     public NoEqualString(String txt) {

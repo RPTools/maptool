@@ -21,7 +21,6 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -130,7 +129,7 @@ public class Directory {
       File[] listFiles = directory.listFiles(fileFilter);
       if (listFiles == null)
         throw new FileNotFoundException("Invalid directory name: '" + directory.getPath() + "'");
-      files = Collections.unmodifiableList(Arrays.asList(listFiles));
+      files = List.of(listFiles);
       File[] subdirList = directory.listFiles(DIRECTORY_FILTER);
       subdirs = new ArrayList<Directory>();
       for (File file : subdirList) {
@@ -172,15 +171,9 @@ public class Directory {
     public boolean accept(File file) {
       if (file.isDirectory()) {
         return false;
-      } else {
-        String path = file.getAbsolutePath().toLowerCase();
-
-        if (path.endsWith(".por") && MAGIC_NUMBER.accept(file)) {
-          return true;
-        } else {
-          return false;
-        }
       }
+      String path = file.getAbsolutePath().toLowerCase();
+      return path.endsWith(".por") && MAGIC_NUMBER.accept(file);
     }
   }
 

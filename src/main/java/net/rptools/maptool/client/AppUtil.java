@@ -182,7 +182,7 @@ public class AppUtil {
       path = jarFile.getParentFile().getPath();
     } catch (URISyntaxException e) {
       log.error("Error retrieving MapTool installation directory: ", e);
-      throw new RuntimeException(I18N.getText("msg.error.unknownInstallPath"));
+      throw new RuntimeException(I18N.getText("msg.error.unknownInstallPath"), e);
     }
 
     return path;
@@ -206,7 +206,7 @@ public class AppUtil {
 
     } catch (URISyntaxException e) {
       log.error("Error retrieving MapTool cfg file: ", e);
-      throw new RuntimeException(I18N.getText("msg.error.retrieveCfgFile"));
+      throw new RuntimeException(I18N.getText("msg.error.retrieveCfgFile"), e);
     }
 
     return cfgFile;

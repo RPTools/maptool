@@ -244,7 +244,7 @@ public class MacroButton extends JButton implements MouseListener {
         List<Token> affectedTokens = new ArrayList<Token>();
         if (getProperties().getCommonMacro()) {
           for (Token nextSelected : selectedTokens) {
-            Boolean isCommonToToken = false;
+            boolean isCommonToToken = false;
             for (MacroButtonProperties nextMacro : nextSelected.getMacroList(true)) {
               if (nextMacro.hashCodeForComparison() == getProperties().hashCodeForComparison()) {
                 isCommonToToken = true;
@@ -290,7 +290,7 @@ public class MacroButton extends JButton implements MouseListener {
     }
   }
 
-  private class DSListener implements DragSourceListener {
+  private static class DSListener implements DragSourceListener {
 
     public void dragEnter(DragSourceDragEvent event) {
       // System.out.println("TMB: drag enter");

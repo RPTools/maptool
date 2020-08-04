@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
@@ -29,7 +25,7 @@ public class LookupTable {
 
   private static ExpressionParser expressionParser = new ExpressionParser();
 
-  private ArrayList<LookupEntry> entryList;
+  private List<LookupEntry> entryList;
   private String name;
   private String defaultRoll;
   private MD5Key tableImage;
@@ -47,11 +43,7 @@ public class LookupTable {
     name = table.name;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
-    if (table.pickOnce == null) {
-      pickOnce = false;
-    } else {
-      pickOnce = table.pickOnce;
-    }
+    pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
 
     if (table.entryList != null) {
       getInternalEntryList().addAll(table.entryList);
@@ -158,8 +150,8 @@ public class LookupTable {
   }
 
   private int constrainRoll(int val) {
-    Integer minmin = Integer.MAX_VALUE;
-    Integer maxmax = Integer.MIN_VALUE;
+    int minmin = Integer.MAX_VALUE;
+    int maxmax = Integer.MIN_VALUE;
 
     for (LookupEntry entry : getInternalEntryList()) {
       if (entry.min < minmin) {
@@ -182,7 +174,7 @@ public class LookupTable {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      ArrayList<LookupEntry> le = getInternalEntryList();
+      List<LookupEntry> le = getInternalEntryList();
       LookupEntry entry;
       int len = le.size();
       List unpicked = new ArrayList<Integer>();
@@ -225,7 +217,7 @@ public class LookupTable {
     }
   }
 
-  private ArrayList<LookupEntry> getInternalEntryList() {
+  private List<LookupEntry> getInternalEntryList() {
     if (entryList == null) {
       entryList = new ArrayList<>();
     }
@@ -234,8 +226,8 @@ public class LookupTable {
 
   /** Sets the picked flag on each table entry to false. */
   public void reset() {
-    ArrayList<LookupEntry> curList = getInternalEntryList();
-    ArrayList<LookupEntry> newList = new ArrayList<>();
+    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
       newList.add(entry);

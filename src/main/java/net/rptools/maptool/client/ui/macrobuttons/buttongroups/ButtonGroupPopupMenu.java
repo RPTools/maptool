@@ -40,6 +40,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.eclipse.jetty.util.StringUtil;
 
 @SuppressWarnings("serial")
 public class ButtonGroupPopupMenu extends JPopupMenu {
@@ -276,12 +277,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       if (alreadyExists) {
                         String tokenName = token.getName();
-                        if (MapTool.getPlayer().isGM()) {
-                          if (token.getGMName() != null) {
-                            if (!token.getGMName().equals("")) {
-                              tokenName = tokenName + "(" + token.getGMName() + ")";
-                            }
-                          }
+                        if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                          tokenName = tokenName + "(" + token.getGMName() + ")";
                         }
                         alreadyExists =
                             confirmImport(
@@ -303,12 +300,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                   }
                   if (alreadyExists) {
                     String tokenName = token.getName();
-                    if (MapTool.getPlayer().isGM()) {
-                      if (token.getGMName() != null) {
-                        if (!token.getGMName().equals("")) {
-                          tokenName = tokenName + "(" + token.getGMName() + ")";
-                        }
-                      }
+                    if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                      tokenName += "(" + token.getGMName() + ")";
                     }
                     alreadyExists =
                         confirmImport(
@@ -364,12 +357,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               List<MacroButtonProperties> toAdd = new ArrayList<>(newButtonProps.size());
               int nextIndex = token.getMacroNextIndex();
               String tokenName = token.getName();
-              if (MapTool.getPlayer().isGM()) {
-                if (token.getGMName() != null) {
-                  if (!token.getGMName().equals("")) {
-                    tokenName = tokenName + "(" + token.getGMName() + ")";
-                  }
-                }
+              if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                tokenName = tokenName + "(" + token.getGMName() + ")";
               }
               for (MacroButtonProperties nextProps : newButtonProps) {
                 Integer code = nextProps.hashCodeForComparison();
@@ -670,23 +659,21 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
         if (MapTool.confirm(I18N.getText("confirm.macro.clearPanel", I18N.getText("panel.Gm")))) {
           GmPanel.clearPanel();
         }
-      } else if (tokenId != null) {
-        if (panelClass.equals("ImpersonatePanel")) {
-          if (MapTool.confirm(
-              I18N.getText("confirm.macro.clearPanel", I18N.getText("panel.Impersonate")))) {
-            MapTool.getFrame()
-                .getCurrentZoneRenderer()
-                .getZone()
-                .getToken(tokenId)
-                .deleteAllMacros(true);
-          }
+      } else if (tokenId != null && "ImpersonatePanel".equals(panelClass)) {
+        if (MapTool.confirm(
+            I18N.getText("confirm.macro.clearPanel", I18N.getText("panel.Impersonate")))) {
+          MapTool.getFrame()
+              .getCurrentZoneRenderer()
+              .getZone()
+              .getToken(tokenId)
+              .deleteAllMacros(true);
         }
       }
     }
   }
 
   private Boolean confirmCommonExport(MacroButtonProperties buttonMacro) {
-    Boolean failComparison = false;
+    boolean failComparison = false;
     String comparisonResults = "";
     if (!buttonMacro.getCompareGroup()) {
       failComparison = true;

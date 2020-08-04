@@ -22,10 +22,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
@@ -233,7 +230,7 @@ public final class ExtractHeroLab {
         heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
         // Is it a minion?
-        if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
+        if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
           Node master = hero.getParentNode().getParentNode();
           String minionMasterIndex = ((Element) master).getAttribute("herolableadindex");
           String minionMasterName = ((Element) master).getAttribute("name");
@@ -259,11 +256,7 @@ public final class ExtractHeroLab {
         heroes.add(heroFile);
         markComplete(new XMLDocument(portfolioIndex).toString());
       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -322,7 +315,7 @@ public final class ExtractHeroLab {
       heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
       // Is it a minion?
-      if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
+      if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
         Node master = hero.getParentNode().getParentNode();
         String minionMasterIndex = ((Element) master).getAttribute("herolableadindex");
 
@@ -335,11 +328,7 @@ public final class ExtractHeroLab {
       }
 
       markComplete(new XMLDocument(portfolioIndex).toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (SAXException e) {
-      e.printStackTrace();
-    } catch (XPathExpressionException e) {
+    } catch (IOException | XPathExpressionException | SAXException e) {
       e.printStackTrace();
     }
 
@@ -366,8 +355,7 @@ public final class ExtractHeroLab {
   }
 
   public HeroLabData refreshHeroLabData(HeroLabData heroData) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
@@ -390,14 +378,13 @@ public final class ExtractHeroLab {
     return heroData;
   }
 
-  private HashMap<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero) {
+  private Map<String, Map<String, String>> getStatBlocks(XPath xpath, Node hero) {
     return getStatBlocks(xpath, hero, null, null);
   }
 
-  private HashMap<String, HashMap<String, String>> getStatBlocks(
+  private Map<String, Map<String, String>> getStatBlocks(
       XPath xpath, Node hero, Node master, String minionName) {
-    HashMap<String, HashMap<String, String>> statBlocks =
-        new HashMap<String, HashMap<String, String>>(3);
+    HashMap<String, Map<String, String>> statBlocks = new HashMap<>(3);
 
     statBlocks.put(
         HeroLabData.StatBlockType.TEXT,
@@ -515,8 +502,8 @@ public final class ExtractHeroLab {
     return path;
   }
 
-  private HashMap<String, String> getStatBlock(String zipPath, String type) {
-    HashMap<String, String> statBlock = new HashMap<String, String>(2);
+  private Map<String, String> getStatBlock(String zipPath, String type) {
+    Map<String, String> statBlock = new HashMap<String, String>(2);
     ZipFile por;
 
     try {
@@ -533,8 +520,6 @@ public final class ExtractHeroLab {
       }
 
       por.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     } catch (NullPointerException e) {
       e.printStackTrace();
     } catch (Exception e) {

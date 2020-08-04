@@ -42,7 +42,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
-import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,8 +89,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   private UserDefinedMacroFunctions() {}
 
   @Override
-  public void checkParameters(String functionName, List<Object> parameters)
-      throws ParameterException {
+  public void checkParameters(String functionName, List<Object> parameters) {
     // Do nothing as we do not know what we will need.
   }
 
@@ -204,7 +202,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
-        if (userDefinedFunctions.get(name).equals(macro)) {
+        if (userDefinedFunctions.get(name).macroName.equals(macro)) {
           return;
         }
         // We have to rename the old function
@@ -365,9 +363,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       if (functionName.equals(function.getKey())) {
         FunctionDefinition funcDef = function.getValue();
         String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
-          String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
+        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
+          String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
+          String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
           Token token = FindTokenFunctions.findToken(tokenName);
           if (token != null) {
             List<MacroButtonProperties> macros = token.getMacroList(false);
@@ -393,9 +391,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       if (functionName.equals(function.getKey())) {
         final FunctionDefinition funcDef = function.getValue();
         final String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          final String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
-          final String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
+        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
+          final String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
+          final String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
           final Token token = FindTokenFunctions.findToken(tokenName);
           if (token != null) {
             final List<MacroButtonProperties> macros = token.getMacroList(false);

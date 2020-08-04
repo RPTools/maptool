@@ -43,7 +43,7 @@ public class ImagePanel extends JComponent
 
   private int gridSize = 50;
   private final Dimension gridPadding = new Dimension(9, 11);
-  private final int captionPadding = 5;
+  private static final int captionPadding = 5;
 
   private final Map<Rectangle, Integer> imageBoundsMap = new HashMap<Rectangle, Integer>();
 
@@ -161,8 +161,7 @@ public class ImagePanel extends JComponent
   }
 
   public List<Object> getSelectedIds() {
-    List<Object> list = new ArrayList<Object>();
-    list.addAll(selectedIDList);
+    List<Object> list = new ArrayList<Object>(selectedIDList);
     return list;
   }
 
@@ -259,8 +258,7 @@ public class ImagePanel extends JComponent
       // Selected
       if (selectedIDList.contains(model.getID(i))) {
         // TODO: Let the user pick the border
-        ImageBorder.RED.paintAround(
-            (Graphics2D) g, bounds.x, bounds.y, bounds.width, bounds.height);
+        ImageBorder.RED.paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
       }
       // Decorations
       Image[] decorations = model.getDecorations(i);
@@ -406,9 +404,9 @@ public class ImagePanel extends JComponent
   }
 
   protected int getImageIndexAt(int x, int y) {
-    for (Rectangle rect : imageBoundsMap.keySet()) {
-      if (rect.contains(x, y)) {
-        return imageBoundsMap.get(rect);
+    for (var imageBounds : imageBoundsMap.entrySet()) {
+      if (imageBounds.getKey().contains(x, y)) {
+        return imageBounds.getValue();
       }
     }
     return -1;

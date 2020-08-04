@@ -425,22 +425,20 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
         return BigDecimal.ZERO;
       }
 
-      if (left instanceof JSONObject) {
-        if (right instanceof JSONObject) {
-          JSONObject lo = (JSONObject) left;
-          JSONObject ro = (JSONObject) right;
+      if (left instanceof JSONObject && right instanceof JSONObject) {
+        JSONObject lo = (JSONObject) left;
+        JSONObject ro = (JSONObject) right;
 
-          if (lo.size() != ro.size()) {
+        if (lo.size() != ro.size()) {
+          return BigDecimal.ZERO;
+        }
+
+        for (Object key : lo.keySet()) {
+          if (!lo.get(key).equals(ro.get(key))) {
             return BigDecimal.ZERO;
           }
-
-          for (Object key : lo.keySet()) {
-            if (!lo.get(key).equals(ro.get(key))) {
-              return BigDecimal.ZERO;
-            }
-          }
-          return BigDecimal.ONE;
         }
+        return BigDecimal.ONE;
       }
 
       if (left instanceof String) {
@@ -630,11 +628,11 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
    */
   private Object JSONRemoveFirst(List<Object> parameters) throws ParserException {
 
-    List<Object> result = new LinkedList<>();
+    List<Object> result;
 
     Object o = asJSON(parameters.get(0).toString());
     if (o instanceof JSONArray) {
-      result.addAll((JSONArray) o);
+      result = new LinkedList<>((JSONArray) o);
     } else {
       throw new ParserException(
           I18N.getText(
@@ -644,9 +642,9 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
     }
 
     o = asJSON(parameters.get(1).toString());
-    List<Object> toRemove = new ArrayList<>();
+    List<Object> toRemove;
     if (o instanceof JSONArray) {
-      toRemove.addAll((JSONArray) o);
+      toRemove = new ArrayList<>((JSONArray) o);
     } else {
       throw new ParserException(
           I18N.getText(
@@ -866,8 +864,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
               "json.unique"));
     }
     JSONArray jarr = (JSONArray) obj;
-    Set s = new HashSet();
-    s.addAll(jarr);
+    Set s = new HashSet(jarr);
     return JSONArray.fromObject(s);
   }
 
@@ -1670,7 +1667,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
    */
   private boolean JSONContains(Object obj, String key) throws ParserException {
 
-    if (obj != null && obj instanceof JSONObject) {
+    if (obj instanceof JSONObject) {
       return ((JSONObject) obj).containsKey(key);
     }
 

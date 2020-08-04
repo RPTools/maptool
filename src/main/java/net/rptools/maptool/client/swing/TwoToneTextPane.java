@@ -174,7 +174,8 @@ public class TwoToneTextPane extends JTextPane {
       e.printStackTrace();
       throw new IllegalStateException(
           "This should not happen since I always use the document to "
-              + "determine the location to write. It might be due to synchronization problems though");
+              + "determine the location to write. It might be due to synchronization problems though",
+          e);
     }
   }
 
@@ -276,7 +277,7 @@ public class TwoToneTextPane extends JTextPane {
    * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
    *     azhrei_fje $
    */
-  public class TwoToneGlyphPainter extends GlyphView.GlyphPainter {
+  public static class TwoToneGlyphPainter extends GlyphView.GlyphPainter {
 
     /*---------------------------------------------------------------------------------------------
      * Instance Variables
@@ -314,7 +315,7 @@ public class TwoToneTextPane extends JTextPane {
         Document doc = v.getDocument();
         doc.getText(p0, p1 - p0, text);
       } catch (BadLocationException bl) {
-        throw new IllegalStateException("GlyphView: Stale view: " + bl);
+        throw new IllegalStateException("GlyphView: Stale view: " + bl, bl);
       }
       return text;
     }

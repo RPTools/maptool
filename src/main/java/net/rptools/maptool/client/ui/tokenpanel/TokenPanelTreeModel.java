@@ -99,7 +99,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
   /** The list of token filters. */
   private final List<TokenFilter> filterList = new ArrayList<TokenFilter>();
 
-  private final String root = "Views";
+  private static final String root = "Views";
   private Zone zone;
   private final JTree tree;
   /** Is an updateInternal pending? */
