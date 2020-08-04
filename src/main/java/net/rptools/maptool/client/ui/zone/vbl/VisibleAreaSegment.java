@@ -49,7 +49,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   }
 
   public long getDistanceSqFromOrigin() {
-    return (long)getCenterPoint().distanceSq(origin);
+    return (long) getCenterPoint().distanceSq(origin);
   }
 
   public Point2D getCenterPoint() {
