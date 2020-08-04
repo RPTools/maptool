@@ -245,14 +245,11 @@ public class MessagePanel extends JPanel {
             try {
               Element element = document.getElement("body");
               document.insertBeforeEnd(element, "<div>" + output + "</div>");
-
               if (!message.getSource().equals(MapTool.getPlayer().getName())) {
                 MapTool.playSound(SND_MESSAGE_RECEIVED);
               }
-            } catch (IOException ioe) {
+            } catch (IOException | BadLocationException ioe) {
               ioe.printStackTrace();
-            } catch (BadLocationException ble) {
-              ble.printStackTrace();
             }
           }
         });
