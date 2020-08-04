@@ -990,7 +990,7 @@ public class PreferencesDialog extends JDialog {
   }
 
   /** @author frank */
-  private abstract class DocumentListenerProxy<T> implements DocumentListener {
+  private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
     JTextField comp;
 
@@ -1027,7 +1027,7 @@ public class PreferencesDialog extends JDialog {
   }
 
   /** @author frank */
-  private abstract class ChangeListenerProxy implements ChangeListener {
+  private abstract static class ChangeListenerProxy implements ChangeListener {
 
     @Override
     public void stateChanged(ChangeEvent ce) {

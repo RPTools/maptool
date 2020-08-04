@@ -408,7 +408,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
         .addElement(new ServerInfo(new String(data), address, port));
   }
 
-  private class ServerInfo {
+  private static class ServerInfo {
     String id;
     InetAddress address;
     int port;
