@@ -424,10 +424,7 @@ public class ZoneView implements ModelChangeListener {
         workerThread
             .get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish
         // before we go on
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ExecutionException e) {
+      } catch (InterruptedException | ExecutionException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }

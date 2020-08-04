@@ -2248,7 +2248,7 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     List<InitiativeList.TokenInitiative> ret = new ArrayList<>(list.size());
     for (Integer index : list) {
