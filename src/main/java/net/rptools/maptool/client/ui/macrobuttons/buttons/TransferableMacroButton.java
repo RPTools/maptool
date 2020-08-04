@@ -16,8 +16,6 @@ package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 
 public class TransferableMacroButton implements Transferable {
 
@@ -40,8 +38,7 @@ public class TransferableMacroButton implements Transferable {
     return dataFlavor.equals(macroButtonFlavor);
   }
 
-  public Object getTransferData(DataFlavor dataFlavor)
-      throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor dataFlavor) {
     if (dataFlavor.equals(macroButtonFlavor)) {
       return transferData;
     }

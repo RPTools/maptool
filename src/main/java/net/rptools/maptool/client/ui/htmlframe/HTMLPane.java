@@ -315,9 +315,7 @@ public class HTMLPane extends JEditorPane {
             HTMLDocument document = (HTMLDocument) getDocument();
             StyleSheet style = document.getStyleSheet();
             style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException e) {
-            // Do nothing
-          } catch (IOException e) {
+          } catch (ParserException | IOException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {

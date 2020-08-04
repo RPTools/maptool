@@ -16,9 +16,9 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.net.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -308,11 +308,7 @@ public class MediaPlayerAdapter {
       } else {
         info = adapter.getInfo();
       }
-      if (info == null) {
-        return "";
-      } else {
-        return info;
-      }
+      return Objects.requireNonNullElse(info, "");
     }
   }
 
