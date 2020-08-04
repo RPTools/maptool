@@ -173,14 +173,14 @@ public class TokenLightFunctions extends AbstractFunction {
    */
   public static boolean hasLightSource(Token token, String category, String name)
       throws ParserException {
-    if (category.equals("*") && name.equals("*")) {
+    if ("*".equals(category) && "*".equals(name)) {
       return token.hasLightSources();
     }
 
     Map<String, Map<GUID, LightSource>> lightSourcesMap =
         MapTool.getCampaign().getLightSourcesMap();
 
-    if (category.equals("*")) {
+    if ("*".equals(category)) {
       for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
         for (LightSource ls : lsMap.values()) {
           if (ls.getName().equals(name)) {
@@ -193,7 +193,7 @@ public class TokenLightFunctions extends AbstractFunction {
     } else {
       if (lightSourcesMap.containsKey(category)) {
         for (LightSource ls : lightSourcesMap.get(category).values()) {
-          if (ls.getName().equals(name) || name.equals("*")) {
+          if (ls.getName().equals(name) || "*".equals(name)) {
             if (token.hasLightSource(ls)) {
               return true;
             }
