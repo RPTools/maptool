@@ -676,7 +676,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
         JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(entry.getKey());
         if (jtb == null) {
           log.warn("GUI component for export setting '" + entry.getKey() + "' not found.");
-        } else jtb.setSelected(entry.getValue());
+        } else {
+          jtb.setSelected(entry.getValue());
+        }
       }
     }
   }
