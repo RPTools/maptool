@@ -1523,7 +1523,9 @@ public class MapToolLineParser {
 
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
-    if (options != null) s.append("\001").append(StringUtils.join(options, ",")).append("\002");
+    if (options != null) {
+      s.append("\001").append(StringUtils.join(options, ",")).append("\002");
+    }
 
     if (tooltip != null) {
       tooltip = tooltip.replaceAll("'", "&#39;");
