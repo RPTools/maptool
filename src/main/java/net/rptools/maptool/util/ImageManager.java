@@ -72,7 +72,7 @@ public class ImageManager {
 
   private static ExecutorService largeImageLoader = Executors.newFixedThreadPool(1);
 
-  private static Object imageLoaderMutex = new Object();
+  private static final Object imageLoaderMutex = new Object();
 
   /**
    * A Map containing sets of observers for each asset id. Observers are notified when the image is
@@ -252,9 +252,7 @@ public class ImageManager {
     }
     Set<ImageObserver> observerSet =
         imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
-    for (ImageObserver observer : observers) {
-      observerSet.add(observer);
-    }
+    observerSet.addAll(Arrays.asList(observers));
   }
 
   /**
@@ -388,8 +386,11 @@ public class ImageManager {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return id.equals(obj);
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      AssetListener that = (AssetListener) o;
+      return Objects.equals(id, that.id);
     }
   }
 }

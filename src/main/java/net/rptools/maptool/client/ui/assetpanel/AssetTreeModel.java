@@ -25,7 +25,7 @@ import net.rptools.maptool.model.AssetGroup;
 /** */
 public class AssetTreeModel implements TreeModel {
   private final List<AssetGroup> rootAssetGroups = new ArrayList<AssetGroup>();
-  private final Object root = new String("Images");
+  private final Object root = "Images";
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
 
   public AssetTreeModel() {}

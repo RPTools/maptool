@@ -76,7 +76,8 @@ public class LoadSaveImpl {
             addDataObjects("Campaign/Maps", cmpgn.getZones());
           }
         });
-    for (DataTemplate dt : registry.values()) {
+    for (String name : registry.keySet()) {
+      DataTemplate dt = registry.get(name);
       dt.populateModel(model);
     }
     form.expandAndSelectAll(true);

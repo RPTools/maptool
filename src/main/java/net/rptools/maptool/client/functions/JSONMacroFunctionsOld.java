@@ -628,11 +628,11 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
    */
   private Object JSONRemoveFirst(List<Object> parameters) throws ParserException {
 
-    List<Object> result = new LinkedList<>();
+    List<Object> result;
 
     Object o = asJSON(parameters.get(0).toString());
     if (o instanceof JSONArray) {
-      result.addAll((JSONArray) o);
+      result = new LinkedList<>((JSONArray) o);
     } else {
       throw new ParserException(
           I18N.getText(
@@ -642,9 +642,9 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
     }
 
     o = asJSON(parameters.get(1).toString());
-    List<Object> toRemove = new ArrayList<>();
+    List<Object> toRemove;
     if (o instanceof JSONArray) {
-      toRemove.addAll((JSONArray) o);
+      toRemove = new ArrayList<>((JSONArray) o);
     } else {
       throw new ParserException(
           I18N.getText(
@@ -864,8 +864,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
               "json.unique"));
     }
     JSONArray jarr = (JSONArray) obj;
-    Set s = new HashSet();
-    s.addAll(jarr);
+    Set s = new HashSet(jarr);
     return JSONArray.fromObject(s);
   }
 

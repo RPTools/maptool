@@ -310,9 +310,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     if (properties != null) {
       oldHashCode = properties.hashCodeForComparison();
       Boolean playerCanEdit = !MapTool.getPlayer().isGM() && properties.getAllowPlayerEdits();
-      Boolean onGlobalPanel = properties.getSaveLocation().equals("Global");
-      Boolean allowEdits = onGlobalPanel || MapTool.getPlayer().isGM() || playerCanEdit;
-      Boolean isCommonMacro =
+      boolean onGlobalPanel = properties.getSaveLocation().equals("Global");
+      boolean allowEdits = onGlobalPanel || MapTool.getPlayer().isGM() || playerCanEdit;
+      boolean isCommonMacro =
           button.getPanelClass().equals("SelectionPanel")
               && MapTool.getFrame().getSelectionPanel().getCommonMacros().contains(properties);
       if (allowEdits) {

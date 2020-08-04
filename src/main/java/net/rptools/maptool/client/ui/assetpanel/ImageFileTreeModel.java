@@ -26,7 +26,7 @@ import net.rptools.maptool.client.MapTool;
 /** */
 public class ImageFileTreeModel implements TreeModel {
   private final List<Directory> rootDirectories = new ArrayList<Directory>();
-  private final Object root = new String("");
+  private final Object root = "";
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
 
   public ImageFileTreeModel() {}

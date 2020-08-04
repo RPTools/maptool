@@ -391,7 +391,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
     long delay;
 
-    Object sleepSemaphore = new Object();
+    final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
       delay = millidelay;

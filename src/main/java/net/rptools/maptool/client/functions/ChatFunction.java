@@ -16,7 +16,6 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
@@ -108,11 +107,11 @@ public class ChatFunction extends AbstractFunction {
             MapTool.addGlobalMessage(message);
           } else {
             @SuppressWarnings("unchecked")
-            Collection<String> targets =
+            List<String> targets =
                 JSONMacroFunctions.getInstance()
                     .getJsonArrayFunctions()
                     .jsonArrayToListOfStrings(jarray);
-            MapTool.addGlobalMessage(message, (List<String>) targets);
+            MapTool.addGlobalMessage(message, targets);
           }
         }
         return "";

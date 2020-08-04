@@ -316,8 +316,7 @@ public class HexGridHorizontal extends HexGrid {
     // Adjust to grid if token is an even number of grid cells
     double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
     double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide =
-        (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
 
     final AffineTransform at = new AffineTransform();
     final double coordinateOffsetX;

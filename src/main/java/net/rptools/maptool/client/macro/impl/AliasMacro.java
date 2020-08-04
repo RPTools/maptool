@@ -78,8 +78,7 @@ public class AliasMacro implements Macro {
         .append("</b></td></tr>");
 
     Map<String, String> aliasMap = MacroManager.getAliasMap();
-    List<String> nameList = new ArrayList<String>();
-    nameList.addAll(aliasMap.keySet());
+    List<String> nameList = new ArrayList<String>(aliasMap.keySet());
     Collections.sort(nameList);
 
     for (String name : nameList) {

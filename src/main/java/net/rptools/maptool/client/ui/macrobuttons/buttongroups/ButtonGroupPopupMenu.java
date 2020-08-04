@@ -673,7 +673,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
   }
 
   private Boolean confirmCommonExport(MacroButtonProperties buttonMacro) {
-    Boolean failComparison = false;
+    boolean failComparison = false;
     String comparisonResults = "";
     if (!buttonMacro.getCompareGroup()) {
       failComparison = true;

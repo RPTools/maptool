@@ -230,7 +230,7 @@ public final class ExtractHeroLab {
         heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
         // Is it a minion?
-        if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
+        if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
           Node master = hero.getParentNode().getParentNode();
           String minionMasterIndex = ((Element) master).getAttribute("herolableadindex");
           String minionMasterName = ((Element) master).getAttribute("name");
@@ -315,7 +315,7 @@ public final class ExtractHeroLab {
       heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes"));
 
       // Is it a minion?
-      if (hero.getParentNode().getNodeName().toString().equalsIgnoreCase("minions")) {
+      if (hero.getParentNode().getNodeName().equalsIgnoreCase("minions")) {
         Node master = hero.getParentNode().getParentNode();
         String minionMasterIndex = ((Element) master).getAttribute("herolableadindex");
 
