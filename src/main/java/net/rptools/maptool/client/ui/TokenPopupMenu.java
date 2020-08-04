@@ -614,7 +614,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     return item;
   }
 
-  private class SetHaloAction extends AbstractAction {
+  private static class SetHaloAction extends AbstractAction {
     private static final long serialVersionUID = 936075111485618012L;
 
     protected Color color;
@@ -650,7 +650,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  private class SetColorChooserAction extends AbstractAction {
+  private static class SetColorChooserAction extends AbstractAction {
     private static final long serialVersionUID = 2212977067043864272L;
 
     protected Color currentColor;

@@ -143,7 +143,7 @@ public class OutlookPanel extends JPanel {
   }
 
   // For convenience
-  private class JButtonEx extends JButton {
+  private static class JButtonEx extends JButton {
     public JButtonEx(String label, int index, JComponent component) {
       super(label);
       m_index = index;
