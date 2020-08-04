@@ -418,10 +418,12 @@ public class ServerCommandClientImpl implements ServerCommand {
       while (true) {
 
         flush();
-        try {
-          sleepSemaphore.wait(delay);
-        } catch (InterruptedException ie) {
-          // nothing to do
+        synchronized (sleepSemaphore) {
+          try {
+            Thread.sleep(delay);
+          } catch (InterruptedException ie) {
+            // nothing to do
+          }
         }
       }
     }
