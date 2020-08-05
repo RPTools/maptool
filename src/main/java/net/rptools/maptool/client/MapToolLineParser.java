@@ -1397,12 +1397,15 @@ public class MapToolLineParser {
    *     the caller doesn't have access to the token.
    */
   public Token getTokenMacroLib(String location) throws ParserException {
+    if (location == null) {
+      return null;
+    }
     if (!location.matches("(?i)^lib:.*")) {
       throw new ParserException(I18N.getText("lineParser.notALibToken"));
     }
     final String libTokenName = location;
     Token libToken = null;
-    if (libTokenName != null && libTokenName.length() > 0) {
+    if (libTokenName.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
@@ -1435,12 +1438,15 @@ public class MapToolLineParser {
    *     the caller doesn't have access to the token.
    */
   public Zone getTokenMacroLibZone(String location) throws ParserException {
+    if (location == null) {
+      return null;
+    }
     if (!location.matches("(?i)^lib:.*")) {
       throw new ParserException(I18N.getText("lineParser.notALibToken"));
     }
     final String libTokenName = location;
     Zone libTokenZone = null;
-    if (libTokenName != null && libTokenName.length() > 0) {
+    if (libTokenName.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =

@@ -552,7 +552,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   @SuppressWarnings("unused")
-  private static class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
+  private class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
     private static final long serialVersionUID = -6109869878632628827L;
 
     private final Set<GUID> tokenSet;
@@ -614,7 +614,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     return item;
   }
 
-  private static class SetHaloAction extends AbstractAction {
+  private class SetHaloAction extends AbstractAction {
     private static final long serialVersionUID = 936075111485618012L;
 
     protected Color color;
@@ -650,7 +650,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  private static class SetColorChooserAction extends AbstractAction {
+  private class SetColorChooserAction extends AbstractAction {
     private static final long serialVersionUID = 2212977067043864272L;
 
     protected Color currentColor;

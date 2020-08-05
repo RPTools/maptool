@@ -403,8 +403,10 @@ public class DrawPanelPopupMenu extends JPopupMenu {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
       for (GUID guid : selectedDrawSet) {
         DrawnElement de = findDrawnElement(drawableList, guid);
-        if (de.getDrawable() instanceof AbstractTemplate) continue;
-        if (de != null) VblTool(de.getDrawable(), pathOnly, isEraser);
+        if (de == null || de.getDrawable() instanceof AbstractTemplate) {
+          continue;
+        }
+        VblTool(de.getDrawable(), pathOnly, isEraser);
       }
     }
   }
@@ -512,11 +514,11 @@ public class DrawPanelPopupMenu extends JPopupMenu {
    * @return boolean
    */
   private boolean hasPath(DrawnElement drawnElement) {
+    if (drawnElement == null) return false;
     if (drawnElement.getDrawable() instanceof LineSegment) return true;
     if (drawnElement.getDrawable() instanceof ShapeDrawable) {
       ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
-      if ("Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName())) return false;
-      return true;
+      return "Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()) == false;
     }
     return false;
   }
