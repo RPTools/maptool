@@ -59,4 +59,12 @@ public class StringFunctionsTest {
         submitStringFunction(capitalize, string2),
         "use numbers and symbols as boundaries by default");
   }
+
+  @Test
+  public void testIsNumber() throws ParserException {
+    String isNumber = "isNumber";
+    String emptyString = "";
+
+    assertEquals(BigDecimal.ZERO, submitStringFunction(isNumber, emptyString));
+  }
 }
