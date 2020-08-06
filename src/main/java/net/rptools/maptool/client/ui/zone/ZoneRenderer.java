@@ -3321,7 +3321,7 @@ public class ZoneRenderer extends JComponent
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
           // if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
           if (zone.getGrid()
-                  .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+              .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
             tokenG.drawImage(workImage, at, this);
           } else {
             // else draw the clipped stamp/token
