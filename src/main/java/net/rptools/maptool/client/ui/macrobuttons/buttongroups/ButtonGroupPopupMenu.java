@@ -115,6 +115,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     add(new ExportMacroSetAction());
     add(new JSeparator());
     if (areaGroup != null) {
+      add(new ExportMacroGroupAction());
       add(new RenameGroupAction());
     }
     add(new ClearGroupAction());
@@ -463,6 +464,156 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               } catch (IOException ioe) {
                 MapTool.showError("msg.error.macro.importSetFail", ioe);
               }
+            }
+          });
+    }
+  }
+
+  /** Export macros from a single group. */
+  private class ExportMacroGroupAction extends AbstractAction {
+    public ExportMacroGroupAction() {
+      putValue(Action.NAME, I18N.getText("action.macro.exportGroup"));
+    }
+
+    public ExportMacroGroupAction(String name) {
+      putValue(Action.NAME, name);
+    }
+
+    /**
+     * Filters a list of Macro Buttons to return only those in the specified macroGroup.
+     *
+     * @param buttons the list to filter
+     * @param macroGroup the macroGroup to match
+     * @return a list of matching macros
+     */
+    private List<MacroButtonProperties> buttonsInGroup(
+        List<MacroButtonProperties> buttons, String macroGroup) {
+      return buttons.stream()
+          .filter(b -> macroGroup.equals(b.getGroup()))
+          .collect(Collectors.toList());
+    }
+
+    public void actionPerformed(ActionEvent event) {
+
+      JFileChooser chooser = MapTool.getFrame().getSaveMacroSetFileChooser();
+
+      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+        return;
+      }
+
+      final File selectedFile = chooser.getSelectedFile();
+
+      if (selectedFile.exists()) {
+        if (selectedFile.getName().endsWith(".mtmacset")) {
+          if (!MapTool.confirm(I18N.getText("confirm.macro.exportSetInto"))) {
+            return;
+          }
+        } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportSetOverwrite"))) {
+          return;
+        }
+      }
+
+      EventQueue.invokeLater(
+          () -> {
+            try {
+              if (panelClass.equals("GlobalPanel")) {
+                PersistenceUtil.saveMacroSet(
+                    buttonsInGroup(MacroButtonPrefs.getButtonProperties(), macroGroup),
+                    selectedFile);
+              } else if (panelClass.equals("CampaignPanel")) {
+                PersistenceUtil.saveMacroSet(
+                    buttonsInGroup(
+                        MapTool.getCampaign().getMacroButtonPropertiesArray(), macroGroup),
+                    selectedFile);
+              } else if (panelClass.equals("GmPanel")) {
+                PersistenceUtil.saveMacroSet(
+                    buttonsInGroup(
+                        MapTool.getCampaign().getGmMacroButtonPropertiesArray(), macroGroup),
+                    selectedFile);
+              } else if (panelClass.equals("SelectionPanel")) {
+                if (areaGroup != null) {
+                  if (areaGroup
+                      .getGroupLabel()
+                      .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
+                    Boolean checkComparisons = MapTool.confirm("confirm.macro.checkComparisons");
+                    List<MacroButtonProperties> commonMacros =
+                        MapTool.getFrame().getSelectionPanel().getCommonMacros();
+                    commonMacros = buttonsInGroup(commonMacros, macroGroup); // filter early
+                    List<MacroButtonProperties> exportList = new ArrayList<MacroButtonProperties>();
+                    Boolean trusted = true;
+                    Boolean allowExport = true;
+                    for (MacroButtonProperties nextMacro : commonMacros) {
+                      trusted = true;
+                      allowExport = true;
+                      for (Token nextToken :
+                          MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
+                        if (!AppUtil.playerOwns(nextToken)) {
+                          trusted = false;
+                        }
+                        if (nextToken.getMacroList(trusted).size() > 0) {
+                          for (MacroButtonProperties nextCompMacro :
+                              nextToken.getMacroList(trusted)) {
+                            if (nextCompMacro.hashCodeForComparison()
+                                    == nextMacro.hashCodeForComparison()
+                                && (!MapTool.getPlayer().isGM()
+                                    || (!MapTool.getPlayer().isGM()
+                                        && !nextCompMacro.getAllowPlayerEdits()))) {
+                              allowExport = false;
+                            }
+                          }
+                        } else {
+                          allowExport = false;
+                        }
+                      }
+                      if (checkComparisons) {
+                        if (confirmCommonExport(nextMacro)) {
+                          if (trusted && allowExport) {
+                            exportList.add(nextMacro);
+                          } else {
+                            MapTool.showWarning(
+                                I18N.getText(
+                                    "msg.warning.macro.willNotExport", nextMacro.getLabel()));
+                          }
+                        } else {
+                          return;
+                        }
+                      } else {
+                        if (trusted && allowExport) {
+                          exportList.add(nextMacro);
+                        } else {
+                          MapTool.showWarning(
+                              I18N.getText(
+                                  "msg.warning.macro.willNotExport", nextMacro.getLabel()));
+                        }
+                      }
+                    }
+                    PersistenceUtil.saveMacroSet(exportList, selectedFile);
+                  } else if (tokenId != null) {
+                    Token token = getToken();
+                    Boolean trusted = AppUtil.playerOwns(token);
+                    List<MacroButtonProperties> exportList = new ArrayList<MacroButtonProperties>();
+                    List<MacroButtonProperties> candidateList =
+                        buttonsInGroup(token.getMacroList(trusted), macroGroup);
+                    for (MacroButtonProperties nextMacro : candidateList) {
+                      if (MapTool.getPlayer().isGM()
+                          || (!MapTool.getPlayer().isGM() && nextMacro.getAllowPlayerEdits())) {
+                        exportList.add(nextMacro);
+                      } else {
+                        MapTool.showWarning(
+                            I18N.getText("msg.warning.macro.willNotExport", nextMacro.getLabel()));
+                      }
+                    }
+                    PersistenceUtil.saveMacroSet(exportList, selectedFile);
+                  }
+                }
+              } else if (tokenId != null) {
+                Token token = getToken();
+                PersistenceUtil.saveMacroSet(
+                    buttonsInGroup(token.getMacroList(true), macroGroup), selectedFile);
+              }
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
     }
