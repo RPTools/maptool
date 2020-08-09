@@ -33,6 +33,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This (data)class is used by all Macro Buttons, including campaign, global and token macro
@@ -411,11 +412,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
      * This is actually one of the "common macro" buttons that are on the selection panel so we need to handle this case a little differently. If apply to all tokens is checked by the user then we
      * need to check that the command is part of the common values otherwise it would cause unexpected things to occur.
      */
-    if (applyToTokens) {
-      if (!compareCommand) {
-        MapTool.showError("msg.error.cantApplyMacroToSelected");
-        return;
-      }
+    if (applyToTokens && (!compareCommand)) {
+      MapTool.showError("msg.error.cantApplyMacroToSelected");
+      return;
     }
 
     if (compareCommand) {
@@ -899,7 +898,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   // function to enable sorting of buttons; uses the group first, then sortby field
   // concatenated with the label field. Case Insensitive
-  public int compareTo(MacroButtonProperties b2) throws ClassCastException {
+  public int compareTo(@NotNull MacroButtonProperties b2) throws ClassCastException {
     if (b2 != this) {
       String b1group = getGroup();
       if (b1group == null) b1group = "";

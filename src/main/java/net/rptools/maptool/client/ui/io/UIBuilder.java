@@ -49,7 +49,7 @@ public class UIBuilder extends JDialog {
   private static final Logger log = LogManager.getLogger(UIBuilder.class);
 
   /** @author crash */
-  public class TreeModel extends DefaultTreeModel {
+  public static class TreeModel extends DefaultTreeModel {
     /**
      * @param root the top-level node for the tree
      * @param asksAllowsChildren <code>false</code> means all nodes are leaf nodes unless they have
@@ -188,7 +188,7 @@ public class UIBuilder extends JDialog {
         while (children.hasMoreElements()) {
           DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
           if (MapTool.isDevelopment()) _Checking(next);
-          if (((MaptoolNode) next.getUserObject()).hashCode() == elem.hashCode()) {
+          if (next.getUserObject().hashCode() == elem.hashCode()) {
             start = next;
             _Found(start);
             continue OuterLoop;

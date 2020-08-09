@@ -399,25 +399,19 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     try {
       Constructor<SetHaloAction> standardColorActionConstructor =
           standardColorActionClass.getConstructor(
-              new Class[] {
-                TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class
-              });
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class);
       Constructor<SetColorChooserAction> customColorActionConstructor =
           customColorActionClass.getConstructor(
-              new Class[] {TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class});
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
 
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
               standardColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")
-                  }));
+                  this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")));
       JCheckBoxMenuItem customMenu =
           new JCheckBoxMenuItem(
               customColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")
-                  }));
+                  this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")));
 
       if (selectedColor == null) {
         noneMenu.setSelected(true);
@@ -439,7 +433,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         JCheckBoxMenuItem item =
             new JCheckBoxMenuItem(
                 standardColorActionConstructor.newInstance(
-                    new Object[] {this, getRenderer(), selectedTokenSet, bgColor, displayName}));
+                    this, getRenderer(), selectedTokenSet, bgColor, displayName));
         item.setBackground(bgColor);
         item.setForeground(fgColor);
 
@@ -558,7 +552,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   @SuppressWarnings("unused")
-  private static class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
+  private class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
     private static final long serialVersionUID = -6109869878632628827L;
 
     private final Set<GUID> tokenSet;
@@ -583,7 +577,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         Token token = zone.getToken(guid);
 
         if (selected) {
-          for (Player player : (Iterable<Player>) MapTool.getPlayerList()) {
+          for (Player player : MapTool.getPlayerList()) {
             token.addOwner(player.getName());
           }
           token.removeOwner(name);
@@ -888,16 +882,19 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         } else {
           for (int i = list.length - 1; i >= 0; i--) {
             int index = list[i];
+            if (index == -1) {
+              continue;
+            }
             if (name.equals("initiative.menu.remove")) {
-              if (index != -1) init.removeToken(index);
+              init.removeToken(index);
             } else if (name.equals("initiative.menu.hold")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(true);
+              init.getTokenInitiative(index).setHolding(true);
             } else if (name.equals("initiative.menu.resume")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(false);
+              init.getTokenInitiative(index).setHolding(false);
             } else if (name.equals("initiative.menu.setState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(input);
+              init.getTokenInitiative(index).setState(input);
             } else if (name.equals("initiative.menu.clearState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(null);
+              init.getTokenInitiative(index).setState(null);
             } // endif
           } // endif
         } // endfor

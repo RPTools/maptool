@@ -67,7 +67,7 @@ public class LoadAliasesMacro implements Macro {
         // Split into components
         String name = line;
         String value = null;
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         if (split > 0) {
           name = line.substring(0, split);
           value = line.substring(split + 1).trim();

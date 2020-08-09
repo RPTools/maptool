@@ -4,6 +4,7 @@
 package net.rptools.maptool.client.ui.logger;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.core.Filter;
@@ -18,7 +19,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 @Plugin(name = "JTextAreaAppender", category = "Core", elementType = "appender", printObject = true)
 public class JTextAreaAppender extends AbstractAppender {
-  private static volatile ArrayList<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
+  private static volatile List<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
 
   private int maxLines = 0;
 

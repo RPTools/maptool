@@ -67,8 +67,8 @@ public class DiamondTokenOverlay extends XTokenOverlay {
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Double hc = (double) bounds.width / 2;
-    Double vc = (double) bounds.height / 2;
+    double hc = (double) bounds.width / 2;
+    double vc = (double) bounds.height / 2;
     Color tempColor = g.getColor();
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();

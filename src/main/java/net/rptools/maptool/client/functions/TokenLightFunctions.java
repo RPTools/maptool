@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Direction;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -99,8 +96,8 @@ public class TokenLightFunctions extends AbstractFunction {
         MapTool.getCampaign().getLightSourcesMap();
 
     if (category == null || category.equals("*")) {
-      for (String catName : lightSourcesMap.keySet()) {
-        for (LightSource ls : lightSourcesMap.get(catName).values()) {
+      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
+        for (LightSource ls : lsMap.values()) {
           if (token.hasLightSource(ls)) {
             lightList.add(ls.getName());
           }
@@ -176,27 +173,25 @@ public class TokenLightFunctions extends AbstractFunction {
    */
   public static boolean hasLightSource(Token token, String category, String name)
       throws ParserException {
-    if (category.equals("*") && name.equals("*")) {
+    if ("*".equals(category) && "*".equals(name)) {
       return token.hasLightSources();
     }
 
     Map<String, Map<GUID, LightSource>> lightSourcesMap =
         MapTool.getCampaign().getLightSourcesMap();
 
-    if (category.equals("*")) {
-      for (String catName : lightSourcesMap.keySet()) {
-        for (LightSource ls : lightSourcesMap.get(catName).values()) {
-          if (ls.getName().equals(name) || name.equals("*")) {
-            if (token.hasLightSource(ls)) {
-              return true;
-            }
+    if ("*".equals(category)) {
+      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
+        for (LightSource ls : lsMap.values()) {
+          if (ls.getName().equals(name) && token.hasLightSource(ls)) {
+            return true;
           }
         }
       }
     } else {
       if (lightSourcesMap.containsKey(category)) {
         for (LightSource ls : lightSourcesMap.get(category).values()) {
-          if (ls.getName().equals(name) || name.equals("*")) {
+          if (ls.getName().equals(name) || "*".equals(name)) {
             if (token.hasLightSource(ls)) {
               return true;
             }

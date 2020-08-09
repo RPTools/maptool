@@ -88,10 +88,8 @@ public class MessagePanel extends JPanel {
               textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
             } else {
               Matcher m = URL_PATTERN.matcher(e.getDescription());
-              if (m.matches()) {
-                if (m.group(1).equalsIgnoreCase("macro")) {
-                  MacroLinkFunction.runMacroLink(e.getDescription());
-                }
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
@@ -247,14 +245,11 @@ public class MessagePanel extends JPanel {
             try {
               Element element = document.getElement("body");
               document.insertBeforeEnd(element, "<div>" + output + "</div>");
-
               if (!message.getSource().equals(MapTool.getPlayer().getName())) {
                 MapTool.playSound(SND_MESSAGE_RECEIVED);
               }
-            } catch (IOException ioe) {
+            } catch (IOException | BadLocationException ioe) {
               ioe.printStackTrace();
-            } catch (BadLocationException ble) {
-              ble.printStackTrace();
             }
           }
         });

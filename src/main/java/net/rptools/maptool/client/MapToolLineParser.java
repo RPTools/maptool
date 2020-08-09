@@ -140,12 +140,12 @@ public class MapToolLineParser {
 
     for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof AdditionalFunctionDescription) {
-        for (String alias : Arrays.asList(function.getAliases())) {
+        for (String alias : function.getAliases()) {
           functionList.put(alias, function.getClass().getName());
           //          log.info(alias + " : " + function.getClass().getName());
         }
       } else {
-        for (String alias : Arrays.asList(function.getAliases()))
+        for (String alias : function.getAliases())
           functionList.put(alias, function.getClass().getName());
       }
     }
@@ -260,7 +260,7 @@ public class MapToolLineParser {
       List<InlineRollMatch> matches = this.locateInlineRolls(line);
 
       for (InlineRollMatch match : matches) {
-        builder.append(line.substring(start, match.getStart())); // add everything before the roll
+        builder.append(line, start, match.getStart()); // add everything before the roll
 
         start = match.getEnd() + 1;
         // These variables will hold data extracted from the roll options.
@@ -980,17 +980,9 @@ public class MapToolLineParser {
       }
       builder.append(line.substring(start));
       return builder.toString();
-    } catch (AbortFunctionException e) {
+    } catch (ParserException e) {
       // do nothing; this exception will never generate any output
       // throw doError("macroExecutionAbort", opts == null ? "" : opts, roll == null ? line : roll);
-      throw e;
-    } catch (AssertFunctionException e) {
-      // do nothing; this exception will never generate any output
-      // throw doError("macroExecutionAssert", opts == null ? "" : opts, roll == null ? line :
-      // roll);
-      throw e;
-    } catch (ParserException e) {
-      // do nothing, jut pass message back up
       throw e;
     } catch (Exception e) {
       log.info(line, e);
@@ -1063,14 +1055,13 @@ public class MapToolLineParser {
       Result result = new Result("");
       result.setValue("");
       return result;
+    } catch (ParserException pe) {
+      log.debug(pe);
+      throw pe;
     } catch (Exception e) {
       if (e.getCause() instanceof ParserException) {
         log.debug(e.getCause());
         throw (ParserException) e.getCause();
-      }
-      if (e instanceof ParserException) {
-        log.debug(e);
-        throw (ParserException) e;
       }
       log.debug(e);
       throw new ParserException(
@@ -1100,12 +1091,8 @@ public class MapToolLineParser {
         sb.append(result.getDetailExpression()).append(" = ").append(result.getValue());
       }
       return sb.toString();
-    } catch (AbortFunctionException ae) {
-      throw ae;
-    } catch (AssertFunctionException afe) {
-      throw afe;
-    } catch (ParserException e) {
-      throw e;
+    } catch (ParserException pe) {
+      throw pe;
     } catch (Exception e) {
       return I18N.getText("lineParser.invalidExpr", roll);
     }
@@ -1410,12 +1397,15 @@ public class MapToolLineParser {
    *     the caller doesn't have access to the token.
    */
   public Token getTokenMacroLib(String location) throws ParserException {
+    if (location == null) {
+      return null;
+    }
     if (!location.matches("(?i)^lib:.*")) {
       throw new ParserException(I18N.getText("lineParser.notALibToken"));
     }
     final String libTokenName = location;
     Token libToken = null;
-    if (libTokenName != null && libTokenName.length() > 0) {
+    if (libTokenName.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
@@ -1448,12 +1438,15 @@ public class MapToolLineParser {
    *     the caller doesn't have access to the token.
    */
   public Zone getTokenMacroLibZone(String location) throws ParserException {
+    if (location == null) {
+      return null;
+    }
     if (!location.matches("(?i)^lib:.*")) {
       throw new ParserException(I18N.getText("lineParser.notALibToken"));
     }
     final String libTokenName = location;
     Zone libTokenZone = null;
-    if (libTokenName != null && libTokenName.length() > 0) {
+    if (libTokenName.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
@@ -1521,13 +1514,15 @@ public class MapToolLineParser {
 
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
-    if (options != null) s.append("\001" + StringUtils.join(options, ",") + "\002");
+    if (options != null) {
+      s.append("\001").append(StringUtils.join(options, ",")).append("\002");
+    }
 
     if (tooltip != null) {
       tooltip = tooltip.replaceAll("'", "&#39;");
-      s.append(tooltip + "\037");
+      s.append(tooltip).append("\037");
     }
-    s.append(text + "\036");
+    s.append(text).append("\036");
     return s.toString();
   }
 
@@ -1547,10 +1542,8 @@ public class MapToolLineParser {
       // The path is untrusted if any typing is involved, including GM's
       macroPathTrusted = context != null && context.isTrusted();
       macroButtonIndex = context == null ? -1 : context.getMacroButtonIndex();
-    } else if (context != null) {
-      if (!context.isTrusted()) {
-        macroPathTrusted = false;
-      }
+    } else if (context != null && !context.isTrusted()) {
+      macroPathTrusted = false;
     }
     if (context == null) {
       if (contextStack.size() == 0) {

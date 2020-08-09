@@ -309,7 +309,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public class ChatNotificationTimers extends Observable {
+  public static class ChatNotificationTimers extends Observable {
     private final LinkedMap chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
@@ -728,7 +728,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  private class MTFileFilter extends FileFilter {
+  private static class MTFileFilter extends FileFilter {
     private final String extension;
     private final String description;
 
@@ -746,11 +746,7 @@ public class MapToolFrame extends DefaultDockableHolder
       }
       String ext = getExtension(f);
       if (ext != null) {
-        if (ext.equals(extension)) {
-          return true;
-        } else {
-          return false;
-        }
+        return ext.equals(extension);
       }
       return false;
     }
@@ -1093,15 +1089,13 @@ public class MapToolFrame extends DefaultDockableHolder
                 tree.clearSelection();
               }
               tree.addSelectionInterval(rowIndex, rowIndex);
-              if (row instanceof DrawnElement) {
-                if (e.getClickCount() == 2) {
-                  DrawnElement de = (DrawnElement) row;
-                  getCurrentZoneRenderer()
-                      .centerOn(
-                          new ZonePoint(
-                              (int) de.getDrawable().getBounds().getCenterX(),
-                              (int) de.getDrawable().getBounds().getCenterY()));
-                }
+              if (row instanceof DrawnElement && e.getClickCount() == 2) {
+                DrawnElement de = (DrawnElement) row;
+                getCurrentZoneRenderer()
+                    .centerOn(
+                        new ZonePoint(
+                            (int) de.getDrawable().getBounds().getCenterX(),
+                            (int) de.getDrawable().getBounds().getCenterY()));
               }
               /*
                * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =
@@ -1194,15 +1188,13 @@ public class MapToolFrame extends DefaultDockableHolder
               }
               tree.addSelectionInterval(rowIndex, rowIndex);
 
-              if (row instanceof Token) {
-                if (e.getClickCount() == 2) {
-                  Token token = (Token) row;
-                  getCurrentZoneRenderer().clearSelectedTokens();
-                  // Pick an appropriate tool
-                  // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
-                  getCurrentZoneRenderer().centerOn(token);
-                  getCurrentZoneRenderer().updateAfterSelection();
-                }
+              if (row instanceof Token && e.getClickCount() == 2) {
+                Token token = (Token) row;
+                getCurrentZoneRenderer().clearSelectedTokens();
+                // Pick an appropriate tool
+                // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
+                getCurrentZoneRenderer().centerOn(token);
+                getCurrentZoneRenderer().updateAfterSelection();
               }
             }
             if (SwingUtilities.isRightMouseButton(e)) {
@@ -1685,7 +1677,7 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenFrame = null;
   }
 
-  public class FullScreenFrame extends JFrame {
+  public static class FullScreenFrame extends JFrame {
     public FullScreenFrame() {
       setUndecorated(true);
     }
@@ -1733,12 +1725,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public boolean confirmClose() {
-    if (MapTool.isHostingServer()) {
-      if (!MapTool.confirm("msg.confirm.hostingDisconnect")) {
-        return false;
-      }
-    }
-    return true;
+    return !MapTool.isHostingServer() || MapTool.confirm("msg.confirm.hostingDisconnect");
   }
 
   public void closingMaintenance() {
@@ -1818,8 +1805,8 @@ public class MapToolFrame extends DefaultDockableHolder
      */
     // updateKeyStrokes(menuBar);
 
-    for (MTFrame frame : frameMap.keySet()) {
-      updateKeyStrokes(frameMap.get(frame));
+    for (DockableFrame frame : frameMap.values()) {
+      updateKeyStrokes(frame);
     }
   }
 
@@ -1876,8 +1863,9 @@ public class MapToolFrame extends DefaultDockableHolder
         }
       }
     }
-    for (KeyStroke keyStroke : keyStrokeMap.keySet()) {
-      final MacroButton button = keyStrokeMap.get(keyStroke);
+    for (var entry : keyStrokeMap.entrySet()) {
+      final KeyStroke keyStroke = entry.getKey();
+      final MacroButton button = entry.getValue();
       if (button != null) {
         c.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, button);
         c.getActionMap().put(button, new MTButtonHotKeyAction(button));
@@ -2013,7 +2001,7 @@ public class MapToolFrame extends DefaultDockableHolder
   // end of Table import/export support
 
   @SuppressWarnings("serial")
-  private static class MTButtonHotKeyAction extends AbstractAction {
+  private class MTButtonHotKeyAction extends AbstractAction {
     private final MacroButton macroButton;
 
     public MTButtonHotKeyAction(MacroButton button) {

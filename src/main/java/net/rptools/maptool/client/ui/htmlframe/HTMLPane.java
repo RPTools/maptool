@@ -81,10 +81,8 @@ public class HTMLPane extends JEditorPane {
               scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
             } else {
               Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
-              if (m.matches()) {
-                if (m.group(1).equalsIgnoreCase("macro")) {
-                  MacroLinkFunction.runMacroLink(e.getDescription());
-                }
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
@@ -315,9 +313,7 @@ public class HTMLPane extends JEditorPane {
             HTMLDocument document = (HTMLDocument) getDocument();
             StyleSheet style = document.getStyleSheet();
             style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException e) {
-            // Do nothing
-          } catch (IOException e) {
+          } catch (ParserException | IOException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {

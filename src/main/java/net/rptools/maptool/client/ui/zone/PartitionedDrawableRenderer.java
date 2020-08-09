@@ -194,7 +194,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     ListIterator<Tuple> iter = list.listIterator();
     while (iter.hasNext()) {
       Tuple tuple = iter.next();
-      if (tuple.equals(key)) {
+      if (tuple.key.equals(key)) {
         iter.remove();
         return tuple;
       }
@@ -312,8 +312,11 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return key.equals(obj.toString());
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Tuple tuple = (Tuple) o;
+      return Objects.equals(key, tuple.key);
     }
 
     @Override

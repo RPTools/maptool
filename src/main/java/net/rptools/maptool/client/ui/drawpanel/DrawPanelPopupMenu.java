@@ -272,7 +272,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
             if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea());
           }
         }
-        Shape s = (Shape) a;
+        Shape s = a;
         Pen newPen = new Pen(elementUnderMouse.getPen());
         if (elementUnderMouse.getDrawable() instanceof LineSegment) newPen = invertPen(newPen);
         DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
@@ -377,7 +377,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent e) {
       MapTool.serverCommand()
           .undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
-      DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) elementUnderMouse).getDrawable();
+      DrawablesGroup dg = (DrawablesGroup) elementUnderMouse.getDrawable();
       for (DrawnElement de : dg.getDrawableList()) {
         MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
       }
@@ -403,8 +403,10 @@ public class DrawPanelPopupMenu extends JPopupMenu {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
       for (GUID guid : selectedDrawSet) {
         DrawnElement de = findDrawnElement(drawableList, guid);
-        if (de.getDrawable() instanceof AbstractTemplate) continue;
-        if (de != null) VblTool(de.getDrawable(), pathOnly, isEraser);
+        if (de == null || de.getDrawable() instanceof AbstractTemplate) {
+          continue;
+        }
+        VblTool(de.getDrawable(), pathOnly, isEraser);
       }
     }
   }
@@ -512,11 +514,11 @@ public class DrawPanelPopupMenu extends JPopupMenu {
    * @return boolean
    */
   private boolean hasPath(DrawnElement drawnElement) {
+    if (drawnElement == null) return false;
     if (drawnElement.getDrawable() instanceof LineSegment) return true;
     if (drawnElement.getDrawable() instanceof ShapeDrawable) {
       ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
-      if ("Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName())) return false;
-      return true;
+      return "Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()) == false;
     }
     return false;
   }

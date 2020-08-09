@@ -653,52 +653,50 @@ public class MacroLinkFunction extends AbstractFunction {
   private boolean isAutoExecLink(String link) {
     Matcher m = AUTOEXEC_PATTERN.matcher(link);
 
-    if (m.matches()) {
-      if (m.group(1).equalsIgnoreCase("macro")) {
-        String command = m.group(2);
-        try {
-          String[] parts = command.split("@");
-          if (parts.length > 1) {
-            Token token = MapTool.getParser().getTokenMacroLib(parts[1]);
-            if (token == null) {
-              return false;
-            }
-            MacroButtonProperties mbp = token.getMacro(parts[0], false);
-            if (mbp == null) {
-              return false;
-            }
-            if (mbp.getAutoExecute()) {
-              // Next make sure that it is trusted
-              boolean trusted = true;
+    if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+      String command = m.group(2);
+      try {
+        String[] parts = command.split("@");
+        if (parts.length > 1) {
+          Token token = MapTool.getParser().getTokenMacroLib(parts[1]);
+          if (token == null) {
+            return false;
+          }
+          MacroButtonProperties mbp = token.getMacro(parts[0], false);
+          if (mbp == null) {
+            return false;
+          }
+          if (mbp.getAutoExecute()) {
+            // Next make sure that it is trusted
+            boolean trusted = true;
 
-              // If the token is not owned by everyone and all
-              // owners are GMs then we are in
-              // a secure context as players can not modify the
-              // macro so GM can specify what
-              // ever they want.
-              if (token.isOwnedByAll()) {
-                trusted = false;
-              } else {
-                Set<String> gmPlayers = new HashSet<>();
-                for (Object o : MapTool.getPlayerList()) {
-                  Player p = (Player) o;
-                  if (p.isGM()) {
-                    gmPlayers.add(p.getName());
-                  }
-                }
-                for (String owner : token.getOwners()) {
-                  if (!gmPlayers.contains(owner)) {
-                    trusted = false;
-                    break;
-                  }
+            // If the token is not owned by everyone and all
+            // owners are GMs then we are in
+            // a secure context as players can not modify the
+            // macro so GM can specify what
+            // ever they want.
+            if (token.isOwnedByAll()) {
+              trusted = false;
+            } else {
+              Set<String> gmPlayers = new HashSet<>();
+              for (Object o : MapTool.getPlayerList()) {
+                Player p = (Player) o;
+                if (p.isGM()) {
+                  gmPlayers.add(p.getName());
                 }
               }
-              return trusted;
+              for (String owner : token.getOwners()) {
+                if (!gmPlayers.contains(owner)) {
+                  trusted = false;
+                  break;
+                }
+              }
             }
+            return trusted;
           }
-        } catch (ParserException e) {
-          log.error("Exception while handling macro " + command, e);
         }
+      } catch (ParserException e) {
+        log.error("Exception while handling macro " + command, e);
       }
     }
     return false;

@@ -51,8 +51,8 @@ public class Toolbox {
   public Tool createTool(Class<? extends Tool> toolClass) {
     Tool tool;
     try {
-      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor(new Class[] {});
-      tool = constructor.newInstance(new Object[] {});
+      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor();
+      tool = constructor.newInstance();
       // tool = constructor.newInstance((Object) null);
 
       if (tool.hasGroup()) {
@@ -106,15 +106,13 @@ public class Toolbox {
           if (tool == currentTool) {
             return;
           }
-          if (currentTool != null) {
-            if (currentRenderer != null) {
-              currentTool.removeListeners(currentRenderer);
-              // currentTool.addGridBasedKeys(currentRenderer, false);
-              currentTool.detachFrom(currentRenderer);
+          if (currentTool != null && currentRenderer != null) {
+            currentTool.removeListeners(currentRenderer);
+            // currentTool.addGridBasedKeys(currentRenderer, false);
+            currentTool.detachFrom(currentRenderer);
 
-              if (currentTool instanceof ZoneOverlay) {
-                currentRenderer.removeOverlay((ZoneOverlay) currentTool);
-              }
+            if (currentTool instanceof ZoneOverlay) {
+              currentRenderer.removeOverlay((ZoneOverlay) currentTool);
             }
           }
           // Update

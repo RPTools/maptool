@@ -462,7 +462,7 @@ public class AppActions {
            */
           try {
             File topdir = urd.getDirectory();
-            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : null);
+            File dir = new File(urd.isCreateSubdir() ? getFormattedDate(null) : ".");
 
             Map<String, String> repoEntries = new HashMap<String, String>(missing.size());
             FTPClient ftp = new FTPClient(urd.getHostname(), urd.getUsername(), urd.getPassword());
@@ -2470,9 +2470,12 @@ public class AppActions {
 
         MapTool.setCampaign(campaign.campaign, campaign.currentZoneId);
         ZoneRenderer current = MapTool.getFrame().getCurrentZoneRenderer();
-        if (campaign.currentView != null && current != null)
-          current.setZoneScale(campaign.currentView);
-        current.getZoneScale().reset();
+        if (current != null) {
+          if (campaign.currentView != null) {
+            current.setZoneScale(campaign.currentView);
+          }
+          current.getZoneScale().reset();
+        }
         MapTool.getAutoSaveManager().tidy();
 
         // UI related stuff
@@ -2632,7 +2635,6 @@ public class AppActions {
   public static void doCampaignExport() {
     CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
     dialog.setVisible(true);
-    MapTool.getCampaign().setExportCampaignDialog(dialog);
 
     if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
       saveAndUpdateCampaignName(dialog.getVersionText(), dialog.getCampaignFile(), null);

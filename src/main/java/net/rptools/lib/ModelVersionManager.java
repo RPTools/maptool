@@ -98,9 +98,7 @@ public class ModelVersionManager {
 
     List<ModelVersionTransformation> transformList =
         transformMap.computeIfAbsent(version, k -> new LinkedList<ModelVersionTransformation>());
-    for (ModelVersionTransformation transform : transforms) {
-      transformList.add(transform);
-    }
+    transformList.addAll(Arrays.asList(transforms));
   }
 
   /**
@@ -158,8 +156,8 @@ public class ModelVersionManager {
       return false;
     }
 
-    String[] v1 = version1.indexOf(".") > 0 ? version1.split("\\.") : new String[] {version1};
-    String[] v2 = version2.indexOf(".") > 0 ? version2.split("\\.") : new String[] {version2};
+    String[] v1 = version1.indexOf('.') > 0 ? version1.split("\\.") : new String[] {version1};
+    String[] v2 = version2.indexOf('.') > 0 ? version2.split("\\.") : new String[] {version2};
 
     int maxIndex = Math.max(v1.length, v2.length);
     int val1 = 0;
