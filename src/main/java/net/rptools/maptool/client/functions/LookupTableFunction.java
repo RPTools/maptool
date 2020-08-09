@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
@@ -313,17 +314,35 @@ public class LookupTableFunction extends AbstractFunction {
         entryDetails.addProperty("assetid", "");
       }
       return entryDetails;
-
     } else if ("resetTablePicks".equalsIgnoreCase(function)) {
-
+      /*
+       * resetTablePicks(tblName) - reset all entries on a table
+       * resetTablePicks(tblName, entriesToReset) - reset specific entries from a String List with "," delim
+       * resetTablePicks(tblName, entriesToReset, delim) - use custom delimiter
+       * resetTablePicks(tblName, entriesToReset, "json") - entriesToReset is a JsonArray
+       */
       checkTrusted(function);
-      FunctionUtil.checkNumberParam("setTableVisible", params, 1, 1);
-      String name = params.get(0).toString();
-      LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.reset();
+      FunctionUtil.checkNumberParam(function, params, 1, 3);
+      String tblName = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(tblName, function);
+      if (params.size() > 1) {
+        String delim = (params.size() > 2) ? params.get(2).toString() : ",";
+        List<String> entriesToReset;
+        if (delim.equalsIgnoreCase("json")) {
+          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(function, params, 1);
+          entriesToReset =
+              JSONMacroFunctions.getInstance()
+                  .getJsonArrayFunctions()
+                  .jsonArrayToListOfStrings(jsonArray);
+        } else {
+          entriesToReset = StrListFunctions.toList(params.get(1).toString(), delim);
+        }
+        lookupTable.reset(entriesToReset);
+      } else {
+        lookupTable.reset();
+      }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
-
     } else if ("setTablePickOnce".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
