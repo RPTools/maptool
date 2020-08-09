@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
@@ -230,6 +231,32 @@ public class LookupTable {
     List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
+      newList.add(entry);
+    }
+    entryList = newList;
+  }
+
+  /**
+   * Reset the picked status of specific entries, allowing them to be picked again in this PickOnce
+   * table. Note that this uses the same indexing scheme as {@link #getPickOnceLookup(String)} -
+   * these entries are identified by list index (starting at 0), and NOT by any configured range.
+   *
+   * @param entriesToReset a list of strings representing the integer indices of entries to reset
+   * @throws NumberFormatException if any of the string entries cannot be successfully parsed as an
+   *     integer.
+   */
+  public void reset(List<String> entriesToReset) {
+    Set<Integer> indicesToReset =
+        entriesToReset.stream()
+            .map(Integer::parseInt)
+            .collect(Collectors.toCollection(HashSet::new));
+    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> newList = new ArrayList<>();
+    for (int i = 0; i < curList.size(); i++) {
+      LookupEntry entry = curList.get(i);
+      if (indicesToReset.contains(i)) {
+        entry.setPicked(false);
+      }
       newList.add(entry);
     }
     entryList = newList;

@@ -38,7 +38,14 @@ public class MiscInitiativeFunction extends AbstractFunction {
 
   /** Handle adding one, all, all PCs or all NPC tokens. */
   private MiscInitiativeFunction() {
-    super(0, 0, "nextInitiative", "sortInitiative", "initiativeSize", "getInitiativeList");
+    super(
+        0,
+        0,
+        "nextInitiative",
+        "prevInitiative",
+        "sortInitiative",
+        "initiativeSize",
+        "getInitiativeList");
   }
 
   /** singleton instance of this function */
@@ -68,6 +75,19 @@ public class MiscInitiativeFunction extends AbstractFunction {
         } // endif
       }
       list.nextInitiative();
+      return new BigDecimal(list.getCurrent());
+    } else if (functionName.equals("prevInitiative")) {
+      if (!MapTool.getParser().isMacroTrusted()) {
+        if (!ip.hasGMPermission()
+            && (list.getCurrent() <= 0
+                || !ip.hasOwnerPermission(list.getTokenInitiative(list.getCurrent()).getToken()))) {
+          String message = I18N.getText("macro.function.initiative.gmOnly", functionName);
+          if (ip.isOwnerPermissions())
+            message = I18N.getText("macro.function.initiative.gmOrOwner", functionName);
+          throw new ParserException(message);
+        } // endif
+      }
+      list.prevInitiative();
       return new BigDecimal(list.getCurrent());
     } else if (functionName.equals("getInitiativeList")) {
 
