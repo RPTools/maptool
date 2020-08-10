@@ -83,11 +83,11 @@ public class MacroJavaScriptBridge extends AbstractFunction {
       // MTScript doesnt have a null, only empty string
       return "";
     } else if (val instanceof Integer) {
-      return BigDecimal.valueOf(((Integer) val).intValue());
+      return BigDecimal.valueOf((Integer) val);
     } else if (val instanceof Long) {
-      return BigDecimal.valueOf(((Long) val).longValue());
+      return BigDecimal.valueOf((Long) val);
     } else if (val instanceof Double) {
-      return BigDecimal.valueOf(((Double) val).doubleValue());
+      return BigDecimal.valueOf((Double) val);
     } else if (val instanceof JSObject) {
       JSObject jsObject = (JSObject) val;
       if (jsObject.isArray()) {

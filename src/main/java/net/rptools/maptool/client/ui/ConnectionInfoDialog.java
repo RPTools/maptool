@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui;
 
 import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,12 +137,7 @@ public class ConnectionInfoDialog extends JDialog {
    * @return javax.swing.JButton
    */
   private void bindOKButtonActions(JButton okButton) {
-    okButton.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            setVisible(false);
-          }
-        });
+    okButton.addActionListener(e -> setVisible(false));
   }
 
   private static class ExternalAddressFinder implements Callable<String>, Runnable {
@@ -167,7 +161,7 @@ public class ConnectionInfoDialog extends JDialog {
                 .filter(s -> !s.startsWith("#"))
                 .collect(Collectors.toList());
       } catch (IOException e) {
-        throw new AssertionError("Unable to read ip-check list."); // Shouldn't happen
+        throw new AssertionError("Unable to read ip-check list.", e); // Shouldn't happen
       }
 
       for (String urlString : ipCheckURLs) {
@@ -190,12 +184,7 @@ public class ConnectionInfoDialog extends JDialog {
     @Override
     public void run() {
       String result = call();
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              myLabel.setText(result);
-            }
-          });
+      SwingUtilities.invokeLater(() -> myLabel.setText(result));
     }
   }
 }

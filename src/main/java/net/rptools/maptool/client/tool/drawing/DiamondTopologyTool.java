@@ -125,9 +125,7 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
 
     ZonePoint zp = getPoint(e);
     if (diamond != null) {
-      if (diamond != null) {
-        diamond = createDiamond(originPoint, zp);
-      }
+      diamond = createDiamond(originPoint, zp);
       renderer.repaint();
     }
   }

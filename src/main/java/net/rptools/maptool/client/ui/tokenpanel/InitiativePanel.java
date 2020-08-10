@@ -245,13 +245,13 @@ public class InitiativePanel extends JPanel
     popupMenu.add(item);
     if (hasGMPermission()) {
       hideNPCMenuItem = new JCheckBoxMenuItem(TOGGLE_HIDE_NPC_ACTION);
-      hideNPCMenuItem.setSelected(list == null ? false : list.isHideNPC());
+      hideNPCMenuItem.setSelected(list != null && list.isHideNPC());
       popupMenu.add(hideNPCMenuItem);
       ownerPermissionsMenuItem = new JCheckBoxMenuItem(TOGGLE_OWNER_PERMISSIONS_ACTION);
-      ownerPermissionsMenuItem.setSelected(list == null ? false : ownerPermissions);
+      ownerPermissionsMenuItem.setSelected(list != null && ownerPermissions);
       popupMenu.add(ownerPermissionsMenuItem);
       movementLockMenuItem = new JCheckBoxMenuItem(TOGGLE_MOVEMENT_LOCK_ACTION);
-      movementLockMenuItem.setSelected(list == null ? false : movementLock);
+      movementLockMenuItem.setSelected(list != null && movementLock);
       popupMenu.add(movementLockMenuItem);
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(ADD_PCS_ACTION));
@@ -277,8 +277,7 @@ public class InitiativePanel extends JPanel
   }
 
   private void updateRound() {
-    if (list.getRound() > 0)
-      round.setText(I18N.getText("initPanel.round") + " " + Integer.toString(list.getRound()));
+    if (list.getRound() > 0) round.setText(I18N.getText("initPanel.round") + " " + list.getRound());
     else round.setText("");
   }
 
@@ -300,15 +299,12 @@ public class InitiativePanel extends JPanel
       updateRound();
     }
     EventQueue.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            model.setList(list);
-            NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
-            if (list.getCurrent() >= 0) {
-              int index = model.getDisplayIndex(list.getCurrent());
-              if (index >= 0) displayList.ensureIndexIsVisible(index);
-            }
+        () -> {
+          model.setList(list);
+          NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
+          if (list.getCurrent() >= 0) {
+            int index = model.getDisplayIndex(list.getCurrent());
+            if (index >= 0) displayList.ensureIndexIsVisible(index);
           }
         });
   }
@@ -439,7 +435,7 @@ public class InitiativePanel extends JPanel
   public void valueChanged(ListSelectionEvent e) {
     if (e != null && e.getValueIsAdjusting()) return;
     TokenInitiative ti = displayList.getSelectedValue();
-    boolean enabled = (ti != null && hasOwnerPermission(ti.getToken())) ? true : false;
+    boolean enabled = ti != null && hasOwnerPermission(ti.getToken());
     CLEAR_INIT_STATE_VALUE.setEnabled(enabled);
     SET_INIT_STATE_VALUE.setEnabled(enabled);
     TOGGLE_HOLD_ACTION.setEnabled(enabled);
@@ -489,7 +485,7 @@ public class InitiativePanel extends JPanel
   @Override
   public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if ((Zone) event.getModel() == zone) {
+      if (event.getModel() == zone) {
         int oldSize = model.getSize();
         setList(((Zone) event.getModel()).getInitiativeList());
         if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();

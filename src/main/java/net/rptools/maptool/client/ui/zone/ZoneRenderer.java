@@ -32,14 +32,11 @@ import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -126,6 +123,7 @@ import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /** */
 public class ZoneRenderer extends JComponent
@@ -359,18 +357,16 @@ public class ZoneRenderer extends JComponent
     invalidateCurrentViewCache();
 
     scale.addPropertyChangeListener(
-        new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent evt) {
-            if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
-              tokenLocationCache.clear();
-              flushFog = true;
-            }
-            if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
-              // flushFog = true;
-            }
-            visibleScreenArea = null;
-            repaintDebouncer.dispatch();
+        evt -> {
+          if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
+            tokenLocationCache.clear();
+            flushFog = true;
           }
+          if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
+            // flushFog = true;
+          }
+          visibleScreenArea = null;
+          repaintDebouncer.dispatch();
         });
   }
 
@@ -613,7 +609,7 @@ public class ZoneRenderer extends JComponent
       moveTimer.start("onMultipleTokensMove");
       // Multiple tokens, the list of tokens and call
       // onMultipleTokensMove() macro function.
-      if (filteredTokens != null && filteredTokens.size() > 1) {
+      if (filteredTokens.size() > 1) {
         tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
@@ -1042,7 +1038,7 @@ public class ZoneRenderer extends JComponent
         if (element.hasFacing()) {
           // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
           // reason
-          Integer facing = element.getFacing() + 90;
+          int facing = element.getFacing() + 90;
           if (facing > 180) {
             facing -= 360;
           }
@@ -1060,11 +1056,11 @@ public class ZoneRenderer extends JComponent
             // shift by 1/2 of the length.
             // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
             if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-              Integer size = Math.max(drawnBounds.width, drawnBounds.height);
-              Integer x = drawnBounds.x - (int) (0.21 * size);
-              Integer y = drawnBounds.y - (int) (0.21 * size);
-              Integer w = drawnBounds.width + (int) (0.42 * size);
-              Integer h = drawnBounds.height + (int) (0.42 * size);
+              int size = Math.max(drawnBounds.width, drawnBounds.height);
+              int x = drawnBounds.x - (int) (0.21 * size);
+              int y = drawnBounds.y - (int) (0.21 * size);
+              int w = drawnBounds.width + (int) (0.42 * size);
+              int h = drawnBounds.height + (int) (0.42 * size);
               drawnBounds.setBounds(x, y, w, h);
             }
           }
@@ -1300,20 +1296,18 @@ public class ZoneRenderer extends JComponent
       timer.stop("drawableTokens");
       // }
 
-      if (view.isGMView()) {
-        if (Zone.Layer.GM.isEnabled()) {
-          drawables = zone.getGMDrawnElements();
-          // if (!drawables.isEmpty()) {
-          timer.start("drawableGM");
-          renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
-          timer.stop("drawableGM");
-          // }
-          List<Token> stamps = zone.getGMStamps(false);
-          if (!stamps.isEmpty()) {
-            timer.start("tokensGM");
-            renderTokens(g2d, stamps, view);
-            timer.stop("tokensGM");
-          }
+      if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
+        drawables = zone.getGMDrawnElements();
+        // if (!drawables.isEmpty()) {
+        timer.start("drawableGM");
+        renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        timer.stop("drawableGM");
+        // }
+        List<Token> stamps = zone.getGMStamps(false);
+        if (!stamps.isEmpty()) {
+          timer.start("tokensGM");
+          renderTokens(g2d, stamps, view);
+          timer.stop("tokensGM");
         }
       }
       List<Token> tokens = zone.getTokens(false);
@@ -1426,10 +1420,8 @@ public class ZoneRenderer extends JComponent
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
-    if (Zone.Layer.TOKEN.isEnabled()) {
-      if (view.isGMView() && AppState.isShowLightSources()) {
-        lightSourceIconOverlay.paintOverlay(this, g2d);
-      }
+    if (Zone.Layer.TOKEN.isEnabled() && view.isGMView() && AppState.isShowLightSources()) {
+      lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
     // g2d.setColor(Color.red);
@@ -2859,31 +2851,22 @@ public class ZoneRenderer extends JComponent
     List<Token> list = new ArrayList<Token>();
 
     // Always assume tokens, for now
-    List<TokenLocation> tokenLocationListCopy = new ArrayList<TokenLocation>();
-    tokenLocationListCopy.addAll(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> tokenLocationListCopy =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     for (TokenLocation location : tokenLocationListCopy) {
       list.add(location.token);
     }
 
     // Sort by location on screen, top left to bottom right
-    Collections.sort(
-        list,
-        new Comparator<Token>() {
-          public int compare(Token o1, Token o2) {
-            if (o1.getY() < o2.getY()) {
-              return -1;
-            }
-            if (o1.getY() > o2.getY()) {
-              return 1;
-            }
-            if (o1.getX() < o2.getX()) {
-              return -1;
-            }
-            if (o1.getX() > o2.getX()) {
-              return 1;
-            }
-            return 0;
+    list.sort(
+        (o1, o2) -> {
+          if (o1.getY() < o2.getY()) {
+            return -1;
           }
+          if (o1.getY() > o2.getY()) {
+            return 1;
+          }
+          return Integer.compare(o1.getX(), o2.getX());
         });
     return list;
   }
@@ -3018,9 +3001,7 @@ public class ZoneRenderer extends JComponent
 
     List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
     for (Token token : tokenList) {
-      if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE)
-          && figuresOnly
-          && !token.isAlwaysVisible()) {
+      if (token.getShape() != Token.TokenShape.FIGURE && figuresOnly && !token.isAlwaysVisible()) {
         continue;
       }
 
@@ -3298,13 +3279,9 @@ public class ZoneRenderer extends JComponent
         at.scale(getScale(), getScale());
       } else {
         if (token.getShape() == TokenShape.FIGURE) {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledWidth / workImage.getWidth());
+          at.scale(scaledWidth / workImage.getWidth(), scaledWidth / workImage.getWidth());
         } else {
-          at.scale(
-              (double) scaledWidth / workImage.getWidth(),
-              (double) scaledHeight / workImage.getHeight());
+          at.scale(scaledWidth / workImage.getWidth(), scaledHeight / workImage.getHeight());
         }
       }
       timer.stop("tokenlist-6");
@@ -3561,7 +3538,7 @@ public class ZoneRenderer extends JComponent
           selectedBorder.paintAround(clippedG, (int) sp.x, (int) sp.y, (int) width, (int) height);
         }
         // Remove labels from the cache if the corresponding tokens are deselected
-      } else if (!AppState.isShowTokenNames() && labelRenderingCache.containsKey(token.getId())) {
+      } else if (!AppState.isShowTokenNames()) {
         labelRenderingCache.remove(token.getId());
       }
 
@@ -3571,10 +3548,9 @@ public class ZoneRenderer extends JComponent
       // if policy does not auto-reveal FoW, check if fog covers the token (slow)
       if (showCurrentTokenLabel
           && !isGMView
-          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())) {
-        if (!zone.isTokenVisible(token)) {
-          showCurrentTokenLabel = false;
-        }
+          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())
+          && !zone.isTokenVisible(token)) {
+        showCurrentTokenLabel = false;
       }
       if (showCurrentTokenLabel) {
         GUID tokId = token.getId();
@@ -3795,10 +3771,7 @@ public class ZoneRenderer extends JComponent
       return false; // doesn't exist
     }
     if (!zone.isTokenVisible(token)) {
-      if (AppUtil.playerOwns(token)) {
-        return true;
-      }
-      return false; // can't own or see
+      return AppUtil.playerOwns(token); // can't own or see
     }
     return true;
   }
@@ -4031,8 +4004,8 @@ public class ZoneRenderer extends JComponent
    * @return the token
    */
   public Token getTokenAt(int x, int y) {
-    List<TokenLocation> locationList = new ArrayList<TokenLocation>();
-    locationList.addAll(getTokenLocations(getActiveLayer()));
+    List<TokenLocation> locationList =
+        new ArrayList<TokenLocation>(getTokenLocations(getActiveLayer()));
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4043,8 +4016,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public Token getMarkerAt(int x, int y) {
-    List<TokenLocation> locationList = new ArrayList<TokenLocation>();
-    locationList.addAll(markerLocationList);
+    List<TokenLocation> locationList = new ArrayList<TokenLocation>(markerLocationList);
     Collections.reverse(locationList);
     for (TokenLocation location : locationList) {
       if (location.bounds.contains(x, y)) {
@@ -4060,7 +4032,7 @@ public class ZoneRenderer extends JComponent
       return null;
     }
     List<Token> tokenList = new ArrayList<Token>(tokenStackMap.get(token));
-    Collections.sort(tokenList, Token.COMPARE_BY_NAME);
+    tokenList.sort(Token.COMPARE_BY_NAME);
     return tokenList;
   }
 
@@ -4073,8 +4045,7 @@ public class ZoneRenderer extends JComponent
    * @return the Label
    */
   public Label getLabelAt(int x, int y) {
-    List<LabelLocation> labelList = new ArrayList<LabelLocation>();
-    labelList.addAll(labelLocationList);
+    List<LabelLocation> labelList = new ArrayList<LabelLocation>(labelLocationList);
     Collections.reverse(labelList);
     for (LabelLocation location : labelList) {
       if (location.bounds.contains(x, y)) {
@@ -4256,7 +4227,7 @@ public class ZoneRenderer extends JComponent
 
     private final Logger log = LogManager.getLogger(ZoneRenderer.SelectionSet.class);
 
-    private final HashSet<GUID> selectionSet = new HashSet<GUID>();
+    private final Set<GUID> selectionSet = new HashSet<GUID>();
     private final GUID keyToken;
     private final String playerId;
     private ZoneWalker walker;
@@ -4316,16 +4287,14 @@ public class ZoneRenderer extends JComponent
     // timeout
     public void renderFinalPath() {
       if (ZoneRenderer.this.zone.getGrid().getCapabilities().isPathingSupported()
-          && token.isSnapToGrid()) {
-
-        if (renderPathTask != null) {
-          while (!renderPathTask.isDone()) {
-            log.trace("Waiting on Path Rendering... ");
-            try {
-              Thread.sleep(10);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
+          && token.isSnapToGrid()
+          && renderPathTask != null) {
+        while (!renderPathTask.isDone()) {
+          log.trace("Waiting on Path Rendering... ");
+          try {
+            Thread.sleep(10);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
           }
         }
       }
@@ -4720,19 +4689,17 @@ public class ZoneRenderer extends JComponent
   private BufferedImage getTokenImage(Token token) {
     BufferedImage image = null;
     // Get the basic image
-    if (token.getHasImageTable() && token.hasFacing()) {
-      if (token.getImageTableName() != null) {
-        LookupTable lookupTable =
-            MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
-        if (lookupTable != null) {
-          try {
-            LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
-            if (result != null) {
-              image = ImageManager.getImage(result.getImageId(), this);
-            }
-          } catch (ParserException p) {
-            // do nothing
+    if (token.getHasImageTable() && token.hasFacing() && token.getImageTableName() != null) {
+      LookupTable lookupTable =
+          MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+      if (lookupTable != null) {
+        try {
+          LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+          if (result != null) {
+            image = ImageManager.getImage(result.getImageId(), this);
           }
+        } catch (ParserException p) {
+          // do nothing
         }
       }
     }
@@ -4820,7 +4787,7 @@ public class ZoneRenderer extends JComponent
 
   //
   // COMPARABLE
-  public int compareTo(ZoneRenderer o) {
+  public int compareTo(@NotNull ZoneRenderer o) {
     if (o != this) {
       return (int) (zone.getCreationTime() - o.zone.getCreationTime());
     }

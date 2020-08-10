@@ -168,13 +168,13 @@ public class StringUtil {
       newlinePos = subString.lastIndexOf(wrapChar);
       if (newlinePos == -1) {
         // if there's no line break, then find the first space to break the line
-        newlinePos = subString.lastIndexOf(" ");
+        newlinePos = subString.lastIndexOf(' ');
         if (newlinePos == -1) {
           // if there are no spaces, then force the line break within the word.
           newlinePos = wrapLength - 1; // -1 because of 0 start point of position
         }
       }
-      wrappedString.append(subString.substring(0, newlinePos));
+      wrappedString.append(subString, 0, newlinePos);
       wrappedString.append(wrapChar);
       startPosition += newlinePos + 1;
     }
@@ -272,8 +272,6 @@ public class StringUtil {
       builder.append(c);
     }
     return Arrays.asList(
-        new String[] {
-          line.substring(start, end), line.substring(Math.min(end + 1, line.length()))
-        });
+        line.substring(start, end), line.substring(Math.min(end + 1, line.length())));
   }
 }

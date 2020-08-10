@@ -16,10 +16,7 @@ package net.rptools.maptool.model;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -45,9 +42,7 @@ public class TokenFootprint {
     id = new GUID();
     this.isDefault = isDefault;
     this.scale = scale;
-    for (Point p : points) {
-      cellSet.add(p);
-    }
+    cellSet.addAll(Arrays.asList(points));
   }
 
   @Override
@@ -129,6 +124,11 @@ public class TokenFootprint {
       return false;
     }
     return ((TokenFootprint) obj).id.equals(id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name);
   }
 
   private Object readResolve() {

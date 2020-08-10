@@ -335,10 +335,8 @@ public class MapToolVariableResolver implements VariableResolver {
   @Override
   public void setVariable(String varname, VariableModifiers modifiers, Object value)
       throws ParserException {
-    if (tokenInContext != null) {
-      if (validTokenProperty(varname, tokenInContext)) {
-        updateTokenProperty(tokenInContext, varname, value.toString());
-      }
+    if (tokenInContext != null && validTokenProperty(varname, tokenInContext)) {
+      updateTokenProperty(tokenInContext, varname, value.toString());
     }
 
     // Check to see if it is a token state.

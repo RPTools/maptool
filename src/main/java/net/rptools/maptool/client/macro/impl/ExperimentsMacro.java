@@ -66,7 +66,7 @@ public class ExperimentsMacro implements Macro {
   }
 
   private void displayUsage() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("<table border=1><tr><td><b>")
         .append(I18N.getText("experiments.listTitle"))
         .append("</b></td></tr>");

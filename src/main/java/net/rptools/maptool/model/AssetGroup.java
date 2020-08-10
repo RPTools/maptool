@@ -63,11 +63,7 @@ public class AssetGroup {
       };
 
   private static final FilenameFilter DIRECTORY_FILE_FILTER =
-      new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return new File(dir.getPath() + File.separator + name).isDirectory();
-        }
-      };
+      (dir, name) -> new File(dir.getPath() + File.separator + name).isDirectory();
 
   public AssetGroup(File location, String name) {
     assert name != null : "Name cannot be null";
@@ -128,7 +124,7 @@ public class AssetGroup {
     assetGroupTSMap.put(group.location, group);
 
     // Keeps the groups ordered
-    Collections.sort(assetGroupList, GROUP_COMPARATOR);
+    assetGroupList.sort(GROUP_COMPARATOR);
   }
 
   public void remove(AssetGroup group) {
@@ -180,7 +176,7 @@ public class AssetGroup {
           assetGroupTSMap.put(subdir, subgroup);
           assetGroupList.add(subgroup);
         }
-        Collections.sort(assetGroupList, GROUP_COMPARATOR);
+        assetGroupList.sort(GROUP_COMPARATOR);
       } finally {
         // Cleanup
         for (AssetGroup group : tempAssetGroupFiles.values()) {
@@ -258,9 +254,5 @@ public class AssetGroup {
   }
 
   public static final Comparator<AssetGroup> GROUP_COMPARATOR =
-      new Comparator<AssetGroup>() {
-        public int compare(AssetGroup o1, AssetGroup o2) {
-          return o1.getName().toUpperCase().compareTo(o2.getName().toUpperCase());
-        }
-      };
+      (o1, o2) -> o1.getName().toUpperCase().compareTo(o2.getName().toUpperCase());
 }

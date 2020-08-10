@@ -37,7 +37,7 @@ public class ImageTransferableHandler extends TransferableHandler {
 
     DataFlavor flavor;
 
-    private Flavor(DataFlavor flavor) {
+    Flavor(DataFlavor flavor) {
       this.flavor = flavor;
     }
 

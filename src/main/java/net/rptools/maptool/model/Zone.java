@@ -18,18 +18,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -100,7 +89,7 @@ public class Zone extends BaseModel {
 
     private String displayName;
 
-    private Layer(String displayName) {
+    Layer(String displayName) {
       this.displayName = displayName;
     }
 
@@ -227,7 +216,7 @@ public class Zone extends BaseModel {
   private int height;
   private int width;
 
-  private transient HashMap<String, Integer> tokenNumberCache;
+  private transient Map<String, Integer> tokenNumberCache;
 
   /**
    * Note: When adding new fields to this class, make sure to update all constructors, {@link
@@ -370,23 +359,22 @@ public class Zone extends BaseModel {
     // library that use a Transformer and that seemed like a lot more work. :-/
     if (zone.drawables != null && !zone.drawables.isEmpty()) {
       drawables = new LinkedList<DrawnElement>();
-      drawables.addAll(Collections.nCopies(zone.drawables.size(), (DrawnElement) null));
+      drawables.addAll(Collections.nCopies(zone.drawables.size(), null));
       Collections.copy(drawables, zone.drawables);
     }
     if (zone.objectDrawables != null && !zone.objectDrawables.isEmpty()) {
       objectDrawables = new LinkedList<DrawnElement>();
-      objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), (DrawnElement) null));
+      objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), null));
       Collections.copy(objectDrawables, zone.objectDrawables);
     }
     if (zone.backgroundDrawables != null && !zone.backgroundDrawables.isEmpty()) {
       backgroundDrawables = new LinkedList<DrawnElement>();
-      backgroundDrawables.addAll(
-          Collections.nCopies(zone.backgroundDrawables.size(), (DrawnElement) null));
+      backgroundDrawables.addAll(Collections.nCopies(zone.backgroundDrawables.size(), null));
       Collections.copy(backgroundDrawables, zone.backgroundDrawables);
     }
     if (zone.gmDrawables != null && !zone.gmDrawables.isEmpty()) {
       gmDrawables = new LinkedList<DrawnElement>();
-      gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), (DrawnElement) null));
+      gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), null));
       Collections.copy(gmDrawables, zone.gmDrawables);
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {
@@ -1131,7 +1119,7 @@ public class Zone extends BaseModel {
 
   /** Sort the tokens by their ZOrder */
   public void sortZOrder() {
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -1277,9 +1265,7 @@ public class Zone extends BaseModel {
   }
 
   public void clearDrawables(List<DrawnElement> drawableList) {
-    ListIterator<DrawnElement> i = drawableList.listIterator();
-    while (i.hasNext()) {
-      DrawnElement drawable = i.next();
+    for (DrawnElement drawable : drawableList) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_REMOVED, drawable));
     }
     drawableList.clear();
@@ -1510,7 +1496,7 @@ public class Zone extends BaseModel {
   }
 
   public List<Token> getAllTokens() {
-    return Collections.unmodifiableList(new ArrayList<Token>(tokenOrderedList));
+    return List.copyOf(tokenOrderedList);
   }
 
   public Set<MD5Key> getAllAssetIds() {
@@ -1572,14 +1558,11 @@ public class Zone extends BaseModel {
 
   public List<Token> getTokens(boolean getAlwaysVisible) {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            if (getAlwaysVisible) {
-              return !t.isStamp();
-            } else {
-              return !t.isStamp() && !t.isAlwaysVisible();
-            }
+        t -> {
+          if (getAlwaysVisible) {
+            return !t.isStamp();
+          } else {
+            return !t.isStamp() && !t.isAlwaysVisible();
           }
         });
   }
@@ -1590,14 +1573,11 @@ public class Zone extends BaseModel {
 
   public List<Token> getGMStamps(boolean getAlwaysVisible) {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            if (getAlwaysVisible) {
-              return t.isGMStamp();
-            } else {
-              return t.isGMStamp() && !t.isAlwaysVisible();
-            }
+        t -> {
+          if (getAlwaysVisible) {
+            return t.isGMStamp();
+          } else {
+            return t.isGMStamp() && !t.isAlwaysVisible();
           }
         });
   }
@@ -1608,14 +1588,11 @@ public class Zone extends BaseModel {
 
   public List<Token> getStampTokens(boolean getAlwaysVisible) {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            if (getAlwaysVisible) {
-              return t.isObjectStamp();
-            } else {
-              return t.isObjectStamp() && !t.isAlwaysVisible();
-            }
+        t -> {
+          if (getAlwaysVisible) {
+            return t.isObjectStamp();
+          } else {
+            return t.isObjectStamp() && !t.isAlwaysVisible();
           }
         });
   }
@@ -1626,66 +1603,34 @@ public class Zone extends BaseModel {
 
   public List<Token> getBackgroundStamps(boolean getAlwaysVisible) {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            if (getAlwaysVisible) {
-              return t.isBackgroundStamp();
-            } else {
-              return t.isBackgroundStamp() && !t.isAlwaysVisible();
-            }
+        t -> {
+          if (getAlwaysVisible) {
+            return t.isBackgroundStamp();
+          } else {
+            return t.isBackgroundStamp() && !t.isAlwaysVisible();
           }
         });
   }
 
   public List<Token> getPlayerTokens() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.getType() == Token.Type.PC;
-          }
-        });
+    return getTokensFiltered(t -> t.getType() == Token.Type.PC);
   }
 
   public List<Token> getFigureTokens() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.getShape() == Token.TokenShape.FIGURE;
-          }
-        });
+    return getTokensFiltered(t -> t.getShape() == Token.TokenShape.FIGURE);
   }
 
   public List<Token> getTokensAlwaysVisible() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.isAlwaysVisible();
-          }
-        });
+    return getTokensFiltered(Token::isAlwaysVisible);
   }
 
   public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.hasVBL();
-          }
-        });
+    return getTokensFiltered(Token::hasVBL);
   }
 
   public List<Token> getTokensWithTerrainModifiers() {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return !t.getTerrainModifierOperation().equals(TerrainModifierOperation.NONE);
-          }
-        });
+        t -> !t.getTerrainModifierOperation().equals(TerrainModifierOperation.NONE));
   }
 
   /**
@@ -1700,46 +1645,39 @@ public class Zone extends BaseModel {
    */
   public List<Token> getOwnedTokensWithSight(Player p) {
     return getTokensFiltered(
-        new Filter() {
-          public boolean matchToken(Token t) {
-            // System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
-            // System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" +
-            // AppUtil.playerOwns(t));
-            // return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
+        t -> {
+          // System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
+          // System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" +
+          // AppUtil.playerOwns(t));
+          // return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
 
-            if (tokenSelection == null) {
-              tokenSelection = TokenSelection.ALL;
-            }
-            // System.out.println("TokenSelection: " + tokenSelection);
-            switch (tokenSelection) {
-              case ALL: // Show FoW for ANY Token I own
-                return t.getHasSight() && AppUtil.playerOwns(t);
-              case NPC: // Show FoW for only NPC Tokens I own
-                return t.getHasSight()
-                    && t.getType() == Token.Type.NPC
-                    && (t.isOwnedByAll() || AppUtil.playerOwns(t));
-              case PC: // Show FoW for only PC Tokens I own
-                return t.getHasSight()
-                    && t.getType() == Token.Type.PC
-                    && (t.isOwnedByAll() || AppUtil.playerOwns(t));
-              case GM: // Show FoW for ANY Token the GM "username" explicitly owns OR has no
-                // ownership
-                return t.getHasSight() && AppUtil.gmOwns(t);
-              default: // Show FoW for ANY Token I own
-                return t.getHasSight() && AppUtil.playerOwns(t);
-            }
+          if (tokenSelection == null) {
+            tokenSelection = TokenSelection.ALL;
+          }
+          // System.out.println("TokenSelection: " + tokenSelection);
+          switch (tokenSelection) {
+            case ALL: // Show FoW for ANY Token I own
+              return t.getHasSight() && AppUtil.playerOwns(t);
+            case NPC: // Show FoW for only NPC Tokens I own
+              return t.getHasSight()
+                  && t.getType() == Token.Type.NPC
+                  && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+            case PC: // Show FoW for only PC Tokens I own
+              return t.getHasSight()
+                  && t.getType() == Token.Type.PC
+                  && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+            case GM: // Show FoW for ANY Token the GM "username" explicitly owns OR has no
+              // ownership
+              return t.getHasSight() && AppUtil.gmOwns(t);
+            default: // Show FoW for ANY Token I own
+              return t.getHasSight() && AppUtil.playerOwns(t);
           }
         });
   }
 
   /** @return list of PCs tokens with sight. For FogUtil.exposePCArea to skip sight test. */
   public List<Token> getPlayerTokensWithSight() {
-    return getTokensFiltered(
-        new Filter() {
-          public boolean matchToken(Token t) {
-            return t.getType() == Token.Type.PC && t.getHasSight();
-          }
-        });
+    return getTokensFiltered(t -> t.getType() == Token.Type.PC && t.getHasSight());
   }
 
   /**
@@ -1749,14 +1687,11 @@ public class Zone extends BaseModel {
    * @return the list of tokens with sight.
    */
   public List<Token> getTokensOwnedByAllWithSight() {
+    // String playerId = MapTool.getPlayer().getName();
     return getTokensFiltered(
-        new Filter() {
-          // String playerId = MapTool.getPlayer().getName();
-          public boolean matchToken(Token t) {
-            return (t.getHasSight()
-                && (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t))));
-          }
-        });
+        t ->
+            (t.getHasSight()
+                && (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t)))));
   }
 
   // Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
@@ -1776,12 +1711,7 @@ public class Zone extends BaseModel {
 
   public List<Token> getPlayerOwnedTokensWithSight(Player p) {
     return getTokensFiltered(
-        new Filter() {
-          @Override
-          public boolean matchToken(Token t) {
-            return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
-          }
-        });
+        t -> t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t));
   }
 
   public int findFreeNumber(String tokenBaseName, boolean checkDm) {
@@ -1792,11 +1722,7 @@ public class Zone extends BaseModel {
 
     int lastUsed;
 
-    if (_lastUsed == null) {
-      lastUsed = 0;
-    } else {
-      lastUsed = _lastUsed;
-    }
+    lastUsed = Objects.requireNonNullElse(_lastUsed, 0);
     boolean repeat;
     do {
       lastUsed++;
@@ -1851,40 +1777,37 @@ public class Zone extends BaseModel {
    * @return the token comparator.
    */
   public Comparator<Token> getFigureZOrderComparator() {
-    return new Comparator<Token>() {
-      @Override
-      public int compare(Token o1, Token o2) {
-        /*
-         * It is an assumption of this comparator that all tokens are being sorted using isometric
-         * logic.
-         *
-         * <p>Get the footprint (dependent on Grid) and find the centre of the footprint. If the
-         * same, place tokens above objects. Otherwise use height to place the smallest in front. If
-         * still equal use normal z order.
-         */
-        int v1 = getFigureZOrder(o1);
-        int v2 = getFigureZOrder(o2);
-        if ((v1 - v2) != 0) {
-          return v1 - v2;
-        }
-        if (!o1.isToken() && o2.isToken()) {
-          return -1;
-        }
-        if (!o2.isToken() && o1.isToken()) {
-          return +1;
-        }
-        if (o1.getHeight() != o2.getHeight()) {
-          // Larger tokens at the same position, go behind
-          return o2.getHeight() - o1.getHeight();
-        }
-        int lval = o1.getZOrder();
-        int rval = o2.getZOrder();
+    return (o1, o2) -> {
+      /*
+       * It is an assumption of this comparator that all tokens are being sorted using isometric
+       * logic.
+       *
+       * <p>Get the footprint (dependent on Grid) and find the centre of the footprint. If the
+       * same, place tokens above objects. Otherwise use height to place the smallest in front. If
+       * still equal use normal z order.
+       */
+      int v1 = getFigureZOrder(o1);
+      int v2 = getFigureZOrder(o2);
+      if ((v1 - v2) != 0) {
+        return v1 - v2;
+      }
+      if (!o1.isToken() && o2.isToken()) {
+        return -1;
+      }
+      if (!o2.isToken() && o1.isToken()) {
+        return +1;
+      }
+      if (o1.getHeight() != o2.getHeight()) {
+        // Larger tokens at the same position, go behind
+        return o2.getHeight() - o1.getHeight();
+      }
+      int lval = o1.getZOrder();
+      int rval = o2.getZOrder();
 
-        if (lval == rval) {
-          return o1.getId().compareTo(o2.getId());
-        } else {
-          return lval - rval;
-        }
+      if (lval == rval) {
+        return o1.getId().compareTo(o2.getId());
+      } else {
+        return lval - rval;
       }
     };
   }
@@ -2012,15 +1935,7 @@ public class Zone extends BaseModel {
 
     // 1.3b47 -> 1.3b48
     if (visionType == null) {
-      if (getTokensFiltered(
-                  new Filter() {
-                    @Override
-                    public boolean matchToken(Token token) {
-                      return token.hasLightSources();
-                    }
-                  })
-              .size()
-          > 0) {
+      if (getTokensFiltered(Token::hasLightSources).size() > 0) {
         visionType = VisionType.NIGHT;
       } else if (topology != null && !topology.isEmpty()) {
         visionType = VisionType.DAY;

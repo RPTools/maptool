@@ -414,7 +414,7 @@ public class FunctionUtil {
   public static boolean getBooleanValue(Object value) {
     boolean set = false;
     if (value instanceof Boolean) {
-      set = ((Boolean) value).booleanValue();
+      set = (Boolean) value;
     } else if (value instanceof Number) {
       set = ((Number) value).doubleValue() != 0;
     } else if (value == null) {

@@ -19,8 +19,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -544,19 +542,17 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         chooser.setSelectedFile(defaultFile);
 
         chooser.addPropertyChangeListener(
-            new PropertyChangeListener() {
-              public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY
-                    && showSaveDialog) {
-                  if (chooser.getFileFilter() != tokenFilter) {
-                    File newFileName = new File(chooser.getCurrentDirectory(), tokenNameGM);
-                    System.out.println("newFileName 1: " + newFileName);
-                    chooser.setSelectedFile(newFileName);
-                  } else {
-                    File newFileName = new File(chooser.getCurrentDirectory(), tokenName);
-                    System.out.println("newFileName 1: " + newFileName);
-                    chooser.setSelectedFile(newFileName);
-                  }
+            evt -> {
+              if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY
+                  && showSaveDialog) {
+                if (chooser.getFileFilter() != tokenFilter) {
+                  File newFileName = new File(chooser.getCurrentDirectory(), tokenNameGM);
+                  System.out.println("newFileName 1: " + newFileName);
+                  chooser.setSelectedFile(newFileName);
+                } else {
+                  File newFileName = new File(chooser.getCurrentDirectory(), tokenName);
+                  System.out.println("newFileName 1: " + newFileName);
+                  chooser.setSelectedFile(newFileName);
                 }
               }
             });

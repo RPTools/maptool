@@ -793,7 +793,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setTokenSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      Boolean toGrid = FunctionUtil.getBooleanValue((Object) parameters.get(0));
+      Boolean toGrid = FunctionUtil.getBooleanValue(parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToGrid, toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
@@ -1001,11 +1001,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       return false;
     }
 
-    if (StringUtil.isEmpty(val.toString())) {
-      return false;
-    }
-
-    return true;
+    return !StringUtil.isEmpty(val.toString());
   }
 
   /**
@@ -1030,7 +1026,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       }
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();
-        namesList.forEach(n -> jarr.add(n));
+        namesList.forEach(jarr::add);
         return jarr.toString();
       } else {
         return StringFunctions.getInstance().join(namesList, delim);

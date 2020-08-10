@@ -52,17 +52,14 @@ public class SplashScreen extends JFrame {
 
     Platform.setImplicitExit(false); // necessary to use JavaFX later
     Platform.runLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            initFX(fxPanel, versionText);
-            int w = imgWidth;
-            int h = imgHeight;
-            int x = (screenSize.width - w) / 2;
-            int y = (screenSize.height - h) / 2;
-            setBounds(x, y, imgWidth, imgHeight);
-            setVisible(true);
-          }
+        () -> {
+          initFX(fxPanel, versionText);
+          int w = imgWidth;
+          int h = imgHeight;
+          int x = (screenSize.width - w) / 2;
+          int y = (screenSize.height - h) / 2;
+          setBounds(x, y, imgWidth, imgHeight);
+          setVisible(true);
         });
   }
 

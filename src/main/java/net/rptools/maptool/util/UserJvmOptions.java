@@ -15,11 +15,8 @@
 package net.rptools.maptool.util;
 
 import java.io.File;
-import java.util.Locale;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.AppUtil;
@@ -47,7 +44,7 @@ public class UserJvmOptions {
   private static final String I18N_RESOURCE_PATH = "net/rptools/maptool/language";
   private static final String CURRENT_DATA_DIR = AppUtil.getAppHome().getName();
   private static final Pattern UNIT_PATTERN = Pattern.compile("^([0-9]+)[g|G|m|M|k|K]$");
-  private static final TreeMap<String, String> LANGUAGE_MAP = getResourceBundles();
+  private static final Map<String, String> LANGUAGE_MAP = getResourceBundles();
 
   private static FileBasedConfigurationBuilder<INIConfiguration> configurationBuilder;
   private static SubnodeConfiguration jvmNodeConfiguration;
@@ -221,16 +218,12 @@ public class UserJvmOptions {
       return false;
     } else {
       // Don't allow values less than 0
-      if (Integer.parseInt(m.group(1)) <= 0) {
-        return false;
-      } else {
-        return true;
-      }
+      return Integer.parseInt(m.group(1)) > 0;
     }
   }
 
-  private static TreeMap<String, String> getResourceBundles() {
-    TreeMap<String, String> languages = new TreeMap<>();
+  private static Map<String, String> getResourceBundles() {
+    Map<String, String> languages = new TreeMap<>();
 
     Locale loc = new Locale("en");
     languages.put(loc.getDisplayLanguage(), "");

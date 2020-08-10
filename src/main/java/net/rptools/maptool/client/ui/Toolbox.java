@@ -51,8 +51,8 @@ public class Toolbox {
   public Tool createTool(Class<? extends Tool> toolClass) {
     Tool tool;
     try {
-      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor(new Class[] {});
-      tool = constructor.newInstance(new Object[] {});
+      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor();
+      tool = constructor.newInstance();
       // tool = constructor.newInstance((Object) null);
 
       if (tool.hasGroup()) {
@@ -79,23 +79,16 @@ public class Toolbox {
   public void setTargetRenderer(final ZoneRenderer renderer) {
     // Need to be synchronous with the timing of the invokes within this method
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            final Tool oldTool = currentTool;
+        () -> {
+          final Tool oldTool = currentTool;
 
-            // Disconnect the current tool from the current renderer
-            setSelectedTool((Tool) null);
+          // Disconnect the current tool from the current renderer
+          setSelectedTool((Tool) null);
 
-            // Update the renderer
-            EventQueue.invokeLater(
-                new Runnable() {
-                  public void run() {
-                    currentRenderer = renderer;
-                  }
-                });
-            // Attach the old tool to the new renderer
-            setSelectedTool(oldTool);
-          }
+          // Update the renderer
+          EventQueue.invokeLater(() -> currentRenderer = renderer);
+          // Attach the old tool to the new renderer
+          setSelectedTool(oldTool);
         });
   }
 
@@ -109,41 +102,37 @@ public class Toolbox {
 
   public void setSelectedTool(final Tool tool) {
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            if (tool == currentTool) {
-              return;
+        () -> {
+          if (tool == currentTool) {
+            return;
+          }
+          if (currentTool != null && currentRenderer != null) {
+            currentTool.removeListeners(currentRenderer);
+            // currentTool.addGridBasedKeys(currentRenderer, false);
+            currentTool.detachFrom(currentRenderer);
+
+            if (currentTool instanceof ZoneOverlay) {
+              currentRenderer.removeOverlay((ZoneOverlay) currentTool);
             }
-            if (currentTool != null) {
-              if (currentRenderer != null) {
-                currentTool.removeListeners(currentRenderer);
-                // currentTool.addGridBasedKeys(currentRenderer, false);
-                currentTool.detachFrom(currentRenderer);
+          }
+          // Update
+          currentTool = tool;
 
-                if (currentTool instanceof ZoneOverlay) {
-                  currentRenderer.removeOverlay((ZoneOverlay) currentTool);
-                }
+          if (currentTool != null) {
+            if (currentRenderer != null) {
+              // We have a renderer at this point so we can figure out the grid type and add its
+              // keystrokes
+              // to the PointerTool.
+              // currentTool.addGridBasedKeys(currentRenderer, true);
+              currentTool.addListeners(currentRenderer);
+              currentTool.attachTo(currentRenderer);
+
+              if (currentTool instanceof ZoneOverlay) {
+                currentRenderer.addOverlay((ZoneOverlay) currentTool);
               }
             }
-            // Update
-            currentTool = tool;
-
-            if (currentTool != null) {
-              if (currentRenderer != null) {
-                // We have a renderer at this point so we can figure out the grid type and add its
-                // keystrokes
-                // to the PointerTool.
-                // currentTool.addGridBasedKeys(currentRenderer, true);
-                currentTool.addListeners(currentRenderer);
-                currentTool.attachTo(currentRenderer);
-
-                if (currentTool instanceof ZoneOverlay) {
-                  currentRenderer.addOverlay((ZoneOverlay) currentTool);
-                }
-              }
-              if (MapTool.getFrame() != null) {
-                MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
-              }
+            if (MapTool.getFrame() != null) {
+              MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
             }
           }
         });

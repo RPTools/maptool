@@ -16,8 +16,6 @@ package net.rptools.maptool.client.ui.io;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -91,19 +89,15 @@ public class UpdateRepoDialog extends JDialog {
 
     AbstractButton btn = form.getButton("@okButton");
     btn.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setStatus(JOptionPane.OK_OPTION);
-            UpdateRepoDialog.this.setVisible(false);
-          }
+        e -> {
+          setStatus(JOptionPane.OK_OPTION);
+          UpdateRepoDialog.this.setVisible(false);
         });
     btn = form.getButton("@cancelButton");
     btn.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setStatus(JOptionPane.CANCEL_OPTION);
-            UpdateRepoDialog.this.setVisible(false);
-          }
+        e -> {
+          setStatus(JOptionPane.CANCEL_OPTION);
+          UpdateRepoDialog.this.setVisible(false);
         });
   }
 
@@ -177,8 +171,7 @@ public class UpdateRepoDialog extends JDialog {
   public List<String> getSelectedRepositories() {
     Object[] objects = list.getSelectedObjects();
     List<String> repoList = new ArrayList<String>(objects.length);
-    for (int i = 0; i < objects.length; i++) {
-      Object s = objects[i];
+    for (Object s : objects) {
       // System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
       // s.getClass().getCanonicalName());
       repoList.add(s.toString());

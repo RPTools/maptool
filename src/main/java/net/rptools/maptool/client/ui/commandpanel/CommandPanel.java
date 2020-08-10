@@ -27,7 +27,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -464,12 +463,7 @@ public class CommandPanel extends JPanel
         emotePopupButton.setBorderPainted(false);
         emotePopupButton.setFocusPainted(false);
         emotePopupButton.setOpaque(false);
-        emotePopupButton.addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                emotePopup.show(emotePopupButton, 0, 0);
-              }
-            });
+        emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
@@ -651,12 +645,10 @@ public class CommandPanel extends JPanel
       MapTool.getEventDispatcher()
           .addListener(
               MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  commandTextArea.setFont(
-                      commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
-                  doLayout();
-                }
+              event -> {
+                commandTextArea.setFont(
+                    commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+                doLayout();
               });
     }
     return commandTextArea;
@@ -838,13 +830,7 @@ public class CommandPanel extends JPanel
       messagePanel = new MessagePanel();
       // Update whenever the preferences change
       MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  messagePanel.refreshRenderer();
-                }
-              });
+          .addListener(MapTool.PreferencesEvent.Changed, event -> messagePanel.refreshRenderer());
     }
     return messagePanel;
   }

@@ -65,7 +65,7 @@ public class Campaign {
 
   private static ExportDialog
       exportDialog; // this is the new export dialog (different name for upward compatibility)
-  private static CampaignExportDialog campaignExportDialog;
+  private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
@@ -431,11 +431,11 @@ public class Campaign {
    * @return <code>true</code> if IF feature has ever been used; <code>false</code> otherwise
    */
   public boolean hasUsedFogToolbar() {
-    return hasUsedFogToolbar == null ? false : hasUsedFogToolbar.booleanValue();
+    return hasUsedFogToolbar != null && hasUsedFogToolbar;
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = new Boolean(b);
+    hasUsedFogToolbar = b;
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {
@@ -498,6 +498,43 @@ public class Campaign {
    */
   public void setGmMacroButtonPropertiesArray(List<MacroButtonProperties> properties) {
     gmMacroButtonProperties = properties;
+  }
+
+  /**
+   * Adds multiple MacroButtonProperties to the GM or Campaign macro panel, starting at the next
+   * appropriate index.
+   *
+   * @param toSave the list of button properties to add
+   * @param gmPanel true for the GM panel, false for the Campaign panel.
+   */
+  public void addMacroButtonPropertiesAtNextIndex(
+      List<MacroButtonProperties> toSave, boolean gmPanel) {
+    List<MacroButtonProperties> macroButtonList =
+        gmPanel ? gmMacroButtonProperties : macroButtonProperties;
+    int lastIndex = gmPanel ? gmMacroButtonLastIndex : macroButtonLastIndex;
+    // populate the lookup table and confirm lastIndex
+    for (MacroButtonProperties prop : macroButtonList) {
+      int curIndex = prop.getIndex();
+      if (curIndex > lastIndex) {
+        lastIndex = curIndex;
+      }
+    }
+    // set the indexes and add to list
+    for (MacroButtonProperties newProp : toSave) {
+      newProp.setIndex(++lastIndex);
+    }
+    macroButtonList.addAll(toSave);
+
+    // update the ButtonLastIndex prop as appropriate
+    if (gmPanel) {
+      gmMacroButtonLastIndex = lastIndex;
+    } else {
+      macroButtonLastIndex = lastIndex;
+    }
+
+    AbstractMacroPanel macroPanel =
+        gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+    macroPanel.reset();
   }
 
   /**
@@ -616,7 +653,7 @@ public class Campaign {
 
   /** @return Getter for initiativeOwnerPermissions */
   public boolean isInitiativeOwnerPermissions() {
-    return campaignProperties != null ? campaignProperties.isInitiativeOwnerPermissions() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
   /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
@@ -626,7 +663,7 @@ public class Campaign {
 
   /** @return Getter for initiativeMovementLock */
   public boolean isInitiativeMovementLock() {
-    return campaignProperties != null ? campaignProperties.isInitiativeMovementLock() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
@@ -640,13 +677,6 @@ public class Campaign {
   }
 
   public ExportDialog getExportDialog() {
-    if (exportDialog == null) {
-      try {
-        exportDialog = new ExportDialog();
-      } catch (Exception e) {
-        return null;
-      }
-    }
     // TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from
     // the dialog
     // and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually
@@ -664,18 +694,6 @@ public class Campaign {
   }
 
   public CampaignExportDialog getExportCampaignDialog() {
-    if (campaignExportDialog == null) {
-      try {
-        campaignExportDialog = new CampaignExportDialog();
-      } catch (Exception e) {
-        return null;
-      }
-    }
-
     return campaignExportDialog;
-  }
-
-  public void setExportCampaignDialog(CampaignExportDialog d) {
-    campaignExportDialog = d;
   }
 }
