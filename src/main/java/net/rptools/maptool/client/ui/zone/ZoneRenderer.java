@@ -3299,15 +3299,56 @@ public class ZoneRenderer extends JComponent
 
       // Finally render the token image
       timer.start("tokenlist-7");
+      /*if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
+        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+          // the cell intersects visible area so
+          if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+            // if we can see the centre, draw the whole token
+            tokenG.drawImage(workImage, at, this);
+            // g.draw(cb); // debugging
+          } else {
+            // else draw the clipped token
+            Area cellArea = new Area(visibleScreenArea);
+            cellArea.intersect(cb);
+            tokenG.setClip(cellArea);
+            tokenG.drawImage(workImage, at, this);
+          }
+        }
+      } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
+        // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
+        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+          // if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
+          if (zone.getGrid()
+                  .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+            tokenG.drawImage(workImage, at, this);
+          } else {
+            // else draw the clipped stamp/token
+            // This will only show the part of the token that does not have VBL on it
+            // as any VBL on the token will block LOS, affecting the clipping.
+            Area cellArea = new Area(visibleScreenArea);
+            cellArea.intersect(cb);
+            tokenG.setClip(cellArea);
+            tokenG.drawImage(workImage, at, this);
+          }
+        }
+      } else {
+        // fallthrough normal token rendered against visible area
+        tokenG.drawImage(workImage, at, this);
+      }*/
+
       if (!isGMView && zoneView.isUsingVision()) {
-        if (token.getShape() == TokenShape.FIGURE || token.isAlwaysVisible()) {
-          Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
-          if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-            if (isTokenInNeedOfClipping(token, cb, false)) {
-              Area cellArea = new Area(visibleScreenArea);
-              cellArea.intersect(cb);
-              tokenG.setClip(cellArea);
-            }
+        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+          if (token.getShape() == TokenShape.FIGURE && zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+            tokenG.drawImage(workImage, at, this);
+          } else if (token.isAlwaysVisible() && zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+            tokenG.drawImage(workImage, at, this);
+          } else {
+            Area cellArea = new Area(visibleScreenArea);
+            cellArea.intersect(cb);
+            tokenG.setClip(cellArea);
             tokenG.drawImage(workImage, at, this);
           }
         }
