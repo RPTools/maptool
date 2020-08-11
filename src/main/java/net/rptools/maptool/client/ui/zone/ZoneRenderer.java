@@ -3302,9 +3302,13 @@ public class ZoneRenderer extends JComponent
       if (!isGMView && zoneView.isUsingVision()) {
         Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-          if (token.getShape() == TokenShape.FIGURE && zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+          if (token.getShape() == TokenShape.FIGURE
+              && zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
             tokenG.drawImage(workImage, at, this);
-          } else if (token.isAlwaysVisible() && zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+          } else if (token.isAlwaysVisible()
+              && zone.getGrid()
+                  .checkRegion(
+                      cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
             tokenG.drawImage(workImage, at, this);
           } else {
             Area cellArea = new Area(visibleScreenArea);
