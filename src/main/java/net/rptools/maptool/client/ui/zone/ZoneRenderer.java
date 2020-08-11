@@ -3299,21 +3299,11 @@ public class ZoneRenderer extends JComponent
 
       // Finally render the token image
       timer.start("tokenlist-7");
-      if (!isGMView && zoneView.isUsingVision()) {
-        if (token.getShape() == TokenShape.FIGURE || token.isAlwaysVisible()) {
-          Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
-          if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-            if (isTokenInNeedOfClipping(token, cb, false)) {
-              Area cellArea = new Area(visibleScreenArea);
-              cellArea.intersect(cb);
-              tokenG.setClip(cellArea);
-            }
-            tokenG.drawImage(workImage, at, this);
-          }
-        }
-      } else if (token.getShape() != TokenShape.FIGURE || !token.isAlwaysVisible()) {
-        tokenG.drawImage(workImage, at, this);
-      }
+      Composite oldComposite = tokenG.getComposite();
+      if (opacity < 1.0f)
+        tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+      tokenG.drawImage(workImage, at, this);
+      tokenG.setComposite(oldComposite);
       timer.stop("tokenlist-7");
 
       timer.start("tokenlist-8");
