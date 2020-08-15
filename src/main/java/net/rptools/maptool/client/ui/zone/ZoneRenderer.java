@@ -3299,11 +3299,27 @@ public class ZoneRenderer extends JComponent
 
       // Finally render the token image
       timer.start("tokenlist-7");
-      Composite oldComposite = tokenG.getComposite();
-      if (opacity < 1.0f)
-        tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-      tokenG.drawImage(workImage, at, this);
-      tokenG.setComposite(oldComposite);
+      if (!isGMView && zoneView.isUsingVision()) {
+        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+          if (token.getShape() == TokenShape.FIGURE
+              && zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+            tokenG.drawImage(workImage, at, this);
+          } else if (token.isAlwaysVisible()
+              && zone.getGrid()
+                  .checkRegion(
+                      cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+            tokenG.drawImage(workImage, at, this);
+          } else {
+            Area cellArea = new Area(visibleScreenArea);
+            cellArea.intersect(cb);
+            tokenG.setClip(cellArea);
+            tokenG.drawImage(workImage, at, this);
+          }
+        }
+      } else if (token.getShape() != TokenShape.FIGURE || !token.isAlwaysVisible()) {
+        tokenG.drawImage(workImage, at, this);
+      }
       timer.stop("tokenlist-7");
 
       timer.start("tokenlist-8");
