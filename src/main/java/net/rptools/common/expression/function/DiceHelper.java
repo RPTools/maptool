@@ -212,16 +212,22 @@ public class DiceHelper {
     return result;
   }
 
-  public static String countShadowRun4(int times, int gremlins, boolean explode) {
+  public enum ShadowrunEdition {
+    EDITION_4,
+    EDITION_5
+  }
+
+  public static String countShadowRun(
+      int poolSize, int gremlins, boolean explode, ShadowrunEdition edition) {
     RunData runData = RunData.getCurrent();
 
     int hitCount = 0;
     int oneCount = 0;
     int sides = 6;
     int success = 5;
-    String actual = "";
-    String glitch = "";
+    StringBuilder actual = new StringBuilder();
 
+    int times = poolSize;
     for (int i = 0; i < times; i++) {
       int value = runData.randomInt(sides);
 
@@ -231,19 +237,37 @@ public class DiceHelper {
 
       if (value == 6 && explode) times++;
 
-      actual = actual + value + " ";
+      actual.append(value).append(" ");
     }
 
     // Check for Glitchs
-    if (oneCount != 0) {
-      if ((hitCount == 0) && ((double) times / 2 - gremlins) <= (double) oneCount) {
-        glitch = " *Critical Glitch*";
-      } else if ((double) (times / 2 - gremlins) <= (double) oneCount) {
-        glitch = " *Glitch*";
-      }
-    }
+    // TODO check, if there already was a bug here concerning glitches on exploding dice in SR4
+    // in SR5, Exploding dice are re-rolled and do not increase the pool size tested here
+    boolean normalGlitch =
+        edition == ShadowrunEdition.EDITION_4
+            // SR4: half of pool or more
+            ? ((double) oneCount >= ((double) times / 2))
+            // SR5: strictly more than half of pool
+            : ((double) oneCount > ((double) poolSize / 2));
 
-    String result = "Hits: " + hitCount + " Ones: " + oneCount + glitch + "  Results: " + actual;
+    boolean gremlinGlitch =
+        edition == ShadowrunEdition.EDITION_4
+            ? ((double) oneCount >= ((double) times / 2 - gremlins))
+            : ((double) oneCount > ((double) poolSize / 2 - gremlins));
+
+    boolean noSuccess = hitCount == 0;
+    // Both Editions: Critical, if no success
+    String criticalPart = noSuccess ? "Critical " : "";
+    // Signalize glitches only caused due to gremlins for storytelling
+    String gremlinPart = (gremlinGlitch ^ normalGlitch) ? "Gremlin " : "";
+    // but only if this was a glitch.
+    // if anyone feeds invalid negative gremlin values into this, non-glitches will become gremlin
+    // glitches.
+    String glitchFormatted =
+        (normalGlitch || gremlinGlitch) ? " *" + criticalPart + gremlinPart + "Glitch*" : "";
+
+    String result =
+        "Hits: " + hitCount + " Ones: " + oneCount + glitchFormatted + "  Results: " + actual;
 
     return result;
   }

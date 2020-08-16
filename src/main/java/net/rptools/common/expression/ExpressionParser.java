@@ -133,6 +133,14 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[sS][rR]4[gG](\\d+)\\b", "sr4($1, $2)"},
         new String[] {"\\b(\\d+)[sS][rR]4\\b", "sr4($1)"},
 
+        // Shadowrun 5 Edge or Exploding Test
+        new String[] {"\\b(\\d+)[sS][rR]5[eE][gG](\\d+)\\b", "sr5e($1, $2)"},
+        new String[] {"\\b(\\d+)[sS][rR]5[eE]\\b", "sr5e($1)"},
+
+        // Shadowrun 5 Normal Test
+        new String[] {"\\b(\\d+)[sS][rR]5[gG](\\d+)\\b", "sr5($1, $2)"},
+        new String[] {"\\b(\\d+)[sS][rR]5\\b", "sr5($1)"},
+
         // Subtract X with minimum of Y
         new String[] {
           "\\b(\\d+)[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower($1, $2, $3, $4)"
@@ -188,6 +196,8 @@ public class ExpressionParser {
     parser.addFunction(new UbiquityRoll());
     parser.addFunction(new ShadowRun4Dice());
     parser.addFunction(new ShadowRun4ExplodeDice());
+    parser.addFunction(new ShadowRun5Dice());
+    parser.addFunction(new ShadowRun5ExplodeDice());
     parser.addFunction(new Roll());
     parser.addFunction(new ExplodingSuccessDice());
     parser.addFunction(new OpenTestDice());

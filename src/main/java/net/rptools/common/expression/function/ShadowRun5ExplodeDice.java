@@ -14,30 +14,30 @@
  */
 package net.rptools.common.expression.function;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 import net.rptools.parser.Parser;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 import net.rptools.parser.function.EvaluationException;
 
-public class ShadowRun4ExplodeDice extends AbstractNumberFunction {
+import java.math.BigDecimal;
+import java.util.List;
 
-    public ShadowRun4ExplodeDice() {
-        super(1, 2, true, "sr4e");
-    }
+public class ShadowRun5ExplodeDice extends AbstractNumberFunction {
 
-    @Override
-    public Object childEvaluate(
-            Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
-            throws EvaluationException {
+  public ShadowRun5ExplodeDice() {
+    super(1, 2, true, "sr5e");
+  }
 
-        int n = 0;
-        int gremlins = 0;
-        int times = ((BigDecimal) parameters.get(n++)).intValue();
-        if (parameters.size() == 2) gremlins = ((BigDecimal) parameters.get(n++)).intValue();
+  @Override
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
+      throws EvaluationException {
 
-        return DiceHelper.countShadowRun(times, gremlins, true, DiceHelper.ShadowrunEdition.EDITION_4);
-    }
+    int n = 0;
+    int gremlins = 0;
+    int times = ((BigDecimal) parameters.get(n++)).intValue();
+    if (parameters.size() == 2) gremlins = ((BigDecimal) parameters.get(n++)).intValue();
+
+    return DiceHelper.countShadowRun(times, gremlins, true, DiceHelper.ShadowrunEdition.EDITION_5);
+  }
 }

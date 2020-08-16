@@ -37,6 +37,6 @@ public class ShadowRun4Dice extends AbstractNumberFunction {
     int times = ((BigDecimal) parameters.get(n++)).intValue();
     if (parameters.size() == 2) gremlins = ((BigDecimal) parameters.get(n++)).intValue();
 
-    return DiceHelper.countShadowRun4(times, gremlins, false);
+    return DiceHelper.countShadowRun(times, gremlins, false, DiceHelper.ShadowrunEdition.EDITION_4);
   }
 }
