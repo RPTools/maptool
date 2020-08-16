@@ -134,7 +134,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
   }
 
   public void testEvaluate_ExplodeWithMockRunData() throws ParserException {
-    int[] rolls = {3, 6, 6, 2};
+    int[] rolls = {3, 6, 6, 2}; // explode both sixes
     setUpMockRunData(rolls);
     Result result = new ExpressionParser().evaluate("2d6e");
     assertEquals(new BigDecimal(17), result.getValue());
