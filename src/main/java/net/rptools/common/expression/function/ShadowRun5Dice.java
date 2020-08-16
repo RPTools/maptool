@@ -14,13 +14,12 @@
  */
 package net.rptools.common.expression.function;
 
+import java.math.BigDecimal;
+import java.util.List;
 import net.rptools.parser.Parser;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 import net.rptools.parser.function.EvaluationException;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 public class ShadowRun5Dice extends AbstractNumberFunction {
 
