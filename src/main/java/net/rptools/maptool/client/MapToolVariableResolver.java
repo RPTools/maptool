@@ -339,7 +339,8 @@ public class MapToolVariableResolver implements VariableResolver {
   public void setVariable(String varname, VariableModifiers modifiers, Object value)
       throws ParserException {
 
-    if (CONSTANTS.containsKey(varname)) {
+    if (CONSTANTS.containsKey(varname.toLowerCase())
+        && variables.containsKey(varname)) { // allow to be sirt first time
       throw new ParserException(I18N.getText("lineParser.cantAssignToConstant", varname));
     }
 
