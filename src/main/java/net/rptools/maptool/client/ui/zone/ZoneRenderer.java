@@ -4615,9 +4615,9 @@ public class ZoneRenderer extends JComponent
       token.setType(type);
 
       // Token type
+      Token tokenNameUsed = zone.getTokenByName(token.getName());
       if (isGM) {
         // Check the name (after Token layer is set as name relies on layer)
-        Token tokenNameUsed = zone.getTokenByName(token.getName());
         token.setName(MapToolUtil.nextTokenId(zone, token, tokenNameUsed != null));
 
         if (getActiveLayer() == Zone.Layer.TOKEN) {
@@ -4632,23 +4632,15 @@ public class ZoneRenderer extends JComponent
       } else {
         // Player dropped, ensure it's a PC token
         // (Why? Couldn't a Player drop an RPTOK that represents an NPC, such as for a summoned
-        // monster?
-        // Unfortunately, we can't know at this point whether the original input was an RPTOK or
-        // not.)
-        token.setType(Token.Type.PC);
+        // monster?  Unfortunately, we can't know at this point whether the original input was
+        // an RPTOK or not.)
+        //token.setType(Token.Type.PC);
 
         // For Players, check to see if the name is already in use. If it is already in use, make
-        // sure the
-        // current Player
-        // owns the token being duplicated (to avoid subtle ways of manipulating someone else's
-        // token!).
-        Token tokenNameUsed = zone.getTokenByName(token.getName());
+        // sure the current Player owns the token being duplicated (to avoid subtle ways of
+        // manipulating someone else's token!).
         if (tokenNameUsed != null) {
-          if (!AppUtil.playerOwns(tokenNameUsed)) {
-            failedPaste.add(token.getName());
-            continue;
-          }
-          String newName = MapToolUtil.nextTokenId(zone, token, tokenNameUsed != null);
+          String newName = MapToolUtil.nextTokenId(zone, token, true);
           token.setName(newName);
         }
       }
