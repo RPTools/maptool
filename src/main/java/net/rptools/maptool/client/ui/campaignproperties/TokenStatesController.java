@@ -301,7 +301,7 @@ public class TokenStatesController
         formPanel.setText(NAME, "");
         formPanel.setText(GROUP, "");
         formPanel.setSelected(MOUSEOVER, false);
-        formPanel.getSpinner(OPACITY).setValue(new Integer(100));
+        formPanel.getSpinner(OPACITY).setValue(100);
         formPanel.getSpinner(INDEX).setValue(selected);
         formPanel.setSelected(SHOW_GM, true);
         formPanel.setSelected(SHOW_OWNER, true);

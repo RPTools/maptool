@@ -1731,8 +1731,9 @@ public class MapTool {
       // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
-      for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
-        Object key = keys.nextElement();
+      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
+          iterator.hasNext(); ) {
+        Object key = iterator.next();
         Object value = UIManager.get(key);
         if (value instanceof FontUIResource) {
           UIManager.put(key, fontRes);

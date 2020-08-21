@@ -183,10 +183,8 @@ public class TokenLightFunctions extends AbstractFunction {
     if ("*".equals(category)) {
       for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
         for (LightSource ls : lsMap.values()) {
-          if (ls.getName().equals(name)) {
-            if (token.hasLightSource(ls)) {
-              return true;
-            }
+          if (ls.getName().equals(name) && token.hasLightSource(ls)) {
+            return true;
           }
         }
       }
