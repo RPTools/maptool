@@ -15,6 +15,9 @@
 package net.rptools.maptool.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -69,7 +72,7 @@ public class UserJvmOptions {
     INIConfiguration iniConfiguration;
 
     File cfgFile = AppUtil.getAppCfgFile();
-    if (!cfgFile.exists()) {
+    if (cfgFile == null || !cfgFile.exists()) {
       return false;
     }
 
@@ -112,7 +115,7 @@ public class UserJvmOptions {
     return true;
   }
 
-  public static void saveAppCfg() {
+  public static boolean saveAppCfg() {
     // Special handling of -X memory parameters and parms that don't follow key=value notation
     // e.g. -XSS and -XX:+ShowCodeDetailsInExceptionMessages
     jvmNodeConfiguration
@@ -153,10 +156,43 @@ public class UserJvmOptions {
     try {
       configurationBuilder.save();
     } catch (ConfigurationException e) {
+      String msgKey;
+      if (AppUtil.MAC_OS_X) {
+        msgKey = "startup.config.cantWrite.macosx";
+      } else if (AppUtil.WINDOWS) {
+        msgKey = "startup.config.cantWrite.windows";
+      } else if (AppUtil.LINUX_OR_UNIX) {
+        msgKey = "startup.config.cantWrite.linuxOrUnix";
+      } else {
+        msgKey = "startup.config.cantWrite.unknown";
+      }
+
+      MapTool.showError(I18N.getText(msgKey, AppUtil.getAppCfgFile().toString()));
+
       log.error("Error saving jvm cfg file.", e);
+      return false;
     }
 
     log.debug("JVM configurations saved!");
+
+    copyConfigFile();
+    return true;
+  }
+
+  private static void copyConfigFile() {
+    File userDirAppConfig = AppUtil.getDataDirAppCfgFile();
+    File appConfig = AppUtil.getAppCfgFile();
+
+    if (appConfig == null || !appConfig.canWrite()) {
+      return;
+    }
+
+    try {
+      Files.copy(
+          appConfig.toPath(), userDirAppConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      MapTool.showError("msg.error.copyingStartupConfig", e);
+    }
   }
 
   public static String getJvmOption(JVM_OPTION option) {
