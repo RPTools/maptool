@@ -49,6 +49,8 @@ public class AppUtil {
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
   private static final Logger log = LogManager.getLogger(AppUtil.class);
   private static final String CLIENT_ID_FILE = "client-id";
+  private static final String CONFIG_SUB_DIR = "config";
+  private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
@@ -56,6 +58,13 @@ public class AppUtil {
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+  /** Returns true if currently running on Linux or other Unix/Unix like system. */
+  public static boolean LINUX_OR_UNIX =
+      (System.getProperty("os.name").indexOf("nix") >= 0
+          || System.getProperty("os.name").indexOf("nux") >= 0
+          || System.getProperty("os.name").indexOf("aix") >= 0
+          || System.getProperty("os.name").indexOf("sunos") >= 0);
 
   public static final String LOOK_AND_FEEL_NAME =
       MAC_OS_X
@@ -68,7 +77,9 @@ public class AppUtil {
   static {
     System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
     packagerCfgFileName =
-        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg";
+        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
+            ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
+            : null;
   }
 
   /**
@@ -189,13 +200,17 @@ public class AppUtil {
   }
 
   /**
-   * Returns a File path representing the base directory that the application is running from. e.g.
-   * C:\Users\Troll\AppData\Local\MapTool\app
+   * Returns a File path representing the configuration file in the base directory that the
+   * application is running from. e.g. C:\Users\Troll\AppData\Local\MapTool\app
    *
-   * @return the maptool install directory
+   * @return the configuration file in the maptool install directory
    */
   public static File getAppCfgFile() {
     File cfgFile;
+
+    if (packagerCfgFileName == null) {
+      return null;
+    }
 
     try {
       CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
@@ -210,6 +225,14 @@ public class AppUtil {
     }
 
     return cfgFile;
+  }
+  /**
+   * Returns a File path representing configuration file under the app home directory structure.
+   *
+   * @return the maptool configuration file under the app home directory structure.
+   */
+  public static File getDataDirAppCfgFile() {
+    return getAppHome(CONFIG_SUB_DIR).toPath().resolve(APP_HOME_CONFIG_FILENAME).toFile();
   }
 
   /**
