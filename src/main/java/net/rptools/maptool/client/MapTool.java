@@ -1328,6 +1328,13 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+
+    // Check to see status of start up configuration
+    if (AppSetup.didStartupPreferencesGetCopied()) {
+      MapTool.showInformation("startup.config.checkConfigMessage");
+    } else if (AppSetup.didCopyPreviousStartupPreferences()) {
+      MapTool.showInformation("startup.config.copiedPrevious");
+    }
   }
 
   /**
