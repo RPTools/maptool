@@ -3308,11 +3308,19 @@ public class ZoneRenderer extends JComponent
               cellArea.intersect(cb);
               tokenG.setClip(cellArea);
             }
+            Composite oldComposite = tokenG.getComposite();
+            if (opacity < 1.0f)
+              tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
             tokenG.drawImage(workImage, at, this);
+            tokenG.setComposite(oldComposite);
           }
         }
       } else if (token.getShape() != TokenShape.FIGURE || !token.isAlwaysVisible()) {
+        Composite oldComposite = tokenG.getComposite();
+        if (opacity < 1.0f)
+          tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         tokenG.drawImage(workImage, at, this);
+        tokenG.setComposite(oldComposite);
       }
       timer.stop("tokenlist-7");
 
