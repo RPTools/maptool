@@ -33,6 +33,106 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     RunData.setCurrent(mockRD);
   }
 
+  public void testEvaluate_ShadowRun4NonGlich25() throws ParserException {
+    int[] rolls = {2, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4");
+    assertEquals("Hits: 1 Ones: 0  Results: 2 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun4GremlinGlich25() throws ParserException {
+    int[] rolls = {2, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4g1");
+    assertEquals("Hits: 1 Ones: 0 *Gremlin Glitch*  Results: 2 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun4CriticalGremlinGlich22() throws ParserException {
+    int[] rolls = {2, 2};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4g1");
+    assertEquals("Hits: 0 Ones: 0 *Critical Gremlin Glitch*  Results: 2 2 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun4Glitch15() throws ParserException {
+    int[] rolls = {1, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4");
+    assertEquals("Hits: 1 Ones: 1 *Glitch*  Results: 1 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun4CriticalGlitch12() throws ParserException {
+    int[] rolls = {1, 2};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4");
+    assertEquals("Hits: 0 Ones: 1 *Critical Glitch*  Results: 1 2 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun4CriticalGlitch11() throws ParserException {
+    int[] rolls = {1, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr4");
+    assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5NonGlich25() throws ParserException {
+    int[] rolls = {2, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5");
+    assertEquals("Hits: 1 Ones: 0  Results: 2 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5NonGlitch15() throws ParserException {
+    int[] rolls = {1, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5");
+    assertEquals("Hits: 1 Ones: 1  Results: 1 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5CriticalGlitch11() throws ParserException {
+    int[] rolls = {1, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5");
+    assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5CriticalGremlinGlitch12() throws ParserException {
+    int[] rolls = {1, 2};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5g1");
+    assertEquals("Hits: 0 Ones: 1 *Critical Gremlin Glitch*  Results: 1 2 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5GremlinGlitch15() throws ParserException {
+    int[] rolls = {1, 5};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5g1");
+    assertEquals("Hits: 1 Ones: 1 *Gremlin Glitch*  Results: 1 5 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5CriticalNonGremlinGlitch11() throws ParserException {
+    int[] rolls = {1, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5g1");
+    // This one would have glitched even without gremlins, thus, don't show the gremlin mark
+    assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5Glitch61Exploding1() throws ParserException {
+    int[] rolls = {6, 1, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5e");
+    assertEquals("Hits: 1 Ones: 2 *Glitch*  Results: 6 1 1 ", result.getValue());
+  }
+
+  public void testEvaluate_ShadowRun5Glitch66Exploding6611() throws ParserException {
+    int[] rolls = {6, 6, 6, 6, 1, 1};
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("2sr5e");
+    // this is still a glitch.
+    assertEquals("Hits: 4 Ones: 2 *Glitch*  Results: 6 6 6 6 1 1 ", result.getValue());
+  }
+
   public void testEvaluate_ExplodeWithMockRunData() throws ParserException {
     int[] rolls = {3, 6, 6, 2}; // explode both sixes
     setUpMockRunData(rolls);
