@@ -539,6 +539,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               InitiativePanel ip = frame.getInitiativePanel();
               ip.setOwnerPermissions(properties.isInitiativeOwnerPermissions());
               ip.setMovementLock(properties.isInitiativeMovementLock());
+              ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
+              ip.updateView();
               MapTool.getFrame().getLookupTablePanel().updateView();
               return;
 

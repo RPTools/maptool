@@ -117,6 +117,9 @@ public class InitiativePanel extends JPanel
   /** Flag indicating that the owners of tokens can only move their tokens when it is their turn. */
   private boolean movementLock;
 
+  /** Whether the {@link #SORT_LIST_ACTION} should use the reversed (Ascending) order */
+  private boolean initUseReverseSort;
+
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
@@ -148,6 +151,7 @@ public class InitiativePanel extends JPanel
 
     ownerPermissions = MapTool.getCampaign().isInitiativeOwnerPermissions();
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
+    initUseReverseSort = MapTool.getCampaign().isInitiativeUseReverseSort();
 
     // Set up the list with an empty model
     displayList = new JList<TokenInitiative>();
@@ -184,6 +188,7 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.showTokenStates", SHOW_TOKEN_STATES_ACTION);
     I18N.setAction("initPanel.showInitStates", SHOW_INIT_STATE);
     I18N.setAction("initPanel.initStateSecondLine", INIT_STATE_SECOND_LINE);
+    I18N.setAction("initPanel.toggleReverseSort", TOGGLE_REVERSE_INIT_SORT_ORDER);
     I18N.setAction("initPanel.toggleHideNPCs", TOGGLE_HIDE_NPC_ACTION);
     I18N.setAction("initPanel.addPCs", ADD_PCS_ACTION);
     I18N.setAction("initPanel.addAll", ADD_ALL_ACTION);
@@ -225,6 +230,9 @@ public class InitiativePanel extends JPanel
     popupMenu.removeAll();
     if (hasGMPermission()) {
       popupMenu.add(new JMenuItem(SORT_LIST_ACTION));
+      JCheckBoxMenuItem reverseSort = new JCheckBoxMenuItem(TOGGLE_REVERSE_INIT_SORT_ORDER);
+      reverseSort.setSelected(initUseReverseSort);
+      popupMenu.add(reverseSort);
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(MAKE_CURRENT_ACTION));
     } // endif
@@ -399,6 +407,14 @@ public class InitiativePanel extends JPanel
   /** @param anMovementLock Setter for MovementLock */
   public void setMovementLock(boolean anMovementLock) {
     movementLock = anMovementLock;
+  }
+
+  public boolean isInitUseReverseSort() {
+    return initUseReverseSort;
+  }
+
+  public void setInitUseReverseSort(boolean anInitUseReverseSort) {
+    initUseReverseSort = anInitUseReverseSort;
   }
 
   /**
@@ -610,7 +626,18 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.sort();
+          list.sort(initUseReverseSort);
+        };
+      };
+
+  /** Toggle the Use Reverse Sort Order preference */
+  public final Action TOGGLE_REVERSE_INIT_SORT_ORDER =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          initUseReverseSort = ((JCheckBoxMenuItem) e.getSource()).isSelected();
+          MapTool.getCampaign().setInitiativeUseReverseSort(initUseReverseSort);
+          MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
         };
       };
 

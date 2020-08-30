@@ -671,6 +671,14 @@ public class Campaign {
     campaignProperties.setInitiativeMovementLock(initiativeMovementLock);
   }
 
+  public boolean isInitiativeUseReverseSort() {
+    return campaignProperties != null && campaignProperties.isInitiativeUseReverseSort();
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    campaignProperties.setInitiativeUseReverseSort(initiativeUseReverseSort);
+  }
+
   /** @return Getter for characterSheets */
   public Map<String, String> getCharacterSheets() {
     return getCampaignProperties().getCharacterSheets();

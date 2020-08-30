@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.InitiativeListModel;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -40,7 +41,7 @@ public class MiscInitiativeFunction extends AbstractFunction {
   private MiscInitiativeFunction() {
     super(
         0,
-        0,
+        1,
         "nextInitiative",
         "prevInitiative",
         "sortInitiative",
@@ -118,7 +119,11 @@ public class MiscInitiativeFunction extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted() && !ip.hasGMPermission())
       throw new ParserException(I18N.getText("macro.function.general.onlyGM", functionName));
     if (functionName.equals("sortInitiative")) {
-      list.sort();
+      boolean ascendingOrder = false;
+      if (args.size() > 0) {
+        ascendingOrder = FunctionUtil.paramAsBoolean(functionName, args, 0, false);
+      }
+      list.sort(ascendingOrder);
       return new BigDecimal(list.getSize());
     } else if (functionName.equals("initiativeSize")) {
       return new BigDecimal(list.getSize());

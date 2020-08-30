@@ -66,6 +66,9 @@ public class CampaignProperties {
   /** Flag indicating that owners can only move tokens when they have initiative */
   private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
 
+  /** Whether the default initiative sort order is reversed */
+  private boolean initiativeUseReverseSort = false;
+
   public CampaignProperties() {
     init();
   }
@@ -113,6 +116,7 @@ public class CampaignProperties {
 
     initiativeOwnerPermissions = properties.initiativeOwnerPermissions;
     initiativeMovementLock = properties.initiativeMovementLock;
+    initiativeUseReverseSort = properties.initiativeUseReverseSort;
 
     characterSheets = new HashMap<String, String>();
     if (properties.characterSheets == null || properties.characterSheets.isEmpty()) {
@@ -419,6 +423,14 @@ public class CampaignProperties {
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     this.initiativeMovementLock = initiativeMovementLock;
+  }
+
+  public boolean isInitiativeUseReverseSort() {
+    return initiativeUseReverseSort;
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    this.initiativeUseReverseSort = initiativeUseReverseSort;
   }
 
   /**
