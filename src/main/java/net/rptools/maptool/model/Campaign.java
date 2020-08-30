@@ -679,6 +679,14 @@ public class Campaign {
     campaignProperties.setInitiativeUseReverseSort(initiativeUseReverseSort);
   }
 
+  public boolean isInitiativePanelButtonsDisabled() {
+    return campaignProperties != null && campaignProperties.isInitiativePanelButtonsDisabled();
+  }
+
+  public void setInitiativePanelButtonsDisabled(boolean disabled) {
+    campaignProperties.setInitiativePanelButtonsDisabled(disabled);
+  }
+
   /** @return Getter for characterSheets */
   public Map<String, String> getCharacterSheets() {
     return getCampaignProperties().getCharacterSheets();

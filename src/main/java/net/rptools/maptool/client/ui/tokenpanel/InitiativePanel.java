@@ -120,6 +120,12 @@ public class InitiativePanel extends JPanel
   /** Whether the {@link #SORT_LIST_ACTION} should use the reversed (Ascending) order */
   private boolean initUseReverseSort;
 
+  /**
+   * The Next/Previous buttons can be disabled to prevent bypass of a framework's custom initiative
+   * functions
+   */
+  private boolean initPanelButtonsDisabled;
+
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
@@ -152,6 +158,7 @@ public class InitiativePanel extends JPanel
     ownerPermissions = MapTool.getCampaign().isInitiativeOwnerPermissions();
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
     initUseReverseSort = MapTool.getCampaign().isInitiativeUseReverseSort();
+    initPanelButtonsDisabled = MapTool.getCampaign().isInitiativePanelButtonsDisabled();
 
     // Set up the list with an empty model
     displayList = new JList<TokenInitiative>();
@@ -190,6 +197,7 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.initStateSecondLine", INIT_STATE_SECOND_LINE);
     I18N.setAction("initPanel.toggleReverseSort", TOGGLE_REVERSE_INIT_SORT_ORDER);
     I18N.setAction("initPanel.toggleHideNPCs", TOGGLE_HIDE_NPC_ACTION);
+    I18N.setAction("initPanel.togglePanelButtonsDisabled", TOGGLE_PANEL_BUTTONS_DISABLED_ACTION);
     I18N.setAction("initPanel.addPCs", ADD_PCS_ACTION);
     I18N.setAction("initPanel.addAll", ADD_ALL_ACTION);
     I18N.setAction("initPanel.remove", REMOVE_TOKEN_ACTION);
@@ -221,10 +229,12 @@ public class InitiativePanel extends JPanel
     displayList.setDragEnabled(hasGMPermission());
 
     // Set up the buttons
-    PREV_ACTION.setEnabled(hasGMPermission());
+    PREV_ACTION.setEnabled(hasGMPermission() && !isInitPanelButtonsDisabled());
     RESET_COUNTER_ACTION.setEnabled(hasGMPermission());
     NEXT_ACTION.setEnabled(
-        hasGMPermission() || (ownerPermissions && hasOwnerPermission(list.getCurrentToken())));
+        !isInitPanelButtonsDisabled()
+            && (hasGMPermission()
+                || (ownerPermissions && hasOwnerPermission(list.getCurrentToken()))));
 
     // Set up the menu
     popupMenu.removeAll();
@@ -255,6 +265,9 @@ public class InitiativePanel extends JPanel
       hideNPCMenuItem = new JCheckBoxMenuItem(TOGGLE_HIDE_NPC_ACTION);
       hideNPCMenuItem.setSelected(list != null && list.isHideNPC());
       popupMenu.add(hideNPCMenuItem);
+      item = new JCheckBoxMenuItem(TOGGLE_PANEL_BUTTONS_DISABLED_ACTION);
+      item.setSelected(initPanelButtonsDisabled);
+      popupMenu.add(item);
       ownerPermissionsMenuItem = new JCheckBoxMenuItem(TOGGLE_OWNER_PERMISSIONS_ACTION);
       ownerPermissionsMenuItem.setSelected(list != null && ownerPermissions);
       popupMenu.add(ownerPermissionsMenuItem);
@@ -309,7 +322,9 @@ public class InitiativePanel extends JPanel
     EventQueue.invokeLater(
         () -> {
           model.setList(list);
-          NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
+          NEXT_ACTION.setEnabled(
+              !isInitPanelButtonsDisabled()
+                  && (hasGMPermission() || hasOwnerPermission(list.getCurrentToken())));
           if (list.getCurrent() >= 0) {
             int index = model.getDisplayIndex(list.getCurrent());
             if (index >= 0) displayList.ensureIndexIsVisible(index);
@@ -417,6 +432,28 @@ public class InitiativePanel extends JPanel
     initUseReverseSort = anInitUseReverseSort;
   }
 
+  public boolean isInitPanelButtonsDisabled() {
+    return initPanelButtonsDisabled;
+  }
+
+  /**
+   * Updates the "Disable Panel Buttons" setting, and tweaks the Next/Previous button tooltips
+   * appropriately. Updates the view.
+   *
+   * @param initPanelButtonsDisabled
+   */
+  public void setInitPanelButtonsDisabled(boolean initPanelButtonsDisabled) {
+    this.initPanelButtonsDisabled = initPanelButtonsDisabled;
+    if (this.initPanelButtonsDisabled) {
+      NEXT_ACTION.putValue(Action.SHORT_DESCRIPTION, I18N.getText("initPanel.buttonsAreDisabled"));
+      PREV_ACTION.putValue(Action.SHORT_DESCRIPTION, I18N.getText("initPanel.buttonsAreDisabled"));
+    } else {
+      I18N.setAction("initPanel.next", NEXT_ACTION);
+      I18N.setAction("initPanel.prev", PREV_ACTION);
+    }
+    updateView();
+  }
+
   /**
    * Returns true if the passed token can not be moved because it is not the current token.
    *
@@ -458,7 +495,9 @@ public class InitiativePanel extends JPanel
     MAKE_CURRENT_ACTION.setEnabled(enabled && ti != list.getCurrentTokenInitiative());
 
     REMOVE_TOKEN_ACTION.setEnabled(enabled);
-    NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
+    NEXT_ACTION.setEnabled(
+        !isInitPanelButtonsDisabled()
+            && (hasGMPermission() || hasOwnerPermission(list.getCurrentToken())));
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -478,7 +517,8 @@ public class InitiativePanel extends JPanel
           && t.getType() != Type.NPC
           && AppPreferences.isShowInitGainMessage()) MapTool.addMessage(TextMessage.say(null, s));
       displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
-      NEXT_ACTION.setEnabled(hasOwnerPermission(list.getCurrentToken()));
+      NEXT_ACTION.setEnabled(
+          !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
     } else if (evt.getPropertyName().equals(InitiativeList.TOKENS_PROP)) {
       if ((evt.getOldValue() == null && evt.getNewValue() instanceof TokenInitiative)
           || (evt.getNewValue() == null & evt.getOldValue() instanceof TokenInitiative))
@@ -637,6 +677,18 @@ public class InitiativePanel extends JPanel
         public void actionPerformed(ActionEvent e) {
           initUseReverseSort = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           MapTool.getCampaign().setInitiativeUseReverseSort(initUseReverseSort);
+          MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+        };
+      };
+
+  /** Enable/Disable the Next & Previous buttons on the Panel */
+  public final Action TOGGLE_PANEL_BUTTONS_DISABLED_ACTION =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          // use the setter to make sure related changes are applied to the panel
+          setInitPanelButtonsDisabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+          MapTool.getCampaign().setInitiativePanelButtonsDisabled(isInitPanelButtonsDisabled());
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
         };
       };

@@ -540,6 +540,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               ip.setOwnerPermissions(properties.isInitiativeOwnerPermissions());
               ip.setMovementLock(properties.isInitiativeMovementLock());
               ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
+              ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
               ip.updateView();
               MapTool.getFrame().getLookupTablePanel().updateView();
               return;
