@@ -601,6 +601,12 @@ public class InitiativeList implements Serializable {
     /** Save off the icon so that it can be displayed as needed. */
     private transient Icon displayIcon;
 
+    /**
+     * Need to remember whether the displayIcon was shaded (to indicate a hidden token) so we can
+     * update when needed
+     */
+    private transient boolean tokenVisibleWhenIconUpdated = false;
+
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
@@ -676,9 +682,33 @@ public class InitiativeList implements Serializable {
       return displayIcon;
     }
 
-    /** @param displayIcon Setter for the displayIcon to set */
+    /**
+     * NOTE: Be sure to also call {@link#setTokenVisibleWhenIconUpdated(boolean)}
+     *
+     * @param displayIcon Setter for the displayIcon to set.
+     */
     public void setDisplayIcon(Icon displayIcon) {
       this.displayIcon = displayIcon;
+    }
+
+    /**
+     * Checks whether the cached icon for this {@link TokenInitiative} was generated with the alpha
+     * shading - indicating whether the token was visible when the icon was last refreshed.
+     *
+     * @return true if the token was visible (and the icon was therefore opaque), false otherwise
+     */
+    public boolean wasTokenVisibleWhenIconUpdated() {
+      return tokenVisibleWhenIconUpdated;
+    }
+
+    /**
+     * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
+     * be refreshed if needed.
+     *
+     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false otherwise
+     */
+    public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
+      this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
     }
 
     /**
