@@ -168,7 +168,8 @@ public class UserJvmOptions {
     File appConfig = AppUtil.getAppCfgFile();
 
     if (appConfig == null || !appConfig.canWrite()) {
-      return; // If not running from install or its not possible to write to install configuration file then skip copy.
+      return; // If not running from install or its not possible to write to install configuration
+      // file then skip copy.
     }
 
     try {
