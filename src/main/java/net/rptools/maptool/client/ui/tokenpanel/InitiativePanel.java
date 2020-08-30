@@ -736,9 +736,9 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          boolean op = !MapTool.getCampaign().isInitiativeMovementLock();
-          if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
-          MapTool.getCampaign().setInitiativeMovementLock(op);
+          boolean mvLock = !MapTool.getCampaign().isInitiativeMovementLock();
+          if (movementLockMenuItem != null) movementLockMenuItem.setSelected(mvLock);
+          MapTool.getCampaign().setInitiativeMovementLock(mvLock);
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
         };
       };
