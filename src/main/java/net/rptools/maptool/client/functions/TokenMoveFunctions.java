@@ -26,10 +26,8 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -44,11 +42,11 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -417,7 +415,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   public static BigDecimal tokenMoved(
       final Token originalToken, final Path<?> path, final List<GUID> filteredTokens) {
-    Token token = getMoveMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
+    Token token = EventMacroUtil.getEventMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
 
     List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
     JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
@@ -461,41 +459,6 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
     }
     return BigDecimal.ZERO;
-  }
-
-  private static Token getMoveMacroToken(final String macroCallback) {
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      List<Token> tokenList =
-          zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
-      for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs
-        // then we are in
-        // its a trusted Lib:token so we can run the macro
-        if (token != null) {
-          if (token.isOwnedByAll()) {
-            continue;
-          } else {
-            Set<String> gmPlayers = new HashSet<String>();
-            for (Object o : MapTool.getPlayerList()) {
-              Player p = (Player) o;
-              if (p.isGM()) {
-                gmPlayers.add(p.getName());
-              }
-            }
-            for (String owner : token.getOwners()) {
-              if (!gmPlayers.contains(owner)) {
-                continue;
-              }
-            }
-          }
-        }
-        if (token.getMacro(macroCallback, false) != null) {
-          return token;
-        }
-      }
-    }
-    return null;
   }
 
   private String getMovement(
@@ -584,7 +547,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   public static BigDecimal multipleTokensMoved(List<GUID> filteredTokens) {
-    Token token = getMoveMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
+    Token token = EventMacroUtil.getEventMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
     if (token != null) {
       try {
         JsonArray json = new JsonArray();

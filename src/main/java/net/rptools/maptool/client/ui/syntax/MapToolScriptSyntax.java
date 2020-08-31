@@ -19,6 +19,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +48,8 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "tokens.denyMove",
     "tokens.moveCount",
     "init.current",
-    "init.round"
+    "init.round",
+    InitiativeList.ON_INITIATIVE_CHANGE_DENY_VARIABLE
   };
 
   static String[] RESERVED_WORDS = {
@@ -90,7 +92,12 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
   };
 
   static String[] RESERVED_WORDS_2 = {
-    "onCampaignLoad", "onChangeSelection", "onMouseOverEvent", "onMultipleTokensMove", "onTokenMove"
+    "onCampaignLoad",
+    "onChangeSelection",
+    "onMouseOverEvent",
+    "onMultipleTokensMove",
+    "onTokenMove",
+    InitiativeList.ON_INITIATIVE_CHANGE_MACRO_CALLBACK
   };
 
   static String[] OPERATORS = {
