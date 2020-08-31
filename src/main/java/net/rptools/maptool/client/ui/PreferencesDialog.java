@@ -21,6 +21,7 @@ import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,19 +29,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -154,6 +143,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox jvmOpenGLCheckbox;
   private final JCheckBox jvmInitAwtCheckbox;
   private final JComboBox<String> jamLanguageOverrideComboBox;
+  private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
 
   public PreferencesDialog() {
@@ -290,6 +280,22 @@ public class PreferencesDialog extends JDialog {
 
     jamLanguageOverrideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
+
+    startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    File appCfgFile = AppUtil.getAppCfgFile();
+    if (appCfgFile != null) {
+      String copyInfo = "";
+      if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
+        copyInfo =
+            I18N.getText(
+                "startup.preferences.info.manualCopy",
+                AppUtil.getDataDirAppCfgFile().toString(),
+                appCfgFile.toString());
+      }
+      String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
+      startupInfoLabel.setText(startupInfoMsg);
+    }
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
     languageModel.addAll(getLanguages());
@@ -946,7 +952,7 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
     // get JVM User Defaults/User override preferences
-    if (AppUtil.getAppCfgFile() == null || !AppUtil.getAppCfgFile().canWrite()) {
+    if (AppUtil.getAppCfgFile() == null) {
       int ind = tabbedPane.indexOfTab("Startup");
       if (ind >= 0) {
         tabbedPane.removeTabAt(ind);

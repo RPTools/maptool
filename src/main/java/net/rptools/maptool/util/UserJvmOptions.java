@@ -71,10 +71,7 @@ public class UserJvmOptions {
     Configurations configurations = new Configurations();
     INIConfiguration iniConfiguration;
 
-    File cfgFile = AppUtil.getAppCfgFile();
-    if (cfgFile == null || !cfgFile.exists()) {
-      return false;
-    }
+    File cfgFile = AppUtil.getDataDirAppCfgFile();
 
     configurationBuilder = configurations.iniBuilder(cfgFile);
 
@@ -156,20 +153,7 @@ public class UserJvmOptions {
     try {
       configurationBuilder.save();
     } catch (ConfigurationException e) {
-      String msgKey;
-      if (AppUtil.MAC_OS_X) {
-        msgKey = "startup.config.cantWrite.macosx";
-      } else if (AppUtil.WINDOWS) {
-        msgKey = "startup.config.cantWrite.windows";
-      } else if (AppUtil.LINUX_OR_UNIX) {
-        msgKey = "startup.config.cantWrite.linuxOrUnix";
-      } else {
-        msgKey = "startup.config.cantWrite.unknown";
-      }
-
-      MapTool.showError(I18N.getText(msgKey, AppUtil.getAppCfgFile().toString()));
-
-      log.error("Error saving jvm cfg file.", e);
+      MapTool.showError("startup.config.unableToWrite", e);
       return false;
     }
 
@@ -184,12 +168,13 @@ public class UserJvmOptions {
     File appConfig = AppUtil.getAppCfgFile();
 
     if (appConfig == null || !appConfig.canWrite()) {
-      return;
+      return; // If not running from install or its not possible to write to install configuration
+      // file then skip copy.
     }
 
     try {
       Files.copy(
-          appConfig.toPath(), userDirAppConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
+          userDirAppConfig.toPath(), appConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException e) {
       MapTool.showError("msg.error.copyingStartupConfig", e);
     }
