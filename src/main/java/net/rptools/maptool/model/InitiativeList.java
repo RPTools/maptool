@@ -705,7 +705,8 @@ public class InitiativeList implements Serializable {
      * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
      * be refreshed if needed.
      *
-     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false otherwise
+     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false
+     *     otherwise
      */
     public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
       this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
