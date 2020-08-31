@@ -412,13 +412,22 @@ public class InitiativeList implements Serializable {
   }
 
   /**
-   * Sort the tokens by their initiative state from largest to smallest. If the initiative state
-   * string can be converted into a {@link Double} that is done first. All values converted to
-   * {@link Double}s are always considered bigger than the {@link String} values. The {@link String}
-   * values are considered bigger than any <code>null</code> values.
+   * Sort the tokens by their initiative state according to the default, descending order. See
+   * {@link #sort(boolean)} for more details on handling of strings and nulls.
    */
   public void sort() {
+    this.sort(false);
+  }
+
+  /**
+   * Sort the tokens by their initiative state, in either ascending or descending order. If the
+   * initiative state string can be converted into a {@link Double} that is done first. All values
+   * converted to {@link Double}s are always considered bigger than the {@link String} values. The
+   * {@link String} values are considered bigger than any <code>null</code> values.
+   */
+  public void sort(boolean ascendingOrder) {
     startUnitOfWork();
+    final int DIRECTION = ascendingOrder ? -1 : 1;
     TokenInitiative currentInitiative =
         getTokenInitiative(getCurrent()); // Save the currently selected initiative
     tokens.sort(
@@ -448,14 +457,14 @@ public class InitiativeList implements Serializable {
 
           // Do the comparison
           if (Objects.equals(one, two)) return 0;
-          if (one == null) return 1; // Null is always the smallest value
-          if (two == null) return -1;
+          if (one == null) return 1 * DIRECTION; // Null is always the smallest value
+          if (two == null) return -1 * DIRECTION;
           if (one instanceof Double & two instanceof Double)
-            return ((Double) two).compareTo((Double) one);
+            return ((Double) two).compareTo((Double) one) * DIRECTION;
           if (one instanceof String & two instanceof String)
-            return ((String) two).compareTo((String) one);
-          if (one instanceof Double) return -1; // Integers are bigger than strings
-          return 1;
+            return ((String) two).compareTo((String) one) * DIRECTION;
+          if (one instanceof Double) return -1 * DIRECTION; // Integers are bigger than strings
+          return 1 * DIRECTION;
         });
     getPCS().firePropertyChange(TOKENS_PROP, null, tokens);
     setCurrent(indexOf(currentInitiative)); // Restore current initiative
@@ -592,6 +601,12 @@ public class InitiativeList implements Serializable {
     /** Save off the icon so that it can be displayed as needed. */
     private transient Icon displayIcon;
 
+    /**
+     * Need to remember whether the displayIcon was shaded (to indicate a hidden token) so we can
+     * update when needed
+     */
+    private transient boolean tokenVisibleWhenIconUpdated = false;
+
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
@@ -667,9 +682,34 @@ public class InitiativeList implements Serializable {
       return displayIcon;
     }
 
-    /** @param displayIcon Setter for the displayIcon to set */
+    /**
+     * NOTE: Be sure to also call {@link#setTokenVisibleWhenIconUpdated(boolean)}
+     *
+     * @param displayIcon Setter for the displayIcon to set.
+     */
     public void setDisplayIcon(Icon displayIcon) {
       this.displayIcon = displayIcon;
+    }
+
+    /**
+     * Checks whether the cached icon for this {@link TokenInitiative} was generated with the alpha
+     * shading - indicating whether the token was visible when the icon was last refreshed.
+     *
+     * @return true if the token was visible (and the icon was therefore opaque), false otherwise
+     */
+    public boolean wasTokenVisibleWhenIconUpdated() {
+      return tokenVisibleWhenIconUpdated;
+    }
+
+    /**
+     * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
+     * be refreshed if needed.
+     *
+     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false
+     *     otherwise
+     */
+    public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
+      this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
     }
 
     /**
