@@ -66,6 +66,12 @@ public class CampaignProperties {
   /** Flag indicating that owners can only move tokens when they have initiative */
   private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
 
+  /** Whether the default initiative sort order is reversed */
+  private boolean initiativeUseReverseSort = false;
+
+  /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
+  private boolean initiativePanelButtonsDisabled = false;
+
   public CampaignProperties() {
     init();
   }
@@ -113,6 +119,8 @@ public class CampaignProperties {
 
     initiativeOwnerPermissions = properties.initiativeOwnerPermissions;
     initiativeMovementLock = properties.initiativeMovementLock;
+    initiativeUseReverseSort = properties.initiativeUseReverseSort;
+    initiativePanelButtonsDisabled = properties.initiativePanelButtonsDisabled;
 
     characterSheets = new HashMap<String, String>();
     if (properties.characterSheets == null || properties.characterSheets.isEmpty()) {
@@ -419,6 +427,22 @@ public class CampaignProperties {
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     this.initiativeMovementLock = initiativeMovementLock;
+  }
+
+  public boolean isInitiativeUseReverseSort() {
+    return initiativeUseReverseSort;
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    this.initiativeUseReverseSort = initiativeUseReverseSort;
+  }
+
+  public boolean isInitiativePanelButtonsDisabled() {
+    return initiativePanelButtonsDisabled;
+  }
+
+  public void setInitiativePanelButtonsDisabled(boolean initiativePanelButtonsDisabled) {
+    this.initiativePanelButtonsDisabled = initiativePanelButtonsDisabled;
   }
 
   /**
