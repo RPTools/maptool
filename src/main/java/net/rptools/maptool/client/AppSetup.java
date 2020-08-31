@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -63,9 +64,6 @@ public class AppSetup {
     if (appConfig == null) {
       log.info("Not running from install skipping config file copy");
       return;
-    } else if (!appConfig.canWrite()) {
-      log.info("Install location config file not writeable skipping config file copy");
-      return;
     }
 
     if (userDirAppConfig.exists()) {
@@ -81,7 +79,15 @@ public class AppSetup {
           log.info("Startup configuration file copied from previous version.");
         }
       } catch (IOException e) {
-        MapTool.showError("msg.error.copyingStartupConfig", e);
+        if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
+          MapTool.showInformation(
+              I18N.getText(
+                  "msg.error.copyingStartupConfig.unixLike",
+                  userDirAppConfig.toString(),
+                  appConfig.toString()));
+        } else {
+          MapTool.showError("msg.error.copyingStartupConfig", e);
+        }
       }
     } else { // Configuration in user data dir does not exist.
       try {
