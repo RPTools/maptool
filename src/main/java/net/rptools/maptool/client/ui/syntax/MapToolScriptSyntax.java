@@ -97,7 +97,8 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "onMouseOverEvent",
     "onMultipleTokensMove",
     "onTokenMove",
-    InitiativeList.ON_INITIATIVE_CHANGE_MACRO_CALLBACK
+    InitiativeList.ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
+    InitiativeList.ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK
   };
 
   static String[] OPERATORS = {

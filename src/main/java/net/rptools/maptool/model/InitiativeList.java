@@ -19,13 +19,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,11 +90,16 @@ public class InitiativeList implements Serializable {
   /** Name of the owner permission property passed in {@link PropertyChangeEvent}s. */
   public static final String OWNER_PERMISSIONS_PROP = "ownerPermissions";
 
-  /** "callback" name used for the onInitiativeChange event */
-  public static final String ON_INITIATIVE_CHANGE_MACRO_CALLBACK = "onInitiativeChange";
+  /** "callback" name used for the onInitiativeChangeAttempt event */
+  public static final String ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK =
+      "onInitiativeChangeAttempt";
 
   /** variable to test for initiative change denial */
   public static final String ON_INITIATIVE_CHANGE_DENY_VARIABLE = "init.denyChange";
+
+  /** "callback" name used for the onInitiativeChangeCommit event */
+  public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK =
+      "onInitiativeChangeCommit";
 
   /** Logger for this class */
   private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
@@ -271,11 +273,18 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 0) ? 1 : (current + 1 >= tokens.size()) ? round + 1 : round;
     int newCurrent = (current < 0 || current + 1 >= tokens.size()) ? 0 : current + 1;
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
     // confirm via onInitiativeChange
-    BigDecimal denyChange =
-        onInitiativeChangeMacroEvent(
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        handleInitiativeChangeCommitMacroEvent(
             current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
-    if (!BigDecimal.ONE.equals(denyChange)) {
+      }
       setCurrent(newCurrent);
       setRound(newRound);
     }
@@ -288,11 +297,18 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 2) ? 1 : (current - 1 < 0) ? round - 1 : round;
     int newCurrent = (current < 1) ? (round < 2 ? 0 : tokens.size() - 1) : current - 1;
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
     // confirm via onInitiativeChange
-    BigDecimal denyChange =
-        onInitiativeChangeMacroEvent(
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        handleInitiativeChangeCommitMacroEvent(
             current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
-    if (!BigDecimal.ONE.equals(denyChange)) {
+      }
       setCurrent(newCurrent);
       setRound(newRound);
     }
@@ -598,69 +614,83 @@ public class InitiativeList implements Serializable {
   }
 
   /**
-   * Handle the {@value #ON_INITIATIVE_CHANGE_MACRO_CALLBACK} macro event, if a handler is present.
-   * Similar to onTokenMove, we handle this "event" by passing in some relevant info to a lib:Token
-   * macro, and then pass back the value of {@value #ON_INITIATIVE_CHANGE_DENY_VARIABLE} to indicate
-   * whether the change should be allowed to proceed.
+   * Handle the {@value #ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified, and
+   * checks to see whether ANY of the consulted handlers have vetoed the change.
    *
-   * <p>If errors are encountered while executing the handler (or if no handler is found), the
-   * change will be permitted.
+   * <p>Note: This is designed NOT to short-circuit. All handlers will be invoked, even if earlier
+   * handlers have already vetoed.
+   *
+   * <p>If errors are encountered while executing any particular handler, that handler will be
+   * considered to have allowed the change to proceed.
    *
    * @param oldOffset the offset prior to the pending change
    * @param newOffset the offset desired
    * @param oldRound the round prior to the pending change
    * @param newRound the round desired
    * @param direction whether the change was via next, previous, etc.
-   * @return {@link BigDecimal#ONE} if the change should be prevented, {@link BigDecimal#ZERO}
-   *     otherwise.
+   * @return true if the change should be prevented, false otherwise
    */
-  public BigDecimal onInitiativeChangeMacroEvent(
+  public boolean callForInitiativeChangeVetoes(
       int oldOffset,
       int newOffset,
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
-    Token libToken = EventMacroUtil.getEventMacroToken(ON_INITIATIVE_CHANGE_MACRO_CALLBACK);
-    if (libToken != null) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK);
+    boolean isVetoed = false;
+    if (!libTokens.isEmpty()) {
       JsonObject args = new JsonObject();
-      getInfoForOffset(oldOffset, oldRound);
       args.add("old", getInfoForOffset(oldOffset, oldRound));
       args.add("new", getInfoForOffset(newOffset, newRound));
       args.addProperty("direction", direction.toString());
-      try {
-        MapToolVariableResolver newResolver = new MapToolVariableResolver(null);
-        newResolver.setVariable(ON_INITIATIVE_CHANGE_DENY_VARIABLE, 0);
-        String resultVal =
-            MapTool.getParser()
-                .runMacro(
-                    newResolver,
-                    null,
-                    ON_INITIATIVE_CHANGE_MACRO_CALLBACK + "@" + libToken.getName(),
-                    args.toString(),
-                    false);
-        if (resultVal != null && !resultVal.equals("")) {
-          MapTool.addMessage(
-              new TextMessage(
-                  TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
-        }
-        BigDecimal denyChange = BigDecimal.ZERO;
-        if (newResolver.getVariable(ON_INITIATIVE_CHANGE_DENY_VARIABLE) instanceof BigDecimal) {
-          denyChange = (BigDecimal) newResolver.getVariable(ON_INITIATIVE_CHANGE_DENY_VARIABLE);
-        }
-        return (denyChange != null && denyChange.intValue() == 1)
-            ? BigDecimal.ONE
-            : BigDecimal.ZERO;
-      } catch (AbortFunction.AbortFunctionException afe) {
-        // Do nothing
-      } catch (Exception e) {
-        MapTool.addLocalMessage(
-            "Initiative change continuing after error running "
-                + ON_INITIATIVE_CHANGE_MACRO_CALLBACK
-                + ": "
-                + e.getMessage());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        boolean thisVote =
+            EventMacroUtil.pollEventHandlerForVeto(
+                prefix + handler.getName(),
+                argStr,
+                null,
+                ON_INITIATIVE_CHANGE_DENY_VARIABLE,
+                Collections.emptyMap());
+        isVetoed = isVetoed || thisVote;
       }
     }
-    return BigDecimal.ZERO;
+    return isVetoed;
+  }
+
+  /**
+   * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified.
+   *
+   * @param oldOffset the offset prior to the approved change
+   * @param newOffset the resulting offset
+   * @param oldRound the round prior to the approved change
+   * @param newRound the resulting round
+   * @param direction whether the change was via next, previous, etc.
+   */
+  public void handleInitiativeChangeCommitMacroEvent(
+      int oldOffset,
+      int newOffset,
+      int oldRound,
+      int newRound,
+      InitiativeChangeDirection direction) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK);
+    if (!libTokens.isEmpty()) {
+      JsonObject args = new JsonObject();
+      args.add("old", getInfoForOffset(oldOffset, oldRound));
+      args.add("new", getInfoForOffset(newOffset, newRound));
+      args.addProperty("direction", direction.toString());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        EventMacroUtil.callEventHandler(
+            prefix + handler.getName(), argStr, null, Collections.emptyMap());
+      }
+    }
   }
 
   /**
