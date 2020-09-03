@@ -14,9 +14,11 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -50,20 +52,18 @@ public class RadiusTemplate extends AbstractTemplate {
     if (distance == radius) {
       // Paint lines between vertical boundaries if needed
       if (getDistance(x + 1, y) > radius) {
-        paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
-        paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
-        paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
-        paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
-      } // endif
+        for (Quadrant q : Quadrant.values()) {
+          paintFarVerticalBorder(g, xOff, yOff, gridSize, q);
+        }
+      }
 
       // Paint lines between horizontal boundaries if needed
       if (getDistance(x, y + 1) > radius) {
-        paintFarHorizontalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
-        paintFarHorizontalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
-        paintFarHorizontalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
-        paintFarHorizontalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
-      } // endif
-    } // endif
+        for (Quadrant q : Quadrant.values()) {
+          paintFarHorizontalBorder(g, xOff, yOff, gridSize, q);
+        }
+      }
+    }
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -97,11 +97,10 @@ public class RadiusTemplate extends AbstractTemplate {
     // Only squares w/in the radius
     if (distance <= getRadius()) {
       // Paint the squares
-      paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
-      paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
-      paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
-      paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
-    } // endif
+      for (Quadrant q : Quadrant.values()) {
+        paintArea(g, xOff, yOff, gridSize, q);
+      }
+    }
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -125,8 +124,36 @@ public class RadiusTemplate extends AbstractTemplate {
         vertex.x - quadrantSize, vertex.y - quadrantSize, quadrantSize * 2, quadrantSize * 2);
   }
 
+  public PathIterator getPathIterator() {
+    return getArea().getPathIterator(new AffineTransform());
+  }
+
   public Area getArea() {
-    // I don't feel like figuring out the exact shape of this right now
-    return null;
+    if (getZoneId() == null) {
+      return new Area();
+    }
+    Zone zone = getCampaign().getZone(getZoneId());
+    if (zone == null) {
+      return new Area();
+    }
+    int gridSize = zone.getGrid().getSize();
+    int r = getRadius();
+    ZonePoint vertex = getVertex();
+    Area result = new Area();
+    for (int x = 0; x < r; x++) {
+      for (int y = 0; y < r; y++) {
+        if (getDistance(x, y) <= r) {
+          int xOff = x * gridSize;
+          int yOff = y * gridSize;
+          // Add all four quadrants
+          for (Quadrant q : Quadrant.values()) {
+            int rx = vertex.x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
+            int ry = vertex.y + getYMult(q) * yOff + ((getYMult(q) - 1) / 2) * gridSize;
+            result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
+          }
+        }
+      }
+    }
+    return result;
   }
 }
