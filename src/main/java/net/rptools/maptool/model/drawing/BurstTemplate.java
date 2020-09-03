@@ -19,6 +19,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
 
@@ -117,5 +118,10 @@ public class BurstTemplate extends RadiusTemplate {
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
     renderer.drawBackground(g);
     g.setComposite(old);
+  }
+
+  @Override
+  public Area getArea() {
+    return renderer.getArea();
   }
 }
