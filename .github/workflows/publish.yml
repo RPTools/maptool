@@ -56,15 +56,16 @@ jobs:
       #   | | /| / // // __ \ / __  // __ \| | /| / // ___/
       #   | |/ |/ // // / / // /_/ // /_/ /| |/ |/ /(__  ) 
       #   |__/|__//_//_/ /_/ \__,_/ \____/ |__/|__//____/
-      #                                                  
+      #
+    - name: Copy Release Files
+      if: matrix.os == 'windows-latest'
+      run: |
+        cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
+        cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
     - name: Upload Windows EXE Release Asset
       id: upload-release-asset-exe
       uses: actions/upload-release-asset@v1
       if: matrix.os == 'windows-latest'
-      run: |
-          cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
-          cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
-
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -100,11 +101,13 @@ jobs:
       #    / /___ / // / / // /_/ /_>  <  
       #   /_____//_//_/ /_/ \__,_//_/|_|  
       #
+    - name: Copy Release Files
+      if: matrix.os == 'ubuntu-latest'
+      run: cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}-1.x86_64.rpm
     - name: Upload Linux RPM Release Asset
       id: upload-release-asset-rpm
       uses: actions/upload-release-asset@v1
       if: matrix.os == 'ubuntu-latest'
-      run: cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}-1.x86_64.rpm
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
