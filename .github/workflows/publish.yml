@@ -53,7 +53,7 @@ jobs:
       #   | |/ |/ // // / / // /_/ // /_/ /| |/ |/ /(__  ) 
       #   |__/|__//_//_/ /_/ \__,_/ \____/ |__/|__//____/
       #
-    - name: Copy Release Files
+    - name: Copy Windows Release Files
       if: matrix.os == 'windows-latest'
       run: |
         cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
@@ -97,7 +97,7 @@ jobs:
       #    / /___ / // / / // /_/ /_>  <  
       #   /_____//_//_/ /_/ \__,_//_/|_|  
       #
-    - name: Copy Release Files
+    - name: Copy Linux Release Files
       if: matrix.os == 'ubuntu-latest'
       run: |
         cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}-1.x86_64.rpm
@@ -130,6 +130,11 @@ jobs:
       #    / / / / / // /_/ // /__ / /_/ /___/ / 
       #   /_/ /_/ /_/ \__,_/ \___/ \____//____/  
       #
+    - name: Copy Mac OS Release Files
+      if: matrix.os == 'macOS-latest'
+        run: |
+          cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
+          cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1
