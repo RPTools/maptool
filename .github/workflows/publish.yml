@@ -132,9 +132,9 @@ jobs:
       #
     - name: Copy Mac OS Release Files
       if: matrix.os == 'macOS-latest'
-        run: |
-          cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
-          cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
+      run: |
+        cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
+        cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1
