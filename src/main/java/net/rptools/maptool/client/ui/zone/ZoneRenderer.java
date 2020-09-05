@@ -32,7 +32,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -515,7 +514,6 @@ public class ZoneRenderer extends JComponent
       // Jamz: add final path render here?
 
       List<GUID> filteredTokens = new ArrayList<GUID>();
-      BigDecimal tmc = null;
       moveTimer.stop("setup");
 
       int offsetX, offsetY;
@@ -593,13 +591,11 @@ public class ZoneRenderer extends JComponent
 
       moveTimer.start("onTokenMove");
       if (!filteredTokens.isEmpty()) {
-        // run tokenMoved() for each token in the filtered selection
-        // list, canceling if it returns 1.0
+        // give onTokenMove a chance to reject each token's movement
         for (GUID tokenGUID : filteredTokens) {
           Token token = zone.getToken(tokenGUID);
-          tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
-
-          if (BigDecimal.ONE.equals(tmc)) {
+          boolean moveDenied = TokenMoveFunctions.callForTokenMoveVeto(token, path, filteredTokens);
+          if (moveDenied) {
             denyMovement(token);
           }
         }
@@ -610,10 +606,10 @@ public class ZoneRenderer extends JComponent
       // Multiple tokens, the list of tokens and call
       // onMultipleTokensMove() macro function.
       if (filteredTokens.size() > 1) {
-        tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
-        if (BigDecimal.ONE.equals(tmc)) {
+        boolean moveDenied = TokenMoveFunctions.callForMultiTokenMoveVeto(filteredTokens);
+        if (moveDenied) {
           for (GUID tokenGUID : filteredTokens) {
             Token token = zone.getToken(tokenGUID);
             denyMovement(token);
