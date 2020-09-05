@@ -90,16 +90,15 @@ public class InitiativeList implements Serializable {
   /** Name of the owner permission property passed in {@link PropertyChangeEvent}s. */
   public static final String OWNER_PERMISSIONS_PROP = "ownerPermissions";
 
-  /** "callback" name used for the onInitiativeChangeAttempt event */
+  /** "callback" name used for the onInitiativeChangeRequest event */
   public static final String ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK =
-      "onInitiativeChangeAttempt";
+      "onInitiativeChangeRequest";
 
   /** variable to test for initiative change denial */
   public static final String ON_INITIATIVE_CHANGE_DENY_VARIABLE = "init.denyChange";
 
-  /** "callback" name used for the onInitiativeChangeCommit event */
-  public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK =
-      "onInitiativeChangeCommit";
+  /** "callback" name used for the onInitiativeChange (non-vetoable) event */
+  public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK = "onInitiativeChange";
 
   /** Logger for this class */
   private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
@@ -275,13 +274,14 @@ public class InitiativeList implements Serializable {
     int newCurrent = (current < 0 || current + 1 >= tokens.size()) ? 0 : current + 1;
     // if nothing has changed, there's no need to fire the macro events
     boolean fireEvents = (newRound != round || newCurrent != current);
-    // confirm via onInitiativeChange
+    // confirm via onInitiativeChangeRequest
     boolean changeIsVetoed =
         fireEvents
             && callForInitiativeChangeVetoes(
                 current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
     if (!changeIsVetoed) {
       if (fireEvents) {
+        // notify via onInitiativeChange
         handleInitiativeChangeCommitMacroEvent(
             current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
       }
@@ -299,13 +299,14 @@ public class InitiativeList implements Serializable {
     int newCurrent = (current < 1) ? (round < 2 ? 0 : tokens.size() - 1) : current - 1;
     // if nothing has changed, there's no need to fire the macro events
     boolean fireEvents = (newRound != round || newCurrent != current);
-    // confirm via onInitiativeChange
+    // confirm via onInitiativeChangeRequest
     boolean changeIsVetoed =
         fireEvents
             && callForInitiativeChangeVetoes(
                 current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
     if (!changeIsVetoed) {
       if (fireEvents) {
+        // notify via onInitiativeChange
         handleInitiativeChangeCommitMacroEvent(
             current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
       }
@@ -708,10 +709,12 @@ public class InitiativeList implements Serializable {
     JsonObject info = new JsonObject();
     info.addProperty("round", round);
     info.addProperty("offset", offset);
-    TokenInitiative newTI = getTokenInitiative(offset);
-    String stateStr = (newTI != null) ? newTI.getState() : "";
+    TokenInitiative theTI = getTokenInitiative(offset);
+    String stateStr = (theTI != null) ? theTI.getState() : "";
     if (stateStr == null) stateStr = "";
     info.addProperty("initiative", stateStr);
+    boolean isHolding = (theTI != null) ? theTI.isHolding() : false;
+    info.addProperty("holding", isHolding ? 1 : 0);
     info.addProperty("token", offset != -1 ? getToken(offset).getId().toString() : "");
     return info;
   }
