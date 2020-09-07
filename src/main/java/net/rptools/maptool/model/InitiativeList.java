@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -22,6 +23,7 @@ import java.util.*;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -87,6 +89,16 @@ public class InitiativeList implements Serializable {
 
   /** Name of the owner permission property passed in {@link PropertyChangeEvent}s. */
   public static final String OWNER_PERMISSIONS_PROP = "ownerPermissions";
+
+  /** "callback" name used for the onInitiativeChangeRequest event */
+  public static final String ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK =
+      "onInitiativeChangeRequest";
+
+  /** variable to test for initiative change denial */
+  public static final String ON_INITIATIVE_CHANGE_DENY_VARIABLE = "init.denyChange";
+
+  /** "callback" name used for the onInitiativeChange (non-vetoable) event */
+  public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK = "onInitiativeChange";
 
   /** Logger for this class */
   private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
@@ -260,8 +272,22 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 0) ? 1 : (current + 1 >= tokens.size()) ? round + 1 : round;
     int newCurrent = (current < 0 || current + 1 >= tokens.size()) ? 0 : current + 1;
-    setCurrent(newCurrent);
-    setRound(newRound);
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
+    // confirm via onInitiativeChangeRequest
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        // notify via onInitiativeChange
+        handleInitiativeChangeCommitMacroEvent(
+            current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
+      }
+      setCurrent(newCurrent);
+      setRound(newRound);
+    }
     finishUnitOfWork();
   }
 
@@ -271,8 +297,22 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 2) ? 1 : (current - 1 < 0) ? round - 1 : round;
     int newCurrent = (current < 1) ? (round < 2 ? 0 : tokens.size() - 1) : current - 1;
-    setCurrent(newCurrent);
-    setRound(newRound);
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
+    // confirm via onInitiativeChangeRequest
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        // notify via onInitiativeChange
+        handleInitiativeChangeCommitMacroEvent(
+            current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
+      }
+      setCurrent(newCurrent);
+      setRound(newRound);
+    }
     finishUnitOfWork();
   }
 
@@ -572,6 +612,121 @@ public class InitiativeList implements Serializable {
   /** @return Getter for tokens */
   public List<TokenInitiative> getTokens() {
     return Collections.unmodifiableList(tokens);
+  }
+
+  /**
+   * Handle the {@value #ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified, and
+   * checks to see whether ANY of the consulted handlers have vetoed the change.
+   *
+   * <p>Note: This is designed NOT to short-circuit. All handlers will be invoked, even if earlier
+   * handlers have already vetoed.
+   *
+   * <p>If errors are encountered while executing any particular handler, that handler will be
+   * considered to have allowed the change to proceed.
+   *
+   * @param oldOffset the offset prior to the pending change
+   * @param newOffset the offset desired
+   * @param oldRound the round prior to the pending change
+   * @param newRound the round desired
+   * @param direction whether the change was via next, previous, etc.
+   * @return true if the change should be prevented, false otherwise
+   */
+  public boolean callForInitiativeChangeVetoes(
+      int oldOffset,
+      int newOffset,
+      int oldRound,
+      int newRound,
+      InitiativeChangeDirection direction) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK);
+    boolean isVetoed = false;
+    if (!libTokens.isEmpty()) {
+      JsonObject args = new JsonObject();
+      args.add("old", getInfoForOffset(oldOffset, oldRound));
+      args.add("new", getInfoForOffset(newOffset, newRound));
+      args.addProperty("direction", direction.toString());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        boolean thisVote =
+            EventMacroUtil.pollEventHandlerForVeto(
+                prefix + handler.getName(),
+                argStr,
+                null,
+                ON_INITIATIVE_CHANGE_DENY_VARIABLE,
+                Collections.emptyMap());
+        isVetoed = isVetoed || thisVote;
+      }
+    }
+    return isVetoed;
+  }
+
+  /**
+   * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified.
+   *
+   * @param oldOffset the offset prior to the approved change
+   * @param newOffset the resulting offset
+   * @param oldRound the round prior to the approved change
+   * @param newRound the resulting round
+   * @param direction whether the change was via next, previous, etc.
+   */
+  public void handleInitiativeChangeCommitMacroEvent(
+      int oldOffset,
+      int newOffset,
+      int oldRound,
+      int newRound,
+      InitiativeChangeDirection direction) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK);
+    if (!libTokens.isEmpty()) {
+      JsonObject args = new JsonObject();
+      args.add("old", getInfoForOffset(oldOffset, oldRound));
+      args.add("new", getInfoForOffset(newOffset, newRound));
+      args.addProperty("direction", direction.toString());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        EventMacroUtil.callEventHandler(
+            prefix + handler.getName(), argStr, null, Collections.emptyMap());
+      }
+    }
+  }
+
+  /**
+   * Get a JsonObject describing the give initiative slot - includes offset, state, and token
+   * information.
+   *
+   * <p>Because this output is intended for use with initiative event macros, nulls (for tokens,
+   * initiative values, etc) are avoided in favor of empty strings.
+   *
+   * @param offset the offset from which to derive information
+   * @param round the round number to include in the output
+   * @return a JsonObject containing information about the the given initiative slot
+   */
+  private JsonObject getInfoForOffset(int offset, int round) {
+    JsonObject info = new JsonObject();
+    info.addProperty("round", round);
+    info.addProperty("offset", offset);
+    TokenInitiative theTI = getTokenInitiative(offset);
+    String stateStr = (theTI != null) ? theTI.getState() : "";
+    if (stateStr == null) stateStr = "";
+    info.addProperty("initiative", stateStr);
+    boolean isHolding = (theTI != null) ? theTI.isHolding() : false;
+    info.addProperty("holding", isHolding ? 1 : 0);
+    info.addProperty("token", offset != -1 ? getToken(offset).getId().toString() : "");
+    return info;
+  }
+
+  /** Types of initiative changes - intended for use with initiative event macros. */
+  public enum InitiativeChangeDirection {
+    /** The initiative is advancing normally from the current initiative to the next */
+    NEXT,
+    /** The initiative is reverting back to the slot/token that last had initiative. */
+    PREVIOUS,
+    /** Initiative has been directly set to a specific slot without regard for sequence. */
+    ARBITRARY;
   }
 
   /*---------------------------------------------------------------------------------------------

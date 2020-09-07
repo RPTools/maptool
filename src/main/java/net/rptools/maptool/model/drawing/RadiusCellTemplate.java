@@ -138,7 +138,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
 
     if (getDistance(x + 1, y + 1) <= radius) {
       paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
-    } // endif
+    }
   }
 
   /**
@@ -278,8 +278,38 @@ public class RadiusCellTemplate extends AbstractTemplate {
     adjustShape();
   }
 
+  @Override
   public Area getArea() {
-    // I don't feel like figuring out the exact shape of this right now
-    return null;
+    if (getZoneId() == null) {
+      return new Area();
+    }
+    Zone zone = getCampaign().getZone(getZoneId());
+    if (zone == null) {
+      return new Area();
+    }
+    int gridSize = zone.getGrid().getSize();
+    int r = getRadius();
+    ZonePoint vertex = getVertex();
+    Area result = new Area();
+    for (int x = 0; x < r; x++) {
+      for (int y = 0; y < r; y++) {
+        for (Quadrant q : Quadrant.values()) {
+          int xShift = (getXMult(q) - 1) / 2;
+          int yShift = (getYMult(q) - 1) / 2;
+          int distance = getDistance(x - xShift, y - yShift);
+          if (distance > r) {
+            continue;
+          }
+          int xOff = x * gridSize;
+          int yOff = y * gridSize;
+          // Add all four quadrants
+
+          int rx = vertex.x + getXMult(q) * xOff + xShift * gridSize;
+          int ry = vertex.y + getYMult(q) * yOff + yShift * gridSize;
+          result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
+        }
+      }
+    }
+    return result;
   }
 }

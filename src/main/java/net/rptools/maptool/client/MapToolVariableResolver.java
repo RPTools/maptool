@@ -26,6 +26,7 @@ import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.util.FunctionUtil;
@@ -98,8 +99,9 @@ public class MapToolVariableResolver implements VariableResolver {
       this.setVariable("macro.catchAbort", BigDecimal.ZERO);
       this.setVariable("macro.catchAssert", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
-      this.setVariable("tokens.denyMove", 0);
-      this.setVariable("tokens.moveCount", 1);
+      this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE, 0);
+      this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_COUNT_VARIABLE, 1);
+      this.setVariable(InitiativeList.ON_INITIATIVE_CHANGE_DENY_VARIABLE, 0);
     } catch (ParserException e) {
       LOGGER.error("Error: Unable to set macro.args to default value <br>" + e.getMessage());
     }
