@@ -101,8 +101,7 @@ public class MacroManager {
   }
 
   public static Set<Macro> getRegisteredMacros() {
-    Set<Macro> ret = new HashSet<Macro>();
-    ret.addAll(MACROS.values());
+    Set<Macro> ret = new HashSet<Macro>(MACROS.values());
     return ret;
   }
 
@@ -144,7 +143,7 @@ public class MacroManager {
         recurseCount++;
 
         command = command.trim();
-        if (command == null || command.length() == 0) {
+        if (command.length() == 0) {
           return;
         }
         if (command.charAt(0) == '/') {

@@ -70,7 +70,7 @@ public class LargeImage {
   private final Map<Integer, BufferedImage> loadedChunkMap = new HashMap<Integer, BufferedImage>();
   List<Integer> usedChunkList = new ArrayList<Integer>();
 
-  public LargeImage(byte[] image, File cacheDir) throws IOException {}
+  public LargeImage(byte[] image, File cacheDir) {}
 
   public LargeImage(BufferedImage image, File cacheDir) throws IOException {
     info = loadInfo();
@@ -136,8 +136,7 @@ public class LargeImage {
   }
 
   private void flushChunkCache() {
-    Set<Integer> keySet = new HashSet<Integer>();
-    keySet.addAll(loadedChunkMap.keySet());
+    Set<Integer> keySet = new HashSet<Integer>(loadedChunkMap.keySet());
     for (Integer num : keySet) {
       if (!usedChunkList.contains(num)) {
         loadedChunkMap.remove(num);
@@ -256,7 +255,7 @@ public class LargeImage {
     return getId(ImageUtil.imageToBytes(image));
   }
 
-  private String getId(byte[] image) throws IOException {
+  private String getId(byte[] image) {
     return new MD5Key(image).toString();
   }
 

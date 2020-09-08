@@ -53,7 +53,7 @@ public class SaveAliasesMacro implements Macro {
       }
       aliasFile = chooser.getSelectedFile();
     }
-    if (aliasFile.getName().indexOf(".") < 0) {
+    if (!aliasFile.getName().contains(".")) {
       aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
     }
     if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) {
@@ -70,8 +70,7 @@ public class SaveAliasesMacro implements Macro {
           .append("\n\n");
 
       Map<String, String> aliasMap = MacroManager.getAliasMap();
-      List<String> aliasList = new ArrayList<String>();
-      aliasList.addAll(aliasMap.keySet());
+      List<String> aliasList = new ArrayList<String>(aliasMap.keySet());
       Collections.sort(aliasList);
       for (String key : aliasList) {
         String value = aliasMap.get(key);

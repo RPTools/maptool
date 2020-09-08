@@ -16,8 +16,6 @@ package net.rptools.lib.swing;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
@@ -49,15 +47,12 @@ public class OutlookPanel extends JPanel {
     // Create the button
     JButtonEx button = new JButtonEx(label, m_compList.size(), component);
     button.addActionListener(
-        new ActionListener() {
-
-          public void actionPerformed(ActionEvent ae) {
-            int index = ((JButtonEx) ae.getSource()).getIndex();
-            if (m_active.getIndex() == index && index > 0) {
-              index--;
-            }
-            setActive(index);
+        ae -> {
+          int index = ((JButtonEx) ae.getSource()).getIndex();
+          if (m_active.getIndex() == index && index > 0) {
+            index--;
           }
+          setActive(index);
         });
 
     // Update
@@ -148,7 +143,7 @@ public class OutlookPanel extends JPanel {
   }
 
   // For convenience
-  private class JButtonEx extends JButton {
+  private static class JButtonEx extends JButton {
     public JButtonEx(String label, int index, JComponent component) {
       super(label);
       m_index = index;

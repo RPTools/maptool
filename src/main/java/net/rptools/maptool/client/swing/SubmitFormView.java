@@ -200,13 +200,10 @@ public class SubmitFormView extends FormView {
 
       Map<String, String> fdata = new HashMap<>(getDataFrom(formElement, imageMapName));
       StringBuilder sb = new StringBuilder();
-      for (String s : fdata.keySet()) {
-        if (sb.length() > 0) {
-          sb.append("&");
-        }
-        sb.append(s).append("=").append(fdata.get(s));
+      for (var entry : fdata.entrySet()) {
+        sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
       }
-      sb.append("&").append(data);
+      sb.append(data);
       submitData(sb.toString());
     } else {
       submitData(data);

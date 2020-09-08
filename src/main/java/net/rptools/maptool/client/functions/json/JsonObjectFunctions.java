@@ -184,7 +184,7 @@ public class JsonObjectFunctions {
    * @throws ParserException if an error occurs.
    */
   public JsonObject set(JsonObject jsonObject, List<Object> list) throws ParserException {
-    if (list.size() % 2 != 0) {
+    if ((list.size() & 1) != 0) {
       throw new ParserException(I18N.getText("macro.function.json.setNoMatchingValue", "json.set"));
     }
     JsonObject newJsonObject = jsonObject.deepCopy();
@@ -244,7 +244,7 @@ public class JsonObjectFunctions {
     JsonArray setVars = new JsonArray();
     for (String key : jsonObject.keySet()) {
       // add prefix and suffix
-      String varName = prefix + key.toString().trim() + suffix;
+      String varName = prefix + key.trim() + suffix;
       // replace spaces by underscores
       varName = varName.replaceAll("\\s", "_");
       // delete special characters other than "." & "_" in var name

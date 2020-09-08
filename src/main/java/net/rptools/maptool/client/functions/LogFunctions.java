@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.Gson;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,11 +95,7 @@ public class LogFunctions extends AbstractFunction {
     List<LoggerResponse> loggerLevels = new ArrayList<>();
 
     for (Logger logger : logContext.getLoggers()) {
-      try {
-        loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
-      } catch (IOException ioe) {
-        log.error("Unable to get loggers from LogManager!", ioe);
-      }
+      loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
     }
 
     Gson gson = new Gson();
@@ -242,12 +237,12 @@ public class LogFunctions extends AbstractFunction {
   /*
    * A POJO to hold an Logger Config to marshal as a nice JSON object
    */
-  private final class LoggerResponse {
+  private static final class LoggerResponse {
 
     private final String name;
     private final String level;
 
-    public LoggerResponse(String name, String level) throws IOException {
+    public LoggerResponse(String name, String level) {
       this.name = name;
       this.level = level;
     }

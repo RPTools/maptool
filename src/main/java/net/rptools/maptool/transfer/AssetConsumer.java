@@ -73,10 +73,10 @@ public class AssetConsumer {
    */
   public void update(AssetChunk chunk) throws IOException {
     File file = getFilename();
-    FileOutputStream out = new FileOutputStream(file, true);
     byte[] data = chunk.getData();
-    out.write(data);
-    out.close();
+    try (FileOutputStream out = new FileOutputStream(file, true)) {
+      out.write(data);
+    }
     currentPosition += data.length;
   }
 

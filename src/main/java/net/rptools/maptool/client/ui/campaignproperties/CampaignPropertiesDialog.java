@@ -157,15 +157,13 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initAddRepoButton() {
     JButton button = (JButton) formPanel.getButton("addRepoButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            String newRepo = getNewServerTextField().getText();
-            if (newRepo == null || newRepo.length() == 0) {
-              return;
-            }
-            // TODO: Check for uniqueness
-            ((DefaultListModel) getRepositoryList().getModel()).addElement(newRepo);
+        e -> {
+          String newRepo = getNewServerTextField().getText();
+          if (newRepo == null || newRepo.length() == 0) {
+            return;
           }
+          // TODO: Check for uniqueness
+          ((DefaultListModel) getRepositoryList().getModel()).addElement(newRepo);
         });
   }
 
@@ -184,13 +182,11 @@ public class CampaignPropertiesDialog extends JDialog {
   public void initDeleteRepoButton() {
     JButton button = (JButton) formPanel.getButton("deleteRepoButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            int[] selectedRows = getRepositoryList().getSelectedIndices();
-            Arrays.sort(selectedRows);
-            for (int i = selectedRows.length - 1; i >= 0; i--) {
-              ((DefaultListModel) getRepositoryList().getModel()).remove(selectedRows[i]);
-            }
+        e -> {
+          int[] selectedRows = getRepositoryList().getSelectedIndices();
+          Arrays.sort(selectedRows);
+          for (int i = selectedRows.length - 1; i >= 0; i--) {
+            ((DefaultListModel) getRepositoryList().getModel()).remove(selectedRows[i]);
           }
         });
   }
@@ -389,7 +385,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
         }
         if (lightSource.getLumens() != 0) {
-          builder.append(" lumens=" + lightSource.getLumens());
+          builder.append(" lumens=").append(lightSource.getLumens());
         }
         builder.append('\n');
       }
@@ -464,11 +460,11 @@ public class CampaignPropertiesDialog extends JDialog {
         line = line.trim();
 
         // Blanks
-        if (line.length() == 0 || line.indexOf(":") < 1) {
+        if (line.length() == 0 || line.indexOf(':') < 1) {
           continue;
         }
         // Parse line
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         String label = line.substring(0, split).trim();
         String value = line.substring(split + 1).trim();
 
@@ -496,7 +492,7 @@ public class CampaignPropertiesDialog extends JDialog {
             // Expected when not defining a shape
           }
           // Scale with Token
-          if (arg.toUpperCase().equals("SCALE")) {
+          if (arg.equalsIgnoreCase("SCALE")) {
             scaleWithToken = true;
             continue;
           }
@@ -510,7 +506,7 @@ public class CampaignPropertiesDialog extends JDialog {
               Color personalLightColor = null;
               toBeParsed = arg.substring(1);
 
-              split = toBeParsed.indexOf("#");
+              split = toBeParsed.indexOf('#');
               if (split > 0) {
                 String colorString = toBeParsed.substring(split); // Keep the '#'
                 toBeParsed = toBeParsed.substring(0, split);
@@ -635,7 +631,7 @@ public class CampaignPropertiesDialog extends JDialog {
           continue;
         }
         // Item
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         if (split < 1) {
           continue;
         }
@@ -726,7 +722,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
           Color color = null;
           distance = arg;
-          split = arg.indexOf("#");
+          split = arg.indexOf('#');
           if (split > 0) {
             String colorString = arg.substring(split); // Keep the '#'
             distance = arg.substring(0, split);
@@ -738,7 +734,7 @@ public class CampaignPropertiesDialog extends JDialog {
             gmOnly = false;
             owner = false;
           }
-          owner = gmOnly == true ? false : owner;
+          owner = gmOnly ? false : owner;
           try {
             Light t =
                 new Light(
@@ -800,13 +796,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void initOKButton() {
-    getOKButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                accept();
-              }
-            });
+    getOKButton().addActionListener(e -> accept());
   }
 
   public JButton getCancelButton() {
@@ -832,71 +822,61 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initCancelButton() {
     getCancelButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                status = Status.CANCEL;
-                setVisible(false);
-              }
+            e -> {
+              status = Status.CANCEL;
+              setVisible(false);
             });
   }
 
   private void initImportButton() {
     getImportButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
+            e -> {
+              JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
 
-                if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
-                  return;
+              if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
 
-                final File selectedFile = chooser.getSelectedFile();
-                EventQueue.invokeLater(
-                    new Runnable() {
-                      public void run() {
-                        CampaignProperties properties =
-                            PersistenceUtil.loadCampaignProperties(selectedFile);
-                        // TODO: Allow specifying whether it is a replace or merge
-                        if (properties != null) {
-                          MapTool.getCampaign().mergeCampaignProperties(properties);
-                          copyCampaignToUI(properties);
-                        }
-                      }
-                    });
-              }
+              final File selectedFile = chooser.getSelectedFile();
+              EventQueue.invokeLater(
+                  () -> {
+                    CampaignProperties properties =
+                        PersistenceUtil.loadCampaignProperties(selectedFile);
+                    // TODO: Allow specifying whether it is a replace or merge
+                    if (properties != null) {
+                      MapTool.getCampaign().mergeCampaignProperties(properties);
+                      copyCampaignToUI(properties);
+                    }
+                  });
             });
   }
 
   private void initExportButton() {
     getExportButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                // TODO: Remove this hack. Specifically, make the export use a properties object
-                // composed of the current dialog entries instead of directly from the campaign
-                copyUIToCampaign();
-                // END HACK
+            e -> {
+              // TODO: Remove this hack. Specifically, make the export use a properties object
+              // composed of the current dialog entries instead of directly from the campaign
+              copyUIToCampaign();
+              // END HACK
 
-                JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
-                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
-                  return;
+              JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
+              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
 
-                File selectedFile = chooser.getSelectedFile();
-                if (selectedFile.exists()) {
-                  if (selectedFile.getName().endsWith(".rpgame")) {
-                    if (!MapTool.confirm("Import into game settings file?")) {
-                      return;
-                    }
-                  } else if (!MapTool.confirm("Overwrite existing file?")) {
+              File selectedFile = chooser.getSelectedFile();
+              if (selectedFile.exists()) {
+                if (selectedFile.getName().endsWith(".rpgame")) {
+                  if (!MapTool.confirm("Import into game settings file?")) {
                     return;
                   }
+                } else if (!MapTool.confirm("Overwrite existing file?")) {
+                  return;
                 }
-                try {
-                  PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
-                  MapTool.showInformation("Properties Saved.");
-                } catch (IOException ioe) {
-                  MapTool.showError("Could not save properties: ", ioe);
-                }
+              }
+              try {
+                PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
+                MapTool.showInformation("Properties Saved.");
+              } catch (IOException ioe) {
+                MapTool.showError("Could not save properties: ", ioe);
               }
             });
   }
@@ -917,14 +897,12 @@ public class CampaignPropertiesDialog extends JDialog {
               public void actionPerformed(ActionEvent e) {
                 File selectedFile = getSelectedPropertyFile();
                 EventQueue.invokeLater(
-                    new Runnable() {
-                      public void run() {
-                        CampaignProperties properties =
-                            PersistenceUtil.loadCampaignProperties(selectedFile);
-                        if (properties != null) {
-                          MapTool.getCampaign().mergeCampaignProperties(properties);
-                          copyCampaignToUI(properties);
-                        }
+                    () -> {
+                      CampaignProperties properties =
+                          PersistenceUtil.loadCampaignProperties(selectedFile);
+                      if (properties != null) {
+                        MapTool.getCampaign().mergeCampaignProperties(properties);
+                        copyCampaignToUI(properties);
                       }
                     });
               }

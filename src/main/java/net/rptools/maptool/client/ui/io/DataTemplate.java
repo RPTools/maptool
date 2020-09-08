@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.io;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,14 +137,14 @@ public abstract class DataTemplate {
    * @param path the <code>String</code> representation of the TreePath
    * @param data the <code>Map</code> to add to the UI
    */
-  protected final void addDataObjects(String path, Map<String, ? extends Object> data) {
+  protected final void addDataObjects(String path, Map<String, ?> data) {
     String[] sorted = new String[data.size()];
     data.keySet().toArray(sorted);
     Arrays.sort(sorted);
 
-    for (int i = 0; i < sorted.length; i++) {
-      Object one = data.get(sorted[i]);
-      model.addNode(path, new MaptoolNode(sorted[i], one));
+    for (String s : sorted) {
+      Object one = data.get(s);
+      model.addNode(path, new MaptoolNode(s, one));
     }
   }
 
@@ -155,7 +154,7 @@ public abstract class DataTemplate {
    *
    * @param data the <code>Map</code> to add to the UI
    */
-  protected final void addDataObjects(Map<String, ? extends Object> data) {
+  protected final void addDataObjects(Map<String, ?> data) {
     addDataObjects(getTreePath(), data);
   }
 
@@ -170,11 +169,9 @@ public abstract class DataTemplate {
    * @param path the <code>String</code> representation of the TreePath
    * @param data the <code>Collection</code> to add to the UI (usually a <code>List</code>)
    */
-  protected final void addDataObjects(String path, Collection<? extends Object> data) {
+  protected final void addDataObjects(String path, Collection<?> data) {
     Map<String, Object> mymapping = new HashMap<String, Object>(data.size());
-    Iterator<? extends Object> iter = data.iterator();
-    while (iter.hasNext()) {
-      Object o = iter.next();
+    for (Object o : data) {
       mymapping.put(o.toString(), o);
     }
     addDataObjects(path, mymapping);
@@ -186,7 +183,7 @@ public abstract class DataTemplate {
    *
    * @param data the <code>Collection</code> to add to the UI (usually a <code>List</code>)
    */
-  protected final void addDataObjects(Collection<? extends Object> data) {
+  protected final void addDataObjects(Collection<?> data) {
     addDataObjects(getTreePath(), data);
   }
 }

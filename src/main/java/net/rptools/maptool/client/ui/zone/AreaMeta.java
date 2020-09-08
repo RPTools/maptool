@@ -71,10 +71,8 @@ public class AreaMeta {
     PointNode pointNode = new PointNode(new Point2D.Double(x, y));
 
     // Don't add if we haven't moved
-    if (lastPointNode != null) {
-      if (lastPointNode.point.equals(pointNode.point)) {
-        return;
-      }
+    if (lastPointNode != null && lastPointNode.point.equals(pointNode.point)) {
+      return;
     }
     if (path == null) {
       path = new GeneralPath();

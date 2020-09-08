@@ -373,11 +373,10 @@ public class ImageUtil {
           if (x >= 0
               && y >= 0
               && x <= sourceImage.getWidth() - 1
-              && y <= sourceImage.getHeight() - 1) {
-            if ((sourceImage.getRGB(x, y) >> 24) != 0) {
-              image.setRGB(col, row, color.getRGB());
-              break;
-            }
+              && y <= sourceImage.getHeight() - 1
+              && (sourceImage.getRGB(x, y) >> 24) != 0) {
+            image.setRGB(col, row, color.getRGB());
+            break;
           }
         }
       }

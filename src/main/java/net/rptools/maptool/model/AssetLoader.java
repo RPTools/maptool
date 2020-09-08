@@ -198,8 +198,8 @@ public class AssetLoader {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     PrintWriter pw = new PrintWriter(bout);
     Map<String, String> assets = repositoryMap.get(repository);
-    for (String asset : assets.keySet()) {
-      pw.println(asset + " " + assets.get(asset));
+    for (var entry : assets.entrySet()) {
+      pw.println(entry.getKey() + " " + entry.getValue());
     }
     pw.close();
     return bout.toByteArray();

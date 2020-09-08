@@ -20,7 +20,7 @@ import java.util.List;
 /** @author trevor */
 public class AnimationManager {
 
-  private static List<Animatable> animatableList = new ArrayList<Animatable>();
+  private static final List<Animatable> animatableList = new ArrayList<Animatable>();
 
   private static List<Animatable> removeList = new ArrayList<Animatable>();
   private static List<Animatable> addList = new ArrayList<Animatable>();

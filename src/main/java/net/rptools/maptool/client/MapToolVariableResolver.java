@@ -26,6 +26,7 @@ import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.util.FunctionUtil;
@@ -73,9 +74,13 @@ public class MapToolVariableResolver implements VariableResolver {
   /** The variable name for querying and setting token visible state */
   private static final String TOKEN_VISIBLE = "token.visible";
 
-  private static final String JSON_NULL = "json.null";
-  private static final String JSON_TRUE = "json.true";
-  private static final String JSON_FALSE = "json.false";
+  private static final Map<String, Object> CONSTANTS =
+      Map.of(
+          "true", BigDecimal.ONE,
+          "false", BigDecimal.ZERO,
+          "json.null", JsonNull.INSTANCE,
+          "json.true", new JsonPrimitive(true),
+          "json.false", new JsonPrimitive(false));
 
   private final Map<String, Object> variables = new CaseInsensitiveHashMap<>();
 
@@ -94,10 +99,19 @@ public class MapToolVariableResolver implements VariableResolver {
       this.setVariable("macro.catchAbort", BigDecimal.ZERO);
       this.setVariable("macro.catchAssert", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
-      this.setVariable("tokens.denyMove", 0);
-      this.setVariable("tokens.moveCount", 1);
+      this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE, 0);
+      this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_COUNT_VARIABLE, 1);
+      this.setVariable(InitiativeList.ON_INITIATIVE_CHANGE_DENY_VARIABLE, 0);
     } catch (ParserException e) {
       LOGGER.error("Error: Unable to set macro.args to default value <br>" + e.getMessage());
+    }
+
+    for (Map.Entry<String, Object> entry : CONSTANTS.entrySet()) {
+      try {
+        setVariable(entry.getKey(), entry.getValue());
+      } catch (ParserException e) {
+        LOGGER.error("Error: Unable to set comstant " + entry.getKey() + " to " + entry.getValue());
+      }
     }
   }
 
@@ -175,15 +189,6 @@ public class MapToolVariableResolver implements VariableResolver {
   public Object getVariable(String name, VariableModifiers mods) throws ParserException {
 
     boolean evaluate = false; // Should we try to evaluate the value.
-
-    switch (name) {
-      case JSON_NULL:
-        return JsonNull.INSTANCE;
-      case JSON_TRUE:
-        return new JsonPrimitive(true);
-      case JSON_FALSE:
-        return new JsonPrimitive(false);
-    }
 
     // MT Script doesnt have much in the way of types.
     if (name.startsWith(MarkDownFunctions.MARKDOWN_PREFIX)) {
@@ -335,10 +340,14 @@ public class MapToolVariableResolver implements VariableResolver {
   @Override
   public void setVariable(String varname, VariableModifiers modifiers, Object value)
       throws ParserException {
-    if (tokenInContext != null) {
-      if (validTokenProperty(varname, tokenInContext)) {
-        updateTokenProperty(tokenInContext, varname, value.toString());
-      }
+
+    if (CONSTANTS.containsKey(varname.toLowerCase())
+        && variables.containsKey(varname)) { // allow to be set first time
+      throw new ParserException(I18N.getText("lineParser.cantAssignToConstant", varname));
+    }
+
+    if (tokenInContext != null && validTokenProperty(varname, tokenInContext)) {
+      updateTokenProperty(tokenInContext, varname, value.toString());
     }
 
     // Check to see if it is a token state.

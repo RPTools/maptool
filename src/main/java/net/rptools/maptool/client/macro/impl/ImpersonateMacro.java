@@ -43,11 +43,9 @@ public class ImpersonateMacro implements Macro {
     }
     // Figure out what we want to impersonate
     String name = macro;
-    int index = macro.indexOf(":");
-    if (index > 0) {
-      if (macro.substring(0, index).equalsIgnoreCase("lib")) {
-        index = macro.indexOf(":", index + 1);
-      }
+    int index = macro.indexOf(':');
+    if (index > 0 && macro.substring(0, index).equalsIgnoreCase("lib")) {
+      index = macro.indexOf(':', index + 1);
     }
     if (index > 0) {
       name = macro.substring(0, index).trim();

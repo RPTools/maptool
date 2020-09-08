@@ -23,7 +23,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,8 @@ public class DrawingMiscFunctions extends DrawingFunctions {
         "refreshDrawing",
         "bringDrawingToFront",
         "sendDrawingToBack",
-        "movedOverDrawing");
+        "movedOverDrawing",
+        "removeDrawing");
   }
 
   @Override
@@ -96,6 +96,9 @@ public class DrawingMiscFunctions extends DrawingFunctions {
         return "";
       } else if ("sendDrawingToBack".equalsIgnoreCase(functionName)) {
         sendToBack(map, guid);
+        return "";
+      } else if ("removeDrawing".equalsIgnoreCase(functionName)) {
+        MapTool.serverCommand().undoDraw(map.getId(), guid);
         return "";
       }
     }
@@ -163,9 +166,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
    */
   private List<String> findDrawings(List<DrawnElement> drawableList, String name) {
     List<String> drawingList = new LinkedList<String>();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable() instanceof AbstractDrawing) {
         if (name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
           drawingList.add(de.getDrawable().getId().toString());

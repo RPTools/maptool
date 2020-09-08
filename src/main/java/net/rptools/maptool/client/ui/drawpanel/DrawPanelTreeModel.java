@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JTree;
@@ -38,7 +37,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 
 public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
-  private final String root = "Views";
+  private static final String root = "Views";
   private Zone zone;
   private final JTree tree;
   private final Map<View, List<DrawnElement>> viewMap = new HashMap<View, List<DrawnElement>>();
@@ -52,7 +51,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
     OBJECT_DRAWINGS("panel.DrawExplorer.View.OBJECT", Zone.Layer.OBJECT),
     BACKGROUND_DRAWINGS("panel.DrawExplorer.View.BACKGROUND", Zone.Layer.BACKGROUND);
 
-    private View(String key, Zone.Layer layer) {
+    View(String key, Zone.Layer layer) {
       this.displayName = I18N.getText(key);
       this.layer = layer;
     }
@@ -130,11 +129,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
   @Override
   public boolean isLeaf(Object node) {
-    if (node instanceof DrawnElement) {
-      if (((DrawnElement) node).getDrawable() instanceof DrawablesGroup) return false;
-      else return true;
-    }
-    return false;
+    return node instanceof DrawnElement
+        && ((DrawnElement) node).getDrawable() instanceof DrawablesGroup;
   }
 
   @Override
@@ -148,7 +144,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
       return currentViewList.indexOf(child);
     }
     if (parent instanceof View) {
-      getViewList((View) parent).indexOf(child);
+      return getViewList((View) parent).indexOf(child);
     }
     if (parent instanceof DrawnElement) {
       if (((DrawnElement) parent).getDrawable() instanceof DrawablesGroup) {
@@ -189,11 +185,9 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
     if (!updatePending) {
       updatePending = true;
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              updatePending = false;
-              updateInternal();
-            }
+          () -> {
+            updatePending = false;
+            updateInternal();
           });
     }
   }
@@ -223,11 +217,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
           // Reverse the list so that the element drawn last, is shown at the top of the tree
           // Be careful to clone the list so you don't damage the map
           List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
-          Iterator<DrawnElement> iter = reverseList.iterator();
-          while (iter.hasNext()) {
-            DrawnElement de = iter.next();
-            if (!(de.getDrawable() instanceof AbstractTemplate)) iter.remove();
-          }
+          reverseList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
           Collections.reverse(reverseList);
           viewMap.put(View.TOKEN_DRAWINGS, reverseList);
           currentViewList.add(View.TOKEN_DRAWINGS);

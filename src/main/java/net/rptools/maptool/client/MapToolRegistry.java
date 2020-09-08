@@ -73,7 +73,7 @@ public class MapToolRegistry {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     // long delay = 0;
     //
     // Thread.sleep(delay);

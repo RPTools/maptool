@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.InitiativeListModel;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -38,7 +39,14 @@ public class MiscInitiativeFunction extends AbstractFunction {
 
   /** Handle adding one, all, all PCs or all NPC tokens. */
   private MiscInitiativeFunction() {
-    super(0, 0, "nextInitiative", "sortInitiative", "initiativeSize", "getInitiativeList");
+    super(
+        0,
+        1,
+        "nextInitiative",
+        "prevInitiative",
+        "sortInitiative",
+        "initiativeSize",
+        "getInitiativeList");
   }
 
   /** singleton instance of this function */
@@ -69,6 +77,19 @@ public class MiscInitiativeFunction extends AbstractFunction {
       }
       list.nextInitiative();
       return new BigDecimal(list.getCurrent());
+    } else if (functionName.equals("prevInitiative")) {
+      if (!MapTool.getParser().isMacroTrusted()) {
+        if (!ip.hasGMPermission()
+            && (list.getCurrent() <= 0
+                || !ip.hasOwnerPermission(list.getTokenInitiative(list.getCurrent()).getToken()))) {
+          String message = I18N.getText("macro.function.initiative.gmOnly", functionName);
+          if (ip.isOwnerPermissions())
+            message = I18N.getText("macro.function.initiative.gmOrOwner", functionName);
+          throw new ParserException(message);
+        } // endif
+      }
+      list.prevInitiative();
+      return new BigDecimal(list.getCurrent());
     } else if (functionName.equals("getInitiativeList")) {
 
       // Save round and zone name
@@ -98,7 +119,11 @@ public class MiscInitiativeFunction extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted() && !ip.hasGMPermission())
       throw new ParserException(I18N.getText("macro.function.general.onlyGM", functionName));
     if (functionName.equals("sortInitiative")) {
-      list.sort();
+      boolean ascendingOrder = false;
+      if (args.size() > 0) {
+        ascendingOrder = FunctionUtil.paramAsBoolean(functionName, args, 0, false);
+      }
+      list.sort(ascendingOrder);
       return new BigDecimal(list.getSize());
     } else if (functionName.equals("initiativeSize")) {
       return new BigDecimal(list.getSize());
