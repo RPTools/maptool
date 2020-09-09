@@ -30,7 +30,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class StringFunctions extends AbstractFunction {
   private int matchNo = 0;
@@ -273,7 +273,7 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     if (functionName.equals("isNumber")) {
-      if (StringUtils.isNumeric(parameters.get(0).toString())) {
+      if (NumberUtils.isParsable(parameters.get(0).toString())) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
