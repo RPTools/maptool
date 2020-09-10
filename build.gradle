@@ -192,7 +192,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-    maven { url = 'http://www.nerps.net/repo/' }
+    maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
 
