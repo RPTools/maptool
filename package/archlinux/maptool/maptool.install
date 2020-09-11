@@ -1,0 +1,9 @@
+post_install() {
+    xdg-desktop-menu install /opt/maptool/lib/maptool-MapTool.desktop
+    xdg-mime install /opt/maptool/lib/maptool-MapTool-MimeInfo.xml
+}
+
+pre_remove() {
+    xdg-desktop-menu uninstall /opt/maptool/lib/maptool-MapTool.desktop
+    xdg-mime uninstall /opt/maptool/lib/maptool-MapTool-MimeInfo.xml
+}
