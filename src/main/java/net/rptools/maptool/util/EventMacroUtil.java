@@ -131,6 +131,9 @@ public class EventMacroUtil {
    * Utility wrapper for running a specified macro as an event handler, getting back the variable
    * resolver instance that can be checked for any particular outputs.
    *
+   * <p>Called macros will output to chat as normal - to suppress, see {@link
+   * #callEventHandler(String, String, Token, Map, boolean)}
+   *
    * @param macroTarget the fully-qualified macro name
    * @param args the argument string to pass
    * @param tokenInContext token to set as current, if any
@@ -142,6 +145,28 @@ public class EventMacroUtil {
       final String args,
       final Token tokenInContext,
       Map<String, Object> varsToSet) {
+    return callEventHandler(macroTarget, args, tokenInContext, varsToSet, false);
+  }
+
+  /**
+   * Utility wrapper for running a specified macro as an event handler, getting back the variable
+   * resolver instance that can be checked for any particular outputs.
+   *
+   * <p>Optionally suppresses chat output.
+   *
+   * @param macroTarget the fully-qualified macro name
+   * @param args the argument string to pass
+   * @param tokenInContext token to set as current, if any
+   * @param varsToSet any variables that should be initialized in the macro scope
+   * @param suppressChatOutput whether normal macro chat output should be suppressed
+   * @return the variable resolver containing the resulting variable states
+   */
+  public static MapToolVariableResolver callEventHandler(
+      final String macroTarget,
+      final String args,
+      final Token tokenInContext,
+      Map<String, Object> varsToSet,
+      boolean suppressChatOutput) {
     if (varsToSet == null) varsToSet = Collections.emptyMap();
     MapToolVariableResolver newResolver = new MapToolVariableResolver(tokenInContext);
     try {
@@ -150,7 +175,7 @@ public class EventMacroUtil {
       }
       String resultVal =
           MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);
-      if (resultVal != null && !resultVal.equals("")) {
+      if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
         MapTool.addMessage(
             new TextMessage(
                 TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));

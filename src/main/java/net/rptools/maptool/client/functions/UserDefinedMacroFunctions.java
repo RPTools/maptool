@@ -232,7 +232,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
   /**
    * Clears any previously mapped UDFs and handles the {@value #ON_LOAD_CAMPAIGN_CALLBACK} macro
-   * event.
+   * event. Suppresses chat output on the called macros.
    */
   public void handleCampaignLoadMacroEvent() {
     userDefinedFunctions.clear();
@@ -240,7 +240,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
     for (Token handler : libTokens) {
       EventMacroUtil.callEventHandler(
-          prefix + handler.getName(), "", handler, Collections.emptyMap());
+          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
     }
   }
 
