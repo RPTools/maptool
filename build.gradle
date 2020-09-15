@@ -122,25 +122,7 @@ run {
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
 
-    def currentOs = org.gradle.internal.os.OperatingSystem.current()
 
-    if (currentOs.windows) {
-        targetPlatform('win') {
-            jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x86-32_windows_hotspot_14.0.2_12.zip');
-        }
-    }
-
-    if (currentOs.linux) {
-        targetPlatform('linux') {
-            jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz');
-        }
-    }
-
-    if (currentOs.macOsX) {
-        targetPlatform('mac') {
-            jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_mac_hotspot_14.0.2_12.tar.gz');
-        }
-    }
 
 
     jpackage {
@@ -173,7 +155,9 @@ runtime {
                     '--win-menu-group', vendor,
                     '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
             ]
-
+            targetPlatform('win') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x86-32_windows_hotspot_14.0.2_12.zip');
+            }
         }
 
         if (osdetector.os.is('osx')) {
@@ -182,7 +166,9 @@ runtime {
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
-
+            targetPlatform('mac') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_mac_hotspot_14.0.2_12.tar.gz');
+            }
         }
 
         if (osdetector.os.is('unix')) {
@@ -204,7 +190,9 @@ runtime {
                         '--linux-rpm-license-type', 'AGPLv3'
                 ]
             }
-
+            targetPlatform('linux') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz');
+            }
         }
     }
 }
