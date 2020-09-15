@@ -18,6 +18,7 @@ import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.parser.function.Function;
@@ -45,8 +46,8 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "token.label",
     "token.name",
     "token.visible",
-    "tokens.denyMove",
-    "tokens.moveCount",
+    TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE,
+    TokenMoveFunctions.ON_TOKEN_MOVE_COUNT_VARIABLE,
     "init.current",
     "init.round",
     InitiativeList.ON_INITIATIVE_CHANGE_DENY_VARIABLE
@@ -95,8 +96,8 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "onCampaignLoad",
     "onChangeSelection",
     "onMouseOverEvent",
-    "onMultipleTokensMove",
-    "onTokenMove",
+    TokenMoveFunctions.ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK,
+    TokenMoveFunctions.ON_TOKEN_MOVE_COMPLETE_CALLBACK,
     InitiativeList.ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
     InitiativeList.ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK
   };

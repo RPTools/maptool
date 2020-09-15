@@ -192,7 +192,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-    maven { url = 'http://www.nerps.net/repo/' }
+    maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
 
@@ -227,7 +227,7 @@ dependencies {
     implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
-    implementation 'com.github.RPTools:dicelib:1.6.6'
+    implementation 'com.github.RPTools:dicelib:1.7.0'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'

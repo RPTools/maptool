@@ -988,7 +988,7 @@ public class MapTool {
     MapTool.getFrame().getGmPanel().reset();
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
-    UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
+    UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
   public static void setServerPolicy(ServerPolicy policy) {
