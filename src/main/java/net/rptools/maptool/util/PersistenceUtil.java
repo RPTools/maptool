@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -202,8 +201,7 @@ public class PersistenceUtil {
         // destroy all properties and macros. Keep some fields, though. Since that type
         // of object editing doesn't belong here, we just call Token.imported() and let
         // that method Do The Right Thing.
-        for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext(); ) {
-          Token token = iter.next();
+        for (Token token : persistedMap.zone.getAllTokens()) {
           token.imported();
         }
         // XXX FJE This doesn't work the way I want it to. But doing this the Right Way
@@ -239,7 +237,7 @@ public class PersistenceUtil {
     for (Zone zone : zones) {
       if (zone.getName().equals(n)) {
         String count = n.replaceFirst("Import (\\d+) of.*", "$1"); // $NON-NLS-1$
-        Integer next = 1;
+        int next = 1;
         try {
           next = StringUtil.parseInteger(count) + 1;
           n = n.replaceFirst("Import \\d+ of", "Import " + next + " of"); // $NON-NLS-1$
@@ -583,7 +581,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static Token loadToken(File file) throws IOException {
+  public static Token loadToken(File file) {
     Token token = null;
     try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setModelVersionManager(tokenVersionManager);
@@ -962,7 +960,7 @@ public class PersistenceUtil {
   public static void saveMacroSet(List<MacroButtonProperties> macroButtonSet, File file)
       throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.MACROSET_FILE_EXTENSION);
     }
 
@@ -997,7 +995,7 @@ public class PersistenceUtil {
     return table;
   }
 
-  public static LookupTable loadTable(File file) throws IOException {
+  public static LookupTable loadTable(File file) {
 
     try {
       try (PackedFile pakFile = new PackedFile(file)) {
@@ -1023,7 +1021,7 @@ public class PersistenceUtil {
 
   public static void saveTable(LookupTable lookupTable, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.TABLE_FILE_EXTENSION);
     }
 

@@ -105,10 +105,8 @@ public class getInfoFunction extends AbstractFunction {
     JsonObject minfo = new JsonObject();
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
-    if (!MapTool.getParser().isMacroTrusted()) {
-      if (!zone.isVisible()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", "getInfo('map')"));
-      }
+    if (!MapTool.getParser().isMacroTrusted() && !zone.isVisible()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", "getInfo('map')"));
     }
 
     minfo.addProperty("name", zone.getName());
@@ -376,7 +374,7 @@ public class getInfoFunction extends AbstractFunction {
    * @return the debug information.
    * @throws ParserException if an error occurs.
    */
-  private JsonObject getDebugInfo() throws ParserException {
+  private JsonObject getDebugInfo() {
     return sysInfoProvider.getSysInfoJSON();
   }
 }

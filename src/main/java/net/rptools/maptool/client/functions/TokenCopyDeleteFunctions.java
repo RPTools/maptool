@@ -204,9 +204,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // Location...
     boolean useDistance = false; // FALSE means to multiple x,y values by grid size
     if (newVals.has("useDistance")) {
-      if (newVals.get("useDistance").getAsInt() != 0) {
-        useDistance = true;
-      }
+      useDistance = newVals.get("useDistance").getAsInt() != 0;
     }
     Grid grid =
         zone.getGrid(); // These won't change for a given execution; this could be more efficient
@@ -219,9 +217,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     boolean tokenMoved = false;
     boolean delta = false;
     if (newVals.has("delta")) {
-      if (newVals.get("delta").getAsInt() != 0) {
-        delta = true;
-      }
+      delta = newVals.get("delta").getAsInt() != 0;
     }
 
     // X

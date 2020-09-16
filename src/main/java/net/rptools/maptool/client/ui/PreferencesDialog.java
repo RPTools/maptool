@@ -21,6 +21,7 @@ import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,19 +29,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -48,6 +37,7 @@ import javax.swing.event.DocumentListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
@@ -153,6 +143,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox jvmOpenGLCheckbox;
   private final JCheckBox jvmInitAwtCheckbox;
   private final JComboBox<String> jamLanguageOverrideComboBox;
+  private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
 
   public PreferencesDialog() {
@@ -176,12 +167,15 @@ public class PreferencesDialog extends JDialog {
             }
           }
 
+          boolean close = true;
           if (jvmValuesChanged) {
-            UserJvmOptions.saveAppCfg();
+            close = UserJvmOptions.saveAppCfg();
           }
 
-          setVisible(false);
-          dispose();
+          if (close) {
+            setVisible(false);
+            dispose();
+          }
           MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
         });
 
@@ -286,6 +280,22 @@ public class PreferencesDialog extends JDialog {
 
     jamLanguageOverrideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
+
+    startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    File appCfgFile = AppUtil.getAppCfgFile();
+    if (appCfgFile != null) {
+      String copyInfo = "";
+      if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
+        copyInfo =
+            I18N.getText(
+                "startup.preferences.info.manualCopy",
+                AppUtil.getDataDirAppCfgFile().toString(),
+                appCfgFile.toString());
+      }
+      String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
+      startupInfoLabel.setText(startupInfoMsg);
+    }
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
     languageModel.addAll(getLanguages());
@@ -942,27 +952,34 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
     // get JVM User Defaults/User override preferences
-    loadUserCfg:
-    try {
+    if (AppUtil.getAppCfgFile() == null) {
+      int ind = tabbedPane.indexOfTab("Startup");
+      if (ind >= 0) {
+        tabbedPane.removeTabAt(ind);
+      }
+    } else {
       if (!UserJvmOptions.loadAppCfg()) {
         tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
-        break loadUserCfg;
+      } else {
+        try {
+
+          jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
+          jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
+          jvmXssTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.STACK_SIZE));
+          dataDirTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.DATA_DIR));
+
+          jvmDirect3dCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
+          jvmOpenGLCheckbox.setSelected(
+              UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
+          jvmInitAwtCheckbox.setSelected(
+              UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
+
+          jamLanguageOverrideComboBox.setSelectedItem(
+              UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
+        } catch (Exception e) {
+          log.error("Unable to retrieve JVM user options!", e);
+        }
       }
-
-      jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
-      jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
-      jvmXssTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.STACK_SIZE));
-      dataDirTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.DATA_DIR));
-
-      jvmDirect3dCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
-      jvmOpenGLCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
-      jvmInitAwtCheckbox.setSelected(
-          UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
-
-      jamLanguageOverrideComboBox.setSelectedItem(
-          UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-    } catch (Exception e) {
-      log.error("Unable to retrieve JVM user options!", e);
     }
 
     Integer rawVal = AppPreferences.getTypingNotificationDuration();
@@ -990,7 +1007,7 @@ public class PreferencesDialog extends JDialog {
   }
 
   /** @author frank */
-  private abstract class DocumentListenerProxy<T> implements DocumentListener {
+  private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
     JTextField comp;
 
@@ -1027,7 +1044,7 @@ public class PreferencesDialog extends JDialog {
   }
 
   /** @author frank */
-  private abstract class ChangeListenerProxy implements ChangeListener {
+  private abstract static class ChangeListenerProxy implements ChangeListener {
 
     @Override
     public void stateChanged(ChangeEvent ce) {

@@ -66,7 +66,7 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
             I18N.getText("macro.function.assert.message", parameters.get(1).toString()));
       }
     }
-    return new BigDecimal(1);
+    return BigDecimal.ONE;
   }
 
   /** Exception type thrown by assert() function, allowing a user-defined error message. */

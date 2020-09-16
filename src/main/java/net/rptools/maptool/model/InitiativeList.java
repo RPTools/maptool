@@ -14,18 +14,16 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -91,6 +89,16 @@ public class InitiativeList implements Serializable {
 
   /** Name of the owner permission property passed in {@link PropertyChangeEvent}s. */
   public static final String OWNER_PERMISSIONS_PROP = "ownerPermissions";
+
+  /** "callback" name used for the onInitiativeChangeRequest event */
+  public static final String ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK =
+      "onInitiativeChangeRequest";
+
+  /** variable to test for initiative change denial */
+  public static final String ON_INITIATIVE_CHANGE_DENY_VARIABLE = "init.denyChange";
+
+  /** "callback" name used for the onInitiativeChange (non-vetoable) event */
+  public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK = "onInitiativeChange";
 
   /** Logger for this class */
   private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
@@ -264,8 +272,22 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 0) ? 1 : (current + 1 >= tokens.size()) ? round + 1 : round;
     int newCurrent = (current < 0 || current + 1 >= tokens.size()) ? 0 : current + 1;
-    setCurrent(newCurrent);
-    setRound(newRound);
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
+    // confirm via onInitiativeChangeRequest
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        // notify via onInitiativeChange
+        handleInitiativeChangeCommitMacroEvent(
+            current, newCurrent, round, newRound, InitiativeChangeDirection.NEXT);
+      }
+      setCurrent(newCurrent);
+      setRound(newRound);
+    }
     finishUnitOfWork();
   }
 
@@ -275,8 +297,22 @@ public class InitiativeList implements Serializable {
     startUnitOfWork();
     int newRound = (round < 2) ? 1 : (current - 1 < 0) ? round - 1 : round;
     int newCurrent = (current < 1) ? (round < 2 ? 0 : tokens.size() - 1) : current - 1;
-    setCurrent(newCurrent);
-    setRound(newRound);
+    // if nothing has changed, there's no need to fire the macro events
+    boolean fireEvents = (newRound != round || newCurrent != current);
+    // confirm via onInitiativeChangeRequest
+    boolean changeIsVetoed =
+        fireEvents
+            && callForInitiativeChangeVetoes(
+                current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
+    if (!changeIsVetoed) {
+      if (fireEvents) {
+        // notify via onInitiativeChange
+        handleInitiativeChangeCommitMacroEvent(
+            current, newCurrent, round, newRound, InitiativeChangeDirection.PREVIOUS);
+      }
+      setCurrent(newCurrent);
+      setRound(newRound);
+    }
     finishUnitOfWork();
   }
 
@@ -416,53 +452,59 @@ public class InitiativeList implements Serializable {
   }
 
   /**
-   * Sort the tokens by their initiative state from largest to smallest. If the initiative state
-   * string can be converted into a {@link Double} that is done first. All values converted to
-   * {@link Double}s are always considered bigger than the {@link String} values. The {@link String}
-   * values are considered bigger than any <code>null</code> values.
+   * Sort the tokens by their initiative state according to the default, descending order. See
+   * {@link #sort(boolean)} for more details on handling of strings and nulls.
    */
   public void sort() {
+    this.sort(false);
+  }
+
+  /**
+   * Sort the tokens by their initiative state, in either ascending or descending order. If the
+   * initiative state string can be converted into a {@link Double} that is done first. All values
+   * converted to {@link Double}s are always considered bigger than the {@link String} values. The
+   * {@link String} values are considered bigger than any <code>null</code> values.
+   */
+  public void sort(boolean ascendingOrder) {
     startUnitOfWork();
+    final int DIRECTION = ascendingOrder ? -1 : 1;
     TokenInitiative currentInitiative =
         getTokenInitiative(getCurrent()); // Save the currently selected initiative
-    Collections.sort(
-        tokens,
-        new Comparator<TokenInitiative>() {
-          public int compare(TokenInitiative o1, TokenInitiative o2) {
+    tokens.sort(
+        (o1, o2) -> {
 
-            // Get a number, string, or null for first parameter
-            Object one = null;
-            if (o1.state != null) {
-              one = o1.state;
-              try {
-                one = Double.valueOf(o1.state);
-              } catch (NumberFormatException e) {
-                // Not a number so ignore
-              } // endtry
-            } // endif
+          // Get a number, string, or null for first parameter
+          Object one = null;
+          if (o1.state != null) {
+            one = o1.state;
+            try {
+              one = Double.valueOf(o1.state);
+            } catch (NumberFormatException e) {
+              // Not a number so ignore
+            } // endtry
+          } // endif
 
-            // Repeat for second param
-            Object two = null;
-            if (o2.state != null) {
-              two = o2.state;
-              try {
-                two = Double.valueOf(o2.state);
-              } catch (NumberFormatException e) {
-                // Not a number so ignore
-              } // endtry
-            } // endif
+          // Repeat for second param
+          Object two = null;
+          if (o2.state != null) {
+            two = o2.state;
+            try {
+              two = Double.valueOf(o2.state);
+            } catch (NumberFormatException e) {
+              // Not a number so ignore
+            } // endtry
+          } // endif
 
-            // Do the comparison
-            if (one == two || (one != null && one.equals(two))) return 0;
-            if (one == null) return 1; // Null is always the smallest value
-            if (two == null) return -1;
-            if (one instanceof Double & two instanceof Double)
-              return ((Double) two).compareTo((Double) one);
-            if (one instanceof String & two instanceof String)
-              return ((String) two).compareTo((String) one);
-            if (one instanceof Double) return -1; // Integers are bigger than strings
-            return 1;
-          }
+          // Do the comparison
+          if (Objects.equals(one, two)) return 0;
+          if (one == null) return 1 * DIRECTION; // Null is always the smallest value
+          if (two == null) return -1 * DIRECTION;
+          if (one instanceof Double & two instanceof Double)
+            return ((Double) two).compareTo((Double) one) * DIRECTION;
+          if (one instanceof String & two instanceof String)
+            return ((String) two).compareTo((String) one) * DIRECTION;
+          if (one instanceof Double) return -1 * DIRECTION; // Integers are bigger than strings
+          return 1 * DIRECTION;
         });
     getPCS().firePropertyChange(TOKENS_PROP, null, tokens);
     setCurrent(indexOf(currentInitiative)); // Restore current initiative
@@ -572,6 +614,121 @@ public class InitiativeList implements Serializable {
     return Collections.unmodifiableList(tokens);
   }
 
+  /**
+   * Handle the {@value #ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified, and
+   * checks to see whether ANY of the consulted handlers have vetoed the change.
+   *
+   * <p>Note: This is designed NOT to short-circuit. All handlers will be invoked, even if earlier
+   * handlers have already vetoed.
+   *
+   * <p>If errors are encountered while executing any particular handler, that handler will be
+   * considered to have allowed the change to proceed.
+   *
+   * @param oldOffset the offset prior to the pending change
+   * @param newOffset the offset desired
+   * @param oldRound the round prior to the pending change
+   * @param newRound the round desired
+   * @param direction whether the change was via next, previous, etc.
+   * @return true if the change should be prevented, false otherwise
+   */
+  public boolean callForInitiativeChangeVetoes(
+      int oldOffset,
+      int newOffset,
+      int oldRound,
+      int newRound,
+      InitiativeChangeDirection direction) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK);
+    boolean isVetoed = false;
+    if (!libTokens.isEmpty()) {
+      JsonObject args = new JsonObject();
+      args.add("old", getInfoForOffset(oldOffset, oldRound));
+      args.add("new", getInfoForOffset(newOffset, newRound));
+      args.addProperty("direction", direction.toString());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        boolean thisVote =
+            EventMacroUtil.pollEventHandlerForVeto(
+                prefix + handler.getName(),
+                argStr,
+                null,
+                ON_INITIATIVE_CHANGE_DENY_VARIABLE,
+                Collections.emptyMap());
+        isVetoed = isVetoed || thisVote;
+      }
+    }
+    return isVetoed;
+  }
+
+  /**
+   * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
+   * are present. Passes in some relevant info to each qualifying lib:token macro identified.
+   *
+   * @param oldOffset the offset prior to the approved change
+   * @param newOffset the resulting offset
+   * @param oldRound the round prior to the approved change
+   * @param newRound the resulting round
+   * @param direction whether the change was via next, previous, etc.
+   */
+  public void handleInitiativeChangeCommitMacroEvent(
+      int oldOffset,
+      int newOffset,
+      int oldRound,
+      int newRound,
+      InitiativeChangeDirection direction) {
+    List<Token> libTokens =
+        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK);
+    if (!libTokens.isEmpty()) {
+      JsonObject args = new JsonObject();
+      args.add("old", getInfoForOffset(oldOffset, oldRound));
+      args.add("new", getInfoForOffset(newOffset, newRound));
+      args.addProperty("direction", direction.toString());
+      String argStr = args.toString();
+      String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
+      for (Token handler : libTokens) {
+        EventMacroUtil.callEventHandler(
+            prefix + handler.getName(), argStr, null, Collections.emptyMap());
+      }
+    }
+  }
+
+  /**
+   * Get a JsonObject describing the give initiative slot - includes offset, state, and token
+   * information.
+   *
+   * <p>Because this output is intended for use with initiative event macros, nulls (for tokens,
+   * initiative values, etc) are avoided in favor of empty strings.
+   *
+   * @param offset the offset from which to derive information
+   * @param round the round number to include in the output
+   * @return a JsonObject containing information about the the given initiative slot
+   */
+  private JsonObject getInfoForOffset(int offset, int round) {
+    JsonObject info = new JsonObject();
+    info.addProperty("round", round);
+    info.addProperty("offset", offset);
+    TokenInitiative theTI = getTokenInitiative(offset);
+    String stateStr = (theTI != null) ? theTI.getState() : "";
+    if (stateStr == null) stateStr = "";
+    info.addProperty("initiative", stateStr);
+    boolean isHolding = (theTI != null) ? theTI.isHolding() : false;
+    info.addProperty("holding", isHolding ? 1 : 0);
+    info.addProperty("token", offset != -1 ? getToken(offset).getId().toString() : "");
+    return info;
+  }
+
+  /** Types of initiative changes - intended for use with initiative event macros. */
+  public enum InitiativeChangeDirection {
+    /** The initiative is advancing normally from the current initiative to the next */
+    NEXT,
+    /** The initiative is reverting back to the slot/token that last had initiative. */
+    PREVIOUS,
+    /** Initiative has been directly set to a specific slot without regard for sequence. */
+    ARBITRARY;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * TokenInitiative Inner Class
    *-------------------------------------------------------------------------------------------*/
@@ -598,6 +755,12 @@ public class InitiativeList implements Serializable {
 
     /** Save off the icon so that it can be displayed as needed. */
     private transient Icon displayIcon;
+
+    /**
+     * Need to remember whether the displayIcon was shaded (to indicate a hidden token) so we can
+     * update when needed
+     */
+    private transient boolean tokenVisibleWhenIconUpdated = false;
 
     /*---------------------------------------------------------------------------------------------
      * Constructors
@@ -661,7 +824,7 @@ public class InitiativeList implements Serializable {
      * @param aState state to set
      */
     public void setState(String aState) {
-      if (state == aState || (state != null && state.equals(aState))) return;
+      if (Objects.equals(state, aState)) return;
       startUnitOfWork();
       String old = state;
       state = aState;
@@ -674,9 +837,34 @@ public class InitiativeList implements Serializable {
       return displayIcon;
     }
 
-    /** @param displayIcon Setter for the displayIcon to set */
+    /**
+     * NOTE: Be sure to also call {@link#setTokenVisibleWhenIconUpdated(boolean)}
+     *
+     * @param displayIcon Setter for the displayIcon to set.
+     */
     public void setDisplayIcon(Icon displayIcon) {
       this.displayIcon = displayIcon;
+    }
+
+    /**
+     * Checks whether the cached icon for this {@link TokenInitiative} was generated with the alpha
+     * shading - indicating whether the token was visible when the icon was last refreshed.
+     *
+     * @return true if the token was visible (and the icon was therefore opaque), false otherwise
+     */
+    public boolean wasTokenVisibleWhenIconUpdated() {
+      return tokenVisibleWhenIconUpdated;
+    }
+
+    /**
+     * Remember whether the generated icon was shaded (to indicate a non-visible token), so it can
+     * be refreshed if needed.
+     *
+     * @param tokenVisibleWhenIconUpdated true to indicate that the token was visible, false
+     *     otherwise
+     */
+    public void setTokenVisibleWhenIconUpdated(boolean tokenVisibleWhenIconUpdated) {
+      this.tokenVisibleWhenIconUpdated = tokenVisibleWhenIconUpdated;
     }
 
     /**

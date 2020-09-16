@@ -32,7 +32,7 @@ public class PositionalPanel extends JPanel {
 
     super.addImpl(comp, constraints, index);
 
-    if (((PositionalLayout.Position) constraints) == PositionalLayout.Position.CENTER) {
+    if (constraints == PositionalLayout.Position.CENTER) {
 
       setComponentZOrder(comp, getComponents().length - 1);
     } else {

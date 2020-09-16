@@ -33,7 +33,6 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.LayerSelectionDialog;
-import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
@@ -66,12 +65,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
             new Zone.Layer[] {
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
-            new LayerSelectionListener() {
-              @Override
-              public void layerSelected(Layer layer) {
-                selectedLayer = layer;
-              }
-            });
+            layer -> selectedLayer = layer);
   }
 
   protected Rectangle createRect(ZonePoint originPoint, ZonePoint newPoint) {

@@ -17,11 +17,8 @@ package net.rptools.maptool.client.ui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import javax.swing.*;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
@@ -48,24 +45,15 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
     if (!MapTool.getPlayer().isGM()) {
-      for (ListIterator<ZoneRenderer> iter = rendererList.listIterator(); iter.hasNext(); ) {
-        ZoneRenderer renderer = iter.next();
-        if (!renderer.getZone().isVisible()) {
-          iter.remove();
-        }
-      }
+      rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
     }
 
-    Collections.sort(
-        rendererList,
-        new Comparator<ZoneRenderer>() {
-          public int compare(ZoneRenderer o1, ZoneRenderer o2) {
+    rendererList.sort(
+        (o1, o2) -> {
+          String name1 = o1.getZone().getName();
+          String name2 = o2.getZone().getName();
 
-            String name1 = o1.getZone().getName();
-            String name2 = o2.getZone().getName();
-
-            return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-          }
+          return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
         });
 
     JMenuItem selection = null;
@@ -84,7 +72,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
     return selection;
   }
 
-  private class ZoneItem extends JCheckBoxMenuItem implements ActionListener {
+  private static class ZoneItem extends JCheckBoxMenuItem implements ActionListener {
 
     private ZoneRenderer renderer;
 

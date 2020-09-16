@@ -16,8 +16,6 @@ package net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -33,7 +31,7 @@ public class TransferableAssetReference implements Transferable {
     this.assetID = asset.getId();
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return assetID;
   }
 

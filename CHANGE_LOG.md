@@ -1,7 +1,9 @@
 # Maptool 1.8.0
 **MapTool now uses Java 14 from AdoptOpenJDK.**
 
-Lots of enhancements, bug fixes and improvements to the code base.
+Lots of enhancements, bug fixes and performance improvements to the code base.
+
+Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010 for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation. 
 
 ## Highlights
 - Significant improvements in macro run times giving a 4x to 10x (and sometimes more) reduction in run times.
@@ -12,8 +14,17 @@ Lots of enhancements, bug fixes and improvements to the code base.
   ```
 - ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - Several Export Screenshot bugs fixed.
+- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1845][i1845], [#2097][i2097] 
+  - See wiki page [Introduction to Initiative](http://lmwcs.com/rptools/wiki/Introduction_to_Initiative)
+
 
 ## Enhancements
+- [#2205][i2205] Improved efficiency of `onTokenMove` event handler with multiple tokens selected.
+- [#2199][i2199] Updated Dicelib 1.7.0 adds support for Shadowrun 5 dice rolls: `sr5(n)`, `sr5(n,g)`, `sr5e(n)`, `sr5(n,g)`
+- [#2188][i2188] New macro function `removeDrawing(MapName, DrawingID)` to remove drawings from map.
+- [#2157][i2157] Macro function `resetTablePicks()` can now be used to reset specific entries in table. I.e. return drawn cards to a deck.
+- [#2149][i2149] Improved performance of Fog of War checks for a noticeable improvement on complex maps. 
+- [#2097][i2097] Initiative can now be set to ascending or descending order with *descending* as default.
 - [#2032][i2032] Added various Preferences settings to output of `getInfo("client")`.  Added _personal server_ status to `getInfo("server")`.
 - [#1986][i1986] Stat sheets and token notes now appear above Overlays.
 - [#1958][i1958] Moving a token into a unreachable location adds a `fail` key/value pair to the last object in the array of location objects returned by `getLastPath()` or to `onTokenMove`.
@@ -21,15 +32,30 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1890][i1890] Map name parameter added to `removeToken()` function. `copyToken()` function cleaned up internally.
 - [#1882][i1882] NullPointerException messages now include more information about _why_ the error occured.
 - [#1861][i1861] Macro errors now produce a _call stack_ showing the macro calls leading to the error.
-- [#1726][i1726] Lumens value added to Personal Lights in Sight definitions. This allows Sight definitions that will see into areas of darkness. 
+- [#1845][i1845] Initiative Panel restyled to make it more obvious when a token isn't visible to players.
+- [#1726][i1726] Lumens value added to Personal Lights in Sight definitions. This allows Sight definitions that will see into areas of darkness.
+- [#1482][i1482] Can now export Macro Groups instead of an entire macro panel with right-click Export Macro Group option.
+- [#1479][i1479] New macro function `prevInitiative()` allows stepping back one initiative advance.
+- [#1458][i1458] New Initiative panel menu option to disable Next/Previous functions.
+- [#1362][i1362] New macro function to run JavaScript functions defined in frames, dialogs and overlays: `runJsFunction(name, type, func, thisArg, argsArray)`
+- [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
 
 ## Bug Fixes
+- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed. 
+- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed. 
+- [#2178][i2178] Token opacity was broken in develop.  Fixed.
+- [#2174][i2174] Ability to save startup settings broken by Java/packaging changes.  Restored.  Startup tab now has more explanation.
+- [#2152][i2152] Function `isNumber()` was returning true for empty strings. Fixed.
+- [#2119][i2119] Excessive processing of roll options was making macro execution slow. Changes improved speed by 10x or more.  
+- [#2118][i2118] Importing large macrosets was very slow and used **a lot** of memory. Changes improved speed by 10:1 up to 150:1 for macro buttons with images.
+- [#2116][i2116] Failing to load a campaign incorrectly reported *"Could not save campaign."* Fixed.
 - [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed. 
 - [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed. 
 - [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed. 
 - [#2069][i2069] Tokens partially out of line-of-sight were fully shown on player clients. Fixed. 
 - [#2057][i2057] Token properties with a single element JSON array returned bad results when accessed. Not in published code. Fixed. 
 - [#2056][i2056] Form submit for dialogs, frames and overlays was on wrong thread leading to inconsistent results from macro functions such as `getToken()`. Fixed. 
+- [#2046][i2046] Cancelling out of Rename Macro Group would cause an NPE. Fixed.
 - [#2041][i2041] A number of macro functions if called with the wrong case such as `getplayername()` instead of `getPlayerName()`, would either call the wrong function internally or return the wrong result. A parser exception will now be thrown instead.  See issue for more details. 
 - [#2040][i2040] Vision of player-owned NPC tokens were not visible when no PC tokens were on map. Fixed. 
 - [#2037][i2037] Clicking on Move Up/Down buttons with only a Single bar defined was throwing an exception. Fixed. 
@@ -69,11 +95,16 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1867][i1867] Macro links to macros with no output would produce an empty line in chat. Fixed.
 - [#1863][i1863] HTML5 form submit was not allowed at document load. Fixed.
 - [#1737][i1737] Some CMYK JPEGs would appear as all black. Fixed.
+- [#1736][i1736] Variable names can now start with `tru`, `true`, `fal`, `fals`, and `false`.
 - [#1705][i1705] Map functions `getCurrentMapName(), getMapVisible() and setMapVisible()` would throw NPEs if campaign had no maps. Fixed.
 - [#1560][i1560] Default property settings using assigment expressions, i.e.`{prop2 = prop1}`, would fail. Fixed.
 - [#715][i715] Bad or missing remote repository would produce a Null Pointer Exception in the log but not inform the user. Fixed.
 
 ## Other
+- [#2197][i2197] Build changes caused release builds to barf if release tags contained alpha chars(i.e. beta).  Fixed.
+- [#2135][i2135] Code cleanup: removed redundant null checks, tests that were always true/false, replaced anonymous inner classes with lambdas, etc.
+- [#2109][i2109] Build.gradle update to pull version from tag. Fixed.  Dev only.
+- [#2102][i2102] `jpackage` created Windows installers weren't installing/updating with existing installs. Fixed.  Dev only.
 - [#2049][i2049] Removed a number of classes that were obsolete/unused. 
 - [#2047][i2047] Code cleanup. Removed obsolete Java version checks.  
 - [#2019][i2019] Updated to Parse 1.8.0 which added support for logical operators to Expression.format()/InlineTreeFormatter..  
@@ -82,6 +113,23 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.  
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2199]: https://github.com/RPTools/maptool/issues/2199
+[i2197]: https://github.com/RPTools/maptool/issues/2197
+[i2192]: https://github.com/RPTools/maptool/issues/2192
+[i2188]: https://github.com/RPTools/maptool/issues/2188
+[i2184]: https://github.com/RPTools/maptool/issues/2184
+[i2178]: https://github.com/RPTools/maptool/issues/2178
+[i2174]: https://github.com/RPTools/maptool/issues/2174
+[i2157]: https://github.com/RPTools/maptool/issues/2157
+[i2152]: https://github.com/RPTools/maptool/issues/2152
+[i2149]: https://github.com/RPTools/maptool/issues/2149
+[i2135]: https://github.com/RPTools/maptool/issues/2135
+[i2119]: https://github.com/RPTools/maptool/issues/2119
+[i2118]: https://github.com/RPTools/maptool/issues/2118
+[i2116]: https://github.com/RPTools/maptool/issues/2116
+[i2109]: https://github.com/RPTools/maptool/issues/2109
+[i2102]: https://github.com/RPTools/maptool/issues/2102
+[i2097]: https://github.com/RPTools/maptool/issues/2097
 [i2081]: https://github.com/RPTools/maptool/issues/2081
 [i2078]: https://github.com/RPTools/maptool/issues/2078
 [i2074]: https://github.com/RPTools/maptool/issues/2074
@@ -90,6 +138,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i2056]: https://github.com/RPTools/maptool/issues/2056
 [i2049]: https://github.com/RPTools/maptool/issues/2049
 [i2047]: https://github.com/RPTools/maptool/issues/2047
+[i2046]: https://github.com/RPTools/maptool/issues/2046
 [i2041]: https://github.com/RPTools/maptool/issues/2041
 [i2040]: https://github.com/RPTools/maptool/issues/2040
 [i2037]: https://github.com/RPTools/maptool/issues/2037
@@ -134,10 +183,17 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1867]: https://github.com/RPTools/maptool/issues/1867
 [i1863]: https://github.com/RPTools/maptool/issues/1863
 [i1861]: https://github.com/RPTools/maptool/issues/1861
+[i1845]: https://github.com/RPTools/maptool/issues/1845
 [i1737]: https://github.com/RPTools/maptool/issues/1737
+[i1736]: https://github.com/RPTools/maptool/issues/1736
 [i1726]: https://github.com/RPTools/maptool/issues/1726
 [i1705]: https://github.com/RPTools/maptool/issues/1705
 [i1560]: https://github.com/RPTools/maptool/issues/1560
+[i1482]: https://github.com/RPTools/maptool/issues/1482
+[i1458]: https://github.com/RPTools/maptool/issues/1458
+[i1479]: https://github.com/RPTools/maptool/issues/1479
+[i1362]: https://github.com/RPTools/maptool/issues/1362
+[i987]: https://github.com/RPTools/maptool/issues/987
 [i715]: https://github.com/RPTools/maptool/issues/715
 
 ---

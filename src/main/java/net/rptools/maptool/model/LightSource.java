@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.lib.FileUtil;
 import org.apache.commons.lang.math.NumberUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class LightSource implements Comparable<LightSource> {
   public enum Type {
@@ -228,10 +229,10 @@ public class LightSource implements Comparable<LightSource> {
    *
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
-  public int compareTo(LightSource o) {
+  public int compareTo(@NotNull LightSource o) {
     if (o != this) {
-      Integer nameLong = NumberUtils.toInt(name, Integer.MIN_VALUE);
-      Integer onameLong = NumberUtils.toInt(o.name, Integer.MIN_VALUE);
+      int nameLong = NumberUtils.toInt(name, Integer.MIN_VALUE);
+      int onameLong = NumberUtils.toInt(o.name, Integer.MIN_VALUE);
       if (nameLong != Integer.MIN_VALUE && onameLong != Integer.MIN_VALUE)
         return nameLong - onameLong;
       return name.compareTo(o.name);

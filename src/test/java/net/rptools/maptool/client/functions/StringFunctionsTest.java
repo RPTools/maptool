@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import net.rptools.parser.ParserException;
 import org.junit.jupiter.api.Test;
 
@@ -58,5 +59,28 @@ public class StringFunctionsTest {
         cap2WithSymbolBoundaries,
         submitStringFunction(capitalize, string2),
         "use numbers and symbols as boundaries by default");
+  }
+
+  @Test
+  public void testIsNumber() throws ParserException {
+    String isNumber = "isNumber";
+
+    List<String> numbers = List.of("4", "4.3", "-4.3", "04");
+    // strings that the parser doesn't consider numeric or doesn't interpret correctly should be
+    // considered NOT numbers
+    List<String> notNumbers = List.of("", "control", "1E3", "1,000");
+
+    for (String s : numbers) {
+      assertEquals(
+          BigDecimal.ONE,
+          submitStringFunction(isNumber, s),
+          "Expection [" + s + "] to be recognized as a number");
+    }
+    for (String s : notNumbers) {
+      assertEquals(
+          BigDecimal.ZERO,
+          submitStringFunction(isNumber, s),
+          "Expecting [" + s + "] to be non-numeric");
+    }
   }
 }

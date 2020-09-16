@@ -25,7 +25,6 @@ import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -39,7 +38,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
-import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -123,15 +121,13 @@ public class PointerTool extends DefaultTool {
             new Zone.Layer[] {
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
-            new LayerSelectionListener() {
-              public void layerSelected(Layer layer) {
-                if (renderer != null) {
-                  renderer.setActiveLayer(layer);
-                  MapTool.getFrame().setLastSelectedLayer(layer);
+            layer -> {
+              if (renderer != null) {
+                renderer.setActiveLayer(layer);
+                MapTool.getFrame().setLastSelectedLayer(layer);
 
-                  if (layer != Zone.Layer.TOKEN) {
-                    MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-                  }
+                if (layer != Layer.TOKEN) {
+                  MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
                 }
               }
             });
@@ -163,7 +159,7 @@ public class PointerTool extends DefaultTool {
    */
   @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
-    if (comp != null && comp instanceof ZoneRenderer) {
+    if (comp instanceof ZoneRenderer) {
       Grid grid = ((ZoneRenderer) comp).getZone().getGrid();
       addGridBasedKeys(grid, true);
     }
@@ -296,11 +292,10 @@ public class PointerTool extends DefaultTool {
       }
 
       // Lee: fog exposure according to reveal type
-      if (zone.getWaypointExposureToggle()) FogUtil.exposeVisibleArea(renderer, exposeSet, false);
-      else {
+      if (!zone.getWaypointExposureToggle()) {
         FogUtil.exposeLastPath(renderer, exposeSet);
-        FogUtil.exposeVisibleArea(renderer, exposeSet, false);
       }
+      FogUtil.exposeVisibleArea(renderer, exposeSet, false);
     }
   }
 
@@ -1457,7 +1452,7 @@ public class PointerTool extends DefaultTool {
         Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
         // Jamz test move clients to view when using point (for GM only)...
         // TODO: Snap player view back when done?
-        if (MapTool.getPlayer().isGM() & type.equals(Pointer.Type.LOOK_HERE)) {
+        if (MapTool.getPlayer().isGM() && type.equals(Pointer.Type.LOOK_HERE)) {
           MapTool.serverCommand()
               .enforceZoneView(
                   renderer.getZone().getId(),
@@ -1591,16 +1586,13 @@ public class PointerTool extends DefaultTool {
           image =
               ImageManager.getImage(
                   portraitId,
-                  new ImageObserver() {
-                    public boolean imageUpdate(
-                        Image img, int infoflags, int x, int y, int width, int height) {
-                      // The image was loading, so now rebuild the portrait panel with the
-                      // real
-                      // image
-                      statSheet = null;
-                      renderer.repaint();
-                      return true;
-                    }
+                  (img, infoflags, x, y, width, height) -> {
+                    // The image was loading, so now rebuild the portrait panel with the
+                    // real
+                    // image
+                    statSheet = null;
+                    renderer.repaint();
+                    return true;
                   });
 
           imgSize = new Dimension(image.getWidth(), image.getHeight());
@@ -1648,16 +1640,14 @@ public class PointerTool extends DefaultTool {
               Object propertyValue =
                   tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
               resolver.flush();
-              if (propertyValue != null) {
-                if (propertyValue.toString().length() > 0) {
-                  String propName = property.getName();
-                  if (property.getShortName() != null) {
-                    propName = property.getShortName();
-                  }
-                  Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                  resolver.flush();
-                  propertyMap.put(propName, value != null ? value.toString() : "");
+              if (propertyValue != null && propertyValue.toString().length() > 0) {
+                String propName = property.getName();
+                if (property.getShortName() != null) {
+                  propName = property.getShortName();
                 }
+                Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                resolver.flush();
+                propertyMap.put(propName, value != null ? value.toString() : "");
               }
             }
           }

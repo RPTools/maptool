@@ -56,7 +56,6 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
 import net.rptools.maptool.client.ui.AutoResizeStampDialog;
 import net.rptools.maptool.client.ui.StampPopupMenu;
 import net.rptools.maptool.client.ui.TokenLocation;
@@ -109,16 +108,13 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             new Zone.Layer[] {
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
-            new LayerSelectionListener() {
-              @Override
-              public void layerSelected(Layer layer) {
-                if (renderer != null) {
-                  renderer.setActiveLayer(layer);
-                  MapTool.getFrame().setLastSelectedLayer(layer);
+            layer -> {
+              if (renderer != null) {
+                renderer.setActiveLayer(layer);
+                MapTool.getFrame().setLastSelectedLayer(layer);
 
-                  if (layer == Zone.Layer.TOKEN) {
-                    MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
-                  }
+                if (layer == Layer.TOKEN) {
+                  MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
                 }
               }
             });
@@ -558,9 +554,9 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private Token getTokenAt(int x, int y) {
     Token token = renderer.getTokenAt(mouseX, mouseY);
     if (token == null) {
-      for (Shape bounds : resizeBoundsMap.keySet()) {
-        if (bounds.contains(mouseX, mouseY)) {
-          token = resizeBoundsMap.get(bounds);
+      for (var entry : resizeBoundsMap.entrySet()) {
+        if (entry.getKey().contains(mouseX, mouseY)) {
+          token = entry.getValue();
         }
       }
     }
@@ -1259,7 +1255,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         }
         // Resize
         if (!token.isSnapToScale()) {
-          Double scale = renderer.getScale();
+          double scale = renderer.getScale();
           Rectangle footprintBounds = token.getBounds(renderer.getZone());
 
           double scaledWidth = (footprintBounds.width * scale);

@@ -124,10 +124,8 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
 
     ZonePoint p = getPoint(e);
     if (rectangle != null) {
-      if (rectangle != null) {
-        rectangle.getEndPoint().x = p.x;
-        rectangle.getEndPoint().y = p.y;
-      }
+      rectangle.getEndPoint().x = p.x;
+      rectangle.getEndPoint().y = p.y;
       renderer.repaint();
     }
   }

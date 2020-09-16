@@ -47,7 +47,7 @@ public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
   private static class ClasspathStreamHandler extends URLStreamHandler {
 
     @Override
-    protected URLConnection openConnection(URL u) throws IOException {
+    protected URLConnection openConnection(URL u) {
 
       // TODO: This should really figure out the exact type
       return new ImageURLConnection(u);
@@ -75,12 +75,12 @@ public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
     }
 
     @Override
-    public void connect() throws IOException {
+    public void connect() {
       // Nothing to do
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
       return new ByteArrayInputStream(data);
     }
   }

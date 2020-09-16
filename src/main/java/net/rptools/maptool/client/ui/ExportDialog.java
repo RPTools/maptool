@@ -21,7 +21,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -67,6 +66,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   // Dialog/ UI related vars
   //
   private static final Logger log = LogManager.getLogger(ExportDialog.class);
+
+  private static final ExportDialog instance = new ExportDialog();
 
   /** the modal panel the user uses to select the screenshot options */
   private static FormPanel interactPanel;
@@ -138,7 +139,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  public static enum ExportRadioButtons {
+  public enum ExportRadioButtons {
     // Format of enum declaration:
     // [Abeille Forms Designer button name] (default checked, default enabled)
     // Button Group 1 (not that it matters for this controller)
@@ -164,12 +165,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           if (form.getRadioButton(button.toString()) == null) {
             throw new Exception("Export Dialog has a mis-matched enum: " + button.toString());
           }
-          button.addActionListener(
-              new ActionListener() {
-                public void actionPerformed(ActionEvent evt) {
-                  enforceButtonRules();
-                }
-              });
+          button.addActionListener(evt -> enforceButtonRules());
         } catch (Exception ex) {
           MapTool.showError("dialog.screenshot.radio.button.uiImplementationError", ex);
         }
@@ -237,7 +233,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  private static enum ExportLayers {
+  private enum ExportLayers {
     // enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
     LAYER_TOKEN(true),
     LAYER_HIDDEN(false),
@@ -375,13 +371,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  public ExportDialog() throws Exception {
+  public static ExportDialog getInstance() {
+    return instance;
+  }
+
+  private ExportDialog() {
     super(MapTool.getFrame(), I18N.getText("action.exportScreenShot.title"), true);
-    if (instanceCount == 0) {
-      instanceCount++;
-    } else {
-      throw new Exception("Only one instance of ExportDialog allowed!");
-    }
 
     // The window uses about 1MB. Disposing frees this, but repeated uses
     // will cause more memory fragmentation.
@@ -404,30 +399,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     ExportRadioButtons.setForm(interactPanel);
     ExportLayers.setForm(interactPanel);
 
-    interactPanel
-        .getButton("exportButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                exportButtonAction();
-              }
-            });
-    interactPanel
-        .getButton("cancelButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                dispose();
-              }
-            });
-    interactPanel
-        .getButton("browseButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                browseButtonAction();
-              }
-            });
+    interactPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
+    interactPanel.getButton("cancelButton").addActionListener(evt -> dispose());
+    interactPanel.getButton("browseButton").addActionListener(evt -> browseButtonAction());
 
     // Run this once to make sure the dialog is in a good starting state.
     ExportLayers.setDefaultChecked();
@@ -546,6 +520,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     MapTool.getFrame()
         .setStatusMessage(I18N.getString("dialog.screenshot.msg.GeneratingScreenshot"));
     ExportRadioButtons type = ExportRadioButtons.getType();
+    if (type == null) {
+      throw new Exception(I18N.getString("dialog.screenshot.error.invalidDialogSettings"));
+    }
     Player.Role role;
     try {
       switch (type) {
@@ -696,11 +673,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   public void setExportSettings(Map<String, Boolean> settings) {
     resetExportSettings();
     if (settings != null) {
-      for (String iter : settings.keySet()) {
-        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(iter);
+      for (var entry : settings.entrySet()) {
+        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(entry.getKey());
         if (jtb == null) {
-          log.warn("GUI component for export setting '" + iter + "' not found.");
-        } else jtb.setSelected(settings.get(iter));
+          log.warn("GUI component for export setting '" + entry.getKey() + "' not found.");
+        } else {
+          jtb.setSelected(entry.getValue());
+        }
       }
     }
   }

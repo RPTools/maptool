@@ -16,10 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -51,16 +48,14 @@ public class CampaignExportDialog extends JDialog {
   private static File campaignFile;
   private static int saveStatus = -1;
 
-  /** Only doing this because I don't expect more than one instance of this modal dialog */
-  private static int instanceCount = 0;
+  private static final CampaignExportDialog instance = new CampaignExportDialog();
 
-  public CampaignExportDialog() throws Exception {
+  public static CampaignExportDialog getInstance() {
+    return instance;
+  }
+
+  private CampaignExportDialog() {
     super(MapTool.getFrame(), "Export Campaign", true);
-    if (instanceCount == 0) {
-      instanceCount++;
-    } else {
-      throw new Exception("Only one instance of ExportCampaignDialog allowed!");
-    }
 
     setDefaultCloseOperation(HIDE_ON_CLOSE);
 
@@ -73,22 +68,13 @@ public class CampaignExportDialog extends JDialog {
     getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));
     pack();
 
-    mainPanel
-        .getButton("exportButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                exportButtonAction();
-              }
-            });
+    mainPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
     mainPanel
         .getButton("cancelButton")
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                saveStatus = -1;
-                dispose();
-              }
+            evt -> {
+              saveStatus = -1;
+              dispose();
             });
 
     versionNotesText = (JEditorPane) mainPanel.getComponentByName("versionNotesText");
@@ -116,13 +102,10 @@ public class CampaignExportDialog extends JDialog {
         I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
 
     selectVersionCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent event) {
-            if (event.getStateChange() == ItemEvent.SELECTED) {
-              versionNotesText.setText(
-                  I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
-            }
+        event -> {
+          if (event.getStateChange() == ItemEvent.SELECTED) {
+            versionNotesText.setText(
+                I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
           }
         });
   }

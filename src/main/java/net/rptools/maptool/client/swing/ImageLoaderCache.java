@@ -63,7 +63,7 @@ public class ImageLoaderCache {
         }
       } else if ("asset".equals(protocol)) {
         // Look for size request
-        int index = path.indexOf("-");
+        int index = path.indexOf('-');
         int size = -1;
         if (index >= 0) {
           String szStr = path.substring(index + 1);

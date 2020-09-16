@@ -48,19 +48,18 @@ public class MemoryStatusBar extends JProgressBar {
     int h = 4 + fm.getHeight();
     minSize = new Dimension(w, h);
 
-    new Thread() {
-      @Override
-      public void run() {
-        while (true) {
-          update();
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException ie) {
-            break;
-          }
-        }
-      }
-    }.start();
+    new Thread(
+            () -> {
+              while (true) {
+                update();
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException ie) {
+                  break;
+                }
+              }
+            })
+        .start();
     addMouseListener(
         new MouseAdapter() {
           @Override

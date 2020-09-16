@@ -170,7 +170,7 @@ public class MessagePanelImageView extends View {
    *     loaded asynchronously.
    */
   public void setLoadsSynchronously(boolean newValue) {
-    synchronized (this) {
+    synchronized (stateLock) {
       if (newValue) {
         state |= SYNC_LOAD_FLAG;
       } else {
@@ -217,6 +217,8 @@ public class MessagePanelImageView extends View {
     return getAltText();
   }
 
+  private final Object stateLock = new Object();
+
   /** Update any cached values that come from attributes. */
   protected void setPropertiesFromAttributes() {
     StyleSheet sheet = getStyleSheet();
@@ -249,11 +251,11 @@ public class MessagePanelImageView extends View {
 
     AttributeSet anchorAttr = (AttributeSet) attr.getAttribute(HTML.Tag.A);
     if (anchorAttr != null && anchorAttr.isDefined(HTML.Attribute.HREF)) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state |= LINK_FLAG;
       }
     } else {
-      synchronized (this) {
+      synchronized (stateLock) {
         state = (state | LINK_FLAG) ^ LINK_FLAG;
       }
     }
@@ -268,7 +270,7 @@ public class MessagePanelImageView extends View {
     super.setParent(parent);
     container = (parent != null) ? getContainer() : null;
     if (oldParent != parent) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state |= RELOAD_FLAG;
       }
     }
@@ -279,7 +281,7 @@ public class MessagePanelImageView extends View {
   public void changedUpdate(DocumentEvent e, Shape a, ViewFactory f) {
     super.changedUpdate(e, a, f);
 
-    synchronized (this) {
+    synchronized (stateLock) {
       state |= RELOAD_FLAG | RELOAD_IMAGE_FLAG;
     }
 
@@ -316,7 +318,7 @@ public class MessagePanelImageView extends View {
     if (image != null) {
       if (!hasPixels(image)) {
         // No pixels yet, use the default
-        Icon icon = (image == null) ? getNoImageIcon() : getLoadingImageIcon();
+        Icon icon = getLoadingImageIcon();
 
         if (icon != null) {
           icon.paintIcon(getContainer(), g, rect.x + leftInset, rect.y + topInset);
@@ -443,12 +445,10 @@ public class MessagePanelImageView extends View {
    */
   @Override
   public float getAlignment(int axis) {
-    switch (axis) {
-      case View.Y_AXIS:
-        return vAlign;
-      default:
-        return super.getAlignment(axis);
+    if (axis == View.Y_AXIS) {
+      return vAlign;
     }
+    return super.getAlignment(axis);
   }
 
   /**
@@ -463,7 +463,7 @@ public class MessagePanelImageView extends View {
    * @see View#modelToView
    */
   @Override
-  public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+  public Shape modelToView(int pos, Shape a, Position.Bias b) {
     int p0 = getStartOffset();
     int p1 = getEndOffset();
     if ((pos >= p0) && (pos <= p1)) {
@@ -579,7 +579,7 @@ public class MessagePanelImageView extends View {
     }
     s = state;
     if ((s & RELOAD_FLAG) != 0) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state = (state | RELOAD_FLAG) ^ RELOAD_FLAG;
       }
       setPropertiesFromAttributes();
@@ -591,7 +591,7 @@ public class MessagePanelImageView extends View {
    * <code>loadImage</code> or <code>updateImageSize</code> directly.
    */
   private void refreshImage() {
-    synchronized (this) {
+    synchronized (stateLock) {
       // clear out width/height/realoadimage flag and set loading flag
       state =
           (state | LOADING_FLAG | RELOAD_IMAGE_FLAG | WIDTH_FLAG | HEIGHT_FLAG)
@@ -604,7 +604,7 @@ public class MessagePanelImageView extends View {
       // And update the size params
       updateImageSize();
     } finally {
-      synchronized (this) {
+      synchronized (stateLock) {
         // Clear out state in case someone threw an exception.
         state = (state | LOADING_FLAG) ^ LOADING_FLAG;
       }
@@ -663,7 +663,7 @@ public class MessagePanelImageView extends View {
       }
 
       boolean createText = false;
-      synchronized (this) {
+      synchronized (stateLock) {
         // If imageloading failed, other thread may have called
         // ImageLoader which will null out image, hence we check
         // for it.
@@ -697,6 +697,8 @@ public class MessagePanelImageView extends View {
     }
   }
 
+  private final Object altViewLock = new Object();
+
   /** Updates the view representing the alt text. */
   private void updateAltTextView() {
     String text = getAltText();
@@ -705,7 +707,7 @@ public class MessagePanelImageView extends View {
       ImageLabelView newView;
 
       newView = new ImageLabelView(getElement(), text);
-      synchronized (this) {
+      synchronized (altViewLock) {
         altView = newView;
       }
     }
@@ -715,7 +717,7 @@ public class MessagePanelImageView extends View {
   private View getAltView() {
     View view;
 
-    synchronized (this) {
+    synchronized (altViewLock) {
       view = altView;
     }
     if (view != null && view.getParent() == null) {
@@ -736,12 +738,7 @@ public class MessagePanelImageView extends View {
         ((AbstractDocument) doc).readUnlock();
       }
     } else {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              safePreferenceChanged();
-            }
-          });
+      SwingUtilities.invokeLater(this::safePreferenceChanged);
     }
   }
 
@@ -775,12 +772,7 @@ public class MessagePanelImageView extends View {
       } else {
         // Avoids a possible deadlock between us waiting for imageLoaderMutex and it waiting on
         // us...
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                imageUpdate(img, flags, x, y, newWidth, newHeight);
-              }
-            });
+        SwingUtilities.invokeLater(() -> imageUpdate(img, flags, x, y, newWidth, newHeight));
       }
       return ((flags & ALLBITS) == 0);
     }
@@ -791,7 +783,7 @@ public class MessagePanelImageView extends View {
    * attribute. It overriden a handle of methods as the text is hardcoded and does not come from the
    * document.
    */
-  private class ImageLabelView extends InlineView {
+  private static class ImageLabelView extends InlineView {
     private Segment segment;
     private Color fg;
 

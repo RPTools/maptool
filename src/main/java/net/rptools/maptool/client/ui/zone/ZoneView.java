@@ -67,7 +67,7 @@ public class ZoneView implements ModelChangeListener {
   /** Map each token to their current vision, depending on other lights. */
   private final Map<GUID, Area> tokenVisionCache = new HashMap<>();
   /** Map lightSourceToken to the areaBySightMap. */
-  private final Map<GUID, Map<String, TreeMap<Double, Area>>> lightSourceCache = new HashMap<>();
+  private final Map<GUID, Map<String, Map<Double, Area>>> lightSourceCache = new HashMap<>();
   /** Map light source type to all tokens with that type. */
   private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
   /** Map each token to their map between sightType and set of lights. */
@@ -79,7 +79,7 @@ public class ZoneView implements ModelChangeListener {
   /** Hold all of our lights combined by lumens. Used for hard FoW reveal. */
   private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<>();
   /** Map each token to their personal bright light source area. */
-  private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<GUID, Set<Area>>();
+  private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<>();
   /** Map each token to their personal drawable lights. */
   private final Map<GUID, Set<DrawableLight>> personalDrawableLightCache = new HashMap<>();
 
@@ -173,16 +173,16 @@ public class ZoneView implements ModelChangeListener {
    * @param lightSourceToken the token holding the light sources.
    * @return the lightSourceArea.
    */
-  private TreeMap<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
+  private Map<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
     GUID tokenId = lightSourceToken.getId();
-    Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
+    Map<String, Map<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
     if (areaBySightMap != null) {
-      TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
+      Map<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
       if (lightSourceArea != null) {
         return lightSourceArea;
       }
     } else {
-      areaBySightMap = new HashMap<String, TreeMap<Double, Area>>();
+      areaBySightMap = new HashMap<>();
       lightSourceCache.put(lightSourceToken.getId(), areaBySightMap);
     }
 
@@ -424,10 +424,7 @@ public class ZoneView implements ModelChangeListener {
         workerThread
             .get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish
         // before we go on
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ExecutionException e) {
+      } catch (InterruptedException | ExecutionException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
@@ -524,7 +521,7 @@ public class ZoneView implements ModelChangeListener {
    *     <p>A Callable task add to the ExecutorCompletionService to combine lights as a threaded
    *     task
    */
-  private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
+  private final class CombineLightsTask implements Callable<Map<Double, Area>> {
     private final String sightName;
     private final Token lightSourceToken;
 
@@ -534,8 +531,8 @@ public class ZoneView implements ModelChangeListener {
     }
 
     @Override
-    public TreeMap<Double, Area> call() {
-      TreeMap<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
+    public Map<Double, Area> call() {
+      Map<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
         // Area tempArea = light.getValue();
@@ -600,10 +597,11 @@ public class ZoneView implements ModelChangeListener {
               if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                 continue;
               }
-              if (light.isOwnerOnly() && lightSource.getType() == LightSource.Type.AURA) {
-                if (!isOwner && !MapTool.getPlayer().isEffectiveGM()) {
-                  continue;
-                }
+              if (light.isOwnerOnly()
+                  && lightSource.getType() == LightSource.Type.AURA
+                  && !isOwner
+                  && !MapTool.getPlayer().isEffectiveGM()) {
+                continue;
               }
               lightList.add(new DrawableLight(type, light.getPaint(), visibleArea));
             }
@@ -766,10 +764,8 @@ public class ZoneView implements ModelChangeListener {
         }
       } else {
         // If we're viewing the map as a player and the token is not a PC, then skip it.
-        if (!isGMview && token.getType() != Token.Type.PC) {
-          if (!AppUtil.ownedByOnePlayer(token)) {
-            continue;
-          }
+        if (!isGMview && token.getType() != Token.Type.PC && !AppUtil.ownedByOnePlayer(token)) {
+          continue;
         }
       }
       // player ownership permission
