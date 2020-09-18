@@ -110,7 +110,7 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "-Djavax.net.debug=all"]
     // Add -Dlog4j2.debug to see log4j2 details
 
     if (System.getProperty("exec.args") != null) {
@@ -121,7 +121,32 @@ run {
 // Badass Runtime Plugin Options
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
-
+    modules = ['java.base',
+               'java.compiler',
+               'java.datatransfer',
+               'java.desktop',
+               'java.instrument',
+               'java.logging',
+               'java.management',
+               'java.naming',
+               'java.net.http',
+               'java.prefs',
+               'java.rmi',
+               'java.scripting',
+               'java.security.sasl',
+               'java.sql',
+               'java.transaction.xa',
+               'java.xml',
+               'jdk.dynalink',
+               'jdk.jfr',
+               'jdk.jsobject',
+               'jdk.scripting.nashorn',
+               'jdk.unsupported',
+               'jdk.unsupported.desktop',
+               'jdk.xml.dom',
+               'jdk.crypto.cryptoki',
+               'jdk.crypto.ec'
+            ]
 
 
 
