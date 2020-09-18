@@ -41,6 +41,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
 
 ## Bug Fixes
+- [#2211][i2211] Function `isNumber()` returning incorrect response on anything not a positive integer. Fixed. 
 - [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed. 
 - [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed. 
 - [#2178][i2178] Token opacity was broken in develop.  Fixed.
@@ -113,6 +114,9 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.  
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2215]: https://github.com/RPTools/maptool/issues/2215
+[i2211]: https://github.com/RPTools/maptool/issues/2211
+[i2205]: https://github.com/RPTools/maptool/issues/2205
 [i2199]: https://github.com/RPTools/maptool/issues/2199
 [i2197]: https://github.com/RPTools/maptool/issues/2197
 [i2192]: https://github.com/RPTools/maptool/issues/2192
