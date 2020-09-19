@@ -53,7 +53,8 @@ public class DrawingMiscFunctions extends DrawingFunctions {
         "refreshDrawing",
         "bringDrawingToFront",
         "sendDrawingToBack",
-        "movedOverDrawing");
+        "movedOverDrawing",
+        "removeDrawing");
   }
 
   @Override
@@ -95,6 +96,9 @@ public class DrawingMiscFunctions extends DrawingFunctions {
         return "";
       } else if ("sendDrawingToBack".equalsIgnoreCase(functionName)) {
         sendToBack(map, guid);
+        return "";
+      } else if ("removeDrawing".equalsIgnoreCase(functionName)) {
+        MapTool.serverCommand().undoDraw(map.getId(), guid);
         return "";
       }
     }

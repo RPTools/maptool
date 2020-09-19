@@ -32,7 +32,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +49,7 @@ import java.util.Set;
 import java.util.TooManyListenersException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -515,7 +515,6 @@ public class ZoneRenderer extends JComponent
       // Jamz: add final path render here?
 
       List<GUID> filteredTokens = new ArrayList<GUID>();
-      BigDecimal tmc = null;
       moveTimer.stop("setup");
 
       int offsetX, offsetY;
@@ -593,15 +592,14 @@ public class ZoneRenderer extends JComponent
 
       moveTimer.start("onTokenMove");
       if (!filteredTokens.isEmpty()) {
-        // run tokenMoved() for each token in the filtered selection
-        // list, canceling if it returns 1.0
-        for (GUID tokenGUID : filteredTokens) {
-          Token token = zone.getToken(tokenGUID);
-          tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
-
-          if (BigDecimal.ONE.equals(tmc)) {
-            denyMovement(token);
-          }
+        // give onTokenMove a chance to reject each token's movement.
+        // pass in all the tokens at once so it doesn't have to re-scan for handlers for each token
+        List<Token> tokensToCheck =
+            filteredTokens.stream().map(zone::getToken).collect(Collectors.toList());
+        List<Token> tokensDenied =
+            TokenMoveFunctions.callForIndividualTokenMoveVetoes(path, tokensToCheck);
+        for (Token token : tokensDenied) {
+          denyMovement(token);
         }
       }
       moveTimer.stop("onTokenMove");
@@ -610,10 +608,10 @@ public class ZoneRenderer extends JComponent
       // Multiple tokens, the list of tokens and call
       // onMultipleTokensMove() macro function.
       if (filteredTokens.size() > 1) {
-        tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
         // now determine if the macro returned false and if so
         // revert each token's move to the last path.
-        if (BigDecimal.ONE.equals(tmc)) {
+        boolean moveDenied = TokenMoveFunctions.callForMultiTokenMoveVeto(filteredTokens);
+        if (moveDenied) {
           for (GUID tokenGUID : filteredTokens) {
             Token token = zone.getToken(tokenGUID);
             denyMovement(token);
@@ -3299,26 +3297,68 @@ public class ZoneRenderer extends JComponent
 
       // Finally render the token image
       timer.start("tokenlist-7");
-      if (!isGMView && zoneView.isUsingVision()) {
+      if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
         Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
         if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-          if (token.getShape() == TokenShape.FIGURE
-              && zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+          // the cell intersects visible area so
+          if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+            // if we can see the centre, draw the whole token
+            Composite oldComposite = tokenG.getComposite();
+            if (opacity < 1.0f) {
+              tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            }
             tokenG.drawImage(workImage, at, this);
-          } else if (token.isAlwaysVisible()
-              && zone.getGrid()
-                  .checkRegion(
-                      cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
-            tokenG.drawImage(workImage, at, this);
+            tokenG.setComposite(oldComposite);
+            // g.draw(cb); // debugging
           } else {
+            // else draw the clipped token
             Area cellArea = new Area(visibleScreenArea);
             cellArea.intersect(cb);
             tokenG.setClip(cellArea);
+            Composite oldComposite = tokenG.getComposite();
+            if (opacity < 1.0f) {
+              tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            }
             tokenG.drawImage(workImage, at, this);
+            tokenG.setComposite(oldComposite);
           }
         }
-      } else if (token.getShape() != TokenShape.FIGURE || !token.isAlwaysVisible()) {
+      } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
+        // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
+        Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+        if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+          // if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
+          if (zone.getGrid()
+              .checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
+            Composite oldComposite = tokenG.getComposite();
+            if (opacity < 1.0f) {
+              tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            }
+            tokenG.drawImage(workImage, at, this);
+            tokenG.setComposite(oldComposite);
+          } else {
+            // else draw the clipped stamp/token
+            // This will only show the part of the token that does not have VBL on it
+            // as any VBL on the token will block LOS, affecting the clipping.
+            Area cellArea = new Area(visibleScreenArea);
+            cellArea.intersect(cb);
+            tokenG.setClip(cellArea);
+            Composite oldComposite = tokenG.getComposite();
+            if (opacity < 1.0f) {
+              tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            }
+            tokenG.drawImage(workImage, at, this);
+            tokenG.setComposite(oldComposite);
+          }
+        }
+      } else {
+        // fallthrough normal token rendered against visible area
+        Composite oldComposite = tokenG.getComposite();
+        if (opacity < 1.0f) {
+          tokenG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+        }
         tokenG.drawImage(workImage, at, this);
+        tokenG.setComposite(oldComposite);
       }
       timer.stop("tokenlist-7");
 

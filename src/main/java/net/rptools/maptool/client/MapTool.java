@@ -977,13 +977,18 @@ public class MapTool {
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
     clientFrame.getInitiativePanel().setMovementLock(campaign.isInitiativeMovementLock());
+    clientFrame.getInitiativePanel().setInitUseReverseSort(campaign.isInitiativeUseReverseSort());
+    clientFrame
+        .getInitiativePanel()
+        .setInitPanelButtonsDisabled(campaign.isInitiativePanelButtonsDisabled());
+    clientFrame.getInitiativePanel().updateView();
 
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
-    UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
+    UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
   public static void setServerPolicy(ServerPolicy policy) {

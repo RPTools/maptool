@@ -23,21 +23,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -234,57 +230,17 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     return userDefinedFunctions.containsKey(name);
   }
 
-  public void loadCampaignLibFunctions() {
+  /**
+   * Clears any previously mapped UDFs and handles the {@value #ON_LOAD_CAMPAIGN_CALLBACK} macro
+   * event. Suppresses chat output on the called macros.
+   */
+  public void handleCampaignLoadMacroEvent() {
     userDefinedFunctions.clear();
-
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      List<Token> tokenList =
-          zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
-
-      for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs then we are in its a trusted
-        // Lib:token so we can run the macro
-        if (token != null) {
-          if (token.isOwnedByAll()) {
-            continue;
-          } else {
-            Set<String> gmPlayers = new HashSet<String>();
-            for (Object o : MapTool.getPlayerList()) {
-              Player p = (Player) o;
-              if (p.isGM()) {
-                gmPlayers.add(p.getName());
-              }
-            }
-            for (String owner : token.getOwners()) {
-              if (!gmPlayers.contains(owner)) {
-                continue;
-              }
-            }
-          }
-        }
-        // If we get here it is trusted so try to execute it.
-        if (token.getMacro(ON_LOAD_CAMPAIGN_CALLBACK, false) != null) {
-          try {
-            MapTool.getParser()
-                .runMacro(
-                    new MapToolVariableResolver(token),
-                    token,
-                    ON_LOAD_CAMPAIGN_CALLBACK + "@" + token.getName(),
-                    "");
-          } catch (AbortFunctionException afe) {
-            // Do nothing
-          } catch (Exception e) {
-            MapTool.addLocalMessage(
-                "Error running "
-                    + ON_LOAD_CAMPAIGN_CALLBACK
-                    + " on "
-                    + token.getName()
-                    + " : "
-                    + e.getMessage());
-          }
-        }
-      }
+    List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_LOAD_CAMPAIGN_CALLBACK);
+    String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
+    for (Token handler : libTokens) {
+      EventMacroUtil.callEventHandler(
+          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
     }
   }
 
