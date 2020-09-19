@@ -4674,7 +4674,7 @@ public class ZoneRenderer extends JComponent
         // (Why? Couldn't a Player drop an RPTOK that represents an NPC, such as for a summoned
         // monster?  Unfortunately, we can't know at this point whether the original input was
         // an RPTOK or not.)
-        //token.setType(Token.Type.PC);
+        // token.setType(Token.Type.PC);
 
         // For Players, check to see if the name is already in use. If it is already in use, make
         // sure the current Player owns the token being duplicated (to avoid subtle ways of
