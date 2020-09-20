@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
@@ -100,11 +101,15 @@ public class MacroDialogFunctions extends AbstractFunction {
     }
     if (functionName.equals("getFrameProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      return HTMLFrame.getFrameProperties(parameters.get(0).toString());
+      Optional<JsonObject> props = HTMLFrame.getFrameProperties(parameters.get(0).toString());
+      if (props.isPresent()) return props.get();
+      else return "";
     }
     if (functionName.equals("getDialogProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-      return HTMLDialog.getDialogProperties(parameters.get(0).toString());
+      Optional<JsonObject> props = HTMLDialog.getDialogProperties(parameters.get(0).toString());
+      if (props.isPresent()) return props.get();
+      else return "";
     }
     if (functionName.equalsIgnoreCase("getOverlayProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
@@ -144,31 +149,17 @@ public class MacroDialogFunctions extends AbstractFunction {
           MapTool.getFrame().getOverlayPanel().getOverlays();
       JsonArray jarr = new JsonArray();
       for (HTMLOverlayManager overlay : overlays) {
-        jarr.add(getOverlayProperties(overlay));
+        jarr.add(overlay.getProperties());
       }
       return jarr;
     } else {
       HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
       if (overlay != null) {
-        return getOverlayProperties(overlay);
+        return overlay.getProperties();
       } else {
         return "";
       }
     }
-  }
-
-  /**
-   * Returns a JsonObject with the properties of the overlay. Includes name, zorder, and visible.
-   *
-   * @param overlay the overlay to get the properties from.
-   * @return the properties
-   */
-  private JsonObject getOverlayProperties(HTMLOverlayManager overlay) {
-    JsonObject jobj = new JsonObject();
-    jobj.addProperty("name", overlay.getName());
-    jobj.addProperty("zorder", overlay.getZOrder());
-    jobj.addProperty("visible", overlay.isVisible() ? BigDecimal.ONE : BigDecimal.ZERO);
-    return jobj;
   }
 
   /**

@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonObject;
 import com.sun.webkit.WebPage;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.web.WebEngine;
@@ -237,6 +239,18 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   @Override
   public void remove(Component component) {}
 
+  /**
+   * Returns a JsonObject with the properties of the overlay. Includes name, zorder, and visible.
+   *
+   * @return the properties
+   */
+  public JsonObject getProperties() {
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("name", getName());
+    jobj.addProperty("zorder", getZOrder());
+    jobj.addProperty("visible", isVisible() ? BigDecimal.ONE : BigDecimal.ZERO);
+    return jobj;
+  }
   /**
    * Act when an action is performed.
    *
