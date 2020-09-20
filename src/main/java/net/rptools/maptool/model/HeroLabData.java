@@ -116,17 +116,47 @@ public class HeroLabData {
     heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
   }
 
-  /*
-   * Evaluate the HeroLab XML statBlock against the supplied xPath expression Sample expression: /document/public/character/race/@racetext
+  /**
+   * Evaluate the HeroLab XML statBlock against the supplied xPath expression, returning the results
+   * as a String List with the requested delimiter.
+   *
+   * <p>Sample expression: /document/public/character/race/@racetext
+   *
+   * @param xPathExpression the expression
+   * @param delim the delimiter to use for the returned list
+   * @return the String list (which may contain only a single element)
+   * @throws IllegalArgumentException if xPathExpression is empty, invalid, or does not point to
+   *     text or attribute nodes.
    */
-  public String parseXML(String xPathExpression) {
-    if (xPathExpression.isEmpty()) return "Error: No XPath expression given.";
+  public String parseXML(String xPathExpression, String delim) {
+    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
 
     String results;
     XML xmlObj = new XMLDocument(getStatBlock_xml());
-    results = String.join(", ", xmlObj.xpath(xPathExpression));
+    results = String.join(delim, xmlObj.xpath(xPathExpression));
 
     // System.out.println("HeroLabData parseXML(" + xPathExpression + ") :: '" + results + "'");
+
+    return results;
+  }
+
+  /**
+   * Evaluate the HeroLab XML statBlock against the supplied xPath expression, returning the results
+   * as a JsonArray.
+   *
+   * @param xPathExpression the expression
+   * @return a JsonArray of results
+   * @throws IllegalArgumentException if xPathExpression is empty, invalid, or does not point to
+   *     text or attribute nodes.
+   */
+  public JsonArray parseXmlToJson(String xPathExpression) {
+    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
+
+    JsonArray results = new JsonArray();
+    XML xmlObj = new XMLDocument(getStatBlock_xml());
+    for (String r : xmlObj.xpath(xPathExpression)) {
+      results.add(r);
+    }
 
     return results;
   }
