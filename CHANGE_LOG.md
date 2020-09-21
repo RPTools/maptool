@@ -3,7 +3,7 @@
 
 Lots of enhancements, bug fixes and performance improvements to the code base.
 
-Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010 for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation. 
+Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010 for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation.
 
 ## Highlights
 - Significant improvements in macro run times giving a 4x to 10x (and sometimes more) reduction in run times.
@@ -14,16 +14,17 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
   ```
 - ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - Several Export Screenshot bugs fixed.
-- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1845][i1845], [#2097][i2097] 
+- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1845][i1845], [#2097][i2097]
   - See wiki page [Introduction to Initiative](http://lmwcs.com/rptools/wiki/Introduction_to_Initiative)
 
 
 ## Enhancements
+- [#2237][i2237] MapTool is now packaged for ArchLinux
 - [#2205][i2205] Improved efficiency of `onTokenMove` event handler with multiple tokens selected.
 - [#2199][i2199] Updated Dicelib 1.7.0 adds support for Shadowrun 5 dice rolls: `sr5(n)`, `sr5(n,g)`, `sr5e(n)`, `sr5(n,g)`
 - [#2188][i2188] New macro function `removeDrawing(MapName, DrawingID)` to remove drawings from map.
 - [#2157][i2157] Macro function `resetTablePicks()` can now be used to reset specific entries in table. I.e. return drawn cards to a deck.
-- [#2149][i2149] Improved performance of Fog of War checks for a noticeable improvement on complex maps. 
+- [#2149][i2149] Improved performance of Fog of War checks for a noticeable improvement on complex maps.
 - [#2097][i2097] Initiative can now be set to ascending or descending order with *descending* as default.
 - [#2032][i2032] Added various Preferences settings to output of `getInfo("client")`.  Added _personal server_ status to `getInfo("server")`.
 - [#1986][i1986] Stat sheets and token notes now appear above Overlays.
@@ -41,41 +42,41 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
 
 ## Bug Fixes
-- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed. 
-- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed. 
+- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed.
+- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed.
 - [#2178][i2178] Token opacity was broken in develop.  Fixed.
 - [#2174][i2174] Ability to save startup settings broken by Java/packaging changes.  Restored.  Startup tab now has more explanation.
 - [#2152][i2152] Function `isNumber()` was returning true for empty strings. Fixed.
-- [#2119][i2119] Excessive processing of roll options was making macro execution slow. Changes improved speed by 10x or more.  
+- [#2119][i2119] Excessive processing of roll options was making macro execution slow. Changes improved speed by 10x or more.
 - [#2118][i2118] Importing large macrosets was very slow and used **a lot** of memory. Changes improved speed by 10:1 up to 150:1 for macro buttons with images.
 - [#2116][i2116] Failing to load a campaign incorrectly reported *"Could not save campaign."* Fixed.
-- [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed. 
-- [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed. 
-- [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed. 
-- [#2069][i2069] Tokens partially out of line-of-sight were fully shown on player clients. Fixed. 
-- [#2057][i2057] Token properties with a single element JSON array returned bad results when accessed. Not in published code. Fixed. 
-- [#2056][i2056] Form submit for dialogs, frames and overlays was on wrong thread leading to inconsistent results from macro functions such as `getToken()`. Fixed. 
+- [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed.
+- [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed.
+- [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed.
+- [#2069][i2069] Tokens partially out of line-of-sight were fully shown on player clients. Fixed.
+- [#2057][i2057] Token properties with a single element JSON array returned bad results when accessed. Not in published code. Fixed.
+- [#2056][i2056] Form submit for dialogs, frames and overlays was on wrong thread leading to inconsistent results from macro functions such as `getToken()`. Fixed.
 - [#2046][i2046] Cancelling out of Rename Macro Group would cause an NPE. Fixed.
-- [#2041][i2041] A number of macro functions if called with the wrong case such as `getplayername()` instead of `getPlayerName()`, would either call the wrong function internally or return the wrong result. A parser exception will now be thrown instead.  See issue for more details. 
-- [#2040][i2040] Vision of player-owned NPC tokens were not visible when no PC tokens were on map. Fixed. 
-- [#2037][i2037] Clicking on Move Up/Down buttons with only a Single bar defined was throwing an exception. Fixed. 
-- [#2023][i2023] Moving a token on a map with FoW and triggering an `onTokenMove` event that moved the token to a different map would cause an NPE. Fixed. 
-- [#2021][i2021] Double-clicking on token in Initiative List wasn't updating Selected panel. Fixed. 
-- [#2006][i2006] Some themes still had some UI elements using fonts lacking CJK support. Fixed. 
-- [#1996][i1996] Error message for missing remote repository was missing closing quote. Fixed. 
-- [#1995][i1995] Function `capitalize()` would always treat numbers and symbols as word boundaries. New parameter allows for turning off.   
-- [#1988][i1988] Audio funciton `playClip()` was hogging the JavaFX application thread. Fixed. 
+- [#2041][i2041] A number of macro functions if called with the wrong case such as `getplayername()` instead of `getPlayerName()`, would either call the wrong function internally or return the wrong result. A parser exception will now be thrown instead.  See issue for more details.
+- [#2040][i2040] Vision of player-owned NPC tokens were not visible when no PC tokens were on map. Fixed.
+- [#2037][i2037] Clicking on Move Up/Down buttons with only a Single bar defined was throwing an exception. Fixed.
+- [#2023][i2023] Moving a token on a map with FoW and triggering an `onTokenMove` event that moved the token to a different map would cause an NPE. Fixed.
+- [#2021][i2021] Double-clicking on token in Initiative List wasn't updating Selected panel. Fixed.
+- [#2006][i2006] Some themes still had some UI elements using fonts lacking CJK support. Fixed.
+- [#1996][i1996] Error message for missing remote repository was missing closing quote. Fixed.
+- [#1995][i1995] Function `capitalize()` would always treat numbers and symbols as word boundaries. New parameter allows for turning off.
+- [#1988][i1988] Audio funciton `playClip()` was hogging the JavaFX application thread. Fixed.
 - [#1976][i1976] Calling `overlay()` with new content was not erasing previous content. Fixed.
 - [#1974][i1974] Disabling deterministic expression building was causing NPEs. Not in released builds. Fixed.
 - [#1972][i1972] Using `listGet()` on lists where elements had spaces in the name would fail. Fixed.
-- [#1962][i1962] Selecting colors in Drawing tool color palette could fail if mouse is moved between click and release. Fixed. 
+- [#1962][i1962] Selecting colors in Drawing tool color palette could fail if mouse is moved between click and release. Fixed.
 - [#1950][i1950] Calling `getname()` instead of `getName()` was calling `setName() instead. Fixed.
 - [#1948][i1948] Multiple fixes to Exporting Screenshots.
   - Uninitialized variables if attempting to do an Entire Map export would cause NPE. Fixed.
   - Exposed FoW areas not included in exported image. Fixed.
   - Entire Map exports were not getting correct extents. Fixed.
 - [#1938][i1938] Macros created via `createaMacro()` or already present on a droped in token were getting set to _Player Editable_ as they should be. Fixed.
-- [#1935][i1935] Players calling macros via a frame macrolink would not have permission to use trusted functions. Fixed. 
+- [#1935][i1935] Players calling macros via a frame macrolink would not have permission to use trusted functions. Fixed.
 - [#1926][i1926] Updates to Hot Key display checkbox and macro Commonality were only applied on first edit. Fixed.
 - [#1921][i1921] Rapidly changing Token facing in vision range of of multiple lights would degrade performance. Fixed.
 - [#1896][i1896] Light sources with a lumens value of 100 weren't revealing for tokens with personal light. Fixed.
@@ -105,14 +106,15 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#2135][i2135] Code cleanup: removed redundant null checks, tests that were always true/false, replaced anonymous inner classes with lambdas, etc.
 - [#2109][i2109] Build.gradle update to pull version from tag. Fixed.  Dev only.
 - [#2102][i2102] `jpackage` created Windows installers weren't installing/updating with existing installs. Fixed.  Dev only.
-- [#2049][i2049] Removed a number of classes that were obsolete/unused. 
-- [#2047][i2047] Code cleanup. Removed obsolete Java version checks.  
-- [#2019][i2019] Updated to Parse 1.8.0 which added support for logical operators to Expression.format()/InlineTreeFormatter..  
+- [#2049][i2049] Removed a number of classes that were obsolete/unused.
+- [#2047][i2047] Code cleanup. Removed obsolete Java version checks.
+- [#2019][i2019] Updated to Parse 1.8.0 which added support for logical operators to Expression.format()/InlineTreeFormatter..
 - [#1992][i1992] Code cleanup of I18NManager.
-- [#1947][i1947] MapTool credits updated with recent (and long time) contributors.  
-- [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.  
+- [#1947][i1947] MapTool credits updated with recent (and long time) contributors.
+- [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2237]: https://github.com/RPTools/maptool/issues/2237
 [i2199]: https://github.com/RPTools/maptool/issues/2199
 [i2197]: https://github.com/RPTools/maptool/issues/2197
 [i2192]: https://github.com/RPTools/maptool/issues/2192
@@ -759,7 +761,7 @@ Bug Fixes
 Other
 -----
 - [#1045][i1045] Update remaining dependencies.
-- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
+- [#1037][i1037] Updated dependencies with reported vulnerabilites.
 
 [i1045]: https://github.com/RPTools/maptool/issues/1045
 [i1037]: https://github.com/RPTools/maptool/issues/1037
@@ -798,7 +800,7 @@ Maptool 1.5.8
 Enhancements
 -----
 - [#949][i949] New macro function `getAssetProperties()` returns the properties of assets including size and type.
-- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.  
+- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.
   - Map name parameter added to: `getTokenX()`, `getTokenY()`, `getTokenDrawOrder()`, `setTokenDrawOrder()`
 - [#901][i901] Default stack size increased to 8MB.  See Preferences -> Startup
 - [#898][i898] Macro functions `getOwned()` and `getOwnedNames` now take optional map name parameter.

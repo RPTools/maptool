@@ -430,6 +430,15 @@ public class FunctionUtil {
   }
 
   /**
+   * Get our standard BigDecimal representation (1 or 0) of a boolean value.
+   *
+   * @param b the boolean value
+   * @return {@link BigDecimal#ONE} if true, {@link BigDecimal#ZERO} if false
+   */
+  public static BigDecimal getDecimalForBoolean(boolean b) {
+    return b ? BigDecimal.ONE : BigDecimal.ZERO;
+  }
+  /**
    * Throw an exception if the macro isn't trusted.
    *
    * @param functionName the name of the function.
