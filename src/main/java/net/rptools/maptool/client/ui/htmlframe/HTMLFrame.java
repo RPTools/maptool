@@ -325,9 +325,12 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       frameProperties.addProperty(
           "temporary", FunctionUtil.getDecimalForBoolean(frame.getTemporary()));
       frameProperties.addProperty("title", frame.getTitle());
+      frameProperties.addProperty("tabtitle", frame.getTabTitle());
       frameProperties.addProperty("visible", FunctionUtil.getDecimalForBoolean(frame.isVisible()));
       frameProperties.addProperty("docked", FunctionUtil.getDecimalForBoolean(frame.isDocked()));
-
+      frameProperties.addProperty(
+          "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
+      frameProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(frame.isHTML5));
       Object frameValue = frame.getValue();
       if (frameValue == null) {
         frameValue = "";
