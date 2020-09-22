@@ -1,9 +1,6 @@
 ---
 name: Submit a Question
 about: Technical Questions
-title: ''
-labels: question
-assignees: ''
 
 ---
 
