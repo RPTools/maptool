@@ -3737,10 +3737,24 @@ public class ZoneRenderer extends JComponent
     visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
   }
 
+  /**
+   * Returns whether the token should be clipped, depending on its bounds, the view, and the visible
+   * screen area.
+   *
+   * @param token the token that could be clipped
+   * @param tokenCellArea the cell area corresponding to the bounds of the token
+   * @param isGMView whether it is the view of a GM
+   * @return true if the token is need of clipping, false otherwise
+   */
   private boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
 
     // can view everything or zone is not using vision = no clipping needed
     if (isGMView || !zoneView.isUsingVision()) return false;
+
+    // no clipping if there is no visible screen area
+    if (visibleScreenArea == null) {
+      return false;
+    }
 
     // If the token is a figure and its center is visible then no clipping
     if (token.getShape() == Token.TokenShape.FIGURE

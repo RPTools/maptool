@@ -110,8 +110,9 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "-Djavax.net.debug=all"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
+    // Add  -Djavax.net.debug=all to debug networking issues
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -196,11 +197,12 @@ runtime {
             }
         }
 
-        if (osdetector.os.is('unix')) {
+        if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
-            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
+            resourceDir = file('package/linux')
+            imageOptions += ['--icon', project.name + developerRelease + '.png']
             installerOptions += [
-                    '--linux-menu-group', vendor,
+                    '--linux-menu-group', 'Game',
                     '--linux-shortcut'
             ]
 
