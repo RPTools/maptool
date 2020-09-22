@@ -269,7 +269,12 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialogProperties.addProperty("title", dialog.getTitle());
       dialogProperties.addProperty(
           "visible", FunctionUtil.getDecimalForBoolean(dialog.isVisible()));
-
+      dialogProperties.addProperty(
+          "noframe", FunctionUtil.getDecimalForBoolean(dialog.isUndecorated()));
+      dialogProperties.addProperty("input", FunctionUtil.getDecimalForBoolean(dialog.input));
+      dialogProperties.addProperty(
+          "closebutton", FunctionUtil.getDecimalForBoolean(dialog.isAncestorOf(dialog.closePanel)));
+      dialogProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(dialog.isHTML5));
       Object dialogValue = dialog.getValue();
       if (dialogValue == null) {
         dialogValue = "";
