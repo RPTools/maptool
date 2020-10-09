@@ -172,6 +172,7 @@ public class HTMLWebViewManager {
           + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
           + " 'unsafe-inline' 'unsafe-eval' ; "
           + " font-src https://fonts.gstatic.com 'self'"
+		  + " img=src 'self' data: ;"
           + "\">\n";
 
   /** The default rule for the body tag. */
