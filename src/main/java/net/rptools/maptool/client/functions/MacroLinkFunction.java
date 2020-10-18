@@ -724,7 +724,7 @@ public class MacroLinkFunction extends AbstractFunction {
     }
 
     sb.append(
-            "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
+        "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
     if (trusted && !MapTool.getPlayer().isGM()) {
       sb.append("<span style='background-color: #C9F7AD' ")
           .append("title='")
