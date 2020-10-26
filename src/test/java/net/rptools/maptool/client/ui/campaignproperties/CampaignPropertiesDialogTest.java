@@ -20,6 +20,7 @@ import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.language.I18N;
 import org.junit.jupiter.api.Test;
 
 public class CampaignPropertiesDialogTest {
@@ -30,7 +31,7 @@ public class CampaignPropertiesDialogTest {
 
     JButton button = cpd.getImportPredefinedButton();
 
-    assertEquals(button.getText(), "Import predefined");
+    assertEquals(button.getText(), I18N.getText("CampaignPropertiesDialog.button.import"));
   }
 
   @Test
