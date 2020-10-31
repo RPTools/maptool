@@ -59,12 +59,10 @@ public class AssetProducer {
       size = (int) (length - currentPosition);
     }
     byte[] data = new byte[size];
-    FileInputStream in = new FileInputStream(assetFile);
-
-    in.skip(currentPosition);
-    in.read(data, 0, size);
-    in.close();
-
+    try (FileInputStream in = new FileInputStream(assetFile)) {
+      in.skip(currentPosition);
+      in.read(data, 0, size);
+    }
     currentPosition += size;
     return new AssetChunk(id, data);
   }

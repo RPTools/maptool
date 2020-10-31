@@ -75,9 +75,7 @@ public class SelectionPanel extends AbstractMacroPanel {
       if (selectionPanel != null)
         panelVisible =
             (selectionPanel.isVisible() && !selectionPanel.isAutohide())
-                    || selectionPanel.isAutohideShowing()
-                ? true
-                : false;
+                || selectionPanel.isAutohideShowing();
     }
     // Set up a code timer to get some performance data
     timer = new CodeTimer("selectionpanel");

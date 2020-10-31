@@ -20,10 +20,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import javax.swing.*;
 
 /**
@@ -46,22 +43,19 @@ public class JScrollPopupMenu extends JPopupMenu {
     setLayout(new ScrollPopupMenuLayout());
 
     addMouseWheelListener(
-        new MouseWheelListener() {
-          @Override
-          public void mouseWheelMoved(MouseWheelEvent event) {
-            // Fix for hi-res mice
-            if (event.getWheelRotation() == 0) {
-              return;
-            }
-            JScrollBar scrollBar = getScrollBar();
-            int amount =
-                (event.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
-                    ? event.getUnitsToScroll() * scrollBar.getUnitIncrement()
-                    : (event.getWheelRotation() < 0 ? -1 : 1) * scrollBar.getBlockIncrement();
-
-            scrollBar.setValue(scrollBar.getValue() + amount);
-            event.consume();
+        event -> {
+          // Fix for hi-res mice
+          if (event.getWheelRotation() == 0) {
+            return;
           }
+          JScrollBar scrollBar = getScrollBar();
+          int amount =
+              (event.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+                  ? event.getUnitsToScroll() * scrollBar.getUnitIncrement()
+                  : (event.getWheelRotation() < 0 ? -1 : 1) * scrollBar.getBlockIncrement();
+
+          scrollBar.setValue(scrollBar.getValue() + amount);
+          event.consume();
         });
   }
 
@@ -71,12 +65,9 @@ public class JScrollPopupMenu extends JPopupMenu {
     if (popupScrollBar == null) {
       popupScrollBar = new JScrollBar(JScrollBar.VERTICAL);
       popupScrollBar.addAdjustmentListener(
-          new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-              doLayout();
-              repaint();
-            }
+          e -> {
+            doLayout();
+            repaint();
           });
     }
 

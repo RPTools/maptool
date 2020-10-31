@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
@@ -53,16 +55,25 @@ public class AssetLoader {
 
   private static final File REPO_CACHE_DIR = AppUtil.getAppHome("repoindx");
 
-  private final ExecutorService retrievalThreadPool = Executors.newFixedThreadPool(3);
-  private final Set<MD5Key> requestedIdSet = new HashSet<MD5Key>();
-  private final Map<String, Map<String, String>> repositoryMap =
-      new HashMap<String, Map<String, String>>();
-  private final Map<String, RepoState> repositoryStateMap = new HashMap<String, RepoState>();
+  /** Length of time, in ms, before a repo index file is deemed out-of-date. */
+  private static final long INDEX_LIFESPAN = TimeUnit.DAYS.toMillis(1);
 
-  public synchronized void addRepository(String repository) {
+  private final ExecutorService retrievalThreadPool = Executors.newFixedThreadPool(3);
+  private final Set<MD5Key> requestedIdSet = new HashSet<>();
+  private final Map<String, Map<String, String>> repositoryMap = new HashMap<>();
+  private final Map<String, RepoState> repositoryStateMap = new HashMap<>();
+
+  /**
+   * Adds a repo to the repositoryMap.
+   *
+   * @param repository the url of the repo
+   * @return true if the repo is active, false otherwise
+   */
+  public synchronized boolean addRepository(String repository) {
     // Assume active, unless we find otherwise during setup
     repositoryStateMap.put(repository, RepoState.ACTIVE);
     repositoryMap.put(repository, getIndexMap(repository));
+    return (RepoState.ACTIVE.equals(repositoryStateMap.get(repository)));
   }
 
   public synchronized void removeRepository(String repository) {
@@ -108,9 +119,9 @@ public class AssetLoader {
    */
   protected Map<String, String> getIndexMap(String repository) {
     RepoState status = RepoState.ACTIVE;
-    Map<String, String> indexMap = new HashMap<String, String>();
+    Map<String, String> indexMap = new HashMap<>();
     try {
-      byte[] index = null;
+      byte[] index;
       if (!hasCurrentIndexFile(repository)) {
         URL url = new URL(repository);
         index = FileUtil.getBytes(url);
@@ -118,16 +129,24 @@ public class AssetLoader {
       } else {
         index = FileUtils.readFileToByteArray(getRepoIndexFile(repository));
       }
+      if (index.length == 0) {
+        throw new MalformedURLException("Empty or inaccessible repository index file.");
+      }
       indexMap = parseIndex(decode(index));
     } catch (MalformedURLException e) {
-      log.error("Invalid repository URL: " + repository, e);
+      if (log.isDebugEnabled()) {
+        log.error("Invalid repository URL: " + repository, e);
+      }
       status = RepoState.BAD_URL;
     } catch (IOException e) {
-      log.error("I/O error retrieving/saving index for '" + repository, e);
+      if (log.isDebugEnabled()) {
+        log.error("I/O error retrieving/saving index for '" + repository + "'", e);
+      }
       status = RepoState.UNAVAILABLE;
     } catch (Throwable t) {
-      log.error("Could not retrieve index for '" + repository, t);
-      t.printStackTrace();
+      if (log.isDebugEnabled()) {
+        log.error("Could not retrieve index for '" + repository + "'", t);
+      }
       status = RepoState.UNAVAILABLE;
     }
     repositoryStateMap.put(repository, status);
@@ -179,8 +198,8 @@ public class AssetLoader {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     PrintWriter pw = new PrintWriter(bout);
     Map<String, String> assets = repositoryMap.get(repository);
-    for (String asset : assets.keySet()) {
-      pw.println(asset + " " + assets.get(asset));
+    for (var entry : assets.entrySet()) {
+      pw.println(entry.getKey() + " " + entry.getValue());
     }
     pw.close();
     return bout.toByteArray();
@@ -191,9 +210,22 @@ public class AssetLoader {
     FileUtils.writeByteArrayToFile(file, data);
   }
 
+  /**
+   * Returns whether the repo index file is current.
+   *
+   * @param repository the path of the repo index file
+   * @return true if the repo index file exists and isn't outdated
+   */
   protected boolean hasCurrentIndexFile(String repository) {
-    // TODO: make this check timestamps, or update once a day or something like that
-    return getRepoIndexFile(repository).exists();
+    File indexFile = getRepoIndexFile(repository);
+    if (!indexFile.exists()) {
+      // Return false if file doesn't exist
+      return false;
+    }
+
+    // Check if the repo index file is out-of-date.
+    long timeDiff = new Date().getTime() - indexFile.lastModified();
+    return timeDiff < INDEX_LIFESPAN;
   }
 
   protected File getRepoIndexFile(String repository) {

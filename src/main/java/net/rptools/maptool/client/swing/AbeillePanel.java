@@ -69,7 +69,7 @@ public class AbeillePanel<T> extends JPanel {
 
             // System.out.println("Name:" + name);
             name = name.substring(1).trim(); // cut the "@"
-            int point = name.indexOf(".");
+            int point = name.indexOf('.');
             if (point >= 0) name = name.substring(0, point).trim();
             return new BindingInfo(name);
           }
@@ -95,11 +95,7 @@ public class AbeillePanel<T> extends JPanel {
       if (method.getName().startsWith("init")) {
         try {
           method.invoke(this, new Object[] {});
-        } catch (IllegalArgumentException e) {
-          log.error("Could not init method: " + method.getName(), e);
-        } catch (IllegalAccessException e) {
-          log.error("Could not init method: " + method.getName(), e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
           log.error("Could not init method: " + method.getName(), e);
         }
       }
@@ -183,7 +179,7 @@ public class AbeillePanel<T> extends JPanel {
     }
 
     @Override
-    protected Object getValue() throws Exception {
+    protected Object getValue() {
       return button.isSelected() ? selected : null;
     }
 
@@ -216,7 +212,7 @@ public class AbeillePanel<T> extends JPanel {
         super.bind(property, view, updateTime);
 
         String bindVal = button.getName();
-        bindVal = bindVal.substring(bindVal.indexOf(".") + 1);
+        bindVal = bindVal.substring(bindVal.indexOf('.') + 1);
 
         selected = Enum.valueOf(property.getType(), bindVal);
       }

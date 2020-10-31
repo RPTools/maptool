@@ -24,6 +24,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenVisibleFunction extends AbstractFunction {
@@ -87,9 +88,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;
@@ -107,9 +108,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;
@@ -121,20 +122,21 @@ public class TokenVisibleFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> param)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
     if (functionName.equals("getVisible")) {
-      return getVisible(parser, param);
+      return getVisible(resolver, param);
     } else if (functionName.equals("setOwnerOnlyVisible")) {
-      return setOwnerOnlyVisible(parser, param);
+      return setOwnerOnlyVisible(resolver, param);
     } else if (functionName.equals("getOwnerOnlyVisible")) {
-      return getOwnerOnlyVisible(parser, param);
+      return getOwnerOnlyVisible(resolver, param);
     } else if (functionName.equals("setVisible")) {
-      return setVisible(parser, param);
+      return setVisible(resolver, param);
     } else if (functionName.equals("setAlwaysVisible")) {
-      return setAlwaysVisible(parser, param);
+      return setAlwaysVisible(resolver, param);
     } else if (functionName.equals("getAlwaysVisible")) {
-      return getAlwaysVisible(parser, param);
+      return getAlwaysVisible(resolver, param);
     } else {
       throw new ParserException(I18N.getText("macro.function.general.unknownFunction"));
     }
@@ -143,12 +145,12 @@ public class TokenVisibleFunction extends AbstractFunction {
   /**
    * Gets if the token is visible
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return if the token is visible or not.
    * @throws ParserException if an error occurs.
    */
-  private static Object getVisible(Parser parser, List<Object> args) throws ParserException {
+  private static Object getVisible(VariableResolver resolver, List<Object> args)
+      throws ParserException {
     Token token;
 
     if (args.size() == 1) {
@@ -159,7 +161,7 @@ public class TokenVisibleFunction extends AbstractFunction {
                 "macro.function.general.unknownToken", "getVisible", args.get(0).toString()));
       }
     } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
@@ -175,12 +177,12 @@ public class TokenVisibleFunction extends AbstractFunction {
   /**
    * Sets if the token is visible
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return the value visible is set to.
    * @throws ParserException if an error occurs.
    */
-  private static Object setVisible(Parser parser, List<Object> args) throws ParserException {
+  private static Object setVisible(VariableResolver resolver, List<Object> args)
+      throws ParserException {
     Object val;
     Token token;
 
@@ -192,7 +194,7 @@ public class TokenVisibleFunction extends AbstractFunction {
                 "macro.function.general.unknownToken", "setVisible", args.get(1).toString()));
       }
     } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
@@ -210,7 +212,7 @@ public class TokenVisibleFunction extends AbstractFunction {
     return val;
   }
 
-  private static Object setOwnerOnlyVisible(Parser parser, List<Object> args)
+  private static Object setOwnerOnlyVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
     Object val;
     Token token;
@@ -225,7 +227,7 @@ public class TokenVisibleFunction extends AbstractFunction {
                 args.get(1).toString()));
       }
     } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
@@ -245,7 +247,7 @@ public class TokenVisibleFunction extends AbstractFunction {
     return val;
   }
 
-  private static Object getOwnerOnlyVisible(Parser parser, List<Object> args)
+  private static Object getOwnerOnlyVisible(VariableResolver resolver, List<Object> args)
       throws ParserException {
     Token token;
 
@@ -259,7 +261,7 @@ public class TokenVisibleFunction extends AbstractFunction {
                 args.get(0).toString()));
       }
     } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
@@ -294,9 +296,9 @@ public class TokenVisibleFunction extends AbstractFunction {
     }
     boolean set;
     if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
+      set = (Integer) val != 0;
     } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+      set = (Boolean) val;
     } else {
       try {
         set = Integer.parseInt(val.toString()) != 0;
@@ -310,16 +312,16 @@ public class TokenVisibleFunction extends AbstractFunction {
   /**
    * Sets if the token is always visible
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return the value visible is set to.
    * @throws ParserException if an error occurs.
    */
-  private static Object setAlwaysVisible(Parser parser, List<Object> args) throws ParserException {
+  private static Object setAlwaysVisible(VariableResolver resolver, List<Object> args)
+      throws ParserException {
     FunctionUtil.checkNumberParam("setAlwaysVisible", args, 1, 3);
 
     Object val = args.get(0);
-    Token token = FunctionUtil.getTokenFromParam(parser, "setAlwaysVisible", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setAlwaysVisible", args, 1, 2);
 
     setAlwaysVisible(token, val);
     return val;
@@ -350,12 +352,12 @@ public class TokenVisibleFunction extends AbstractFunction {
   /**
    * Gets if the token is visible
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return if the token is visible or not.
    * @throws ParserException if an error occurs.
    */
-  private static Object getAlwaysVisible(Parser parser, List<Object> args) throws ParserException {
+  private static Object getAlwaysVisible(VariableResolver resolver, List<Object> args)
+      throws ParserException {
     Token token;
 
     if (args.size() == 1) {
@@ -366,7 +368,7 @@ public class TokenVisibleFunction extends AbstractFunction {
                 "macro.function.general.unknownToken", "getAlwaysVisible", args.get(0).toString()));
       }
     } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(

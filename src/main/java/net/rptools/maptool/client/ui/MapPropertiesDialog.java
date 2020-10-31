@@ -18,18 +18,15 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.swing.PaintChooser;
-import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.FormPanelI18N;
@@ -345,13 +342,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initOKButton() {
-    getOKButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                accept();
-              }
-            });
+    getOKButton().addActionListener(e -> accept());
   }
 
   public JButton getBackgroundButton() {
@@ -369,18 +360,16 @@ public class MapPropertiesDialog extends JDialog {
   private void initBackgroundButton() {
     getBackgroundButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                Paint paint =
-                    paintChooser.choosePaint(
-                        MapTool.getFrame(),
-                        backgroundPaint != null ? backgroundPaint.getPaint() : null,
-                        I18N.getText("MapPropertiesDialog.label.background"));
-                if (paint != null) {
-                  backgroundPaint = DrawablePaint.convertPaint(paint);
-                }
-                updatePreview();
+            e -> {
+              Paint paint =
+                  paintChooser.choosePaint(
+                      MapTool.getFrame(),
+                      backgroundPaint != null ? backgroundPaint.getPaint() : null,
+                      I18N.getText("MapPropertiesDialog.label.background"));
+              if (paint != null) {
+                backgroundPaint = DrawablePaint.convertPaint(paint);
               }
+              updatePreview();
             });
   }
 
@@ -407,18 +396,16 @@ public class MapPropertiesDialog extends JDialog {
   private void initFogButton() {
     getFogButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                Paint paint =
-                    paintChooser.choosePaint(
-                        MapTool.getFrame(),
-                        fogPaint != null ? fogPaint.getPaint() : null,
-                        I18N.getText("MapPropertiesDialog.label.fog"));
-                if (paint != null) {
-                  fogPaint = DrawablePaint.convertPaint(paint);
-                }
-                updatePreview();
+            e -> {
+              Paint paint =
+                  paintChooser.choosePaint(
+                      MapTool.getFrame(),
+                      fogPaint != null ? fogPaint.getPaint() : null,
+                      I18N.getText("MapPropertiesDialog.label.fog"));
+              if (paint != null) {
+                fogPaint = DrawablePaint.convertPaint(paint);
               }
+              updatePreview();
             });
   }
 
@@ -433,11 +420,9 @@ public class MapPropertiesDialog extends JDialog {
   private void initCancelButton() {
     getCancelButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                status = Status.CANCEL;
-                setVisible(false);
-              }
+            e -> {
+              status = Status.CANCEL;
+              setVisible(false);
             });
   }
 
@@ -591,27 +576,25 @@ public class MapPropertiesDialog extends JDialog {
     private JButton createFilesystemButton() {
       JButton button = new JButton(I18N.getText("Label.filesystem"));
       button.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              setVisible(false);
-              if (getImageFileChooser().showOpenDialog(MapPropertiesDialog.this)
-                  == JFileChooser.APPROVE_OPTION) {
-                File imageFile = getImageFileChooser().getSelectedFile();
-                if (imageFile == null || imageFile.isDirectory()) {
-                  return;
-                }
-                lastFilePath = new File(imageFile.getParentFile() + "/.");
-                try {
-                  selectedAsset = AssetManager.createAsset(imageFile);
+          e -> {
+            setVisible(false);
+            if (getImageFileChooser().showOpenDialog(MapPropertiesDialog.this)
+                == JFileChooser.APPROVE_OPTION) {
+              File imageFile = getImageFileChooser().getSelectedFile();
+              if (imageFile == null || imageFile.isDirectory()) {
+                return;
+              }
+              lastFilePath = new File(imageFile.getParentFile() + "/.");
+              try {
+                selectedAsset = AssetManager.createAsset(imageFile);
 
-                  // Store for later use
-                  AssetManager.putAsset(selectedAsset);
-                  updatePreview();
-                  // setBackgroundAsset(asset, getImageFileChooser().getSelectedThumbnailImage());
-                } catch (IOException ioe) {
-                  MapTool.showError("Could not load that map: " + ioe);
-                  selectedAsset = null;
-                }
+                // Store for later use
+                AssetManager.putAsset(selectedAsset);
+                updatePreview();
+                // setBackgroundAsset(asset, getImageFileChooser().getSelectedThumbnailImage());
+              } catch (IOException ioe) {
+                MapTool.showError("Could not load that map: " + ioe);
+                selectedAsset = null;
               }
             }
           });
@@ -649,24 +632,22 @@ public class MapPropertiesDialog extends JDialog {
           new AssetPanel("mapPropertiesImageExplorer", model, JSplitPane.HORIZONTAL_SPLIT);
 
       assetPanel.addImageSelectionListener(
-          new SelectionListener() {
-            public void selectionPerformed(List<Object> selectedList) {
-              // There should be exactly one
-              if (selectedList.size() != 1) {
-                return;
-              }
-              Integer imageIndex = (Integer) selectedList.get(0);
+          selectedList -> {
+            // There should be exactly one
+            if (selectedList.size() != 1) {
+              return;
+            }
+            Integer imageIndex = (Integer) selectedList.get(0);
 
-              // if (getBackgroundAsset() != null) {
-              // // Tighten memory usage
-              // ImageManager.flushImage(getBackgroundAsset());
-              // }
-              selectedAsset = assetPanel.getAsset(imageIndex);
+            // if (getBackgroundAsset() != null) {
+            // // Tighten memory usage
+            // ImageManager.flushImage(getBackgroundAsset());
+            // }
+            selectedAsset = assetPanel.getAsset(imageIndex);
 
-              // Store for later use
-              if (selectedAsset != null) {
-                AssetManager.putAsset(selectedAsset);
-              }
+            // Store for later use
+            if (selectedAsset != null) {
+              AssetManager.putAsset(selectedAsset);
             }
           });
       return assetPanel;
@@ -737,10 +718,8 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private final ImageObserver drawableObserver =
-      new ImageObserver() {
-        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-          MapPropertiesDialog.this.imagePreviewPanel.repaint();
-          return true;
-        }
+      (img, infoflags, x, y, width, height) -> {
+        MapPropertiesDialog.this.imagePreviewPanel.repaint();
+        return true;
       };
 }

@@ -1,32 +1,233 @@
+# Maptool 1.8.0
+**MapTool now uses Java 14 from AdoptOpenJDK.**
+
+Lots of enhancements, bug fixes and performance improvements to the code base.
+
+Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010 for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation.
+
+## Highlights
+- Significant improvements in macro run times giving a 4x to 10x (and sometimes more) reduction in run times.
+- Macro errors now produce a _call stack_ showing the macro calls leading to the error.
+  ```
+  Function "setTokenDrawOrder" requires at least 1 parameters; 0 were provided.
+  Error trace : m3@Campaign <<< m2@Campaign <<< m1@campaign
+  ```
+- ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
+- Several Export Screenshot bugs fixed.
+- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1845][i1845], [#2097][i2097]
+  - See wiki page [Introduction to Initiative](http://lmwcs.com/rptools/wiki/Introduction_to_Initiative)
+
+
+## Enhancements
+- [#2237][i2237] MapTool is now packaged for ArchLinux
+- [#2205][i2205] Improved efficiency of `onTokenMove` event handler with multiple tokens selected.
+- [#2199][i2199] Updated Dicelib 1.7.0 adds support for Shadowrun 5 dice rolls: `sr5(n)`, `sr5(n,g)`, `sr5e(n)`, `sr5(n,g)`
+- [#2188][i2188] New macro function `removeDrawing(MapName, DrawingID)` to remove drawings from map.
+- [#2157][i2157] Macro function `resetTablePicks()` can now be used to reset specific entries in table. I.e. return drawn cards to a deck.
+- [#2149][i2149] Improved performance of Fog of War checks for a noticeable improvement on complex maps.
+- [#2097][i2097] Initiative can now be set to ascending or descending order with *descending* as default.
+- [#2032][i2032] Added various Preferences settings to output of `getInfo("client")`.  Added _personal server_ status to `getInfo("server")`.
+- [#1986][i1986] Stat sheets and token notes now appear above Overlays.
+- [#1958][i1958] Moving a token into a unreachable location adds a `fail` key/value pair to the last object in the array of location objects returned by `getLastPath()` or to `onTokenMove`.
+- [#1898][i1898] A number of improvements to macro performance resulting in as much as 10x or more reduction in run time.
+- [#1890][i1890] Map name parameter added to `removeToken()` function. `copyToken()` function cleaned up internally.
+- [#1882][i1882] NullPointerException messages now include more information about _why_ the error occured.
+- [#1861][i1861] Macro errors now produce a _call stack_ showing the macro calls leading to the error.
+- [#1845][i1845] Initiative Panel restyled to make it more obvious when a token isn't visible to players.
+- [#1726][i1726] Lumens value added to Personal Lights in Sight definitions. This allows Sight definitions that will see into areas of darkness.
+- [#1482][i1482] Can now export Macro Groups instead of an entire macro panel with right-click Export Macro Group option.
+- [#1479][i1479] New macro function `prevInitiative()` allows stepping back one initiative advance.
+- [#1458][i1458] New Initiative panel menu option to disable Next/Previous functions.
+- [#1362][i1362] New macro function to run JavaScript functions defined in frames, dialogs and overlays: `runJsFunction(name, type, func, thisArg, argsArray)`
+- [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
+
+## Bug Fixes
+- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed.
+- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed.
+- [#2178][i2178] Token opacity was broken in develop.  Fixed.
+- [#2174][i2174] Ability to save startup settings broken by Java/packaging changes.  Restored.  Startup tab now has more explanation.
+- [#2152][i2152] Function `isNumber()` was returning true for empty strings. Fixed.
+- [#2119][i2119] Excessive processing of roll options was making macro execution slow. Changes improved speed by 10x or more.
+- [#2118][i2118] Importing large macrosets was very slow and used **a lot** of memory. Changes improved speed by 10:1 up to 150:1 for macro buttons with images.
+- [#2116][i2116] Failing to load a campaign incorrectly reported *"Could not save campaign."* Fixed.
+- [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed.
+- [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed.
+- [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed.
+- [#2069][i2069] Tokens partially out of line-of-sight were fully shown on player clients. Fixed.
+- [#2057][i2057] Token properties with a single element JSON array returned bad results when accessed. Not in published code. Fixed.
+- [#2056][i2056] Form submit for dialogs, frames and overlays was on wrong thread leading to inconsistent results from macro functions such as `getToken()`. Fixed.
+- [#2046][i2046] Cancelling out of Rename Macro Group would cause an NPE. Fixed.
+- [#2041][i2041] A number of macro functions if called with the wrong case such as `getplayername()` instead of `getPlayerName()`, would either call the wrong function internally or return the wrong result. A parser exception will now be thrown instead.  See issue for more details.
+- [#2040][i2040] Vision of player-owned NPC tokens were not visible when no PC tokens were on map. Fixed.
+- [#2037][i2037] Clicking on Move Up/Down buttons with only a Single bar defined was throwing an exception. Fixed.
+- [#2023][i2023] Moving a token on a map with FoW and triggering an `onTokenMove` event that moved the token to a different map would cause an NPE. Fixed.
+- [#2021][i2021] Double-clicking on token in Initiative List wasn't updating Selected panel. Fixed.
+- [#2006][i2006] Some themes still had some UI elements using fonts lacking CJK support. Fixed.
+- [#1996][i1996] Error message for missing remote repository was missing closing quote. Fixed.
+- [#1995][i1995] Function `capitalize()` would always treat numbers and symbols as word boundaries. New parameter allows for turning off.
+- [#1988][i1988] Audio funciton `playClip()` was hogging the JavaFX application thread. Fixed.
+- [#1976][i1976] Calling `overlay()` with new content was not erasing previous content. Fixed.
+- [#1974][i1974] Disabling deterministic expression building was causing NPEs. Not in released builds. Fixed.
+- [#1972][i1972] Using `listGet()` on lists where elements had spaces in the name would fail. Fixed.
+- [#1962][i1962] Selecting colors in Drawing tool color palette could fail if mouse is moved between click and release. Fixed.
+- [#1950][i1950] Calling `getname()` instead of `getName()` was calling `setName() instead. Fixed.
+- [#1948][i1948] Multiple fixes to Exporting Screenshots.
+  - Uninitialized variables if attempting to do an Entire Map export would cause NPE. Fixed.
+  - Exposed FoW areas not included in exported image. Fixed.
+  - Entire Map exports were not getting correct extents. Fixed.
+- [#1938][i1938] Macros created via `createaMacro()` or already present on a droped in token were getting set to _Player Editable_ as they should be. Fixed.
+- [#1935][i1935] Players calling macros via a frame macrolink would not have permission to use trusted functions. Fixed.
+- [#1926][i1926] Updates to Hot Key display checkbox and macro Commonality were only applied on first edit. Fixed.
+- [#1921][i1921] Rapidly changing Token facing in vision range of of multiple lights would degrade performance. Fixed.
+- [#1896][i1896] Light sources with a lumens value of 100 weren't revealing for tokens with personal light. Fixed.
+- [#1894][i1894] Trusted functions called from a `frame` opened from a GM panel macro lacked permission to run. Fixed.
+- [#1893][i1893] Several bugs related to personal lights fixed.
+  - Areas exposed by personal lights would be "overridden" by dim light sources.
+  - Superfluous calls to `flush(token)` and `exposeFoW()` were removed.
+  - Light caches no longer accumulate duplicates.
+- [#1889][i1889] Macro function `copyToken()` wasn't preserving Shape setting of token. Fixed.
+- [#1888][i1888] Clicking on or hovering over a macro link in a campaign with no maps was producing an NPE. Fixed.
+- [#1886][i1886] Error message dialog not being display correctly. Fixed. Not in released code.
+- [#1884][i1884] Overlay transparency broken with Java 14. Fixed. Not in released code.
+- [#1880][i1880] Attempting to create an `overlay` when there are no maps caused an NPE. Fixed.
+- [#1878][i1878] HTML5 button formAction was ignored. Fixed.
+- [#1876][i1876] Spurious quote symbols no longer created in chat by `[if(), code:{}]` blocks lacking the _else_ block.
+- [#1874][i1874] Macro function `getMacroProps()` was returning a misnamed property (`toolapplyToSelected`). Fixed.
+- [#1867][i1867] Macro links to macros with no output would produce an empty line in chat. Fixed.
+- [#1863][i1863] HTML5 form submit was not allowed at document load. Fixed.
+- [#1737][i1737] Some CMYK JPEGs would appear as all black. Fixed.
+- [#1736][i1736] Variable names can now start with `tru`, `true`, `fal`, `fals`, and `false`.
+- [#1705][i1705] Map functions `getCurrentMapName(), getMapVisible() and setMapVisible()` would throw NPEs if campaign had no maps. Fixed.
+- [#1560][i1560] Default property settings using assigment expressions, i.e.`{prop2 = prop1}`, would fail. Fixed.
+- [#715][i715] Bad or missing remote repository would produce a Null Pointer Exception in the log but not inform the user. Fixed.
+
+## Other
+- [#2197][i2197] Build changes caused release builds to barf if release tags contained alpha chars(i.e. beta).  Fixed.
+- [#2135][i2135] Code cleanup: removed redundant null checks, tests that were always true/false, replaced anonymous inner classes with lambdas, etc.
+- [#2109][i2109] Build.gradle update to pull version from tag. Fixed.  Dev only.
+- [#2102][i2102] `jpackage` created Windows installers weren't installing/updating with existing installs. Fixed.  Dev only.
+- [#2049][i2049] Removed a number of classes that were obsolete/unused.
+- [#2047][i2047] Code cleanup. Removed obsolete Java version checks.
+- [#2019][i2019] Updated to Parse 1.8.0 which added support for logical operators to Expression.format()/InlineTreeFormatter..
+- [#1992][i1992] Code cleanup of I18NManager.
+- [#1947][i1947] MapTool credits updated with recent (and long time) contributors.
+- [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
+- [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
+
+[i2237]: https://github.com/RPTools/maptool/issues/2237
+[i2199]: https://github.com/RPTools/maptool/issues/2199
+[i2197]: https://github.com/RPTools/maptool/issues/2197
+[i2192]: https://github.com/RPTools/maptool/issues/2192
+[i2188]: https://github.com/RPTools/maptool/issues/2188
+[i2184]: https://github.com/RPTools/maptool/issues/2184
+[i2178]: https://github.com/RPTools/maptool/issues/2178
+[i2174]: https://github.com/RPTools/maptool/issues/2174
+[i2157]: https://github.com/RPTools/maptool/issues/2157
+[i2152]: https://github.com/RPTools/maptool/issues/2152
+[i2149]: https://github.com/RPTools/maptool/issues/2149
+[i2135]: https://github.com/RPTools/maptool/issues/2135
+[i2119]: https://github.com/RPTools/maptool/issues/2119
+[i2118]: https://github.com/RPTools/maptool/issues/2118
+[i2116]: https://github.com/RPTools/maptool/issues/2116
+[i2109]: https://github.com/RPTools/maptool/issues/2109
+[i2102]: https://github.com/RPTools/maptool/issues/2102
+[i2097]: https://github.com/RPTools/maptool/issues/2097
+[i2081]: https://github.com/RPTools/maptool/issues/2081
+[i2078]: https://github.com/RPTools/maptool/issues/2078
+[i2074]: https://github.com/RPTools/maptool/issues/2074
+[i2069]: https://github.com/RPTools/maptool/issues/2069
+[i2057]: https://github.com/RPTools/maptool/issues/2057
+[i2056]: https://github.com/RPTools/maptool/issues/2056
+[i2049]: https://github.com/RPTools/maptool/issues/2049
+[i2047]: https://github.com/RPTools/maptool/issues/2047
+[i2046]: https://github.com/RPTools/maptool/issues/2046
+[i2041]: https://github.com/RPTools/maptool/issues/2041
+[i2040]: https://github.com/RPTools/maptool/issues/2040
+[i2037]: https://github.com/RPTools/maptool/issues/2037
+[i2032]: https://github.com/RPTools/maptool/issues/2032
+[i2023]: https://github.com/RPTools/maptool/issues/2023
+[i2021]: https://github.com/RPTools/maptool/issues/2021
+[i2019]: https://github.com/RPTools/maptool/issues/2019
+[i2006]: https://github.com/RPTools/maptool/issues/2006
+[i1996]: https://github.com/RPTools/maptool/issues/1996
+[i1995]: https://github.com/RPTools/maptool/issues/1995
+[i1992]: https://github.com/RPTools/maptool/issues/1992
+[i1988]: https://github.com/RPTools/maptool/issues/1988
+[i1986]: https://github.com/RPTools/maptool/issues/1986
+[i1976]: https://github.com/RPTools/maptool/issues/1976
+[i1974]: https://github.com/RPTools/maptool/issues/1974
+[i1972]: https://github.com/RPTools/maptool/issues/1972
+[i1962]: https://github.com/RPTools/maptool/issues/1962
+[i1958]: https://github.com/RPTools/maptool/issues/1958
+[i1950]: https://github.com/RPTools/maptool/issues/1950
+[i1948]: https://github.com/RPTools/maptool/issues/1948
+[i1947]: https://github.com/RPTools/maptool/issues/1947
+[i1943]: https://github.com/RPTools/maptool/issues/1943
+[i1938]: https://github.com/RPTools/maptool/issues/1938
+[i1935]: https://github.com/RPTools/maptool/issues/1935
+[i1926]: https://github.com/RPTools/maptool/issues/1926
+[i1921]: https://github.com/RPTools/maptool/issues/1921
+[i1907]: https://github.com/RPTools/maptool/issues/1907
+[i1898]: https://github.com/RPTools/maptool/issues/1898
+[i1896]: https://github.com/RPTools/maptool/issues/1896
+[i1894]: https://github.com/RPTools/maptool/issues/1894
+[i1893]: https://github.com/RPTools/maptool/issues/1893
+[i1890]: https://github.com/RPTools/maptool/issues/1890
+[i1889]: https://github.com/RPTools/maptool/issues/1889
+[i1888]: https://github.com/RPTools/maptool/issues/1888
+[i1886]: https://github.com/RPTools/maptool/issues/1886
+[i1884]: https://github.com/RPTools/maptool/issues/1884
+[i1882]: https://github.com/RPTools/maptool/issues/1882
+[i1880]: https://github.com/RPTools/maptool/issues/1880
+[i1878]: https://github.com/RPTools/maptool/issues/1878
+[i1876]: https://github.com/RPTools/maptool/issues/1876
+[i1874]: https://github.com/RPTools/maptool/issues/1874
+[i1867]: https://github.com/RPTools/maptool/issues/1867
+[i1863]: https://github.com/RPTools/maptool/issues/1863
+[i1861]: https://github.com/RPTools/maptool/issues/1861
+[i1845]: https://github.com/RPTools/maptool/issues/1845
+[i1737]: https://github.com/RPTools/maptool/issues/1737
+[i1736]: https://github.com/RPTools/maptool/issues/1736
+[i1726]: https://github.com/RPTools/maptool/issues/1726
+[i1705]: https://github.com/RPTools/maptool/issues/1705
+[i1560]: https://github.com/RPTools/maptool/issues/1560
+[i1482]: https://github.com/RPTools/maptool/issues/1482
+[i1458]: https://github.com/RPTools/maptool/issues/1458
+[i1479]: https://github.com/RPTools/maptool/issues/1479
+[i1362]: https://github.com/RPTools/maptool/issues/1362
+[i987]: https://github.com/RPTools/maptool/issues/987
+[i715]: https://github.com/RPTools/maptool/issues/715
+
+---
 # Maptool 1.7.0
 Lots of enhancements, bug fixes and improvements to the code base.
 
 ## Some Highlights
-- **New macro functions for math operations on lists and arrays.**
+- New macro functions for math operations on lists and arrays.
 - New macro function `markdownToHTML()` converts text in Markdown to HTML.
 - nmeier has brought the majority of the MapTool UI under the control of the Look & Feel themes accessible from the Themes menu.
 - New GM option to disable the use of the Edit Token dialog by players.
 - Issue with decimal point in Map Units per Cell for European locales fixed.
 - New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
-- **New Overlay helper functions for management.**
+- New Overlay helper functions for management.
 - Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
 - MapTool can now import the Dungeondraft VTT export format.
 
 Changes since 1.7.0-beta-2 in **BOLD**.
 
 ## Enhancements
-- [#1847][i1847] **Horizontal scrolling restored for MacOS.**
-- [#1808][i1808] **New `impersonate()` function for setting impersonation.**
-- [#1801][i1801] **Performance improvement for token image handling. Copying large sets of tokens from map to map, switching between maps with a large number of tokens, dragging large numbers of tokens have all been improved.**
-- [#1797][i1797] **Forms now work in Chat window!**
+- [#1847][i1847] Horizontal scrolling restored for MacOS.
+- [#1808][i1808] New `impersonate()` function for setting impersonation.
+- [#1801][i1801] Performance improvement for token image handling. Copying large sets of tokens from map to map, switching between maps with a large number of tokens, dragging large numbers of tokens have all been improved.
+- [#1797][i1797] Forms now work in Chat window!
 - [#1765][i1765] New macro function to take Markdown text and covert to HTML.  See issue for details.
-- [#1764][i1764] **New macro functions math operations on lists and JSON arrays.**
+- [#1764][i1764] New macro functions math operations on lists and JSON arrays.
   - `math.arraySum()`, `math.arrayMin()`, `math.arrayMax()`, `math.arrayMean()`, `math.arrayMedian()`, `math.arrayProduct()`
   - `math.listSum()`, `math.listMin()`, `math.listMax()`, `math.listMean()`, `math.listMedian()`, `math.listProduct()`
 - [#1758][i1758] Restyled Initiative and Selection windows for usability and compatibility with Look & Feel themes.  See issue for details.
 - [#1728][i1728] Allow JavaScript/CSS/fonts to be fetched from approved CDNs in frame5/dialog5 window.  See issue for details.
 - [#1678][i1678] Error reporting improved when MapTool can't start. More likely to get information in log file.
-- [#1669][i1669] **New helper functions for HTML Overlays**
+- [#1669][i1669] New helper functions for HTML Overlays
   - `isOverlayRegistered()`, `closeOverlay()`, `getOverlayProperties()`
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1553][i1553] Many of the dialogs in MapTool have been localized so that the text strings are pulled from the I18N translation files.
@@ -48,27 +249,27 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#368][i368] Macro groups can now be renamed.
 
 ## Bug Fixes
-- [#1853][i1853] **CSS loading in incorrect order for Frame5/Dialog5/Overlay when CSS link points to macro.** Fixed.
-- [#1838][i1838] **Internal changes to make detecting Show as Player within code more consistent.**
-- [#1831][i1831] **math.\* functions always returned `0` as the bad argument when passed non-numeric values.** Fixed.
-- [#1828][i1828] **`getSightType()` would fail on new created tokens.** Fixed.
-- [#1822][i1822] **Changing name/image of impersonated token wasn't updating Chat window.** Fixed.
-- [#1814][i1814] **Several macro functions would fail as not trusted when called by GM in chat.** Fixed.
-- [#1812][i1812] **Call a macro on the GM panel from a trusted context wasn't keeping trusted status.** Fixed.
-- [#1804][i1804] **Map selector reworked to behave like a normal popup menu and be theme compliant.**
-- [#1803][i1803] **PC Tokens on Hidden layer were visible on Player's Map Explorer when Strict Token Ownership was off.** Fixed.
-- [#1799][i1799] **Light segments for Light defitions in the results of `getInfo("campaign")` was malformed. Fixed.
-- [#1790][i1790] **Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters. Fixed.
-- [#1788][i1788] **Pressing delete key with Draw Explorer active and no drawings would throw NPE. Fixed.
-- [#1784][i1784] **Attempting to use a port outside of valid range would cause start server to fail without a message. Fixed.
-- [#1782][i1782] **Form `<select multiple>` element only returned one element. Fixed.
-- [#1775][i1775] **Select next/previous token in Selection window broken (Unreleased). Fixed.
-- [#1757][i1757] **Macro function `moveToken()` did not correctly handle tokens not centered in the layout config. Fixed.
+- [#1853][i1853] CSS loading in incorrect order for Frame5/Dialog5/Overlay when CSS link points to macro. Fixed.
+- [#1838][i1838] Internal changes to make detecting Show as Player within code more consistent.
+- [#1831][i1831] math.\* functions always returned `0` as the bad argument when passed non-numeric values. Fixed.
+- [#1828][i1828] `getSightType()` would fail on new created tokens. Fixed.
+- [#1822][i1822] Changing name/image of impersonated token wasn't updating Chat window. Fixed.
+- [#1814][i1814] Several macro functions would fail as not trusted when called by GM in chat. Fixed.
+- [#1812][i1812] Call a macro on the GM panel from a trusted context wasn't keeping trusted status. Fixed.
+- [#1804][i1804] Map selector reworked to behave like a normal popup menu and be theme compliant.
+- [#1803][i1803] PC Tokens on Hidden layer were visible on Player's Map Explorer when Strict Token Ownership was off. Fixed.
+- [#1799][i1799] Light segments for Light defitions in the results of `getInfo("campaign")` was malformed. Fixed.
+- [#1790][i1790] Several dialogs had text that was hardcoded to the Tahoma font which doesn't support CJK characters. Fixed.
+- [#1788][i1788] Pressing delete key with Draw Explorer active and no drawings would throw NPE. Fixed.
+- [#1784][i1784] Attempting to use a port outside of valid range would cause start server to fail without a message. Fixed.
+- [#1782][i1782] Form `<select multiple>` element only returned one element. Fixed.
+- [#1775][i1775] Select next/previous token in Selection window broken (Unreleased). Fixed.
+- [#1757][i1757] Macro function `moveToken()` did not correctly handle tokens not centered in the layout config. Fixed.
 - [#1752][i1752] Reverted Look & Feel changes to restore native OS title bars because of performance issues and conflicts with MacOS.
 - [#1732][i1732] Depending on situation the macro function `getImpersonated/Name()` could return the Current Token or the Impersonated Token. New boolean parameter adds ability to specify returning the actual Impersonated token.
 - [#1725][i1725] Selecting token/object via Map Explorer wasn't updating Selection panel. Fixed.
 - [#1720][i1720] Token properties with default values were not having spaces trimmed from name. Fixed.
-- [#1709][i1709] **Portrait images were rendered with low quality scaling.** Improved.
+- [#1709][i1709] Portrait images were rendered with low quality scaling. Improved.
 - [#1700][i1700] Tokens/stamps showing as "?" image until map is updated. Fixed.
 - [#1688][i1688] Figure tokens and tokens flagged as Visible over FoW on hidden layer were visible to players. Fixed.
 - [#1686][i1686] Crowdin configuration file was display as option in Preferences -> Language. Fixed.
@@ -105,20 +306,20 @@ Changes since 1.7.0-beta-2 in **BOLD**.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
-- [#1495][i1495] **Chosing Edit on a macro already being edited no longer creates new Find/Replace entries in Edit menu.**
+- [#1495][i1495] Chosing Edit on a macro already being edited no longer creates new Find/Replace entries in Edit menu.
 - [#1441][i1441] Content of `input()` dialogs wouldn't fill full width of window with minimal prompt/input sizes. Fixed.
-- [#1426][i1426] **NPE on close caused by editing the same macro twice (simultaneously).** Fixed.
+- [#1426][i1426] NPE on close caused by editing the same macro twice (simultaneously). Fixed.
 - [#1317][i1317] Horizontal scrolling issues on MacOS fixed.
-- [#1264][i1264] **Fixes for thread-safety in Campaign Auto-Save.**
-- [#1263][i1263] **Fixes for thread-safety in Campaign Loading.**
+- [#1264][i1264] Fixes for thread-safety in Campaign Auto-Save.
+- [#1263][i1263] Fixes for thread-safety in Campaign Loading.
 - [#507][i507] The map setting Units per Cell wasn't being handled correctly for locales that use a comma for the decimal point. Fixed.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
 ## Other
-- [#1843][i1843] **Refactor of Initiative classes to avoid raw list types.**
+- [#1843][i1843] Refactor of Initiative classes to avoid raw list types.
 - [#1776][i1776] dicelib updated to 1.6.1
 - [#1704][i1704] dicelib updated to 1.6.0
-- [#1223][i1223] **Javadocs now build without errors.**
+- [#1223][i1223] Javadocs now build without errors.
 
 [i1853]: https://github.com/RPTools/maptool/issues/1853
 [i1847]: https://github.com/RPTools/maptool/issues/1847
@@ -560,7 +761,7 @@ Bug Fixes
 Other
 -----
 - [#1045][i1045] Update remaining dependencies.
-- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
+- [#1037][i1037] Updated dependencies with reported vulnerabilites.
 
 [i1045]: https://github.com/RPTools/maptool/issues/1045
 [i1037]: https://github.com/RPTools/maptool/issues/1037
@@ -599,7 +800,7 @@ Maptool 1.5.8
 Enhancements
 -----
 - [#949][i949] New macro function `getAssetProperties()` returns the properties of assets including size and type.
-- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.  
+- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.
   - Map name parameter added to: `getTokenX()`, `getTokenY()`, `getTokenDrawOrder()`, `setTokenDrawOrder()`
 - [#901][i901] Default stack size increased to 8MB.  See Preferences -> Startup
 - [#898][i898] Macro functions `getOwned()` and `getOwnedNames` now take optional map name parameter.

@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.io;
 
+import java.util.Objects;
+
 /**
  * This class represents a single node in the tree used for import/export operations.
  *
@@ -110,6 +112,11 @@ public class MaptoolNode {
     return false;
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, object);
+  }
+
   /**
    * Eventually I would like this to return not just the string name of this node, but also the
    * number of children under this node. That would cause the JTree display to show quantities,
@@ -117,6 +124,6 @@ public class MaptoolNode {
    * that idea. I think it should be kept separately.
    */
   public String toString() {
-    return name.toString();
+    return name;
   }
 }

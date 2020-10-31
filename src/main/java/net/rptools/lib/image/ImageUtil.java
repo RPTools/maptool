@@ -21,7 +21,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -40,9 +39,12 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class ImageUtil {
+  private static final Logger log = LogManager.getLogger();
 
   public static final String HINT_TRANSPARENCY = "hintTransparency";
 
@@ -193,6 +195,7 @@ public class ImageUtil {
       return Transparency.OPAQUE;
     }
     if ((pg.getStatus() & ImageObserver.ABORT) != 0) {
+      log.error("image fetch aborted or errored");
       System.err.println("image fetch aborted or errored");
       return Transparency.OPAQUE;
     }
@@ -289,7 +292,7 @@ public class ImageUtil {
     boolean interrupted = false;
     Throwable exception = null;
     Image image;
-    image = Toolkit.getDefaultToolkit().createImage(imageBytes);
+    image = ImageIO.read(new ByteArrayInputStream(imageBytes));
     MediaTracker tracker = new MediaTracker(observer);
     tracker.addImage(image, 0);
     do {
@@ -302,13 +305,6 @@ public class ImageUtil {
         exception = t;
       }
     } while (interrupted);
-    if (image == null
-        || exception != null
-        || image.getWidth(null) <= 0
-        || image.getHeight(null) <= 0) {
-      // Try the newer way (although it pretty much sucks rocks)
-      image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-    }
     if (image == null) {
       throw new IOException("Could not load image " + imageName, exception);
     }
@@ -377,11 +373,10 @@ public class ImageUtil {
           if (x >= 0
               && y >= 0
               && x <= sourceImage.getWidth() - 1
-              && y <= sourceImage.getHeight() - 1) {
-            if ((sourceImage.getRGB(x, y) >> 24) != 0) {
-              image.setRGB(col, row, color.getRGB());
-              break;
-            }
+              && y <= sourceImage.getHeight() - 1
+              && (sourceImage.getRGB(x, y) >> 24) != 0) {
+            image.setRGB(col, row, color.getRGB());
+            break;
           }
         }
       }

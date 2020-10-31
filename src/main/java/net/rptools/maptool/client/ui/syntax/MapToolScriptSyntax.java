@@ -16,8 +16,11 @@ package net.rptools.maptool.client.ui.syntax;
 
 import java.util.Map;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,10 +46,11 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "token.label",
     "token.name",
     "token.visible",
-    "tokens.denyMove",
-    "tokens.moveCount",
+    TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE,
+    TokenMoveFunctions.ON_TOKEN_MOVE_COUNT_VARIABLE,
     "init.current",
-    "init.round"
+    "init.round",
+    InitiativeList.ON_INITIATIVE_CHANGE_DENY_VARIABLE
   };
 
   static String[] RESERVED_WORDS = {
@@ -89,7 +93,13 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
   };
 
   static String[] RESERVED_WORDS_2 = {
-    "onCampaignLoad", "onChangeSelection", "onMouseOverEvent", "onMultipleTokensMove", "onTokenMove"
+    "onCampaignLoad",
+    "onChangeSelection",
+    "onMouseOverEvent",
+    TokenMoveFunctions.ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK,
+    TokenMoveFunctions.ON_TOKEN_MOVE_COMPLETE_CALLBACK,
+    InitiativeList.ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
+    InitiativeList.ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK
   };
 
   static String[] OPERATORS = {
@@ -115,7 +125,7 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     for (String operators : OPERATORS) macroFunctionTokenMap.put(operators, Token.OPERATOR);
 
     // Add "highlights defined by functions like Special Variables" as Data Type
-    for (Function function : MapTool.getParser().getMacroFunctions()) {
+    for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof DefinesSpecialVariables) {
         for (String specialVariable : ((DefinesSpecialVariables) function).getSpecialVariables()) {
           macroFunctionTokenMap.put(specialVariable, Token.DATA_TYPE);
@@ -149,12 +159,15 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
         Map<String, String> macroMap = MapTool.getParser().listAllMacroFunctions();
 
-        for (String macro : macroMap.keySet()) {
-          if (macroMap.get(macro).equals(UserDefinedMacroFunctions.class.getName()))
+        for (var entry : macroMap.entrySet()) {
+          String macro = entry.getKey();
+          if (entry.getValue().equals(UserDefinedMacroFunctions.class.getName())) {
             macroFunctionTokenMap.put(macro, Token.ANNOTATION);
-          else macroFunctionTokenMap.put(macro, Token.FUNCTION);
+          } else {
+            macroFunctionTokenMap.put(macro, Token.FUNCTION);
+          }
 
-          log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
+          log.debug("Adding \"" + entry + "\" macro function to syntax highlighting.");
         }
       }
     }

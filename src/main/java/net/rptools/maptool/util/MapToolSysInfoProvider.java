@@ -23,14 +23,22 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.AppUtil;
@@ -44,11 +52,50 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MapToolSysInfoProvider implements SysInfoProvider {
+
   private static final Logger log = LogManager.getLogger(MapToolSysInfoProvider.class);
 
   private static final DecimalFormat format = new DecimalFormat("#,##0.#");
   private static String os = "";
   private List<String> rows = new ArrayList<>();
+
+  private static String getEncoding() {
+    final byte[] bytes = {'D'};
+    final InputStream inputStream = new ByteArrayInputStream(bytes);
+    final InputStreamReader reader = new InputStreamReader(inputStream);
+    return reader.getEncoding();
+  }
+
+  private static String getRouterIP() {
+    String oneOctet = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+    String exIP = "(?:" + oneOctet + "\\.){3}" + oneOctet;
+
+    Pattern pat = Pattern.compile("^\\s*(?:0\\.0\\.0\\.0\\s*){1,2}(" + exIP + ").*");
+    try {
+      Process proc = Runtime.getRuntime().exec("netstat -rn");
+      InputStream inputstream = proc.getInputStream();
+      InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
+
+      BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
+      String line;
+      while ((line = bufferedreader.readLine()) != null) {
+        Matcher m = pat.matcher(line);
+
+        if (m.matches()) {
+          return m.group(1);
+        }
+        if (line.startsWith("default")) {
+          StringTokenizer st = new StringTokenizer(line);
+          st.nextToken();
+          return st.nextToken();
+        }
+      }
+    } catch (IOException ex) {
+      log.error(ex);
+      return "Failed";
+    }
+    return "Unknown";
+  }
 
   @Override
   public JsonObject getSysInfoJSON() {
@@ -104,25 +151,40 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
     appendInfo("==== MapTool Information ====");
     appendInfo("MapTool Version: " + MapTool.getVersion());
     appendInfo("MapTool Home...: " + AppUtil.getAppHome());
+    appendInfo("MapTool Install: " + AppUtil.getAppInstallLocation());
     appendInfo(
         "Max mem avail..: " + FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
     appendInfo(
         "Max mem used...: "
             + FileUtils.byteCountToDisplaySize(
                 MemoryStatusBar.getInstance().getLargestMemoryUsed()));
+
     for (String prop : p.stringPropertyNames()) {
       if (prop.startsWith("MAPTOOL_")) {
         appendInfo("Custom Property: -D" + prop + "=" + p.getProperty(prop));
       }
     }
+
     appendInfo("");
   }
 
   private void getJavaInfo(Properties p) {
     appendInfo("==== Java Information ====");
-    appendInfo("Java Vendor.: " + p.getProperty("java.vendor"));
-    appendInfo("Java Home...: " + p.getProperty("java.home"));
-    appendInfo("Java Version: " + p.getProperty("java.version"));
+    appendInfo("Java Home......: " + p.getProperty("java.home"));
+    appendInfo("Java Vendor....: " + p.getProperty("java.vendor"));
+    appendInfo("Java Version...: " + p.getProperty("java.version"));
+    appendInfo("Java Parameters: ");
+
+    RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+    List<String> jvmParmList = runtimeMxBean.getInputArguments();
+
+    for (String jvmParm : jvmParmList) {
+      if (!jvmParm.startsWith("-DMAPTOOL_") && !jvmParm.isBlank()) {
+        appendInfo("  " + jvmParm);
+      }
+    }
+
+    appendInfo("");
   }
 
   private void getLocaleInfo() {
@@ -165,13 +227,6 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
     appendInfo("User Name: " + p.getProperty("user.name"));
     appendInfo("User Home: " + p.getProperty("user.home"));
     appendInfo("User Dir.: " + p.getProperty("user.dir"));
-  }
-
-  private static String getEncoding() {
-    final byte[] bytes = {'D'};
-    final InputStream inputStream = new ByteArrayInputStream(bytes);
-    final InputStreamReader reader = new InputStreamReader(inputStream);
-    return reader.getEncoding();
   }
 
   private void getNetworkInterfaces() {
@@ -227,37 +282,6 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
     }
   }
 
-  private static String getRouterIP() {
-    String oneOctet = "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-    String exIP = "(?:" + oneOctet + "\\.){3}" + oneOctet;
-
-    Pattern pat = Pattern.compile("^\\s*(?:0\\.0\\.0\\.0\\s*){1,2}(" + exIP + ").*");
-    try {
-      Process proc = Runtime.getRuntime().exec("netstat -rn");
-      InputStream inputstream = proc.getInputStream();
-      InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
-
-      BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
-      String line;
-      while ((line = bufferedreader.readLine()) != null) {
-        Matcher m = pat.matcher(line);
-
-        if (m.matches()) {
-          return m.group(1);
-        }
-        if (line.startsWith("default")) {
-          StringTokenizer st = new StringTokenizer(line);
-          st.nextToken();
-          return st.nextToken();
-        }
-      }
-    } catch (IOException ex) {
-      log.error(ex);
-      return "Failed";
-    }
-    return "Unknown";
-  }
-
   private void getIGDs() {
     int discoveryTimeout = 5000;
     InternetGatewayDevice[] IGDs = null;
@@ -270,7 +294,7 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
       log.error(ex);
     }
 
-    if (IGDs != null)
+    if (IGDs != null) {
       for (InternetGatewayDevice igd : IGDs) {
         UPNPRootDevice rootDev = igd.getIGDRootDevice();
         appendInfo("Device Name.: " + rootDev.getFriendlyName());
@@ -290,7 +314,9 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
         }
         appendInfo("");
       }
-    else appendInfo("\tNo IGDs Found!");
+    } else {
+      appendInfo("\tNo IGDs Found!");
+    }
   }
 
   public List<String> getInfo() {

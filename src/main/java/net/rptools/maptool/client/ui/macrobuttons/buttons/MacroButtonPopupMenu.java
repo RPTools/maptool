@@ -209,8 +209,8 @@ public class MacroButtonPopupMenu extends JPopupMenu {
                 MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
               if (AppUtil.playerOwns(nextToken)) {
                 List<MacroButtonProperties> workingMacros = new ArrayList<MacroButtonProperties>();
-                Boolean hashCodesMatch = false;
-                Boolean allowDelete = false;
+                boolean hashCodesMatch = false;
+                boolean allowDelete = false;
                 for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
                   hashCodesMatch =
                       nextMacro.hashCodeForComparison()
@@ -337,46 +337,44 @@ public class MacroButtonPopupMenu extends JPopupMenu {
           FileUtil.getFileWithExtension(
               chooser.getSelectedFile(), AppConstants.MACRO_FILE_EXTENSION);
       EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              if (!selectedFile.exists()) {
-                if (!MapTool.confirm(
-                    I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
-                  return;
-                }
-              } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+          () -> {
+            if (!selectedFile.exists()) {
+              if (!MapTool.confirm(
+                  I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
                 return;
               }
+            } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+              return;
+            }
 
-              try {
-                if (panelClass.equals("SelectionPanel")) {
-                  if (MapTool.getFrame()
-                      .getSelectionPanel()
-                      .getCommonMacros()
-                      .contains(button.getProperties())) {
-                    if (confirmCommonExport(button.getProperties())) {
-                      PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
-                    } else {
-                      MapTool.showInformation(I18N.getText("msg.info.macro.exportCancel"));
-                      return;
-                    }
-                  } else {
+            try {
+              if (panelClass.equals("SelectionPanel")) {
+                if (MapTool.getFrame()
+                    .getSelectionPanel()
+                    .getCommonMacros()
+                    .contains(button.getProperties())) {
+                  if (confirmCommonExport(button.getProperties())) {
                     PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
+                  } else {
+                    MapTool.showInformation(I18N.getText("msg.info.macro.exportCancel"));
+                    return;
                   }
+                } else {
+                  PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
                 }
-                PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
-                MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-                MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
               }
+              PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
+              MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
+            } catch (IOException ioe) {
+              ioe.printStackTrace();
+              MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
             }
           });
     }
   }
 
   private Boolean confirmCommonExport(MacroButtonProperties buttonMacro) {
-    Boolean failComparison = false;
+    boolean failComparison = false;
     String comparisonResults = "";
     if (!buttonMacro.getCompareGroup()) {
       failComparison = true;

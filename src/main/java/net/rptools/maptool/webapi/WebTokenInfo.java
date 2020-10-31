@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -36,12 +35,9 @@ public class WebTokenInfo {
   private WebTokenInfo() {
     // Add listener for new zones.
     appEventListener =
-        new AppEventListener() {
-          @Override
-          public void handleAppEvent(AppEvent appEvent) {
-            if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
-              addTokenChangeListeners();
-            }
+        appEvent -> {
+          if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
+            addTokenChangeListeners();
           }
         };
 
@@ -54,24 +50,21 @@ public class WebTokenInfo {
       if (modelChangeListeners.containsKey(zone) == false) {
         modelChangeListeners.put(
             zone,
-            new ModelChangeListener() {
-              @Override
-              public void modelChanged(ModelChangeEvent event) {
-                System.out.println("DEBUG: Event " + event.eventType);
-                if (event.eventType == Zone.Event.TOKEN_CHANGED) {
-                  tokenChanged((Token) event.getArg());
-                } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
-                  tokenAdded((Token) event.getArg());
-                } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
-                  if (event.getArg() instanceof List<?>) {
-                    @SuppressWarnings("unchecked")
-                    List<Token> list = (List<Token>) (event.getArg());
-                    for (Token token : list) {
-                      tokenRemoved(token);
-                    }
-                  } else {
-                    tokenRemoved((Token) event.getArg());
+            event -> {
+              System.out.println("DEBUG: Event " + event.eventType);
+              if (event.eventType == Zone.Event.TOKEN_CHANGED) {
+                tokenChanged((Token) event.getArg());
+              } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
+                tokenAdded((Token) event.getArg());
+              } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
+                if (event.getArg() instanceof List<?>) {
+                  @SuppressWarnings("unchecked")
+                  List<Token> list = (List<Token>) (event.getArg());
+                  for (Token token : list) {
+                    tokenRemoved(token);
                   }
+                } else {
+                  tokenRemoved((Token) event.getArg());
                 }
               }
             });
@@ -119,14 +112,7 @@ public class WebTokenInfo {
 
     List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zr : zrenderers) {
-      tokenList.addAll(
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getId().equals(id);
-                    }
-                  }));
+      tokenList.addAll(zr.getZone().getTokensFiltered(t -> t.getId().equals(id)));
 
       if (tokenList.size() > 0) {
         break;
@@ -300,18 +286,14 @@ public class WebTokenInfo {
 
     final JsonObject props = data.get("properties").getAsJsonObject();
     EventQueue.invokeLater(
-        new Runnable() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public void run() {
-            Set<String> pnames = props.keySet();
-            for (String pname : pnames) {
-              String val = props.get(pname).getAsString();
-              token.setProperty(pname, val);
-            }
-
-            zone.putToken(token);
+        () -> {
+          Set<String> pnames = props.keySet();
+          for (String pname : pnames) {
+            String val = props.get(pname).getAsString();
+            token.setProperty(pname, val);
           }
+
+          zone.putToken(token);
         });
   }
 }

@@ -19,11 +19,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -49,7 +51,8 @@ public class ExportDataFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (!MapTool.getParser().isMacroTrusted())
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -66,8 +69,7 @@ public class ExportDataFunctions extends AbstractFunction {
 
       File file = new File(parameters.get(0).toString());
       String data = parameters.get(1).toString();
-      boolean appendToFile =
-          (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE) ? true : false);
+      boolean appendToFile = (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE));
 
       try {
         // if file doesn't exists, then create it
@@ -103,15 +105,11 @@ public class ExportDataFunctions extends AbstractFunction {
       String envName = parameters.get(0).toString();
       String value = System.getenv(envName);
 
-      if (value != null) {
-        // System.out.format("%s=%s%n", envName, value);
-        return value;
-      } else {
-        // System.out.format("%s is not assigned.%n", envName);
-        return "";
-      }
+      // System.out.format("%s=%s%n", envName, value);
+      // System.out.format("%s is not assigned.%n", envName);
+      return Objects.requireNonNullElse(value, "");
     }
 
-    return BigDecimal.ZERO;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

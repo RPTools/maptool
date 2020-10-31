@@ -90,14 +90,10 @@ public class WebAppInitiative {
   private WebAppInitiative() {
     initiativeListener = new InitiativeListener();
     SwingUtilities.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            MapTool.getEventDispatcher()
-                .addListener(initiativeListener, MapTool.ZoneEvent.Activated);
-            initiativeListener.updateListeners();
-            System.out.println("Here...");
-          }
+        () -> {
+          MapTool.getEventDispatcher().addListener(initiativeListener, MapTool.ZoneEvent.Activated);
+          initiativeListener.updateListeners();
+          System.out.println("Here...");
         });
   }
 
@@ -215,10 +211,6 @@ public class WebAppInitiative {
 
     InitiativeList ilist = initiativeListener.initiativeList;
 
-    if (ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken())) {
-      return true;
-    }
-
-    return false;
+    return ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken());
   }
 }

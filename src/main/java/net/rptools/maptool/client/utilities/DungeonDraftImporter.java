@@ -78,7 +78,7 @@ public class DungeonDraftImporter {
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset = new Asset("LightSource", AppStyle.lightSourceIcon);
 
-  {
+  static {
     AssetManager.putAsset(lightSourceAsset);
   }
 
@@ -161,11 +161,22 @@ public class DungeonDraftImporter {
     if (doors != null) {
       doors.forEach(
           d -> {
-            JsonArray bounds = d.getAsJsonObject().get("bounds").getAsJsonArray();
-            Area vblArea =
-                new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
-            zone.addTopology(vblArea, TopologyMode.COMBINED);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            JsonObject jobj = d.getAsJsonObject();
+            boolean isClosed;
+            if (jobj.has("closed")) {
+              isClosed = jobj.get("closed").getAsBoolean();
+            } else {
+              isClosed = true;
+            }
+
+            if (isClosed) {
+              JsonArray bounds = jobj.get("bounds").getAsJsonArray();
+
+              Area vblArea =
+                  new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
+              zone.addTopology(vblArea, TopologyMode.COMBINED);
+              zone.addTopology(vblArea, TopologyMode.MBL);
+            }
           });
     }
 

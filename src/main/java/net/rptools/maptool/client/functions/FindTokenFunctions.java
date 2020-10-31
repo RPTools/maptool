@@ -31,6 +31,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /** Includes currentToken(), findToken(), and functions to get lists of tokens through filters. */
@@ -305,17 +306,17 @@ public class FindTokenFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     boolean nameOnly = false;
 
     if (!functionName.equals("currentToken")
         && !functionName.startsWith("getImpersonated")
         && !functionName.startsWith("getVisible")
-        && !functionName.startsWith("getSelected")) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
+        && !functionName.startsWith("getSelected")
+        && !MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
     if (functionName.equals("findToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
@@ -381,16 +382,18 @@ public class FindTokenFunctions extends AbstractFunction {
 
     // Special case of getToken,getTokenNames where a JSON object supplies arguments
     if (findType == FindType.ALL && parameters.size() > 1) {
-      return getTokenList(parser, nameOnly, delim, parameters.get(1).toString());
+      return getTokenList(
+          (MapToolVariableResolver) resolver, nameOnly, delim, parameters.get(1).toString());
     }
-    return getTokens(parser, findType, nameOnly, delim, findArgs, zoneRenderer);
+    return getTokens(
+        (MapToolVariableResolver) resolver, findType, nameOnly, delim, findArgs, zoneRenderer);
   }
 
   /**
    * Called when the MTscript function is <code>getToken</code>, <code>getTokens</code>, <code>
    * getTokenName</code>, or <code>getTokenNames</code>.
    *
-   * @param parser parser context object
+   * @param resolver parser context object
    * @param nameOnly whether to return only token names (<code>false</code> = token GUIDs)
    * @param delim either <code>json</code> or a string delimiter between output entries
    * @param jsonString incoming JSON data structure to filter results
@@ -398,7 +401,8 @@ public class FindTokenFunctions extends AbstractFunction {
    * @throws ParserException if a condition is incorrect
    */
   private static Object getTokenList(
-      Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
+      MapToolVariableResolver resolver, boolean nameOnly, String delim, String jsonString)
+      throws ParserException {
     JsonObject jobj = JsonParser.parseString(jsonString).getAsJsonObject();
 
     // First get a list of all our tokens. By default this is limited to the TOKEN and GM layers.
@@ -461,7 +465,7 @@ public class FindTokenFunctions extends AbstractFunction {
         for (JsonElement item : states) {
           tokenList =
               getTokenList(
-                  parser, FindType.STATE, item.getAsString(), match, tokenList, zoneRenderer);
+                  resolver, FindType.STATE, item.getAsString(), match, tokenList, zoneRenderer);
         }
       } else if ("range".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
@@ -536,18 +540,18 @@ public class FindTokenFunctions extends AbstractFunction {
       } else {
         match = booleanCheck(jobj, searchType);
         if ("npc".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.NPC, "", match, tokenList, zoneRenderer);
+          tokenList = getTokenList(resolver, FindType.NPC, "", match, tokenList, zoneRenderer);
         } else if ("pc".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.PC, "", match, tokenList, zoneRenderer);
+          tokenList = getTokenList(resolver, FindType.PC, "", match, tokenList, zoneRenderer);
         } else if ("selected".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.SELECTED, "", match, tokenList, zoneRenderer);
+          tokenList = getTokenList(resolver, FindType.SELECTED, "", match, tokenList, zoneRenderer);
         } else if ("visible".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.VISIBLE, "", match, tokenList, zoneRenderer);
+          tokenList = getTokenList(resolver, FindType.VISIBLE, "", match, tokenList, zoneRenderer);
         } else if ("current".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.CURRENT, "", match, tokenList, zoneRenderer);
+          tokenList = getTokenList(resolver, FindType.CURRENT, "", match, tokenList, zoneRenderer);
         } else if ("impersonated".equalsIgnoreCase(searchType)) {
           tokenList =
-              getTokenList(parser, FindType.IMPERSONATED, "", match, tokenList, zoneRenderer);
+              getTokenList(resolver, FindType.IMPERSONATED, "", match, tokenList, zoneRenderer);
         }
       }
     }
@@ -594,7 +598,7 @@ public class FindTokenFunctions extends AbstractFunction {
       }
       List<Token> inrange = new LinkedList<Token>();
       for (Token targetToken : tokenList) {
-        Double distance = instance.getDistance(token, targetToken, useDistancePerCell, metric);
+        double distance = instance.getDistance(token, targetToken, useDistancePerCell, metric);
         if (distance <= upto && distance >= from && token != targetToken) {
           inrange.add(targetToken);
         }
@@ -685,11 +689,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (jprim.isBoolean()) {
         return jprim.getAsBoolean();
       } else if (jprim.isNumber()) {
-        if (jprim.getAsInt() == 0) {
-          return false;
-        } else {
-          return true;
-        }
+        return jprim.getAsInt() != 0;
       } else {
         // What's the rationale for returning true for other types?
         // Should we be looking at strings for true/false?
@@ -703,7 +703,7 @@ public class FindTokenFunctions extends AbstractFunction {
    * Take a list of tokens and return a new sublist where each token satisfies the specified
    * condition
    *
-   * @param parser The parser, to get variables in context
+   * @param resolver The parser, to get variables in context
    * @param findType the type of search to do
    * @param findArgs additional argument for the search
    * @param match should the property match? true: only include matches, false: exclude matches
@@ -712,7 +712,7 @@ public class FindTokenFunctions extends AbstractFunction {
    * @return tokenList satisfying the requirement
    */
   private static List<Token> getTokenList(
-      Parser parser,
+      MapToolVariableResolver resolver,
       FindType findType,
       String findArgs,
       boolean match,
@@ -737,7 +737,7 @@ public class FindTokenFunctions extends AbstractFunction {
         tokenList = getTokensFiltered(zoneRenderer.getSelectedTokensList(), originalList, match);
         break;
       case CURRENT:
-        Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+        Token token = resolver.getTokenInContext();
         if (token != null) {
           tokenList = getTokensFiltered(Collections.singletonList(token), originalList, match);
         } else if (!match) tokenList = originalList;
@@ -809,7 +809,7 @@ public class FindTokenFunctions extends AbstractFunction {
   /**
    * Gets the names or ids of the tokens on a map.
    *
-   * @param parser The parser that called the function.
+   * @param resolver The parser that called the function.
    * @param findType The type of tokens to find.
    * @param nameOnly If a list of names is wanted.
    * @param delim The delimiter to use for lists, or "json" for a json array.
@@ -819,7 +819,7 @@ public class FindTokenFunctions extends AbstractFunction {
    * @throws ParserException if this code adds a new enum but doesn't properly handle it
    */
   private static String getTokens(
-      Parser parser,
+      MapToolVariableResolver resolver,
       FindType findType,
       boolean nameOnly,
       String delim,
@@ -832,9 +832,9 @@ public class FindTokenFunctions extends AbstractFunction {
     }
     Zone zone = zoneRenderer.getZone();
     List<Token> tokens =
-        getTokenList(parser, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
+        getTokenList(resolver, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
 
-    if (tokens != null && !tokens.isEmpty()) {
+    if (!tokens.isEmpty()) {
       for (Token token : tokens) {
         if (nameOnly) {
           values.add(token.getName());

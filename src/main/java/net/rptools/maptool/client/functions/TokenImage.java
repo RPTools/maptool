@@ -25,10 +25,10 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenImage extends AbstractFunction {
@@ -84,7 +84,8 @@ public class TokenImage extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     Token token;
 
@@ -95,7 +96,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String strOpacity = args.get(0).toString();
       FunctionUtil.paramAsFloat(functionName, args, 0, true);
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setTokenOpacity, strOpacity);
       return token.getTokenOpacity();
@@ -106,7 +107,7 @@ public class TokenImage extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
 
       return token.getTokenOpacity();
     }
@@ -115,7 +116,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       setImage(token, assetName);
       return "";
@@ -125,7 +126,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       setPortrait(token, assetName);
       return "";
@@ -135,7 +136,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       setHandout(token, assetName);
       return "";
@@ -173,7 +174,7 @@ public class TokenImage extends AbstractFunction {
         indexSize = 0;
       }
 
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
     }
 
     StringBuilder assetId = new StringBuilder("asset://");
@@ -192,11 +193,15 @@ public class TokenImage extends AbstractFunction {
         return "";
       }
       assetId.append(token.getImageAssetId().toString());
-    } else { // getTokenHandout, or different capitalization
+    } else if ("getTokenHandout"
+        .equalsIgnoreCase(functionName)) { // getTokenHandout, or different capitalization
       if (token.getCharsheetImage() == null) {
         return "";
       }
       assetId.append(token.getCharsheetImage().toString());
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     if (indexSize >= 0
@@ -268,20 +273,13 @@ public class TokenImage extends AbstractFunction {
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setCharsheetImage, md5key);
   }
 
-  private static Token findImageToken(final String name, String functionName)
-      throws ParserException {
+  private static Token findImageToken(final String name, String functionName) {
     Token imageToken = null;
     if (name != null && name.length() > 0) {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
-            zr.getZone()
-                .getTokensFiltered(
-                    new Zone.Filter() {
-                      public boolean matchToken(Token t) {
-                        return t.getName().equalsIgnoreCase(name);
-                      }
-                    });
+            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(name));
         for (Token token : tokenList) {
           // If we are not the GM and the token is not visible to players then we don't
           // let them get functions from it.

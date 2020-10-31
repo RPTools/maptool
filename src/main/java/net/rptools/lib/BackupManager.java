@@ -17,8 +17,6 @@ package net.rptools.lib;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +31,7 @@ public class BackupManager {
     this(backupDir, DEFAULT_MAX_BACKUP_SIZE);
   }
 
-  public BackupManager(File backupDir, long maxBackupSize) throws IOException {
+  public BackupManager(File backupDir, long maxBackupSize) {
     this.backupDir = backupDir;
     this.maxBackupSize = maxBackupSize;
 
@@ -79,14 +77,7 @@ public class BackupManager {
   private List<File> getFiles() {
 
     List<File> fileList = new LinkedList<File>(Arrays.asList(backupDir.listFiles()));
-    Collections.sort(
-        fileList,
-        new Comparator<File>() {
-          public int compare(File o1, File o2) {
-
-            return o1.lastModified() < o2.lastModified() ? -1 : 1;
-          }
-        });
+    fileList.sort((o1, o2) -> o1.lastModified() < o2.lastModified() ? -1 : 1);
 
     return fileList;
   }

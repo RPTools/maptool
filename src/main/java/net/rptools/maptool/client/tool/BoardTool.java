@@ -98,12 +98,7 @@ public class BoardTool extends DefaultTool {
     boardPositionYTextField = controlPanel.getTextField("offsetY");
     boardPositionYTextField.addKeyListener(new UpdateBoardListener());
 
-    ActionListener enforceRules =
-        new ActionListener() {
-          public void actionPerformed(ActionEvent evt) {
-            enforceButtonRules();
-          }
-        };
+    ActionListener enforceRules = evt -> enforceButtonRules();
     snapNoneButton = controlPanel.getRadioButton("snapNone");
     snapNoneButton.addActionListener(enforceRules);
 
@@ -114,12 +109,7 @@ public class BoardTool extends DefaultTool {
     snapTileButton.addActionListener(enforceRules);
 
     JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
-    closeButton.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            resetTool();
-          }
-        });
+    closeButton.addActionListener(e -> resetTool());
   }
 
   @Override
@@ -306,7 +296,7 @@ public class BoardTool extends DefaultTool {
   }
 
   /** A simple enum for correlating keys with directions */
-  private static enum Direction {
+  private enum Direction {
     Left,
     Right,
     Up,

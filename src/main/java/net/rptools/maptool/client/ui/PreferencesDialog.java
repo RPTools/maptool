@@ -14,35 +14,22 @@
  */
 package net.rptools.maptool.client.ui;
 
+import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
+import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
+
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.ServiceConfigurationError;
+import java.util.Objects;
 import java.util.stream.Stream;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -50,6 +37,7 @@ import javax.swing.event.DocumentListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
@@ -60,66 +48,17 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UserJvmPrefs;
-import net.rptools.maptool.util.UserJvmPrefs.JVM_OPTION;
+import net.rptools.maptool.util.UserJvmOptions;
+import net.rptools.maptool.util.UserJvmOptions.JVM_OPTION;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class PreferencesDialog extends JDialog {
+
   private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
-
-  /** @author frank */
-  private abstract class DocumentListenerProxy<T> implements DocumentListener {
-    JTextField comp;
-
-    public DocumentListenerProxy(JTextField tf) {
-      comp = tf;
-    }
-
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-      updateValue();
-    }
-
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-      updateValue();
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-      updateValue();
-    }
-
-    protected void updateValue() {
-      try {
-        storeNumericValue(convertString(comp.getText())); // Localized
-      } catch (ParseException nfe) {
-        // Ignore it
-      }
-    }
-
-    protected abstract T convertString(String value) throws ParseException;
-
-    protected abstract void storeNumericValue(T value);
-  }
-
-  /** @author frank */
-  private abstract class ChangeListenerProxy implements ChangeListener {
-    @Override
-    public void stateChanged(ChangeEvent ce) {
-      JSpinner sp = (JSpinner) ce.getSource();
-      int value = (Integer) sp.getValue();
-      storeSpinnerValue(value);
-    }
-
-    protected abstract void storeSpinnerValue(int value);
-  }
-
   // Tabbed Panel
   private final JTabbedPane tabbedPane;
-
   // Interactions
   private final JCheckBox newMapsHaveFOWCheckBox;
   private final JCheckBox tokensPopupWarningWhenDeletedCheckBox;
@@ -142,7 +81,6 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
   private final JCheckBox forceFacingArrowCheckBox;
-
   private final JSpinner haloLineWidthSpinner;
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
@@ -155,14 +93,10 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox playStreamsCheckBox;
   private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox;
   private final JCheckBox syrinscapeActiveCheckBox;
-
   private final JCheckBox facingFaceEdges;
   private final JCheckBox facingFaceVertices;
-
   private final JCheckBox showAvatarInChat;
-
   private final JCheckBox allowPlayerMacroEditsDefault;
-
   private final JCheckBox toolTipInlineRolls;
   private final JCheckBox suppressToolTipsMacroLinks;
   private final JETAColorWell trustedOuputForeground;
@@ -170,30 +104,23 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner chatAutosaveTime;
   private final JTextField chatFilenameFormat;
   private final JSpinner typingNotificationDuration;
-
   private final JComboBox macroEditorThemeCombo;
-
   // Chat Notification
   private final JETAColorWell chatNotificationColor;
   private final JCheckBox chatNotificationShowBackground;
-
   // Defaults
   private final JComboBox defaultGridTypeCombo;
   private final JTextField defaultGridSizeTextField;
   private final JTextField defaultUnitsPerCellTextField;
   private final JTextField defaultVisionDistanceTextField;
   private final JTextField statsheetPortraitSize;
-
   private final JSpinner autoSaveSpinner;
   private final JCheckBox saveReminderCheckBox;
-
   private final JCheckBox showDialogOnNewToken;
-
   // Accessibility
   private final JTextField fontSizeTextField;
   private final JTextField toolTipInitialDelay;
   private final JTextField toolTipDismissDelay;
-
   // Application
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
@@ -207,20 +134,16 @@ public class PreferencesDialog extends JDialog {
   private final JTextField fileSyncPath;
   private final JButton fileSyncPathButton;
   private final JCheckBox allowExternalMacroAccessCheckBox;
-
   // Startup
   private final JTextField jvmXmxTextField;
   private final JTextField jvmXmsTextField;
   private final JTextField jvmXssTextField;
   private final JTextField dataDirTextField;
-
-  private final JCheckBox jvmAssertionsCheckbox;
   private final JCheckBox jvmDirect3dCheckbox;
   private final JCheckBox jvmOpenGLCheckbox;
   private final JCheckBox jvmInitAwtCheckbox;
-
-  private final JComboBox<String> jvmLanguageOverideComboBox;
-
+  private final JComboBox<String> jamLanguageOverrideComboBox;
+  private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
 
   public PreferencesDialog() {
@@ -234,18 +157,26 @@ public class PreferencesDialog extends JDialog {
     JButton okButton = (JButton) panel.getButton("okButton");
     getRootPane().setDefaultButton(okButton);
     okButton.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(java.awt.event.ActionEvent e) {
-            // Warn the user that they changed JVM options and need to restart MapTool for them to
-            // take affect.
-            // Also warn user to double check settings...
-            if (jvmValuesChanged) if (!MapTool.confirm("msg.confirm.jvm.options")) return;
+        e -> {
+          // Warn the user that they changed JVM options and need to restart MapTool for
+          // them to take affect.
+          // Also warn user to double check settings...
+          if (jvmValuesChanged) {
+            if (!MapTool.confirm("msg.confirm.jvm.options")) {
+              return;
+            }
+          }
 
+          boolean close = true;
+          if (jvmValuesChanged) {
+            close = UserJvmOptions.saveAppCfg();
+          }
+
+          if (close) {
             setVisible(false);
             dispose();
-            MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
           }
+          MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");
@@ -335,63 +266,62 @@ public class PreferencesDialog extends JDialog {
     jvmXmsTextField.setToolTipText(I18N.getText("prefs.jvm.xms.tooltip"));
     jvmXssTextField = panel.getTextField("jvmXssTextField");
     jvmXssTextField.setToolTipText(I18N.getText("prefs.jvm.xss.tooltip"));
+
     dataDirTextField = panel.getTextField("dataDirTextField");
 
-    jvmAssertionsCheckbox = panel.getCheckBox("jvmAssertionsCheckbox");
-    jvmAssertionsCheckbox.setToolTipText(
-        I18N.getText("prefs.jvm.advanced.enableAssertions.tooltip"));
     jvmDirect3dCheckbox = panel.getCheckBox("jvmDirect3dCheckbox");
     jvmDirect3dCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.direct3d.tooltip"));
+
     jvmOpenGLCheckbox = panel.getCheckBox("jvmOpenGLCheckbox");
     jvmOpenGLCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.opengl.tooltip"));
+
     jvmInitAwtCheckbox = panel.getCheckBox("jvmInitAwtCheckbox");
     jvmInitAwtCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.initAWTbeforeJFX.tooltip"));
 
-    jvmLanguageOverideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
-    jvmLanguageOverideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
+    jamLanguageOverrideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
+    jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
+
+    startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    File appCfgFile = AppUtil.getAppCfgFile();
+    if (appCfgFile != null) {
+      String copyInfo = "";
+      if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
+        copyInfo =
+            I18N.getText(
+                "startup.preferences.info.manualCopy",
+                AppUtil.getDataDirAppCfgFile().toString(),
+                appCfgFile.toString());
+      }
+      String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
+      startupInfoLabel.setText(startupInfoMsg);
+    }
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
-    for (Entry<String, String> language : UserJvmPrefs.getLanguages())
-      languageModel.addElement(language.getKey());
-
-    jvmLanguageOverideComboBox.setModel(languageModel);
+    languageModel.addAll(getLanguages());
+    jamLanguageOverrideComboBox.setModel(languageModel);
 
     setInitialState();
 
     // And keep it updated
     facingFaceEdges.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setFaceEdge(facingFaceEdges.isSelected());
-            updateFacings();
-          }
+        e -> {
+          AppPreferences.setFaceEdge(facingFaceEdges.isSelected());
+          updateFacings();
         });
     facingFaceVertices.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setFaceVertex(facingFaceVertices.isSelected());
-            updateFacings();
-          }
+        e -> {
+          AppPreferences.setFaceVertex(facingFaceVertices.isSelected());
+          updateFacings();
         });
 
     toolTipInlineRolls.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setUseToolTipForInlineRoll(toolTipInlineRolls.isSelected());
-          }
-        });
+        e -> AppPreferences.setUseToolTipForInlineRoll(toolTipInlineRolls.isSelected()));
 
     suppressToolTipsMacroLinks.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setSuppressToolTipsForMacroLinks(
-                suppressToolTipsMacroLinks.isSelected());
-          }
-        });
+                suppressToolTipsMacroLinks.isSelected()));
 
     toolTipInitialDelay
         .getDocument()
@@ -425,35 +355,26 @@ public class PreferencesDialog extends JDialog {
             });
 
     chatNotificationColor.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setChatNotificationColor(chatNotificationColor.getColor());
-            MapTool.getFrame().setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
-          }
+        e -> {
+          AppPreferences.setChatNotificationColor(chatNotificationColor.getColor());
+          MapTool.getFrame().setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
         });
 
     trustedOuputForeground.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setTrustedPrefixFG(trustedOuputForeground.getColor());
-            MapTool.getFrame()
-                .getCommandPanel()
-                .setTrustedMacroPrefixColors(
-                    AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
-          }
+        e -> {
+          AppPreferences.setTrustedPrefixFG(trustedOuputForeground.getColor());
+          MapTool.getFrame()
+              .getCommandPanel()
+              .setTrustedMacroPrefixColors(
+                  AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
         });
     trustedOuputBackground.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setTrustedPrefixBG(trustedOuputBackground.getColor());
-            MapTool.getFrame()
-                .getCommandPanel()
-                .setTrustedMacroPrefixColors(
-                    AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
-          }
+        e -> {
+          AppPreferences.setTrustedPrefixBG(trustedOuputBackground.getColor());
+          MapTool.getFrame()
+              .getCommandPanel()
+              .setTrustedMacroPrefixColors(
+                  AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
         });
 
     chatAutosaveTime.addChangeListener(
@@ -476,7 +397,7 @@ public class PreferencesDialog extends JDialog {
           @Override
           public void focusLost(FocusEvent e) {
             if (!e.isTemporary()) {
-              StringBuffer saveFile = new StringBuffer(chatFilenameFormat.getText());
+              StringBuilder saveFile = new StringBuilder(chatFilenameFormat.getText());
               if (saveFile.indexOf(".") < 0) {
                 saveFile.append(".html");
               }
@@ -486,35 +407,16 @@ public class PreferencesDialog extends JDialog {
         });
 
     allowPlayerMacroEditsDefault.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setAllowPlayerMacroEditsDefault(
-                allowPlayerMacroEditsDefault.isSelected());
-          }
-        });
+                allowPlayerMacroEditsDefault.isSelected()));
 
     showAvatarInChat.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowAvatarInChat(showAvatarInChat.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowAvatarInChat(showAvatarInChat.isSelected()));
     saveReminderCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setSaveReminder(saveReminderCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setSaveReminder(saveReminderCheckBox.isSelected()));
     fillSelectionCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected()));
     frameRateCapTextField
         .getDocument()
         .addDocumentListener(
@@ -535,144 +437,58 @@ public class PreferencesDialog extends JDialog {
     // }
     // });
     allowExternalMacroAccessCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setAllowExternalMacroAccess(
-                allowExternalMacroAccessCheckBox.isSelected());
-          }
-        });
+                allowExternalMacroAccessCheckBox.isSelected()));
     showDialogOnNewToken.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowDialogOnNewToken(showDialogOnNewToken.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowDialogOnNewToken(showDialogOnNewToken.isSelected()));
     autoSaveSpinner.addChangeListener(
-        new ChangeListener() {
-          @Override
-          public void stateChanged(ChangeEvent ce) {
-            int newInterval = (Integer) autoSaveSpinner.getValue();
-            AppPreferences.setAutoSaveIncrement(newInterval);
-          }
+        ce -> {
+          int newInterval = (Integer) autoSaveSpinner.getValue();
+          AppPreferences.setAutoSaveIncrement(newInterval);
         });
     newMapsHaveFOWCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setNewMapsHaveFOW(newMapsHaveFOWCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setNewMapsHaveFOW(newMapsHaveFOWCheckBox.isSelected()));
     tokensPopupWarningWhenDeletedCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setTokensWarnWhenDeleted(
-                tokensPopupWarningWhenDeletedCheckBox.isSelected());
-          }
-        });
+                tokensPopupWarningWhenDeletedCheckBox.isSelected()));
     tokensStartSnapToGridCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setTokensStartSnapToGrid(tokensStartSnapToGridCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setTokensStartSnapToGrid(tokensStartSnapToGridCheckBox.isSelected()));
     tokensSnapWhileDraggingCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setTokensSnapWhileDragging(tokensSnapWhileDraggingCheckBox.isSelected());
-          }
-        });
+        e ->
+            AppPreferences.setTokensSnapWhileDragging(
+                tokensSnapWhileDraggingCheckBox.isSelected()));
     hideMousePointerWhileDraggingCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setHideMousePointerWhileDragging(
-                hideMousePointerWhileDraggingCheckBox.isSelected());
-          }
-        });
+                hideMousePointerWhileDraggingCheckBox.isSelected()));
     newMapsVisibleCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setNewMapsVisible(newMapsVisibleCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setNewMapsVisible(newMapsVisibleCheckBox.isSelected()));
     newTokensVisibleCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setNewTokensVisible(newTokensVisibleCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setNewTokensVisible(newTokensVisibleCheckBox.isSelected()));
     stampsStartFreeSizeCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setObjectsStartFreesize(stampsStartFreeSizeCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setObjectsStartFreesize(stampsStartFreeSizeCheckBox.isSelected()));
     tokensStartFreeSizeCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setTokensStartFreesize(tokensStartFreeSizeCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setTokensStartFreesize(tokensStartFreeSizeCheckBox.isSelected()));
     stampsStartSnapToGridCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setObjectsStartSnapToGrid(stampsStartSnapToGridCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setObjectsStartSnapToGrid(stampsStartSnapToGridCheckBox.isSelected()));
     showStatSheetCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowStatSheet(showStatSheetCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowStatSheet(showStatSheetCheckBox.isSelected()));
     showPortraitCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowPortrait(showPortraitCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowPortrait(showPortraitCheckBox.isSelected()));
     showStatSheetModifierCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowStatSheetModifier(showStatSheetModifierCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowStatSheetModifier(showStatSheetModifierCheckBox.isSelected()));
     forceFacingArrowCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setForceFacingArrow(forceFacingArrowCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setForceFacingArrow(forceFacingArrowCheckBox.isSelected()));
     backgroundsStartFreeSizeCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setBackgroundsStartFreesize(
-                backgroundsStartFreeSizeCheckBox.isSelected());
-          }
-        });
+                backgroundsStartFreeSizeCheckBox.isSelected()));
     backgroundsStartSnapToGridCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setBackgroundsStartSnapToGrid(
-                backgroundsStartSnapToGridCheckBox.isSelected());
-          }
-        });
+                backgroundsStartSnapToGridCheckBox.isSelected()));
     defaultGridSizeTextField
         .getDocument()
         .addDocumentListener(
@@ -731,12 +547,7 @@ public class PreferencesDialog extends JDialog {
               }
             });
     haloLineWidthSpinner.addChangeListener(
-        new ChangeListener() {
-          @Override
-          public void stateChanged(ChangeEvent ce) {
-            AppPreferences.setHaloLineWidth((Integer) haloLineWidthSpinner.getValue());
-          }
-        });
+        ce -> AppPreferences.setHaloLineWidth((Integer) haloLineWidthSpinner.getValue()));
 
     // Overlay opacity options in AppPreferences, with
     // error checking to ensure values are within the acceptable range
@@ -774,61 +585,33 @@ public class PreferencesDialog extends JDialog {
           }
         });
     useHaloColorAsVisionOverlayCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setUseHaloColorOnVisionOverlay(
-                useHaloColorAsVisionOverlayCheckBox.isSelected());
-          }
-        });
+                useHaloColorAsVisionOverlayCheckBox.isSelected()));
     autoRevealVisionOnGMMoveCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setAutoRevealVisionOnGMMovement(
-                autoRevealVisionOnGMMoveCheckBox.isSelected());
-          }
-        });
+                autoRevealVisionOnGMMoveCheckBox.isSelected()));
     showSmiliesCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowSmilies(showSmiliesCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowSmilies(showSmiliesCheckBox.isSelected()));
     playSystemSoundCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected()));
 
     playStreamsCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
-            if (!playStreamsCheckBox.isSelected()) MediaPlayerAdapter.stopStream("*", true, 0);
+        e -> {
+          AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
+          if (!playStreamsCheckBox.isSelected()) {
+            MediaPlayerAdapter.stopStream("*", true, 0);
           }
         });
 
     playSystemSoundOnlyWhenNotFocusedCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setPlaySystemSoundsOnlyWhenNotFocused(
-                playSystemSoundOnlyWhenNotFocusedCheckBox.isSelected());
-          }
-        });
+                playSystemSoundOnlyWhenNotFocusedCheckBox.isSelected()));
 
     syrinscapeActiveCheckBox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setSyrinscapeActive(syrinscapeActiveCheckBox.isSelected());
-          }
-        });
+        e -> AppPreferences.setSyrinscapeActive(syrinscapeActiveCheckBox.isSelected()));
 
     fontSizeTextField
         .getDocument()
@@ -845,41 +628,14 @@ public class PreferencesDialog extends JDialog {
               }
             });
 
-    fitGMView.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setFitGMView(fitGMView.isSelected());
-          }
-        });
-    hideNPCs.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setInitHideNpcs(hideNPCs.isSelected());
-          }
-        });
+    fitGMView.addActionListener(e -> AppPreferences.setFitGMView(fitGMView.isSelected()));
+    hideNPCs.addActionListener(e -> AppPreferences.setInitHideNpcs(hideNPCs.isSelected()));
     ownerPermissions.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setInitOwnerPermissions(ownerPermissions.isSelected());
-          }
-        });
+        e -> AppPreferences.setInitOwnerPermissions(ownerPermissions.isSelected()));
     lockMovement.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setInitLockMovement(lockMovement.isSelected());
-          }
-        });
+        e -> AppPreferences.setInitLockMovement(lockMovement.isSelected()));
     showInitGainMessage.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setShowInitGainMessage(showInitGainMessage.isSelected());
-          }
-        });
+        e -> AppPreferences.setShowInitGainMessage(showInitGainMessage.isSelected()));
     upnpDiscoveryTimeoutTextField
         .getDocument()
         .addDocumentListener(
@@ -895,23 +651,20 @@ public class PreferencesDialog extends JDialog {
               }
             });
     fileSyncPathButton.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int returnVal = fileChooser.showOpenDialog(null);
+        e -> {
+          JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
+          fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          int returnVal = fileChooser.showOpenDialog(null);
 
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-              String selectedPath = fileChooser.getSelectedFile().getPath().toString();
+          if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String selectedPath = fileChooser.getSelectedFile().getPath();
 
-              // Set the text field
-              fileSyncPath.setText(selectedPath);
-              fileSyncPath.setCaretPosition(0);
+            // Set the text field
+            fileSyncPath.setText(selectedPath);
+            fileSyncPath.setCaretPosition(0);
 
-              // Save to preferences
-              AppPreferences.setFileSyncPath(selectedPath);
-            }
+            // Save to preferences
+            AppPreferences.setFileSyncPath(selectedPath);
           }
         });
     jvmXmxTextField.addFocusListener(
@@ -921,12 +674,12 @@ public class PreferencesDialog extends JDialog {
             if (!e.isTemporary()) {
               String jvmXmx = jvmXmxTextField.getText().trim();
 
-              if (UserJvmPrefs.verifyJvmOptions(jvmXmx)) {
-                UserJvmPrefs.setJvmOption(JVM_OPTION.MAX_MEM, jvmXmx);
+              if (UserJvmOptions.verifyJvmOptions(jvmXmx)) {
+                setJvmOption(JVM_OPTION.MAX_MEM, jvmXmx);
               } else {
                 jvmXmxTextField.setText(JVM_OPTION.MAX_MEM.getDefaultValue());
-                UserJvmPrefs.setJvmOption(JVM_OPTION.MAX_MEM, JVM_OPTION.MAX_MEM.getDefaultValue());
-                log.warn("Invalid JVM Xmx paramater entered: " + jvmXmx);
+                setJvmOption(JVM_OPTION.MAX_MEM, JVM_OPTION.MAX_MEM.getDefaultValue());
+                log.warn("Invalid JVM Xmx parameter entered: " + jvmXmx);
               }
               jvmValuesChanged = true;
             }
@@ -939,12 +692,12 @@ public class PreferencesDialog extends JDialog {
             if (!e.isTemporary()) {
               String jvmXms = jvmXmsTextField.getText().trim();
 
-              if (UserJvmPrefs.verifyJvmOptions(jvmXms)) {
-                UserJvmPrefs.setJvmOption(JVM_OPTION.MIN_MEM, jvmXms);
+              if (UserJvmOptions.verifyJvmOptions(jvmXms)) {
+                setJvmOption(JVM_OPTION.MIN_MEM, jvmXms);
               } else {
                 jvmXmsTextField.setText(JVM_OPTION.MIN_MEM.getDefaultValue());
-                UserJvmPrefs.setJvmOption(JVM_OPTION.MIN_MEM, JVM_OPTION.MIN_MEM.getDefaultValue());
-                log.warn("Invalid JVM Xms paramater entered: " + jvmXms);
+                setJvmOption(JVM_OPTION.MIN_MEM, JVM_OPTION.MIN_MEM.getDefaultValue());
+                log.warn("Invalid JVM Xms parameter entered: " + jvmXms);
               }
               jvmValuesChanged = true;
             }
@@ -957,13 +710,12 @@ public class PreferencesDialog extends JDialog {
             if (!e.isTemporary()) {
               String jvmXss = jvmXssTextField.getText().trim();
 
-              if (UserJvmPrefs.verifyJvmOptions(jvmXss)) {
-                UserJvmPrefs.setJvmOption(JVM_OPTION.STACK_SIZE, jvmXss);
+              if (UserJvmOptions.verifyJvmOptions(jvmXss)) {
+                setJvmOption(JVM_OPTION.STACK_SIZE, jvmXss);
               } else {
                 jvmXssTextField.setText(JVM_OPTION.STACK_SIZE.getDefaultValue());
-                UserJvmPrefs.setJvmOption(
-                    JVM_OPTION.STACK_SIZE, JVM_OPTION.STACK_SIZE.getDefaultValue());
-                log.warn("Invalid JVM Xss paramater entered: " + jvmXss);
+                setJvmOption(JVM_OPTION.STACK_SIZE, JVM_OPTION.STACK_SIZE.getDefaultValue());
+                log.warn("Invalid JVM Xss parameter entered: " + jvmXss);
               }
               jvmValuesChanged = true;
             }
@@ -974,67 +726,39 @@ public class PreferencesDialog extends JDialog {
           @Override
           public void focusLost(FocusEvent e) {
             if (!e.isTemporary()) {
-              UserJvmPrefs.setJvmOption(JVM_OPTION.DATA_DIR, dataDirTextField.getText().trim());
+              setJvmOption(JVM_OPTION.DATA_DIR, dataDirTextField.getText().trim());
               jvmValuesChanged = true;
             }
           }
         });
-
-    jvmAssertionsCheckbox.addActionListener(
-        new ActionListener() {
-
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            UserJvmPrefs.setJvmOption(JVM_OPTION.ASSERTIONS, jvmAssertionsCheckbox.isSelected());
-            jvmValuesChanged = true;
-          }
-        });
     jvmDirect3dCheckbox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            UserJvmPrefs.setJvmOption(JVM_OPTION.JAVA2D_D3D, jvmDirect3dCheckbox.isSelected());
-            jvmValuesChanged = true;
-          }
+        e -> {
+          setJvmOption(JVM_OPTION.JAVA2D_D3D, jvmDirect3dCheckbox.isSelected());
+          jvmValuesChanged = true;
         });
     jvmOpenGLCheckbox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            UserJvmPrefs.setJvmOption(
-                JVM_OPTION.JAVA2D_OPENGL_OPTION, jvmOpenGLCheckbox.isSelected());
-            jvmValuesChanged = true;
-          }
+        e -> {
+          setJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION, jvmOpenGLCheckbox.isSelected());
+          jvmValuesChanged = true;
         });
     jvmInitAwtCheckbox.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            UserJvmPrefs.setJvmOption(
-                JVM_OPTION.MACOSX_EMBEDDED_OPTION, jvmInitAwtCheckbox.isSelected());
-            jvmValuesChanged = true;
-          }
+        e -> {
+          setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, jvmInitAwtCheckbox.isSelected());
+          jvmValuesChanged = true;
         });
 
-    jvmLanguageOverideComboBox.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            UserJvmPrefs.setJvmOption(
-                JVM_OPTION.LOCALE_LANGUAGE,
-                jvmLanguageOverideComboBox.getSelectedItem().toString());
-            jvmValuesChanged = true;
-          }
+    jamLanguageOverrideComboBox.addItemListener(
+        e -> {
+          setJvmOption(
+              JVM_OPTION.LOCALE_LANGUAGE,
+              Objects.requireNonNull(jamLanguageOverrideComboBox.getSelectedItem()).toString());
+          jvmValuesChanged = true;
         });
 
     chatNotificationShowBackground.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
+        e ->
             AppPreferences.setChatNotificationShowBackground(
-                chatNotificationShowBackground.isSelected());
-          }
-        });
+                chatNotificationShowBackground.isSelected()));
 
     DefaultComboBoxModel gridTypeModel = new DefaultComboBoxModel();
     gridTypeModel.addElement(GridFactory.SQUARE);
@@ -1044,12 +768,7 @@ public class PreferencesDialog extends JDialog {
     gridTypeModel.setSelectedItem(AppPreferences.getDefaultGridType());
     defaultGridTypeCombo.setModel(gridTypeModel);
     defaultGridTypeCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            AppPreferences.setDefaultGridType((String) defaultGridTypeCombo.getSelectedItem());
-          }
-        });
+        e -> AppPreferences.setDefaultGridType((String) defaultGridTypeCombo.getSelectedItem()));
 
     DefaultComboBoxModel tokenNumModel = new DefaultComboBoxModel();
     tokenNumModel.addElement(Token.NUM_INCREMENT);
@@ -1057,12 +776,8 @@ public class PreferencesDialog extends JDialog {
     tokenNumModel.setSelectedItem(AppPreferences.getDuplicateTokenNumber());
     duplicateTokenCombo.setModel(tokenNumModel);
     duplicateTokenCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            AppPreferences.setDuplicateTokenNumber((String) duplicateTokenCombo.getSelectedItem());
-          }
-        });
+        e ->
+            AppPreferences.setDuplicateTokenNumber((String) duplicateTokenCombo.getSelectedItem()));
 
     DefaultComboBoxModel tokenNameModel = new DefaultComboBoxModel();
     tokenNameModel.addElement(Token.NAME_USE_FILENAME);
@@ -1070,12 +785,7 @@ public class PreferencesDialog extends JDialog {
     tokenNameModel.setSelectedItem(AppPreferences.getNewTokenNaming());
     tokenNamingCombo.setModel(tokenNameModel);
     tokenNamingCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            AppPreferences.setNewTokenNaming((String) tokenNamingCombo.getSelectedItem());
-          }
-        });
+        e -> AppPreferences.setNewTokenNaming((String) tokenNamingCombo.getSelectedItem()));
 
     DefaultComboBoxModel showNumModel = new DefaultComboBoxModel();
     showNumModel.addElement(Token.NUM_ON_NAME);
@@ -1084,12 +794,7 @@ public class PreferencesDialog extends JDialog {
     showNumModel.setSelectedItem(AppPreferences.getTokenNumberDisplay());
     showNumberingCombo.setModel(showNumModel);
     showNumberingCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            AppPreferences.setTokenNumberDisplay((String) showNumberingCombo.getSelectedItem());
-          }
-        });
+        e -> AppPreferences.setTokenNumberDisplay((String) showNumberingCombo.getSelectedItem()));
 
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
     movementMetricModel.addElement(WalkerMetric.ONE_TWO_ONE);
@@ -1100,12 +805,8 @@ public class PreferencesDialog extends JDialog {
 
     movementMetricCombo.setModel(movementMetricModel);
     movementMetricCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
-            AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
-          }
-        });
+        e ->
+            AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem()));
 
     DefaultComboBoxModel<Zone.VisionType> visionTypeModel = new DefaultComboBoxModel<>();
     for (Zone.VisionType vt : Zone.VisionType.values()) {
@@ -1115,15 +816,12 @@ public class PreferencesDialog extends JDialog {
 
     visionTypeCombo.setModel(visionTypeModel);
     visionTypeCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
+        e ->
             AppPreferences.setDefaultVisionType(
-                (Zone.VisionType) visionTypeCombo.getSelectedItem());
-          }
-        });
+                (Zone.VisionType) visionTypeCombo.getSelectedItem()));
 
     DefaultComboBoxModel macroEditorThemeModel = new DefaultComboBoxModel();
+
     try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {
       paths
           .filter(Files::isRegularFile)
@@ -1142,13 +840,9 @@ public class PreferencesDialog extends JDialog {
     macroEditorThemeCombo.setModel(macroEditorThemeModel);
 
     macroEditorThemeCombo.addItemListener(
-        new ItemListener() {
-          @Override
-          public void itemStateChanged(ItemEvent e) {
+        e ->
             AppPreferences.setDefaultMacroEditorTheme(
-                (String) macroEditorThemeModel.getSelectedItem());
-          }
-        });
+                (String) macroEditorThemeModel.getSelectedItem()));
 
     add(panel);
     pack();
@@ -1258,35 +952,41 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
     // get JVM User Defaults/User override preferences
-    try {
-      jvmXmxTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.MAX_MEM));
-      jvmXmsTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.MIN_MEM));
-      jvmXssTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.STACK_SIZE));
-      dataDirTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.DATA_DIR));
+    if (AppUtil.getAppCfgFile() == null) {
+      int ind = tabbedPane.indexOfTab("Startup");
+      if (ind >= 0) {
+        tabbedPane.removeTabAt(ind);
+      }
+    } else {
+      if (!UserJvmOptions.loadAppCfg()) {
+        tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+      } else {
+        try {
 
-      jvmAssertionsCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.ASSERTIONS));
-      jvmDirect3dCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
-      jvmOpenGLCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
-      jvmInitAwtCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
+          jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
+          jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
+          jvmXssTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.STACK_SIZE));
+          dataDirTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.DATA_DIR));
 
-      jvmLanguageOverideComboBox.setSelectedItem(
-          UserJvmPrefs.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-    } catch (UnsatisfiedLinkError | NoClassDefFoundError | ServiceConfigurationError e) {
-      log.warn(
-          "Warning, unable to get JVM options from preferences. Most likely cause, manual launch of JAR.");
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
-    } catch (Exception e) {
-      log.error(
-          "Error getting JVM options from preferences. Most likely cause, manual launch of JAR.",
-          e);
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+          jvmDirect3dCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
+          jvmOpenGLCheckbox.setSelected(
+              UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
+          jvmInitAwtCheckbox.setSelected(
+              UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
+
+          jamLanguageOverrideComboBox.setSelectedItem(
+              UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
+        } catch (Exception e) {
+          log.error("Unable to retrieve JVM user options!", e);
+        }
+      }
     }
 
     Integer rawVal = AppPreferences.getTypingNotificationDuration();
     Integer typingVal = null;
     if (rawVal != null
         && rawVal > 99) { // backward compatibility -- used to be stored in ms, now in seconds
-      Double dbl = (double) (rawVal / 1000);
+      double dbl = rawVal / 1000;
       if (dbl >= 1) {
         long fixedUp = Math.round(dbl);
         typingVal = (int) fixedUp;
@@ -1304,5 +1004,55 @@ public class PreferencesDialog extends JDialog {
 
     chatNotificationColor.setColor(AppPreferences.getChatNotificationColor());
     chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
+  }
+
+  /** @author frank */
+  private abstract static class DocumentListenerProxy<T> implements DocumentListener {
+
+    JTextField comp;
+
+    public DocumentListenerProxy(JTextField tf) {
+      comp = tf;
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+      updateValue();
+    }
+
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+      updateValue();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+      updateValue();
+    }
+
+    protected void updateValue() {
+      try {
+        storeNumericValue(convertString(comp.getText())); // Localized
+      } catch (ParseException nfe) {
+        // Ignore it
+      }
+    }
+
+    protected abstract T convertString(String value) throws ParseException;
+
+    protected abstract void storeNumericValue(T value);
+  }
+
+  /** @author frank */
+  private abstract static class ChangeListenerProxy implements ChangeListener {
+
+    @Override
+    public void stateChanged(ChangeEvent ce) {
+      JSpinner sp = (JSpinner) ce.getSource();
+      int value = (Integer) sp.getValue();
+      storeSpinnerValue(value);
+    }
+
+    protected abstract void storeSpinnerValue(int value);
   }
 }

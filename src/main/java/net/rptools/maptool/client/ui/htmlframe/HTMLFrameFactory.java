@@ -211,7 +211,9 @@ public class HTMLFrameFactory {
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
         boolean selectedChange = false;
         for (Token token : tokens) {
-          if (selectedTokens.contains(token)) selectedChange = true;
+          if (selectedTokens.contains(token.getId())) {
+            selectedChange = true;
+          }
           if (token.getName().equals(cpanel.getIdentity())
               || token.getId().equals(cpanel.getIdentityGUID())) {
             impersonateToken();

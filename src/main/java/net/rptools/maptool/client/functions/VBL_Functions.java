@@ -37,6 +37,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -67,7 +68,8 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
@@ -129,9 +131,7 @@ public class VBL_Functions extends AbstractFunction {
             break;
         }
       }
-    }
-
-    if (functionName.equals("getVBL")) {
+    } else if (functionName.equals("getVBL")) {
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
@@ -180,9 +180,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       return getAreaPoints(vblArea, simpleJSON);
-    }
-
-    if (functionName.equals("getTokenVBL")) {
+    } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
@@ -195,7 +193,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -213,9 +211,7 @@ public class VBL_Functions extends AbstractFunction {
       } else {
         return "";
       }
-    }
-
-    if (functionName.equals("setTokenVBL")) {
+    } else if (functionName.equals("setTokenVBL")) {
       Token token = null;
 
       if (parameters.size() > 2) {
@@ -253,7 +249,7 @@ public class VBL_Functions extends AbstractFunction {
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
       } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
       }
       if (token == null) {
@@ -301,9 +297,7 @@ public class VBL_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    }
-
-    if (functionName.equals("transferVBL")) {
+    } else if (functionName.equals("transferVBL")) {
       Token token = null;
 
       if (parameters.size() > 3) {
@@ -336,7 +330,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -353,9 +347,9 @@ public class VBL_Functions extends AbstractFunction {
       boolean vblFromToken;
 
       if (val instanceof Integer) {
-        vblFromToken = ((Integer) val).intValue() != 0;
+        vblFromToken = (Integer) val != 0;
       } else if (val instanceof Boolean) {
-        vblFromToken = ((Boolean) val).booleanValue();
+        vblFromToken = (Boolean) val;
       } else {
         try {
           vblFromToken = Integer.parseInt(val.toString()) != 0;
@@ -376,6 +370,9 @@ public class VBL_Functions extends AbstractFunction {
           TokenVBL.renderVBL(renderer, vbl, true);
         }
       }
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     if (results >= 0) {
@@ -409,7 +406,7 @@ public class VBL_Functions extends AbstractFunction {
             "setTokenVBL[Auto]");
 
     Color color = new Color(r, g, b, a);
-    final boolean inverseVbl = (inverse == 1) ? true : false;
+    final boolean inverseVbl = inverse == 1;
 
     return TokenVBL.createOptimizedVblArea(token, sensitivity, inverseVbl, color, level, method);
   }
@@ -467,23 +464,21 @@ public class VBL_Functions extends AbstractFunction {
     } // Set height to min of 4, as a 2 pixel thick rectangle as to be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults to 2f
     BasicStroke stroke = new BasicStroke(t != 0f ? t : 2f);
 
@@ -610,7 +605,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       BasicStroke stroke =
-          new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+          new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
     } else {
       // User requests for polygon to be closed, so a Polygon is used which is automatically
@@ -634,7 +629,7 @@ public class VBL_Functions extends AbstractFunction {
       // A strokedShape will not be filled in and have a defined thickness.
       if (fill == 0) {
         BasicStroke stroke =
-            new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         area = new Area(stroke.createStrokedShape(poly));
       } else {
         area = new Area(poly);
@@ -904,23 +899,21 @@ public class VBL_Functions extends AbstractFunction {
     // be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults handled above
     BasicStroke stroke = new BasicStroke(t);
 
@@ -1173,7 +1166,7 @@ public class VBL_Functions extends AbstractFunction {
     return value;
   }
 
-  private static enum Shape {
+  private enum Shape {
     RECTANGLE,
     POLYGON,
     CROSS,

@@ -30,9 +30,11 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 /** Class used to implement Json related functions in MT script. */
 public class JSONMacroFunctions extends AbstractFunction {
@@ -127,7 +129,8 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
     if (functionName.startsWith("json.path.")) {
@@ -185,12 +188,12 @@ public class JSONMacroFunctions extends AbstractFunction {
             String prefix = args.size() > 1 ? args.get(1).toString() : "";
             String suffix = args.size() > 2 ? args.get(2).toString() : "";
 
-            return jsonObjectFunctions.toVars(parser, json.getAsJsonObject(), prefix, suffix);
+            return jsonObjectFunctions.toVars(resolver, json.getAsJsonObject(), prefix, suffix);
           } else {
             FunctionUtil.checkNumberParam(functionName, args, 2, 2);
             String varName = args.get(1).toString();
 
-            return jsonArrayFunctions.toVars(parser, json.getAsJsonArray(), varName);
+            return jsonArrayFunctions.toVars(resolver, json.getAsJsonArray(), varName);
           }
         }
       case "json.toList":
@@ -281,7 +284,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
           // Special case if first argument is empty string it represents an empty array
           JsonArray jsonArray;
-          if (args.get(0).toString().length() == 0) {
+          Object arg = args.get(0);
+          if (arg instanceof String && StringUtils.isEmpty(((String) arg))) {
             jsonArray = new JsonArray();
           } else {
             jsonArray = jsonArrayFunctions.coerceToJsonArray(args.get(0));
@@ -328,10 +332,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 1, UNLIMITED_PARAMETERS);
           JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           boolean sortAscending = true;
-          if (args.size() > 1) {
-            if (args.get(1).toString().startsWith("d")) {
-              sortAscending = false;
-            }
+          if (args.size() > 1 && args.get(1).toString().startsWith("d")) {
+            sortAscending = false;
           }
           if (args.size() < 3) {
             if (sortAscending) {
@@ -367,9 +369,8 @@ public class JSONMacroFunctions extends AbstractFunction {
         {
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
           JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
-          return jsonEvaluate(jsonElement, resolver);
+          return jsonEvaluate(jsonElement, (MapToolVariableResolver) resolver);
         }
       case "json.isEmpty":
         {
@@ -540,7 +541,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
   private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, JsonArray rolls)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
 
     if (stats.size() != rolls.size()) {
       throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
@@ -595,7 +596,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonArray jsonRolls(String rollString, int outerDim, int innerDim)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
 
     if (innerDim == 1) {
       return jsonRolls(rollString, outerDim, parser);

@@ -90,4 +90,15 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
   public void addActionListener(ActionListener container) {
     pane.addActionListener(container);
   }
+
+  /**
+   * Returns false.
+   *
+   * @param script the script that cannot be ran
+   * @return false
+   */
+  @Override
+  public boolean runJavascript(String script) {
+    return false;
+  }
 }

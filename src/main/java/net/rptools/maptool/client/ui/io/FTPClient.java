@@ -47,8 +47,8 @@ public class FTPClient {
   protected FTPClientConn cconn;
 
   protected List<Object> fifoQueue;
-  protected Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
-  protected Map<Object, FTPTransferObject> transferringMap; // Currently in process...
+  protected final Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
+  protected final Map<Object, FTPTransferObject> transferringMap; // Currently in process...
 
   private int numThreads = 1;
   private List<ChangeListener> changeListeners;
@@ -81,7 +81,7 @@ public class FTPClient {
   public void setEnabled(boolean b) {
     boolean old = running;
     running = b;
-    if (old != b && b == true) {
+    if (old != b && b) {
       // We just enabled this object from a disabled state, so start the first transfer
       startNextTransfer();
     }
@@ -108,13 +108,7 @@ public class FTPClient {
    */
   protected void fireStateChanged(final Object data) {
     if (SwingUtilities.isEventDispatchThread()) postAllChangeEvents(data);
-    else
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              postAllChangeEvents(data);
-            }
-          });
+    else SwingUtilities.invokeLater(() -> postAllChangeEvents(data));
   }
 
   private void postAllChangeEvents(Object fto) {
@@ -210,7 +204,7 @@ public class FTPClient {
   private void uploadDone(FTPTransferObject data, boolean keep) {
     boolean startAnother = false;
     synchronized (transferringMap) {
-      if (transferringMap.containsKey(data.local)) transferringMap.remove(data.local);
+      transferringMap.remove(data.local);
       // TODO Should delete the remote file for uploading, or remove the local
       // file for downloading.
       if (fifoQueue.isEmpty() == false && transferringMap.size() < numThreads) startAnother = true;
@@ -221,7 +215,7 @@ public class FTPClient {
 
   private static final int BLOCKSIZE = 4 * 1024;
 
-  protected InputStream prepareInputStream(FTPTransferObject data) throws IOException {
+  protected InputStream prepareInputStream(FTPTransferObject data) {
     InputStream is = null;
     if (data.getput == Direction.FTP_PUT) {
       /*
@@ -368,10 +362,8 @@ public class FTPClient {
     FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
     // ftp.setNumberOfThreads(3);
     File dir = new File("testdir");
-    for (int i = 0; i < uploadList.length; i++) {
-      FTPTransferObject fto =
-          new FTPTransferObject(
-              FTPTransferObject.Direction.FTP_PUT, uploadList[i], dir, uploadList[i]);
+    for (String s : uploadList) {
+      FTPTransferObject fto = new FTPTransferObject(Direction.FTP_PUT, s, dir, s);
       ftp.addToQueue(fto);
     }
     // Need to listen for all progress bars to finish and count down using 'progress'.

@@ -55,21 +55,19 @@ public class AppConstants {
   public static final int ASSET_SEARCH_LIMIT = 1000;
 
   public static final FilenameFilter IMAGE_FILE_FILTER =
-      new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          name = name.toLowerCase();
-          // I can drop TIFF files into TokenTool and it works. Should that extension be
-          // added here? The question is really whether the Java2D libraries can read TIFF
-          // or my desktop GUI is converting the image during the drop operation... FJE
-          return name.endsWith(".bmp")
-              || name.endsWith(".png")
-              || name.endsWith(".gif")
-              || name.endsWith(".jpg")
-              || name.endsWith(".jpeg")
-              ||
-              // name.endsWith(".pdf") || name.endsWith(".por") ||
-              name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
-        }
+      (dir, name) -> {
+        name = name.toLowerCase();
+        // I can drop TIFF files into TokenTool and it works. Should that extension be
+        // added here? The question is really whether the Java2D libraries can read TIFF
+        // or my desktop GUI is converting the image during the drop operation... FJE
+        return name.endsWith(".bmp")
+            || name.endsWith(".png")
+            || name.endsWith(".gif")
+            || name.endsWith(".jpg")
+            || name.endsWith(".jpeg")
+            ||
+            // name.endsWith(".pdf") || name.endsWith(".por") ||
+            name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
       };
 
   public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";
@@ -85,11 +83,5 @@ public class AppConstants {
   public static final File CAMPAIGN_PROPERTIES_DIR = AppUtil.getAppHome("campaignProps");
 
   public static final FilenameFilter CAMPAIGN_PROPERTIES_FILE_FILTER =
-      new FilenameFilter() {
-
-        @Override
-        public boolean accept(File dir, String name) {
-          return name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
-        }
-      };
+      (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
 }

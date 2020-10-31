@@ -16,13 +16,19 @@ package net.rptools.maptool.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,31 +44,43 @@ import org.apache.logging.log4j.Logger;
 
 /** This class provides utility functions for maptool client. */
 public class AppUtil {
-  static {
-    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
-  }
-
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
 
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-
-  private static File dataDirPath;
-
+  private static final Logger log = LogManager.getLogger(AppUtil.class);
   private static final String CLIENT_ID_FILE = "client-id";
+  private static final String CONFIG_SUB_DIR = "config";
+  private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
       (System.getProperty("os.name").toLowerCase().startsWith("windows"));
-
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+  /** Returns true if currently running on Linux or other Unix/Unix like system. */
+  public static boolean LINUX_OR_UNIX =
+      (System.getProperty("os.name").indexOf("nix") >= 0
+          || System.getProperty("os.name").indexOf("nux") >= 0
+          || System.getProperty("os.name").indexOf("aix") >= 0
+          || System.getProperty("os.name").indexOf("sunos") >= 0);
 
   public static final String LOOK_AND_FEEL_NAME =
       MAC_OS_X
           ? "net.rptools.maptool.client.TinyLookAndFeelMac"
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
+
+  private static File dataDirPath;
+  private static String packagerCfgFileName;
+
+  static {
+    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
+    packagerCfgFileName =
+        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
+            ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
+            : null;
+  }
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -92,8 +110,9 @@ public class AppUtil {
       path = new File(path.getAbsolutePath(), subdir);
     }
     // Now check for characters known to cause problems. See getDataDir() for details.
-    if (path.getAbsolutePath().matches("!"))
+    if (path.getAbsolutePath().matches("!")) {
       throw new RuntimeException(I18N.getText("msg.error.unusableDir", path.getAbsolutePath()));
+    }
 
     if (!path.exists()) {
       path.mkdirs();
@@ -102,7 +121,9 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log.isInfoEnabled()) log.info("msg.error.unableToCreateDataDir", re);
+        if (log.isInfoEnabled()) {
+          log.info("msg.error.unableToCreateDataDir", re);
+        }
         throw re;
       }
     }
@@ -123,7 +144,7 @@ public class AppUtil {
       if (StringUtils.isEmpty(path)) {
         path = DEFAULT_DATADIR_NAME;
       }
-      if (path.indexOf("/") < 0 && path.indexOf("\\") < 0) {
+      if (!path.contains("/") && !path.contains("\\")) {
         path = getUserHome() + "/" + path;
       }
       // Now we need to check for characters that are known to cause problems in
@@ -131,8 +152,9 @@ public class AppUtil {
       // the built-in "jar://" URL uses the "!" as a separator between the archive name
       // and the archive member. :( Right now we're only checking for that one character
       // but the list may need to be expanded in the future.
-      if (path.matches("!"))
+      if (path.matches("!")) {
         throw new RuntimeException(I18N.getText("msg.error.unusableDataDir", path));
+      }
 
       dataDirPath = new File(path);
     }
@@ -154,6 +176,84 @@ public class AppUtil {
    */
   public static File getAppHome() {
     return getAppHome("");
+  }
+
+  /**
+   * Returns a File path representing the base directory that the application is running from. e.g.
+   * C:\Users\Troll\AppData\Local\MapTool\app
+   *
+   * @return the maptool install directory
+   */
+  public static String getAppInstallLocation() {
+    String path = "UNKNOWN";
+
+    try {
+      CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
+      File jarFile = new File(codeSource.getLocation().toURI().getPath());
+      path = jarFile.getParentFile().getPath();
+    } catch (URISyntaxException e) {
+      log.error("Error retrieving MapTool installation directory: ", e);
+      throw new RuntimeException(I18N.getText("msg.error.unknownInstallPath"), e);
+    }
+
+    return path;
+  }
+
+  /**
+   * Returns a File path representing the configuration file in the base directory that the
+   * application is running from. e.g. C:\Users\Troll\AppData\Local\MapTool\app
+   *
+   * @return the configuration file in the maptool install directory
+   */
+  public static File getAppCfgFile() {
+    File cfgFile;
+
+    if (packagerCfgFileName == null) {
+      return null;
+    }
+
+    try {
+      CodeSource codeSource = MapTool.class.getProtectionDomain().getCodeSource();
+      File jarFile = new File(codeSource.getLocation().toURI().getPath());
+      String cfgFilepath = jarFile.getParentFile().getPath() + File.separator + packagerCfgFileName;
+
+      cfgFile = new File(cfgFilepath);
+
+    } catch (URISyntaxException e) {
+      log.error("Error retrieving MapTool cfg file: ", e);
+      throw new RuntimeException(I18N.getText("msg.error.retrieveCfgFile"), e);
+    }
+
+    return cfgFile;
+  }
+  /**
+   * Returns a File path representing configuration file under the app home directory structure.
+   *
+   * @return the maptool configuration file under the app home directory structure.
+   */
+  public static File getDataDirAppCfgFile() {
+    return getAppHome(CONFIG_SUB_DIR).toPath().resolve(APP_HOME_CONFIG_FILENAME).toFile();
+  }
+
+  /**
+   * Get the an attribute value from MANIFEST.MF
+   *
+   * @return the String value or empty string if not found
+   */
+  public static String getAttributeFromJarManifest(String attributeName, String defaultValue) {
+    ClassLoader cl = MapTool.class.getClassLoader();
+
+    try {
+      URL url = cl.getResource("META-INF/MANIFEST.MF");
+      Manifest manifest = new Manifest(url.openStream());
+
+      Attributes attr = manifest.getMainAttributes();
+      return attr.getValue(attributeName);
+    } catch (IOException e) {
+      log.error("No {} attribute found in MANIFEST.MF...", attributeName, e);
+    }
+
+    return defaultValue;
   }
 
   /**
@@ -183,6 +283,25 @@ public class AppUtil {
       return true;
     }
     return token.isOwner(player.getName());
+  }
+
+  /**
+   * Returns whether the token is owned by a non-gm player.
+   *
+   * @param token the token
+   * @return true if owned by all, or one of the owners is online and not a gm.
+   */
+  public static boolean ownedByOnePlayer(Token token) {
+    if (token.isOwnedByAll()) {
+      return true;
+    }
+    List<String> players = MapTool.getNonGMs();
+    for (String owner : token.getOwners()) {
+      if (players.contains(owner)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -222,9 +341,9 @@ public class AppUtil {
    * adjusting to kb/mb/gb etc.
    *
    * @param directory the directory to retrieve the space used for.
+   * @return String of disk usage information.
    * @author Jamz
    * @since 1.4.0.1
-   * @return String of disk usage information.
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
@@ -239,10 +358,10 @@ public class AppUtil {
    * Returns the free disk spaced for a given directory in a human readable format automatically
    * adjusting to kb/mb/gb etc.
    *
-   * @author Jamz
-   * @since 1.4.0.
    * @param directory the directory to retrieve the free space for.
    * @return String of free disk space
+   * @author Jamz
+   * @since 1.4.0.
    */
   public static String getFreeDiskSpace(File directory) {
     return FileUtils.byteCountToDisplaySize(directory.getFreeSpace()) + " ";
@@ -298,16 +417,6 @@ public class AppUtil {
   }
 
   /**
-   * Sets the name of the theme to use for the MapTool UI.
-   *
-   * @param themeName the name of the theme to use for the MapTool UI.
-   */
-  public static void setThemeName(String themeName) {
-    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
-    prefs.put("themeName", themeName);
-  }
-
-  /**
    * Returns the name of the theme to use for the MapTool UI.
    *
    * @return the name of the theme to use for the MapTool UI.
@@ -315,6 +424,16 @@ public class AppUtil {
   public static String getThemeName() {
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
     return prefs.get("themeName", AppConstants.DEFAULT_THEME_NAME);
+  }
+
+  /**
+   * Sets the name of the theme to use for the MapTool UI.
+   *
+   * @param themeName the name of the theme to use for the MapTool UI.
+   */
+  public static void setThemeName(String themeName) {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    prefs.put("themeName", themeName);
   }
 
   /**

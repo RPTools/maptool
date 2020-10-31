@@ -26,8 +26,8 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 
 /**
@@ -83,7 +83,6 @@ public class FunctionUtil {
    * the list size before trying to retrieve the token so it is safe to use for functions that have
    * the token as a optional argument.
    *
-   * @param parser the parser for variables
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
    * @param indexToken the index to find the token at. If -1, use current token instead.
@@ -93,7 +92,11 @@ public class FunctionUtil {
    *     token can not be found, or if no token is specified and no token is impersonated.
    */
   public static Token getTokenFromParam(
-      Parser parser, String functionName, List<Object> param, int indexToken, int indexMap)
+      VariableResolver resolver,
+      String functionName,
+      List<Object> param,
+      int indexToken,
+      int indexMap)
       throws ParserException {
 
     int size = param.size();
@@ -115,7 +118,7 @@ public class FunctionUtil {
         }
       }
     } else {
-      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+      token = ((MapToolVariableResolver) resolver).getTokenInContext();
       if (token == null) {
         throw new ParserException(I18N.getText(KEY_NO_IMPERSONATED, functionName));
       }
@@ -411,7 +414,7 @@ public class FunctionUtil {
   public static boolean getBooleanValue(Object value) {
     boolean set = false;
     if (value instanceof Boolean) {
-      set = ((Boolean) value).booleanValue();
+      set = (Boolean) value;
     } else if (value instanceof Number) {
       set = ((Number) value).doubleValue() != 0;
     } else if (value == null) {
@@ -426,6 +429,15 @@ public class FunctionUtil {
     return set;
   }
 
+  /**
+   * Get our standard BigDecimal representation (1 or 0) of a boolean value.
+   *
+   * @param b the boolean value
+   * @return {@link BigDecimal#ONE} if true, {@link BigDecimal#ZERO} if false
+   */
+  public static BigDecimal getDecimalForBoolean(boolean b) {
+    return b ? BigDecimal.ONE : BigDecimal.ZERO;
+  }
   /**
    * Throw an exception if the macro isn't trusted.
    *

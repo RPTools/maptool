@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
@@ -73,7 +72,7 @@ public class ImageManager {
 
   private static ExecutorService largeImageLoader = Executors.newFixedThreadPool(1);
 
-  private static Object imageLoaderMutex = new Object();
+  private static final Object imageLoaderMutex = new Object();
 
   /**
    * A Map containing sets of observers for each asset id. Observers are notified when the image is
@@ -149,22 +148,17 @@ public class ImageManager {
     image =
         getImage(
             assetId,
-            new ImageObserver() {
-              public boolean imageUpdate(
-                  Image img, int infoflags, int x, int y, int width, int height) {
-                // If we're here then the image has just finished loading
-                // release the blocked thread
-                log.debug("Countdown: " + assetId);
-                loadLatch.countDown();
-                return false;
-              }
+            (img, infoflags, x, y, width, height) -> {
+              // If we're here then the image has just finished loading
+              // release the blocked thread
+              log.debug("Countdown: " + assetId);
+              loadLatch.countDown();
+              return false;
             });
     if (image == TRANSFERING_IMAGE) {
       try {
-        synchronized (loadLatch) {
-          log.debug("Wait for:  " + assetId);
-          loadLatch.await();
-        }
+        log.debug("Wait for:  " + assetId);
+        loadLatch.await();
         // This time we'll get the cached version
         image = getImage(assetId);
       } catch (InterruptedException ie) {
@@ -221,9 +215,7 @@ public class ImageManager {
 
       // Force a load of the asset, this will trigger a transfer if the
       // asset is not available locally
-      if (image == null) {
-        AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
-      }
+      AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
       return TRANSFERING_IMAGE;
     }
   }
@@ -258,14 +250,9 @@ public class ImageManager {
     if (observers == null || observers.length == 0) {
       return;
     }
-    Set<ImageObserver> observerSet = imageObserverMap.get(assetId);
-    if (observerSet == null) {
-      observerSet = new HashSet<ImageObserver>();
-      imageObserverMap.put(assetId, observerSet);
-    }
-    for (ImageObserver observer : observers) {
-      observerSet.add(observer);
-    }
+    Set<ImageObserver> observerSet =
+        imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
+    observerSet.addAll(Arrays.asList(observers));
   }
 
   /**
@@ -399,8 +386,11 @@ public class ImageManager {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return id.equals(obj);
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      AssetListener that = (AssetListener) o;
+      return Objects.equals(id, that.id);
     }
   }
 }

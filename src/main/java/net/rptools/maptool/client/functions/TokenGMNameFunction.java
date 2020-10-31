@@ -21,6 +21,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenGMNameFunction extends AbstractFunction {
@@ -42,19 +43,21 @@ public class TokenGMNameFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
     if (functionName.equals("getGMName")) {
       FunctionUtil.checkNumberParam("getGMName", args, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
       return getGMName(token);
-    } else {
+    } else if ("setGMName".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam("setGMName", args, 1, 3);
       String gmName = args.get(0).toString();
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
       return setGMName(token, gmName);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

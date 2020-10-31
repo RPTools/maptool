@@ -119,7 +119,7 @@ public class TwoToneTextPane extends JTextPane {
    * @param style Style being modified
    * @param font Font to add to the style.
    */
-  public static final void setFont(Style style, Font font) {
+  public static void setFont(Style style, Font font) {
     StyleConstants.setFontFamily(style, font.getFamily());
     StyleConstants.setFontSize(style, font.getSize());
     StyleConstants.setBold(style, font.isBold());
@@ -148,7 +148,7 @@ public class TwoToneTextPane extends JTextPane {
    * @param text Text to parse
    * @param pane Pane to modify. The pane also provides the style names
    */
-  public static final void parse(String text, JTextPane pane) {
+  public static void parse(String text, JTextPane pane) {
     try {
       Matcher match = TEXT_PATTERN.matcher(text);
       Document doc = pane.getDocument();
@@ -159,7 +159,7 @@ public class TwoToneTextPane extends JTextPane {
         // Save the current text first
         String styledText = text.substring(textStart, match.start());
         textStart = match.end() + 1;
-        if (style != null && styledText != null) {
+        if (style != null) {
           doc.insertString(doc.getLength(), styledText, style);
         } // endif
 
@@ -174,7 +174,8 @@ public class TwoToneTextPane extends JTextPane {
       e.printStackTrace();
       throw new IllegalStateException(
           "This should not happen since I always use the document to "
-              + "determine the location to write. It might be due to synchronization problems though");
+              + "determine the location to write. It might be due to synchronization problems though",
+          e);
     }
   }
 
@@ -276,7 +277,7 @@ public class TwoToneTextPane extends JTextPane {
    * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
    *     azhrei_fje $
    */
-  public class TwoToneGlyphPainter extends GlyphView.GlyphPainter {
+  public static class TwoToneGlyphPainter extends GlyphView.GlyphPainter {
 
     /*---------------------------------------------------------------------------------------------
      * Instance Variables
@@ -314,7 +315,7 @@ public class TwoToneTextPane extends JTextPane {
         Document doc = v.getDocument();
         doc.getText(p0, p1 - p0, text);
       } catch (BadLocationException bl) {
-        throw new IllegalStateException("GlyphView: Stale view: " + bl);
+        throw new IllegalStateException("GlyphView: Stale view: " + bl, bl);
       }
       return text;
     }

@@ -15,8 +15,6 @@
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -32,8 +30,6 @@ import javax.swing.JList;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -95,58 +91,38 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   public void initUpdateButton() {
-    getUpdateButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                update();
-              }
-            });
+    getUpdateButton().addActionListener(e -> update());
   }
 
   public void initNewButton() {
     getNewButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-
+            e ->
                 EventQueue.invokeLater(
-                    new Runnable() {
-                      public void run() {
-                        // This will force a reset
-                        getTokenTypeList().getSelectionModel().clearSelection();
-                        reset();
-                      }
-                    });
-              }
-            });
+                    () -> {
+                      // This will force a reset
+                      getTokenTypeList().getSelectionModel().clearSelection();
+                      reset();
+                    }));
   }
 
   public void initRevertButton() {
-    getRevertButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                bind(editingType);
-              }
-            });
+    getRevertButton().addActionListener(e -> bind(editingType));
   }
 
   public void initTypeList() {
 
     getTokenTypeList()
         .addListSelectionListener(
-            new ListSelectionListener() {
-              public void valueChanged(ListSelectionEvent e) {
-                if (e.getValueIsAdjusting()) {
-                  return;
-                }
+            e -> {
+              if (e.getValueIsAdjusting()) {
+                return;
+              }
 
-                if (getTokenTypeList().getSelectedValue() == null) {
-                  reset();
-                } else {
-                  bind((String) getTokenTypeList().getSelectedValue());
-                }
+              if (getTokenTypeList().getSelectedValue() == null) {
+                reset();
+              } else {
+                bind((String) getTokenTypeList().getSelectedValue());
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -272,7 +248,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         // had to do this here since the short name is not built
         // to take advantage of multiple opening/closing parenthesis
         // in a single property line
-        int indexDefault = line.indexOf(":");
+        int indexDefault = line.indexOf(':');
         if (indexDefault > 0) {
           String defaultVal = line.substring(indexDefault + 1).trim();
           if (defaultVal.length() > 0) {
@@ -284,9 +260,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         }
         // Suffix
         // (Really should handle nested parens here)
-        int index = line.indexOf("(");
+        int index = line.indexOf('(');
         if (index > 0) {
-          int indexClose = line.lastIndexOf(")");
+          int indexClose = line.lastIndexOf(')');
           // Check for unenclosed parentheses. Fix #1575.
           if (indexClose < index) {
             MapTool.showError(I18N.getText("CampaignPropertyDialog.error.parenthesis", line));
