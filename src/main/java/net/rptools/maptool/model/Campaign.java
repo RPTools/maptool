@@ -695,7 +695,7 @@ public class Campaign {
   public ExportDialog getExportDialog() {
     if (exportDialog == null) {
       try {
-        exportDialog = new ExportDialog();
+        exportDialog = ExportDialog.getInstance();
       } catch (Exception e) {
         return null;
       }
