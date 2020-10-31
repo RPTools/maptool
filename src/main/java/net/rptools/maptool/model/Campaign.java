@@ -693,6 +693,13 @@ public class Campaign {
   }
 
   public ExportDialog getExportDialog() {
+    if (exportDialog == null) {
+      try {
+        exportDialog = new ExportDialog();
+      } catch (Exception e) {
+        return null;
+      }
+    }
     // TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from
     // the dialog
     // and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually
