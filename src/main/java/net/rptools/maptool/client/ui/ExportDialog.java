@@ -402,10 +402,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     interactPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
     interactPanel.getButton("cancelButton").addActionListener(evt -> dispose());
     interactPanel.getButton("browseButton").addActionListener(evt -> browseButtonAction());
-
-    // Run this once to make sure the dialog is in a good starting state.
-    ExportLayers.setDefaultChecked();
-    enforceButtonRules();
   }
 
   @Override
