@@ -393,7 +393,7 @@ public class ImagePanel extends JComponent
       rowCount = model.getImageCount();
     } else {
       int itemsPerRow = width / itemWidth;
-      rowCount = (int) Math.ceil(model.getImageCount() / (float)itemsPerRow);
+      rowCount = (int) Math.ceil(model.getImageCount() / (float) itemsPerRow);
     }
     int height = rowCount * itemHeight;
     return new Dimension(width, height);
