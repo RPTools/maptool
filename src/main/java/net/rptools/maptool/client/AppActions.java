@@ -2151,7 +2151,9 @@ public class AppActions {
                     serverProps.getUseToolTipsForUnformattedRolls());
 
                 // my addition
-                policy.setRestrictedImpersonation(serverProps.getRestrictedImpersonation());
+                // Note: Restricted impersonation setting is the opposite of its label
+                // (Unrestricted when checked and restricted when unchecked)
+                policy.setRestrictedImpersonation(!serverProps.getRestrictedImpersonation());
                 policy.setMovementMetric(serverProps.getMovementMetric());
                 boolean useIF =
                     serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();

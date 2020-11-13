@@ -57,7 +57,11 @@ public class ImpersonateMacro implements Macro {
     }
     // Permission
     if (!canImpersonate(token)) {
-      MapTool.addLocalMessage(I18N.getText("impersonate.mustOwn", token.getName()));
+      if (token != null) {
+        MapTool.addLocalMessage(I18N.getText("impersonate.mustOwn", name));
+      } else {
+        MapTool.addLocalMessage(I18N.getText("msg.error.gmRequired"));
+      }
       return;
     }
     // Impersonate
