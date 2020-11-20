@@ -17,6 +17,7 @@ package net.rptools.maptool.server;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -41,33 +42,13 @@ public class Handshake {
    * @return A player structure for the connected player or null on issues
    */
   public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException {
-    // TODO: remove server config as a param
-    ServerConfig config = server.getConfig();
-
-    HessianInput input = new HessianInput(s.getInputStream());
-    HessianOutput output = new HessianOutput(s.getOutputStream());
-
-    // Jamz: Method renamed in Hessian 4.0.+
-    // output.findSerializerFactory().setAllowNonSerializable(true);
-    output.getSerializerFactory().setAllowNonSerializable(true);
-
-    Request request = (Request) input.readObject();
 
     Response response = new Response();
-    response.code = Code.OK;
-
-    boolean passwordMatches =
-        Player.Role.valueOf(request.role) == Player.Role.GM
-            ? config.gmPasswordMatches(request.password)
-            : config.playerPasswordMatches(request.password);
-    if (!passwordMatches) {
-
-      // PASSWORD
+    Request request = decodeRequest(s.getInputStream());
+    if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
-    } else if (server.isPlayerConnected(request.name)) {
-
-      // UNIQUE NAME
+    } else if (server.isPlayerConnected(request.name)) { // Enforce a unique name
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.duplicateName");
     } else if (!MapTool.isDevelopment()
@@ -77,17 +58,25 @@ public class Handshake {
       // Allows a version running without a 'version.txt' to act as client or server to any other
       // version
 
-      // CORRECT VERSION
       response.code = Code.ERROR;
       String clientUsed = request.version;
       String serverUsed = MapTool.getVersion();
       response.message = I18N.getText("Handshake.msg.wrongVersion", clientUsed, serverUsed);
+    } else {
+      response.code = Code.OK;
     }
+
+
+    HessianOutput output = new HessianOutput(s.getOutputStream());
     response.policy = server.getPolicy();
     output.writeObject(response);
     return response.code == Code.OK
         ? new Player(request.name, Player.Role.valueOf(request.role), request.password)
         : null;
+  }
+
+  private static Request decodeRequest(InputStream inputStream) {
+
   }
 
   /**

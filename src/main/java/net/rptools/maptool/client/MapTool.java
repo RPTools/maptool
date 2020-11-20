@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.crypto.tink.aead.AeadConfig;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -1755,6 +1757,15 @@ public class MapTool {
 
     // Draw frame contents on resize
     tk.setDynamicLayout(true);
+
+
+    // Initialize Google Tink Aead
+    try {
+      AeadConfig.register();
+    } catch (GeneralSecurityException e) {
+      MapTool.showError("msg.error.encryptionSetup", e);
+      System.exit(1);
+    }
 
     EventQueue.invokeLater(
         () -> {

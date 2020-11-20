@@ -17,6 +17,7 @@ package net.rptools.maptool.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
@@ -109,4 +110,6 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
             playerMap.get(conn.getId().toUpperCase()));
     playerMap.remove(conn.getId().toUpperCase());
   }
+
+
 }
