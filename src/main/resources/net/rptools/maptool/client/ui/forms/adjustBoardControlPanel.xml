@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Snap to:</at>
+            <at name="text">AdjustBoardDialog.snapto</at>
             <at name="height">14</at>
             <at name="width">44</at>
             <at name="name">snapTitle</at>
@@ -114,7 +114,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Offset X:</at>
+            <at name="text">GridControlPanel.offset.x</at>
             <at name="height">14</at>
             <at name="width">44</at>
             <at name="name"></at>
@@ -174,7 +174,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Offset Y:</at>
+            <at name="text">GridControlPanel.offset.y</at>
             <at name="height">14</at>
             <at name="width">44</at>
             <at name="name"></at>
@@ -344,7 +344,7 @@
           <at name="classname">javax.swing.JButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Close</at>
+            <at name="text">Button.close</at>
             <at name="height">22</at>
             <at name="width">140</at>
             <at name="name">closeButton</at>
@@ -400,7 +400,7 @@
           <at name="classname">javax.swing.JRadioButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">None</at>
+            <at name="text">AddResourcesDialog.label.none</at>
             <at name="height">16</at>
             <at name="buttonGroup">
              <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -411,7 +411,7 @@
             <at name="width">44</at>
             <at name="name">snapNone</at>
             <at name="actionCommand">None</at>
-            <at name="toolTipText">no snap</at>
+            <at name="toolTipText">AdjustBoardDialog.none.tooltip</at>
             <at name="border">
              <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
               <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -463,7 +463,7 @@
           <at name="classname">javax.swing.JRadioButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Grid</at>
+            <at name="text">Label.grid</at>
             <at name="height">16</at>
             <at name="buttonGroup">
              <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -474,7 +474,7 @@
             <at name="width">44</at>
             <at name="name">snapGrid</at>
             <at name="actionCommand">None</at>
-            <at name="toolTipText">the token grid</at>
+            <at name="toolTipText">AdjustBoardDialog.grid.tooltip</at>
             <at name="border">
              <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
               <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -526,7 +526,7 @@
           <at name="classname">javax.swing.JRadioButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Tile</at>
+            <at name="text">Label.tile</at>
             <at name="selected">true</at>
             <at name="height">16</at>
             <at name="buttonGroup">
@@ -538,7 +538,7 @@
             <at name="width">44</at>
             <at name="name">snapTile</at>
             <at name="actionCommand">None</at>
-            <at name="toolTipText">the repeating background texture</at>
+            <at name="toolTipText">AdjustBoardDialog.tile.tooltip</at>
             <at name="border">
              <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
               <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -591,7 +591,7 @@
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
             <at name="horizontalAlignment">0</at>
-            <at name="text">Adjust Board Position</at>
+            <at name="text">AdjustBoardDialog.title</at>
             <at name="height">16</at>
             <at name="width">140</at>
             <at name="name"></at>

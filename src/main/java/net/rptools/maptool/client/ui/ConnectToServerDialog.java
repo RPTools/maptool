@@ -15,15 +15,12 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -124,22 +121,14 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   public void initCancelButton() {
     getCancelButton()
         .addActionListener(
-            new java.awt.event.ActionListener() {
-              public void actionPerformed(java.awt.event.ActionEvent e) {
-                accepted = false;
-                dialog.closeDialog();
-              }
+            e -> {
+              accepted = false;
+              dialog.closeDialog();
             });
   }
 
   public void initOKButton() {
-    getOKButton()
-        .addActionListener(
-            new java.awt.event.ActionListener() {
-              public void actionPerformed(java.awt.event.ActionEvent e) {
-                handleOK();
-              }
-            });
+    getOKButton().addActionListener(e -> handleOK());
   }
 
   public boolean accepted() {
@@ -181,7 +170,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       RemoteServerTableModel model = null;
 
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         model = new RemoteServerTableModel(MapToolRegistry.findAllInstances());
         return null;
       }
@@ -237,22 +226,14 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   public void initRescanButton() {
     getRescanButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                ((DefaultListModel) getLocalServerList().getModel()).clear();
-                finder.find();
-              }
+            e -> {
+              ((DefaultListModel) getLocalServerList().getModel()).clear();
+              finder.find();
             });
   }
 
   public void initRefreshButton() {
-    getRefreshButton()
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                updateRemoteServerList();
-              }
-            });
+    getRefreshButton().addActionListener(e -> updateRemoteServerList());
   }
 
   public JTextField getUsernameTextField() {
@@ -384,7 +365,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     public RemoteServerTableModel(List<String> encodedData) {
       // Simple but sufficient
-      Collections.sort(encodedData, String.CASE_INSENSITIVE_ORDER);
+      encodedData.sort(String.CASE_INSENSITIVE_ORDER);
 
       data = new ArrayList<String[]>(encodedData.size());
       for (String line : encodedData) {
@@ -427,7 +408,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
         .addElement(new ServerInfo(new String(data), address, port));
   }
 
-  private class ServerInfo {
+  private static class ServerInfo {
     String id;
     InetAddress address;
     int port;

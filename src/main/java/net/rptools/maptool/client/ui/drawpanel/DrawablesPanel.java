@@ -43,8 +43,7 @@ public class DrawablesPanel extends JComponent {
   private final List<GUID> selectedIDList = new ArrayList<GUID>();
 
   public List<Object> getSelectedIds() {
-    List<Object> list = new ArrayList<Object>();
-    list.addAll(selectedIDList);
+    List<Object> list = new ArrayList<Object>(selectedIDList);
     return list;
   }
 
@@ -147,7 +146,7 @@ public class DrawablesPanel extends JComponent {
       Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
       // Handle pen size
       Pen pen = element.getPen();
-      int penSize = (int) pen.getThickness();
+      int penSize = pen.getForegroundMode() == Pen.MODE_TRANSPARENT ? 0 : (int) pen.getThickness();
       drawnBounds.setRect(
           drawnBounds.getX() - penSize,
           drawnBounds.getY() - penSize,

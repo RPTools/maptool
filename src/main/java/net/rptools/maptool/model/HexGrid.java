@@ -28,7 +28,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Set;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
@@ -81,6 +81,11 @@ public abstract class HexGrid extends Grid {
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+  }
+
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, 0);
   }
 
   /** minorRadius / edgeLength */
@@ -178,8 +183,8 @@ public abstract class HexGrid extends Grid {
     int w = shape.getBounds().width;
     int h = shape.getBounds().height;
 
-    zp.x -= w / 2 + getOffsetX();
-    zp.y -= h / 2 + getOffsetY();
+    zp.x -= w / 2;
+    zp.y -= h / 2;
 
     // System.out.println(new Rectangle(zp.x, zp.y, w, h));
     return new Rectangle(zp.x, zp.y, w, h);
@@ -222,6 +227,8 @@ public abstract class HexGrid extends Grid {
   /**
    * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
    * the cell's bounding rectangle.
+   *
+   * @return a {@link Dimension} object where width and height is translated to the grid
    */
   protected abstract Dimension setCellOffset();
 
@@ -372,7 +379,7 @@ public abstract class HexGrid extends Grid {
   /**
    * Default orientation is for a vertical hex grid Override for other orientations
    *
-   * @param hex
+   * @param hex a grid to orient
    */
   protected void orientHex(GeneralPath hex) {
     return;
@@ -413,7 +420,7 @@ public abstract class HexGrid extends Grid {
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < getRendererSizeV(renderer);
         v += scaledMinorRadius) {
-      double offsetU = (int) (count % 2 == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
+      double offsetU = (int) ((count & 1) == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
       count++;
 
       double start =
@@ -447,6 +454,8 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(ZonePoint zp) to allow for alternate grid orientations
    *
+   * @param zpU Zone point U dimension
+   * @param zpV Zone point V dimension
    * @return Coordinates in Cell-space of the ZonePoint
    */
   protected CellPoint convertZP(int zpU, int zpV) {
@@ -462,13 +471,13 @@ public abstract class HexGrid extends Grid {
       xSect = (int) (offsetZpU / (edgeProjection + edgeLength));
     }
     if (offsetZpV < 0) {
-      if (Math.abs(xSect) % 2 == 1) {
+      if ((xSect & 1) == 1) {
         ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius)) - 1;
       } else {
         ySect = (int) (offsetZpV / (2 * minorRadius)) - 1;
       }
     } else {
-      if (Math.abs(xSect) % 2 == 1) {
+      if ((xSect & 1) == 1) {
         ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius));
       } else {
         ySect = (int) (offsetZpV / (2 * minorRadius));
@@ -485,7 +494,7 @@ public abstract class HexGrid extends Grid {
     // System.out.format("gx:%d gy:%d px:%d py:%d m:%f\n", xSect, ySect, xPxl, yPxl, m);
     // System.out.format("gx:%d gy:%d px:%d py:%d\n", xSect, ySect, zp.x, zp.y);
 
-    switch (Math.abs(xSect) % 2) {
+    switch (xSect & 1) {
       case 0:
         if (yPxl <= minorRadius) {
           if (xPxl < edgeProjection - yPxl * m) {
@@ -527,15 +536,15 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(CellPoint cp) to allow for alternate grid orientations
    *
+   * @param cpU Cell point U dimension
+   * @param cpV Cell point V dimension
    * @return A ZonePoint positioned at the center of the Hex
    */
   protected ZonePoint convertCP(int cpU, int cpV) {
     int u, v;
 
     u = (int) Math.round(cpU * (edgeProjection + edgeLength) + edgeLength) + getOffsetU();
-    v =
-        (int)
-            (cpV * 2 * minorRadius + (Math.abs(cpU) % 2 == 0 ? 1 : 2) * minorRadius + getOffsetV());
+    v = (int) (cpV * 2 * minorRadius + ((cpU & 1) == 0 ? 1 : 2) * minorRadius + getOffsetV());
 
     return new ZonePoint(u, v);
   }
@@ -563,7 +572,7 @@ public abstract class HexGrid extends Grid {
   @Override
   protected Area createGridArea(int gridRadius) {
     final Area cellArea = new Area(createCellShape(getSize()));
-    final HashSet<Point> points = generateRing(gridRadius);
+    final Set<Point> points = generateRing(gridRadius);
     Area gridArea = new Area();
 
     // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap

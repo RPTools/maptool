@@ -22,7 +22,6 @@ import java.awt.Paint;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +46,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;
 import net.rptools.maptool.client.TransferableToken;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
@@ -82,6 +82,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   private Directory dir;
   private static String filter;
   private boolean global;
+  private boolean extractRenderedPages;
   private List<File> fileList = new ArrayList<File>();
   private List<Directory> subDirList;
 
@@ -138,24 +139,19 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   public Image[] getDecorations(int index) {
+    if (!Token.isTokenFile(fileList.get(index).getName())) {
+      return null;
+    }
     try {
-      if (Token.isTokenFile(fileList.get(index).getName())) {
-
-        PackedFile pakFile = new PackedFile(fileList.get(index));
-        Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
-        if (isHeroLab != null) {
-          if ((boolean) isHeroLab) {
-            return new Image[] {herolabDecorationImage};
-          }
-        }
-
-        return new Image[] {rptokenDecorationImage};
+      PackedFile pakFile = new PackedFile(fileList.get(index));
+      Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
+      if (isHeroLab != null && (boolean) isHeroLab) {
+        return new Image[] {herolabDecorationImage};
       }
-
+      return new Image[] {rptokenDecorationImage};
     } catch (IOException | NullPointerException | IndexOutOfBoundsException e) {
       e.printStackTrace();
     }
-
     return null;
   }
 
@@ -191,15 +187,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     File file = fileList.get(index);
     if (file.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
-
-      try {
-        Token token = PersistenceUtil.loadToken(file);
-
-        return new TransferableToken(token);
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load that token: ", ioe);
-        return null;
-      }
+      Token token = PersistenceUtil.loadToken(file);
+      return new TransferableToken(token);
     }
 
     if (dir instanceof AssetDirectory || dir instanceof PdfAsDirectory) {
@@ -275,14 +264,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
                 + "<b>"
                 + name
                 + "</b>"
-                + "<br>Dimensions: "
-                + width
-                + " x "
-                + height
-                + "<br>Type: "
-                + fileType
-                + "<br>Size: "
-                + fileSize
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.dimensions", width, height)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.type", fileType)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.size", fileSize)
                 + "</html>";
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -311,7 +298,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   public Object getID(int index) {
-    return new Integer(index);
+    return index;
   }
 
   public Image getImage(Object ID) {
@@ -375,10 +362,14 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
   }
 
+  public void setExtractRenderedPages(boolean extractRenderedPages) {
+    this.extractRenderedPages = extractRenderedPages;
+  }
+
   private class PdfExtractor extends SwingWorker<Void, Boolean> {
     private ExtractImagesFromPDF extractor;
     private final int pageCount;
-    private final int numThreads = 6;
+    private static final int numThreads = 6;
 
     private final boolean forceRescan;
 
@@ -387,7 +378,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       this.forceRescan = forceRescan;
 
       try {
-        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
 
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -448,11 +439,11 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan)
         throws IOException {
       this.pageNumber = pageNumber;
-      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
     }
 
     @Override
-    public Void call() throws Exception {
+    public Void call() {
       try {
         fileList.addAll(extractor.extractPage(pageNumber));
       } catch (Exception e) {
@@ -598,7 +589,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
+    protected Void doInBackground() {
       assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       listFilesInSubDirectories();
       publish(fileList.size());
@@ -641,13 +632,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       // This will filter out any non maptool files, ie show only image file types
       // But it also filters out directories, so we'll just handle them as separate loops.
       File[] files = folderPath.listFiles(AppConstants.IMAGE_FILE_FILTER);
-      File[] folders =
-          folderPath.listFiles(
-              new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                  return new File(dir, name).isDirectory();
-                }
-              });
+      File[] folders = folderPath.listFiles((dir, name) -> new File(dir, name).isDirectory());
 
       for (final File fileEntry : files) {
         if (fileEntry.getName().toUpperCase().contains(filter) && !assetPanel.isLimitReached())
@@ -669,9 +654,5 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   private static Comparator<File> filenameComparator =
-      new Comparator<File>() {
-        public int compare(File o1, File o2) {
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
-      };
+      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 }

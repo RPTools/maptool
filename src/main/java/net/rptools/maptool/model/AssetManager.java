@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,9 +78,7 @@ public class AssetManager {
 
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
-    if (cacheDir != null) {
-      usePersistentCache = true;
-    }
+    usePersistentCache = true;
   }
 
   /**
@@ -104,9 +104,23 @@ public class AssetManager {
    * campaign.
    */
   public static void updateRepositoryList() {
+    List<String> invalidRepos = new ArrayList<>();
     assetLoader.removeAllRepositories();
     for (String repo : MapTool.getCampaign().getRemoteRepositoryList()) {
-      assetLoader.addRepository(repo);
+      if (!assetLoader.addRepository(repo)) {
+        invalidRepos.add(repo);
+      }
+    }
+
+    if (!invalidRepos.isEmpty()) {
+      if (MapTool.isHostingServer()) {
+        String tab = "    ";
+        String repos = tab + String.join("\n" + tab, invalidRepos);
+        MapTool.showError(I18N.getText("msg.error.host.inaccessibleRepo", repos));
+      } else {
+        invalidRepos.forEach(
+            repo -> MapTool.addLocalMessage(I18N.getText("msg.error.inaccessibleRepo", repo)));
+      }
     }
   }
 
@@ -135,11 +149,8 @@ public class AssetManager {
       return;
     }
 
-    List<AssetAvailableListener> listenerList = assetListenerListMap.get(key);
-    if (listenerList == null) {
-      listenerList = new LinkedList<AssetAvailableListener>();
-      assetListenerListMap.put(key, listenerList);
-    }
+    List<AssetAvailableListener> listenerList =
+        assetListenerListMap.computeIfAbsent(key, k -> new LinkedList<AssetAvailableListener>());
 
     for (AssetAvailableListener listener : listeners) {
       if (!listenerList.contains(listener)) {
@@ -180,8 +191,8 @@ public class AssetManager {
    * Determine if the asset manager has the asset. This does not tell you if the asset is done
    * downloading.
    *
-   * @param key
-   * @return
+   * @param key the key
+   * @return true if the asset manager has the key
    */
   public static boolean hasAsset(MD5Key key) {
     return assetMap.containsKey(key)
@@ -193,7 +204,7 @@ public class AssetManager {
    * Determines if the asset data is in memory.
    *
    * @param key MD5 sum associated with asset
-   * @return True if hte asset is loaded, false otherwise
+   * @return True if the asset is loaded, false otherwise
    */
   public static boolean hasAssetInMemory(MD5Key key) {
     return assetMap.containsKey(key);
@@ -234,30 +245,31 @@ public class AssetManager {
 
   /**
    * Similar to getAsset(), but does not block. It will always use the listeners to pass the data
+   *
+   * @param id MD5 of the asset requested
+   * @param listeners instances of {@link AssetAvailableListener} that will be notified when the
+   *     asset is available
    */
   public static void getAssetAsynchronously(
       final MD5Key id, final AssetAvailableListener... listeners) {
 
     assetLoaderThreadPool.submit(
-        new Runnable() {
-          public void run() {
+        () -> {
+          Asset asset = getAsset(id);
 
-            Asset asset = getAsset(id);
-
-            // Simplest case, we already have it
-            if (asset != null) {
-              for (AssetAvailableListener listener : listeners) {
-                listener.assetAvailable(id);
-              }
-
-              return;
+          // Simplest case, we already have it
+          if (asset != null) {
+            for (AssetAvailableListener listener : listeners) {
+              listener.assetAvailable(id);
             }
 
-            // Let's get it from the server
-            // As a last resort we request the asset from the server
-            if (asset == null && !isAssetRequested(id)) {
-              requestAssetFromServer(id, listeners);
-            }
+            return;
+          }
+
+          // Let's get it from the server
+          // As a last resort we request the asset from the server
+          if (!isAssetRequested(id)) {
+            requestAssetFromServer(id, listeners);
           }
         });
   }
@@ -351,7 +363,7 @@ public class AssetManager {
    * caution!
    *
    * @param id MD5 of the asset to load from the server
-   * @return
+   * @return Asset from the server
    */
   public static Asset requestAssetFromServer(MD5Key id) {
 
@@ -406,7 +418,7 @@ public class AssetManager {
    *
    * @param file File to use for asset
    * @return Asset associated with the file
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(File file) throws IOException {
     return new Asset(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
@@ -417,7 +429,7 @@ public class AssetManager {
    *
    * @param url File to use for asset
    * @return Asset associated with the file
-   * @throws IOException
+   * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(URL url) throws IOException {
     // Create a temporary file from the downloaded URL
@@ -442,17 +454,13 @@ public class AssetManager {
   public static Properties getAssetInfo(MD5Key id) {
 
     File infoFile = getAssetInfoFile(id);
-    try {
-
-      Properties props = new Properties();
-      InputStream is = new FileInputStream(infoFile);
+    Properties props = new Properties();
+    try (InputStream is = new FileInputStream(infoFile)) {
       props.load(is);
-      is.close();
-      return props;
-
-    } catch (Exception e) {
-      return new Properties();
+    } catch (IOException ioe) {
+      // do nothing
     }
+    return props;
   }
 
   /**
@@ -470,41 +478,30 @@ public class AssetManager {
 
       final File assetFile = getAssetCacheFile(asset);
 
-      new Thread() {
-        @Override
-        public void run() {
-
-          try {
-            assetFile.getParentFile().mkdirs();
-            // Image
-            OutputStream out = new FileOutputStream(assetFile);
-            out.write(asset.getImage());
-            out.close();
-          } catch (IOException ioe) {
-            log.error("Could not persist asset while writing image data", ioe);
-            return;
-          } catch (NullPointerException npe) {
-            // Not an issue, will update once th frame is finished loading...
-            log.warn("Could not update statusbar while MapTool frame is loading.", npe);
-          }
-        }
-      }.start();
+      new Thread(
+              () -> {
+                assetFile.getParentFile().mkdirs();
+                try (OutputStream out = new FileOutputStream(assetFile)) {
+                  out.write(asset.getImage());
+                } catch (IOException ioe) {
+                  log.error("Could not persist asset while writing image data", ioe);
+                  return;
+                } catch (NullPointerException npe) {
+                  // Not an issue, will update once th frame is finished loading...
+                  log.warn("Could not update statusbar while MapTool frame is loading.", npe);
+                }
+              })
+          .start();
     }
     if (!assetInfoIsInPersistentCache(asset)) {
 
       File infoFile = getAssetInfoFile(asset);
-
-      try {
-        // Info
-        OutputStream out = new FileOutputStream(infoFile);
-        Properties props = new Properties();
+      Properties props = new Properties();
+      try (OutputStream out = new FileOutputStream(infoFile)) {
         props.put(NAME, asset.getName() != null ? asset.getName() : "");
         props.store(out, "Asset Info");
-        out.close();
-
       } catch (IOException ioe) {
         log.error("Could not persist asset while writing image properties", ioe);
-        return;
       }
     }
   }
@@ -546,8 +543,8 @@ public class AssetManager {
    * field from the AssetPanel the option of searching through all directories and not just the
    * current one. FJE
    *
-   * @param image
-   * @throws IOException
+   * @param image the file to be stored
+   * @throws IOException in case of an I/O error
    */
   public static void rememberLocalImageReference(File image) throws IOException {
 
@@ -568,11 +565,9 @@ public class AssetManager {
     }
 
     // Keep track of this reference
-    FileOutputStream out = new FileOutputStream(lnkFile, true); // For appending
-
-    out.write((image.getAbsolutePath() + "\n").getBytes());
-
-    out.close();
+    try (FileOutputStream out = new FileOutputStream(lnkFile, true)) { // For appending
+      out.write((image.getAbsolutePath() + "\n").getBytes());
+    }
   }
 
   /**
@@ -748,9 +743,11 @@ public class AssetManager {
     }
 
     // Now create the aggregate of all repositories.
-    Set<String> aggregate = new HashSet<String>(size);
+    Set<MD5Key> aggregate = new HashSet<>(size);
     for (String repo : repos) {
-      aggregate.addAll(assetLoader.getRepositoryMap(repo).keySet());
+      for (String key : assetLoader.getRepositoryMap(repo).keySet()) {
+        aggregate.add(new MD5Key(key));
+      }
     }
 
     /*
@@ -762,9 +759,10 @@ public class AssetManager {
      */
     Map<MD5Key, Asset> missing =
         new HashMap<MD5Key, Asset>(Math.min(assetMap.size(), aggregate.size()));
-    for (MD5Key key : assetMap.keySet()) {
-      if (aggregate.contains(key) == false) // Not in any repository so add it.
-      missing.put(key, assetMap.get(key));
+
+    for (var entry : assetMap.entrySet()) {
+      if (aggregate.contains(entry.getKey()) == false) // Not in any repository so add it.
+      missing.put(entry.getKey(), entry.getValue());
     }
     return missing;
   }

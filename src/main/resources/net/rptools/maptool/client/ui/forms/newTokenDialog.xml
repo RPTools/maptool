@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Name:</at>
+            <at name="text">Label.name</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>
@@ -114,7 +114,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">GM Name:</at>
+            <at name="text">Label.gmname</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>
@@ -174,7 +174,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Type:</at>
+            <at name="text">dialog.NewToken.type</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>
@@ -594,7 +594,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">25</at>
                  <at name="width">53</at>
                  <at name="name">okButton</at>
@@ -650,7 +650,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">25</at>
                  <at name="width">75</at>
                  <at name="name">cancelButton</at>
@@ -842,7 +842,7 @@
           <at name="classname">javax.swing.JCheckBox</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Show this dialog</at>
+            <at name="text">dialog.NewToken.show</at>
             <at name="selected">true</at>
             <at name="height">17</at>
             <at name="width">452</at>
@@ -899,7 +899,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Visible:</at>
+            <at name="text">dialog.NewToken.visible</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>

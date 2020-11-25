@@ -18,8 +18,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -120,26 +118,19 @@ public class LogConsoleFrame extends JFrame {
 
   private JButton getClearButton() {
     if (clearButton == null) {
-      clearButton = new JButton("Clear");
-      clearButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              getNoteArea().setText("");
-            }
-          });
+      clearButton = new JButton(I18N.getText("Button.clear"));
+      clearButton.addActionListener(e -> getNoteArea().setText(""));
     }
     return clearButton;
   }
 
   private JButton getCloseButton() {
     if (closeButton == null) {
-      closeButton = new JButton("Close");
+      closeButton = new JButton(I18N.getText("Button.close"));
       closeButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              processWindowEvent(new WindowEvent(LogConsoleFrame.this, WindowEvent.WINDOW_CLOSING));
-            }
-          });
+          e ->
+              processWindowEvent(
+                  new WindowEvent(LogConsoleFrame.this, WindowEvent.WINDOW_CLOSING)));
     }
     return closeButton;
   }

@@ -27,8 +27,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Zone.Event;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -48,9 +48,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
       if (impersonatePanel != null)
         panelVisible =
             (impersonatePanel.isVisible() && !impersonatePanel.isAutohide())
-                    || impersonatePanel.isAutohideShowing()
-                ? true
-                : false;
+                || impersonatePanel.isAutohideShowing();
     }
     // Only repaint the panel if its visible
     if (panelVisible && mtf != null && mtf.getCurrentZoneRenderer() != null) {
@@ -137,6 +135,52 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  /** Resets the panel only if no token is impersonated. */
+  public void resetIfNotImpersonating() {
+    if (!currentlyImpersonating || getToken() == null) {
+      reset();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
+      // Only resets if the impersonated token is among those changed/deleted
+      boolean impersonatedChanged;
+      if (event.getArg() instanceof List<?>) {
+        impersonatedChanged = isImpersonatedAmongList((List<Token>) event.getArg());
+      } else {
+        impersonatedChanged = isTokenImpersonated((Token) event.getArg());
+      }
+      if (impersonatedChanged) {
+        reset();
+      }
+    }
+  }
+
+  private boolean isTokenImpersonated(Token token) {
+    return token != null && getTokenId() != null && token.getId().equals(getTokenId());
+  }
+
+  private boolean isImpersonatedAmongList(List<Token> list) {
+    for (Token token : list) {
+      if (isTokenImpersonated(token)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* this is not going to be called for this panel */
+    return null;
   }
 
   /**

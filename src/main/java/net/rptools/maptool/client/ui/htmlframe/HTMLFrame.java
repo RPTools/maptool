@@ -23,13 +23,13 @@ import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.swing.ImageIcon;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 
 /**
  * Represents a dockable frame holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
@@ -57,6 +57,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   /** Is the panel HTML5 or HTML3.2. */
   private boolean isHTML5;
+
+  /**
+   * Runs a javascript on a frame.
+   *
+   * @param name the name of the frame
+   * @param script the script to run
+   * @return true if the frame exists and can run the script, false otherwise
+   */
+  public static boolean runScript(String name, String script) {
+    HTMLFrame frame = frames.get(name);
+    return frame != null && frame.panel.runJavascript(script);
+  }
 
   @Override
   public Map<String, String> macroCallbacks() {
@@ -88,15 +100,26 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   }
 
   /**
+   * Gets an unmodifiable set view of the names of all known frames.
+   *
+   * @return the frame names
+   */
+  public static Set<String> getFrameNames() {
+    return Collections.unmodifiableSet(frames.keySet());
+  }
+
+  /**
    * Creates a new HTMLFrame and displays it or displays an existing frame. The width and height are
    * ignored for existing frames so that they will not override the size that the player may have
    * resized them to.
    *
    * @param name the name of the frame.
    * @param title the title of the frame.
+   * @param tabTitle the title of the tab.
    * @param width the width of the frame in pixels.
    * @param height the height of the frame in pixels.
    * @param temp whether the frame should be temporary.
+   * @param scrollReset whether the scrollbar should be reset.
    * @param isHTML5 whether it should use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param val a value that can be returned by getFrameProperties().
    * @param html the html to display in the frame.
@@ -109,6 +132,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       int width,
       int height,
       boolean temp,
+      boolean scrollReset,
       boolean isHTML5,
       Object val,
       String html) {
@@ -129,7 +153,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
-    frame.updateContents(html, title, tabTitle, temp, isHTML5, val);
+    frame.updateContents(html, title, tabTitle, temp, scrollReset, isHTML5, val);
     return frame;
   }
 
@@ -160,7 +184,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this);
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
     } else {
       panel = new HTMLPanel(this, true);
     }
@@ -225,11 +249,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param title the title of the frame
    * @param tabTitle the tabTitle of the frame
    * @param temp whether the frame is temporary
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether the frame should support HTML5 (JavaFX)
    * @param val the value to put in the frame
    */
   public void updateContents(
-      String html, String title, String tabTitle, boolean temp, boolean isHTML5, Object val) {
+      String html,
+      String title,
+      String tabTitle,
+      boolean temp,
+      boolean scrollReset,
+      boolean isHTML5,
+      Object val) {
     if (this.isHTML5 != isHTML5) {
       this.isHTML5 = isHTML5;
       panel.removeFromContainer(this); // remove previous panel
@@ -241,7 +272,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     setTabTitle(tabTitle);
     setTemporary(temp);
     setValue(val);
-    panel.updateContents(html);
+    panel.updateContents(html, scrollReset);
   }
 
   /** Run all callback macros for "onChangeSelection". */
@@ -281,9 +312,10 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * Return a json with the width, height, title, temporary, and value of the frame
    *
    * @param name the name of the frame.
-   * @return a json with the width, height, title, temporary, and value of the frame
+   * @return a json with the width, height, title, temporary, and value of the frame, if one was
+   *     found
    */
-  public static Object getFrameProperties(String name) {
+  public static Optional<JsonObject> getFrameProperties(String name) {
     if (frames.containsKey(name)) {
       HTMLFrame frame = frames.get(name);
       JsonObject frameProperties = new JsonObject();
@@ -291,9 +323,14 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       frameProperties.addProperty("width", frame.getWidth());
       frameProperties.addProperty("height", frame.getHeight());
       frameProperties.addProperty(
-          "temporary", frame.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+          "temporary", FunctionUtil.getDecimalForBoolean(frame.getTemporary()));
       frameProperties.addProperty("title", frame.getTitle());
-
+      frameProperties.addProperty("tabtitle", frame.getTabTitle());
+      frameProperties.addProperty("visible", FunctionUtil.getDecimalForBoolean(frame.isVisible()));
+      frameProperties.addProperty("docked", FunctionUtil.getDecimalForBoolean(frame.isDocked()));
+      frameProperties.addProperty(
+          "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
+      frameProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(frame.isHTML5));
       Object frameValue = frame.getValue();
       if (frameValue == null) {
         frameValue = "";
@@ -311,9 +348,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       }
       frameProperties.addProperty("value", frameValue.toString());
 
-      return frameProperties;
+      return Optional.of(frameProperties);
     } else {
-      return "";
+      return Optional.empty();
     }
   }
 

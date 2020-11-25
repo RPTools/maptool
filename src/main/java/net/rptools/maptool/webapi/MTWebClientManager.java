@@ -14,11 +14,11 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import net.sf.json.JSONObject;
 
 public class MTWebClientManager {
 
@@ -55,7 +55,7 @@ public class MTWebClientManager {
    * @param messageType the type of the message.
    * @param data the data to send
    */
-  public void sendToAllSessions(String messageType, JSONObject data) {
+  public void sendToAllSessions(String messageType, JsonObject data) {
     for (MTWebSocket ws : clientSockets) {
       ws.sendMessage(messageType, data);
     }

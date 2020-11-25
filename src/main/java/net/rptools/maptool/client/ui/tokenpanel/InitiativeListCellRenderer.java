@@ -17,19 +17,7 @@ package net.rptools.maptool.client.ui.tokenpanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.CellConstraints.Alignment;
 import com.jgoodies.forms.layout.FormLayout;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
@@ -42,6 +30,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -58,7 +47,8 @@ import net.rptools.maptool.util.ImageManager;
  *
  * @author Jay
  */
-public class InitiativeListCellRenderer extends JPanel implements ListCellRenderer {
+public class InitiativeListCellRenderer extends JPanel
+    implements ListCellRenderer<TokenInitiative> {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -97,12 +87,17 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
               .getResource("net/rptools/maptool/client/image/currentIndicator.png"));
 
   /** Border used to show that an item is selected */
-  public static final Border SELECTED_BORDER = BorderFactory.createLineBorder(Color.BLACK);
+  public static final Border SELECTED_BORDER = ImageBorder.RED;
 
   /** Border used to show that an item is not selected */
-  public static final Border UNSELECTED_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+  public static final Border UNSELECTED_BORDER =
+      BorderFactory.createEmptyBorder(
+          ImageBorder.RED.getTopMargin(),
+          ImageBorder.RED.getLeftMargin(),
+          ImageBorder.RED.getBottomMargin(),
+          ImageBorder.RED.getRightMargin());
 
-  /** Border used to show that an item is selected */
+  /** Border used for name plate */
   public static final Border NAME_BORDER = BorderFactory.createEmptyBorder(2, 4, 3, 4);
 
   /** The size of the ICON shown in the list renderer */
@@ -122,8 +117,8 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
     // Set up the panel
     panel = aPanel;
     setLayout(new FormLayout("1px pref 1px pref:grow", "fill:pref"));
-    setBorder(SELECTED_BORDER);
-    setBackground(Color.WHITE);
+    //    setBorder(SELECTED_BORDER);
+    //    setBackground(Color.WHITE);
 
     // The current indicator
     currentIndicator = new JLabel();
@@ -150,12 +145,14 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
    * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList,
    *     java.lang.Object, int, boolean, boolean)
    */
+  @Override
   public Component getListCellRendererComponent(
-      JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      JList list, TokenInitiative ti, int index, boolean isSelected, boolean cellHasFocus) {
+
+    setOpaque(false);
 
     // Set the background by type
     Token token = null;
-    TokenInitiative ti = (TokenInitiative) value;
     if (ti != null) token = ti.getToken();
     if (token == null) { // Can happen when deleting a token before all events have propagated
       currentIndicator.setIcon(null);
@@ -169,6 +166,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
             ? token.getType() == Token.Type.NPC ? GraphicsUtil.BLUE_LABEL : GraphicsUtil.GREY_LABEL
             : GraphicsUtil.DARK_GREY_LABEL;
     name.setForeground(Color.BLACK);
+    name.setFont(name.getFont().deriveFont(token.isVisible() ? Font.PLAIN : Font.ITALIC));
 
     // Show the indicator?
     int currentIndex = panel.getList().getCurrent();
@@ -190,9 +188,10 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
     Icon icon = null;
     if (panel.isShowTokens()) {
       icon = ti.getDisplayIcon();
-      if (icon == null) {
+      if (icon == null || ti.wasTokenVisibleWhenIconUpdated() != token.isVisible()) {
         icon = new InitiativeListIcon(ti);
         ti.setDisplayIcon(icon);
+        ti.setTokenVisibleWhenIconUpdated(token.isVisible());
       } // endif
     } // endif
     name.setText(sName);
@@ -304,6 +303,9 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
       Dimension d = new Dimension(image.getWidth(null), image.getHeight(null));
       SwingUtil.constrainTo(d, getIconWidth(), getIconHeight());
       Graphics2D g = bi.createGraphics();
+      g.setComposite(
+          AlphaComposite.getInstance(
+              AlphaComposite.SRC_OVER, tokenInitiative.getToken().isVisible() ? 1.0F : 0.5F));
       g.drawImage(
           image,
           (getIconWidth() - d.width) / 2,

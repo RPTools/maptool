@@ -21,20 +21,19 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.model.Zone;
 
 public class LayerSelectionDialog extends JPanel {
 
   private final FormPanel panel;
-  private JList list;
+  private JList<Zone.Layer> list;
   private final LayerSelectionListener listener;
   private final Zone.Layer[] layerList;
 
   public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
-    panel = new FormPanel("net/rptools/maptool/client/ui/forms/layerSelectionDialog.xml");
+    panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/layerSelectionDialog.xml");
     this.listener = listener;
     this.layerList = layerList;
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -49,7 +48,7 @@ public class LayerSelectionDialog extends JPanel {
 
     int index = list.getSelectedIndex();
     if (index >= 0 && listener != null) {
-      listener.layerSelected((Zone.Layer) list.getModel().getElementAt(index));
+      listener.layerSelected(list.getModel().getElementAt(index));
     }
   }
 
@@ -58,12 +57,12 @@ public class LayerSelectionDialog extends JPanel {
         .setSelectedValue(MapTool.getFrame().getCurrentZoneRenderer().getActiveLayer(), true);
   }
 
-  private JList getLayerList() {
+  private JList<Zone.Layer> getLayerList() {
 
     if (list == null) {
       list = panel.getList("layerList");
 
-      DefaultListModel model = new DefaultListModel();
+      DefaultListModel<Zone.Layer> model = new DefaultListModel<>();
       for (Zone.Layer layer : layerList) {
         model.addElement(layer);
       }
@@ -71,15 +70,12 @@ public class LayerSelectionDialog extends JPanel {
       list.setModel(model);
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.addListSelectionListener(
-          new ListSelectionListener() {
-
-            public void valueChanged(ListSelectionEvent e) {
-              if (e.getValueIsAdjusting()) {
-                return;
-              }
-
-              fireViewSelectionChange();
+          e -> {
+            if (e.getValueIsAdjusting()) {
+              return;
             }
+
+            fireViewSelectionChange();
           });
       list.setSelectedIndex(0);
     }
@@ -91,7 +87,7 @@ public class LayerSelectionDialog extends JPanel {
     list.setSelectedValue(layer, true);
   }
 
-  public static interface LayerSelectionListener {
+  public interface LayerSelectionListener {
     public void layerSelected(Zone.Layer layer);
   }
 }

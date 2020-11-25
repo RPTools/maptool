@@ -15,7 +15,6 @@
 package net.rptools.maptool.model;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -140,20 +139,15 @@ public class Path<T extends AbstractPoint> {
         indexCheck++;
       }
 
-      if (waypointCheck.isEmpty())
-        processPath.addAllPathCells(nw.calculatePath(prevPoint, terminalPoint));
-      else {
-        Iterator<T> i = waypointCheck.iterator();
-        while (i.hasNext()) {
-          T p = i.next();
+      if (!waypointCheck.isEmpty()) {
+        for (T p : waypointCheck) {
           if (p instanceof ZonePoint) convPoint = grid.convert((ZonePoint) p);
           else convPoint = (CellPoint) p;
           processPath.addAllPathCells(nw.calculatePath(prevPoint, convPoint));
           prevPoint = convPoint;
         }
-
-        processPath.addAllPathCells(nw.calculatePath(prevPoint, terminalPoint));
       }
+      processPath.addAllPathCells(nw.calculatePath(prevPoint, terminalPoint));
 
       path = (Path<T>) processPath;
 

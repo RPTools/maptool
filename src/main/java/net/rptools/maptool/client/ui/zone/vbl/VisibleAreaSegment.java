@@ -22,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.util.GraphicsUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   private final Point2D origin;
@@ -46,6 +47,10 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   public long getDistanceFromOrigin() {
     // return GeometryUtil.getDistance(getCenterPoint(), origin);
     return (long) (getCenterPoint().distance(origin) * 1000);
+  }
+
+  public long getDistanceSqFromOrigin() {
+    return (long) getCenterPoint().distanceSq(origin);
   }
 
   public Point2D getCenterPoint() {
@@ -120,14 +125,14 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 
   ////
   // COMPARABLE
-  public int compareTo(VisibleAreaSegment o) {
+  public int compareTo(@NotNull VisibleAreaSegment o) {
     if (o != this) {
       // Jamz: We're getting the following exception from this compare:
       // java.lang.IllegalArgumentException: Comparison method violates its general contract!
       // So we changed getDistanceFromOrigin() to return a long after multiplying by 1000 for
       // precision
-      long odist = o.getDistanceFromOrigin();
-      long val = getDistanceFromOrigin() - odist; // separate variable for debugging
+      long odist = o.getDistanceSqFromOrigin();
+      long val = getDistanceSqFromOrigin() - odist; // separate variable for debugging
       return (int) val;
       // return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
       // return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;

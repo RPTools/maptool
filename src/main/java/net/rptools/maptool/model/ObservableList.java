@@ -15,16 +15,16 @@
 package net.rptools.maptool.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
+import org.jetbrains.annotations.NotNull;
 
 // TODO: Make this class implement 'List'
-public class ObservableList<K> extends Observable implements Iterable {
+public class ObservableList<K> extends Observable implements Iterable<K> {
 
-  private List<K> list;
+  private final List<K> list;
 
   public enum Event {
     add,
@@ -48,7 +48,7 @@ public class ObservableList<K> extends Observable implements Iterable {
   }
 
   public void sort(Comparator<K> comparitor) {
-    Collections.sort(list, comparitor);
+    list.sort(comparitor);
   }
 
   public boolean contains(K item) {
@@ -122,7 +122,7 @@ public class ObservableList<K> extends Observable implements Iterable {
    *
    * @return An iterator over the displayed list.
    */
-  public Iterator<K> iterator() {
+  public @NotNull Iterator<K> iterator() {
     return list.iterator();
   }
 }

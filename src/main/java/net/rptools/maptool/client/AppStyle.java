@@ -35,6 +35,7 @@ public class AppStyle {
   public static Font labelFont = Font.decode("serif-NORMAL-12");
 
   public static BufferedImage tokenInvisible;
+  public static BufferedImage notVisible;
 
   public static BufferedImage cellWaypointImage;
   public static BufferedImage validMoveImage;
@@ -89,11 +90,16 @@ public class AppStyle {
   public static BufferedImage impersonatePanelImage;
   public static BufferedImage tablesPanelImage;
   public static BufferedImage initiativePanelImage;
+
+  public static BufferedImage resize;
+
   public static BufferedImage arrowOut;
   public static BufferedImage arrowRotateClockwise;
   public static BufferedImage arrowIn;
+  public static BufferedImage arrowMenu;
   public static BufferedImage arrowRight;
   public static BufferedImage arrowLeft;
+  public static BufferedImage arrowHold;
 
   public static BufferedImage lightSourceIcon;
 
@@ -102,6 +108,7 @@ public class AppStyle {
       // Set defaults
       tokenInvisible =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/icon_invisible.png");
+      notVisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/notvisible.png");
       cellWaypointImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
       validMoveImage =
@@ -156,6 +163,9 @@ public class AppStyle {
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/layers.png");
       initiativePanelImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/initiativePanel.png");
+
+      resize = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/resize.png");
+
       arrowOut = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_out.png");
       arrowRotateClockwise =
           ImageUtil.getCompatibleImage(
@@ -163,6 +173,8 @@ public class AppStyle {
       arrowIn = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_in_red.png");
       arrowRight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_right.png");
       arrowLeft = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_left.png");
+      arrowMenu = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_menu.png");
+      arrowHold = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_hold.png");
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");

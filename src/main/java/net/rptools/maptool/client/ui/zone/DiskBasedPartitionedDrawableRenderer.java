@@ -102,8 +102,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
     int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
 
-    Set<String> chunkCache = new HashSet<String>();
-    chunkCache.addAll(chunkMap.keySet());
+    Set<String> chunkCache = new HashSet<String>(chunkMap.keySet());
     int count = 0;
     for (int row = 0; row < verticalChunkCount; row++) {
       for (int col = 0; col < horizontalChunkCount; col++) {

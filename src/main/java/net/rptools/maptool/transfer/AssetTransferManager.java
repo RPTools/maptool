@@ -38,6 +38,8 @@ public class AssetTransferManager {
   /**
    * Add a new producer to the chunk queue. Assumes that the header has already been transferred to
    * the consumer. Producer chunks can then be retrieved via nextChunk()
+   *
+   * @param producer the new producer
    */
   public synchronized void addProducer(AssetProducer producer) {
     producerList.add(producer);
@@ -47,7 +49,8 @@ public class AssetTransferManager {
    * Get the next chunk from the available producers
    *
    * @param size size of the data to retrieve
-   * @throws IOException
+   * @throws IOException if an I/O error occurs or current position in the file is wrong
+   * @return an {@link AssetChunk} with the next size bytes of data
    */
   public synchronized AssetChunk nextChunk(int size) throws IOException {
     if (producerList.size() == 0) {
@@ -64,6 +67,8 @@ public class AssetTransferManager {
   /**
    * Add the corresponding consumer that is expecting to receive chunks. Add a ConsumerListener to
    * know when the asset is complete
+   *
+   * @param consumer the consumer the will receive the chunks
    */
   public synchronized void addConsumer(AssetConsumer consumer) {
     if (consumerMap.get(consumer.getId()) != null) {
@@ -79,7 +84,9 @@ public class AssetTransferManager {
    * Update the appropriate asset. To be notified when the asset is complete add a ConsumerListener.
    * When the asset is complete it will be removed from the internal map automatically
    *
-   * @throws IOException
+   * @param chunk the chunk to with the data of the update
+   * @throws IOException if the file exists but is a directory rather than a regular file, does not
+   *     exist but cannot be created, or cannot be opened for any other reason
    */
   public synchronized void update(AssetChunk chunk) throws IOException {
     AssetConsumer consumer = consumerMap.get(chunk.getId());
@@ -101,6 +108,8 @@ public class AssetTransferManager {
 
   /**
    * Get a list of current asset consumers, this is a good way to know what's going on in the system
+   *
+   * @return a list of consumers for the asset
    */
   public synchronized List<AssetConsumer> getAssetConsumers() {
     return new ArrayList<AssetConsumer>(consumerMap.values());

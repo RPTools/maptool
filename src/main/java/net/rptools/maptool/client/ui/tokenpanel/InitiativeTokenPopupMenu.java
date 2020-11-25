@@ -109,7 +109,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
           for (TokenInitiative ti : selectedTokenInitiatives) ti.setHolding(!ti.isHolding());
-        };
+        }
       };
 
   /** This action will make the token under the mouse the current token. */
@@ -119,7 +119,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
         public void actionPerformed(ActionEvent e) {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           list.setCurrent(list.indexOf(tokenInitiativeUnderMouse));
-        };
+        }
       };
 
   /** This action will set the initiative state of the currently selected token. */
@@ -136,14 +136,14 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
                 && ti.getToken().getGMName() != null
                 && ti.getToken().getGMName().trim().length() != 0)
               sName += " (" + ti.getToken().getGMName().trim() + ")";
-            message = String.format(I18N.getText("initPanel.enterState"), sName);
+            message = I18N.getText("initPanel.enterState", sName);
             defaultValue = ti.getState();
           } // endif
           String input = JOptionPane.showInputDialog(message, defaultValue);
           if (input == null) return;
           input = input.trim();
           for (TokenInitiative ti : selectedTokenInitiatives) ti.setState(input.trim());
-        };
+        }
       };
 
   /** This action will set the initiative state of the currently selected token. */
@@ -152,7 +152,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
           for (TokenInitiative ti : selectedTokenInitiatives) ti.setState(null);
-        };
+        }
       };
 
   /** This action will remove the selected token from the list. */
@@ -168,7 +168,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
               list.removeToken(index);
             } // endif
           } // endfor
-        };
+        }
       };
 
   /** This action will move a token up one space */
@@ -179,7 +179,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           int index = list.indexOf(tokenInitiativeUnderMouse);
           list.moveToken(index, index - 1);
-        };
+        }
       };
 
   /** This action will move a token up one space */
@@ -190,7 +190,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           int index = list.indexOf(tokenInitiativeUnderMouse);
           list.moveToken(index, index + 2);
-        };
+        }
       };
 
   /** This action will center the selected token on the map and select it. */
@@ -202,6 +202,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
           getRenderer().centerOn(new ZonePoint(token.getX(), token.getY()));
           getRenderer().clearSelectedTokens();
           getRenderer().selectToken(token.getId());
-        };
+          getRenderer().updateAfterSelection();
+        }
       };
 }

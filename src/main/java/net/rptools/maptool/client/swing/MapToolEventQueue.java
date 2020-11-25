@@ -19,103 +19,49 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
-import java.awt.event.FocusEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
-import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
-  private static final JideOptionPane optionPane =
-      new JideOptionPane(
-          I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
-          JOptionPane.ERROR_MESSAGE,
-          JideOptionPane.CLOSE_OPTION);
-  /**
-   * This field must only ever be accessed from the EDT. Otherwise, a separate thread could access
-   * it to determine the state of the `Shift` key only to have the EDT progress to a different event
-   * such that the state is outdated.
-   *
-   * <p>An `int` is used to allow for future implementations to include the location of the key,
-   * i.e., Left-Shift or Right-Shift via event.getKeyLocation().
-   */
-  public static int shiftState = 0;
-
-  public static final int ALL_MODIFIERS_EXC_SHIFT =
-      InputEvent.CTRL_DOWN_MASK
-          | InputEvent.ALT_DOWN_MASK
-          | InputEvent.META_DOWN_MASK
-          | InputEvent.ALT_GRAPH_DOWN_MASK;
+  private static JideOptionPane optionPane;
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
-      if (event instanceof KeyEvent) {
-        KeyEvent ke = (KeyEvent) event;
-        if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
-          switch (ke.getID()) {
-            case KeyEvent.KEY_PRESSED:
-              MapToolEventQueue.shiftState = 1;
-              break;
-            case KeyEvent.KEY_RELEASED:
-              MapToolEventQueue.shiftState = 0;
-              break;
-          }
-          // log.info("shiftState set to " + MapToolEventQueue.shiftState);
-        }
-      } else if (event instanceof FocusEvent) {
-        FocusEvent fe = (FocusEvent) event;
-        if (fe.getID() == FocusEvent.FOCUS_LOST) {
-          // When we lose focus, assume the Shift key is released.
-          MapToolEventQueue.shiftState = 0;
-          // log.info("shiftState forced off (focus lost)");
-        }
-      } else if (event instanceof MouseWheelEvent) {
+      if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
-          int all_mods = mwe.getModifiersEx() & MapToolEventQueue.ALL_MODIFIERS_EXC_SHIFT;
-          event =
-              new MouseWheelEvent(
-                  mwe.getComponent(),
-                  mwe.getID(),
-                  mwe.getWhen(),
-                  all_mods,
-                  mwe.getX(),
-                  mwe.getY(),
-                  mwe.getXOnScreen(),
-                  mwe.getYOnScreen(),
-                  1,
-                  mwe.isPopupTrigger(),
-                  mwe.getScrollType(),
-                  mwe.getScrollAmount(),
-                  mwe.getWheelRotation(),
-                  mwe.getPreciseWheelRotation());
-          // log.info("shiftModifier forced off");
+        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
+          // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
+          // held down.
+          return;
         }
       }
       super.dispatchEvent(event);
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
+      JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
       optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
       log.error(t, t);
+      JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); // $NON-NLS-1$
       optionPane.setDetails(toString(t));
       try {
@@ -134,6 +80,18 @@ public class MapToolEventQueue extends EventQueue {
         reportToSentryIO(thrown);
       }
     }
+  }
+
+  /** @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured. */
+  private static JideOptionPane getOptionPane() {
+    if (optionPane == null) {
+      optionPane =
+          new JideOptionPane(
+              I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
+              JOptionPane.ERROR_MESSAGE,
+              JideOptionPane.CLOSE_OPTION);
+    }
+    return optionPane;
   }
 
   private static void displayPopup() {
@@ -191,7 +149,7 @@ public class MapToolEventQueue extends EventQueue {
     boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
-    Sentry.getContext().addExtra("System Info", new SysInfo().getSysInfoJSON());
+    Sentry.getContext().addExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON());
 
     addGetInfoToSentry("campaign");
 
@@ -212,7 +170,7 @@ public class MapToolEventQueue extends EventQueue {
       campaign =
           getInfoFunction
               .getInstance()
-              .childEvaluate(null, null, Collections.singletonList(command));
+              .childEvaluate(null, null, null, Collections.singletonList(command));
       MapTool.getParser().exitContext();
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();

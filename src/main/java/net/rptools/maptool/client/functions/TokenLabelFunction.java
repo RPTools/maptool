@@ -22,6 +22,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenLabelFunction extends AbstractFunction {
@@ -57,24 +58,26 @@ public class TokenLabelFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (functionName.equals("getLabel")) {
-      return getLabel(parser, args);
-    } else {
-      return setLabel(parser, args);
+      return getLabel((MapToolVariableResolver) resolver, args);
+    } else if ("setLabel".equalsIgnoreCase(functionName)) {
+      return setLabel((MapToolVariableResolver) resolver, args);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
    * Gets the label of the token
    *
-   * @param parser The parser that called the Object.
    * @param args The arguments passed.
    * @return the name of the token.
    * @throws ParserException when an error occurs.
    */
-  private static Object getLabel(Parser parser, List<Object> args) throws ParserException {
+  private static Object getLabel(MapToolVariableResolver resolver, List<Object> args)
+      throws ParserException {
     Token token;
 
     if (args.size() == 1) {
@@ -89,8 +92,7 @@ public class TokenLabelFunction extends AbstractFunction {
                 "macro.function.general.unknownToken", "getLabel", args.get(0).toString()));
       }
     } else if (args.isEmpty()) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
+      token = resolver.getTokenInContext();
       if (token == null) {
         throw new ParserException(
             I18N.getText("macro.function.general.noImpersonated", "getLabel"));
@@ -105,16 +107,16 @@ public class TokenLabelFunction extends AbstractFunction {
   /**
    * Sets the label of the token.
    *
-   * @param parser The parser that called the Object.
    * @param args The arguments passed.
    * @return the new name of the token.
    * @throws ParserException when an error occurs.
    */
-  private static Object setLabel(Parser parser, List<Object> args) throws ParserException {
+  private static Object setLabel(MapToolVariableResolver resolver, List<Object> args)
+      throws ParserException {
     FunctionUtil.checkNumberParam("setLabel", args, 1, 3);
 
     String label = args.get(0).toString();
-    Token token = FunctionUtil.getTokenFromParam(parser, "setLabel", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setLabel", args, 1, 2);
     setLabel(token, label);
     return label;
   }

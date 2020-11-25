@@ -18,7 +18,6 @@ import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
 import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
@@ -42,28 +41,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
@@ -93,6 +75,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -106,8 +89,9 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
-import net.rptools.maptool.util.UserJvmPrefs;
+import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
+import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -137,12 +121,6 @@ public class MapTool {
 
   public static final String SND_INVALID_OPERATION = "invalidOperation";
 
-  /**
-   * Version of Java being used. Note that this is the "specification version" , so expect numbers
-   * like 1.4, 1.5, and 1.6.
-   */
-  public static Double JAVA_VERSION;
-
   private static String clientId = AppUtil.readClientId();
 
   public enum ZoneEvent {
@@ -171,7 +149,7 @@ public class MapTool {
 
   private static ObservableList<Player> playerList;
   private static ObservableList<TextMessage> messageList;
-  private static Player player;
+  private static LocalPlayer player;
 
   private static ClientConnection conn;
   private static ClientMethodHandler handler;
@@ -583,13 +561,7 @@ public class MapTool {
     // using a renderer that's on screen
     if (!EventQueue.isDispatchThread()) {
       try {
-        EventQueue.invokeAndWait(
-            new Runnable() {
-              @Override
-              public void run() {
-                renderer.renderZone(g, view);
-              }
-            });
+        EventQueue.invokeAndWait(() -> renderer.renderZone(g, view));
       } catch (InterruptedException | InvocationTargetException ie) {
         MapTool.showError("While creating snapshot", ie);
       }
@@ -676,11 +648,7 @@ public class MapTool {
     AppSetup.install();
 
     // Clean up after ourselves
-    try {
-      FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
-    } catch (IOException ioe) {
-      MapTool.showError("While initializing (cleaning tmpdir)", ioe);
-    }
+    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
@@ -708,7 +676,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new Player("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, "");
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -783,6 +751,7 @@ public class MapTool {
     return serverCommand;
   }
 
+  /** @return the server, or null if player is a client. */
   public static MapToolServer getServer() {
     return server;
   }
@@ -792,13 +761,7 @@ public class MapTool {
       playerList.add(player);
 
       // LATER: Make this non-anonymous
-      playerList.sort(
-          new Comparator<Player>() {
-            @Override
-            public int compare(Player arg0, Player arg1) {
-              return arg0.getName().compareToIgnoreCase(arg1.getName());
-            }
-          });
+      playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
 
       if (!player.equals(MapTool.getPlayer())) {
         String msg =
@@ -893,6 +856,21 @@ public class MapTool {
   }
 
   /**
+   * Adds an error message that includes the macro stack trace.
+   *
+   * @param e the ParserException to display the error of
+   */
+  public static void addErrorMessage(ParserException e) {
+    MapTool.addLocalMessage(e.getMessage());
+
+    String[] macroStackTrace = e.getMacroStackTrace();
+    if (macroStackTrace.length > 0) {
+      MapTool.addLocalMessage(
+          I18N.getText("msg.error.trace", String.join(" &lt;&lt;&lt; ", macroStackTrace)));
+    }
+  }
+
+  /**
    * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
    *
    * @param message message to be sent
@@ -979,11 +957,11 @@ public class MapTool {
     ZoneRenderer currRenderer = null;
 
     // Clean up
-    clientFrame.setCurrentZoneRenderer(null);
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
     clientFrame.clearTokenTree();
     if (campaign == null) {
+      clientFrame.setCurrentZoneRenderer(null);
       return;
     }
     // Install new campaign
@@ -999,11 +977,18 @@ public class MapTool {
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
     clientFrame.getInitiativePanel().setMovementLock(campaign.isInitiativeMovementLock());
+    clientFrame.getInitiativePanel().setInitUseReverseSort(campaign.isInitiativeUseReverseSort());
+    clientFrame
+        .getInitiativePanel()
+        .setInitPanelButtonsDisabled(campaign.isInitiativePanelButtonsDisabled());
+    clientFrame.getInitiativePanel().updateView();
 
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
-    UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
+    // overlay vanishes after campaign change
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
   public static void setServerPolicy(ServerPolicy policy) {
@@ -1092,15 +1077,27 @@ public class MapTool {
     return playerList;
   }
 
+  /** Returns the list of non-gm names. */
+  public static List<String> getNonGMs() {
+    List<String> nonGMs = new ArrayList<>(playerList.size());
+    playerList.forEach(
+        player -> {
+          if (!player.isGM()) {
+            nonGMs.add(player.getName());
+          }
+        });
+    return nonGMs;
+  }
+
+  /** Returns the list of gm names. */
   public static List<String> getGMs() {
-    Iterator<Player> pliter = playerList.iterator();
-    List<String> gms = new ArrayList<String>(playerList.size());
-    while (pliter.hasNext()) {
-      Player plr = pliter.next();
-      if (plr.isGM()) {
-        gms.add(plr.getName());
-      }
-    }
+    List<String> gms = new ArrayList<>(playerList.size());
+    playerList.forEach(
+        player -> {
+          if (player.isGM()) {
+            gms.add(player.getName());
+          }
+        });
     return gms;
   }
 
@@ -1150,7 +1147,7 @@ public class MapTool {
     }
   }
 
-  public static Player getPlayer() {
+  public static LocalPlayer getPlayer() {
     return player;
   }
 
@@ -1162,16 +1159,16 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new Player(username, Player.Role.GM, null));
+        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player)
-      throws UnknownHostException, IOException {
+  public static void createConnection(String host, int port, LocalPlayer player)
+      throws IOException {
     MapTool.player = player;
-    MapTool.getFrame().getCommandPanel().setIdentityName(null);
+    MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     ClientConnection clientConn = new MapToolConnection(host, port, player);
 
@@ -1199,10 +1196,12 @@ public class MapTool {
     return conn;
   }
 
+  /** returns whether the player is using a personal server. */
   public static boolean isPersonalServer() {
     return server != null && server.getConfig().isPersonalServer();
   }
 
+  /** returns whether the player is hosting a server - personal servers do not count. */
   public static boolean isHostingServer() {
     return server != null && !server.getConfig().isPersonalServer();
   }
@@ -1254,93 +1253,59 @@ public class MapTool {
     return clientFrame;
   }
 
-  private static final void configureJide() {
+  private static void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
-        new LookAndFeelFactory.UIDefaultsCustomizer() {
-          @Override
-          public void customize(UIDefaults defaults) {
-            ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
-            defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
+        defaults -> {
+          ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
+          defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
-            defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
-            // is true
-            defaults.put(
-                "OptionPane.bannerIcon",
-                new ImageIcon(
-                    MapTool.class
-                        .getClassLoader()
-                        .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
-            defaults.put("OptionPane.bannerFontSize", 13);
-            defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
-            defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-            defaults.put(
-                "OptionPane.bannerForeground",
-                painter != null ? painter.getOptionPaneBannerForeground() : null); // you
-            // should
-            // adjust
-            // this
-            // if
-            // banner
-            // background
-            // is
-            // not
-            // the
-            // default
-            // gradient paint
-            defaults.put("OptionPane.bannerBorder", null); // use default border
+          defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
+          // is true
+          defaults.put(
+              "OptionPane.bannerIcon",
+              new ImageIcon(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+          defaults.put("OptionPane.bannerFontSize", 13);
+          defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
+          defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
+          defaults.put(
+              "OptionPane.bannerForeground",
+              painter != null ? painter.getOptionPaneBannerForeground() : null); // you
+          // should
+          // adjust
+          // this
+          // if
+          // banner
+          // background
+          // is
+          // not
+          // the
+          // default
+          // gradient paint
+          defaults.put("OptionPane.bannerBorder", null); // use default border
 
-            // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
-            // gradient
-            defaults.put(
-                "OptionPane.bannerBackgroundDk",
-                painter != null ? painter.getOptionPaneBannerDk() : null);
-            defaults.put(
-                "OptionPane.bannerBackgroundLt",
-                painter != null ? painter.getOptionPaneBannerLt() : null);
-            defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
-            // true
+          // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
+          // gradient
+          defaults.put(
+              "OptionPane.bannerBackgroundDk",
+              painter != null ? painter.getOptionPaneBannerDk() : null);
+          defaults.put(
+              "OptionPane.bannerBackgroundLt",
+              painter != null ? painter.getOptionPaneBannerLt() : null);
+          defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
+          // true
 
-            // optionally, you can set a Paint object for BannerPanel. If so, the three
-            // UIDefaults
-            // related to banner background above will be ignored.
-            defaults.put("OptionPane.bannerBackgroundPaint", null);
+          // optionally, you can set a Paint object for BannerPanel. If so, the three
+          // UIDefaults
+          // related to banner background above will be ignored.
+          defaults.put("OptionPane.bannerBackgroundPaint", null);
 
-            defaults.put(
-                "OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
-            defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
-          }
+          defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
+          defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
         };
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
-  }
-
-  /**
-   * Check to see if we're running on Java 6+.
-   *
-   * <p>While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen
-   * third-party libraries and a search of those JAR files indicate that <i>they DO use</i> Java 6.
-   * So it's best if we warn users that they might be going along happily and suddenly hit a Java
-   * runtime error! It might even be something they do every time they run the program, but some
-   * piece of data was different and the library took a different path and the Java 6-only method
-   * was invoked...
-   *
-   * <p>This method uses the system property <b>java.specification.version</b> as it seemed the
-   * easiest thing to test. :)
-   */
-  private static void verifyJavaVersion() {
-    String version = System.getProperty("java.specification.version");
-    boolean keepgoing = true;
-    if (version == null) {
-      keepgoing = confirm("msg.error.unknownJavaVersion");
-      JAVA_VERSION = 1.5;
-    } else {
-      JAVA_VERSION = Double.valueOf(version);
-      if (JAVA_VERSION < 1.8) {
-        keepgoing = confirm("msg.error.wrongJavaVersion", version);
-      }
-    }
-    if (!keepgoing) {
-      System.exit(1);
-    }
   }
 
   private static void postInitialize() {
@@ -1353,10 +1318,9 @@ public class MapTool {
         AppActions.loadCampaign(campaignFile);
       }
     }
-    // loadCampaign() is guaranteed to restart the ASM so we don't need this, but
-    // we can't be sure which path of the IF statement is taken, so this is easy
-    // and relatively inexpensive.
-    getAutoSaveManager().restart();
+
+    // fire up autosaves
+    getAutoSaveManager().start();
 
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
@@ -1369,6 +1333,13 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+
+    // Check to see status of start up configuration
+    if (AppSetup.didStartupPreferencesGetCopied()) {
+      MapTool.showInformation("startup.config.checkConfigMessage");
+    } else if (AppSetup.didCopyPreviousStartupPreferences()) {
+      MapTool.showInformation("startup.config.copiedPrevious");
+    }
   }
 
   /**
@@ -1401,7 +1372,7 @@ public class MapTool {
   }
 
   public static boolean useToolTipsForUnformatedRolls() {
-    if (isPersonalServer()) {
+    if (isPersonalServer() || getServerPolicy() == null) {
       return AppPreferences.getUseToolTipForInlineRoll();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();
@@ -1415,15 +1386,13 @@ public class MapTool {
   public static void startWebAppServer(final int port) {
     try {
       Thread webAppThread =
-          new Thread() {
-            @Override
-            public void run() {
-              webAppServer.setPort(port);
-              webAppServer.startServer();
-            }
-          };
+          new Thread(
+              () -> {
+                webAppServer.setPort(port);
+                webAppServer.startServer();
+              });
 
-      webAppThread.run();
+      webAppThread.start();
     } catch (Exception e) { // TODO: This needs to be logged
       System.out.println("Unable to start web server");
       e.printStackTrace();
@@ -1621,7 +1590,7 @@ public class MapTool {
       listMacros = getCommandLineOption(cmd, "macros");
 
       if (getCommandLineOption(cmd, "reset")) {
-        UserJvmPrefs.resetJvmOptions();
+        UserJvmOptions.resetJvmOptions();
       }
     } catch (ParseException e) {
       // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
@@ -1695,14 +1664,10 @@ public class MapTool {
       System.exit(1);
     }
 
-    // XXX Should we even be doing this now that we ship with our own JRE?
-    verifyJavaVersion();
-
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash =
-        new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
@@ -1738,6 +1703,7 @@ public class MapTool {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
+        loadTheme();
       }
       // If running on Windows based OS, CJK font is broken when using TinyLAF.
       // else if (WINDOWS) {
@@ -1746,53 +1712,18 @@ public class MapTool {
       // }
       else {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        loadTheme();
         menuBar = new AppMenuBar();
       }
-      // After the TinyLAF library is initialized, look to see if there is a Default.theme
-      // in our AppHome directory and load it if there is. Unfortunately, changing the
-      // search path for the default theme requires subclassing TinyLAF and because
-      // we have both the original and a Mac version that gets cumbersome. (Really
-      // the Mac version should use the default and then install the keystroke differences
-      // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-      File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
-      // File f = AppUtil.getAppHome("config");
-      // if (f.exists()) {
-      // File f2 = new File(f, "Default.theme");
-      if (f2.exists()) {
-        if (Theme.loadTheme(f2)) {
-          // re-install the Tiny Look and Feel
-          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-
-          // Update the ComponentUIs for all Components. This
-          // needs to be invoked for all windows.
-          // SwingUtilities.updateComponentTreeUI(rootComponent);
-        }
-      }
-      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
       LookAndFeelFactory.addUIDefaultsCustomizer(
-          new LookAndFeelFactory.UIDefaultsCustomizer() {
-            @Override
-            public void customize(UIDefaults defaults) {
-              // Remove red border around menus
-              defaults.put("PopupMenu.foreground", Color.lightGray);
-            }
+          defaults -> {
+            // Remove red border around menus
+            defaults.put("PopupMenu.foreground", Color.lightGray);
           });
       LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
-
-      /**
-       * ************************************************************************** For TinyLAF
-       * 1.3.04 this is how the color was changed for a button.
-       */
-      // Theme.buttonPressedColor[Theme.style] = new ColorReference(Color.gray);
-
-      /**
-       * ************************************************************************** And this is how
-       * it's done in TinyLAF 1.4.0 (no idea about the intervening versions).
-       */
-      Theme.buttonPressedColor = new SBReference(Color.GRAY, 0, -6, SBReference.SUB3_COLOR);
 
       configureJide();
     } catch (Exception e) {
@@ -1812,8 +1743,9 @@ public class MapTool {
       // from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
       Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
       FontUIResource fontRes = new FontUIResource(f);
-      for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
-        Object key = keys.nextElement();
+      for (Iterator<Object> iterator = UIManager.getDefaults().keySet().iterator();
+          iterator.hasNext(); ) {
+        Object key = iterator.next();
         Object value = UIManager.get(key);
         if (value instanceof FontUIResource) {
           UIManager.put(key, fontRes);
@@ -1825,27 +1757,39 @@ public class MapTool {
     tk.setDynamicLayout(true);
 
     EventQueue.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            initialize();
-            EventQueue.invokeLater(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    clientFrame.setVisible(true);
-                    splash.hideSplashScreen();
-                    EventQueue.invokeLater(
-                        new Runnable() {
-                          @Override
-                          public void run() {
-                            postInitialize();
-                          }
-                        });
-                  }
-                });
-          }
+        () -> {
+          initialize();
+          EventQueue.invokeLater(
+              () -> {
+                clientFrame.setVisible(true);
+                splash.hideSplashScreen();
+                EventQueue.invokeLater(MapTool::postInitialize);
+              });
         });
     // new Thread(new HeapSpy()).start();
+  }
+
+  private static void loadTheme()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+          UnsupportedLookAndFeelException {
+    // After the TinyLAF library is initialized, look to see if there is a Default.theme
+    // in our AppHome directory and load it if there is. Unfortunately, changing the
+    // search path for the default theme requires subclassing TinyLAF and because
+    // we have both the original and a Mac version that gets cumbersome. (Really
+    // the Mac version should use the default and then install the keystroke differences
+    // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
+    File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
+    // File f = AppUtil.getAppHome("config");
+    // if (f.exists()) {
+    // File f2 = new File(f, "Default.theme");
+    if (f2.exists() && Theme.loadTheme(f2)) {
+      // re-install the Tiny Look and Feel
+      UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+
+      // Update the ComponentUIs for all Components. This
+      // needs to be invoked for all windows.
+      // SwingUtilities.updateComponentTreeUI(rootWindow);
+    }
+    // }
   }
 }

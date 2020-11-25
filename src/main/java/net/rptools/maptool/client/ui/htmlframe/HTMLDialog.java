@@ -20,8 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
@@ -29,7 +28,7 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.parser.ParserException;
+import net.rptools.maptool.util.FunctionUtil;
 
 /**
  * Represents a JDialog holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
@@ -59,7 +58,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   private final String name;
 
   /** Can the dialog be resized? */
-  private final boolean canResize = true;
+  private static final boolean canResize = true;
 
   /** The parent of the dialog */
   private final Frame parent;
@@ -86,6 +85,27 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       return dialogs.get(name).isVisible();
     }
     return false;
+  }
+
+  /**
+   * Gets an unmodifiable set view of the names of all known dialogs.
+   *
+   * @return the dialog names
+   */
+  public static Set<String> getDialogNames() {
+    return Collections.unmodifiableSet(dialogs.keySet());
+  }
+
+  /**
+   * Runs a javascript on a dialog.
+   *
+   * @param name the name of the dialog
+   * @param script the script to run
+   * @return true if the dialog exists and can run the script, false otherwise
+   */
+  public static boolean runScript(String name, String script) {
+    HTMLDialog dialog = dialogs.get(name);
+    return dialog != null && dialog.panel.runJavascript(script);
   }
 
   /**
@@ -155,7 +175,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this);
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
     } else {
       panel = new HTMLPanel(this, scrollBar);
     }
@@ -175,6 +195,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param input whether submitting the form closes it
    * @param temp whether the frame is temporary
    * @param closeButton whether the close button is to be displayed
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether the frame should support HTML5
    * @param value a value to be returned by getDialogProperties()
    * @param html the HTML to display in the dialog
@@ -189,6 +210,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      boolean scrollReset,
       boolean isHTML5,
       Object value,
       String html) {
@@ -199,7 +221,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialog = new HTMLDialog(MapTool.getFrame(), name, frame, width, height, isHTML5);
       dialogs.put(name, dialog);
     }
-    dialog.updateContents(html, title, frame, input, temp, closeButton, isHTML5, value);
+    dialog.updateContents(
+        html, title, frame, input, temp, closeButton, scrollReset, isHTML5, value);
 
     // dialog.canResize = false;
     if (!dialog.isVisible()) {
@@ -232,9 +255,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * Return a json with the width, height, temporary variable and title of the dialog
    *
    * @param name The name of the frame.
-   * @return A json with the width, height, temporary, title, and value of dialog
+   * @return A json with the width, height, temporary, title, and value of dialog, if one was found
    */
-  public static Object getDialogProperties(String name) throws ParserException {
+  public static Optional<JsonObject> getDialogProperties(String name) {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
       JsonObject dialogProperties = new JsonObject();
@@ -242,9 +265,16 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialogProperties.addProperty("width", dialog.getWidth());
       dialogProperties.addProperty("height", dialog.getHeight());
       dialogProperties.addProperty(
-          "temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+          "temporary", FunctionUtil.getDecimalForBoolean(dialog.getTemporary()));
       dialogProperties.addProperty("title", dialog.getTitle());
-
+      dialogProperties.addProperty(
+          "visible", FunctionUtil.getDecimalForBoolean(dialog.isVisible()));
+      dialogProperties.addProperty(
+          "noframe", FunctionUtil.getDecimalForBoolean(dialog.isUndecorated()));
+      dialogProperties.addProperty("input", FunctionUtil.getDecimalForBoolean(dialog.input));
+      dialogProperties.addProperty(
+          "closebutton", FunctionUtil.getDecimalForBoolean(dialog.isAncestorOf(dialog.closePanel)));
+      dialogProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(dialog.isHTML5));
       Object dialogValue = dialog.getValue();
       if (dialogValue == null) {
         dialogValue = "";
@@ -259,9 +289,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       }
       dialogProperties.add("value", JSONMacroFunctions.getInstance().asJsonElement(dialogValue));
 
-      return dialogProperties;
+      return Optional.of(dialogProperties);
     } else {
-      return "";
+      return Optional.empty();
     }
   }
 
@@ -307,6 +337,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param input whether to close the dialog on form submit
    * @param temp whether to make the dialog temporary
    * @param closeButton whether to show a close button
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether to make the dialog HTML5 (JavaFX)
    * @param val the value held in the frame
    */
@@ -317,6 +348,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      boolean scrollReset,
       boolean isHTML5,
       Object val) {
     if (this.isHTML5 != isHTML5) {
@@ -336,7 +368,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     this.setTitle(title);
     macroCallbacks.clear();
     updateButton(closeButton);
-    panel.updateContents(html);
+    panel.updateContents(html, scrollReset);
   }
 
   /**

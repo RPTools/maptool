@@ -14,8 +14,9 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
-import net.sf.json.JSONObject;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
@@ -46,10 +47,10 @@ public class MTWebSocket extends WebSocketAdapter {
     System.out.println("DEBUG: Got Message" + message);
     // FIXME: need to test this is valid
     try {
-      JSONObject json = JSONObject.fromObject(message);
-      String messageType = json.getString("messageType");
-      String messageId = json.getString("messageId");
-      JSONObject data = json.getJSONObject("data");
+      JsonObject json = JSONMacroFunctions.getInstance().asJsonElement(message).getAsJsonObject();
+      String messageType = json.get("messageType").getAsString();
+      String messageId = json.get("messageId").getAsString();
+      JsonObject data = json.get("data").getAsJsonObject();
 
       if ("initiative".equals(messageType)) {
         System.out.println("DEBUG: Got an initiative message");
@@ -81,7 +82,7 @@ public class MTWebSocket extends WebSocketAdapter {
     MTWebClientManager.getInstance().removeClient(this);
   }
 
-  void sendMessage(String messageType, JSONObject data) {
+  void sendMessage(String messageType, JsonObject data) {
     sendMessage(messageType, null, data);
   }
 
@@ -92,12 +93,12 @@ public class MTWebSocket extends WebSocketAdapter {
    * @param inResponseTo The message this is a response to.
    * @param data The data in the message.
    */
-  void sendMessage(String messageType, String inResponseTo, JSONObject data) {
-    JSONObject message = new JSONObject();
-    message.put("messageType", messageType);
-    message.put("data", data);
+  void sendMessage(String messageType, String inResponseTo, JsonObject data) {
+    JsonObject message = new JsonObject();
+    message.addProperty("messageType", messageType);
+    message.add("data", data);
     if (inResponseTo != null) {
-      message.put("inResponseTo", inResponseTo);
+      message.addProperty("inResponseTo", inResponseTo);
     }
 
     try {

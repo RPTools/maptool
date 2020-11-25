@@ -19,14 +19,15 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolLineParser;
-import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
@@ -54,7 +55,8 @@ public class ExecFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     FunctionUtil.checkNumberParam(functionName, args, 2, 5);
     if (!MapTool.getParser().isMacroTrusted()) {
@@ -105,12 +107,7 @@ public class ExecFunction extends AbstractFunction {
   private static void sendExecFunction(
       final String execName, List<Object> execArgs, boolean defer, Collection<String> targets) {
     if (defer) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              sendExecFunction(execName, execArgs, targets);
-            }
-          });
+      EventQueue.invokeLater(() -> sendExecFunction(execName, execArgs, targets));
     } else {
       sendExecFunction(execName, execArgs, targets);
     }
@@ -202,12 +199,11 @@ public class ExecFunction extends AbstractFunction {
    * @param execArgs the arguments to the function
    */
   private static void runExecFunction(String functionName, List<Object> execArgs) {
-    MapToolVariableResolver resolver = new MapToolVariableResolver(null);
-    Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
+    Parser parser = new MapToolExpressionParser().getParser();
     Function function = parser.getFunction(functionName);
     MapTool.getParser().enterTrustedContext(functionName, "execFunction");
     try {
-      function.evaluate(parser, functionName, execArgs);
+      function.evaluate(parser, new MapVariableResolver(), functionName, execArgs);
     } catch (ParserException ignored) {
     }
     MapTool.getParser().exitContext();

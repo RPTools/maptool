@@ -25,7 +25,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -51,6 +51,14 @@ public class HTMLPane extends JEditorPane {
   /** The editorKit that handles the HTML. */
   private final HTMLPaneEditorKit editorKit;
 
+  /** The default rule for the body tag. */
+  private static final String CSS_RULE_BODY =
+      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}";
+  /** The default rule for the div tag. */
+  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  /** The default rule for the span tag. */
+  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+
   public HTMLPane() {
     editorKit = new HTMLPaneEditorKit(this);
     setEditorKit(editorKit);
@@ -58,30 +66,34 @@ public class HTMLPane extends JEditorPane {
     setEditable(false);
 
     addHyperlinkListener(
-        new HyperlinkListener() {
-          public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: "
-                      + e.getEventType().toString()
-                      + " "
-                      + e.toString());
-            }
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-              if (e.getURL() != null) {
-                MapTool.showDocument(e.getURL().toString());
-              } else {
-                Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
-                if (m.matches()) {
-                  if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.runMacroLink(e.getDescription());
-                  }
-                }
+        e -> {
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "Responding to hyperlink event: "
+                    + e.getEventType().toString()
+                    + " "
+                    + e.toString());
+          }
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (e.getURL() != null) {
+              MapTool.showDocument(e.getURL().toString());
+            } else if (e.getDescription().startsWith("#")) {
+              scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+            } else {
+              Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
         });
+
     ToolTipManager.sharedInstance().registerComponent(this);
+  }
+
+  /** @return the rule for the body tag */
+  public String getRuleBody() {
+    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }
 
   public void addActionListener(ActionListener listener) {
@@ -93,13 +105,47 @@ public class HTMLPane extends JEditorPane {
   }
 
   /**
+   * Set the default cursor of the editor kit.
+   *
+   * @param cursor the cursor to set
+   */
+  public void setEditorKitDefaultCursor(Cursor cursor) {
+    editorKit.setDefaultCursor(cursor);
+  }
+
+  /**
+   * Flush the pane, set the new html, and set the caret to zero.
+   *
+   * @param html the html to set
+   * @param scrollReset whether the scrollbar should be reset
+   */
+  public void updateContents(final String html, boolean scrollReset) {
+    EventQueue.invokeLater(
+        () -> {
+          DefaultCaret caret = (DefaultCaret) getCaret();
+          caret.setUpdatePolicy(
+              scrollReset ? DefaultCaret.UPDATE_WHEN_ON_EDT : DefaultCaret.NEVER_UPDATE);
+          editorKit.flush();
+          setText(html);
+          if (scrollReset) {
+            setCaretPosition(0);
+          }
+        });
+  }
+
+  /** Flushes any caching for the panel. */
+  public void flush() {
+    EventQueue.invokeLater(editorKit::flush);
+  }
+
+  /**
    * Handle a submit.
    *
    * @param method The method of the submit.
    * @param action The action for the submit.
    * @param data The data from the form.
    */
-  void doSubmit(String method, String action, String data) {
+  public void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
       if (log.isDebugEnabled()) {
         log.debug(
@@ -177,12 +223,9 @@ public class HTMLPane extends JEditorPane {
         style.removeStyle(s);
       }
 
-      style.addRule(
-          "body { font-family: sans-serif; font-size: "
-              + AppPreferences.getFontSize()
-              + "pt; background: #ECE9D8}");
-      style.addRule("div {margin-bottom: 5px}");
-      style.addRule("span.roll {background:#efefef}");
+      style.addRule(getRuleBody());
+      style.addRule(CSS_RULE_DIV);
+      style.addRule(CSS_RULE_SPAN);
       parse.parse(new StringReader(text), new ParserCallBack(), true);
     } catch (IOException e) {
       // Do nothing, we should not get an io exception on string
@@ -270,9 +313,7 @@ public class HTMLPane extends JEditorPane {
             HTMLDocument document = (HTMLDocument) getDocument();
             StyleSheet style = document.getStyleSheet();
             style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException e) {
-            // Do nothing
-          } catch (IOException e) {
+          } catch (ParserException | IOException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {

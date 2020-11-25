@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -31,10 +32,12 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
+import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -51,6 +54,7 @@ import net.rptools.parser.function.AbstractFunction;
  * <p>transferVBL(direction[, delete][, tokenId] :: move or copy VBL between token and VBL layer
  */
 public class VBL_Functions extends AbstractFunction {
+
   private static final VBL_Functions instance = new VBL_Functions();
   private static final String[] paramTranslate = new String[] {"tx", "ty"};
   private static final String[] paramScale = new String[] {"sx", "sy"};
@@ -63,19 +67,12 @@ public class VBL_Functions extends AbstractFunction {
     return instance;
   }
 
-  private static enum Shape {
-    RECTANGLE,
-    POLYGON,
-    CROSS,
-    CIRCLE,
-    AUTO,
-    NONE
-  };
-
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+    int results = -1;
 
     if (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) {
       boolean erase = false;
@@ -86,10 +83,13 @@ public class VBL_Functions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
       }
 
-      if (!MapTool.getParser().isMacroTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
-      if (functionName.equals("eraseVBL")) erase = true;
+      if (functionName.equals("eraseVBL")) {
+        erase = true;
+      }
 
       JsonElement json =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
@@ -131,25 +131,28 @@ public class VBL_Functions extends AbstractFunction {
             break;
         }
       }
-    }
-
-    if (functionName.equals("getVBL")) {
+    } else if (functionName.equals("getVBL")) {
       boolean simpleJSON = false; // If true, send only array of x,y
 
-      if (parameters.size() > 2)
+      if (parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+      }
 
-      if (parameters.isEmpty())
+      if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+      }
 
-      if (!MapTool.getParser().isMacroTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
-      if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) simpleJSON = true;
+      if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
+        simpleJSON = true;
+      }
 
       JsonElement json =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
@@ -177,9 +180,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       return getAreaPoints(vblArea, simpleJSON);
-    }
-
-    if (functionName.equals("getTokenVBL")) {
+    } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
@@ -192,7 +193,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -205,25 +206,29 @@ public class VBL_Functions extends AbstractFunction {
       }
 
       Area vblArea = token.getVBL();
-      if (vblArea != null) return getAreaPoints(vblArea, false);
-      else return "";
-    }
-
-    if (functionName.equals("setTokenVBL")) {
+      if (vblArea != null) {
+        return getAreaPoints(vblArea, false);
+      } else {
+        return "";
+      }
+    } else if (functionName.equals("setTokenVBL")) {
       Token token = null;
 
-      if (parameters.size() > 2)
+      if (parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+      }
 
-      if (parameters.isEmpty())
+      if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+      }
 
-      if (!MapTool.getParser().isMacroTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
       JsonElement jsonArea =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
@@ -244,7 +249,7 @@ public class VBL_Functions extends AbstractFunction {
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
       } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
       }
       if (token == null) {
@@ -271,11 +276,17 @@ public class VBL_Functions extends AbstractFunction {
             tokenVBL.add(drawCircleVBL(null, vblObject, false));
             break;
           case AUTO:
-            int alpha = getJSONint(vblObject, "alpha", "setTokenVBL[Auto]");
-            if (alpha < 0 || alpha > 255)
-              throw new ParserException(
-                  I18N.getText("macro.function.input.illegalArgumentType", alpha, "0-255"));
-            tokenVBL = TokenVBL.createVblArea(token, alpha);
+            tokenVBL = autoGenerateVBL(token, vblObject);
+
+            if (tokenVBL != null) {
+              int tokenVblOptimizedPointCount = 0;
+              for (PathIterator pi = tokenVBL.getPathIterator(null); !pi.isDone(); pi.next()) {
+                tokenVblOptimizedPointCount++;
+              }
+
+              results = tokenVblOptimizedPointCount;
+            }
+
             break;
           case NONE:
             // Setting to null causes various Token VBL updating to be skipped
@@ -286,23 +297,24 @@ public class VBL_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    }
-
-    if (functionName.equals("transferVBL")) {
+    } else if (functionName.equals("transferVBL")) {
       Token token = null;
 
-      if (parameters.size() > 3)
+      if (parameters.size() > 3) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+      }
 
-      if (parameters.isEmpty())
+      if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+      }
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
 
       // make sure only to check the last parameter as token if it is not the BigDecimal for delete
       if (parameters.size() >= 2
@@ -318,7 +330,7 @@ public class VBL_Functions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -335,9 +347,9 @@ public class VBL_Functions extends AbstractFunction {
       boolean vblFromToken;
 
       if (val instanceof Integer) {
-        vblFromToken = ((Integer) val).intValue() != 0;
+        vblFromToken = (Integer) val != 0;
       } else if (val instanceof Boolean) {
-        vblFromToken = ((Boolean) val).booleanValue();
+        vblFromToken = (Boolean) val;
       } else {
         try {
           vblFromToken = Integer.parseInt(val.toString()) != 0;
@@ -358,9 +370,45 @@ public class VBL_Functions extends AbstractFunction {
           TokenVBL.renderVBL(renderer, vbl, true);
         }
       }
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
-    return "";
+    if (results >= 0) {
+      return results;
+    } else {
+      return "";
+    }
+  }
+
+  /**
+   * Auto generate VBL using new token vbl optimzation options
+   *
+   * @param token the token to generate VBL from
+   * @param jsonParms the parameters json passed in
+   * @return the generated token vbl as an Area
+   * @throws ParserException
+   */
+  private Area autoGenerateVBL(Token token, JsonObject jsonParms) throws ParserException {
+    final int sensitivity = getJSONint(jsonParms, "sensitivity", 10, 0, 255, "setTokenVBL[Auto]");
+    final int inverse = getJSONint(jsonParms, "inverse", 0, 0, 1, "setTokenVBL[Auto]");
+    final int r = getJSONint(jsonParms, "r", 0, 0, 255, "setTokenVBL[Auto]");
+    final int g = getJSONint(jsonParms, "g", 0, 0, 255, "setTokenVBL[Auto]");
+    final int b = getJSONint(jsonParms, "b", 0, 0, 255, "setTokenVBL[Auto]");
+    final int a = getJSONint(jsonParms, "a", 0, 0, 255, "setTokenVBL[Auto]");
+    final int level = getJSONint(jsonParms, "level", 2, 0, 100, "setTokenVBL[Auto]");
+    final String method =
+        getJSONasString(
+            jsonParms,
+            "method",
+            JTS_SimplifyMethodType.getDefault().getLabel(),
+            "setTokenVBL[Auto]");
+
+    Color color = new Color(r, g, b, a);
+    final boolean inverseVbl = inverse == 1;
+
+    return TokenVBL.createOptimizedVblArea(token, sensitivity, inverseVbl, color, level, method);
   }
 
   /**
@@ -378,9 +426,10 @@ public class VBL_Functions extends AbstractFunction {
     String funcname = "drawVBL[Rectangle]";
     // Required Parameters
     String[] requiredParms = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname))
+    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
+    }
 
     int x = getJSONint(vblObject, "x", funcname);
     int y = getJSONint(vblObject, "y", funcname);
@@ -415,23 +464,21 @@ public class VBL_Functions extends AbstractFunction {
     } // Set height to min of 4, as a 2 pixel thick rectangle as to be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults to 2f
     BasicStroke stroke = new BasicStroke(t != 0f ? t : 2f);
 
@@ -439,7 +486,9 @@ public class VBL_Functions extends AbstractFunction {
     Area area = new Area(stroke.createStrokedShape(new java.awt.Rectangle(x, y, w, h)));
 
     // Fill in the rectangle if requested
-    if (fill != 0) area.add(new Area(new java.awt.Rectangle(x, y, w, h)));
+    if (fill != 0) {
+      area.add(new Area(new java.awt.Rectangle(x, y, w, h)));
+    }
 
     AffineTransform atArea = new AffineTransform();
     applyTranslate(funcname, atArea, vblObject, paramTranslate);
@@ -456,12 +505,16 @@ public class VBL_Functions extends AbstractFunction {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
       }
-      if (useFacing) r = -(facing + 90);
+      if (useFacing) {
+        r = -(facing + 90);
+      }
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
     applyScale(funcname, atArea, vblObject, paramScale);
 
-    if (!atArea.isIdentity()) area.transform(atArea);
+    if (!atArea.isIdentity()) {
+      area.transform(atArea);
+    }
 
     return TokenVBL.renderVBL(renderer, area, erase);
   }
@@ -500,9 +553,10 @@ public class VBL_Functions extends AbstractFunction {
       throws ParserException {
     String funcname = "drawVBL[Polygon]";
     String requiredParms[] = {"points"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname))
+    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeA", "points", funcname));
+    }
 
     // Get all the x,y coords for the Polygon, must have at least 2
     JsonArray points = vblObject.get("points").getAsJsonArray();
@@ -518,7 +572,9 @@ public class VBL_Functions extends AbstractFunction {
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
     boolean useFacing = vblObject.has("facing");
 
-    if (!vblObject.has("thickness")) t = 2; // Set default thickness if no value is passed.
+    if (!vblObject.has("thickness")) {
+      t = 2; // Set default thickness if no value is passed.
+    }
 
     Area area = null;
 
@@ -532,9 +588,10 @@ public class VBL_Functions extends AbstractFunction {
         JsonObject point = points.get(i).getAsJsonObject();
 
         String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname))
+        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
               I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
+        }
 
         double x = getJSONdouble(point, "x", funcname);
         double y = getJSONdouble(point, "y", funcname);
@@ -548,7 +605,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       BasicStroke stroke =
-          new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+          new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
     } else {
       // User requests for polygon to be closed, so a Polygon is used which is automatically
@@ -559,9 +616,10 @@ public class VBL_Functions extends AbstractFunction {
         JsonObject point = points.get(i).getAsJsonObject();
 
         String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname))
+        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
               I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
+        }
 
         int x = getJSONint(point, "x", funcname);
         int y = getJSONint(point, "y", funcname);
@@ -571,7 +629,7 @@ public class VBL_Functions extends AbstractFunction {
       // A strokedShape will not be filled in and have a defined thickness.
       if (fill == 0) {
         BasicStroke stroke =
-            new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         area = new Area(stroke.createStrokedShape(poly));
       } else {
         area = new Area(poly);
@@ -592,13 +650,17 @@ public class VBL_Functions extends AbstractFunction {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
       }
-      if (useFacing) r = -(facing + 90);
+      if (useFacing) {
+        r = -(facing + 90);
+      }
 
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
     applyScale(funcname, atArea, vblObject, paramScale);
 
-    if (!atArea.isIdentity()) area.transform(atArea);
+    if (!atArea.isIdentity()) {
+      area.transform(atArea);
+    }
 
     return TokenVBL.renderVBL(renderer, area, erase);
   }
@@ -620,9 +682,10 @@ public class VBL_Functions extends AbstractFunction {
     String funcname = "drawVBL[Cross]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname))
+    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
+    }
 
     int x = getJSONint(vblObject, "x", funcname);
     int y = getJSONint(vblObject, "y", funcname);
@@ -675,13 +738,17 @@ public class VBL_Functions extends AbstractFunction {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
       }
-      if (useFacing) r = -(facing + 90);
+      if (useFacing) {
+        r = -(facing + 90);
+      }
 
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
     applyScale(funcname, atArea, vblObject, paramScale);
 
-    if (!atArea.isIdentity()) area.transform(atArea);
+    if (!atArea.isIdentity()) {
+      area.transform(atArea);
+    }
 
     return TokenVBL.renderVBL(renderer, area, erase);
   }
@@ -702,9 +769,10 @@ public class VBL_Functions extends AbstractFunction {
     String funcname = "drawVBL[Circle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "radius", "sides"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname))
+    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,radius,sides}", funcname));
+    }
 
     int x = getJSONint(vblObject, "x", funcname);
     int y = getJSONint(vblObject, "y", funcname);
@@ -720,8 +788,12 @@ public class VBL_Functions extends AbstractFunction {
     boolean useFacing = vblObject.has("facing");
 
     // Lets set some sanity limits
-    if (sides < 3) sides = 3;
-    if (sides > 100) sides = 100;
+    if (sides < 3) {
+      sides = 3;
+    }
+    if (sides > 100) {
+      sides = 100;
+    }
 
     // Apply Scaling if requested
     if (scale != 0) {
@@ -748,7 +820,9 @@ public class VBL_Functions extends AbstractFunction {
     Area area = new Area(stroke.createStrokedShape(fakeCircle));
 
     // Fill in the circle if requested
-    if (fill != 0) area.add(new Area(fakeCircle));
+    if (fill != 0) {
+      area.add(new Area(fakeCircle));
+    }
 
     AffineTransform atArea = new AffineTransform();
     applyTranslate(funcname, atArea, vblObject, paramTranslate);
@@ -765,13 +839,17 @@ public class VBL_Functions extends AbstractFunction {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
       }
-      if (useFacing) rotation = -(facing + 90);
+      if (useFacing) {
+        rotation = -(facing + 90);
+      }
 
       atArea.rotate(Math.toRadians(rotation), rx, ry);
     }
     applyScale(funcname, atArea, vblObject, paramScale);
 
-    if (!atArea.isIdentity()) area.transform(atArea);
+    if (!atArea.isIdentity()) {
+      area.transform(atArea);
+    }
 
     return TokenVBL.renderVBL(renderer, area, erase);
   }
@@ -789,9 +867,10 @@ public class VBL_Functions extends AbstractFunction {
     String funcname = "getVBL[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname))
+    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
+    }
 
     int x = getJSONint(vblObject, "x", funcname);
     int y = getJSONint(vblObject, "y", funcname);
@@ -807,30 +886,34 @@ public class VBL_Functions extends AbstractFunction {
     boolean useFacing = vblObject.has("facing");
 
     // Allow thickness of 0 and default to 0 to allow complete capture of VBL under a token.
-    if (t < 0) t = 0; // Set default thickness to 0 if null or negative
-    if (w < 4) w = 4; // Set width to min of 4, as a 2 pixel thick rectangle as to
+    if (t < 0) {
+      t = 0; // Set default thickness to 0 if null or negative
+    }
+    if (w < 4) {
+      w = 4; // Set width to min of 4, as a 2 pixel thick rectangle as to
+    }
     // be at least 4 pixels wide
-    if (h < 4) h = 4; // Set height to min of 4, as a 2 pixel thick rectangle as to
+    if (h < 4) {
+      h = 4; // Set height to min of 4, as a 2 pixel thick rectangle as to
+    }
     // be at least 4 pixels high
 
     // Apply Scaling if requested
+    double w2;
+    double h2;
     if (s != 0) {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = (w * s) - t;
-      double h2 = (h * s) - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = (w * s) - t;
+      h2 = (h * s) - t;
     } else {
       // Subtracting "thickness" so drawing stays within "bounds"
-      double w2 = w - t;
-      double h2 = h - t;
-      x = (int) (x + (t / 2));
-      y = (int) (y + (t / 2));
-      w = (int) w2;
-      h = (int) h2;
+      w2 = w - t;
+      h2 = h - t;
     }
+    x = (int) (x + (t / 2));
+    y = (int) (y + (t / 2));
+    w = (int) w2;
+    h = (int) h2;
     // Apply Thickness, defaults handled above
     BasicStroke stroke = new BasicStroke(t);
 
@@ -838,7 +921,9 @@ public class VBL_Functions extends AbstractFunction {
     Area area = new Area(stroke.createStrokedShape(new java.awt.Rectangle(x, y, w, h)));
 
     // Fill in the rectangle if requested
-    if (fill != 0) area.add(new Area(new java.awt.Rectangle(x, y, w, h)));
+    if (fill != 0) {
+      area.add(new Area(new java.awt.Rectangle(x, y, w, h)));
+    }
 
     // Rotate the rectangle if requested
     if (useFacing || r != 0) {
@@ -852,7 +937,9 @@ public class VBL_Functions extends AbstractFunction {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
       }
-      if (useFacing) r = -(facing + 90);
+      if (useFacing) {
+        r = -(facing + 90);
+      }
 
       AffineTransform atArea = new AffineTransform();
       atArea.rotate(Math.toRadians(r), rx, ry);
@@ -957,9 +1044,38 @@ public class VBL_Functions extends AbstractFunction {
    */
   private boolean jsonKeysExist(JsonObject jsonObject, String[] parmList, String funcname) {
     for (String parm : parmList) {
-      if (!jsonObject.has(parm)) return false;
+      if (!jsonObject.has(parm)) {
+        return false;
+      }
     }
     return true;
+  }
+
+  /**
+   * This is a convenience method to fetch and return an int value from the JSON if key exists,
+   * otherwise return 0.
+   *
+   * @param jsonObject The JsonObject to get key from.
+   * @param key The string value to look for in the JSON.
+   * @param defaultVal The default value to return if key not found
+   * @return A String
+   */
+  private String getJSONasString(
+      JsonObject jsonObject, String key, String defaultVal, String funcname)
+      throws ParserException {
+    String value = defaultVal;
+
+    if (jsonObject.has(key)) {
+      JsonElement v = jsonObject.get(key);
+      if (v.getAsJsonPrimitive().isString()) {
+        return v.getAsJsonPrimitive().getAsString();
+      } else {
+        // Is this even possible?
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
+      }
+    }
+    return value;
   }
 
   /**
@@ -972,12 +1088,52 @@ public class VBL_Functions extends AbstractFunction {
    */
   private int getJSONint(JsonObject jsonObject, String key, String funcname)
       throws ParserException {
+
     int value = 0;
 
     if (jsonObject.has(key)) {
       JsonElement v = jsonObject.get(key);
       if (v.getAsJsonPrimitive().isNumber()) {
         return v.getAsJsonPrimitive().getAsInt();
+      } else {
+        // Is this even possible?
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
+      }
+    }
+    return value;
+  }
+
+  /**
+   * This is a convenience method to fetch and return an int value from the JSON if key exists,
+   * otherwise return 0.
+   *
+   * @param jsonObject The JsonObject to get key from.
+   * @param key The string value to look for in the JSON.
+   * @param defaultVal The default value to return if key not found
+   * @param min minimal acceptable value
+   * @param max maximum acceptable value
+   * @return An int
+   */
+  private int getJSONint(
+      JsonObject jsonObject, String key, int defaultVal, int min, int max, String funcname)
+      throws ParserException {
+    int value = defaultVal;
+
+    if (jsonObject.has(key)) {
+      JsonElement v = jsonObject.get(key);
+      if (v.getAsJsonPrimitive().isNumber()) {
+        value = v.getAsJsonPrimitive().getAsInt();
+
+        if (value < min || value > max) {
+          throw new ParserException(
+              I18N.getText(
+                  "macro.function.input.illegalArgumentType",
+                  value,
+                  min + "-" + max + " for " + key));
+        }
+
+        return value;
       } else {
         // Is this even possible?
         throw new ParserException(
@@ -1008,5 +1164,14 @@ public class VBL_Functions extends AbstractFunction {
           I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
     }
     return value;
+  }
+
+  private enum Shape {
+    RECTANGLE,
+    POLYGON,
+    CROSS,
+    CIRCLE,
+    AUTO,
+    NONE
   }
 }

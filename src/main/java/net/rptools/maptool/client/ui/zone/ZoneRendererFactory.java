@@ -22,6 +22,7 @@ public class ZoneRendererFactory {
    * Create a new ZoneRenderer from a zone.
    *
    * @param zone the Zone.
+   * @return the new {@link ZoneRenderer}
    */
   public static ZoneRenderer newRenderer(Zone zone) {
     ZoneRenderer renderer = new ZoneRenderer(zone);

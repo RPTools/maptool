@@ -21,7 +21,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -34,14 +33,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class ImageUtil {
+  private static final Logger log = LogManager.getLogger();
 
   public static final String HINT_TRANSPARENCY = "hintTransparency";
 
@@ -50,30 +53,32 @@ public class ImageUtil {
   // GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
 
   public static final FilenameFilter SUPPORTED_IMAGE_FILE_FILTER =
-      new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          name = name.toLowerCase();
-          // TODO: FJE: When we move to Java 6, use <code>ImageIO.getReaderFileSuffixes()</code>
-          // instead
-          return name.endsWith(".png")
-              || name.endsWith(".gif")
-              || name.endsWith(".jpg")
-              || name.endsWith(".jpeg")
-              || name.endsWith(".bmp");
-        }
+      (dir, name) -> {
+        name = name.toLowerCase();
+        return Arrays.asList(ImageIO.getReaderFileSuffixes()).contains(name);
       };
 
   // public static void setGraphicsConfiguration(GraphicsConfiguration config) {
   // graphicsConfig = config;
   // }
   //
-  /** Load the image. Does not create a graphics configuration compatible version. */
+  /**
+   * Load the image. Does not create a graphics configuration compatible version.
+   *
+   * @param file the file with the image in it
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
+   */
   public static Image getImage(File file) throws IOException {
-    return bytesToImage(FileUtils.readFileToByteArray(file));
+    return bytesToImage(FileUtils.readFileToByteArray(file), file.getCanonicalPath());
   }
 
   /**
    * Load the image in the classpath. Does not create a graphics configuration compatible version.
+   *
+   * @param image the resource name of the image file
+   * @throws IOException when the image can't be read in the file
+   * @return an {@link Image} from the content of the file
    */
   public static Image getImage(String image) throws IOException {
     ByteArrayOutputStream dataStream = new ByteArrayOutputStream(8192);
@@ -87,7 +92,7 @@ public class ImageUtil {
     while ((bite = inStream.read()) >= 0) {
       dataStream.write(bite);
     }
-    return bytesToImage(dataStream.toByteArray());
+    return bytesToImage(dataStream.toByteArray(), image);
   }
 
   public static Image getImage(String image, int w, int h) throws IOException {
@@ -106,8 +111,8 @@ public class ImageUtil {
   /**
    * Create a copy of the image that is compatible with the current graphics context
    *
-   * @param img
-   * @return
+   * @param img to use
+   * @return compatible BufferedImage
    */
   public static BufferedImage createCompatibleImage(Image img) {
     return createCompatibleImage(img, null);
@@ -127,6 +132,13 @@ public class ImageUtil {
   /**
    * Create a copy of the image that is compatible with the current graphics context and scaled to
    * the supplied size
+   *
+   * @param img the image to copy
+   * @param width width of the created image
+   * @param height height of the created image
+   * @param hints a {@link Map} that may contain the key HINT_TRANSPARENCY to define a the
+   *     transparency color
+   * @return a {@link BufferedImage} with a copy of img
    */
   public static BufferedImage createCompatibleImage(
       Image img, int width, int height, Map<String, Object> hints) {
@@ -161,7 +173,7 @@ public class ImageUtil {
    * transparent pixel and no translucent pixels it will return Transparency.BITMASK, in all other
    * cases it returns Transparency.OPAQUE, including errors
    *
-   * @param image
+   * @param image to pick transparency from
    * @return one of Transparency constants
    */
   public static int pickBestTransparency(Image image) {
@@ -183,6 +195,7 @@ public class ImageUtil {
       return Transparency.OPAQUE;
     }
     if ((pg.getStatus() & ImageObserver.ABORT) != 0) {
+      log.error("image fetch aborted or errored");
       System.err.println("image fetch aborted or errored");
       return Transparency.OPAQUE;
     }
@@ -268,17 +281,18 @@ public class ImageUtil {
    * Converts a byte array into an {@link Image} instance.
    *
    * @param imageBytes bytes to convert
+   * @param imageName name of image
    * @return the image
-   * @throws IOException
+   * @throws IOException if image could not be loaded
    */
-  public static Image bytesToImage(byte[] imageBytes) throws IOException {
+  public static Image bytesToImage(byte[] imageBytes, String imageName) throws IOException {
     if (imageBytes == null) {
       throw new IOException("Could not load image - no data provided");
     }
     boolean interrupted = false;
     Throwable exception = null;
-    Image image = null;
-    image = Toolkit.getDefaultToolkit().createImage(imageBytes);
+    Image image;
+    image = ImageIO.read(new ByteArrayInputStream(imageBytes));
     MediaTracker tracker = new MediaTracker(observer);
     tracker.addImage(image, 0);
     do {
@@ -287,26 +301,20 @@ public class ImageUtil {
         tracker.waitForID(0); // This is the only method that throws an exception
       } catch (InterruptedException t) {
         interrupted = true;
-        continue;
       } catch (Throwable t) {
         exception = t;
       }
     } while (interrupted);
-    if (image == null
-        || exception != null
-        || image.getWidth(null) <= 0
-        || image.getHeight(null) <= 0) {
-      // Try the newer way (although it pretty much sucks rocks)
-      image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-    }
     if (image == null) {
-      throw new IOException("Could not load image", exception);
+      throw new IOException("Could not load image " + imageName, exception);
     }
     return image;
   }
 
   public static void clearImage(BufferedImage image) {
-    if (image == null) return;
+    if (image == null) {
+      return;
+    }
 
     Graphics2D g = null;
     try {
@@ -320,31 +328,6 @@ public class ImageUtil {
         g.dispose();
       }
     }
-  }
-
-  public static BufferedImage rgbToGrayscale(BufferedImage image) {
-    if (image == null) {
-      return null;
-    }
-    BufferedImage returnImage =
-        new BufferedImage(image.getWidth(), image.getHeight(), pickBestTransparency(image));
-    for (int y = 0; y < image.getHeight(); y++) {
-      for (int x = 0; x < image.getWidth(); x++) {
-        int encodedPixel = image.getRGB(x, y);
-
-        int alpha = (encodedPixel >> 24) & 0xff;
-        int red = (encodedPixel >> 16) & 0xff;
-        int green = (encodedPixel >> 8) & 0xff;
-        int blue = (encodedPixel) & 0xff;
-
-        int average = (int) ((red + blue + green) / 3.0);
-
-        // y = 0.3R + 0.59G + 0.11B luminance formula
-        int value = (alpha << 24) + (average << 16) + (average << 8) + average;
-        returnImage.setRGB(x, y, value);
-      }
-    }
-    return returnImage;
   }
 
   private static final int[][] outlineNeighborMap = {
@@ -383,19 +366,17 @@ public class ImageUtil {
             continue;
           }
         }
-        for (int i = 0; i < outlineNeighborMap.length; i++) {
-          int[] neighbor = outlineNeighborMap[i];
+        for (int[] neighbor : outlineNeighborMap) {
           int x = sourceX + neighbor[0];
           int y = sourceY + neighbor[1];
 
           if (x >= 0
               && y >= 0
               && x <= sourceImage.getWidth() - 1
-              && y <= sourceImage.getHeight() - 1) {
-            if ((sourceImage.getRGB(x, y) >> 24) != 0) {
-              image.setRGB(col, row, color.getRGB());
-              break;
-            }
+              && y <= sourceImage.getHeight() - 1
+              && (sourceImage.getRGB(x, y) >> 24) != 0) {
+            image.setRGB(col, row, color.getRGB());
+            break;
           }
         }
       }
@@ -406,8 +387,9 @@ public class ImageUtil {
   /**
    * Flip the image and return a new image
    *
+   * @param image the image to flip
    * @param direction 0-nothing, 1-horizontal, 2-vertical, 3-both
-   * @return
+   * @return flipped BufferedImage
    */
   public static BufferedImage flip(BufferedImage image, int direction) {
     BufferedImage workImage =

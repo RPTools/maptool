@@ -54,11 +54,11 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Export screenshot</at>
+            <at name="text">action.exportScreenShot.title</at>
             <at name="height">15</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">12</at>
              </object>
@@ -154,7 +154,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Filesystem</at>
+                   <at name="title">Label.filesystem2</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -207,7 +207,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Location:</at>
+                              <at name="text">Label.location</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">44</at>
@@ -322,7 +322,7 @@
                             <at name="classname">javax.swing.JButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Browse ...</at>
+                              <at name="text">Button.browse</at>
                               <at name="height">23</at>
                               <at name="width">83</at>
                               <at name="name">browseButton</at>
@@ -501,7 +501,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Host:</at>
+                              <at name="text">Label.host</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">72</at>
@@ -616,7 +616,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Username:</at>
+                              <at name="text">ConnectToServerDialog.username</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">72</at>
@@ -676,7 +676,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Password:</at>
+                              <at name="text">ConnectToServerDialog.password</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">72</at>
@@ -790,7 +790,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Path/Filename:</at>
+                              <at name="text">Label.pathfilename</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">72</at>
@@ -958,7 +958,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">(ex: myhost.com)</at>
+                              <at name="text">ExportScreenshot.ftp.host.example</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">164</at>
@@ -1018,7 +1018,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">(ex: pbpuser)</at>
+                              <at name="text">ExportScreenshot.ftp.username.example</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">164</at>
@@ -1078,7 +1078,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">(ex: path/to/my/images/map.png)</at>
+                              <at name="text">ExportScreenshot.ftp.path.example</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">164</at>
@@ -1138,7 +1138,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">NOTE: path must already exist</at>
+                              <at name="text">ExportScreenshot.ftp.path.note</at>
                               <at name="height">14</at>
                               <at name="name"/>
                               <at name="width">246</at>
@@ -1289,7 +1289,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Advanced</at>
+                   <at name="title">Label.advanced</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -1716,7 +1716,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Export</at>
+                 <at name="text">Button.export</at>
                  <at name="height">23</at>
                  <at name="width">65</at>
                  <at name="name">exportButton</at>
@@ -1772,7 +1772,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">23</at>
                  <at name="width">65</at>
                  <at name="name">cancelButton</at>
@@ -1932,7 +1932,7 @@
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">View:</at>
+                 <at name="text">Label.view</at>
                  <at name="height">14</at>
                  <at name="name"/>
                  <at name="width">36</at>
@@ -1992,7 +1992,7 @@
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">GM</at>
+                 <at name="text">userTerm.GM</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
                   <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -2003,7 +2003,7 @@
                  <at name="width">81</at>
                  <at name="name">VIEW_GM</at>
                  <at name="actionCommand">GM</at>
-                 <at name="toolTipText">Everything the GM sees</at>
+                 <at name="toolTipText">ExportScreenshot.view.gm.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2055,7 +2055,7 @@
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Player</at>
+                 <at name="text">userTerm.Player</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
                   <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -2066,7 +2066,7 @@
                  <at name="width">75</at>
                  <at name="name">VIEW_PLAYER</at>
                  <at name="actionCommand">Player</at>
-                 <at name="toolTipText">Only what a Player can see</at>
+                 <at name="toolTipText">ExportScreenshot.view.player.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2118,7 +2118,7 @@
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Type:</at>
+                 <at name="text">dialog.NewToken.type</at>
                  <at name="height">14</at>
                  <at name="name"/>
                  <at name="width">36</at>
@@ -2178,7 +2178,7 @@
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Current View</at>
+                 <at name="text">Label.view.current</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
@@ -2241,7 +2241,7 @@
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Entire Map</at>
+                 <at name="text">ExportScreenshot.view.entiremap</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
                   <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -2252,7 +2252,7 @@
                  <at name="width">75</at>
                  <at name="name">TYPE_ENTIRE_MAP</at>
                  <at name="actionCommand">Entire Map</at>
-                 <at name="toolTipText">Entire map, respects visibility and fog</at>
+                 <at name="toolTipText">ExportScreenshot.view.entiremap.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2305,7 +2305,7 @@
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Layers:</at>
+                 <at name="text">Label.layers</at>
                  <at name="height">14</at>
                  <at name="width">36</at>
                  <at name="name">LAYERS_LABEL</at>
@@ -2366,13 +2366,13 @@
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Token</at>
+                 <at name="text">Label.token</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="width">75</at>
                  <at name="name">LAYER_TOKEN</at>
                  <at name="actionCommand">Token</at>
-                 <at name="toolTipText">include this layer</at>
+                 <at name="toolTipText">ExportScreenshot.view.layer.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2425,13 +2425,13 @@
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Hidden</at>
+                 <at name="text">panel.MapExplorer.View.GM</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="width">75</at>
                  <at name="name">LAYER_HIDDEN</at>
                  <at name="actionCommand">Hidden</at>
-                 <at name="toolTipText">include this layer</at>
+                 <at name="toolTipText">ExportScreenshot.view.layer.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2484,17 +2484,13 @@
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Fog</at>
+                 <at name="text">Button.fog</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="width">57</at>
                  <at name="name">LAYER_FOG</at>
                  <at name="actionCommand">Fog</at>
-                 <at name="toolTipText">Entire Map:  
-    Same as enabling fog on the Map menu.
-
-Entire Map As Layers: 
-    If checked, a separate file will be exported with the current fog mask.</at>
+                 <at name="toolTipText">ExportScreenshot.view.fog.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2546,7 +2542,7 @@ Entire Map As Layers:
                <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Layers:</at>
+                 <at name="text">Label.layers</at>
                  <at name="height">14</at>
                  <at name="name"/>
                  <at name="width">36</at>
@@ -2606,7 +2602,7 @@ Entire Map As Layers:
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Current View</at>
+                 <at name="text">Label.view.current</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
@@ -2618,7 +2614,7 @@ Entire Map As Layers:
                  <at name="width">81</at>
                  <at name="name">LAYERS_CURRENT</at>
                  <at name="actionCommand">Current View</at>
-                 <at name="toolTipText">What you see is what you get.</at>
+                 <at name="toolTipText">ExportScreenshot.view.current.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2670,7 +2666,7 @@ Entire Map As Layers:
                <at name="classname">javax.swing.JRadioButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">As Selected</at>
+                 <at name="text">ExportScreenshot.view.asselected</at>
                  <at name="height">17</at>
                  <at name="buttonGroup">
                   <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -2681,7 +2677,7 @@ Entire Map As Layers:
                  <at name="width">75</at>
                  <at name="name">LAYERS_AS_SELECTED</at>
                  <at name="actionCommand">As Selected</at>
-                 <at name="toolTipText">Pick which layers to include in the screenshot.</at>
+                 <at name="toolTipText">ExportScreenshot.view.asselected.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2734,13 +2730,13 @@ Entire Map As Layers:
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Object</at>
+                 <at name="text">panel.MapExplorer.View.OBJECTS</at>
                  <at name="selected">true</at>
                  <at name="height">16</at>
                  <at name="width">75</at>
                  <at name="name">LAYER_OBJECT</at>
                  <at name="actionCommand">Object</at>
-                 <at name="toolTipText">include this layer</at>
+                 <at name="toolTipText">ExportScreenshot.view.layer.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2793,13 +2789,13 @@ Entire Map As Layers:
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Background</at>
+                 <at name="text">panel.MapExplorer.View.BACKGROUND</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="width">75</at>
                  <at name="name">LAYER_BACKGROUND</at>
                  <at name="actionCommand">Background</at>
-                 <at name="toolTipText">include this layer</at>
+                 <at name="toolTipText">ExportScreenshot.view.layer.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2852,13 +2848,13 @@ Entire Map As Layers:
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Board</at>
+                 <at name="text">Label.board</at>
                  <at name="selected">true</at>
                  <at name="height">17</at>
                  <at name="width">75</at>
                  <at name="name">LAYER_BOARD</at>
                  <at name="actionCommand">Board</at>
-                 <at name="toolTipText">The tiling background and/or the image used in &quot;New Map&quot;</at>
+                 <at name="toolTipText">ExportScreenshot.view.board.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -2911,13 +2907,13 @@ Entire Map As Layers:
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
                  <at name="enabled">false</at>
-                 <at name="text">Visibility</at>
+                 <at name="text">Label.visibility</at>
                  <at name="selected">true</at>
                  <at name="height">16</at>
                  <at name="width">57</at>
                  <at name="name">LAYER_VISIBILITY</at>
                  <at name="actionCommand">Visibility</at>
-                 <at name="toolTipText">Saves Visibility Blocking Layer (VBL) as a monochrome image.</at>
+                 <at name="toolTipText">ExportScreenshot.view.layer.vbl.tooltip</at>
                  <at name="border">
                   <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                    <super classname="com.jeta.forms.store.properties.BorderProperty">

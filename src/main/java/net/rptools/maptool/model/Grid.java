@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Action;
@@ -94,7 +95,7 @@ public abstract class Grid implements Cloneable {
     final double gridScale = (double) MAX_GRID_SIZE / getSize();
     at.scale(gridScale, gridScale);
 
-    getGridShapeCache().put(Integer.valueOf(gridRadius), newGridArea.createTransformedArea(at));
+    getGridShapeCache().put(gridRadius, newGridArea.createTransformedArea(at));
 
     // Verify combined Area is a single union of polygons
     if (!newGridArea.isSingular()) {
@@ -236,6 +237,9 @@ public abstract class Grid implements Cloneable {
     return 0;
   }
 
+  /** @return the difference in pixels between the center of a cell and its converted zonepoint. */
+  public abstract Point2D.Double getCenterOffset();
+
   /**
    * @return The offset required to translate from the center of a cell to the top right (x_min,
    *     y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>
@@ -370,7 +374,7 @@ public abstract class Grid implements Cloneable {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
         // which Hex type you choose
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
-        visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+        visionRange += Math.min(footprintWidth, footprintHeight);
       }
     }
 
@@ -429,7 +433,7 @@ public abstract class Grid implements Cloneable {
 
         double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-        double adjustment = (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+        double adjustment = Math.min(footprintWidth, footprintHeight);
         x -= adjustment / 2;
         y -= adjustment / 2;
 
@@ -510,6 +514,12 @@ public abstract class Grid implements Cloneable {
     // Do nothing
   }
 
+  /**
+   * Returns a rectangle of pixels bounding the CellPoint, taking into account the grid offset.
+   *
+   * @param cp the CellPoint to bound.
+   * @return the bounding rectangle.
+   */
   public abstract Rectangle getBounds(CellPoint cp);
 
   /**
@@ -819,7 +829,7 @@ public abstract class Grid implements Cloneable {
    */
   protected Area createGridArea(int gridRadius) {
     final Area cellArea = new Area(createCellShape(getSize()));
-    final HashSet<Point> points = generateRadius(gridRadius);
+    final Set<Point> points = generateRadius(gridRadius);
     Area gridArea = new Area();
 
     for (Point point : points) {
@@ -838,10 +848,10 @@ public abstract class Grid implements Cloneable {
    * edge of cells
    *
    * @param radius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet<Point>} that includes all cells that only equal in distance to the
-   *     given radius
+   * @return a {@link HashSet} that includes all cells that only equal in distance to the given
+   *     radius
    */
-  protected HashSet<Point> generateRing(int radius) {
+  protected Set<Point> generateRing(int radius) {
     return generateRadius(radius, radius);
   }
 
@@ -849,9 +859,9 @@ public abstract class Grid implements Cloneable {
    * Generates a set of {@link Point} used to create a grid area
    *
    * @param radius The maximum radius to generate all cell points within this range
-   * @return a {@link HashSet<Point>} that includes all cells up to the radius
+   * @return a {@link HashSet} that includes all cells up to the radius
    */
-  protected HashSet<Point> generateRadius(int radius) {
+  protected Set<Point> generateRadius(int radius) {
     return generateRadius(0, radius);
   }
 
@@ -860,10 +870,10 @@ public abstract class Grid implements Cloneable {
    *
    * @param minRadius The minimum radius to generate the ring of cell points for this range
    * @param maxRadius The maximum radius to generate the ring of cell points for this range
-   * @return a {@link HashSet<Point>} that includes all cells between the minRadius to the maxRadius
+   * @return a {@link HashSet} that includes all cells between the minRadius to the maxRadius
    */
-  protected HashSet<Point> generateRadius(int minRadius, int maxRadius) {
-    HashSet<Point> points = new HashSet<>();
+  protected Set<Point> generateRadius(int minRadius, int maxRadius) {
+    Set<Point> points = new HashSet<>();
     CellPoint start = new CellPoint(0, 0);
 
     WalkerMetric metric = getCurrentMetric();
@@ -901,7 +911,7 @@ public abstract class Grid implements Cloneable {
   protected Area getGridAreaFromCache(int gridRadius) {
     // If not already in cache, create and cache it
     // Or if debug is enabled recreate cache
-    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(Integer.valueOf(gridRadius))) {
+    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(gridRadius)) {
       createGridArea(gridRadius);
     }
 
@@ -909,7 +919,7 @@ public abstract class Grid implements Cloneable {
     final AffineTransform at = new AffineTransform();
     at.scale(rescale, rescale);
 
-    return getGridShapeCache().get(Integer.valueOf(gridRadius)).createTransformedArea(at);
+    return getGridShapeCache().get(gridRadius).createTransformedArea(at);
   }
 
   static class DirectionCalculator {

@@ -99,6 +99,11 @@ public class IsometricGrid extends Grid {
     return getSize();
   }
 
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, getCellHeight() / 2);
+  }
+
   public double getCellWidthHalf() {
     return getSize();
   }
@@ -207,15 +212,15 @@ public class IsometricGrid extends Grid {
 
   @Override
   public ZonePoint convert(CellPoint cp) {
-    double mapX = (cp.x - cp.y) * getCellWidthHalf();
-    double mapY = (cp.x + cp.y) * getCellHeightHalf();
+    double mapX = (cp.x - cp.y) * getCellWidthHalf() + getOffsetX();
+    double mapY = (cp.x + cp.y) * getCellHeightHalf() + getOffsetY();
     return new ZonePoint((int) (mapX), (int) (mapY));
   }
 
   @Override
   public ZonePoint getNearestVertex(ZonePoint point) {
-    double px = point.x - getOffsetX();
-    double py = point.y - getOffsetY() + getCellHeightHalf();
+    double px = point.x;
+    double py = point.y + getCellHeightHalf();
     ZonePoint zp = new ZonePoint((int) px, (int) py);
     return convert(convert(zp));
   }
@@ -247,8 +252,8 @@ public class IsometricGrid extends Grid {
 
   @Override
   protected Area createCellShape(int size) {
-    int x[] = {(int) size, (int) size * 2, (int) size, 0};
-    int y[] = {0, (int) size / 2, (int) size, (int) size / 2};
+    int x[] = {size, size * 2, size, 0};
+    int y[] = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 
@@ -464,7 +469,7 @@ public class IsometricGrid extends Grid {
   /**
    * Take a rectangular image, rotate it 45 degrees then reduce its resulting height by half.
    *
-   * @param planImage
+   * @param planImage the image to rotate and scale
    * @return image in isometric format
    */
   public static BufferedImage isoImage(BufferedImage planImage) {
@@ -504,7 +509,7 @@ public class IsometricGrid extends Grid {
   /**
    * Take a rectangular Area, rotate it 45 degrees then reduce its resulting height by half.
    *
-   * @param planArea
+   * @param planArea the area to rotate and scale
    * @return Area in isometric format
    */
   public static Area isoArea(Area planArea) {

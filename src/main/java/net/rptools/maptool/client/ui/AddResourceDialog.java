@@ -17,8 +17,6 @@ package net.rptools.maptool.client.ui;
 import com.jidesoft.swing.FolderChooser;
 import io.sentry.Sentry;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -28,7 +26,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -38,8 +38,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppSetup;
@@ -87,7 +85,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   }
 
   public void showDialog() {
-    dialog = new GenericDialog("Add Resource to Library", MapTool.getFrame(), this);
+    dialog = new GenericDialog(I18N.getText("action.addIconSelector"), MapTool.getFrame(), this);
 
     model = new Model();
 
@@ -128,21 +126,19 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     tabPane
         .getModel()
         .addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                // Hmmm, this is fragile (breaks if the order changes) rethink this later
-                switch (tabPane.getSelectedIndex()) {
-                  case 0:
-                    model.tab = Tab.LOCAL;
-                    break;
-                  case 1:
-                    model.tab = Tab.WEB;
-                    break;
-                  case 2:
-                    model.tab = Tab.RPTOOLS;
-                    downloadLibraryList();
-                    break;
-                }
+            e -> {
+              // Hmmm, this is fragile (breaks if the order changes) rethink this later
+              switch (tabPane.getSelectedIndex()) {
+                case 0:
+                  model.tab = Tab.LOCAL;
+                  break;
+                case 1:
+                  model.tab = Tab.WEB;
+                  break;
+                case 2:
+                  model.tab = Tab.RPTOOLS;
+                  downloadLibraryList();
+                  break;
               }
             });
   }
@@ -150,21 +146,18 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   public void initLocalDirectoryButton() {
     final JButton button = (JButton) getComponent("localDirectoryButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+        e -> {
+          FolderChooser folderChooser = new FolderChooser();
+          folderChooser.setCurrentDirectory(
+              MapTool.getFrame().getLoadFileChooser().getCurrentDirectory());
+          folderChooser.setRecentListVisible(false);
+          folderChooser.setFileHidingEnabled(true);
+          folderChooser.setDialogTitle(I18N.getText("msg.title.loadAssetTree"));
 
-            FolderChooser folderChooser = new FolderChooser();
-            folderChooser.setCurrentDirectory(
-                MapTool.getFrame().getLoadFileChooser().getCurrentDirectory());
-            folderChooser.setRecentListVisible(false);
-            folderChooser.setFileHidingEnabled(true);
-            folderChooser.setDialogTitle(I18N.getText("msg.title.loadAssetTree"));
-
-            int result = folderChooser.showOpenDialog(button.getTopLevelAncestor());
-            if (result == FolderChooser.APPROVE_OPTION) {
-              File root = folderChooser.getSelectedFolder();
-              getBrowseTextField().setText(root.getAbsolutePath());
-            }
+          int result = folderChooser.showOpenDialog(button.getTopLevelAncestor());
+          if (result == FolderChooser.APPROVE_OPTION) {
+            File root = folderChooser.getSelectedFolder();
+            getBrowseTextField().setText(root.getAbsolutePath());
           }
         });
   }
@@ -172,24 +165,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   public void initInstallButton() {
     JButton button = (JButton) getComponent("installButton");
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            install = true;
-            if (commit()) {
-              close();
-            }
+        e -> {
+          install = true;
+          if (commit()) {
+            close();
           }
         });
   }
 
   public void initCancelButton() {
     JButton button = (JButton) getComponent("cancelButton");
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            close();
-          }
-        });
+    button.addActionListener(e -> close());
   }
 
   private void downloadLibraryList() {
@@ -200,56 +186,20 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     // This pattern is safe because it is only called on the EDT
     downloadLibraryListInitiated = true;
 
-    new SwingWorker<Object, Object>() {
-      ListModel model;
-
-      @Override
-      protected Object doInBackground() throws Exception {
-        String result = null;
-        try {
-          WebDownloader downloader = new WebDownloader(new URL(LIBRARY_LIST_URL));
-          result = downloader.read();
-        } finally {
-          if (result == null) {
-            model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
-            return null;
-          }
-        }
-        DefaultListModel listModel = new DefaultListModel();
-
-        // Create a list to compare against for dups
-        List<String> libraryNameList = new ArrayList<String>();
-        for (File file : AppPreferences.getAssetRoots()) {
-          libraryNameList.add(file.getName());
-        }
-        // Generate the list
-        try {
-          BufferedReader reader =
-              new BufferedReader(
-                  new InputStreamReader(new ByteArrayInputStream(result.getBytes())));
-          String line = null;
-          while ((line = reader.readLine()) != null) {
-            LibraryRow row = new LibraryRow(line);
-
-            // Don't include if we've already got it
-            if (libraryNameList.contains(row.name)) {
-              continue;
-            }
-            listModel.addElement(row);
-          }
-          model = listModel;
-        } catch (Throwable t) {
-          log.error("unable to parse library list", t);
-          model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
-        }
-        return null;
-      }
-
-      @Override
-      protected void done() {
-        getLibraryList().setModel(model);
-      }
-    }.execute();
+    try {
+      DownloadListWorker worker =
+          new DownloadListWorker(
+              getLibraryList(),
+              new WebDownloader(new URL(LIBRARY_LIST_URL)),
+              AppPreferences.getAssetRoots());
+      worker.execute();
+    } catch (MalformedURLException e) {
+      MapTool.showMessage(
+          "dialog.addresource.error.malformedurl",
+          "Error",
+          JOptionPane.ERROR_MESSAGE,
+          LIBRARY_LIST_URL);
+    }
   }
 
   @Override
@@ -288,25 +238,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
               model.getLocalDirectory());
           return false;
         }
-        try {
-          AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
-        } catch (MalformedURLException e) {
-          log.error("Bad path url: " + root.getPath(), e);
-          MapTool.showMessage(
-              "dialog.addresource.warn.badpath",
-              "Error",
-              JOptionPane.ERROR_MESSAGE,
-              model.getLocalDirectory());
-          return false;
-        } catch (IOException e) {
-          log.error("IOException adding local root: " + root.getPath(), e);
-          MapTool.showMessage(
-              "dialog.addresource.warn.badpath",
-              "Error",
-              JOptionPane.ERROR_MESSAGE,
-              model.getLocalDirectory());
-          return false;
-        }
+        AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
         return true;
 
       case WEB:
@@ -368,7 +300,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
     new SwingWorker<Object, Object>() {
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         for (LibraryRow row : rowList) {
           try {
             RemoteFileDownloader downloader = new RemoteFileDownloader(new URL(row.path));
@@ -389,42 +321,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   private void close() {
     unbind();
     dialog.closeDialog();
-  }
-
-  private static class LibraryRow {
-    private final String name;
-    private String path;
-    private final int size;
-
-    public LibraryRow(String name, String path, int size) {
-      this.name = name.trim();
-      this.path = path.trim();
-      this.size = size;
-    }
-
-    public LibraryRow(String row) {
-      String[] data = row.split("\\|");
-
-      name = data[0].trim();
-      path = data[1].trim();
-      size = Integer.parseInt(data[2]);
-    }
-
-    @Override
-    public String toString() {
-      return "<html><b>" + name + "</b> <i>(" + getSizeString() + ")</i>";
-    }
-
-    private String getSizeString() {
-      NumberFormat format = NumberFormat.getNumberInstance();
-      if (size < 1000) {
-        return format.format(size) + " bytes";
-      }
-      if (size < 1000000) {
-        return format.format(size / 1000) + " k";
-      }
-      return format.format(size / 1000000) + " mb";
-    }
   }
 
   public static class Model {
@@ -465,20 +361,118 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
       this.urlName = urlName;
     }
   }
+}
 
-  private class MessageListModel extends AbstractListModel {
-    private final String message;
+class LibraryRow {
+  final String name;
+  String path;
+  final int size;
 
-    public MessageListModel(String message) {
-      this.message = message;
+  LibraryRow(String name, String path, int size) {
+    this.name = name.trim();
+    this.path = path.trim();
+    this.size = size;
+  }
+
+  LibraryRow(String row) {
+    String[] data = row.split("\\|");
+
+    name = data[0].trim();
+    path = data[1].trim();
+    size = Integer.parseInt(data[2]);
+  }
+
+  @Override
+  public String toString() {
+    return "<html><b>" + name + "</b> <i>(" + getSizeString() + ")</i>";
+  }
+
+  private String getSizeString() {
+    NumberFormat format = NumberFormat.getNumberInstance();
+    if (size < 1000) {
+      return format.format(size) + " bytes";
+    }
+    if (size < 1000000) {
+      return format.format(size / 1000) + " k";
+    }
+    return format.format(size / 1000000) + " mb";
+  }
+}
+
+class MessageListModel extends AbstractListModel {
+  private final String message;
+
+  public MessageListModel(String message) {
+    this.message = message;
+  }
+
+  public Object getElementAt(int index) {
+    return message;
+  }
+
+  public int getSize() {
+    return 1;
+  }
+}
+
+class DownloadListWorker extends SwingWorker<Object, Object> {
+  private static final Logger log = LogManager.getLogger(DownloadListWorker.class);
+  private ListModel model;
+  private JList<LibraryRow> jList;
+  private WebDownloader downloader;
+  private Set<File> assetRoots;
+
+  DownloadListWorker(JList<LibraryRow> jList, WebDownloader downloader, Set<File> assetRoots) {
+    this.jList = jList;
+    this.downloader = downloader;
+    this.assetRoots = assetRoots;
+  }
+
+  @Override
+  protected Object doInBackground() throws Exception {
+    String result = null;
+    try {
+      result = downloader.read();
+    } finally {
+      if (result == null) {
+        model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
+      }
+    }
+    DefaultListModel<LibraryRow> listModel = new DefaultListModel<>();
+
+    // Create a list to compare against for dups
+    List<String> libraryNameList = new ArrayList<>();
+    for (File file : assetRoots) {
+      libraryNameList.add(file.getName());
     }
 
-    public Object getElementAt(int index) {
-      return message;
-    }
+    try {
+      BufferedReader reader =
+          new BufferedReader(new InputStreamReader(new ByteArrayInputStream(result.getBytes())));
+      List<LibraryRow> tempRows = new ArrayList<>();
+      String line;
+      while ((line = reader.readLine()) != null) {
+        LibraryRow row = new LibraryRow(line);
 
-    public int getSize() {
-      return 1;
+        // Don't include if we've already got it
+        if (!libraryNameList.contains(row.name)) {
+          tempRows.add(row);
+        }
+      }
+      tempRows.sort(Comparator.comparing(o -> o.name));
+      for (LibraryRow row : tempRows) {
+        listModel.addElement(row);
+      }
+      model = listModel;
+    } catch (Throwable t) {
+      log.error("unable to parse library list", t);
+      model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
     }
+    return null;
+  }
+
+  @Override
+  protected void done() {
+    jList.setModel(model);
   }
 }

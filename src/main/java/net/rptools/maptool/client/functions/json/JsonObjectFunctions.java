@@ -21,8 +21,8 @@ import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.language.I18N;
-import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 
 /** Class used to implement MT Script related Json functions / utilities for JsonObjects. */
 public class JsonObjectFunctions {
@@ -184,7 +184,7 @@ public class JsonObjectFunctions {
    * @throws ParserException if an error occurs.
    */
   public JsonObject set(JsonObject jsonObject, List<Object> list) throws ParserException {
-    if (list.size() % 2 != 0) {
+    if ((list.size() & 1) != 0) {
       throw new ParserException(I18N.getText("macro.function.json.setNoMatchingValue", "json.set"));
     }
     JsonObject newJsonObject = jsonObject.deepCopy();
@@ -232,26 +232,26 @@ public class JsonObjectFunctions {
   /**
    * Sets variable values based on the keys and values in a JsonObject.
    *
-   * @param parser The parser that this function is being run by.
    * @param jsonObject The JsonObject to get the names and values from.
    * @param prefix The prefix for all the variable names.
    * @param suffix The suffix for all the variable names.
    * @return A JsonArray that contains the names of all variables set.
    * @throws ParserException if an error occurs while trying to set the variables.
    */
-  public JsonArray toVars(Parser parser, JsonObject jsonObject, String prefix, String suffix)
+  public JsonArray toVars(
+      VariableResolver resolver, JsonObject jsonObject, String prefix, String suffix)
       throws ParserException {
     JsonArray setVars = new JsonArray();
     for (String key : jsonObject.keySet()) {
       // add prefix and suffix
-      String varName = prefix + key.toString().trim() + suffix;
+      String varName = prefix + key.trim() + suffix;
       // replace spaces by underscores
       varName = varName.replaceAll("\\s", "_");
       // delete special characters other than "." & "_" in var name
       varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
       if (!varName.equals("")) {
-        parser.setVariable(varName, typeConversion.asScriptType(jsonObject.get(key)));
+        resolver.setVariable(varName, typeConversion.asScriptType(jsonObject.get(key)));
         setVars.add(varName);
       }
     }

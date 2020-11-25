@@ -24,6 +24,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -47,25 +48,27 @@ public class TokenInitFunction extends AbstractFunction {
   };
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (functionName.equalsIgnoreCase("getInitiative")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
       return getInitiative(token);
     } else if (functionName.equalsIgnoreCase("addToInitiative")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 4);
       boolean allowDuplicates =
           args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : false;
       String state = args.size() > 1 && !"".equals(args.get(1)) ? args.get(1).toString() : null;
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 2, 3);
       return addToInitiative(allowDuplicates, state, token);
-    } else { // setInitiative
+    } else if ("setInitiative".equalsIgnoreCase(functionName)) { // setInitiative
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String value = args.get(0).toString();
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
       return setInitiative(token, value);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

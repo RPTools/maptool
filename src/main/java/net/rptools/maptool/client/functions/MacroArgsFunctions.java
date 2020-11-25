@@ -19,6 +19,7 @@ import java.util.List;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class MacroArgsFunctions extends AbstractFunction {
@@ -33,10 +34,11 @@ public class MacroArgsFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
-    Object numArgs = parser.getVariable("macro.args.num");
+    Object numArgs = resolver.getVariable("macro.args.num");
     int argCount = 0;
 
     if (numArgs instanceof BigDecimal) {
@@ -45,23 +47,25 @@ public class MacroArgsFunctions extends AbstractFunction {
 
     if (functionName.equals("argCount")) {
       return BigDecimal.valueOf(argCount);
+    } else if ("arg".equalsIgnoreCase(functionName)) {
+
+      if (parameters.size() != 1 || !(parameters.get(0) instanceof BigDecimal)) {
+        throw new ParserException(I18N.getText("macro.function.args.incorrectParam", "arg"));
+      }
+
+      int argNo = ((BigDecimal) parameters.get(0)).intValue();
+
+      if (argCount == 0 && argNo == 0) {
+        return resolver.getVariable("macro.args");
+      }
+
+      if (argNo < 0 || argNo >= argCount) {
+        throw new ParserException(
+            I18N.getText("macro.function.args.outOfRange", "arg", argNo, argCount - 1));
+      }
+
+      return resolver.getVariable("macro.args." + argNo);
     }
-
-    if (parameters.size() != 1 || !(parameters.get(0) instanceof BigDecimal)) {
-      throw new ParserException(I18N.getText("macro.function.args.incorrectParam", "arg"));
-    }
-
-    int argNo = ((BigDecimal) parameters.get(0)).intValue();
-
-    if (argCount == 0 && argNo == 0) {
-      return parser.getVariable("macro.args");
-    }
-
-    if (argNo < 0 || argNo >= argCount) {
-      throw new ParserException(
-          I18N.getText("macro.function.args.outOfRange", "arg", argNo, argCount - 1));
-    }
-
-    return parser.getVariable("macro.args." + argNo);
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

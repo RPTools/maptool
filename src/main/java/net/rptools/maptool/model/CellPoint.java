@@ -85,16 +85,21 @@ public class CellPoint extends AbstractPoint {
     return zp;
   }
 
-  // Return distance in grid units for current map
+  /**
+   * Return distance in grid units for current map.
+   *
+   * @param zone the zone to calculate the distance on
+   * @return the distance traveled, rounded and taking into account the Units per Cell
+   */
   public double getDistanceTraveled(Zone zone) {
     switch (zone.getAStarRounding()) {
       case CELL_UNIT:
-        return roundToCellCost(distanceTraveled, zone.getUnitsPerCell());
+        return roundToCellCost(distanceTraveled * zone.getUnitsPerCell(), zone.getUnitsPerCell());
       case INTEGER:
-        return (int) distanceTraveled;
+        return (int) distanceTraveled * zone.getUnitsPerCell();
       case NONE:
       default:
-        return distanceTraveled;
+        return distanceTraveled * zone.getUnitsPerCell();
     }
   }
 

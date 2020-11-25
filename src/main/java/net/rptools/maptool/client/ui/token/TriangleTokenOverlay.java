@@ -67,8 +67,8 @@ public class TriangleTokenOverlay extends XTokenOverlay {
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    Double hc = (double) bounds.width / 2;
-    Double vc = bounds.height * 0.866;
+    double hc = (double) bounds.width / 2;
+    double vc = bounds.height * 0.866;
     Color tempColor = g.getColor();
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();

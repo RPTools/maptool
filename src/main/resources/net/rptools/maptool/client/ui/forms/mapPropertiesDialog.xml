@@ -98,7 +98,7 @@
                  </at>
                  <at name="width">83</at>
                  <at name="name"/>
-                 <at name="text">Name:</at>
+                 <at name="text">Label.name</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -213,7 +213,7 @@
                  </at>
                  <at name="width">83</at>
                  <at name="name"/>
-                 <at name="text">Cell Type:</at>
+                 <at name="text">MapPropertiesDialog.label.cell.type</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -273,7 +273,7 @@
                  </at>
                  <at name="name"></at>
                  <at name="width">83</at>
-                 <at name="text">Distance per cell:</at>
+                 <at name="text">MapPropertiesDialog.label.cell.dist</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -388,13 +388,13 @@
                  </at>
                  <at name="width">83</at>
                  <at name="name"/>
-                 <at name="text">Light:</at>
+                 <at name="text">Label.lights</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">Can be Off, Day or Night. Can be changed after the map is created.</at>
+                 <at name="toolTipText">MapPropertiesDialog.label.lights.tooltip</at>
                  <at name="height">14</at>
                 </object>
                </at>
@@ -1284,7 +1284,7 @@
                       </at>
                       <at name="width">16</at>
                       <at name="name"/>
-                      <at name="toolTipText">No Grid</at>
+                      <at name="toolTipText">MapPropertiesDialog.image.nogrid</at>
                       <at name="height">16</at>
                      </object>
                     </at>
@@ -1649,7 +1649,7 @@
                  </at>
                  <at name="width">83</at>
                  <at name="name"/>
-                 <at name="text">Pixels per Cell:	</at>
+                 <at name="text">MapPropertiesDialog.label.cell.pixels</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -1764,7 +1764,7 @@
                  </at>
                  <at name="width">83</at>
                  <at name="name"/>
-                 <at name="text">Vision Distance:</at>
+                 <at name="text">MapPropertiesDialog.label.vision.dist</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -1879,13 +1879,13 @@
                  </at>
                  <at name="name"></at>
                  <at name="width">83</at>
-                 <at name="text">AI Cell Rounding:</at>
+                 <at name="text">MapPropertiesDialog.label.cell.ai</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">This controls how the AI will round the distance per cell after terrain modifiers have been applied. The default is no rounding, which may leave the cell cost as a fraction and/or not in even multiples of cell units.</at>
+                 <at name="toolTipText">MapPropertiesDialog.label.cell.ai.tooltip</at>
                  <at name="height">14</at>
                 </object>
                </at>
@@ -2140,7 +2140,7 @@
                  <at name="actionCommand">OK</at>
                  <at name="name">okButton</at>
                  <at name="width">46</at>
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -2196,7 +2196,7 @@
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">64</at>
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -2416,7 +2416,7 @@
                  <at name="actionCommand">Background</at>
                  <at name="name">backgroundButton</at>
                  <at name="width">88</at>
-                 <at name="text">Background</at>
+                 <at name="text">Button.background</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -2472,7 +2472,7 @@
                  <at name="actionCommand">JButton</at>
                  <at name="name">mapButton</at>
                  <at name="width">88</at>
-                 <at name="text">Map</at>
+                 <at name="text">Button.map</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -2528,7 +2528,7 @@
                  <at name="actionCommand">JButton</at>
                  <at name="name">fogButton</at>
                  <at name="width">88</at>
-                 <at name="text">Fog</at>
+                 <at name="text">Button.fog</at>
                  <at name="height">22</at>
                 </object>
                </at>

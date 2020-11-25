@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.jetbrains.annotations.NotNull;
 
 /*
  * $Id: TaskPanelGroup.java 5381 2010-09-07 17:17:26Z azhrei_fje $
@@ -72,7 +73,7 @@ public class TaskPanelGroup extends JPanel {
   }
 
   @Override
-  public void add(Component comp, Object title) {
+  public void add(@NotNull Component comp, Object title) {
     if (!(title instanceof String)) {
       // LATER: Title should be able to handle any component
       throw new IllegalArgumentException("Must supply a string title");

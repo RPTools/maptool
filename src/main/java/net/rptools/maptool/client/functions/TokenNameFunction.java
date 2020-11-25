@@ -21,6 +21,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenNameFunction extends AbstractFunction {
@@ -41,23 +42,27 @@ public class TokenNameFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     Token token;
 
-    if (functionName.equals("getName")) {
+    if (functionName.equalsIgnoreCase("getName")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
-    } else {
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
+    } else if ("setName".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String name = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       if (args.get(0).toString().equals("")) {
         throw new ParserException(
             I18N.getText("macro.function.tokenName.emptyTokenNameForbidden", "setName"));
       }
       setName(token, name);
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
     return token.getName();
   }

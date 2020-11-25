@@ -24,11 +24,11 @@ import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -68,6 +68,7 @@ public class Token extends BaseModel implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
+  /** The unique GUID of the token. */
   private GUID id = new GUID();
 
   public static final String FILE_EXTENSION = "rptok";
@@ -95,7 +96,7 @@ public class Token extends BaseModel implements Cloneable {
 
     private String displayName;
 
-    private TokenShape(String displayName) {
+    TokenShape(String displayName) {
       this.displayName = displayName;
     }
 
@@ -123,6 +124,7 @@ public class Token extends BaseModel implements Cloneable {
     setShape,
     setSnapToScale,
     setSnapToGrid,
+    setSnapToGridAndXY,
     setFootprint,
     setProperty,
     resetProperty,
@@ -136,6 +138,9 @@ public class Token extends BaseModel implements Cloneable {
     setScaleXY,
     setNotes,
     setGMNotes,
+    saveMacro,
+    saveMacroList,
+    deleteMacro,
     setX,
     setY,
     setXY,
@@ -154,6 +159,7 @@ public class Token extends BaseModel implements Cloneable {
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
+    setLayout,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -162,11 +168,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
-      };
+      (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 
   private final Map<String, MD5Key> imageAssetMap;
   private String currentImageAsset;
@@ -206,7 +208,7 @@ public class Token extends BaseModel implements Cloneable {
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
 
-  private int vblAlphaSensitivity = -1;
+  private int vblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
@@ -251,7 +253,7 @@ public class Token extends BaseModel implements Cloneable {
   private double terrainModifier = 0.0d;
   private TerrainModifierOperation terrainModifierOperation = TerrainModifierOperation.NONE;
   private Set<TerrainModifierOperation> terrainModifiersIgnored =
-      new HashSet<>(Arrays.asList(TerrainModifierOperation.NONE));
+      new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
 
   private boolean isFlippedX;
   private boolean isFlippedY;
@@ -293,21 +295,9 @@ public class Token extends BaseModel implements Cloneable {
   private CaseInsensitiveHashMap<Object> propertyMapCI;
 
   private Map<String, String> macroMap;
-  private Map<Integer, Object> macroPropertiesMap;
+  private Map<Integer, MacroButtonProperties> macroPropertiesMap;
 
   private Map<String, String> speechMap;
-
-  // Deprecated, here to allow deserialization
-  @SuppressWarnings("unused")
-  private transient int size; // 1.3b16
-
-  @SuppressWarnings("unused")
-  private transient List<Vision> visionList; // 1.3b18
-
-  public enum ChangeEvent {
-    name,
-    MACRO_CHANGED
-  }
 
   private HeroLabData heroLabData;
 
@@ -359,7 +349,7 @@ public class Token extends BaseModel implements Cloneable {
     isVisible = token.isVisible;
     visibleOnlyToOwner = token.visibleOnlyToOwner;
 
-    vblAlphaSensitivity = token.vblAlphaSensitivity;
+    vblColorSensitivity = token.vblColorSensitivity;
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
@@ -413,11 +403,10 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().putAll(token.propertyMapCI);
     }
     if (token.macroPropertiesMap != null) { // Deep copy of the macros
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      macroPropertiesMap = new HashMap<>(token.macroPropertiesMap.size());
       token.macroPropertiesMap.forEach(
           (key, value) ->
-              macroPropertiesMap.put(
-                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
+              macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -514,9 +503,6 @@ public class Token extends BaseModel implements Cloneable {
       sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
       e.printStackTrace();
     }
-
-    // state = null;
-    visionList = null;
   }
 
   public void setHasSight(boolean hasSight) {
@@ -581,7 +567,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmNotes;
     } else {
       return "";
@@ -593,7 +579,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
     } else {
       return "";
@@ -728,6 +714,10 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean isBackgroundStamp() {
     return getLayer() == Zone.Layer.BACKGROUND;
+  }
+
+  public boolean isOnTokenLayer() {
+    return getLayer() == Zone.Layer.TOKEN;
   }
 
   public boolean isStamp() {
@@ -916,8 +906,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasOwnerOnlyAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -934,8 +923,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasGMAuras() {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null) {
           List<Light> lights = lightSource.getLightList();
@@ -952,8 +940,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
     if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
+      for (AttachedLightSource als : lightSourceList) {
         LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
         if (lightSource != null && lightSource.getType() == lightType) {
           return true;
@@ -967,14 +954,11 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
-      if (als != null
-          && als.getLightSourceId() != null
-          && als.getLightSourceId().equals(source.getId())) {
-        i.remove();
-      }
-    }
+    lightSourceList.removeIf(
+        als ->
+            als != null
+                && als.getLightSourceId() != null
+                && als.getLightSourceId().equals(source.getId()));
   }
 
   /** Clear the lightSourceList */
@@ -989,8 +973,7 @@ public class Token extends BaseModel implements Cloneable {
     if (lightSourceList == null) {
       return false;
     }
-    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-      AttachedLightSource als = i.next();
+    for (AttachedLightSource als : lightSourceList) {
       if (als != null
           && als.getLightSourceId() != null
           && als.getLightSourceId().equals(source.getId())) {
@@ -1000,7 +983,7 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
-  /** Return false if lightSourceList is null or empty, and true otherwise */
+  /** @return false if lightSourceList is null or empty, and true otherwise */
   public boolean hasLightSources() {
     return lightSourceList != null && !lightSourceList.isEmpty();
   }
@@ -1044,8 +1027,9 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** @return the set of owner names of the token. */
   public Set<String> getOwners() {
-    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<String>();
+    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
   }
 
   public boolean isOwnedByAll() {
@@ -1145,10 +1129,8 @@ public class Token extends BaseModel implements Cloneable {
     assetSet.add(charsheetImage);
     assetSet.add(portraitImage);
 
-    if (heroLabData != null) {
-      if (heroLabData.getAllAssetIDs() != null) {
-        assetSet.addAll(heroLabData.getAllAssetIDs());
-      }
+    if (heroLabData != null && heroLabData.getAllAssetIDs() != null) {
+      assetSet.addAll(heroLabData.getAllAssetIDs());
     }
 
     assetSet.remove(null); // Clean up from any null values from above
@@ -1226,7 +1208,7 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOrigin;
   }
 
-  /**
+  /*
    * Lee: changing this to apply new X and Y values (as end point) for the token BEFORE its path is
    * computed. Path to be saved will be computed here instead of in ZoneRenderer
    */
@@ -1338,12 +1320,12 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  public void setAlphaSensitivity(int tolerance) {
-    vblAlphaSensitivity = tolerance;
+  public void setColorSensitivity(int tolerance) {
+    vblColorSensitivity = tolerance;
   }
 
-  public int getAlphaSensitivity() {
-    return vblAlphaSensitivity;
+  public int getColorSensitivity() {
+    return vblColorSensitivity;
   }
 
   /**
@@ -1354,11 +1336,15 @@ public class Token extends BaseModel implements Cloneable {
   public void setVBL(Area vbl) {
     this.vbl = vbl;
     if (vbl == null) {
-      vblAlphaSensitivity = -1;
+      vblColorSensitivity = -1;
     }
   }
 
-  /** Return the vbl area of the token */
+  /**
+   * Return the vbl area of the token
+   *
+   * @return the current VBL of the token
+   */
   public Area getVBL() {
     return vbl;
   }
@@ -1371,7 +1357,8 @@ public class Token extends BaseModel implements Cloneable {
    * This method returns the vbl stored on the token with AffineTransformations applied for scale,
    * position, rotation, &amp; flipping.
    *
-   * @return
+   * @param areaToTransform transformations to apply to the VBL
+   * @return the transformed VBL for the token
    * @author Jamz
    * @since 1.4.1.5
    */
@@ -1387,7 +1374,7 @@ public class Token extends BaseModel implements Cloneable {
     // Lets account for ISO images
     double iso_ho = 0;
     if (getShape() == TokenShape.FIGURE) {
-      double th = getHeight() * Double.valueOf(footprintBounds.width) / getWidth();
+      double th = getHeight() * (double) footprintBounds.width / getWidth();
       iso_ho = footprintBounds.height - th;
       footprintBounds =
           new Rectangle(
@@ -1411,36 +1398,20 @@ public class Token extends BaseModel implements Cloneable {
     // Apply the coordinate translation
     AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
 
-    double rx, ry;
-    if (isSnapToScale()) {
-      // Find the center x,y coords of the rectangle
-      rx = (getWidth() / 2) - (getAnchor().getX() / 2);
-      ry = (getHeight() / 2) - (getAnchor().getY() / 2);
+    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
+    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
 
-      // Apply the scale transformation
+    // Apply the rotation transformation...
+    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
+      // Find the center x,y coords of the rectangle
+      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
+      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
+
       atArea.concatenate(
-          AffineTransform.getScaleInstance(
-              ((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-    } else {
-      // Find the center x,y coords of the rectangle
-      rx = ((getWidth() / 2) - (getAnchor().getX() / scaleX)) * scaleX;
-      ry = ((getHeight() / 2) - (getAnchor().getY() / scaleY)) * scaleY;
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-
-      // Apply the scale transformation
-      atArea.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
     }
+    // Apply the scale transformation
+    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
 
     // Lets account for flipped images...
     if (isFlippedX) {
@@ -1525,6 +1496,114 @@ public class Token extends BaseModel implements Cloneable {
     return footprintBounds;
   }
 
+  /**
+   * Returns the drag offset of the token.
+   *
+   * @param zone the zone where the token is dragged
+   * @return a point representing the offset
+   */
+  public Point getDragOffset(Zone zone) {
+    Grid grid = zone.getGrid();
+    int offsetX, offsetY;
+    if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = getX() + (int) centerOffset.x;
+        offsetY = getY() + (int) centerOffset.y;
+      } else {
+        Rectangle tokenBounds = getBounds(zone);
+        offsetX = tokenBounds.x + tokenBounds.width / 2;
+        offsetY = tokenBounds.y + tokenBounds.height / 2;
+      }
+    } else {
+      offsetX = getX();
+      offsetY = getY();
+    }
+    return new Point(offsetX, offsetY);
+  }
+
+  /**
+   * Gets the point where the token should go, if it were to be snapped to the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once snapped
+   */
+  public ZonePoint getSnappedPoint(Zone zone) {
+    if (snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    }
+    Grid grid = zone.getGrid();
+    Point2D.Double offset = getSnapToUnsnapOffset(zone);
+    double newX = getX() + offset.x;
+    double newY = getY() + offset.y;
+    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+      return grid.convert(
+          grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
+    } else {
+      return new ZonePoint((int) newX, (int) newY);
+    }
+  }
+  /**
+   * Gets the point where the token should go, if it were to be unsnapped from the grid.
+   *
+   * @param zone the zone where the token is
+   * @return the point where the token should be once unsnapped
+   */
+  public ZonePoint getUnsnappedPoint(Zone zone) {
+    if (!snapToGrid) {
+      return new ZonePoint(getX(), getY());
+    } else {
+      Point2D.Double offset = getSnapToUnsnapOffset(zone);
+      return new ZonePoint((int) (getX() - offset.x), (int) (getY() - offset.y));
+    }
+  }
+
+  /**
+   * Gets the offset from the snapped position to the unsnapped position.
+   *
+   * @param zone the zone where the token is
+   * @return a point representing the x, y offset
+   */
+  private Point2D.Double getSnapToUnsnapOffset(Zone zone) {
+    double offsetX, offsetY;
+    Rectangle tokenBounds = getBounds(zone);
+    Grid grid = zone.getGrid();
+    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        TokenFootprint footprint = getFootprint(grid);
+        Rectangle footprintBounds = footprint.getBounds(grid);
+        double footprintOffsetX = 0;
+        double footprintOffsetY = 0;
+        if (!isBackgroundStamp()) {
+          // Non-background tokens can have an offset from top left corner
+          footprintOffsetX = tokenBounds.width - footprintBounds.width;
+          footprintOffsetY = tokenBounds.height - footprintBounds.height;
+        }
+        double cellsX = footprintBounds.width / grid.getCellWidth();
+        double cellsY = footprintBounds.height / grid.getCellHeight();
+        Dimension cellOffset = grid.getCellOffset();
+
+        offsetX = footprintOffsetX / 2.0 - cellOffset.width * cellsX;
+        offsetY = footprintOffsetY / 2.0 - cellOffset.height * cellsY;
+        if (grid.isHex() && "large".equalsIgnoreCase(footprint.getName())) {
+          // Merudo: not sure why this special case is needed.
+          offsetX = offsetX - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
+          offsetY = offsetY - Math.min(grid.getCellWidth(), grid.getCellHeight()) / 2;
+        }
+      } else {
+        // Free-size tokens have their position at their center, plus a grid-specific offset
+        Point2D.Double centerOffset = grid.getCenterOffset();
+        offsetX = tokenBounds.width / 2.0 - centerOffset.x;
+        offsetY = tokenBounds.height / 2.0 - centerOffset.y;
+      }
+    } else {
+      // Gridless non-background tokens hve their position at their center, plus half a cell
+      offsetX = tokenBounds.width / 2.0 - grid.getCellWidth() / 2.0;
+      offsetY = tokenBounds.height / 2.0 - grid.getCellHeight() / 2.0;
+    }
+    return new Point2D.Double(offsetX, offsetY);
+  }
+
   /** @return the String of the sightType */
   public String getSightType() {
     return sightType;
@@ -1534,7 +1613,12 @@ public class Token extends BaseModel implements Cloneable {
     this.sightType = sightType;
   }
 
-  /** @return Returns the size. */
+  /**
+   * Calculate the foot print of a grid
+   *
+   * @param grid the grid to get foot print of
+   * @return Returns the size.
+   */
   public TokenFootprint getFootprint(Grid grid) {
     return grid.getFootprint(getSizeMap().get(grid.getClass()));
   }
@@ -1624,6 +1708,13 @@ public class Token extends BaseModel implements Cloneable {
     return getEvaluatedProperty(null, key);
   }
 
+  /**
+   * Returns the evaluated property corresponding to the key.
+   *
+   * @param resolver the variable resolver to parse code inside the property
+   * @param key the key of the value
+   * @return the value
+   */
   public Object getEvaluatedProperty(MapToolVariableResolver resolver, String key) {
     Object val = getProperty(key);
     if (val == null) {
@@ -1642,10 +1733,10 @@ public class Token extends BaseModel implements Cloneable {
     if (val == null) {
       return "";
     }
-    // First we try convert it to a JSON object.
-    if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+    // First we try convert it to a JSON array. Fixes #2057.
+    if (val.toString().trim().startsWith("[")) {
       JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-      if (json.isJsonObject() || json.isJsonArray()) {
+      if (json.isJsonArray()) {
         return json;
       }
     }
@@ -1667,24 +1758,24 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (val == null) {
       val = "";
+    } else {
+      // Finally we try convert it to a JSON object. Fixes #1560.
+      if (val.toString().trim().startsWith("{")) {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+        if (json.isJsonObject()) {
+          return json;
+        }
+      }
     }
     return val;
   }
 
-  /**
-   * Returns all property names, all in lowercase.
-   *
-   * @return
-   */
+  /** @return all property names, all in lowercase. */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /**
-   * Returns all property names, preserving their case.
-   *
-   * @return
-   */
+  /** @return all property names, preserving their case. */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }
@@ -1701,11 +1792,10 @@ public class Token extends BaseModel implements Cloneable {
       return;
     }
     MacroButtonProperties prop;
-    Set<String> oldMacros = macroMap.keySet();
-    for (String macro : oldMacros) {
+    for (var macro : macroMap.entrySet()) {
       prop = new MacroButtonProperties(getMacroNextIndex());
-      prop.setLabel(macro);
-      prop.setCommand(macroMap.get(macro));
+      prop.setLabel(macro.getKey());
+      prop.setCommand(macro.getValue());
       prop.setApplyToTokens(true);
       macroPropertiesMap.put(prop.getIndex(), prop);
     }
@@ -1717,7 +1807,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public int getMacroNextIndex() {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<Integer, MacroButtonProperties>();
     }
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
@@ -1729,22 +1819,28 @@ public class Token extends BaseModel implements Cloneable {
     return maxIndex + 1;
   }
 
-  public Map<Integer, Object> getMacroPropertiesMap(boolean secure) {
+  /**
+   * Returns the macroPropertiesMap of the token, or a blank map if not permitted.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the map
+   */
+  public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
     if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, Object>();
+      macroPropertiesMap = new HashMap<>();
     }
     if (macroMap != null) {
       loadOldMacros();
     }
     if (secure && !AppUtil.playerOwns(this)) {
-      return new HashMap<Integer, Object>();
+      return new HashMap<>(); // blank map
     } else {
       return macroPropertiesMap;
     }
   }
 
   public MacroButtonProperties getMacro(int index, boolean secure) {
-    return (MacroButtonProperties) getMacroPropertiesMap(secure).get(index);
+    return getMacroPropertiesMap(secure).get(index);
   }
 
   // avoid this; it loads the first macro with this label, but there could be more than one macro
@@ -1752,7 +1848,7 @@ public class Token extends BaseModel implements Cloneable {
   public MacroButtonProperties getMacro(String label, boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       if (prop.getLabel().equals(label)) {
         return prop;
       }
@@ -1760,19 +1856,31 @@ public class Token extends BaseModel implements Cloneable {
     return null;
   }
 
+  /**
+   * Gets the list of macros on the token.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the list
+   */
   public List<MacroButtonProperties> getMacroList(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<MacroButtonProperties> list = new ArrayList<MacroButtonProperties>();
     for (int key : keys) {
-      list.add((MacroButtonProperties) macroPropertiesMap.get(key));
+      list.add(macroPropertiesMap.get(key));
     }
     return list;
   }
 
-  public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
-    // used by the token edit dialog, which will handle resetting panels and putting token to
-    // zone
-    macroPropertiesMap.clear();
+  /**
+   * Add a list of macros to the token.
+   *
+   * @param newMacroList the macro list to add
+   * @param clearOld whether the old macros at other indexes should be removed
+   */
+  public void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
+    if (clearOld) {
+      macroPropertiesMap.clear();
+    }
     for (MacroButtonProperties macro : newMacroList) {
       if (macro.getLabel() == null
           || macro.getLabel().trim().length() == 0
@@ -1780,46 +1888,39 @@ public class Token extends BaseModel implements Cloneable {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
-
-      // Allows the token macro panels to update only if a macro changes
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
     }
+  }
+
+  /**
+   * Saves the macro on the token.
+   *
+   * @param prop the properties of the macro
+   */
+  public void saveMacro(MacroButtonProperties prop) {
+    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
+  }
+
+  /**
+   * Deletes the macro at the given index.
+   *
+   * @param index the index of the macro
+   */
+  public void deleteMacro(int index) {
+    getMacroPropertiesMap(false).remove(index);
   }
 
   public List<String> getMacroNames(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
     List<String> list = new ArrayList<String>();
     for (int key : keys) {
-      MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+      MacroButtonProperties prop = macroPropertiesMap.get(key);
       list.add(prop.getLabel());
     }
     return list;
   }
 
   public boolean hasMacros(boolean secure) {
-    if (!getMacroPropertiesMap(secure).isEmpty()) {
-      return true;
-    }
-    return false;
-  }
-
-  public void saveMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
-    MapTool.getFrame().resetTokenPanels();
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
-  }
-
-  public void deleteMacroButtonProperty(MacroButtonProperties prop) {
-    getMacroPropertiesMap(false).remove(prop.getIndex());
-    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
-    MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render
-    // timing problem.
-
-    // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    return !getMacroPropertiesMap(secure).isEmpty();
   }
 
   public void setSpeechMap(Map<String, String> map) {
@@ -1858,6 +1959,7 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Get a set containing the names of all the states that match the passed value.
    *
+   * @param value the value to look for
    * @return The set of state property names that match the passed value.
    */
   public Set<String> getStatePropertyNames(Object value) {
@@ -1941,10 +2043,24 @@ public class Token extends BaseModel implements Cloneable {
     return new Point(anchorX, anchorY);
   }
 
+  public int getAnchorX() {
+    return anchorX;
+  }
+
+  public int getAnchorY() {
+    return anchorY;
+  }
+
+  /** @return the scale of the token layout */
   public double getSizeScale() {
     return sizeScale;
   }
 
+  /**
+   * Set the scale of the token layout
+   *
+   * @param scale the scale of the token
+   */
   public void setSizeScale(double scale) {
     sizeScale = scale;
   }
@@ -2040,8 +2156,9 @@ public class Token extends BaseModel implements Cloneable {
     @SuppressWarnings("unchecked")
     Map<String, Object> macros = (Map<String, Object>) td.get(TokenTransferData.MACROS);
     macroMap = new HashMap<String, String>();
-    for (String macroName : macros.keySet()) {
-      Object macro = macros.get(macroName);
+    for (var entry : macros.entrySet()) {
+      String macroName = entry.getKey();
+      Object macro = entry.getValue();
       if (macro instanceof String) {
         macroMap.put(macroName, (String) macro);
       } else if (macro instanceof Map) {
@@ -2100,7 +2217,7 @@ public class Token extends BaseModel implements Cloneable {
     if (integer == null) {
       return defaultValue;
     }
-    return integer.intValue();
+    return integer;
   }
 
   /**
@@ -2117,7 +2234,7 @@ public class Token extends BaseModel implements Cloneable {
     if (bool == null) {
       return defaultValue;
     }
-    return bool.booleanValue();
+    return bool;
   }
 
   /**
@@ -2130,7 +2247,7 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     List<InitiativeList.TokenInitiative> ret = new ArrayList<>(list.size());
     for (Integer index : list) {
@@ -2201,23 +2318,32 @@ public class Token extends BaseModel implements Cloneable {
     MapTool.getFrame().resetTokenPanels();
   }
 
+  public void renameMacroGroup(String oldMacroGroup, String newMacroGroup) {
+    List<MacroButtonProperties> tempMacros = new ArrayList<>(getMacroList(true));
+
+    for (MacroButtonProperties nextProp : tempMacros) {
+      if (oldMacroGroup.equals(nextProp.getGroup())) {
+        nextProp.setGroup(newMacroGroup);
+      }
+    }
+    MapTool.serverCommand()
+        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.getFrame().resetTokenPanels();
+  }
+
   public static final Comparator<Token> COMPARE_BY_NAME =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          if (o1 == null || o2 == null) {
-            return 0;
-          }
-          return o1.getName().compareTo(o2.getName());
+      (o1, o2) -> {
+        if (o1 == null || o2 == null) {
+          return 0;
         }
+        return o1.getName().compareTo(o2.getName());
       };
   public static final Comparator<Token> COMPARE_BY_ZORDER =
-      new Comparator<Token>() {
-        public int compare(Token o1, Token o2) {
-          if (o1 == null || o2 == null) {
-            return 0;
-          }
-          return o1.z < o2.z ? -1 : o1.z == o2.z ? 0 : 1;
+      (o1, o2) -> {
+        if (o1 == null || o2 == null) {
+          return 0;
         }
+        return Integer.compare(o1.z, o2.z);
       };
 
   @Override
@@ -2293,6 +2419,8 @@ public class Token extends BaseModel implements Cloneable {
    */
   public void updateProperty(Zone zone, Update update, Object[] parameters) {
     boolean lightChanged = false;
+    boolean macroChanged = false;
+    boolean panelLookChanged = false; // appearance of token in a panel changed
     switch (update) {
       case setState:
         setState(parameters[0].toString(), parameters[1]);
@@ -2325,6 +2453,14 @@ public class Token extends BaseModel implements Cloneable {
       case setSnapToGrid:
         setSnapToGrid((Boolean) parameters[0]);
         break;
+      case setSnapToGridAndXY:
+        if (hasLightSources()) {
+          lightChanged = true;
+        }
+        setSnapToGrid((boolean) parameters[0]);
+        setX((int) parameters[1]);
+        setY((int) parameters[2]);
+        break;
       case setFootprint:
         setSnapToScale(true);
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
@@ -2347,9 +2483,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case clearAllOwners:
         clearAllOwners();
+        panelLookChanged = true;
         break;
       case setOwnedByAll:
         setOwnedByAll((Boolean) parameters[0]);
+        panelLookChanged = true;
         break;
       case addOwner:
         addOwner(parameters[0].toString());
@@ -2400,9 +2538,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setName:
         setName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setGMName:
         setGMName((String) parameters[0]);
+        panelLookChanged = true;
         break;
       case setVisible:
         setVisible((boolean) parameters[0]);
@@ -2433,12 +2573,17 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        panelLookChanged = true;
         break;
       case setPortraitImage:
         setPortraitImage((MD5Key) parameters[0]);
         break;
       case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
+        break;
+      case setLayout:
+        setSizeScale((Double) parameters[0]);
+        setAnchor((int) parameters[1], (int) parameters[2]);
         break;
       case clearLightSources:
         if (hasLightSources()) {
@@ -2468,9 +2613,27 @@ public class Token extends BaseModel implements Cloneable {
         }
         setSightType((String) parameters[0]);
         break;
+      case saveMacro:
+        saveMacro((MacroButtonProperties) parameters[0]);
+        macroChanged = true;
+        break;
+      case saveMacroList:
+        saveMacroList((List<MacroButtonProperties>) parameters[0], (boolean) parameters[1]);
+        macroChanged = true;
+        break;
+      case deleteMacro:
+        deleteMacro((int) parameters[0]);
+        macroChanged = true;
+        break;
     }
     if (lightChanged) {
       getZoneRenderer().flushLight(); // flush lights if it changed
+    }
+    if (macroChanged) {
+      zone.tokenMacroChanged(this);
+    }
+    if (panelLookChanged) {
+      zone.tokenPanelChanged(this);
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }

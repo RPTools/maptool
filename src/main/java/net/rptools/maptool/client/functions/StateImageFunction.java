@@ -22,6 +22,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class StateImageFunction extends AbstractFunction {
@@ -43,16 +44,15 @@ public class StateImageFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     String stateName;
     BigDecimal size = null;
 
     stateName = args.get(0).toString();
-    if (args.size() > 1) {
-      if (args.get(1) instanceof BigDecimal) {
-        size = (BigDecimal) args.get(1);
-      }
+    if (args.size() > 1 && args.get(1) instanceof BigDecimal) {
+      size = (BigDecimal) args.get(1);
     }
     BooleanTokenOverlay over = MapTool.getCampaign().getTokenStatesMap().get(stateName);
     if (over == null) {

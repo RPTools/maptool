@@ -23,8 +23,9 @@ interface HTMLPanelInterface {
    * Update the HTML content and the close button.
    *
    * @param html the html to load.
+   * @param scrollreset whether the scroll bar should be reset.
    */
-  void updateContents(final String html);
+  void updateContents(final String html, boolean scrollreset);
 
   /** Flush the Panel. */
   void flush();
@@ -76,4 +77,12 @@ interface HTMLPanelInterface {
     html = html.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
     return html;
   }
+
+  /**
+   * Runs a javascript, if the panel supports it.
+   *
+   * @param script the script to run.
+   * @return true if the script can be run, false otherwise.
+   */
+  boolean runJavascript(String script);
 }
