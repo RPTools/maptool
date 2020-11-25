@@ -47,28 +47,22 @@ import org.locationtech.jts.geom.LineString;
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);
-
-  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
+  private final GeometryFactory geometryFactory = new GeometryFactory();
   // private List<GUID> debugLabels;
-
+  protected int crossX = 0;
+  protected int crossY = 0;
+  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
   private Area vbl = new Area();
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
-
-  private final GeometryFactory geometryFactory = new GeometryFactory();
   private ShapeReader shapeReader = new ShapeReader(geometryFactory);
   private Geometry vblGeometry = null;
-  private TokenFootprint footprint = new TokenFootprint();
-
-  private Map<AStarCellPoint, AStarCellPoint> checkedList = new ConcurrentHashMap<>();
   // private long avgRetrieveTime;
   // private long avgTestTime;
   // private long retrievalCount;
   // private long testCount;
-
-  protected int crossX = 0;
-  protected int crossY = 0;
-
+  private TokenFootprint footprint = new TokenFootprint();
+  private Map<AStarCellPoint, AStarCellPoint> checkedList = new ConcurrentHashMap<>();
   private List<AStarCellPoint> terrainCells = new ArrayList<>();
 
   public AbstractAStarWalker(Zone zone) {
@@ -150,7 +144,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+      if (MapTool.getServerPolicy().getVblBlocksMove()) {
+        vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+
+        if (tokenVBL != null) {
+          vbl.subtract(tokenVBL);
+        }
+
+        // Finally, add the Move Blocking Layer!
+        vbl.add(zone.getTopologyTerrain());
+      } else {
+        vbl = zone.getTopologyTerrain();
+      }
     }
 
     if (!vbl.isEmpty()) {
@@ -219,39 +224,39 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       closedSet.add(currentNode);
       currentNode = null;
 
-      // We now calculate paths off the main UI thread but only one at a time. If the token moves we
-      // cancel the thread
-      // and restart so we're only calculating the most recent path request. Clearing the list
-      // effectively finishes
-      // this thread gracefully.
+      /*
+        We now calculate paths off the main UI thread but only one at a time.
+        If the token moves, we cancel the thread and restart so we're only calculating the most
+        recent path request. Clearing the list effectively finishes this thread gracefully.
+      */
       if (Thread.interrupted()) {
         // log.info("Thread interrupted!");
         openList.clear();
       }
     }
 
-    List<CellPoint> ret = new LinkedList<>();
+    List<CellPoint> returnedCellPointList = new LinkedList<>();
     while (currentNode != null) {
-      ret.add(currentNode);
+      returnedCellPointList.add(currentNode);
       currentNode = currentNode.parent;
     }
 
-    // Jamz We don't need to "calculate" distance after the fact as it's already stored as the G
-    // cost...
-    if (!ret.isEmpty()) {
-      distance = ret.get(0).getDistanceTraveled(zone);
-    } else { // if pathfinding interrupted because of timeout
+    // We don't need to "calculate" distance after the fact as it's already stored as the G cost...
+    if (!returnedCellPointList.isEmpty()) {
+      distance = returnedCellPointList.get(0).getDistanceTraveled(zone);
+    } else { // if path finding was interrupted because of timeout
       distance = 0;
       AStarCellPoint goalCell = new AStarCellPoint(goal); // we allow reaching of target location
       AStarCellPoint startCell = new AStarCellPoint(start);
 
+      goalCell.setAStarCanceled(true);
       goalCell.parent = startCell;
 
-      ret.add(goalCell);
-      ret.add(startCell);
+      returnedCellPointList.add(goalCell);
+      returnedCellPointList.add(startCell);
     }
 
-    Collections.reverse(ret);
+    Collections.reverse(returnedCellPointList);
     timeOut = (System.currentTimeMillis() - timeOut);
     if (timeOut > 500) {
       log.debug("Time to calculate A* path warning: " + timeOut + "ms");
@@ -262,7 +267,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // if (testCount > 0)
     // log.info("avgTestTime: " + Math.floor(avgTestTime / testCount)/1000 + " micro");
 
-    return ret;
+    return returnedCellPointList;
   }
 
   void pushNode(List<AStarCellPoint> list, AStarCellPoint node) {
@@ -315,7 +320,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         for (CellPoint cellPoint : occupiedCells) {
           AStarCellPoint occupiedNode = new AStarCellPoint(cellPoint);
 
-          // VBL Check FIXME: Add to closed set?
+          // VBL Check
           if (vblBlocksMovement(occupiedNode, neighbor)) {
             closedSet.add(occupiedNode);
             blockNode = true;
@@ -351,6 +356,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           }
         }
       }
+      terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
         continue;
@@ -368,15 +374,27 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       double diagonalMultiplier = getDiagonalMultiplier(neighborArray);
 
       if (terrainIsFree) {
-        neighbor.distanceTraveled = node.distanceTraveled;
         neighbor.g = node.g;
+        neighbor.distanceTraveled = node.distanceTraveled;
       } else {
-        neighbor.distanceTraveled =
-            node.distanceTraveled
-                + (terrainMultiplier * diagonalMultiplier)
-                + (terrainAdder / cell_cost);
+        neighbor.distanceTraveledWithoutTerrain =
+            node.distanceTraveledWithoutTerrain + diagonalMultiplier;
 
-        neighbor.g = node.g + (cell_cost * terrainMultiplier * diagonalMultiplier) + terrainAdder;
+        // basic check to see if we are on the odd or even step of 1-2-1 movement
+        if ((int) neighbor.distanceTraveledWithoutTerrain
+            != neighbor.distanceTraveledWithoutTerrain) {
+
+          neighbor.g = node.g + terrainAdder + terrainMultiplier;
+
+          neighbor.distanceTraveled = node.distanceTraveled + terrainAdder + terrainMultiplier;
+        } else {
+          neighbor.g = node.g + terrainAdder + terrainMultiplier * diagonalMultiplier;
+
+          neighbor.distanceTraveled =
+              node.distanceTraveled
+                  + terrainAdder
+                  + terrainMultiplier * Math.ceil(diagonalMultiplier);
+        }
       }
 
       neighbors.add(neighbor);

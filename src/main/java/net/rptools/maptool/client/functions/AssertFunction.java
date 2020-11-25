@@ -19,6 +19,7 @@ import java.util.List;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 
@@ -39,13 +40,18 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
   /** The singleton instance. */
   private static final AssertFunction instance = new AssertFunction();
 
-  /** Gets the instance. */
+  /**
+   * Gets the instance.
+   *
+   * @return the singleton instance.
+   */
   public static AssertFunction getInstance() {
     return instance;
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (!(parameters.get(1) instanceof String))
       throw new ParameterException(
@@ -60,7 +66,7 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
             I18N.getText("macro.function.assert.message", parameters.get(1).toString()));
       }
     }
-    return new BigDecimal(1);
+    return BigDecimal.ONE;
   }
 
   /** Exception type thrown by assert() function, allowing a user-defined error message. */

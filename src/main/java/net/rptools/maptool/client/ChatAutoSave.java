@@ -22,7 +22,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,15 +64,15 @@ public class ChatAutoSave {
             if (log.isInfoEnabled())
               log.info("Saving log to '" + chatFile + "'"); // $NON-NLS-1$ //$NON-NLS-2$
 
-            FileWriter writer = null;
             CommandPanel chat = MapTool.getFrame().getCommandPanel();
             String old = MapTool.getFrame().getStatusMessage();
             try {
               MapTool.getFrame()
                   .setStatusMessage(
                       I18N.getString("ChatAutoSave.status.chatAutosave")); // $NON-NLS-1$
-              writer = new FileWriter(chatFile);
-              writer.write(chat.getMessageHistory());
+              try (FileWriter writer = new FileWriter(chatFile)) {
+                writer.write(chat.getMessageHistory());
+              }
               if (log.isInfoEnabled()) log.info("Log saved"); // $NON-NLS-1$
             } catch (IOException e) {
               // If this happens should we track it and turn off the autosave? Perhaps
@@ -83,7 +82,6 @@ public class ChatAutoSave {
               // message box that pops up...
               MapTool.showWarning("msg.warn.failedAutoSavingMessageHistory", e); // $NON-NLS-1$
             } finally {
-              IOUtils.closeQuietly(writer);
               MapTool.getFrame().setStatusMessage(old);
             }
           }

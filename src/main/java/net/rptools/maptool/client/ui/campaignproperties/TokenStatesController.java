@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -263,6 +262,7 @@ public class TokenStatesController
   }
 
   /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
+  @Override
   public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
   }
@@ -272,6 +272,7 @@ public class TokenStatesController
    *
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
+  @Override
   public void actionPerformed(ActionEvent e) {
     String name = ((JComponent) e.getSource()).getName();
     JList<Object> list = formPanel.getList(STATES);
@@ -300,7 +301,7 @@ public class TokenStatesController
         formPanel.setText(NAME, "");
         formPanel.setText(GROUP, "");
         formPanel.setSelected(MOUSEOVER, false);
-        formPanel.getSpinner(OPACITY).setValue(new Integer(100));
+        formPanel.getSpinner(OPACITY).setValue(100);
         formPanel.getSpinner(INDEX).setValue(selected);
         formPanel.setSelected(SHOW_GM, true);
         formPanel.setSelected(SHOW_OWNER, true);
@@ -357,6 +358,7 @@ public class TokenStatesController
     } // endif
   }
 
+  @Override
   public void stateChanged(ChangeEvent e) {
     String name = ((JComponent) e.getSource()).getName();
     JList<Object> list = formPanel.getList(STATES);
@@ -422,6 +424,7 @@ public class TokenStatesController
    *
    * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
    */
+  @Override
   public void changedUpdate(DocumentEvent e) {
     String text = formPanel.getText(IMAGE);
     boolean hasImage =
@@ -442,11 +445,13 @@ public class TokenStatesController
   }
 
   /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
+  @Override
   public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
   /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
+  @Override
   public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
@@ -456,6 +461,7 @@ public class TokenStatesController
    *
    * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
    */
+  @Override
   public void valueChanged(ListSelectionEvent e) {
     if (e.getValueIsAdjusting()) return;
     int selected = formPanel.getList(STATES).getSelectedIndex();
@@ -473,7 +479,7 @@ public class TokenStatesController
       formPanel.setText(GROUP, s.getGroup());
       formPanel.setText(IMAGE, "");
       formPanel.setSelected(MOUSEOVER, s.isMouseover());
-      formPanel.getSpinner(OPACITY).setValue(new Integer(s.getOpacity()));
+      formPanel.getSpinner(OPACITY).setValue(s.getOpacity());
       formPanel.getSpinner(INDEX).setValue(selected);
       formPanel.setSelected(SHOW_GM, s.isShowGM());
       formPanel.setSelected(SHOW_OWNER, s.isShowOwner());
@@ -483,7 +489,7 @@ public class TokenStatesController
       int type = -1;
       if (s instanceof XTokenOverlay) {
         type = 7;
-        formPanel.getSpinner(WIDTH).setValue(Integer.valueOf(((XTokenOverlay) s).getWidth()));
+        formPanel.getSpinner(WIDTH).setValue(((XTokenOverlay) s).getWidth());
         ((JETAColorWell) formPanel.getComponentByName(COLOR))
             .setColor(((XTokenOverlay) s).getColor());
       } // endif
@@ -556,7 +562,7 @@ public class TokenStatesController
     Token token = new Token("name", null);
 
     /** Value passed to the overlay painter. */
-    Double value = Double.valueOf(1);
+    Double value = 1d;
 
     /** Overlay being painted by the icon */
     AbstractTokenOverlay overlay;
@@ -567,14 +573,17 @@ public class TokenStatesController
      */
     Icon icon =
         new Icon() {
+          @Override
           public int getIconHeight() {
             return ICON_SIZE + 2;
           }
 
+          @Override
           public int getIconWidth() {
             return ICON_SIZE + 2;
           }
 
+          @Override
           public void paintIcon(Component c, java.awt.Graphics g, int x, int y) {
             g.setColor(Color.BLACK);
             g.drawRect(x, y, ICON_SIZE + 2, ICON_SIZE + 2);
@@ -614,7 +623,7 @@ public class TokenStatesController
     DefaultListModel<Object> model = new DefaultListModel<Object>();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(campaign.getTokenStatesMap().values());
-    Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
+    overlays.sort(BooleanTokenOverlay.COMPARATOR);
     for (BooleanTokenOverlay overlay : overlays) {
       model.addElement(overlay);
       getNames().add(overlay.getName());
@@ -761,7 +770,7 @@ public class TokenStatesController
     JSpinner spinner = formPanel.getSpinner(name);
     try {
       spinner.commitEdit();
-      width = ((Integer) spinner.getValue()).intValue();
+      width = (Integer) spinner.getValue();
     } catch (ParseException e) {
       JOptionPane.showMessageDialog(
           spinner,

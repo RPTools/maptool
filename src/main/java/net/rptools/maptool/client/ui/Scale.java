@@ -184,8 +184,8 @@ public class Scale implements Serializable {
    * Fit the image into the given space by finding the zoom level that allows the image to fit. Then
    * center the image.
    *
-   * @param width
-   * @param height
+   * @param width width of the image
+   * @param height height of the image
    * @return true if this call did something, false if the init has already been called
    */
   public boolean initialize(int width, int height) {

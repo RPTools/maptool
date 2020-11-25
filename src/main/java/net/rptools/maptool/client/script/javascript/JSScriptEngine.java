@@ -32,7 +32,7 @@ public class JSScriptEngine {
   private ScriptEngine engine;
   private ScriptContext anonymousContext;
 
-  public class JSClassFilter implements ClassFilter {
+  public static class JSClassFilter implements ClassFilter {
 
     @Override
     public boolean exposeToScripts(String jclass) {
@@ -110,8 +110,7 @@ public class JSScriptEngine {
     }
   }
 
-  private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj)
-      throws ScriptException {
+  private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj) {
     MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
     Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
     bindings.put(def.javaScriptVariableName(), apiObj);

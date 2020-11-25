@@ -37,7 +37,7 @@ public class NaiveWalker extends AbstractZoneWalker {
     int y = start.y;
 
     int count = 0;
-    while (true && count < 100) {
+    while (count < 100) {
       list.add(new CellPoint(x, y));
 
       if (x == end.x && y == end.y) {

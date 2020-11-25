@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 
@@ -125,9 +126,10 @@ public class StrPropFunctions extends AbstractFunction {
   }
 
   /**
-   * Prepares a string for use in regex operations.
+   * Prepares a {@code String} for use in regex operations.
    *
-   * @param s the String.
+   * @param s the {@code String} to prepare for regex.
+   * @return a {@code String} prepared for regex.
    */
   public static String fullyQuoteString(String s) {
     // We escape each non-alphanumeric character in the delimiter string
@@ -142,7 +144,8 @@ public class StrPropFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     Object retval = "";
     String props = parameters.get(0).toString(); // contains property settings
@@ -162,10 +165,10 @@ public class StrPropFunctions extends AbstractFunction {
       retval = deleteStrProp(parameters, lastParam, props, map, oldKeys, oldKeysNormalized);
     else if ("varsFromStrProp".equalsIgnoreCase(functionName))
       retval =
-          varsFromStrProp(parameters, lastParam, props, map, oldKeys, oldKeysNormalized, parser);
+          varsFromStrProp(parameters, lastParam, props, map, oldKeys, oldKeysNormalized, resolver);
     else if ("strPropFromVars".equalsIgnoreCase(functionName))
       retval =
-          strPropFromVars(parameters, lastParam, props, map, oldKeys, oldKeysNormalized, parser);
+          strPropFromVars(parameters, lastParam, props, map, oldKeys, oldKeysNormalized, resolver);
     else if ("countStrProp".equalsIgnoreCase(functionName))
       retval = countStrProp(parameters, lastParam, props, map, oldKeys, oldKeysNormalized);
     else if ("indexKeyStrProp".equalsIgnoreCase(functionName))
@@ -189,6 +192,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The matching value for <code>key</code>, or <code>""</code> if not found. The value is
    *     converted to a number if possible.
+   * @throws ParserException when an error occurs.
    */
   public Object getStrProp(
       List<Object> parameters,
@@ -236,6 +240,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string.
+   * @throws ParserException when an error occurs.
    */
   public Object setStrProp(
       List<Object> parameters,
@@ -293,6 +298,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string. (If <code>key</code> is not found, no changes are made.)
+   * @throws ParserException when an error occurs.
    */
   public Object deleteStrProp(
       List<Object> parameters,
@@ -366,9 +372,9 @@ public class StrPropFunctions extends AbstractFunction {
    * @param map where the normalized {@code <key,value>} pairs are stored (return value)
    * @param oldKeys list of the original keys from {@code props}
    * @param oldKeysNormalized list of the original keys (converted to uppercase) from {@code props}
-   * @param parser parser object to use as context
    * @return The number of assignments made (keys with spaces in their names are ignored and don't
    *     appear in the count)
+   * @throws ParserException when an error occurs.
    */
   public Object varsFromStrProp(
       List<Object> parameters,
@@ -377,7 +383,7 @@ public class StrPropFunctions extends AbstractFunction {
       Map<String, String> map,
       List<String> oldKeys,
       List<String> oldKeysNormalized,
-      Parser parser)
+      VariableResolver resolver)
       throws ParserException {
     Object retval = "";
     String delim = ";";
@@ -399,7 +405,6 @@ public class StrPropFunctions extends AbstractFunction {
       option = -1;
       String setVars = (String) parameters.get(1);
       if (setVars.equalsIgnoreCase("NONE")) {
-        option = 0;
         return BigDecimal.ZERO;
       } else if (setVars.equalsIgnoreCase("SUFFIXED")) {
         option = 1;
@@ -434,10 +439,10 @@ public class StrPropFunctions extends AbstractFunction {
               // Do nothing
               break;
             case 1:
-              parser.setVariable(k + "_", v);
+              resolver.setVariable(k + "_", v);
               break;
             case 2:
-              parser.setVariable(k, v);
+              resolver.setVariable(k, v);
               break;
           }
         }
@@ -457,8 +462,8 @@ public class StrPropFunctions extends AbstractFunction {
    * @param map is populated with the settings. The keys are normalized to upper case.
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
-   * @param parser the Maptool parser.
    * @return A property string containing the settings of all the variables.
+   * @throws ParserException when an error occurs.
    */
   public Object strPropFromVars(
       List<Object> parameters,
@@ -467,7 +472,7 @@ public class StrPropFunctions extends AbstractFunction {
       Map<String, String> map,
       List<String> oldKeys,
       List<String> oldKeysNormalized,
-      Parser parser)
+      VariableResolver resolver)
       throws ParserException {
     Object retval = null;
     String delim = ";";
@@ -492,8 +497,7 @@ public class StrPropFunctions extends AbstractFunction {
       throw new ParameterException(
           I18N.getText("macro.function.strPropFromVar.wrongArgs", varStyleString));
     }
-    List<String> varList = new ArrayList<String>();
-    StrListFunctions.parse(parameters.get(0).toString(), varList, ",");
+    List<String> varList = StrListFunctions.toList(parameters.get(0).toString(), ",");
     StringBuilder sb = new StringBuilder();
     int i = 0;
     int varListSize = varList.size();
@@ -501,11 +505,11 @@ public class StrPropFunctions extends AbstractFunction {
       String varToGet = (varStyle == 0) ? var + "_" : var;
       sb.append(var);
       sb.append("=");
-      String value = parser.getVariable(varToGet).toString();
+      String value = resolver.getVariable(varToGet).toString();
       sb.append(value);
       i += 1;
       if (i < varListSize) {
-        sb.append(" " + delim + " ");
+        sb.append(" ").append(delim).append(" ");
       }
     }
     retval = sb.toString();
@@ -522,6 +526,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The number of property entries in the string.
+   * @throws ParserException when an error occurs.
    */
   public Object countStrProp(
       List<Object> parameters,
@@ -556,6 +561,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The key for the setting at position <code>index</code>
+   * @throws ParserException when an error occurs.
    */
   public Object indexKeyStrProp(
       List<Object> parameters,
@@ -600,6 +606,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The value (converted to a number if possible) for the setting at position <code>index
    *     </code>
+   * @throws ParserException when an error occurs.
    */
   public Object indexValueStrProp(
       List<Object> parameters,
@@ -654,6 +661,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return A string containing the formatted property string.
+   * @throws ParserException when an error occurs.
    */
   public Object formatStrProp(
       List<Object> parameters,
@@ -702,9 +710,11 @@ public class StrPropFunctions extends AbstractFunction {
   }
 
   /**
-   * Tries to convert a string to a number, returning <code>null</code> on failure.
+   * Tries to convert a {@code String} to an {@code Integer}, returning {@code null} on failure.
    *
-   * @param s the string to convert.
+   * @param s the {@code String} to convert.
+   * @return the {@code Integer} value of the {@code String} or {@code null} if it cannot be
+   *     converted.
    */
   public Integer strToInt(String s) {
     Integer intval = null;
@@ -733,7 +743,9 @@ public class StrPropFunctions extends AbstractFunction {
    * @param funcName the name of the function.
    * @param minParams the minimum number of parameters.
    * @param maxParams the maximum number of parameters.
+   * @param parameters the parameters to check.
    * @param expected an array of expected classes.
+   * @throws ParameterException when an error occurs.
    */
   public void checkVaryingParameters(
       String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)

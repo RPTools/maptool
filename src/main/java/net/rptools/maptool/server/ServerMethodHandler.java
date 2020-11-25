@@ -15,7 +15,6 @@
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
@@ -41,6 +40,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -149,6 +149,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
+        case editToken:
+          editToken(context.getGUID(0), (Token) context.get(1));
+          break;
         case putZone:
           putZone((Zone) context.get(0));
           break;
@@ -160,6 +163,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case removeToken:
           removeToken(context.getGUID(0), context.getGUID(1));
+          break;
+        case removeTokens:
+          removeTokens(context.getGUID(0), context.getGUIDs(1));
           break;
         case removeLabel:
           removeLabel(context.getGUID(0), context.getGUID(1));
@@ -221,10 +227,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           setServerPolicy((ServerPolicy) context.get(0));
           break;
         case addTopology:
-          addTopology(context.getGUID(0), (Area) context.get(1));
+          addTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
           break;
         case removeTopology:
-          removeTopology(context.getGUID(0), (Area) context.get(1));
+          removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -369,7 +375,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         }
       }
       // Arrange
-      Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+      tokenList.sort(Zone.TOKEN_Z_ORDER_COMPARATOR);
 
       // Update
       int z = zone.getLargestZOrder() + 1;
@@ -417,16 +423,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone =
-        server
-            .getCampaign()
-            .getZone(
-                zoneGUID); // this can return a zone that's not in MapToolFrame.zoneRenderList???
+    Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.exposeArea(area, selectedToks);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.exposeFoW.name(), RPCContext.getCurrent().parameters);
+    forwardToClients();
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -457,16 +456,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               producer.getHeader());
       server.addAssetProducer(RPCContext.getCurrent().id, producer);
 
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-
-      // Old fashioned way
-      server
-          .getConnection()
-          .callMethod(
-              RPCContext.getCurrent().id,
-              ClientCommand.COMMAND.putAsset.name(),
-              AssetManager.getAsset(assetID));
     } catch (IllegalArgumentException iae) {
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken
@@ -520,7 +509,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       Zone zone = server.getCampaign().getZone(list.getZone().getId());
       zone.setInitiativeList(list);
     } else if (ownerPermission != null) {
-      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission.booleanValue());
+      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
     }
     forwardToAllClients();
   }
@@ -575,6 +564,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
+  public void editToken(GUID zoneGUID, Token token) {
+    putToken(zoneGUID, token);
+  }
+
   public void putToken(GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -617,13 +610,24 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.removeLabel.name(), RPCContext.getCurrent().parameters);
   }
 
+  /**
+   * Removes the token from the server, and pass the command to all clients.
+   *
+   * @param zoneGUID the GUID of the zone where the token is
+   * @param tokenGUID the GUID of the token
+   */
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeToken(tokenGUID);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.removeToken.name(), RPCContext.getCurrent().parameters);
+    zone.removeToken(tokenGUID); // remove server tokens
+    forwardToClients();
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeTokens(tokenGUIDs); // remove server tokens
+    forwardToClients();
   }
 
   public void updateTokenProperty(
@@ -656,7 +660,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         }
       }
       // Arrange
-      Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+      tokenList.sort(Zone.TOKEN_Z_ORDER_COMPARATOR);
 
       // Update
       int z = zone.getSmallestZOrder() - 1;
@@ -774,18 +778,20 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void setServerPolicy(ServerPolicy policy) {
+    server.updateServerPolicy(policy); // updates the server policy, fixes #1648
+    forwardToClients();
+    MapTool.getFrame().getToolbox().updateTools();
+  }
+
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.addTopology(area, topologyMode);
     forwardToClients();
   }
 
-  public void addTopology(GUID zoneGUID, Area area) {
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area);
-    forwardToClients();
-  }
-
-  public void removeTopology(GUID zoneGUID, Area area) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area);
+    zone.removeTopology(area, topologyMode);
     forwardToClients();
   }
 
@@ -867,6 +873,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     // Convenience methods
     public GUID getGUID(int index) {
       return (GUID) parameters[index];
+    }
+
+    public List<GUID> getGUIDs(int index) {
+      return (List<GUID>) parameters[index];
     }
 
     public Integer getInt(int index) {

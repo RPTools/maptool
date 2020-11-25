@@ -17,6 +17,8 @@ package net.rptools.maptool.client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +32,7 @@ public class AppState {
   private static boolean linkPlayerViews = false;
   private static boolean useDoubleWideLine = true;
   private static boolean showMovementMeasurements = true;
+  private static boolean showTextLabels = true;
   private static boolean enforceNotification = false;
   private static File campaignFile;
   private static int gridSize = 1;
@@ -39,8 +42,7 @@ public class AppState {
 
   private static boolean collectProfilingData = false;
   private static boolean isLoggingToConsole = false;
-  private static boolean isSaving = false;
-  private static boolean isLoading = false;
+  private static boolean isLockedForBackgroundTask = false;
 
   private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
 
@@ -161,6 +163,14 @@ public class AppState {
     return showMovementMeasurements;
   }
 
+  public static void setShowTextLabels(boolean show) {
+    showTextLabels = show;
+  }
+
+  public static boolean getShowTextLabels() {
+    return showTextLabels;
+  }
+
   public static boolean isShowAsPlayer() {
     return showAsPlayer;
   }
@@ -177,26 +187,25 @@ public class AppState {
     showLightSources = show;
   }
 
-  public static synchronized void setIsLoading(boolean loading) {
-    isLoading = loading;
+  private static ReentrantLock backgroundTaskLock = new ReentrantLock();
+
+  public static boolean testBackgroundTaskLock() {
+    return backgroundTaskLock.isLocked();
   }
 
-  public static synchronized boolean isLoading() {
-    return isLoading;
-  }
+  public static class FailedToAcquireLockException extends Exception {}
 
-  public static synchronized void setIsSaving(boolean saving) {
-    if (log.isDebugEnabled()) {
-      log.debug("AppState.isSaving was " + isSaving + "; setting to " + saving); // $NON-NLS-1$
+  public static void acquireBackgroundTaskLock(int waitSeconds)
+      throws FailedToAcquireLockException {
+    try {
+      if (backgroundTaskLock.tryLock(waitSeconds, TimeUnit.SECONDS)) return;
+    } catch (InterruptedException ie) {
     }
-    isSaving = saving;
+    throw new FailedToAcquireLockException();
   }
 
-  public static synchronized boolean isSaving() {
-    if (log.isDebugEnabled()) {
-      log.debug("AppState.isSaving is " + isSaving); // $NON-NLS-1$
-    }
-    return isSaving;
+  public static void releaseBackgroundTaskLock() {
+    backgroundTaskLock.unlock();
   }
 
   public static boolean isNotificationEnforced() {

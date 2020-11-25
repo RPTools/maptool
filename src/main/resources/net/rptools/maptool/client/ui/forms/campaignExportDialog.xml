@@ -75,7 +75,7 @@
             </at>
             <at name="width">496</at>
             <at name="name"/>
-            <at name="text">Export campaign to a previous version</at>
+            <at name="text">ExportCampaign.desc</at>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>
@@ -83,7 +83,7 @@
             </at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">12</at>
              </object>
@@ -165,7 +165,7 @@
                  <at name="actionCommand">Export</at>
                  <at name="name">exportButton</at>
                  <at name="width">64</at>
-                 <at name="text">Export</at>
+                 <at name="text">Button.export</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -221,7 +221,7 @@
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">64</at>
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -380,7 +380,7 @@
                  </at>
                  <at name="width">82</at>
                  <at name="name"/>
-                 <at name="text">MapTool Version:</at>
+                 <at name="text">Label.version</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -614,7 +614,7 @@
             </at>
             <at name="name"></at>
             <at name="width">496</at>
-            <at name="text">Notes</at>
+            <at name="text">EditTokenDialog.tab.notes</at>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>

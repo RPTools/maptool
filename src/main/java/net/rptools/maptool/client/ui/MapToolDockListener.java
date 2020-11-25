@@ -106,10 +106,10 @@ public class MapToolDockListener implements DockableFrameListener {
    */
   private void updatePanels(String panel) {
     if (MapTool.getFrame() != null) {
-      if (panel == "SELECTION") {
+      if (panel.equals("SELECTION")) {
         MapTool.getFrame().getSelectionPanel().reset();
       }
-      if (panel == "IMPERSONATED") {
+      if (panel.equals("IMPERSONATED")) {
         MapTool.getFrame().getImpersonatePanel().reset();
       }
     }

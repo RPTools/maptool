@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 import java.awt.Color;
 import java.awt.Component;
@@ -64,12 +66,11 @@ import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -78,7 +79,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.rptools.parser.function.EvaluationException;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -136,7 +136,11 @@ public class InputFunction extends AbstractFunction {
     super(1, -1, "input");
   }
 
-  /** Gets the singleton instance. */
+  /**
+   * Gets the singleton instance.
+   *
+   * @return the singleton instance for the class.
+   */
   public static InputFunction getInstance() {
     return instance;
   }
@@ -146,11 +150,14 @@ public class InputFunction extends AbstractFunction {
     // The regexp for the option strings is strict: no spaces, and trailing semicolon required.
     // @formatter: off
     TEXT(false, false, "WIDTH=16;SPAN=FALSE;"),
-    LIST(true, false, "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;"),
+    LIST(
+        true,
+        false,
+        "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     CHECK(false, false, "SPAN=FALSE;"),
-    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"),
+    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
-    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
+    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;TYPE=STRPROP;"),
     TAB(false, true, "SELECT=FALSE;");
     // @formatter: on
 
@@ -164,14 +171,20 @@ public class InputFunction extends AbstractFunction {
 
       defaultOptions = new OptionMap();
       Pattern pattern =
-          Pattern.compile("(\\w+)=([\\w-]+)\\;"); // no spaces allowed, semicolon required
+          Pattern.compile("(\\w+)=([\\w-,]+)\\;"); // no spaces allowed, semicolon required
       Matcher matcher = pattern.matcher(nameval);
       while (matcher.find()) {
         defaultOptions.put(matcher.group(1).toUpperCase(), matcher.group(2).toUpperCase());
       }
     }
 
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
+    /**
+     * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
+     *
+     * @param strName the name of the enum values.
+     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no
+     *     match..
+     */
     public static InputType inputTypeFromName(String strName) {
       for (InputType it : InputType.values()) {
         if (strName.equalsIgnoreCase(it.name())) return it;
@@ -179,7 +192,12 @@ public class InputFunction extends AbstractFunction {
       return null;
     }
 
-    /** Gets the default value for an option. */
+    /**
+     * Gets the default value for an option.
+     *
+     * @param option the name of the option to get the default value for.
+     * @return the default value for the passed in option.
+     */
     public String getDefault(String option) {
       return defaultOptions.get(option.toUpperCase());
     }
@@ -187,11 +205,15 @@ public class InputFunction extends AbstractFunction {
     /**
      * Parses a string and returns a Map of options for the given type. Options not found are set to
      * the default value for the type.
+     *
+     * @param s the {@code String} to parse.
+     * @return the options parsed from the string.
+     * @throws OptionException if an error occurs.
      */
     public OptionMap parseOptionString(String s) throws OptionException {
       OptionMap ret = new OptionMap();
       ret.putAll(defaultOptions); // copy the default values first
-      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*\\=\\s*([\\w-]+)\\s*");
+      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*=\\s*([^ ]+)\\s*");
       Matcher matcher = pattern.matcher(s);
       while (matcher.find()) {
         String key = matcher.group(1);
@@ -281,7 +303,7 @@ public class InputFunction extends AbstractFunction {
 
     /** Thrown when an option value is invalid. */
     @SuppressWarnings("serial")
-    public class OptionException extends Exception {
+    public static class OptionException extends Exception {
       public String key, value, type;
 
       public OptionException(InputType it, String key, String value) {
@@ -294,7 +316,7 @@ public class InputFunction extends AbstractFunction {
   } ///////////////////// end of InputType enum
 
   /** Variable Specifier structure - holds extracted bits of info for a variable. */
-  final class VarSpec {
+  static final class VarSpec {
     public String name, value, prompt;
     public InputType inputType;
     public InputType.OptionMap optionValues;
@@ -347,25 +369,35 @@ public class InputFunction extends AbstractFunction {
       this.value = value;
       this.prompt = prompt;
       this.inputType = inputType;
-      this.optionValues = inputType.parseOptionString(options);
+      if (inputType != null) this.optionValues = inputType.parseOptionString(options);
 
       if (inputType != null && inputType.isValueComposite)
-        this.valueList = parseStringList(this.value);
+        this.valueList = parseStringList(this.value, this.optionValues.get("DELIMITER"));
     }
 
     /**
      * Parses a string into a list of values, for composite types. <br>
      * Before calling, the <code>inputType</code> and <code>value</code> must be set. <br>
      * After calling, the <code>listIndex</code> member is adjusted if necessary.
+     *
+     * @param valueString the string list
+     * @param delim the delimiter
      */
-    public List<String> parseStringList(String valueString) {
+    public List<String> parseStringList(String valueString, String delim) {
       List<String> ret = new ArrayList<String>();
       if (valueString != null) {
-        String[] values = valueString.split(",");
-        int i = 0;
-        for (String s : values) {
-          ret.add(s.trim());
-          i++;
+        if ("json".equalsIgnoreCase(delim)) {
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
+          if (json != null && json.isJsonArray()) {
+            for (JsonElement ele : json.getAsJsonArray()) {
+              ret.add(ele.getAsString().trim());
+            }
+          }
+        } else {
+          String[] values = valueString.split(delim);
+          for (String s : values) {
+            ret.add(s.trim());
+          }
         }
       }
       return ret;
@@ -555,8 +587,8 @@ public class InputFunction extends AbstractFunction {
           // But the resulting behavior is so much nicer with this fix in place, that I'm keeping it
           // in.
           Component list[] = c.getComponents();
-          for (int i = 0; i < list.length; i++)
-            if (list[i] instanceof TinyComboBoxButton) list[i].setFocusable(false); // HACK!
+          for (Component component : list)
+            if (component instanceof TinyComboBoxButton) component.setFocusable(false); // HACK!
           // } else if (c instanceof JTextField) {
           // // Select all text when the text field gains focus
           // final JTextField textFieldFinal = (JTextField) c;
@@ -747,20 +779,32 @@ public class InputFunction extends AbstractFunction {
 
     /** Creates a subpanel with controls for each property. */
     public JComponent createPropsControl(VarSpec vs) {
-      // Get the key/value pairs from the property string
       Map<String, String> map = new HashMap<String, String>();
+      JsonElement jsonElement = JSONMacroFunctions.getInstance().asJsonElement(vs.value);
       List<String> oldKeys = new ArrayList<String>();
-      List<String> oldKeysNormalized = new ArrayList<String>();
-      StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+
+      if (jsonElement instanceof JsonObject) {
+        // Get the key/value pairs from the JsonObject
+        JsonObject jsonObject = (JsonObject) jsonElement;
+        for (String key : jsonObject.keySet()) {
+          map.put(key.toUpperCase(), jsonObject.get(key).getAsString());
+          oldKeys.add(key);
+        }
+      } else {
+        // Get the key/value pairs from the property string
+        List<String> oldKeysNormalized = new ArrayList<String>();
+        StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+      }
 
       // Create list of VarSpecs for the subpanel
       List<VarSpec> varSpecs = new ArrayList<VarSpec>();
+      InputType it = InputType.TEXT;
+      int width = vs.optionValues.getNumeric("WIDTH");
+      String options = "WIDTH=" + width;
       for (String key : oldKeys) {
         String name = key;
         String value = map.get(key.toUpperCase());
         String prompt = key;
-        InputType it = InputType.TEXT;
-        String options = "WIDTH=14;";
         VarSpec subvs;
         try {
           subvs = new VarSpec(name, value, prompt, it, options);
@@ -948,19 +992,17 @@ public class InputFunction extends AbstractFunction {
       // so we have to save cp.lastFocus before it's overwritten.)
       if (tabPane != null) {
         tabPane.addChangeListener(
-            new ChangeListener() {
-              public void stateChanged(ChangeEvent e) {
-                int newTabIndex = tabPane.getSelectedIndex();
-                ColumnPanel cp = columnPanels.get(newTabIndex);
-                cp.onShowFocus = cp.lastFocus;
+            e -> {
+              int newTabIndex = tabPane.getSelectedIndex();
+              ColumnPanel cp = columnPanels.get(newTabIndex);
+              cp.onShowFocus = cp.lastFocus;
 
-                // // debugging
-                // JComponent foc = cp.onShowFocus;
-                // String s = (foc instanceof JTextField) ?
-                // " (" + ((JTextField)foc).getText() + ")" : "";
-                // String c = (foc!=null) ? foc.getClass().getName() : "";
-                // System.out.println("tabpane foc = " + c + s);
-              }
+              // // debugging
+              // JComponent foc = cp.onShowFocus;
+              // String s = (foc instanceof JTextField) ?
+              // " (" + ((JTextField)foc).getText() + ")" : "";
+              // String c = (foc!=null) ? foc.getClass().getName() : "";
+              // System.out.println("tabpane foc = " + c + s);
             });
       }
     }
@@ -974,8 +1016,9 @@ public class InputFunction extends AbstractFunction {
 
   // The function that does all the work
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
-      throws EvaluationException, ParserException {
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
+      throws ParserException {
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
     List<String> varStrings = new ArrayList<String>();
@@ -985,10 +1028,9 @@ public class InputFunction extends AbstractFunction {
         continue;
       }
       // Multiple vars can be packed into a string, separated by "##"
-      List<String> substrings = new ArrayList<String>();
-      StrListFunctions.parse(paramStr, substrings, "##");
+      List<String> substrings = StrListFunctions.toList(paramStr, "##");
       for (String varString : substrings) {
-        if (StringUtils.isEmpty(paramStr)) {
+        if (StringUtils.isEmpty(varString)) {
           continue;
         }
         varStrings.add(varString);
@@ -1016,7 +1058,7 @@ public class InputFunction extends AbstractFunction {
       return BigDecimal.ONE; // No work to do, so treat it as a successful invocation.
 
     // UI step 1 - First, see if a token is in context.
-    VariableResolver varRes = parser.getVariableResolver();
+    VariableResolver varRes = resolver;
     Token tokenInContext = null;
     if (varRes instanceof MapToolVariableResolver) {
       tokenInContext = ((MapToolVariableResolver) varRes).getTokenInContext();
@@ -1047,6 +1089,8 @@ public class InputFunction extends AbstractFunction {
 
     // UI step 3 - show the dialog
     JOptionPane jop = new JOptionPane(ip, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    fixLayoutForTabPanes(jop);
+
     JDialog dlg = jop.createDialog(MapTool.getFrame(), dialogTitle);
 
     // Set up callbacks needed for desired runtime behavior
@@ -1074,6 +1118,7 @@ public class InputFunction extends AbstractFunction {
         VarSpec vs = panelVars.get(varCount);
         JComponent comp = panelControls.get(varCount);
         String newValue = null;
+        JsonObject jsonObject = null;
         switch (vs.inputType) {
           case TEXT:
             {
@@ -1092,17 +1137,17 @@ public class InputFunction extends AbstractFunction {
             }
           case CHECK:
             {
-              Integer value = ((JCheckBox) comp).isSelected() ? 1 : 0;
-              newValue = value.toString();
+              int value = ((JCheckBox) comp).isSelected() ? 1 : 0;
+              newValue = Integer.toString(value);
               break;
             }
           case RADIO:
             {
               // This code assumes that the Box container returns components
               // in the same order that they were added.
-              Component[] comps = ((Box) comp).getComponents();
+              Component[] comps = comp.getComponents();
               int componentCount = 0;
-              Integer index = 0;
+              int index = 0;
               for (Component c : comps) {
                 if (c instanceof JRadioButton) {
                   JRadioButton radio = (JRadioButton) c;
@@ -1113,7 +1158,7 @@ public class InputFunction extends AbstractFunction {
               if (vs.optionValues.optionEquals("VALUE", "STRING")) {
                 newValue = vs.valueList.get(index);
               } else { // default is "NUMBER"
-                newValue = index.toString();
+                newValue = Integer.toString(index);
               }
               break;
             }
@@ -1128,8 +1173,9 @@ public class InputFunction extends AbstractFunction {
               // Read out and assign all the subvariables.
               // The overall return value is a property string (as in StrPropFunctions.java) with
               // all the new settings.
-              Component[] comps = ((JPanel) comp).getComponents();
+              Component[] comps = comp.getComponents();
               StringBuilder sb = new StringBuilder();
+              jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
               if (vs.optionValues.optionEquals("SETVARS", "SUFFIXED")) setVars = 1;
               if (vs.optionValues.optionEquals("SETVARS", "UNSUFFIXED")) setVars = 2;
@@ -1143,15 +1189,19 @@ public class InputFunction extends AbstractFunction {
                 sb.append("=");
                 sb.append(value);
                 sb.append(" ; ");
+                if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+                  jsonObject.add(
+                      key, JSONMacroFunctions.getInstance().convertPrimitiveFromString(value));
+                }
                 switch (setVars) {
                   case 0:
                     // Do nothing
                     break;
                   case 1:
-                    parser.setVariable(key + "_", value);
+                    resolver.setVariable(key + "_", value);
                     break;
                   case 2:
-                    parser.setVariable(key, value);
+                    resolver.setVariable(key, value);
                     break;
                 }
               }
@@ -1165,12 +1215,16 @@ public class InputFunction extends AbstractFunction {
         }
         // Set the variable to the value we got from the dialog box.
         if (newValue != null) {
-          parser.setVariable(vs.name, newValue.trim());
-          allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
+          if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+            resolver.setVariable(vs.name, jsonObject);
+          } else {
+            resolver.setVariable(vs.name, newValue.trim());
+          }
+          allAssignments.append(vs.name).append("=").append(newValue.trim()).append(" ## ");
         }
       }
       if (cp.tabVarSpec != null) {
-        parser.setVariable(cp.tabVarSpec.name, allAssignments.toString());
+        resolver.setVariable(cp.tabVarSpec.name, allAssignments.toString());
       }
     }
 
@@ -1178,6 +1232,25 @@ public class InputFunction extends AbstractFunction {
 
     // for debugging:
     // return debugOutput(varSpecs);
+  }
+
+  /**
+   * This is a workaround to fix the excessive space introduced when using multiple tabs (see issue
+   * #198)
+   */
+  private void fixLayoutForTabPanes(JOptionPane jop) {
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.weightx = 1.0;
+
+    GridBagLayout gbl = new GridBagLayout();
+    for (Component c : jop.getComponents()) {
+      gbl.setConstraints(c, gbc);
+      gbc.gridy += 1;
+    }
+    jop.setLayout(gbl);
   }
 
   @Override
@@ -1223,7 +1296,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** JLabel variant that listens for new image data, and redraws its icon. */
-  public class UpdatingLabel extends JLabel {
+  public static class UpdatingLabel extends JLabel {
     private String macroLink;
 
     @Override
@@ -1260,7 +1333,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Custom renderer to display icons and text inside a combo box */
-  private class ComboBoxRenderer implements ListCellRenderer {
+  private static class ComboBoxRenderer implements ListCellRenderer {
     public Component getListCellRendererComponent(
         JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       JLabel label = null;
@@ -1294,7 +1367,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /** Class found on web to work around a STUPID SWING BUG with JComboBox */
-  public class NoEqualString {
+  public static class NoEqualString {
     private final String text;
 
     public NoEqualString(String txt) {

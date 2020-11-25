@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TestFunctions extends AbstractFunction {
@@ -55,7 +56,8 @@ public class TestFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     switch (functionName) {
@@ -93,7 +95,7 @@ public class TestFunctions extends AbstractFunction {
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  private String runTests() throws ParserException {
+  private String runTests() {
     Set<Token> tokens = new HashSet<>();
     Set<GUID> tokenIds = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (!tokenIds.isEmpty()) {
@@ -113,7 +115,7 @@ public class TestFunctions extends AbstractFunction {
     return runTests(tokens);
   }
 
-  private String runTests(Set<Token> tokens) throws ParserException {
+  private String runTests(Set<Token> tokens) {
     int i = 0;
     for (Token token : tokens) {
       i++;
@@ -124,12 +126,11 @@ public class TestFunctions extends AbstractFunction {
     return "";
   }
 
-  private void runTests(Token token) throws ParserException {
-    Map<Integer, Object> macroPropertiesMap =
+  private void runTests(Token token) {
+    Map<Integer, MacroButtonProperties> macroPropertiesMap =
         token.getMacroPropertiesMap(MapTool.getParser().isMacroTrusted());
 
-    for (Object o : macroPropertiesMap.values()) {
-      MacroButtonProperties mbp = (MacroButtonProperties) o;
+    for (MacroButtonProperties mbp : macroPropertiesMap.values()) {
       if (mbp.getLabel().toLowerCase().startsWith("test:")) {
 
         failures = 0;

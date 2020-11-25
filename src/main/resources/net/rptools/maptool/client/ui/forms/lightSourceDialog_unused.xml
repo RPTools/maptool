@@ -583,7 +583,7 @@
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">0</at>
               <at name="size">11</at>
              </object>
@@ -613,7 +613,7 @@
             </at>
             <at name="titleFont">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">11</at>
              </object>
@@ -653,7 +653,7 @@
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">0</at>
               <at name="size">11</at>
              </object>
@@ -683,7 +683,7 @@
             </at>
             <at name="titleFont">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">11</at>
              </object>
@@ -839,7 +839,7 @@
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">0</at>
               <at name="size">11</at>
              </object>
@@ -869,7 +869,7 @@
             </at>
             <at name="titleFont">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">11</at>
              </object>
@@ -909,7 +909,7 @@
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">0</at>
               <at name="size">11</at>
              </object>
@@ -939,7 +939,7 @@
             </at>
             <at name="titleFont">
              <object classname="com.jeta.forms.store.properties.FontProperty">
-              <at name="family">Tahoma</at>
+              <at name="family">SansSerif</at>
               <at name="style">1</at>
               <at name="size">11</at>
              </object>

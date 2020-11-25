@@ -378,26 +378,19 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
 
     // Start off in the proper state.
     int state = Token.NULL;
-    switch (initialTokenType) {
-      case Token.COMMENT_MULTILINE:
-        state = MLC;
-        start = text.offset;
-        break;
+    if (initialTokenType == Token.COMMENT_MULTILINE) {
+      state = MLC;
+      start = text.offset;
 
-        /* No documentation comments */
-      default:
-        state = Token.NULL;
+      /* No documentation comments */
+    } else {
+      state = Token.NULL;
     }
 
     s = text;
-    try {
-      yyreset(zzReader);
-      yybegin(state);
-      return yylex();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-      return new TokenImpl();
-    }
+    yyreset(zzReader);
+    yybegin(state);
+    return yylex();
   }
 
   /**
@@ -415,7 +408,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
    * Resets the scanner to read from a new input stream. Does not close the old reader.
    *
    * <p>All internal variables are reset, the old input stream <b>cannot</b> be reused (internal
-   * buffer is discarded and lost). Lexical state is set to <tt>YY_INITIAL</tt>.
+   * buffer is discarded and lost). Lexical state is set to <code>YY_INITIAL</code>.
    *
    * @param reader the new input stream
    *     <p>NOTE: Keep this method version and remove the other yyreset(Reader reader) after JFlex
@@ -475,7 +468,11 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     return map;
   }
 
-  /** Closes the input stream. */
+  /**
+   * Closes the input stream.
+   *
+   * @throws IOException If an I/O error occurs
+   */
   public final void yyclose() throws java.io.IOException {
     zzAtEOF = true; /* indicate end of file */
     zzEndRead = zzStartRead; /* invalidate buffer */
@@ -483,7 +480,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     if (zzReader != null) zzReader.close();
   }
 
-  /** Returns the current lexical state. */
+  /** @return the current lexical state. */
   public final int yystate() {
     return zzLexicalState;
   }
@@ -497,13 +494,13 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     zzLexicalState = newState;
   }
 
-  /** Returns the text matched by the current regular expression. */
+  /** @return the text matched by the current regular expression. */
   public final String yytext() {
     return new String(zzBuffer, zzStartRead, zzMarkedPos - zzStartRead);
   }
 
   /**
-   * Returns the character at position <tt>pos</tt> from the matched text.
+   * Returns the character at position <code>pos</code> from the matched text.
    *
    * <p>It is equivalent to yytext().charAt(pos), but faster
    *
@@ -514,7 +511,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     return zzBuffer[zzStartRead + pos];
   }
 
-  /** Returns the length of the matched text region. */
+  /** @return the length of the matched text region. */
   public final int yylength() {
     return zzMarkedPos - zzStartRead;
   }
@@ -563,7 +560,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
    * @return the next token
    * @exception java.io.IOException if any I/O-Error occurs
    */
-  public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
+  public org.fife.ui.rsyntaxtextarea.Token yylex() {
     int zzInput;
     int zzAction;
 

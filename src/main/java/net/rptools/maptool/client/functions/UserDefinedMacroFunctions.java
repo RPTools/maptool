@@ -16,30 +16,34 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
-import net.rptools.parser.function.ParameterException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDescription {
+  private static final Logger log = LogManager.getLogger(UserDefinedMacroFunctions.class);
 
   private final Map<String, FunctionDefinition> userDefinedFunctions =
       new HashMap<String, FunctionDefinition>();
@@ -81,28 +85,39 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   private UserDefinedMacroFunctions() {}
 
   @Override
-  public void checkParameters(String functionName, List<Object> parameters)
-      throws ParameterException {
+  public void checkParameters(String functionName, List<Object> parameters) {
     // Do nothing as we do not know what we will need.
   }
 
-  public Object evaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object evaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     MapToolVariableResolver newResolver;
     JsonArray jarr = new JsonArray();
 
     for (Object obj : parameters) {
-      jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+      if (obj
+          instanceof
+          String) { // Want to make sure we dont translate string arguments where not wanted
+        String s = obj.toString();
+        if (!s.startsWith("[") && !s.startsWith("{")) {
+          jarr.add(new JsonPrimitive(s));
+        } else {
+          jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+        }
+      } else {
+        jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+      }
     }
     String macroArgs = jarr.size() > 0 ? jarr.toString() : "";
     String output;
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
 
     if (funcDef.newVariableContext) {
-      newResolver = new MapToolVariableResolver(resolver.getTokenInContext());
+      newResolver =
+          new MapToolVariableResolver(((MapToolVariableResolver) resolver).getTokenInContext());
     } else {
-      newResolver = resolver;
+      newResolver = (MapToolVariableResolver) resolver;
     }
 
     try {
@@ -110,11 +125,14 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output =
           MapTool.getParser()
               .runMacro(
-                  resolver,
+                  (MapToolVariableResolver) resolver,
                   newResolver.getTokenInContext(),
                   funcDef.macroName,
                   macroArgs,
                   funcDef.newVariableContext);
+    } catch (ParserException e) {
+      e.addMacro(funcDef.macroName);
+      throw e;
     } finally {
       currentFunction.pop();
     }
@@ -171,8 +189,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   }
 
   public void defineFunction(
-      Parser parser, String name, String macro, boolean ignoreOutput, boolean newVariableContext)
-      throws ParserException {
+      Parser parser, String name, String macro, boolean ignoreOutput, boolean newVariableContext) {
     if (parser.getFunction(name) != null) {
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);
@@ -181,7 +198,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
-        if (userDefinedFunctions.get(name).equals(macro)) {
+        if (userDefinedFunctions.get(name).macroName.equals(macro)) {
           return;
         }
         // We have to rename the old function
@@ -197,7 +214,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     MapToolScriptSyntax.resetScriptSyntax();
   }
 
-  public Object executeOldFunction(Parser parser, List<Object> parameters) throws ParserException {
+  public Object executeOldFunction(
+      Parser parser, VariableResolver resolver, List<Object> parameters) throws ParserException {
     String functionName = currentFunction.peek();
     FunctionRedefinition functionRedef = redefinedFunctions.get(functionName);
     if (functionRedef == null) {
@@ -205,70 +223,89 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
     Function function = functionRedef.function;
     function.checkParameters(functionName, parameters);
-    return function.evaluate(parser, functionRedef.functionName, parameters);
+    return function.evaluate(parser, resolver, functionRedef.functionName, parameters);
   }
 
   public boolean isFunctionDefined(String name) {
     return userDefinedFunctions.containsKey(name);
   }
 
-  public void loadCampaignLibFunctions() {
+  /**
+   * Clears any previously mapped UDFs and handles the {@value #ON_LOAD_CAMPAIGN_CALLBACK} macro
+   * event. Suppresses chat output on the called macros.
+   */
+  public void handleCampaignLoadMacroEvent() {
     userDefinedFunctions.clear();
+    List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_LOAD_CAMPAIGN_CALLBACK);
+    String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
+    for (Token handler : libTokens) {
+      EventMacroUtil.callEventHandler(
+          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
+    }
+  }
 
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      List<Token> tokenList =
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getName().toLowerCase().startsWith("lib:");
-                    }
-                  });
-
-      for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs then we are in its a trusted
-        // Lib:token so we can run the macro
-        if (token != null) {
-          if (token.isOwnedByAll()) {
-            continue;
-          } else {
-            Set<String> gmPlayers = new HashSet<String>();
-            for (Object o : MapTool.getPlayerList()) {
-              Player p = (Player) o;
-              if (p.isGM()) {
-                gmPlayers.add(p.getName());
-              }
-            }
-            for (String owner : token.getOwners()) {
-              if (!gmPlayers.contains(owner)) {
-                continue;
-              }
-            }
-          }
+  /**
+   * Macro function to retrieve information about all defined functions. Uses the corresponding
+   * macroButton's tooltip, if any, as a function description.
+   *
+   * <p>If the provided delim is empty, this function produces plain text output: listAngryNPCs -
+   * Lists all NPCs that are angry at PCs.
+   *
+   * <p>If the provided delim is "json", this function produces a JsonArray: [{"name":
+   * "listAngryNPCs", "description": "Lists all NPCs that are angry at PCs."}]
+   *
+   * <p>Otherwise, the output is a string list separated by the given delimiter:
+   * "listAngryNPCs","Lists all NPCs that are angry at PCs."
+   *
+   * @param delim delimiter used to separate values in string list. "" and "json" produce special
+   *     formatting
+   * @param showFullLocations whether fully-qualified macro locations should be included in the
+   *     output
+   * @return a list of user defined functions
+   */
+  public Object getDefinedFunctions(String delim, boolean showFullLocations) {
+    List<String> aliases = Arrays.asList(getAliases());
+    log.info("Found {} defined functions", aliases.size());
+    Collections.sort(aliases);
+    if ("".equals(delim)) {
+      // plain-text output
+      List<String> lines = new ArrayList<>();
+      for (String name : aliases) {
+        StringBuilder line = new StringBuilder(name);
+        if (showFullLocations) line.append(" - ").append(getFunctionLocation(name));
+        String tooltip = getFunctionTooltip(name);
+        if (tooltip != null && !tooltip.isEmpty()) {
+          tooltip = StringFunctions.getInstance().replace(tooltip, "<", "&lt;");
+          line.append(" - ");
+          line.append(tooltip);
         }
-        // If we get here it is trusted so try to execute it.
-        if (token.getMacro(ON_LOAD_CAMPAIGN_CALLBACK, false) != null) {
-          try {
-            MapTool.getParser()
-                .runMacro(
-                    new MapToolVariableResolver(token),
-                    token,
-                    ON_LOAD_CAMPAIGN_CALLBACK + "@" + token.getName(),
-                    "");
-          } catch (AbortFunctionException afe) {
-            // Do nothing
-          } catch (Exception e) {
-            MapTool.addLocalMessage(
-                "Error running "
-                    + ON_LOAD_CAMPAIGN_CALLBACK
-                    + " on "
-                    + token.getName()
-                    + " : "
-                    + e.getMessage());
-          }
-        }
+        lines.add(line.toString());
       }
+      return StringUtils.join(lines, "<br />");
+    } else if ("json".equals(delim)) {
+      // json output
+      JsonArray jsonArray = new JsonArray();
+      for (String name : aliases) {
+        JsonObject fDef = new JsonObject();
+        fDef.addProperty("name", name);
+        if (showFullLocations) fDef.addProperty("source", getFunctionLocation(name));
+        String tooltip = getFunctionTooltip(name);
+        if (tooltip != null && !tooltip.isEmpty()) {
+          tooltip = StringFunctions.getInstance().replace(tooltip, "<", "&lt;");
+          fDef.addProperty("description", tooltip);
+        }
+        jsonArray.add(fDef);
+      }
+      return jsonArray;
+    } else {
+      // string list output, using delim
+      List<String> strings = new ArrayList<>();
+      for (String name : aliases) {
+        strings.add(name);
+        if (showFullLocations) strings.add(getFunctionLocation(name));
+        strings.add(getFunctionTooltip(name));
+      }
+      return StringUtils.join(strings, delim);
     }
   }
 
@@ -282,9 +319,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       if (functionName.equals(function.getKey())) {
         FunctionDefinition funcDef = function.getValue();
         String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
-          String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
+        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
+          String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
+          String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
           Token token = FindTokenFunctions.findToken(tokenName);
           if (token != null) {
             List<MacroButtonProperties> macros = token.getMacroList(false);
@@ -310,9 +347,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       if (functionName.equals(function.getKey())) {
         final FunctionDefinition funcDef = function.getValue();
         final String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          final String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
-          final String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
+        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
+          final String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
+          final String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
           final Token token = FindTokenFunctions.findToken(tokenName);
           if (token != null) {
             final List<MacroButtonProperties> macros = token.getMacroList(false);
@@ -326,5 +363,50 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       }
     }
     return null;
+  }
+
+  /**
+   * Get the macro location for the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the macroName, or null if no such function exists
+   */
+  public String getFunctionLocation(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    return (theDef == null) ? null : theDef.macroName;
+  }
+
+  /**
+   * Get the tooltip from the macro button mapped to the given defined function
+   *
+   * @param functionName the UDF name
+   * @return the evaluated tooltip, or null if no corresponding macro button can be found
+   */
+  public String getFunctionTooltip(String functionName) {
+    if (functionName == null) {
+      return null;
+    }
+    FunctionDefinition theDef = userDefinedFunctions.get(functionName);
+    if (theDef != null) {
+      String[] macroParts = theDef.macroName.split("@", 2);
+      if (macroParts.length != 2) return null;
+      String macroName = macroParts[0];
+      String macroLocation = macroParts[1];
+      try {
+        Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
+        MacroButtonProperties buttonProps = libToken.getMacro(macroName, false);
+        return (buttonProps == null) ? null : buttonProps.getEvaluatedToolTip();
+      } catch (ParserException e) {
+        // this means we couldn't find the unique macro used in the mapping - may want a warning
+        // instead of null?
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 }

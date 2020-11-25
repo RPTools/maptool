@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -50,7 +49,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       boolean hasFocus) {
 
     setBorder(null);
-    setBackgroundNonSelectionColor(Color.white);
 
     String text = "";
     this.row = row;
@@ -112,6 +110,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   }
 
   private Icon setDrawPanelIcon(String key, boolean eraser) {
+    String streamName;
     try {
       switch (key) {
         case "panel.DrawExplorer.ShapeDrawable.Area":

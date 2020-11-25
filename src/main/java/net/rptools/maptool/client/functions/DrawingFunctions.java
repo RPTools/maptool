@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
@@ -42,6 +41,7 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class DrawingFunctions extends AbstractFunction {
@@ -51,7 +51,8 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     // This class should never be called.
     return null;
@@ -65,9 +66,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected void bringToFront(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
@@ -81,9 +80,7 @@ public class DrawingFunctions extends AbstractFunction {
 
   protected Layer changeLayer(Zone map, Layer layer, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getLayer() != layer && de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         MapTool.serverCommand().undoDraw(map.getId(), de.getDrawable().getId());
@@ -116,6 +113,7 @@ public class DrawingFunctions extends AbstractFunction {
    * @param functionName this is used in the exception message
    * @param map the zone that should contain the drawing
    * @param guid the id of the drawing.
+   * @return the {@link Drawable} requested.
    * @throws ParserException if the drawing is not found.
    */
   protected Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
@@ -132,9 +130,7 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         return de;
       }
@@ -157,7 +153,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected float getFloatPercent(String functionName, String f) throws ParserException {
     try {
-      Float per = Float.parseFloat(f);
+      float per = Float.parseFloat(f);
       while (per > 1) per = per / 100;
       return per;
     } catch (Exception e) {
@@ -176,7 +172,7 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected float getFloat(String functionName, String f) throws ParserException {
     try {
-      Float per = Float.parseFloat(f);
+      float per = Float.parseFloat(f);
       return per;
     } catch (Exception e) {
       throw new ParserException(
@@ -281,7 +277,7 @@ public class DrawingFunctions extends AbstractFunction {
    * @param map the zone that should contain the drawing
    * @param guid the id of the drawing.
    * @return JSON in String form.
-   * @throws ParserException
+   * @throws ParserException if the drawable is not found.
    */
   protected JsonObject getDrawingJSONInfo(String functionName, Zone map, GUID guid)
       throws ParserException {
@@ -374,6 +370,7 @@ public class DrawingFunctions extends AbstractFunction {
    * @param functionName this is used in the exception message.
    * @param args List of parameters passed to the function.
    * @param param int reference to the boolean parameter.
+   * @return the boolean equivalent to the passed in argument.
    * @throws ParserException if the parameter fails to parse.
    */
   protected boolean parseBoolean(String functionName, List<Object> args, int param)
@@ -392,9 +389,7 @@ public class DrawingFunctions extends AbstractFunction {
 
   protected void sendToBack(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();
-    Iterator<DrawnElement> iter = drawableList.iterator();
-    while (iter.hasNext()) {
-      DrawnElement de = iter.next();
+    for (DrawnElement de : drawableList) {
       if (de.getDrawable().getId().equals(guid)) {
         map.removeDrawable(de.getDrawable().getId());
         map.addDrawableRear(de);

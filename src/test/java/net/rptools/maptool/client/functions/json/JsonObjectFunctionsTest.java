@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import net.rptools.parser.ParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,7 +60,7 @@ class JsonObjectFunctionsTest {
   }
 
   @Test
-  void fromStrProp() throws ParserException {
+  void fromStrProp() {
     JsonObject jsonObject = jsonObjectFunctions.fromStrProp("A=1,b=7,t=3,f=hello", ",");
     assertEquals(4, jsonObject.keySet().size(), "JsonObject has 4 keys");
     assertTrue(jsonObject.has("A"), "JsonObject has key 'A'");
@@ -123,7 +122,7 @@ class JsonObjectFunctionsTest {
   }
 
   @Test
-  void toStrProp() throws ParserException {
+  void toStrProp() {
     String strProp = jsonObjectFunctions.toStringProp(jsonObject1, ",");
     assertEquals("A=1,b=2,c=null,d=true,e=false,f=hello", strProp);
     strProp = jsonObjectFunctions.toStringProp(jsonObject1, ";");

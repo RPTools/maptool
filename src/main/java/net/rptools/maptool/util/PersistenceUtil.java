@@ -28,12 +28,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -170,25 +170,21 @@ public class PersistenceUtil {
       // Put in a placeholder
       pMap.assetMap.put(key, null);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(mapFile);
+
+    try (PackedFile pakFile = new PackedFile(mapFile)) {
       saveAssets(z.getAllAssetIds(), pakFile);
       pakFile.setContent(pMap);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
   public static PersistedMap loadMap(File mapFile) throws IOException {
-    PackedFile pakFile = null;
     PersistedMap persistedMap = null;
 
-    try {
-      pakFile = new PackedFile(mapFile);
+    // TODO: split in a try with resources and a try/catch
+    try (PackedFile pakFile = new PackedFile(mapFile)) {
 
       // Sanity check
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
@@ -205,8 +201,7 @@ public class PersistenceUtil {
         // destroy all properties and macros. Keep some fields, though. Since that type
         // of object editing doesn't belong here, we just call Token.imported() and let
         // that method Do The Right Thing.
-        for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext(); ) {
-          Token token = iter.next();
+        for (Token token : persistedMap.zone.getAllTokens()) {
           token.imported();
         }
         // XXX FJE This doesn't work the way I want it to. But doing this the Right Way
@@ -219,15 +214,13 @@ public class PersistenceUtil {
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
-        MapTool.showWarning(
+        throw new IOException(
             I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
     } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.mapVersion", ce);
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapVersion"), ce);
     } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.mapRead", ioe);
-    } finally {
-      if (pakFile != null) pakFile.close();
+      throw new IOException(I18N.getText("PersistenceUtil.error.mapRead"), ioe);
     }
     return persistedMap;
   }
@@ -244,7 +237,7 @@ public class PersistenceUtil {
     for (Zone zone : zones) {
       if (zone.getName().equals(n)) {
         String count = n.replaceFirst("Import (\\d+) of.*", "$1"); // $NON-NLS-1$
-        Integer next = 1;
+        int next = 1;
         try {
           next = StringUtil.parseInteger(count) + 1;
           n = n.replaceFirst("Import \\d+ of", "Import " + next + " of"); // $NON-NLS-1$
@@ -407,6 +400,7 @@ public class PersistenceUtil {
    * Gets a file pointing to where the campaign's thumbnail image should be.
    *
    * @param fileName The campaign's file name.
+   * @return the file for the campaign thumbnail
    */
   public static File getCampaignThumbnailFile(String fileName) {
     return new File(AppUtil.getAppHome("campaignthumbs"), fileName + ".jpg");
@@ -519,28 +513,24 @@ public class PersistenceUtil {
     return persistedCampaign;
   }
 
-  public static BufferedImage getTokenThumbnail(File file) throws Exception {
-    PackedFile pakFile = new PackedFile(file);
-    BufferedImage thumb;
-    String thumbFileName = Token.FILE_THUMBNAIL;
-
-    // Jamz: Lets use the Large thumbnail if needed
+  private static String getThumbFilename(PackedFile pakFile) throws IOException {
     if ((MapTool.getThumbnailSize().width > 50 || MapTool.getThumbnailSize().height > 50)
-        && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE)) thumbFileName = Token.FILE_THUMBNAIL_LARGE;
+        && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE)) return Token.FILE_THUMBNAIL_LARGE;
+    return Token.FILE_THUMBNAIL;
+  }
 
-    try {
+  public static BufferedImage getTokenThumbnail(File file) throws Exception {
+    BufferedImage thumb;
+    try (PackedFile pakFile = new PackedFile(file); ) {
+      // Jamz: Lets use the Large thumbnail if needed
+      String thumbFileName = getThumbFilename(pakFile);
+
       thumb = null;
       if (pakFile.hasFile(thumbFileName)) {
-        InputStream is = null;
-        try {
-          is = pakFile.getFileAsInputStream(thumbFileName);
+        try (InputStream is = pakFile.getFileAsInputStream(thumbFileName)) {
           thumb = ImageIO.read(is);
-        } finally {
-          IOUtils.closeQuietly(is);
         }
       }
-    } finally {
-      pakFile.close();
     }
     return thumb;
   }
@@ -580,9 +570,7 @@ public class PersistenceUtil {
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       saveAssets(token.getAllImageAssets(), pakFile);
       pakFile.putFile(Token.FILE_THUMBNAIL, ImageUtil.imageToBytes(thumb, "png"));
       pakFile.putFile(Token.FILE_THUMBNAIL_LARGE, ImageUtil.imageToBytes(thumbLarge, "png"));
@@ -590,16 +578,12 @@ public class PersistenceUtil {
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.setProperty(HERO_LAB, (token.getHeroLabData() != null));
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
-  public static Token loadToken(File file) throws IOException {
-    PackedFile pakFile = null;
+  public static Token loadToken(File file) {
     Token token = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setModelVersionManager(tokenVersionManager);
 
       // Sanity check
@@ -613,7 +597,6 @@ public class PersistenceUtil {
     } catch (IOException ioe) {
       MapTool.showError("PersistenceUtil.error.tokenRead", ioe);
     }
-    if (pakFile != null) pakFile.close();
     return token;
   }
 
@@ -646,16 +629,12 @@ public class PersistenceUtil {
         String pathname = ASSET_DIR + key;
         Asset asset = null;
         if (fixRequired) {
-          InputStream is = null;
-          try {
-            is = pakFile.getFileAsInputStream(pathname);
+          try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset = new Asset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
           } catch (Exception e) {
             log.error("Could not load asset from 1.3.b64 file in compatibility mode", e);
-          } finally {
-            IOUtils.closeQuietly(is);
           }
         } else {
           try {
@@ -682,9 +661,7 @@ public class PersistenceUtil {
           String ext = asset.getImageExtension();
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
-          InputStream is = null;
-          try {
-            is = pakFile.getFileAsInputStream(pathname);
+          try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset.setImage(IOUtils.toByteArray(is));
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
@@ -692,8 +669,6 @@ public class PersistenceUtil {
           } catch (Exception e) {
             log.error("While reading image data for '" + pathname + "'", e);
             continue;
-          } finally {
-            IOUtils.closeQuietly(is);
           }
         }
         AssetManager.putAsset(asset);
@@ -757,20 +732,18 @@ public class PersistenceUtil {
   public static CampaignProperties loadLegacyCampaignProperties(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadCampaignProperties(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
-  public static CampaignProperties loadCampaignProperties(InputStream in) throws IOException {
+  public static CampaignProperties loadCampaignProperties(InputStream in) {
     CampaignProperties props = null;
     try {
       props =
           (CampaignProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
     }
@@ -837,19 +810,15 @@ public class PersistenceUtil {
 
   public static void saveCampaignProperties(Campaign campaign, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       clearAssets(pakFile);
       saveAssets(campaign.getCampaignProperties().getAllImageAssets(), pakFile);
       pakFile.setContent(campaign.getCampaignProperties());
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -857,61 +826,49 @@ public class PersistenceUtil {
   public static MacroButtonProperties loadLegacyMacro(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadMacro(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
-  public static MacroButtonProperties loadMacro(InputStream in) throws IOException {
+  public static MacroButtonProperties loadMacro(InputStream in) {
     MacroButtonProperties mbProps = null;
+
     try {
       mbProps =
-          (MacroButtonProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          asMacro(
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.macroRead", ioe);
     }
     return mbProps;
   }
 
   public static MacroButtonProperties loadMacro(File file) throws IOException {
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
-
+    try (PackedFile pakFile = new PackedFile(file)) {
       // Sanity check
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      MacroButtonProperties macroButton = (MacroButtonProperties) pakFile.getContent();
-      return macroButton;
+      return asMacro(pakFile.getContent());
     } catch (IOException e) {
-      if (pakFile != null) pakFile.close();
-      pakFile = null;
       return loadLegacyMacro(file);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
+  /**
+   * Saves the macro.
+   *
+   * @param macroButton the button holding the macro
+   * @param file the file to save
+   * @throws IOException if the file can't be saved
+   */
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
-    // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
-      file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
-    }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButton);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -919,21 +876,62 @@ public class PersistenceUtil {
     if (!file.exists()) {
       throw new FileNotFoundException();
     }
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadMacroSet(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
+  /**
+   * Converts an object to a macroset, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macroset, or null if no conversion done
+   */
   @SuppressWarnings("unchecked")
-  public static List<MacroButtonProperties> loadMacroSet(InputStream in) throws IOException {
+  private static List<MacroButtonProperties> asMacroSet(Object object) {
+    if (object instanceof List<?>) {
+      return (List<MacroButtonProperties>) object;
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macrosetWrongFileType", className));
+      return null;
+    }
+  }
+
+  /**
+   * Converts an object to a macro, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macro, or null if no conversion done
+   */
+  private static MacroButtonProperties asMacro(Object object) {
+    if (object instanceof MacroButtonProperties) {
+      return (MacroButtonProperties) object;
+    } else if (object instanceof List && ((List) object).get(0) instanceof MacroButtonProperties) {
+      MapTool.showError(
+          I18N.getText(
+              "PersistenceUtil.warn.macroWrongFileType",
+              I18N.getText("PersistenceUtil.warn.macroSet")));
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macroWrongFileType", className));
+    }
+    return null;
+  }
+
+  /**
+   * Returns a macroset from an inputstream
+   *
+   * @param in the inputstream
+   * @return the macroset
+   */
+  public static List<MacroButtonProperties> loadMacroSet(InputStream in) {
     List<MacroButtonProperties> macroButtonSet = null;
     try {
       macroButtonSet =
-          (List<MacroButtonProperties>)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          asMacroSet(
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -942,22 +940,19 @@ public class PersistenceUtil {
 
   @SuppressWarnings("unchecked")
   public static List<MacroButtonProperties> loadMacroSet(File file) throws IOException {
-    PackedFile pakFile = null;
     List<MacroButtonProperties> macroButtonSet = null;
     try {
-      pakFile = new PackedFile(file);
+      try (PackedFile pakFile = new PackedFile(file)) {
+        // Sanity check
+        String progVersion = (String) pakFile.getProperty(PROP_VERSION);
+        if (!versionCheck(progVersion)) return null;
 
-      // Sanity check
-      String progVersion = (String) pakFile.getProperty(PROP_VERSION);
-      if (!versionCheck(progVersion)) return null;
-
-      macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
-    } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
+        macroButtonSet = asMacroSet(pakFile.getContent());
+      } catch (ConversionException ce) {
+        MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
+      }
     } catch (IOException e) {
       return loadLegacyMacroSet(file);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
     return macroButtonSet;
   }
@@ -965,17 +960,14 @@ public class PersistenceUtil {
   public static void saveMacroSet(List<MacroButtonProperties> macroButtonSet, File file)
       throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.MACROSET_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButtonSet);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -985,11 +977,8 @@ public class PersistenceUtil {
   public static LookupTable loadLegacyTable(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadTable(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -997,57 +986,50 @@ public class PersistenceUtil {
     LookupTable table = null;
     try {
       table =
-          (LookupTable) FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          (LookupTable)
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tableVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.tableRead", ioe);
     }
     return table;
   }
 
-  public static LookupTable loadTable(File file) throws IOException {
-    PackedFile pakFile = null;
+  public static LookupTable loadTable(File file) {
+
     try {
-      pakFile = new PackedFile(file);
+      try (PackedFile pakFile = new PackedFile(file)) {
+        // Sanity check
+        String progVersion = (String) pakFile.getProperty(PROP_VERSION);
+        if (!versionCheck(progVersion)) return null;
 
-      // Sanity check
-      String progVersion = (String) pakFile.getProperty(PROP_VERSION);
-      if (!versionCheck(progVersion)) return null;
-
-      LookupTable lookupTable = (LookupTable) pakFile.getContent();
-      loadAssets(lookupTable.getAllAssetIds(), pakFile);
-      return lookupTable;
-    } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.tableVersion", ce);
+        LookupTable lookupTable = (LookupTable) pakFile.getContent();
+        loadAssets(lookupTable.getAllAssetIds(), pakFile);
+        return lookupTable;
+      } catch (ConversionException ce) {
+        MapTool.showError("PersistenceUtil.error.tableVersion", ce);
+      }
     } catch (IOException e) {
       try {
-        if (pakFile != null) pakFile.close();
-        pakFile = null;
         return loadLegacyTable(file);
       } catch (IOException ioe) {
         MapTool.showError("PersistenceUtil.error.tableRead", ioe);
       }
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
     return null;
   }
 
   public static void saveTable(LookupTable lookupTable, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.TABLE_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(lookupTable);
       saveAssets(lookupTable.getAllAssetIds(), pakFile);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -1062,7 +1044,8 @@ public class PersistenceUtil {
     try {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
-          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+          ImageUtil.createCompatibleImage(
+              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

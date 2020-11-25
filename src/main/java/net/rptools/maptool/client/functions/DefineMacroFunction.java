@@ -18,15 +18,23 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class DefineMacroFunction extends AbstractFunction {
   private static final DefineMacroFunction instance = new DefineMacroFunction();
 
   private DefineMacroFunction() {
-    super(0, UNLIMITED_PARAMETERS, "defineFunction", "isFunctionDefined", "oldFunction");
+    super(
+        0,
+        UNLIMITED_PARAMETERS,
+        "defineFunction",
+        "isFunctionDefined",
+        "oldFunction",
+        "getDefinedFunctions");
   }
 
   public static DefineMacroFunction getInstance() {
@@ -34,7 +42,8 @@ public class DefineMacroFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equals("defineFunction")) {
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -83,8 +92,17 @@ public class DefineMacroFunction extends AbstractFunction {
       return I18N.getText(
           "macro.function.defineFunction.functionDefined", parameters.get(0).toString());
     } else if (functionName.equals("oldFunction")) {
-      return UserDefinedMacroFunctions.getInstance().executeOldFunction(parser, parameters);
-    } else { // isFunctionDefined
+      return UserDefinedMacroFunctions.getInstance()
+          .executeOldFunction(parser, resolver, parameters);
+    } else if (functionName.equals("getDefinedFunctions")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      String delim = parameters.size() > 0 ? parameters.get(0).toString() : "";
+      boolean showFullLocations = false;
+      if (parameters.size() > 1) {
+        showFullLocations = FunctionUtil.paramAsBoolean(functionName, parameters, 1, false);
+      }
+      return UserDefinedMacroFunctions.getInstance().getDefinedFunctions(delim, showFullLocations);
+    } else if ("isFunctionDefined".equalsIgnoreCase(functionName)) {
 
       if (UserDefinedMacroFunctions.getInstance().isFunctionDefined(parameters.get(0).toString())) {
         return BigDecimal.ONE;
@@ -96,5 +114,6 @@ public class DefineMacroFunction extends AbstractFunction {
 
       return BigDecimal.ZERO;
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

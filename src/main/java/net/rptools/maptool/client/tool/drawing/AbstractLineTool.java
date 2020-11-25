@@ -111,6 +111,9 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
   /**
    * Due to mouse movement, a user drawn line often has duplicated points, especially at the end. To
    * draw a clean line with miter joints these duplicates should be removed.
+   *
+   * @param line the {@link LineSegment} to trim.
+   * @return the trimmed {@link LineSegment}.
    */
   protected LineSegment getTrimLine(LineSegment line) {
     LineSegment newLine = new LineSegment(line.getWidth(), line.isSquareCap());

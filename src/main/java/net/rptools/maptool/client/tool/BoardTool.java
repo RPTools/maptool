@@ -41,6 +41,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
@@ -87,7 +88,8 @@ public class BoardTool extends DefaultTool {
       ioe.printStackTrace();
     }
     // Create the control panel
-    controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
+    controlPanel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
     // controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
     boardPositionXTextField = controlPanel.getTextField("offsetX");
@@ -96,12 +98,7 @@ public class BoardTool extends DefaultTool {
     boardPositionYTextField = controlPanel.getTextField("offsetY");
     boardPositionYTextField.addKeyListener(new UpdateBoardListener());
 
-    ActionListener enforceRules =
-        new ActionListener() {
-          public void actionPerformed(ActionEvent evt) {
-            enforceButtonRules();
-          }
-        };
+    ActionListener enforceRules = evt -> enforceButtonRules();
     snapNoneButton = controlPanel.getRadioButton("snapNone");
     snapNoneButton.addActionListener(enforceRules);
 
@@ -112,12 +109,7 @@ public class BoardTool extends DefaultTool {
     snapTileButton.addActionListener(enforceRules);
 
     JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
-    closeButton.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            resetTool();
-          }
-        });
+    closeButton.addActionListener(e -> resetTool());
   }
 
   @Override
@@ -304,7 +296,7 @@ public class BoardTool extends DefaultTool {
   }
 
   /** A simple enum for correlating keys with directions */
-  private static enum Direction {
+  private enum Direction {
     Left,
     Right,
     Up,

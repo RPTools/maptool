@@ -16,6 +16,7 @@ package net.rptools.maptool.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
+import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
@@ -50,16 +52,21 @@ public class Campaign {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
   private GUID id = new GUID();
-  private Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
+  /** The {@link Zone}s that make up this {@code Campaign}. */
+  private final Map<GUID, Zone> zones =
+      Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
   @SuppressWarnings("unused")
   private static transient ExportDialog exportInfo =
       null; // transient so it is not written out; entire element ignore when reading
 
-  private static ExportDialog
-      exportDialog; // this is the new export dialog (different name for upward compatibility)
-  private static CampaignExportDialog campaignExportDialog;
+  private static ExportDialog exportDialog =
+      ExportDialog
+          .getInstance(); // this is the new export dialog (different name for upward compatibility)
+  private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
@@ -150,13 +157,18 @@ public class Campaign {
    */
   public Campaign(Campaign campaign) {
     name = campaign.getName();
-    zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
     /*
-     * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if you have any data that needs to transfer over you will need to manually copy it
-     * as is done below for the campaign properties and macro buttons.
+     * Don't forget that since these are new zones AND new tokens created here from the old one,
+     * if you have any data that needs to transfer over you will need to manually copy it
+     * as is done below for the campaign properties and macro buttons. Iteration over a synchronized
+     *  map must lock the map.
      */
-    for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
+    Map<GUID, Zone> zonesToCopy;
+    synchronized (zones) {
+      zonesToCopy = new LinkedHashMap<>(campaign.zones);
+    }
+    for (Entry<GUID, Zone> entry : zonesToCopy.entrySet()) {
       Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
     }
@@ -182,6 +194,8 @@ public class Campaign {
   /**
    * This is a workaround to avoid the renderer and the serializer interating on the drawables at
    * the same time
+   *
+   * @return true if currently being serialized
    */
   public boolean isBeingSerialized() {
     return isBeingSerialized;
@@ -190,6 +204,9 @@ public class Campaign {
   /**
    * This is a workaround to avoid the renderer and the serializer interating on the drawables at
    * the same time
+   *
+   * @param isBeingSerialized the new value of isBeingSerialized, should be true if the object is
+   *     being serialized
    */
   public void setBeingSerialized(boolean isBeingSerialized) {
     this.isBeingSerialized = isBeingSerialized;
@@ -229,7 +246,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenTypeMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of token types
    */
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -254,7 +271,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getSightTypeMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of {@link SightType}s
    */
   public Map<String, SightType> getSightTypeMap() {
     checkCampaignPropertyConversion();
@@ -264,7 +281,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getLookupTableMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of {@link LookupTable}s types
    */
   public Map<String, LookupTable> getLookupTableMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -281,7 +298,8 @@ public class Campaign {
    * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value
    * for the key <code>lightSourceId</code>.
    *
-   * @return
+   * @param lightSourceId the id to look for
+   * @return the {@link LightSource} or null if not found
    */
   public LightSource getLightSource(GUID lightSourceId) {
 
@@ -296,7 +314,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getLightSourcesMap()</code>.
    *
-   * @return
+   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
    */
   public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
     checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
@@ -307,7 +325,8 @@ public class Campaign {
    * Convenience method that calls {@link #getLightSourcesMap()} and returns the value for the key
    * <code>type</code>.
    *
-   * @return
+   * @param type the key
+   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s for a specifict type
    */
   public Map<GUID, LightSource> getLightSourceMap(String type) {
     return getLightSourcesMap().get(type);
@@ -316,7 +335,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenStatesMap()</code>.
    *
-   * @return
+   * @return the {@link Map} for token states
    */
   public Map<String, BooleanTokenOverlay> getTokenStatesMap() {
     return campaignProperties.getTokenStatesMap();
@@ -325,7 +344,7 @@ public class Campaign {
   /**
    * Stub that calls <code>campaignProperties.getTokenBarsMap()</code>.
    *
-   * @return
+   * @return the {@link Map} for token bars
    */
   public Map<String, BarTokenOverlay> getTokenBarsMap() {
     return campaignProperties.getTokenBarsMap();
@@ -345,17 +364,19 @@ public class Campaign {
    * Returns an <code>ArrayList</code> of all available <code>Zone</code>s from the <code>zones
    * </code> <code>LinkedHashMap</code>.
    *
-   * @return
+   * @return a list of zones
    */
   public List<Zone> getZones() {
-    return new ArrayList<Zone>(zones.values());
+    synchronized (zones) { // Must lock synchronized map while iterating over contents.
+      return new ArrayList<Zone>(zones.values());
+    }
   }
 
   /**
    * Return the <code>Zone</code> with the given GUID.
    *
-   * @param id
-   * @return
+   * @param id the id to look for
+   * @return the Zone for the id
    */
   public Zone getZone(GUID id) {
     return zones.get(id);
@@ -389,7 +410,12 @@ public class Campaign {
   }
 
   public boolean containsAsset(MD5Key key) {
-    for (Zone zone : zones.values()) {
+    Collection<Zone> zonesToCheck;
+    synchronized (zones) { // iteration over synchronized map must lock the map
+      zonesToCheck = zones.values();
+    }
+
+    for (Zone zone : zonesToCheck) {
       Set<MD5Key> assetSet = zone.getAllAssetIds();
       if (assetSet.contains(key)) {
         return true;
@@ -406,11 +432,11 @@ public class Campaign {
    * @return <code>true</code> if IF feature has ever been used; <code>false</code> otherwise
    */
   public boolean hasUsedFogToolbar() {
-    return hasUsedFogToolbar == null ? false : hasUsedFogToolbar.booleanValue();
+    return hasUsedFogToolbar != null && hasUsedFogToolbar;
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = new Boolean(b);
+    hasUsedFogToolbar = b;
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {
@@ -475,38 +501,56 @@ public class Campaign {
     gmMacroButtonProperties = properties;
   }
 
-  public void saveMacroButtonProperty(MacroButtonProperties properties) {
-    // find the matching property in the array
-    // TODO: hashmap? or equals()? or what?
-    for (MacroButtonProperties prop : macroButtonProperties) {
-      if (prop.getIndex() == properties.getIndex()) {
-        prop.setColorKey(properties.getColorKey());
-        prop.setAutoExecute(properties.getAutoExecute());
-        prop.setCommand(properties.getCommand());
-        prop.setHotKey(properties.getHotKey());
-        prop.setIncludeLabel(properties.getIncludeLabel());
-        prop.setApplyToTokens(properties.getApplyToTokens());
-        prop.setLabel(properties.getLabel());
-        prop.setGroup(properties.getGroup());
-        prop.setSortby(properties.getSortby());
-        prop.setFontColorKey(properties.getFontColorKey());
-        prop.setFontSize(properties.getFontSize());
-        prop.setMinWidth(properties.getMinWidth());
-        prop.setMaxWidth(properties.getMaxWidth());
-        prop.setToolTip(properties.getToolTip());
-        prop.setAllowPlayerEdits(properties.getAllowPlayerEdits());
-        MapTool.getFrame().getCampaignPanel().reset();
-        return;
+  /**
+   * Adds multiple MacroButtonProperties to the GM or Campaign macro panel, starting at the next
+   * appropriate index.
+   *
+   * @param toSave the list of button properties to add
+   * @param gmPanel true for the GM panel, false for the Campaign panel.
+   */
+  public void addMacroButtonPropertiesAtNextIndex(
+      List<MacroButtonProperties> toSave, boolean gmPanel) {
+    List<MacroButtonProperties> macroButtonList =
+        gmPanel ? gmMacroButtonProperties : macroButtonProperties;
+    int lastIndex = gmPanel ? gmMacroButtonLastIndex : macroButtonLastIndex;
+    // populate the lookup table and confirm lastIndex
+    for (MacroButtonProperties prop : macroButtonList) {
+      int curIndex = prop.getIndex();
+      if (curIndex > lastIndex) {
+        lastIndex = curIndex;
       }
     }
-    macroButtonProperties.add(properties);
-    MapTool.getFrame().getCampaignPanel().reset();
+    // set the indexes and add to list
+    for (MacroButtonProperties newProp : toSave) {
+      newProp.setIndex(++lastIndex);
+    }
+    macroButtonList.addAll(toSave);
+
+    // update the ButtonLastIndex prop as appropriate
+    if (gmPanel) {
+      gmMacroButtonLastIndex = lastIndex;
+    } else {
+      macroButtonLastIndex = lastIndex;
+    }
+
+    AbstractMacroPanel macroPanel =
+        gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+    macroPanel.reset();
   }
 
-  public void saveGmMacroButtonProperty(MacroButtonProperties properties) {
-    // find the matching property in the array
-    // TODO: hashmap? or equals()? or what?
-    for (MacroButtonProperties prop : gmMacroButtonProperties) {
+  /**
+   * Saves a button in the Campaign or GM panel.
+   *
+   * @param properties the properties of the button to save
+   * @param gmPanel whether the button is in the GM panel.
+   */
+  public void saveMacroButtonProperty(MacroButtonProperties properties, boolean gmPanel) {
+    List<MacroButtonProperties> macroButtonList =
+        gmPanel ? gmMacroButtonProperties : macroButtonProperties;
+    AbstractMacroPanel macroPanel =
+        gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+
+    for (MacroButtonProperties prop : macroButtonList) {
       if (prop.getIndex() == properties.getIndex()) {
         prop.setColorKey(properties.getColorKey());
         prop.setAutoExecute(properties.getAutoExecute());
@@ -523,12 +567,20 @@ public class Campaign {
         prop.setMaxWidth(properties.getMaxWidth());
         prop.setToolTip(properties.getToolTip());
         prop.setAllowPlayerEdits(properties.getAllowPlayerEdits());
-        MapTool.getFrame().getGmPanel().reset();
+        prop.setDisplayHotKey(properties.getDisplayHotKey());
+        prop.setCompareIncludeLabel(properties.getCompareIncludeLabel());
+        prop.setCompareAutoExecute(properties.getCompareAutoExecute());
+        prop.setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
+        prop.setCompareGroup(properties.getCompareGroup());
+        prop.setCompareSortPrefix(properties.getCompareSortPrefix());
+        prop.setCompareCommand(properties.getCompareCommand());
+
+        macroPanel.reset();
         return;
       }
     }
-    gmMacroButtonProperties.add(properties);
-    MapTool.getFrame().getGmPanel().reset();
+    macroButtonList.add(properties);
+    macroPanel.reset();
   }
 
   public int getMacroButtonNextIndex() {
@@ -563,7 +615,7 @@ public class Campaign {
    * This method iterates through all Zones, TokenStates, TokenBars, and LookupTables and writes the
    * keys into a new, empty set. That set is the return value.
    *
-   * @return
+   * @return a set of MD5 keys
    */
   public Set<MD5Key> getAllAssetIds() {
 
@@ -602,7 +654,7 @@ public class Campaign {
 
   /** @return Getter for initiativeOwnerPermissions */
   public boolean isInitiativeOwnerPermissions() {
-    return campaignProperties != null ? campaignProperties.isInitiativeOwnerPermissions() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
   /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
@@ -612,12 +664,28 @@ public class Campaign {
 
   /** @return Getter for initiativeMovementLock */
   public boolean isInitiativeMovementLock() {
-    return campaignProperties != null ? campaignProperties.isInitiativeMovementLock() : false;
+    return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     campaignProperties.setInitiativeMovementLock(initiativeMovementLock);
+  }
+
+  public boolean isInitiativeUseReverseSort() {
+    return campaignProperties != null && campaignProperties.isInitiativeUseReverseSort();
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    campaignProperties.setInitiativeUseReverseSort(initiativeUseReverseSort);
+  }
+
+  public boolean isInitiativePanelButtonsDisabled() {
+    return campaignProperties != null && campaignProperties.isInitiativePanelButtonsDisabled();
+  }
+
+  public void setInitiativePanelButtonsDisabled(boolean disabled) {
+    campaignProperties.setInitiativePanelButtonsDisabled(disabled);
   }
 
   /** @return Getter for characterSheets */
@@ -626,13 +694,6 @@ public class Campaign {
   }
 
   public ExportDialog getExportDialog() {
-    if (exportDialog == null) {
-      try {
-        exportDialog = new ExportDialog();
-      } catch (Exception e) {
-        return null;
-      }
-    }
     // TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from
     // the dialog
     // and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually
@@ -650,18 +711,6 @@ public class Campaign {
   }
 
   public CampaignExportDialog getExportCampaignDialog() {
-    if (campaignExportDialog == null) {
-      try {
-        campaignExportDialog = new CampaignExportDialog();
-      } catch (Exception e) {
-        return null;
-      }
-    }
-
     return campaignExportDialog;
-  }
-
-  public void setExportCampaignDialog(CampaignExportDialog d) {
-    campaignExportDialog = d;
   }
 }

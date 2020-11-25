@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,7 +25,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -40,12 +39,25 @@ import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/** Represents the panel holding the HTMLPaneEditorKit for HTML3.2. */
 @SuppressWarnings("serial")
 public class HTMLPane extends JEditorPane {
+  /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLPane.class);
 
+  /** The action listeners for the container. */
   private ActionListener actionListeners;
+
+  /** The editorKit that handles the HTML. */
   private final HTMLPaneEditorKit editorKit;
+
+  /** The default rule for the body tag. */
+  private static final String CSS_RULE_BODY =
+      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}";
+  /** The default rule for the div tag. */
+  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  /** The default rule for the span tag. */
+  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
   public HTMLPane() {
     editorKit = new HTMLPaneEditorKit(this);
@@ -54,30 +66,34 @@ public class HTMLPane extends JEditorPane {
     setEditable(false);
 
     addHyperlinkListener(
-        new HyperlinkListener() {
-          public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: "
-                      + e.getEventType().toString()
-                      + " "
-                      + e.toString());
-            }
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-              if (e.getURL() != null) {
-                MapTool.showDocument(e.getURL().toString());
-              } else {
-                Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
-                if (m.matches()) {
-                  if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.getInstance().runMacroLink(e.getDescription());
-                  }
-                }
+        e -> {
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "Responding to hyperlink event: "
+                    + e.getEventType().toString()
+                    + " "
+                    + e.toString());
+          }
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (e.getURL() != null) {
+              MapTool.showDocument(e.getURL().toString());
+            } else if (e.getDescription().startsWith("#")) {
+              scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+            } else {
+              Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
         });
+
     ToolTipManager.sharedInstance().registerComponent(this);
+  }
+
+  /** @return the rule for the body tag */
+  public String getRuleBody() {
+    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }
 
   public void addActionListener(ActionListener listener) {
@@ -89,19 +105,54 @@ public class HTMLPane extends JEditorPane {
   }
 
   /**
+   * Set the default cursor of the editor kit.
+   *
+   * @param cursor the cursor to set
+   */
+  public void setEditorKitDefaultCursor(Cursor cursor) {
+    editorKit.setDefaultCursor(cursor);
+  }
+
+  /**
+   * Flush the pane, set the new html, and set the caret to zero.
+   *
+   * @param html the html to set
+   * @param scrollReset whether the scrollbar should be reset
+   */
+  public void updateContents(final String html, boolean scrollReset) {
+    EventQueue.invokeLater(
+        () -> {
+          DefaultCaret caret = (DefaultCaret) getCaret();
+          caret.setUpdatePolicy(
+              scrollReset ? DefaultCaret.UPDATE_WHEN_ON_EDT : DefaultCaret.NEVER_UPDATE);
+          editorKit.flush();
+          setText(html);
+          if (scrollReset) {
+            setCaretPosition(0);
+          }
+        });
+  }
+
+  /** Flushes any caching for the panel. */
+  public void flush() {
+    EventQueue.invokeLater(editorKit::flush);
+  }
+
+  /**
    * Handle a submit.
    *
    * @param method The method of the submit.
    * @param action The action for the submit.
    * @param data The data from the form.
    */
-  void doSubmit(String method, String action, String data) {
+  public void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
       if (log.isDebugEnabled()) {
         log.debug(
             "submit event: method='" + method + "' action='" + action + "' data='" + data + "'");
       }
-      actionListeners.actionPerformed(new FormActionEvent(method, action, data));
+      actionListeners.actionPerformed(
+          new HTMLActionEvent.FormActionEvent(this, method, action, data));
     }
   }
 
@@ -115,7 +166,7 @@ public class HTMLPane extends JEditorPane {
       if (log.isDebugEnabled()) {
         log.debug("changeTitle event: " + title);
       }
-      actionListeners.actionPerformed(new ChangeTitleActionEvent(title));
+      actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
     }
   }
 
@@ -130,7 +181,8 @@ public class HTMLPane extends JEditorPane {
       if (log.isDebugEnabled()) {
         log.debug("registerMacro event: type='" + type + "' link='" + link + "'");
       }
-      actionListeners.actionPerformed(new RegisterMacroActionEvent(type, link));
+      actionListeners.actionPerformed(
+          new HTMLActionEvent.RegisterMacroActionEvent(this, type, link));
     }
   }
 
@@ -145,7 +197,7 @@ public class HTMLPane extends JEditorPane {
       if (log.isDebugEnabled()) {
         log.debug("metaTag found: name='" + name + "' content='" + content + "'");
       }
-      actionListeners.actionPerformed(new MetaTagActionEvent(name, content));
+      actionListeners.actionPerformed(new HTMLActionEvent.MetaTagActionEvent(this, name, content));
     }
   }
 
@@ -171,12 +223,9 @@ public class HTMLPane extends JEditorPane {
         style.removeStyle(s);
       }
 
-      style.addRule(
-          "body { font-family: sans-serif; font-size: "
-              + AppPreferences.getFontSize()
-              + "pt; background: #ECE9D8}");
-      style.addRule("div {margin-bottom: 5px}");
-      style.addRule("span.roll {background:#efefef}");
+      style.addRule(getRuleBody());
+      style.addRule(CSS_RULE_DIV);
+      style.addRule(CSS_RULE_SPAN);
       parse.parse(new StringReader(text), new ParserCallBack(), true);
     } catch (IOException e) {
       // Do nothing, we should not get an io exception on string
@@ -184,134 +233,7 @@ public class HTMLPane extends JEditorPane {
     if (log.isDebugEnabled()) {
       log.debug("setting text in HTMLPane: " + text);
     }
-    // We use ASCII control characters to mark off the rolls so that there's no limitation on what
-    // (printable) characters the output can include
-    // Note: options gm, self, and whisper are currently ignored
-    // Tooltip rolls
-    text =
-        text.replaceAll(
-            "\036(\001\002)?([^\036\037]*)\037([^\036]*)\036",
-            "<span class='roll' title='&#171; $2 &#187;'>$3</span>");
-    // Unformatted rolls
-    text = text.replaceAll("\036\01u\02([^\036]*)\036", "&#171; $1 &#187;");
-    // Inline rolls
-    text =
-        text.replaceAll(
-            "\036(\001\002)?([^\036]*)\036",
-            "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;");
-    // Auto inline expansion
-    text = text.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
-    super.setText(text);
-  }
-
-  /** Class that listens for form events. */
-  public class FormActionEvent extends ActionEvent {
-    private final String method;
-    private final String action;
-    private final String data;
-
-    private FormActionEvent(String method, String action, String data) {
-      super(HTMLPane.this, 0, "submit");
-
-      this.method = method;
-      this.action = action;
-      if (method.equals("json")) {
-        this.data = data;
-      } else {
-        this.data = data.replace("%0A", "%20"); // String properties can not handle \n in strings.
-        // XXX Shouldn't we warn the MTscript programmer somehow?
-      }
-    }
-
-    public String getMethod() {
-      return method;
-    }
-
-    public String getAction() {
-      return action;
-    }
-
-    public String getData() {
-      return data;
-    }
-  }
-
-  /** Action event for changing title of the container. */
-  public class ChangeTitleActionEvent extends ActionEvent {
-    private final String newTitle;
-
-    public ChangeTitleActionEvent(String title) {
-      super(HTMLPane.this, 0, "changeTitle");
-      newTitle = title;
-    }
-
-    /**
-     * Gets the new title.
-     *
-     * @return
-     */
-    public String getNewTitle() {
-      return newTitle;
-    }
-  }
-
-  public class MetaTagActionEvent extends ActionEvent {
-    private final String name;
-    private final String content;
-
-    public MetaTagActionEvent(String name, String content) {
-      super(HTMLPane.this, 0, "metaTag");
-      this.name = name;
-      this.content = content;
-    }
-
-    /**
-     * Gets the name of the meta tag.
-     *
-     * @return the name of the meta tag.
-     */
-    public String getName() {
-      return name;
-    }
-
-    /**
-     * Gets the content for the meta tag.
-     *
-     * @return the content of the meta tag.
-     */
-    public String getContent() {
-      return content;
-    }
-  }
-
-  /** Action event for registering a macro */
-  public class RegisterMacroActionEvent extends ActionEvent {
-    private final String type;
-    private final String macro;
-
-    RegisterMacroActionEvent(String type, String macro) {
-      super(HTMLPane.this, 0, "registerMacro");
-      this.type = type;
-      this.macro = macro;
-    }
-
-    /**
-     * Gets the type of macro to register.
-     *
-     * @return the type of macro.
-     */
-    public String getType() {
-      return type;
-    }
-
-    /**
-     * Gets the link to the macro.
-     *
-     * @return the link to the macro.
-     */
-    public String getMacro() {
-      return macro;
-    }
+    super.setText(HTMLPanelInterface.fixHTML(text));
   }
 
   /** Class that deals with html parser callbacks. */
@@ -391,9 +313,7 @@ public class HTMLPane extends JEditorPane {
             HTMLDocument document = (HTMLDocument) getDocument();
             StyleSheet style = document.getStyleSheet();
             style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException e) {
-            // Do nothing
-          } catch (IOException e) {
+          } catch (ParserException | IOException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {

@@ -20,7 +20,6 @@ import com.jeta.forms.components.panel.FormPanel;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -49,6 +48,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
@@ -60,10 +60,10 @@ public class GridTool extends DefaultTool {
   private static final long serialVersionUID = 3760846783148208951L;
   private static final int zoomSliderStopCount = 100;
 
-  private static enum Size {
+  private enum Size {
     Increase,
     Decrease
-  };
+  }
 
   private final JSpinner gridSizeSpinner;
   private final JTextField gridOffsetXTextField;
@@ -90,7 +90,8 @@ public class GridTool extends DefaultTool {
       ioe.printStackTrace();
     }
     // Create the control panel
-    controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustGridControlPanel.xml");
+    controlPanel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustGridControlPanel.xml");
     controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
     gridSizeSpinner = controlPanel.getSpinner("gridSize");
@@ -108,23 +109,15 @@ public class GridTool extends DefaultTool {
     gridSecondDimension.addFocusListener(new UpdateGridListener());
 
     colorWell = (JETAColorWell) controlPanel.getComponentByName("colorWell");
-    colorWell.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            copyControlPanelToGrid();
-          }
-        });
+    colorWell.addActionListener(e -> copyControlPanelToGrid());
 
     JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
     closeButton.addActionListener(
-        new ActionListener() {
-          @SuppressWarnings("deprecation")
-          public void actionPerformed(ActionEvent e) {
-            resetTool();
-            // Lee: just to make the light sources snap to their owners after the tool is closed
-            Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-            z.putTokens(z.getTokens());
-          }
+        e -> {
+          resetTool();
+          // Lee: just to make the light sources snap to their owners after the tool is closed
+          Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+          z.putTokens(z.getTokens());
         });
     zoomSlider = (JSlider) controlPanel.getComponentByName("zoomSlider");
     zoomSlider.setMinimum(0);
@@ -247,8 +240,7 @@ public class GridTool extends DefaultTool {
 
     Grid grid = renderer.getZone().getGrid();
 
-    boolean showSecond =
-        grid.getCapabilities().isSecondDimensionAdjustmentSupported() ? true : false;
+    boolean showSecond = grid.getCapabilities().isSecondDimensionAdjustmentSupported();
     gridSecondDimension.setVisible(showSecond);
     gridSecondDimensionLabel.setVisible(showSecond);
 
@@ -342,6 +334,10 @@ public class GridTool extends DefaultTool {
    */
   @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
+    // Fix for hi-res mice
+    if (e.getWheelRotation() == 0) {
+      return;
+    }
     ZoneRenderer renderer = (ZoneRenderer) e.getSource();
     if (SwingUtil.isControlDown(e)) {
       if (e.getWheelRotation() > 0) {
@@ -360,11 +356,9 @@ public class GridTool extends DefaultTool {
 
   private void resetZoomSlider() {
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            lastZoomIndex = zoomSliderStopCount / 2;
-            zoomSlider.setValue(lastZoomIndex);
-          }
+        () -> {
+          lastZoomIndex = zoomSliderStopCount / 2;
+          zoomSlider.setValue(lastZoomIndex);
         });
   }
 
@@ -404,6 +398,7 @@ public class GridTool extends DefaultTool {
       this.size = size;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       adjustGridSize(renderer, size);
@@ -411,12 +406,12 @@ public class GridTool extends DefaultTool {
     }
   }
 
-  private static enum Direction {
+  private enum Direction {
     Left,
     Right,
     Up,
     Down
-  };
+  }
 
   private class GridOffsetAction extends AbstractAction {
     private static final long serialVersionUID = 6664327737774374442L;
@@ -426,6 +421,7 @@ public class GridTool extends DefaultTool {
       this.direction = direction;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       switch (direction) {
@@ -447,6 +443,7 @@ public class GridTool extends DefaultTool {
   }
 
   private class ZoomChangeListener extends MouseAdapter implements ChangeListener {
+    @Override
     public void stateChanged(ChangeEvent e) {
       int delta = zoomSlider.getValue() - lastZoomIndex;
       if (delta == 0) {
@@ -475,22 +472,28 @@ public class GridTool extends DefaultTool {
   ////
   // ACTIONS
   private class UpdateGridListener implements KeyListener, ChangeListener, FocusListener {
+    @Override
     public void keyPressed(KeyEvent e) {}
 
+    @Override
     public void keyReleased(KeyEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {}
 
+    @Override
     public void stateChanged(ChangeEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void focusLost(FocusEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void focusGained(FocusEvent e) {}
   }
 }

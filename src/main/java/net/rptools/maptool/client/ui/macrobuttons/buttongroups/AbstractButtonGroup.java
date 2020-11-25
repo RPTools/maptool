@@ -42,7 +42,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -195,7 +194,7 @@ public abstract class AbstractButtonGroup extends JPanel
   public void mouseReleased(MouseEvent event) {
     Token token = getToken();
     if (SwingUtilities.isRightMouseButton(event)) {
-      if (getPanelClass() == "CampaignPanel" && !MapTool.getPlayer().isGM()) {
+      if (getPanelClass().equals("CampaignPanel") && !MapTool.getPlayer().isGM()) {
         return;
       }
       // open button group menu
@@ -290,17 +289,8 @@ public abstract class AbstractButtonGroup extends JPanel
               && event.getClickCount() == 2
               && !SwingUtil.isShiftDown(event)) {
             // open edit token dialog
-            EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-            tokenPropertiesDialog.showDialog(token);
-
-            // update token in the renderer if it is changed
-            if (tokenPropertiesDialog.isTokenSaved()) {
-              ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-              renderer.repaint();
-              renderer.flush(token);
-              MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-              renderer.getZone().putToken(token);
-            }
+            MapTool.getFrame()
+                .showTokenPropertiesDialog(token, MapTool.getFrame().getCurrentZoneRenderer());
           } else if (SwingUtilities.isRightMouseButton(event)) {
             // open token popup menu
             Set<GUID> GUIDSet = new HashSet<GUID>();

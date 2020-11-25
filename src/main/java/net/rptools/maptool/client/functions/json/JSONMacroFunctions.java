@@ -14,10 +14,7 @@
  */
 package net.rptools.maptool.client.functions.json;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -33,9 +30,11 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 /** Class used to implement Json related functions in MT script. */
 public class JSONMacroFunctions extends AbstractFunction {
@@ -130,7 +129,8 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
     if (functionName.startsWith("json.path.")) {
@@ -142,25 +142,25 @@ public class JSONMacroFunctions extends AbstractFunction {
         FunctionUtil.checkNumberParam(functionName, args, 1, 1);
         Object potJson = args.get(0);
         if (potJson instanceof JsonArray) {
-          return JSONObjectType.ARRAY;
+          return JSONObjectType.ARRAY.name();
         } else if (potJson instanceof JsonObject) {
-          return JSONObjectType.OBJECT;
+          return JSONObjectType.OBJECT.name();
         } else {
           String str = potJson.toString().trim();
           if (str.startsWith("{") || str.startsWith("[")) {
             JsonElement json = typeConversion.asJsonElement(str);
             if (json.isJsonArray()) {
-              return JSONObjectType.ARRAY;
+              return JSONObjectType.ARRAY.name();
             } else if (json.isJsonObject()) {
-              return JSONObjectType.OBJECT;
+              return JSONObjectType.OBJECT.name();
             }
           }
         }
-        return JSONObjectType.UNKNOWN;
+        return JSONObjectType.UNKNOWN.name();
       case "json.length":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           if (json.isJsonObject()) {
             return jsonObjectFunctions.length(json.getAsJsonObject());
           } else {
@@ -170,8 +170,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.fields":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
-          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
-          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+          JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
+          String delim = args.size() > 1 ? args.get(1).toString() : DEFAULT_STRING_LIST_DELIM;
 
           if (json.isJsonObject()) {
             return jsonObjectFunctions.fields(json.getAsJsonObject(), delim);
@@ -182,25 +182,25 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.toVars":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
 
           if (json.isJsonObject()) {
             String prefix = args.size() > 1 ? args.get(1).toString() : "";
             String suffix = args.size() > 2 ? args.get(2).toString() : "";
 
-            return jsonObjectFunctions.toVars(parser, json.getAsJsonObject(), prefix, suffix);
+            return jsonObjectFunctions.toVars(resolver, json.getAsJsonObject(), prefix, suffix);
           } else {
             FunctionUtil.checkNumberParam(functionName, args, 2, 2);
             String varName = args.get(1).toString();
 
-            return jsonArrayFunctions.toVars(parser, json.getAsJsonArray(), varName);
+            return jsonArrayFunctions.toVars(resolver, json.getAsJsonArray(), varName);
           }
         }
       case "json.toList":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
-          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
-          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+          JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
+          String delim = args.size() > 1 ? args.get(1).toString() : DEFAULT_STRING_LIST_DELIM;
 
           if (json.isJsonArray()) {
             return jsonArrayFunctions.toStringList(json.getAsJsonArray(), delim);
@@ -225,7 +225,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.toStrProp":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           String delim = args.size() > 1 ? args.get(1).toString() : DEFAULT_STRING_PROP_DELIM;
           if (jsonElement.isJsonArray()) {
             return jsonArrayFunctions.toStringProp(jsonElement.getAsJsonArray(), delim);
@@ -253,7 +253,16 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.get":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement;
+          try {
+            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          } catch (
+              ParserException
+                  pe) { // If we cant convert it to a JsonArray/JsonObject then treat like array
+            // with single value
+            jsonElement = new JsonArray();
+            jsonElement.getAsJsonArray().add(typeConversion.asJsonElement(args.get(0)));
+          }
           if (jsonElement.isJsonArray()) {
             if (args.size() == 2) {
               return jsonArrayFunctions.get(
@@ -275,7 +284,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
           // Special case if first argument is empty string it represents an empty array
           JsonArray jsonArray;
-          if (args.get(0).toString().length() == 0) {
+          Object arg = args.get(0);
+          if (arg instanceof String && StringUtils.isEmpty(((String) arg))) {
             jsonArray = new JsonArray();
           } else {
             jsonArray = jsonArrayFunctions.coerceToJsonArray(args.get(0));
@@ -285,7 +295,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.remove":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, 2);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           if (jsonElement.isJsonArray()) {
             int index = FunctionUtil.paramAsInteger(functionName, args, 1, true);
             return jsonArrayFunctions.remove(jsonElement.getAsJsonArray(), index);
@@ -297,7 +307,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.indent":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           int indentSize = 2;
           if (args.size() > 1) {
             indentSize = FunctionUtil.paramAsInteger(functionName, args, 1, true);
@@ -307,7 +317,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.contains":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, 2);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           boolean contains;
           if (jsonElement.isJsonArray()) {
             contains = jsonArrayFunctions.contains(jsonElement.getAsJsonArray(), args.get(1));
@@ -320,12 +330,10 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.sort":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, UNLIMITED_PARAMETERS);
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           boolean sortAscending = true;
-          if (args.size() > 1) {
-            if (args.get(1).toString().startsWith("d")) {
-              sortAscending = false;
-            }
+          if (args.size() > 1 && args.get(1).toString().startsWith("d")) {
+            sortAscending = false;
           }
           if (args.size() < 3) {
             if (sortAscending) {
@@ -348,31 +356,27 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.shuffle":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           return jsonArrayFunctions.shuffle(jsonArray);
         }
       case "json.reverse":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           return jsonArrayFunctions.reverse(jsonArray);
         }
       case "json.evaluate":
         {
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
-          return jsonEvaluateArg(resolver, args.get(0));
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
+          return jsonEvaluate(jsonElement, (MapToolVariableResolver) resolver);
         }
       case "json.isEmpty":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonElement jsonElement;
-          if (args.get(0).toString().trim().length() == 0) {
-            jsonElement = new JsonArray();
-          } else {
-            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
-          }
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
+
           boolean empty;
           if (jsonElement.isJsonArray()) {
             empty = jsonArrayFunctions.isEmpty(jsonElement.getAsJsonArray());
@@ -384,8 +388,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.equals":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, 2);
-          JsonElement jsonElement1 = FunctionUtil.paramAsJson(functionName, args, 0);
-          JsonElement jsonElement2 = FunctionUtil.paramAsJson(functionName, args, 1);
+          JsonElement jsonElement1 = FunctionUtil.paramConvertedToJson(functionName, args, 0);
+          JsonElement jsonElement2 = FunctionUtil.paramConvertedToJson(functionName, args, 1);
           return jsonElement1.equals(jsonElement2) ? BigDecimal.ONE : BigDecimal.ZERO;
         }
       case "json.count":
@@ -395,7 +399,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           if (args.size() > 2) {
             start = FunctionUtil.paramAsInteger(functionName, args, 2, true);
           }
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           JsonElement value = asJsonElement(args.get(1));
 
           return BigDecimal.valueOf(jsonArrayFunctions.count(jsonArray, value, start));
@@ -403,7 +407,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.indexOf":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, 3);
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           JsonElement value = asJsonElement(args.get(1));
           int start = 0;
           if (args.size() > 2) {
@@ -414,9 +418,9 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.merge":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement = FunctionUtil.paramConvertedToJson(functionName, args, 0);
           if (jsonElement.isJsonArray()) {
-            return jsonArrayFunctions.merge(paramsAsJsonArrays(functionName, args));
+            return jsonArrayFunctions.merge(paramsConvertedToJsonArrays(functionName, args));
           } else {
             return jsonObjectFunctions.merge(paramsAsJsonObjects(functionName, args));
           }
@@ -424,7 +428,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.unique":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+          JsonArray jsonArray = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
 
           return jsonArrayFunctions.unique(jsonArray);
         }
@@ -433,7 +437,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
           JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
           if (jsonElement.isJsonArray()) {
-            List<JsonArray> arrays = (paramsAsJsonArrays(functionName, args));
+            List<JsonArray> arrays = (paramsConvertedToJsonArrays(functionName, args));
             return jsonArrayFunctions.removeAll(arrays.get(0), arrays.subList(1, arrays.size()));
           } else {
             List<JsonObject> objects = paramsAsJsonObjects(functionName, args);
@@ -444,32 +448,32 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.union":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+          List<JsonElement> elements = paramsConvertedToJsonElements(functionName, args);
           return jsonArrayFunctions.union(elements);
         }
       case "json.intersection":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+          List<JsonElement> elements = paramsConvertedToJsonElements(functionName, args);
           return jsonArrayFunctions.intersection(elements);
         }
       case "json.difference":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+          List<JsonElement> elements = paramsConvertedToJsonElements(functionName, args);
           return jsonArrayFunctions.difference(elements);
         }
       case "json.isSubset":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+          List<JsonElement> elements = paramsConvertedToJsonElements(functionName, args);
           return jsonArrayFunctions.isSubset(elements) ? BigDecimal.ONE : BigDecimal.ZERO;
         }
       case "json.removeFirst":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonArray removeFrom = FunctionUtil.paramAsJsonArray(functionName, args, 0);
-          JsonArray toRemove = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+          JsonArray removeFrom = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
+          JsonArray toRemove = FunctionUtil.paramConvertedToJsonArray(functionName, args, 1);
           return jsonArrayFunctions.removeFirst(removeFrom, toRemove);
         }
       case "json.rolls":
@@ -489,10 +493,10 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.objrolls":
         {
           FunctionUtil.checkNumberParam(functionName, args, 3, 3);
-          JsonArray names = FunctionUtil.paramAsJsonArray(functionName, args, 0);
-          JsonArray stats = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+          JsonArray names = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
+          JsonArray stats = FunctionUtil.paramConvertedToJsonArray(functionName, args, 1);
           JsonArray rollArray;
-          String rollString; // = args.get(2).toString();
+          String rollString;
           boolean isArrayOfRolls;
 
           try {
@@ -512,8 +516,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           }
         }
     }
-
-    return null; // TODO CDW
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
@@ -538,7 +541,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
   private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, JsonArray rolls)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
 
     if (stats.size() != rolls.size()) {
       throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
@@ -593,7 +596,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonArray jsonRolls(String rollString, int outerDim, int innerDim)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+    ExpressionParser parser = new ExpressionParser();
 
     if (innerDim == 1) {
       return jsonRolls(rollString, outerDim, parser);
@@ -624,7 +627,25 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     return arrays;
   }
+  /**
+   * Returns the parameter list as a list of {@link JsonArray}s. If the parameter is not a json
+   * object/array and is an empty string it will result in a 0 sized JsonArray, otherwise the value
+   * will result in a JsonArray containing that value.
+   *
+   * @param functionName The name of the MT Script function that was called.
+   * @param params The parameters to extract as {@link JsonArray}s.
+   * @return The list of {@link JsonArray}s.
+   * @throws ParserException if the parameters can not be converted to {@link JsonArray}s.
+   */
+  private List<JsonArray> paramsConvertedToJsonArrays(String functionName, List<Object> params)
+      throws ParserException {
+    List<JsonArray> arrays = new ArrayList<>();
+    for (int i = 0; i < params.size(); i++) {
+      arrays.add(FunctionUtil.paramConvertedToJsonArray(functionName, params, i));
+    }
 
+    return arrays;
+  }
   /**
    * Returns the parameter list as a list of {@link JsonObject}s.
    *
@@ -656,6 +677,25 @@ public class JSONMacroFunctions extends AbstractFunction {
     List<JsonElement> elements = new ArrayList<>();
     for (int i = 0; i < params.size(); i++) {
       elements.add(FunctionUtil.paramAsJson(functionName, params, i));
+    }
+
+    return elements;
+  }
+
+  /**
+   * Returns the parameter list as a list of {@link JsonElement}s. If the parameter is not a json
+   * object/array and is an empty string it * will result in a 0 sized JsonArray, otherwise the
+   * value will result * in a JsonArray containing that value. *
+   *
+   * @param functionName The name of the MT Script function that was called.
+   * @param params The parameters to extract as {@link JsonElement}s.
+   * @return The list of {@link JsonElement}s.
+   */
+  private List<JsonElement> paramsConvertedToJsonElements(
+      String functionName, List<Object> params) {
+    List<JsonElement> elements = new ArrayList<>();
+    for (int i = 0; i < params.size(); i++) {
+      elements.add(FunctionUtil.paramConvertedToJson(functionName, params, i));
     }
 
     return elements;
@@ -837,10 +877,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param key The new key to be added.
    * @param info The new information to add.
    * @return The resulting json data.
-   * @throws ParserException If there is an error adding the information.
    */
-  private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info)
-      throws ParserException {
+  private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info) {
     Object value = asJsonElement(info);
 
     return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
@@ -853,10 +891,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param path The path to change the new information at.
    * @param info The new information to change to.
    * @return The resulting json data.
-   * @throws ParserException If there is an error changing the information.
    */
-  private JsonElement jsonPathSet(JsonElement json, String path, Object info)
-      throws ParserException {
+  private JsonElement jsonPathSet(JsonElement json, String path, Object info) {
     Object value = asJsonElement(info);
 
     return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
@@ -884,10 +920,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param json the json object to read the information from.
    * @param path the path to read in the object.
    * @return the return value as a MT Script type.
-   * @throws ParserException when there is an error converting the json objects.
    */
-  private Object jsonPathRead(JsonElement json, String path, Configuration config)
-      throws ParserException {
+  private Object jsonPathRead(JsonElement json, String path, Configuration config) {
     JsonElement jsonElement = asJsonElement(json);
     return typeConversion.asScriptType(JsonPath.using(config).parse(jsonElement).read(path));
   }
@@ -915,8 +949,18 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param o the object to convert.
    * @return the json representation..
    */
-  public JsonElement asJsonElement(Object o) throws ParserException {
+  public JsonElement asJsonElement(Object o) {
     return typeConversion.asJsonElement(o);
+  }
+
+  /**
+   * Converts a <code>String</code> to a {@link JsonPrimitive}.
+   *
+   * @param string the String to convert.
+   * @return the converted value.
+   */
+  public JsonPrimitive convertPrimitiveFromString(String string) {
+    return typeConversion.convertPrimitiveFromString(string);
   }
 
   /**

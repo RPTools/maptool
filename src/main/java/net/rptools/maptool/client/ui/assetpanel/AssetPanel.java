@@ -18,11 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -38,8 +34,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.metal.MetalSliderUI;
@@ -64,10 +58,21 @@ public class AssetPanel extends JComponent {
   private ImagePanel imagePanel;
   private JTextField filterTextField;
   private JCheckBox globalSearchField;
+  private JCheckBox extractRenderedPages;
   private JSlider thumbnailPreviewSlider;
   private final AssetPanelModel assetPanelModel;
   private Timer updateFilterTimer;
   private JProgressBar imagePanelProgressBar;
+
+  public boolean isLimitReached() {
+    return limitReached;
+  }
+
+  public void setLimitReached(boolean limitReached) {
+    this.limitReached = limitReached;
+  }
+
+  private boolean limitReached = false;
 
   public AssetPanel(String controlName) {
     this(controlName, new AssetPanelModel());
@@ -124,16 +129,17 @@ public class AssetPanel extends JComponent {
     imagePanel.setFont(new Font("Helvetica", 0, 10)); // XXX Overrides TinyLAF?
 
     imagePanel.addMouseWheelListener(
-        new MouseWheelListener() {
-          public void mouseWheelMoved(MouseWheelEvent e) {
-            if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
-              e.consume();
-              int steps = e.getWheelRotation();
-              imagePanel.setGridSize(imagePanel.getGridSize() + steps);
-              thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
-            } else {
-              imagePanel.getParent().dispatchEvent(e);
-            }
+        e -> {
+          int steps = e.getWheelRotation();
+          if (steps == 0) {
+            return;
+          }
+          if (SwingUtil.isControlDown(e) || e.isMetaDown()) { // XXX Why either one?
+            e.consume();
+            imagePanel.setGridSize(imagePanel.getGridSize() + steps);
+            thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
+          } else {
+            imagePanel.getParent().dispatchEvent(e);
           }
         });
   }
@@ -187,6 +193,7 @@ public class AssetPanel extends JComponent {
 
     panel.add(BorderLayout.NORTH, top);
     panel.add(BorderLayout.CENTER, getGlobalSearchField());
+    panel.add(BorderLayout.SOUTH, getExtractRenderedPages());
 
     return panel;
   }
@@ -214,14 +221,17 @@ public class AssetPanel extends JComponent {
           .getDocument()
           .addDocumentListener(
               new DocumentListener() {
+                @Override
                 public void changedUpdate(DocumentEvent e) {
                   // no op
                 }
 
+                @Override
                 public void insertUpdate(DocumentEvent e) {
                   updateFilter();
                 }
 
+                @Override
                 public void removeUpdate(DocumentEvent e) {
                   updateFilter();
                 }
@@ -240,12 +250,7 @@ public class AssetPanel extends JComponent {
     if (globalSearchField == null) {
       globalSearchField =
           new JCheckBox(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"), false);
-      globalSearchField.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-              updateFilter();
-            }
-          });
+      globalSearchField.addActionListener(ev -> updateFilter());
     }
     return globalSearchField;
   }
@@ -287,6 +292,7 @@ public class AssetPanel extends JComponent {
 
       thumbnailPreviewSlider.setUI(
           new MetalSliderUI() {
+            @Override
             protected void scrollDueToClickInTrack(int direction) {
               int value = thumbnailPreviewSlider.getValue();
 
@@ -300,12 +306,7 @@ public class AssetPanel extends JComponent {
           });
 
       thumbnailPreviewSlider.addChangeListener(
-          new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-              setThumbSize(thumbnailPreviewSlider.getValue());
-            }
-          });
+          e -> setThumbSize(thumbnailPreviewSlider.getValue()));
     }
 
     return thumbnailPreviewSlider;
@@ -326,21 +327,20 @@ public class AssetPanel extends JComponent {
       updateFilterTimer =
           new Timer(
               500,
-              new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                  ImageFileImagePanelModel model = (ImageFileImagePanelModel) imagePanel.getModel();
-                  if (model == null) {
-                    return;
-                  }
-                  model.setGlobalSearch(getGlobalSearchField().isSelected());
-                  model.setFilter(getFilterTextField().getText());
-                  // TODO: This should be event based
-                  imagePanel.revalidate();
-                  imagePanel.repaint();
-
-                  updateFilterTimer.stop();
-                  updateFilterTimer = null;
+              e -> {
+                ImageFileImagePanelModel model = (ImageFileImagePanelModel) imagePanel.getModel();
+                if (model == null) {
+                  return;
                 }
+                model.setExtractRenderedPages(getExtractRenderedPages().isSelected());
+                model.setGlobalSearch(getGlobalSearchField().isSelected());
+                model.setFilter(getFilterTextField().getText());
+                // TODO: This should be event based
+                imagePanel.revalidate();
+                imagePanel.repaint();
+
+                updateFilterTimer.stop();
+                updateFilterTimer = null;
               });
       updateFilterTimer.start();
     } else {
@@ -383,7 +383,7 @@ public class AssetPanel extends JComponent {
 
   public void setDirectory(Directory dir) {
     imagePanel.setModel(
-        new ImageFileImagePanelModel(dir) {
+        new ImageFileImagePanelModel(dir, this) {
           @Override
           public Transferable getTransferable(int index) {
             // TransferableAsset t = (TransferableAsset) super.getTransferable(index);
@@ -397,5 +397,17 @@ public class AssetPanel extends JComponent {
 
   public AssetTree getAssetTree() {
     return assetTree;
+  }
+
+  public JCheckBox getExtractRenderedPages() {
+    if (extractRenderedPages == null) {
+      extractRenderedPages =
+          new JCheckBox(
+              I18N.getText("panel.Asset.ImageModel.checkbox.extractRenderedPages"), false);
+      extractRenderedPages.setToolTipText(
+          I18N.getString("panel.Asset.ImageModel.checkbox.tooltip.extractRenderedPages"));
+      extractRenderedPages.addActionListener(ev -> updateFilter());
+    }
+    return extractRenderedPages;
   }
 }

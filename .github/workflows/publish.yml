@@ -1,0 +1,183 @@
+# Builds and uploads native install packages for Windows, Linux & macOS
+# Create and Publish a GitHub Release to activate this workflow.
+# Tag will be used for version and must follow semver x.x.x format exactly or jpackage will fail
+# Only digits allowed and must include major.minor.patch numbers.
+
+name: Publish Assets
+on:
+  release:
+    types:
+      - published
+jobs:
+  build:
+    name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+        java: [ '14' ]
+      fail-fast: false
+    steps:
+      #       ____          _  __     __   ___        ____                __
+      #      / __ ) __  __ (_)/ /____/ /  ( _ )      / __ \ ____ _ _____ / /__ ____ _ ____ _ ___
+      #     / __  |/ / / // // // __  /  / __ \/|   / /_/ // __ `// ___// //_// __ `// __ `// _ \
+      #    / /_/ // /_/ // // // /_/ /  / /_/  <   / ____// /_/ // /__ / ,<  / /_/ // /_/ //  __/
+      #   /_____/ \__,_//_//_/ \__,_/   \____/\/  /_/     \__,_/ \___//_/|_| \__,_/ \__, / \___/
+      #                                                                            /____/
+    - name: Git checkout
+      uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Cache Gradle
+      uses: actions/cache@v1
+      # Cache only seems to work on ubuntu right now...
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Build with Gradle
+      run: ./gradlew jpackage
+    - name: Copy the RPM to the location required to build the ArchLinux package
+      if: matrix.os == 'ubuntu-latest'
+      run: cp releases/maptool-*.rpm package/archlinux/maptool/maptool.rpm
+    - name: Build ArchLinux package
+      uses: 2m/arch-pkgbuild-builder@v1.16
+      # This only even makes sense on Ubuntu.
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        MAPTOOL_VERSION: ${{ github.event.release.tag_name }}
+      with:
+        target: 'pkgbuild'
+        pkgname: 'package/archlinux/maptool'
+    - name: Build uberJar on Windows
+      if: matrix.os == 'windows-latest'
+      run: ./gradlew uberJar
+      # For debugging purposes...
+    - name: List releases
+      run: ls releases
+      #    _       __ _             __
+      #   | |     / /(_)____   ____/ /____  _      __ _____
+      #   | | /| / // // __ \ / __  // __ \| | /| / // ___/
+      #   | |/ |/ // // / / // /_/ // /_/ /| |/ |/ /(__  )
+      #   |__/|__//_//_/ /_/ \__,_/ \____/ |__/|__//____/
+      #
+    - name: Copy Windows Release Files
+      if: matrix.os == 'windows-latest'
+      run: |
+        cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
+        cp releases/MapTool*.msi releases/MapTool-${{ github.event.release.tag_name }}.msi
+    - name: Upload Windows EXE Release Asset
+      id: upload-release-asset-exe
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'windows-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.exe
+        asset_name: MapTool-${{ github.event.release.tag_name }}.exe
+        asset_content_type: application/octet-stream
+    - name: Upload Windows MSI Release Asset
+      id: upload-release-asset-msi
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'windows-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.msi
+        asset_name: MapTool-${{ github.event.release.tag_name }}.msi
+        asset_content_type: application/octet-stream
+    - name: Upload Uber Jar Release Asset
+      id: upload-release-asset-jar
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'windows-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.jar
+        asset_name: MapTool-${{ github.event.release.tag_name }}.jar
+        asset_content_type: application/octet-stream
+      #       __     _
+      #      / /    (_)____   __  __ _  __
+      #     / /    / // __ \ / / / /| |/_/
+      #    / /___ / // / / // /_/ /_>  <
+      #   /_____//_//_/ /_/ \__,_//_/|_|
+      #
+    - name: Copy Linux Release Files
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
+        cp releases/maptool*_amd64.deb releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
+        cp package/archlinux/maptool/maptool-*-x86_64.pkg.tar.zst releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+    - name: Upload Linux RPM Release Asset
+      id: upload-release-asset-rpm
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
+        asset_name: maptool-${{ github.event.release.tag_name }}-x86_64.rpm
+        asset_content_type: application/octet-stream
+    - name: Upload Linux DEB Release Asset
+      id: upload-release-asset-deb
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
+        asset_name: maptool_${{ github.event.release.tag_name }}-amd64.deb
+        asset_content_type: application/octet-stream
+    - name: Upload ArchLinux Release Asset
+      id: upload-release-asset-arch
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+        asset_name: maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+        asset_content_type: application/octet-stream
+      #                               ____  _____
+      #      ____ ___   ____ _ _____ / __ \/ ___/
+      #     / __ `__ \ / __ `// ___// / / /\__ \
+      #    / / / / / // /_/ // /__ / /_/ /___/ /
+      #   /_/ /_/ /_/ \__,_/ \___/ \____//____/
+      #
+    - name: Copy Mac OS Release Files
+      if: matrix.os == 'macOS-latest'
+      run: |
+        cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
+        cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
+    - name: Upload Mac DMG Release Asset
+      id: upload-release-asset-dmg
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'macOS-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.dmg
+        asset_name: MapTool-${{ github.event.release.tag_name }}.dmg
+        asset_content_type: application/octet-stream
+    - name: Upload Mac PKG Release Asset
+      id: upload-release-asset-pkg
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'macOS-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.pkg
+        asset_name: MapTool-${{ github.event.release.tag_name }}.pkg
+        asset_content_type: application/octet-stream

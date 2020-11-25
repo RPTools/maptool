@@ -27,16 +27,20 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  * @author trevor
  */
 public class CellPoint extends AbstractPoint {
+
   public double g; // Only populated by AStarWalker classes to be used upstream
   public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
+  public double
+      distanceTraveledWithoutTerrain; // Only populated by AStarWalker classes to be used upstream
 
   public CellPoint(int x, int y) {
     super(x, y);
   }
 
-  public CellPoint(int x, int y, double distanceTraveled) {
+  public CellPoint(int x, int y, double distanceTraveled, double distanceTraveledWithoutTerrain) {
     super(x, y);
     this.distanceTraveled = distanceTraveled;
+    this.distanceTraveledWithoutTerrain = distanceTraveledWithoutTerrain;
   }
 
   @Override
@@ -81,9 +85,35 @@ public class CellPoint extends AbstractPoint {
     return zp;
   }
 
-  // Return distance in grid units for current map
+  /**
+   * Return distance in grid units for current map.
+   *
+   * @param zone the zone to calculate the distance on
+   * @return the distance traveled, rounded and taking into account the Units per Cell
+   */
   public double getDistanceTraveled(Zone zone) {
-    return Math.floor(distanceTraveled) * zone.getUnitsPerCell();
+    switch (zone.getAStarRounding()) {
+      case CELL_UNIT:
+        return roundToCellCost(distanceTraveled * zone.getUnitsPerCell(), zone.getUnitsPerCell());
+      case INTEGER:
+        return (int) distanceTraveled * zone.getUnitsPerCell();
+      case NONE:
+      default:
+        return distanceTraveled * zone.getUnitsPerCell();
+    }
+  }
+
+  public double getDistanceTraveledWithoutTerrain() {
+    return distanceTraveledWithoutTerrain;
+  }
+
+  private double roundToCellCost(double num, double unitsPerCell) {
+    if (num == 0) {
+      return 0;
+    } else {
+      double result = Math.floor((num + unitsPerCell / 2) / unitsPerCell) * unitsPerCell;
+      return Math.max(result, unitsPerCell);
+    }
   }
 
   public double gCost() {
@@ -93,5 +123,6 @@ public class CellPoint extends AbstractPoint {
   public void replaceG(CellPoint previousCell) {
     g = previousCell.g;
     distanceTraveled = previousCell.distanceTraveled;
+    distanceTraveledWithoutTerrain = previousCell.distanceTraveledWithoutTerrain;
   }
 }

@@ -47,7 +47,7 @@ public class LoadAliasesMacro implements Macro {
       }
       aliasFile = chooser.getSelectedFile();
     }
-    if (aliasFile.getName().indexOf(".") < 0) {
+    if (!aliasFile.getName().contains(".")) {
       aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
     }
     if (!aliasFile.exists()) {
@@ -67,7 +67,7 @@ public class LoadAliasesMacro implements Macro {
         // Split into components
         String name = line;
         String value = null;
-        int split = line.indexOf(":");
+        int split = line.indexOf(':');
         if (split > 0) {
           name = line.substring(0, split);
           value = line.substring(split + 1).trim();

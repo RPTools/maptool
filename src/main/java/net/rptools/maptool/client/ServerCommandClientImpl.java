@@ -34,6 +34,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -129,6 +130,11 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.restoreZoneView, zoneGUID);
   }
 
+  public void editToken(GUID zoneGUID, Token token) {
+    MapTool.getCampaign().getZone(zoneGUID).editToken(token);
+    makeServerCall(COMMAND.editToken, zoneGUID, token);
+  }
+
   public void putToken(GUID zoneGUID, Token token) {
     // Hack to generate zone event. All functions that update tokens call this method
     // after changing the token. But they don't tell the zone about it so classes
@@ -137,8 +143,18 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.putToken, zoneGUID, token);
   }
 
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
+    // delete local token immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
     makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    // delete local tokens immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
+    makeServerCall(COMMAND.removeTokens, zoneGUID, tokenGUIDs);
   }
 
   /**
@@ -261,12 +277,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
-  public void addTopology(GUID zoneGUID, Area area) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area);
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
   }
 
-  public void removeTopology(GUID zoneGUID, Area area) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area);
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -274,6 +290,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+    // Expose locally right away.
+    MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
     makeServerCall(COMMAND.exposeFoW, zoneGUID, area, selectedToks);
   }
 
@@ -373,7 +391,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
     long delay;
 
-    Object sleepSemaphore = new Object();
+    final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
       delay = millidelay;

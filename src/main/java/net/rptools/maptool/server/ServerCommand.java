@@ -30,6 +30,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -37,7 +38,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
-  public static enum COMMAND {
+  public enum COMMAND {
     // @formatter:off
     bootPlayer,
     setCampaign,
@@ -49,7 +50,9 @@ public interface ServerCommand {
     getAsset,
     removeAsset,
     putToken,
+    editToken,
     removeToken,
+    removeTokens,
     updateTokenProperty,
     draw,
     updateDrawing,
@@ -111,9 +114,9 @@ public interface ServerCommand {
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void addTopology(GUID zoneGUID, Area area);
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
 
-  public void removeTopology(GUID zoneGUID, Area area);
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 
@@ -137,9 +140,25 @@ public interface ServerCommand {
 
   public void removeAsset(MD5Key assetID);
 
+  public void editToken(GUID zoneGUID, Token token);
+
   public void putToken(GUID zoneGUID, Token token);
 
+  /**
+   * Removes a token from a zone.
+   *
+   * @param zoneGUID the ID of the zone
+   * @param tokenGUID the ID of the token
+   */
   public void removeToken(GUID zoneGUID, GUID tokenGUID);
+
+  /**
+   * Removes a list of tokens from a zone.
+   *
+   * @param zoneGUID the ID of the zone
+   * @param tokenGUIDs the list of IDs of the tokens
+   */
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
 
   public void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);

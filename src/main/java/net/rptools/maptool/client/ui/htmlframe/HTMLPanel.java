@@ -15,49 +15,37 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 
-public class HTMLPanel extends JPanel {
+/** Represents the JPanel holding the HTML pane. */
+public class HTMLPanel extends JPanel implements HTMLPanelInterface {
   private static final long serialVersionUID = -2574631956909778786L;
 
+  /** The HTMLPane holding the HTML content. */
   private final HTMLPane pane = new HTMLPane();
-  private final JPanel closePanel = new JPanel();
 
   /**
    * Creates a new HTMLPanel.
    *
-   * @param container The container that will hold the HTML panel.
-   * @param closeButton If the panel has a close button.
-   * @param scrollBar Should panel have scroll bars or not.
+   * @param container The container that will hold the HTML panel
+   * @param scrollBar whether panel have scroll bars or not
    */
-  HTMLPanel(final HTMLPanelContainer container, boolean closeButton, boolean scrollBar) {
+  HTMLPanel(final HTMLPanelContainer container, boolean scrollBar) {
     setLayout(new BorderLayout());
-
-    JButton jcloseButton = new JButton("Close");
-    jcloseButton.setActionCommand("Close");
-    jcloseButton.addActionListener(container);
-    closePanel.setLayout(new BoxLayout(closePanel, BoxLayout.LINE_AXIS));
-    closePanel.add(Box.createHorizontalGlue());
-    closePanel.add(jcloseButton);
-    closePanel.add(Box.createHorizontalGlue());
 
     if (scrollBar) {
       add(new JScrollPane(pane), BorderLayout.CENTER);
     } else {
       add(pane, BorderLayout.CENTER);
     }
-    updateContents("", closeButton);
+    updateContents("", false);
 
     // ESCAPE closes the window
     pane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -70,53 +58,47 @@ public class HTMLPanel extends JPanel {
                 container.closeRequest();
               }
             });
-    // Add an action listener so we can get notified about form events.
+  }
+
+  @Override
+  public void updateContents(final String html, boolean scrollReset) {
+    pane.updateContents(html, scrollReset);
+  }
+
+  /** Flushes any caching for the panel. */
+  @Override
+  public void flush() {
+    pane.flush();
+  }
+
+  /**
+   * Add the object to a HTMLPanelContainer.
+   *
+   * @param container the container
+   */
+  @Override
+  public void addToContainer(HTMLPanelContainer container) {
+    container.add(this);
+  }
+
+  @Override
+  public void removeFromContainer(HTMLPanelContainer container) {
+    container.remove(this);
+  }
+
+  @Override
+  public void addActionListener(ActionListener container) {
     pane.addActionListener(container);
   }
 
   /**
-   * Update the contents of the panel.
+   * Returns false.
    *
-   * @param html The HTML to display.
-   * @param closeButton If the panel has a close button.
+   * @param script the script that cannot be ran
+   * @return false
    */
-  public void updateContents(final String html, boolean closeButton) {
-    if (closeButton) {
-      add(closePanel, BorderLayout.SOUTH);
-    } else {
-      remove(closePanel);
-    }
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            ((MessagePanelEditorKit) pane.getEditorKit()).flush();
-            pane.setText(html);
-            pane.setCaretPosition(0);
-          }
-        });
-  }
-
-  /** Flushes any caching for the panel. */
-  public void flush() {
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            ((MessagePanelEditorKit) pane.getEditorKit()).flush();
-          }
-        });
-  }
-
-  /**
-   * Updates if this panel is an input panel or not.
-   *
-   * @param closeButton is this panel has a close button or not.
-   */
-  void updateContents(boolean closeButton) {
-    if (closeButton) {
-      add(closePanel, BorderLayout.SOUTH);
-    } else {
-      remove(closePanel);
-    }
-    revalidate();
+  @Override
+  public boolean runJavascript(String script) {
+    return false;
   }
 }

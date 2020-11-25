@@ -111,7 +111,7 @@ public class ZoneImageGenerator extends BufferedImage {
   private void fillCache() {
     Rectangle rect = cachedRect;
 
-    if ((recentHits == 0) && (numMisses > 0)) {
+    if (recentHits == 0 && numMisses > 0) {
       assert false : "Cache is being thrashed: " + prevCacheRect + cachedRect;
     }
 

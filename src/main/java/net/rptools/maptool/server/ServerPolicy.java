@@ -26,6 +26,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 public class ServerPolicy {
   private boolean strictTokenMovement;
   private boolean isMovementLocked;
+  private boolean isTokenEditorLocked;
   private boolean playersCanRevealVision;
   private boolean gmRevealsVisionForUnownedTokens;
   private boolean useIndividualViews;
@@ -37,6 +38,9 @@ public class ServerPolicy {
   private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
   private WalkerMetric movementMetric;
 
+  private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
+  private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
+
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
     useToolTipsForDefaultRollFormat = AppPreferences.getUseToolTipForInlineRoll();
@@ -47,7 +51,7 @@ public class ServerPolicy {
   /**
    * Whether token management can be done by everyone or only the GM and assigned tokens
    *
-   * @return
+   * @return true if tokens only can be handled by GM and assignee
    */
   public boolean useStrictTokenManagement() {
     return strictTokenMovement;
@@ -63,6 +67,14 @@ public class ServerPolicy {
 
   public void setIsMovementLocked(boolean locked) {
     isMovementLocked = locked;
+  }
+
+  public boolean isTokenEditorLocked() {
+    return isTokenEditorLocked;
+  }
+
+  public void setIsTokenEditorLocked(boolean locked) {
+    isTokenEditorLocked = locked;
   }
 
   public void setPlayersCanRevealVision(boolean flag) {
@@ -133,7 +145,12 @@ public class ServerPolicy {
     return useToolTipsForDefaultRollFormat;
   }
 
-  /** Gets the local server time */
+  /**
+   * Gets the local server time
+   *
+   * @return the current server time as the difference, measured in milliseconds, between the now
+   *     and midnight, January 1, 1970 UTC
+   */
   public long getSystemTime() {
     return System.currentTimeMillis();
   }
@@ -174,6 +191,22 @@ public class ServerPolicy {
     this.includeOwnedNPCs = includeOwnedNPCs;
   }
 
+  public boolean isUsingAstarPathfinding() {
+    return useAstarPathfinding;
+  }
+
+  public void setUseAstarPathfinding(boolean useAstarPathfinding) {
+    this.useAstarPathfinding = useAstarPathfinding;
+  }
+
+  public boolean getVblBlocksMove() {
+    return vblBlocksMove;
+  }
+
+  public void setVblBlocksMove(boolean vblBlocksMove) {
+    this.vblBlocksMove = vblBlocksMove;
+  }
+
   /**
    * Retrieves the server side preferences as a json object.
    *
@@ -194,6 +227,8 @@ public class ServerPolicy {
         "auto reveal on movement", isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
+        "token editor locked", isTokenEditorLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
         "restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "individual views", isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
@@ -208,6 +243,9 @@ public class ServerPolicy {
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
     sinfo.addProperty("movement metric", metric.toString());
 
+    sinfo.addProperty("using ai", isUsingAstarPathfinding() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("vbl blocks movement", getVblBlocksMove() ? BigDecimal.ONE : BigDecimal.ZERO);
+
     sinfo.addProperty("timeInMs", getSystemTime());
     sinfo.addProperty("timeDate", getTimeDate());
 
@@ -219,6 +257,9 @@ public class ServerPolicy {
     sinfo.add("gm", gms);
     sinfo.addProperty(
         "hosting server", MapTool.isHostingServer() ? BigDecimal.ONE : BigDecimal.ZERO);
+
+    sinfo.addProperty(
+        "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     return sinfo;
   }

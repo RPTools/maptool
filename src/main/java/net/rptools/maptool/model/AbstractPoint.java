@@ -19,6 +19,15 @@ public abstract class AbstractPoint implements Cloneable {
   public int x;
   public int y;
 
+  /**
+   * Only populated by AStarWalker classes to be used upstream.
+   *
+   * @return whether A* couldn't find a path to the cell.
+   */
+  public boolean isAStarCanceled() {
+    return false;
+  }
+
   public AbstractPoint(int x, int y) {
     this.x = x;
     this.y = y;
@@ -37,7 +46,7 @@ public abstract class AbstractPoint implements Cloneable {
   }
 
   public int hashCode() {
-    return new String(x + "-" + y).hashCode();
+    return (x + "-" + y).hashCode();
   }
 
   public String toString() {
@@ -49,7 +58,7 @@ public abstract class AbstractPoint implements Cloneable {
       return (AbstractPoint) super.clone();
     } catch (CloneNotSupportedException e) {
       // this shouldn't happen, since we are Cloneable
-      throw new InternalError();
+      throw new InternalError(e);
     }
   }
 }

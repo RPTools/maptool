@@ -100,6 +100,11 @@ public class SquareGrid extends Grid {
     }
   }
 
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
+  }
+
   public SquareGrid(boolean faceEdges, boolean faceVertices) {
     setFacings(faceEdges, faceVertices);
   }
@@ -237,7 +242,8 @@ public class SquareGrid extends Grid {
 
   @Override
   public Rectangle getBounds(CellPoint cp) {
-    return new Rectangle(cp.x * getSize(), cp.y * getSize(), getSize(), getSize());
+    return new Rectangle(
+        cp.x * getSize() + getOffsetX(), cp.y * getSize() + getOffsetY(), getSize(), getSize());
   }
 
   @Override
@@ -359,7 +365,7 @@ public class SquareGrid extends Grid {
   }
 
   public static String decimalToAlphaCoord(int value) {
-    String result = new String();
+    String result = "";
     int temp;
     boolean isNegative = false;
 

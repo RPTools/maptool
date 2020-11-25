@@ -23,6 +23,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -46,18 +47,20 @@ public class TokenInitHoldFunction extends AbstractFunction {
   };
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (functionName.equalsIgnoreCase("getInitiativeHold")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
       return getInitiativeHold(token);
-    } else {
+    } else if ("setInitiativeHold".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       boolean set = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
       return setInitiativeHold(token, set);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

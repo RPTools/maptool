@@ -174,6 +174,9 @@ public class TransferableHelper extends TransferHandler {
   /**
    * Takes a drop event and returns an asset from it. Returns null if an asset could not be
    * obtained.
+   *
+   * @param transferable the {@link Transferable} from the drop event.
+   * @return A list of assets transferred or {@code null} if it could not be obtained from transfer.
    */
   @SuppressWarnings("unchecked")
   public static List<Object> getAsset(Transferable transferable) {
@@ -183,7 +186,7 @@ public class TransferableHelper extends TransferHandler {
       // This *really* should be done using either the Strategy or Template patterns. Sigh.
 
       // EXISTING ASSET
-      if (o == null && transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
+      if (transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
         if (log.isInfoEnabled()) log.info("Selected: " + TransferableAsset.dataFlavor);
         o = handleTransferableAsset(transferable);
       }
@@ -446,12 +449,7 @@ public class TransferableHelper extends TransferHandler {
                 missingTokens);
         // if (EventQueue.isDispatchThread())
         // System.out.println("Yes, we are on the EDT already.");
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                MapTool.showWarning(message);
-              }
-            });
+        SwingUtilities.invokeLater(() -> MapTool.showWarning(message));
       } // endif
     } catch (IOException e) {
       MapTool.showError("TransferableHelper.error.ioException", e); // $NON-NLS-1$
@@ -480,9 +478,9 @@ public class TransferableHelper extends TransferHandler {
    */
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] transferFlavors) {
-    for (int j = 0; j < SUPPORTED_FLAVORS.length; j++) {
-      for (int i = 0; i < transferFlavors.length; i++) {
-        if (SUPPORTED_FLAVORS[j].equals(transferFlavors[i])) return true;
+    for (DataFlavor supportedFlavor : SUPPORTED_FLAVORS) {
+      for (DataFlavor transferFlavor : transferFlavors) {
+        if (supportedFlavor.equals(transferFlavor)) return true;
       }
     }
     return false;
@@ -597,7 +595,7 @@ public class TransferableHelper extends TransferHandler {
               Collections.singletonList(
                   new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
           // A token from the Resource Library is already fully configured.
-          configureTokens = Collections.singletonList(new Boolean(false));
+          configureTokens = Collections.singletonList(Boolean.FALSE);
         } catch (Exception e) {
           log.error("while using TransferableToken.dataFlavor", e); // $NON-NLS-1$
         }

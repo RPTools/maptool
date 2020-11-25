@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class EvalMacroFunctions extends AbstractFunction {
@@ -44,7 +45,8 @@ public class EvalMacroFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     MapToolLineParser lineParser = MapTool.getParser();
 
@@ -52,15 +54,16 @@ public class EvalMacroFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
-    Token tokenInContext = resolver.getTokenInContext();
+    Token tokenInContext = ((MapToolVariableResolver) resolver).getTokenInContext();
 
     // execMacro has new variable scope where as evalMacro does not.
     if (functionName.equals("execMacro")) {
       return execMacro(tokenInContext, parameters.get(0).toString());
-    } else {
-      return evalMacro(resolver, tokenInContext, parameters.get(0).toString());
+    } else if ("evalMacro".equalsIgnoreCase(functionName)) {
+      return evalMacro(
+          (MapToolVariableResolver) resolver, tokenInContext, parameters.get(0).toString());
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
@@ -78,6 +81,7 @@ public class EvalMacroFunctions extends AbstractFunction {
   /**
    * Executes the macro with the specified variable scope.
    *
+   * @param res the {@link MapToolVariableResolver} used to resolve variable values.
    * @param tokenInContext The token in context.
    * @param line the macro to execute.
    * @return the result of the execution.
