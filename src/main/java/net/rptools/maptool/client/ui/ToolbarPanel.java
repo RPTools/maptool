@@ -45,7 +45,6 @@ import net.rptools.maptool.client.tool.MeasureTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.TextTool;
-import net.rptools.maptool.client.tool.drawing.AutoTopologyTool;
 import net.rptools.maptool.client.tool.drawing.BlastTemplateTool;
 import net.rptools.maptool.client.tool.drawing.BurstTemplateTool;
 import net.rptools.maptool.client.tool.drawing.ConeTemplateTool;
@@ -325,7 +324,6 @@ public class ToolbarPanel extends JToolBar {
     panel.add(CrossTopologyTool.class);
     panel.add(DiamondTopologyTool.class);
     panel.add(HollowDiamondTopologyTool.class);
-    panel.add(AutoTopologyTool.class);
 
     // Add with space to denote button is not part of the Topology Panel button group
     final SidePanel topologySelectionPanel = new SidePanel();
