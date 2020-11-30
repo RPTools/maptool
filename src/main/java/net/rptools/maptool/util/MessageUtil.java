@@ -23,9 +23,9 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 
 public class MessageUtil {
-  static final String CSS_EMIT = ".emit { font-weight: bold; font-style: italic; }";
-  static final String CSS_SAY_TD = ".say td { padding: 0px 0px 0px 2px }";
-  static final String CSS_SAY_AVATAR = ".say .avatar { width: 37px; padding-right: 5px }";
+  static final String CSS_EMIT = ".emit { font-weight: bold; font-style: italic }";
+  static final String CSS_SAY_TD = ".say td { padding: 0px }";
+  static final String CSS_SAY_AVATAR = ".say .avatar { width: 40px; text-align: center }";
   static final String CSS_SAY_MESSAGE =
       ".say .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
   static final String CSS_SAY_PREFIX = ".say .prefix, .say .trustedPrefix { font-weight: bold }";
