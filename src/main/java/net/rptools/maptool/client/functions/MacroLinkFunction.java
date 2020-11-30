@@ -542,37 +542,25 @@ public class MacroLinkFunction extends AbstractFunction {
         MapTool.addLocalMessage(MessageUtil.getFormattedSelf(line));
         break;
       case SELF_AND_GM:
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.ME,
-                null,
-                MapTool.getPlayer().getName(),
-                MessageUtil.getFormattedToGmSender(line),
-                null));
+        MapTool.addLocalMessage(MessageUtil.getFormattedToGmSender(line));
         // Intentionally falls through
       case GM:
         MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.GM,
+            TextMessage.gm(
                 null,
-                MapTool.getPlayer().getName(),
                 MessageUtil.getFormattedToGmRecipient(
                     line,
                     MapTool.getPlayer().getName(),
                     MapTool.getParser().isMacroPathTrusted(),
                     macroName,
-                    null),
-                null));
+                    null)));
         break;
       case ALL:
         MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.SAY,
+            TextMessage.say(
                 null,
-                MapTool.getPlayer().getName(),
                 MessageUtil.getFormattedSay(
-                    line, token, MapTool.getParser().isMacroPathTrusted(), macroName, null),
-                null));
+                    line, token, MapTool.getParser().isMacroPathTrusted(), macroName, null)));
         break;
       case LIST:
         StringBuilder sb = new StringBuilder();
@@ -583,13 +571,7 @@ public class MacroLinkFunction extends AbstractFunction {
           }
           sb.append(name);
         }
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.ME,
-                null,
-                MapTool.getPlayer().getName(),
-                MessageUtil.getFormattedWhisperSender(line, sb.toString()),
-                null));
+        MapTool.addLocalMessage(MessageUtil.getFormattedWhisperSender(line, sb.toString()));
 
         break;
       case NONE:
@@ -611,13 +593,8 @@ public class MacroLinkFunction extends AbstractFunction {
 
     // Validate
     if (!MapTool.isPlayerConnected(playerName)) {
-      MapTool.addMessage(
-          new TextMessage(
-              TextMessage.Channel.ME,
-              null,
-              MapTool.getPlayer().getName(),
-              I18N.getText("msg.error.playerNotConnected", playerName),
-              null));
+      MapTool.addLocalMessage(I18N.getText("msg.error.playerNotConnected", playerName));
+      return;
     }
     if (MapTool.getPlayer().getName().equalsIgnoreCase(playerName)) {
       return;
@@ -625,13 +602,11 @@ public class MacroLinkFunction extends AbstractFunction {
 
     // Send
     MapTool.addMessage(
-        new TextMessage(
-            TextMessage.Channel.WHISPER,
+        TextMessage.whisper(
+            null,
             playerName,
-            MapTool.getPlayer().getName(),
             MessageUtil.getFormattedWhisperRecipient(
-                message, MapTool.getFrame().getCommandPanel().getIdentity()),
-            null));
+                message, MapTool.getFrame().getCommandPanel().getIdentity())));
   }
 
   private static String getSelf() {
