@@ -16,7 +16,10 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.security.MessageDigest;
 import java.util.Random;
+import javax.crypto.spec.SecretKeySpec;
+import net.rptools.maptool.util.CipherUtil;
 
 public class ServerConfig {
   public static final int DEFAULT_PORT = 51234;
@@ -30,6 +33,8 @@ public class ServerConfig {
   private String playerPassword;
   private boolean personalServer;
   private String serverName;
+  private SecretKeySpec playerPasswordKey;
+  private SecretKeySpec gmPasswordKey;
 
   public ServerConfig() {
     /* no op */
@@ -42,6 +47,10 @@ public class ServerConfig {
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
+
+    this.playerPasswordKey = CipherUtil.getInstance().createSecretKeySpec(this.playerPassword);
+    this.gmPasswordKey = CipherUtil.getInstance().createSecretKeySpec(this.gmPassword);
+
   }
 
   public String getHostPlayerId() {
@@ -77,6 +86,14 @@ public class ServerConfig {
     config.personalServer = true;
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
     return config;
+  }
+
+  public SecretKeySpec getPlayerPasswordKey() {
+    return playerPasswordKey;
+  }
+
+  public SecretKeySpec getGMPasswordKey() {
+    return gmPasswordKey;
   }
 
   private static Random r = new Random();

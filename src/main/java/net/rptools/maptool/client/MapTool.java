@@ -1759,14 +1759,6 @@ public class MapTool {
     tk.setDynamicLayout(true);
 
 
-    // Initialize Google Tink Aead
-    try {
-      AeadConfig.register();
-    } catch (GeneralSecurityException e) {
-      MapTool.showError("msg.error.encryptionSetup", e);
-      System.exit(1);
-    }
-
     EventQueue.invokeLater(
         () -> {
           initialize();
