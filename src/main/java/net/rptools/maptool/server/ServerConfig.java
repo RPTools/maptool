@@ -16,7 +16,6 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.security.MessageDigest;
 import java.util.Random;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.util.CipherUtil;
@@ -27,6 +26,34 @@ public class ServerConfig {
   public static final int PORT_RANGE_START = 4000;
   public static final int PORT_RANGE_END = 20000;
 
+  private static final String personalServerGMPassword;
+  private static final SecretKeySpec personalServerGMKey;
+
+
+
+  private static final String personalServerPlayerPassword;
+  private static final SecretKeySpec personalServerPlayerKey;
+
+  static {
+      Random random = new Random();
+      // Generate a random password for personal server
+      personalServerGMPassword = random.ints('a', 'z' + 1)
+            .limit(100)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+      personalServerGMKey = CipherUtil.getInstance().createSecretKeySpec(personalServerGMPassword);
+      String playerPass = random.ints('a', 'z' + 1)
+            .limit(100)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+      if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
+        personalServerPlayerPassword = playerPass + "1";
+      } else {
+        personalServerPlayerPassword = playerPass;
+      }
+      personalServerPlayerKey = CipherUtil.getInstance().createSecretKeySpec(personalServerPlayerPassword);
+  }
+
   private int port;
   private String hostPlayerId;
   private String gmPassword;
@@ -36,8 +63,30 @@ public class ServerConfig {
   private SecretKeySpec playerPasswordKey;
   private SecretKeySpec gmPasswordKey;
 
+
+
+  public static String getPersonalServerGMPassword() {
+    return personalServerGMPassword;
+  }
+
+  public static SecretKeySpec getPersonalServerGMKey() {
+    return personalServerGMKey;
+  }
+
+  public static String getPersonalServerPlayerPassword() {
+    return personalServerPlayerPassword;
+  }
+
+  public static SecretKeySpec getPersonalServerPlayerKey() {
+    return personalServerPlayerKey;
+  }
+
+
   public ServerConfig() {
-    /* no op */
+    playerPassword = getPersonalServerPlayerPassword();
+    playerPasswordKey = getPersonalServerPlayerKey();
+    gmPassword = getPersonalServerGMPassword();
+    gmPasswordKey = getPersonalServerGMKey();
   }
 
   public ServerConfig(
@@ -50,7 +99,6 @@ public class ServerConfig {
 
     this.playerPasswordKey = CipherUtil.getInstance().createSecretKeySpec(this.playerPassword);
     this.gmPasswordKey = CipherUtil.getInstance().createSecretKeySpec(this.gmPassword);
-
   }
 
   public String getHostPlayerId() {
@@ -95,6 +143,8 @@ public class ServerConfig {
   public SecretKeySpec getGMPasswordKey() {
     return gmPasswordKey;
   }
+
+
 
   private static Random r = new Random();
 

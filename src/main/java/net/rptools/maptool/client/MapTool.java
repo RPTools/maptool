@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import com.google.crypto.tink.aead.AeadConfig;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -42,7 +41,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -678,7 +676,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new LocalPlayer("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -1161,7 +1159,7 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
+        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
@@ -1757,7 +1755,6 @@ public class MapTool {
 
     // Draw frame contents on resize
     tk.setDynamicLayout(true);
-
 
     EventQueue.invokeLater(
         () -> {

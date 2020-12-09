@@ -16,15 +16,16 @@ package net.rptools.maptool.server;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.client.MapTool;
@@ -47,32 +48,8 @@ public class Handshake {
   private static String USERNAME_FIELD = "username:";
   private static String VERSION_FIELD = "version:";
 
-
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
-
-  /** The {@link Cipher} used for decoding using player password. */
-  private static Cipher playerCipher;
-  /** The {@link Cipher} used for decoding using gm password. */
-  private static Cipher gmCipher;
-
-
-  /**
-   * Set the encryption keys used for decrypting the handshake / login.
-   * @param playerKey The key used for decrypting using the player password.
-   * @param gmKey The key used for decrypting using the gm password.
-   * @throws NoSuchAlgorithmException If the encryption algorithm is not supported.
-   * @throws InvalidKeyException If the decryption key is invalid.
-   * @throws NoSuchPaddingException If the padding mechanism is not supported..
-   */
-  public static void setEncryptionKeys(SecretKeySpec playerKey, SecretKeySpec gmKey)
-      throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException {
-    playerCipher = CipherUtil.getInstance().createDecrypter(MapTool.getServer().getP)
-    gmCipher = Cipher.getInstance("AES");
-
-    playerCipher.init(Cipher.DECRYPT_MODE, MapTool.getServer().getConfig().getPlayerPasswordKey());
-    gmCipher.init(Cipher.DECRYPT_MODE, MapTool.getServer().getConfig().getGMPasswordKey());
-  }
 
   /**
    * Server side of the handshake
@@ -87,7 +64,7 @@ public class Handshake {
   public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException {
 
     Response response = new Response();
-    Request request = decodeRequest(s);
+    Request request = decodeRequest(s, server.getConfig().getPlayerPasswordKey(), server.getConfig().getGMPasswordKey());
     if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -109,15 +86,15 @@ public class Handshake {
       response.code = Code.OK;
     }
 
-
     HessianOutput output = new HessianOutput(s.getOutputStream());
+    output.getSerializerFactory().setAllowNonSerializable(true);
+
     response.policy = server.getPolicy();
     output.writeObject(response);
     return response.code == Code.OK
         ? new Player(request.name, Player.Role.valueOf(request.role), request.password)
         : null;
   }
-
 
   private static Request extractRequestDetails(byte[] bytes, Role role) {
     String[] lines = new String(bytes).split("\n");
@@ -141,19 +118,25 @@ public class Handshake {
 
   /**
    * Decrypts the handshake / login request.
+   *
    * @param socket The network socket for the connection.
+   * @param playerPasswordKey
+   * @param gmPasswordKey
    * @return The decrypted {@link Request}.
    */
-  private static Request decodeRequest(Socket socket) throws IOException {
+  private static Request decodeRequest(Socket socket, SecretKeySpec playerPasswordKey, SecretKeySpec gmPasswordKey) throws IOException {
     InputStream inputStream = socket.getInputStream();
-    String text = new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
+    DataInputStream dis = new DataInputStream(inputStream);
+    int numBytes = dis.readInt();
+    byte[] text = dis.readNBytes(numBytes);
     byte[] decrypted = null;
     Exception playerEx = null;
     Exception gmEx = null;
 
     // First try to decode with the player password
     try {
-      decrypted = playerCipher.doFinal(text.getBytes());
+      Cipher playerCipher = CipherUtil.getInstance().createDecrypter(playerPasswordKey);
+      decrypted = playerCipher.doFinal(text);
     } catch (Exception ex) {
       playerEx = ex;
       // Do nothing as we will report error later if GM password also fails
@@ -166,14 +149,14 @@ public class Handshake {
 
     if (request == null) {
       try {
-        decrypted = gmCipher.doFinal(text.getBytes());
-        request = extractRequestDetails(decrypted, Role.PLAYER);
+        Cipher gmCipher = CipherUtil.getInstance().createDecrypter(gmPasswordKey);
+        decrypted = gmCipher.doFinal(text);
+        request = extractRequestDetails(decrypted, Role.GM);
       } catch (Exception ex) {
         gmEx = ex;
         // Do nothing as weil will report error along with player password error.
       }
     }
-
 
     if (playerEx != null || gmEx != null) {
       log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
@@ -182,7 +165,6 @@ public class Handshake {
     }
 
     return request;
-
   }
 
   /**
@@ -194,21 +176,29 @@ public class Handshake {
    *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return the response from the srever
    */
-  public static Response sendHandshake(Request request, Socket s) throws IOException {
+  public static Response sendHandshake(Request request, Socket s)
+      throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
+          NoSuchAlgorithmException, NoSuchPaddingException {
     HessianInput input = new HessianInput(s.getInputStream());
     // HessianOutput output = new HessianOutput(s.getOutputStream());
     // Jamz: Method renamed in Hessian 4.0.+
     // output.findSerializerFactory().setAllowNonSerializable(true);
     // output.getSerializerFactory().setAllowNonSerializable(true);
-    //output.writeObject(request);
+    // output.writeObject(request);
 
     byte[] reqBytes = buildRequest(request);
-
+    OutputStream out;
+    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+    dos.writeInt(reqBytes.length);
+    dos.write(reqBytes);
+    dos.flush();
 
     return (Response) input.readObject();
   }
 
-  private static byte[] buildRequest(Request request) {
+  private static byte[] buildRequest(Request request)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          BadPaddingException, IllegalBlockSizeException {
     StringBuilder sb = new StringBuilder();
     sb.append(USERNAME_FIELD);
     sb.append(request.name);
@@ -217,12 +207,8 @@ public class Handshake {
     sb.append(request.version);
     sb.append("\n");
 
-    Cipher cipher = Cipher.getInstance("AES");
-
-    SecretKeySpec passordKey = new SecretKeySpec(request.password.getBytes(), "AES");
-
-    cipher.init(Cipher.DECRYPT_MODE, MapTool.getServer().getConfig().getPlayerPasswordKey());
-    return sb.toString().getBytes();
+    Cipher cipher = CipherUtil.getInstance().createEncrypter(request.password);
+    return cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
   }
 
   public static class Request {
