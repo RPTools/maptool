@@ -29,29 +29,32 @@ public class ServerConfig {
   private static final String personalServerGMPassword;
   private static final SecretKeySpec personalServerGMKey;
 
-
-
   private static final String personalServerPlayerPassword;
   private static final SecretKeySpec personalServerPlayerKey;
 
   static {
-      Random random = new Random();
-      // Generate a random password for personal server
-      personalServerGMPassword = random.ints('a', 'z' + 1)
+    Random random = new Random();
+    // Generate a random password for personal server
+    personalServerGMPassword =
+        random
+            .ints('a', 'z' + 1)
             .limit(100)
             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
             .toString();
-      personalServerGMKey = CipherUtil.getInstance().createSecretKeySpec(personalServerGMPassword);
-      String playerPass = random.ints('a', 'z' + 1)
+    personalServerGMKey = CipherUtil.getInstance().createSecretKeySpec(personalServerGMPassword);
+    String playerPass =
+        random
+            .ints('a', 'z' + 1)
             .limit(100)
             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
             .toString();
-      if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
-        personalServerPlayerPassword = playerPass + "1";
-      } else {
-        personalServerPlayerPassword = playerPass;
-      }
-      personalServerPlayerKey = CipherUtil.getInstance().createSecretKeySpec(personalServerPlayerPassword);
+    if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
+      personalServerPlayerPassword = playerPass + "1";
+    } else {
+      personalServerPlayerPassword = playerPass;
+    }
+    personalServerPlayerKey =
+        CipherUtil.getInstance().createSecretKeySpec(personalServerPlayerPassword);
   }
 
   private int port;
@@ -62,8 +65,6 @@ public class ServerConfig {
   private String serverName;
   private SecretKeySpec playerPasswordKey;
   private SecretKeySpec gmPasswordKey;
-
-
 
   public static String getPersonalServerGMPassword() {
     return personalServerGMPassword;
@@ -80,7 +81,6 @@ public class ServerConfig {
   public static SecretKeySpec getPersonalServerPlayerKey() {
     return personalServerPlayerKey;
   }
-
 
   public ServerConfig() {
     playerPassword = getPersonalServerPlayerPassword();
@@ -143,8 +143,6 @@ public class ServerConfig {
   public SecretKeySpec getGMPasswordKey() {
     return gmPasswordKey;
   }
-
-
 
   private static Random r = new Random();
 

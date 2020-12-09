@@ -1159,7 +1159,9 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
+        "localhost",
+        config.getPort(),
+        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);

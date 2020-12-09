@@ -16,13 +16,11 @@ package net.rptools.maptool.server;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.stream.Collectors;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -64,7 +62,9 @@ public class Handshake {
   public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException {
 
     Response response = new Response();
-    Request request = decodeRequest(s, server.getConfig().getPlayerPasswordKey(), server.getConfig().getGMPasswordKey());
+    Request request =
+        decodeRequest(
+            s, server.getConfig().getPlayerPasswordKey(), server.getConfig().getGMPasswordKey());
     if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -124,7 +124,9 @@ public class Handshake {
    * @param gmPasswordKey
    * @return The decrypted {@link Request}.
    */
-  private static Request decodeRequest(Socket socket, SecretKeySpec playerPasswordKey, SecretKeySpec gmPasswordKey) throws IOException {
+  private static Request decodeRequest(
+      Socket socket, SecretKeySpec playerPasswordKey, SecretKeySpec gmPasswordKey)
+      throws IOException {
     InputStream inputStream = socket.getInputStream();
     DataInputStream dis = new DataInputStream(inputStream);
     int numBytes = dis.readInt();
