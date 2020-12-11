@@ -59,7 +59,8 @@ public class ImageLoaderCache {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          MapTool.showWarning("Can't find 'cp://" + url.toString() + "' in image cache?!", ioe);
+          log.error("ImageLoaderCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
         // Look for size request

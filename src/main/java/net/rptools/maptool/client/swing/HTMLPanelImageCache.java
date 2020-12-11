@@ -66,7 +66,8 @@ public class HTMLPanelImageCache extends Dictionary<URL, Image> {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          MapTool.showWarning("Can't find 'cp://" + key.toString() + "' in image cache?!", ioe);
+          log.error("HTMLPanelImageCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
         // Look for size request
