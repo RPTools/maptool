@@ -20,6 +20,7 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 @MacroDefinition(
     name = "emit",
@@ -35,8 +36,8 @@ public class EmitMacro extends AbstractMacro {
               "<b>" + I18N.getText("slash.mustBeGM", "emit") + "</b>"));
       return;
     }
-    StringBuilder sb = new StringBuilder();
-    sb.append("<i><b>").append(macro).append("</b></i>");
-    MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
+
+    MapTool.addMessage(
+        TextMessage.say(context.getTransformationHistory(), MessageUtil.getFormattedEmit(macro)));
   }
 }

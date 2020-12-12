@@ -18,7 +18,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -26,13 +25,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -44,6 +40,7 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -542,28 +539,28 @@ public class MacroLinkFunction extends AbstractFunction {
 
     switch (outputTo) {
       case SELF:
-        MapTool.addLocalMessage(line);
+        MapTool.addLocalMessage(MessageUtil.getFormattedSelf(line));
         break;
       case SELF_AND_GM:
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.ME,
-                null,
-                MapTool.getPlayer().getName(),
-                I18N.getText("togm.self", line),
-                null));
+        MapTool.addLocalMessage(MessageUtil.getFormattedToGmSender(line));
         // Intentionally falls through
       case GM:
         MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.GM,
+            TextMessage.gm(
                 null,
-                MapTool.getPlayer().getName(),
-                I18N.getText("togm.saysToGM", MapTool.getPlayer().getName()) + " " + line,
-                null));
+                MessageUtil.getFormattedToGmRecipient(
+                    line,
+                    MapTool.getPlayer().getName(),
+                    MapTool.getParser().isMacroPathTrusted(),
+                    macroName,
+                    null)));
         break;
       case ALL:
-        doSay(line, token, false, "");
+        MapTool.addMessage(
+            TextMessage.say(
+                null,
+                MessageUtil.getFormattedSay(
+                    line, token, MapTool.getParser().isMacroPathTrusted(), macroName, null)));
         break;
       case LIST:
         StringBuilder sb = new StringBuilder();
@@ -574,15 +571,7 @@ public class MacroLinkFunction extends AbstractFunction {
           }
           sb.append(name);
         }
-        MapTool.addMessage(
-            new TextMessage(
-                TextMessage.Channel.ME,
-                null,
-                MapTool.getPlayer().getName(),
-                "<span class='whisper' style='color:blue'>"
-                    + I18N.getText("whisper.you.string", sb.toString(), line)
-                    + "</span>",
-                null));
+        MapTool.addLocalMessage(MessageUtil.getFormattedWhisperSender(line, sb.toString()));
 
         break;
       case NONE:
@@ -604,13 +593,8 @@ public class MacroLinkFunction extends AbstractFunction {
 
     // Validate
     if (!MapTool.isPlayerConnected(playerName)) {
-      MapTool.addMessage(
-          new TextMessage(
-              TextMessage.Channel.ME,
-              null,
-              MapTool.getPlayer().getName(),
-              I18N.getText("msg.error.playerNotConnected", playerName),
-              null));
+      MapTool.addLocalMessage(I18N.getText("msg.error.playerNotConnected", playerName));
+      return;
     }
     if (MapTool.getPlayer().getName().equalsIgnoreCase(playerName)) {
       return;
@@ -618,16 +602,11 @@ public class MacroLinkFunction extends AbstractFunction {
 
     // Send
     MapTool.addMessage(
-        new TextMessage(
-            TextMessage.Channel.WHISPER,
+        TextMessage.whisper(
+            null,
             playerName,
-            MapTool.getPlayer().getName(),
-            "<span class='whisper' style='color:blue'>"
-                + "<span class='whisper' style='color:blue'>"
-                + I18N.getText(
-                    "whisper.string", MapTool.getFrame().getCommandPanel().getIdentity(), message)
-                + "</span>",
-            null));
+            MessageUtil.getFormattedWhisperRecipient(
+                message, MapTool.getFrame().getCommandPanel().getIdentity())));
   }
 
   private static String getSelf() {
@@ -700,60 +679,5 @@ public class MacroLinkFunction extends AbstractFunction {
       }
     }
     return false;
-  }
-
-  private static void doSay(String msg, Token token, boolean trusted, String macroName) {
-    StringBuilder sb = new StringBuilder();
-
-    String identity = token == null ? MapTool.getPlayer().getName() : token.getName();
-
-    sb.append("<table cellpadding=0><tr>");
-
-    if (token != null && AppPreferences.getShowAvatarInChat()) {
-      if (token != null) {
-        MD5Key imageId = token.getPortraitImage();
-        if (imageId == null) {
-          imageId = token.getImageAssetId();
-        }
-        sb.append("<td valign=top width=40 style=\"padding-right:5px\"><img src=\"asset://")
-            .append(imageId)
-            .append("-40\" ></td>");
-      }
-    } else {
-      sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
-    }
-
-    sb.append(
-        "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
-    if (trusted && !MapTool.getPlayer().isGM()) {
-      sb.append("<span style='background-color: #C9F7AD' ")
-          .append("title='")
-          .append(macroName)
-          .append("'>");
-    }
-    sb.append("<b>").append(identity).append(":</b> ");
-    if (trusted && !MapTool.getPlayer().isGM()) {
-      sb.append("</span>");
-    }
-
-    Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
-    if (color != null) {
-      sb.append("<span style='color:#")
-          .append(String.format("%06X", (color.getRGB() & 0xFFFFFF)))
-          .append("'>");
-    }
-    sb.append(msg);
-    if (color != null) {
-      sb.append("</span>");
-
-      sb.append("</td>");
-
-      sb.append("</tr></table>");
-
-      MacroContext context = new MacroContext();
-      context.addTransform(msg);
-
-      MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
-    }
   }
 }
