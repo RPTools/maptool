@@ -76,6 +76,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
+import net.rptools.maptool.util.MessageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -297,9 +298,8 @@ public class ToolbarPanel extends JToolBar {
               boolean tokensSelected = !zr.getSelectedTokenSet().isEmpty();
               if (tokensSelected && !c.hasUsedFogToolbar() && !MapTool.isHostingServer()) {
                 MapTool.addLocalMessage(
-                    "<span class='whisper' style='color: blue'>"
-                        + I18N.getText("ToolbarPanel.manualFogActivated")
-                        + "</span>");
+                    MessageUtil.getFormattedSystemMsg(
+                        I18N.getText("ToolbarPanel.manualFogActivated")));
                 MapTool.showWarning("ToolbarPanel.manualFogActivated");
               }
             }

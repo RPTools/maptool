@@ -87,6 +87,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
@@ -766,7 +767,7 @@ public class MapTool {
       if (!player.equals(MapTool.getPlayer())) {
         String msg =
             MessageFormat.format(I18N.getText("msg.info.playerConnected"), player.getName());
-        addLocalMessage("<span style='color:#0000ff'><i>" + msg + "</i></span>");
+        addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
       }
     }
   }
@@ -789,7 +790,7 @@ public class MapTool {
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
           MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
-      addLocalMessage("<span style='color:#0000ff'><i>" + msg + "</i></span>");
+      addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
     }
   }
 
@@ -1244,8 +1245,7 @@ public class MapTool {
         .setStatus(ConnectionStatusPanel.Status.disconnected);
 
     if (!isPersonalServer) {
-      addLocalMessage(
-          "<span style='color:blue'><i>" + I18N.getText("msg.info.disconnected") + "</i></span>");
+      addLocalMessage(MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.disconnected")));
     }
   }
 
