@@ -19,6 +19,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 @MacroDefinition(
     name = "self",
@@ -27,8 +28,8 @@ import net.rptools.maptool.model.TextMessage;
 public class SelfMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);
-    StringBuilder sb = new StringBuilder();
-    sb.append("<i>").append(macro).append("</i>");
-    MapTool.addMessage(TextMessage.me(context.getTransformationHistory(), sb.toString()));
+
+    MapTool.addMessage(
+        TextMessage.me(context.getTransformationHistory(), MessageUtil.getFormattedSelf(macro)));
   }
 }

@@ -115,6 +115,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
@@ -2223,9 +2224,7 @@ public class AppActions {
                       .getConnectionStatusPanel()
                       .setStatus(ConnectionStatusPanel.Status.server);
                   MapTool.addLocalMessage(
-                      "<span style='color:blue'><i>"
-                          + I18N.getText("msg.info.startServer")
-                          + "</i></span>");
+                      MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;
