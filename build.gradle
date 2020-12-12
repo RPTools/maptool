@@ -182,7 +182,7 @@ runtime {
                     '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x86-32_windows_hotspot_14.0.2_12.zip');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_windows_hotspot_14.0.2_12.zip');
             }
         }
 
