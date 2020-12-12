@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.0.1"
     id "com.diffplug.gradle.spotless" version "3.28.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.8.3'
+    id 'org.beryx.runtime' version '1.11.4'
 }
 
 // Apply the java plugin to add support for Java
@@ -112,6 +112,7 @@ run {
     args = ['-v=' + appSemVer]
     applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
+    // Add  -Djavax.net.debug=all to debug networking issues
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -121,6 +122,34 @@ run {
 // Badass Runtime Plugin Options
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
+    modules = ['java.base',
+               'java.compiler',
+               'java.datatransfer',
+               'java.desktop',
+               'java.instrument',
+               'java.logging',
+               'java.management',
+               'java.naming',
+               'java.net.http',
+               'java.prefs',
+               'java.rmi',
+               'java.scripting',
+               'java.security.sasl',
+               'java.sql',
+               'java.transaction.xa',
+               'java.xml',
+               'jdk.dynalink',
+               'jdk.jfr',
+               'jdk.jsobject',
+               'jdk.scripting.nashorn',
+               'jdk.unsupported',
+               'jdk.unsupported.desktop',
+               'jdk.xml.dom',
+               'jdk.crypto.cryptoki',
+               'jdk.crypto.ec'
+            ]
+
+
 
     jpackage {
         installerOutputDir = file("releases")
@@ -152,6 +181,9 @@ runtime {
                     '--win-menu-group', vendor,
                     '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
             ]
+            targetPlatform('win') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x86-32_windows_hotspot_14.0.2_12.zip');
+            }
         }
 
         if (osdetector.os.is('osx')) {
@@ -160,13 +192,17 @@ runtime {
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
             ]
+            targetPlatform('mac') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_mac_hotspot_14.0.2_12.tar.gz');
+            }
         }
 
-        if (osdetector.os.is('unix')) {
+        if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
-            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
+            resourceDir = file('package/linux')
+            imageOptions += ['--icon', project.name + developerRelease + '.png']
             installerOptions += [
-                    '--linux-menu-group', vendor,
+                    '--linux-menu-group', 'Game',
                     '--linux-shortcut'
             ]
 
@@ -181,6 +217,9 @@ runtime {
                         '--linux-rpm-license-type', 'AGPLv3'
                 ]
             }
+            targetPlatform('linux') {
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz');
+            }
         }
     }
 }
@@ -192,7 +231,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-    maven { url = 'http://www.nerps.net/repo/' }
+    maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
 
@@ -279,6 +318,10 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.4.3'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.4.3'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.4.3'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.4.3'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.4.3'
+
+    implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea

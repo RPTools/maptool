@@ -710,28 +710,31 @@ public class MacroLinkFunction extends AbstractFunction {
     sb.append("<table cellpadding=0><tr>");
 
     if (token != null && AppPreferences.getShowAvatarInChat()) {
-      MD5Key imageId = token.getPortraitImage();
-      if (imageId == null) {
-        imageId = token.getImageAssetId();
+      if (token != null) {
+        MD5Key imageId = token.getPortraitImage();
+        if (imageId == null) {
+          imageId = token.getImageAssetId();
+        }
+        sb.append("<td valign=top width=40 style=\"padding-right:5px\"><img src=\"asset://")
+            .append(imageId)
+            .append("-40\" ></td>");
       }
-      sb.append("<td valign=top width=40 style=\"padding-right:5px\"><img src=\"asset://")
-          .append(imageId)
-          .append("-40\" ></td>");
+    } else {
+      sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
     }
 
-    sb.append("<td valign=top style=\"margin-right: 5px\">");
+    sb.append(
+        "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
     if (trusted && !MapTool.getPlayer().isGM()) {
       sb.append("<span style='background-color: #C9F7AD' ")
           .append("title='")
           .append(macroName)
           .append("'>");
     }
-    sb.append(identity).append(": ");
+    sb.append("<b>").append(identity).append(":</b> ");
     if (trusted && !MapTool.getPlayer().isGM()) {
       sb.append("</span>");
     }
-
-    sb.append("</td><td valign=top>");
 
     Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
     if (color != null) {

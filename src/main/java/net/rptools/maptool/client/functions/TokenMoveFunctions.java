@@ -170,7 +170,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       if ((parameters.size() == 1) || parameters.size() == 2) {
         String targetToken = (String) parameters.get(0);
-        String jsonPath = (String) (parameters.size() == 2 ? parameters.get(1) : "");
+        String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
         target = zone.resolveToken(targetToken);
         if (target == null) {
           throw new ParserException(
@@ -419,40 +419,38 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   /**
-   * Handle the {@value #ON_TOKEN_MOVE_COMPLETE_CALLBACK} macro event, and determine whether the
-   * movement was denied. Passes path information to the handler, and checks the value of {@value
-   * #ON_TOKEN_MOVE_DENY_VARIABLE} for a veto.
+   * Handles the {@value #ON_TOKEN_MOVE_COMPLETE_CALLBACK} macro event for each individual token,
+   * and returns a list of the tokens for which the movement was denied. Passes path information to
+   * the handler, and checks the value of {@value #ON_TOKEN_MOVE_DENY_VARIABLE} for a veto.
    *
    * <p>Note: To maintain backward-compatibility this event only fires a single handler. If more
    * than one Lib:Token has a matching macro, the first one encountered is called - because this
    * order is unpredictable, this is very much not encouraged.
    *
-   * @param originalToken the primary token being moved
-   * @param path the path taken
-   * @param filteredTokens all tokens being moved
-   * @return true if the move has been vetoed, false otherwise
+   * @param path the path token
+   * @param filteredTokens the tokens being moved (each one will be evaluated individually)
+   * @return the list of tokens from the given list that have their movement rejected
    */
-  public static boolean callForTokenMoveVeto(
-      final Token originalToken, final Path<?> path, final List<GUID> filteredTokens) {
-    Token token = EventMacroUtil.getEventMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
-
-    List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
-    JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
-    String pathCoordinates = pathArr.toString();
-
-    boolean moveDenied = false;
-    if (token != null) {
+  public static List<Token> callForIndividualTokenMoveVetoes(
+      final Path<?> path, final List<Token> filteredTokens) {
+    Token libToken = EventMacroUtil.getEventMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
+    List<Token> deniedTokens = new ArrayList<>();
+    if (libToken != null) {
+      final String macroTarget = ON_TOKEN_MOVE_COMPLETE_CALLBACK + "@" + libToken.getName();
+      List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
+      JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
+      String pathCoordinates = pathArr.toString();
       Map<String, Object> varsToSet = new HashMap<>();
       varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
-      moveDenied =
-          EventMacroUtil.pollEventHandlerForVeto(
-              ON_TOKEN_MOVE_COMPLETE_CALLBACK + "@" + token.getName(),
-              pathCoordinates,
-              originalToken,
-              ON_TOKEN_MOVE_DENY_VARIABLE,
-              varsToSet);
+
+      for (Token token : filteredTokens) {
+        boolean moveDenied =
+            EventMacroUtil.pollEventHandlerForVeto(
+                macroTarget, pathCoordinates, token, ON_TOKEN_MOVE_DENY_VARIABLE, varsToSet);
+        if (moveDenied) deniedTokens.add(token);
+      }
     }
-    return moveDenied;
+    return deniedTokens;
   }
 
   private String getMovement(

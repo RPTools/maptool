@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.TooManyListenersException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -591,13 +592,14 @@ public class ZoneRenderer extends JComponent
 
       moveTimer.start("onTokenMove");
       if (!filteredTokens.isEmpty()) {
-        // give onTokenMove a chance to reject each token's movement
-        for (GUID tokenGUID : filteredTokens) {
-          Token token = zone.getToken(tokenGUID);
-          boolean moveDenied = TokenMoveFunctions.callForTokenMoveVeto(token, path, filteredTokens);
-          if (moveDenied) {
-            denyMovement(token);
-          }
+        // give onTokenMove a chance to reject each token's movement.
+        // pass in all the tokens at once so it doesn't have to re-scan for handlers for each token
+        List<Token> tokensToCheck =
+            filteredTokens.stream().map(zone::getToken).collect(Collectors.toList());
+        List<Token> tokensDenied =
+            TokenMoveFunctions.callForIndividualTokenMoveVetoes(path, tokensToCheck);
+        for (Token token : tokensDenied) {
+          denyMovement(token);
         }
       }
       moveTimer.stop("onTokenMove");
@@ -3735,10 +3737,24 @@ public class ZoneRenderer extends JComponent
     visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
   }
 
+  /**
+   * Returns whether the token should be clipped, depending on its bounds, the view, and the visible
+   * screen area.
+   *
+   * @param token the token that could be clipped
+   * @param tokenCellArea the cell area corresponding to the bounds of the token
+   * @param isGMView whether it is the view of a GM
+   * @return true if the token is need of clipping, false otherwise
+   */
   private boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
 
     // can view everything or zone is not using vision = no clipping needed
     if (isGMView || !zoneView.isUsingVision()) return false;
+
+    // no clipping if there is no visible screen area
+    if (visibleScreenArea == null) {
+      return false;
+    }
 
     // If the token is a figure and its center is visible then no clipping
     if (token.getShape() == Token.TokenShape.FIGURE
