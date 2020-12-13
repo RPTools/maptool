@@ -31,6 +31,6 @@ public class EmotePluralMacro extends AbstractMacro {
 
     MapTool.addMessage(
         TextMessage.say(
-            context.getTransformationHistory(), MessageUtil.getFormattedEmote(macro, true)));
+            context.getTransformationHistory(), MessageUtil.getFormattedEmotePlural(macro, null)));
   }
 }
