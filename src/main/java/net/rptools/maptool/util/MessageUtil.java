@@ -24,10 +24,10 @@ import net.rptools.maptool.model.Token;
 
 public class MessageUtil {
   static final String CSS_EMIT = ".emit { font-weight: bold; font-style: italic }";
-  static final String CSS_SAY_TD = ".say td { padding: 0px }";
-  static final String CSS_SAY_AVATAR = ".say .avatar { width: 40px; text-align: center }";
-  static final String CSS_SAY_MESSAGE =
-      ".say .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
+  static final String CSS_AVASMG_TD = ".ava-msg td { padding: 0px }";
+  static final String CSS_AVAMSG_AVATAR = ".ava-msg .avatar { width: 40px; text-align: center }";
+  static final String CSS_AVAMSG_MESSAGE =
+      ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
   static final String CSS_SAY_PREFIX = ".say .prefix, .say .trustedPrefix { font-weight: bold }";
   static final String CSS_SELF = ".self { font-style: italic }";
   static final String CSS_SYSTEM = ".system { color: blue; font-style: italic }";
@@ -35,9 +35,9 @@ public class MessageUtil {
 
   public static String getMessageCss() {
     return CSS_EMIT
-        + CSS_SAY_TD
-        + CSS_SAY_AVATAR
-        + CSS_SAY_MESSAGE
+        + CSS_AVASMG_TD
+        + CSS_AVAMSG_AVATAR
+        + CSS_AVAMSG_MESSAGE
         + CSS_SAY_PREFIX
         + CSS_SELF
         + CSS_SYSTEM
@@ -48,77 +48,37 @@ public class MessageUtil {
     return "<div class='emit'>" + msg + "</div>";
   }
 
-  public static String getFormattedEmote(String msg, boolean isEmotes) {
-    StringBuilder sb = new StringBuilder();
+  public static String getFormattedEmote(String msg, Token token) {
+    String identity =
+        token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+    msg = applyChatColor(identity + " " + msg);
 
-    sb.append("* ");
-    sb.append("<font color='green'>");
-    sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
-    if (!isEmotes) sb.append(" ");
-    else sb.append("'s ");
+    return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
+  }
 
-    sb.append(msg).append("</font>");
+  public static String getFormattedEmotePlural(String msg, Token token) {
+    String identity =
+        token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+    msg = applyChatColor(identity + "'s " + msg);
 
-    return sb.toString();
+    return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
   }
 
   public static String getFormattedSay(
       String msg, Token token, boolean isTrusted, String macroName, String macroSource) {
-    StringBuilder sb = new StringBuilder();
     String identity =
         token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
+    msg = getPrefix(identity + ":", isTrusted, macroName, macroSource) + " " + applyChatColor(msg);
 
-    sb.append("<table class='say'><tr valign='top'>");
-
-    if (AppPreferences.getShowAvatarInChat()) {
-      if (token == null && MapTool.getFrame().getCommandPanel().isImpersonating()) {
-        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-        else token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokenByName(identity);
-      }
-      sb.append("<td class='avatar'>");
-      if (token != null) {
-        MD5Key imageId = token.getPortraitImage();
-        if (imageId == null) {
-          imageId = token.getImageAssetId();
-        }
-        sb.append("<img src=\"asset://").append(imageId).append("-40\" >");
-      }
-      sb.append("</td>");
-    }
-
-    sb.append("<td class='message'>")
-        .append(getPrefix(identity + ":", isTrusted, macroName, macroSource));
-
-    Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
-    if (color != null) {
-      sb.append(String.format("<font color='#%06X'>%s</font>", (color.getRGB() & 0xFFFFFF), msg));
-    } else {
-      sb.append(msg);
-    }
-
-    sb.append("</td></tr></table>");
-
-    return sb.toString();
+    return "<div class='say'>" + getAvatarMessage(msg, token, identity) + "</div>";
   }
 
   public static String getFormattedOoc(String msg) {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
-    sb.append(": ");
-
-    Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
-    if (color != null) {
-      sb.append(String.format("<font color='#%06X'>", (color.getRGB() & 0xFFFFFF)));
-    }
-    sb.append("(( ").append(msg).append(" ))");
-    if (color != null) {
-      sb.append("</font>");
-    }
-
-    return sb.toString();
+    return "<div class='ooc'>"
+        + MapTool.getFrame().getCommandPanel().getIdentity()
+        + ": "
+        + applyChatColor("(( " + msg + " ))")
+        + "</div>";
   }
 
   public static String getFormattedSelf(String msg) {
@@ -150,6 +110,34 @@ public class MessageUtil {
     return "<div class='whisper'>" + I18N.getText("whisper.you.string", recipients, msg) + "</div>";
   }
 
+  private static String getAvatarMessage(String msg, Token token, String identity) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("<table class='ava-msg'><tr valign='top'>");
+
+    if (AppPreferences.getShowAvatarInChat()) {
+      if (token == null && MapTool.getFrame().getCommandPanel().isImpersonating()) {
+        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
+        if (guid != null)
+          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        else token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokenByName(identity);
+      }
+      sb.append("<td class='avatar'>");
+      if (token != null) {
+        MD5Key imageId = token.getPortraitImage();
+        if (imageId == null) {
+          imageId = token.getImageAssetId();
+        }
+        sb.append("<img src=\"asset://").append(imageId).append("-40\" >");
+      }
+      sb.append("</td>");
+    }
+
+    sb.append("<td class='message'>").append(msg).append("</td></tr></table>");
+
+    return sb.toString();
+  }
+
   private static String getPrefix(
       String prefixStr, boolean isTrusted, String macroName, String macroSource) {
     StringBuilder sb = new StringBuilder();
@@ -164,8 +152,16 @@ public class MessageUtil {
       sb.append("<span class='prefix'>");
     }
 
-    sb.append(prefixStr).append("</span> ");
+    sb.append(prefixStr).append("</span>");
 
     return sb.toString();
+  }
+
+  private static String applyChatColor(String str) {
+    Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
+    if (color == null) {
+      return str;
+    }
+    return String.format("<font color='#%06X'>%s</font>", (color.getRGB() & 0xFFFFFF), str);
   }
 }
