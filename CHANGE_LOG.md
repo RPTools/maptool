@@ -23,6 +23,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#2314][i2314] Output formatting refactored to use CSS classes and moved to a new MessageUtil class.  
 - [#2283][i2283] Basic support for SVG images added.
 - [#2271][i2271] Improved readability for output of chat commands /emote & /say to bring them inline with normal macro output. 
+- [#2256][i2256] Support for `data:` URIs in HTML5 windows (overlay, dialog5, html5).
 - [#2237][i2237] MapTool Builds now include package for ArchLinux.
 - [#2230][i2230] `getInfo("client")` function now includes details about Dialogs, Frames and Overlays.
 - [#2229][i2229] New `delim` parameter for `herolab.XPath()` function allows for returning a string list or JSON Array to address issues with content having commas in it.
@@ -152,6 +153,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 [i2279]: https://github.com/RPTools/maptool/issues/2279
 [i2271]: https://github.com/RPTools/maptool/issues/2271
 [i2270]: https://github.com/RPTools/maptool/issues/2270
+[i2256]: https://github.com/RPTools/maptool/issues/2256
 [i2244]: https://github.com/RPTools/maptool/issues/2244
 [i2242]: https://github.com/RPTools/maptool/issues/2242
 [i2237]: https://github.com/RPTools/maptool/issues/2237
