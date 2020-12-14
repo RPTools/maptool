@@ -146,14 +146,12 @@ public class MessagePanel extends JPanel {
   }
 
   public void setTrustedMacroPrefixColors(Color foreground, Color background) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("span.trustedPrefix {background: #")
-        .append(String.format("%06X", (background.getRGB() & 0xFFFFFF)));
-    sb.append("; color: #")
-        .append(String.format("%06X", (foreground.getRGB() & 0xFFFFFF)))
-        .append("}");
     StyleSheet style = document.getStyleSheet();
-    style.addRule(sb.toString());
+    String css =
+        String.format(
+            ".trusted-prefix { color: #%06X; background: #%06X }",
+            (foreground.getRGB() & 0xFFFFFF), (background.getRGB() & 0xFFFFFF));
+    style.addRule(css);
     repaint();
   }
 

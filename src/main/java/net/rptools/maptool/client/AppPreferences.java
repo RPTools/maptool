@@ -498,8 +498,8 @@ public class AppPreferences {
 
   public static void setTrustedPrefixBG(Color color) {
     prefs.putInt(KEY_TRUSTED_PREFIX_BG_RED, color.getRed());
-    prefs.putInt(KEY_TRUSTED_PREFIX_BG_RED, color.getRed());
-    prefs.putInt(KEY_TRUSTED_PREFIX_BG_RED, color.getRed());
+    prefs.putInt(KEY_TRUSTED_PREFIX_BG_GREEN, color.getGreen());
+    prefs.putInt(KEY_TRUSTED_PREFIX_BG_BLUE, color.getBlue());
   }
 
   public static Color getTrustedPrefixBG() {
@@ -511,8 +511,8 @@ public class AppPreferences {
 
   public static void setTrustedPrefixFG(Color color) {
     prefs.putInt(KEY_TRUSTED_PREFIX_FG_RED, color.getRed());
-    prefs.putInt(KEY_TRUSTED_PREFIX_FG_RED, color.getRed());
-    prefs.putInt(KEY_TRUSTED_PREFIX_FG_RED, color.getRed());
+    prefs.putInt(KEY_TRUSTED_PREFIX_FG_GREEN, color.getGreen());
+    prefs.putInt(KEY_TRUSTED_PREFIX_FG_BLUE, color.getBlue());
   }
 
   public static Color getTrustedPrefixFG() {
