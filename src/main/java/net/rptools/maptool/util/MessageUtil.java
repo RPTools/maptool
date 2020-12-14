@@ -28,6 +28,7 @@ public class MessageUtil {
   static final String CSS_AVAMSG_AVATAR = ".ava-msg .avatar { width: 40px; text-align: center }";
   static final String CSS_AVAMSG_MESSAGE =
       ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
+  static final String CSS_EMOTE_MESSAGE = ".emote .message { border-left-color: #7AC07A }";
   static final String CSS_SAY_PREFIX = ".say .prefix, .say .trustedPrefix { font-weight: bold }";
   static final String CSS_SELF = ".self { font-style: italic }";
   static final String CSS_SYSTEM = ".system { color: blue; font-style: italic }";
@@ -38,6 +39,7 @@ public class MessageUtil {
         + CSS_AVASMG_TD
         + CSS_AVAMSG_AVATAR
         + CSS_AVAMSG_MESSAGE
+        + CSS_EMOTE_MESSAGE
         + CSS_SAY_PREFIX
         + CSS_SELF
         + CSS_SYSTEM
