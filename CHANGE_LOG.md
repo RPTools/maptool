@@ -49,6 +49,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
 
 ## Bug Fixes
+- [#2343][i2343] Trusted Prefix preference colors weren't being correctly saved nor used in chat output. Fixed.  
 - [#2335][i2335] Using `cp:` protocol with invalid resource could freeze client. Fixed.  
 - [#2321][i2321] With Individual Views option OFF, players could not see owned NPC tokens. Fixed.
 - [#2313][i2313] Switching to Player View with an Object flagged as VoFoW could cause an NPE. Fixed by fix for [#2242][i2242]  
@@ -142,6 +143,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2343]: https://github.com/RPTools/maptool/issues/2343
 [i2335]: https://github.com/RPTools/maptool/issues/2335
 [i2321]: https://github.com/RPTools/maptool/issues/2321
 [i2314]: https://github.com/RPTools/maptool/issues/2314
