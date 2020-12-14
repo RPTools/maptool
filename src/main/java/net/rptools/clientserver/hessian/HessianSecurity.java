@@ -33,6 +33,7 @@ public class HessianSecurity {
         allow.add("net.rptools.lib.MD5Key");
 
         Set<String> deny = new HashSet<>();
+        deny.add("*");
 
         allowed = Collections.unmodifiableSet(allow);
 
