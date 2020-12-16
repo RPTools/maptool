@@ -20,6 +20,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 
 
 ## Enhancements
+- [#2345][i2345] `/ooc` chat command now displays Player name instead of current impersonation.  
 - [#2314][i2314] Output formatting refactored to use CSS classes and moved to a new MessageUtil class.  
 - [#2283][i2283] Basic support for SVG images added.
 - [#2271][i2271] Improved readability for output of chat commands /emote & /say to bring them inline with normal macro output. 
@@ -143,6 +144,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2345]: https://github.com/RPTools/maptool/issues/2345
 [i2343]: https://github.com/RPTools/maptool/issues/2343
 [i2335]: https://github.com/RPTools/maptool/issues/2335
 [i2321]: https://github.com/RPTools/maptool/issues/2321
