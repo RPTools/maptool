@@ -77,7 +77,7 @@ public class MessageUtil {
 
   public static String getFormattedOoc(String msg) {
     return "<div class='ooc'>"
-        + MapTool.getFrame().getCommandPanel().getIdentity()
+        + MapTool.getPlayer().getName()
         + ": "
         + applyChatColor("(( " + msg + " ))")
         + "</div>";
