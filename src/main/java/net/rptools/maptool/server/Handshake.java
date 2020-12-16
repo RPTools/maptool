@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -33,6 +34,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -88,15 +90,65 @@ public class Handshake {
       response.code = Code.OK;
     }
 
-    HessianOutput output = new HessianOutput(s.getOutputStream());
-    output.getSerializerFactory().setAllowNonSerializable(true);
+    Player player = null;
+    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+    dos.writeInt(response.code);
+    if (response.code == Code.OK) {
+        player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
+        HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
+        SecretKeySpec passwordKey = player.isGM() ? MapTool.getServer().getConfig().getGMPasswordKey() : MapTool.getServer().getConfig().getPlayerPasswordKey();
+        byte[] challenge = encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
+        dos.writeInt(challenge.length);
+        dos.write(challenge);
+        dos.flush();
 
-    response.policy = server.getPolicy();
-    output.writeObject(response);
-    return response.code == Code.OK
-        ? new Player(request.name, Player.Role.valueOf(request.role), request.password)
-        : null;
+        // Now read the response
+        DataInputStream dis = new DataInputStream(s.getInputStream());
+        int len = dis.readInt();
+        byte[] bytes = dis.readNBytes(len);
+        byte[] responseBytes = decode(bytes, passwordKey);
+        String challengeResponse = new String(responseBytes);
 
+        if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
+          response.policy = server.getPolicy();
+        } else {
+          response.message = I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
+          response.code = Code.ERROR;
+          player = null;
+        }
+
+        HessianOutput output = new HessianOutput(s.getOutputStream());
+        output.getSerializerFactory().setAllowNonSerializable(true);
+        output.writeObject(response);
+
+    }
+    return player;
+  }
+
+  private static byte[] decode(byte[] bytes, String password) {
+    return decode(bytes, CipherUtil.getInstance().createSecretKeySpec(password));
+  }
+
+  private static byte[] decode(byte[] bytes, SecretKeySpec passwordKey) {
+    try {
+      Cipher cipher = CipherUtil.getInstance().createDecrypter(passwordKey);
+      return cipher.doFinal(bytes);
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  private static byte[] encode(byte[] bytes, String password) {
+    return encode(bytes, CipherUtil.getInstance().createSecretKeySpec(password));
+  }
+
+  private static byte[] encode(byte[] bytes, SecretKeySpec passwordKey) {
+    try {
+      Cipher cipher = CipherUtil.getInstance().createEncrypter(passwordKey);
+      return cipher.doFinal(bytes);
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   private static Request extractRequestDetails(byte[] bytes, Role role) {
@@ -199,21 +251,33 @@ public class Handshake {
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
           NoSuchAlgorithmException, NoSuchPaddingException {
 
-    // HessianOutput output = new HessianOutput(s.getOutputStream());
-    // Jamz: Method renamed in Hessian 4.0.+
-    // output.findSerializerFactory().setAllowNonSerializable(true);
-    // output.getSerializerFactory().setAllowNonSerializable(true);
-    // output.writeObject(request);
-
     byte[] reqBytes = buildRequest(request);
-    OutputStream out;
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.writeInt(reqBytes.length);
     dos.write(reqBytes);
     dos.flush();
 
-    HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
+    // wait for and read the challenge
+    DataInputStream dis = new DataInputStream(s.getInputStream());
+    int code = dis.readInt();
+    int len = dis.readInt();
+    byte[] bytes = dis.readNBytes(len);
 
+    if (code == Code.OK) {
+      byte[] resp = decode(bytes, request.password);
+      HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
+      byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8), request.password);
+      dos.writeInt(response.length);
+      dos.write(response);
+    } else {
+      Response response = new Response();
+      response.code = code;
+      response.message = new String(bytes);
+      return response;
+    }
+
+    // If we are here the handshake succeeded so wait for the server policy
+    HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
     return (Response) input.readObject();
   }
 
@@ -254,5 +318,47 @@ public class Handshake {
     public int code;
     public String message;
     public ServerPolicy policy;
+  }
+
+  private static class HandshakeChallenge {
+    private final String challenge;
+    private final String expectedResponse;
+
+
+    HandshakeChallenge() {
+      StringBuilder challengeSb = new StringBuilder();
+      StringBuilder expectedSb = new StringBuilder();
+      PasswordGenerator passwordGenerator = new PasswordGenerator();
+      for (int i = 0; i < 20; i++) {
+        String pass = passwordGenerator.getPassword();
+        challengeSb.append(pass).append("\n");
+        if (i % 2 == 0) {
+          expectedSb.append(pass).append("\n");
+        }
+      }
+
+      challenge = challengeSb.toString();
+      expectedResponse = expectedSb.toString();
+    }
+
+    HandshakeChallenge(String challengeString) {
+      challenge = challengeString;
+      String[] strings = challenge.split("\n");
+      StringBuilder expectedSb = new StringBuilder();
+      for (int i = 0; i < strings.length; i++) {
+        if (i % 2 == 0) {
+          expectedSb.append(strings[i]).append("\n");
+        }
+      }
+      expectedResponse = expectedSb.toString();
+    }
+
+    public String getChallenge() {
+      return challenge;
+    }
+
+    public String getExpectedResponse() {
+      return expectedResponse;
+    }
   }
 }

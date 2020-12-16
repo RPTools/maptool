@@ -19,6 +19,7 @@ import java.net.ServerSocket;
 import java.util.Random;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.PasswordGenerator;
 
 public class ServerConfig {
   public static final int DEFAULT_PORT = 51234;
@@ -33,23 +34,13 @@ public class ServerConfig {
   private static final SecretKeySpec personalServerPlayerKey;
 
   static {
-    Random random = new Random();
+    PasswordGenerator passwordGenerator = new PasswordGenerator();
     // Generate a random password for personal server
-    personalServerGMPassword =
-        random
-            .ints('a', 'z' + 1)
-            .limit(100)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
+    personalServerGMPassword = passwordGenerator.getPassword();
     personalServerGMKey = CipherUtil.getInstance().createSecretKeySpec(personalServerGMPassword);
-    String playerPass =
-        random
-            .ints('a', 'z' + 1)
-            .limit(100)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
+    String playerPass = passwordGenerator.getPassword();
     if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
-      personalServerPlayerPassword = playerPass + "1";
+      personalServerPlayerPassword = playerPass + "!";
     } else {
       personalServerPlayerPassword = playerPass;
     }

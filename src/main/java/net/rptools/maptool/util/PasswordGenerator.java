@@ -4,28 +4,55 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Random;
 
+/**
+ * Utility class for generating random passwords.
+ */
 public class PasswordGenerator {
-    // Uppercase L,O numbers 1 and 0 removed to try reduce ambiguity
-    public static final String ELIGIBLE_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKMNPQRSTUVWZY2o3456789+-@#%!";
-    public static final byte[] ELIGIBLE_BYTES = ELIGIBLE_CHARACTERS.getBytes(StandardCharsets.UTF_8);
+    /**
+     * Valid characters that can be used to make up the password.
+     * Potentially ambiguous characters such as lower case L, uppercase i, one, zero, uppercase o are not present.
+     */
+    public static final byte[] ELIGIBLE_CHARACTERS = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWZY23456789+-@#!".getBytes(StandardCharsets.UTF_8);
 
 
+    /** The default minimum length to use for password when no length is specified. */
+    public static final int DEFAULT_MIN_PASSWORD_LENGTH  = 15;
+    /** The default maximum length to use for password when no length is specified. */
+    public static final int DEFAULT_MAX_PASSWORD_LENGTH  = 30;
+
+    /** {@link Random} number generator used to create the password. */
     private final Random random = new SecureRandom();
 
-
+    /**
+     * Returns a new random password between {@code minLength} and {@code maxLength}.
+     * @param minLength the minimum length of the password.
+     * @param maxLength the maximum length of the password.
+     * @return the random password.
+     */
     public String getPassword(int minLength, int maxLength) {
         int length = minLength + random.nextInt(maxLength - minLength + 1);
         return getPassword(length);
     }
 
+    /**
+     * Returns a new random password of the specified length
+     * @param length the length of the password.
+     * @return the new random password.
+     */
     public String getPassword(int length) {
-        return random.ints(0,  ELIGIBLE_BYTES.length + 1)
+        return random.ints(0,  ELIGIBLE_CHARACTERS.length)
                 .limit(length)
-                .map(i -> ELIGIBLE_BYTES[i])
+                .map(i -> ELIGIBLE_CHARACTERS[i])
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
 
+    /**
+     * Returns a new random password having a length between {@link #DEFAULT_MIN_PASSWORD_LENGTH} and
+     * {@link #DEFAULT_MAX_PASSWORD_LENGTH}.
+     *
+     * @return the new random password.
+     */
     public String getPassword() {
         return getPassword(15, 30);
     }
