@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 
 @MacroDefinition(
@@ -72,15 +73,11 @@ public class WhisperMacro extends AbstractMacro {
         TextMessage.whisper(
             context.getTransformationHistory(),
             playerName,
-            "<span class='whisper' style='color:blue'>"
-                + I18N.getText(
-                    "whisper.string", MapTool.getFrame().getCommandPanel().getIdentity(), message)
-                + "</span>"));
+            MessageUtil.getFormattedWhisperRecipient(
+                message, MapTool.getFrame().getCommandPanel().getIdentity())));
     MapTool.addMessage(
         TextMessage.me(
             context.getTransformationHistory(),
-            "<span class='whisper' style='color:blue'>"
-                + I18N.getText("whisper.you.string", playerName, message)
-                + "</span>"));
+            MessageUtil.getFormattedWhisperSender(message, playerName)));
   }
 }

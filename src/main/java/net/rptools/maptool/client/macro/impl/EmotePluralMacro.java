@@ -19,6 +19,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 @MacroDefinition(
     name = "emotes",
@@ -27,17 +28,9 @@ import net.rptools.maptool.model.TextMessage;
 public class EmotePluralMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);
-    StringBuilder sb = new StringBuilder();
 
-    // Prevent spoofing
-    sb.append("* ");
-
-    sb.append("<span style='color:green'>");
-    sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
-    sb.append("'s ");
-
-    sb.append(macro);
-    sb.append("</span>");
-    MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
+    MapTool.addMessage(
+        TextMessage.say(
+            context.getTransformationHistory(), MessageUtil.getFormattedEmotePlural(macro, null)));
   }
 }
