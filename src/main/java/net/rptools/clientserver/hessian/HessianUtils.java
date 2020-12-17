@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPOutputStream;
 
-/**
- * @author drice
- */
+/** @author drice */
 public class HessianUtils {
 
   public static HessianInput createSafeHessianInput(InputStream is) {
@@ -33,14 +31,13 @@ public class HessianUtils {
     HessianInput in = hessianFactory.createHessianInput(is);
     in.getSerializerFactory().setAllowNonSerializable(true);
     in.getSerializerFactory().getClassFactory().setWhitelist(true);
-    hessianSecurity.getAllowed().forEach( a -> in.getSerializerFactory().getClassFactory().allow(a));
-    hessianSecurity.getDenied().forEach( d -> in.getSerializerFactory().getClassFactory().allow(d));
+    hessianSecurity.getAllowed().forEach(a -> in.getSerializerFactory().getClassFactory().allow(a));
+    hessianSecurity.getDenied().forEach(d -> in.getSerializerFactory().getClassFactory().allow(d));
     return in;
   }
 
   public static final byte[] methodToBytes(String method, Object... parameters) {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
 
     HessianOutput hout = new HessianOutput(bout);
     hout.getSerializerFactory().setAllowNonSerializable(true);

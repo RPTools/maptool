@@ -34,10 +34,11 @@ public abstract class AbstractMethodHandler implements MethodHandler {
   public void handleMessage(String id, byte[] message) {
     try {
 
-
       HessianInput in = null;
       try {
-        in = HessianUtils.createSafeHessianInput(new GZIPInputStream(new ByteArrayInputStream(message)));
+        in =
+            HessianUtils.createSafeHessianInput(
+                new GZIPInputStream(new ByteArrayInputStream(message)));
       } catch (IOException ioe) {
         in = HessianUtils.createSafeHessianInput(new ByteArrayInputStream(message));
       }

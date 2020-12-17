@@ -21,13 +21,11 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -94,33 +92,36 @@ public class Handshake {
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.writeInt(response.code);
     if (response.code == Code.OK) {
-        player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
-        HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-        SecretKeySpec passwordKey = player.isGM() ? MapTool.getServer().getConfig().getGMPasswordKey() : MapTool.getServer().getConfig().getPlayerPasswordKey();
-        byte[] challenge = encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
-        dos.writeInt(challenge.length);
-        dos.write(challenge);
-        dos.flush();
+      player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
+      HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
+      SecretKeySpec passwordKey =
+          player.isGM()
+              ? MapTool.getServer().getConfig().getGMPasswordKey()
+              : MapTool.getServer().getConfig().getPlayerPasswordKey();
+      byte[] challenge =
+          encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
+      dos.writeInt(challenge.length);
+      dos.write(challenge);
+      dos.flush();
 
-        // Now read the response
-        DataInputStream dis = new DataInputStream(s.getInputStream());
-        int len = dis.readInt();
-        byte[] bytes = dis.readNBytes(len);
-        byte[] responseBytes = decode(bytes, passwordKey);
-        String challengeResponse = new String(responseBytes);
+      // Now read the response
+      DataInputStream dis = new DataInputStream(s.getInputStream());
+      int len = dis.readInt();
+      byte[] bytes = dis.readNBytes(len);
+      byte[] responseBytes = decode(bytes, passwordKey);
+      String challengeResponse = new String(responseBytes);
 
-        if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
-          response.policy = server.getPolicy();
-        } else {
-          response.message = I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
-          response.code = Code.ERROR;
-          player = null;
-        }
+      if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
+        response.policy = server.getPolicy();
+      } else {
+        response.message = I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
+        response.code = Code.ERROR;
+        player = null;
+      }
 
-        HessianOutput output = new HessianOutput(s.getOutputStream());
-        output.getSerializerFactory().setAllowNonSerializable(true);
-        output.writeObject(response);
-
+      HessianOutput output = new HessianOutput(s.getOutputStream());
+      output.getSerializerFactory().setAllowNonSerializable(true);
+      output.writeObject(response);
     }
     return player;
   }
@@ -133,7 +134,11 @@ public class Handshake {
     try {
       Cipher cipher = CipherUtil.getInstance().createDecrypter(passwordKey);
       return cipher.doFinal(bytes);
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+    } catch (NoSuchPaddingException
+        | NoSuchAlgorithmException
+        | InvalidKeyException
+        | BadPaddingException
+        | IllegalBlockSizeException e) {
       throw new IllegalStateException(e);
     }
   }
@@ -146,7 +151,11 @@ public class Handshake {
     try {
       Cipher cipher = CipherUtil.getInstance().createEncrypter(passwordKey);
       return cipher.doFinal(bytes);
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+    } catch (NoSuchPaddingException
+        | NoSuchAlgorithmException
+        | InvalidKeyException
+        | BadPaddingException
+        | IllegalBlockSizeException e) {
       throw new IllegalStateException(e);
     }
   }
@@ -180,6 +189,7 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   static int handshakeCount = 0;
+
   private static Request decodeRequest(
       Socket socket, SecretKeySpec playerPasswordKey, SecretKeySpec gmPasswordKey)
       throws IOException {
@@ -235,7 +245,6 @@ public class Handshake {
       System.out.println(o.toString());
       return null;
     }
-
   }
 
   /**
@@ -266,7 +275,10 @@ public class Handshake {
     if (code == Code.OK) {
       byte[] resp = decode(bytes, request.password);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
-      byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8), request.password);
+      byte[] response =
+          encode(
+              handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8),
+              request.password);
       dos.writeInt(response.length);
       dos.write(response);
     } else {
@@ -323,7 +335,6 @@ public class Handshake {
   private static class HandshakeChallenge {
     private final String challenge;
     private final String expectedResponse;
-
 
     HandshakeChallenge() {
       StringBuilder challengeSb = new StringBuilder();

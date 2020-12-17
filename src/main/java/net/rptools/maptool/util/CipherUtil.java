@@ -24,11 +24,8 @@ import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Utility class used for creating objects to encipher/decipher text.
- */
+/** Utility class used for creating objects to encipher/decipher text. */
 public class CipherUtil {
-
 
   /** The singleton instance of {@code CipherUtil}. */
   private static final CipherUtil instance = new CipherUtil();
@@ -54,9 +51,7 @@ public class CipherUtil {
   /** {@link MessageDigest} used for generating a 256 bit key from the password. */
   private final MessageDigest messageDigest;
 
-  /**
-   * Creates a new {@code CipherUtil} instance.
-   */
+  /** Creates a new {@code CipherUtil} instance. */
   private CipherUtil() {
     try {
       messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
@@ -69,6 +64,7 @@ public class CipherUtil {
 
   /**
    * Returns a {@link SecretKeySpec} from the supplied {@link String} key.
+   *
    * @param key the string containing the key.
    * @return the {@link SecretKeySpec}.
    */
@@ -80,9 +76,9 @@ public class CipherUtil {
 
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
+   *
    * @param key the key used for deciphering.
    * @return a {@link Cipher} that can be used for deciphering encoded values.
-   *
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
@@ -94,9 +90,9 @@ public class CipherUtil {
 
   /**
    * Returns a {@link Cipher} that can be used to encipher encoded values.
+   *
    * @param key the key used for encipher.
    * @return a {@link Cipher} that can be used for deciphering encoded values.
-   *
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
@@ -108,9 +104,9 @@ public class CipherUtil {
 
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
+   *
    * @param key the key used for deciphering.
    * @return a {@link Cipher} that can be used for deciphering encoded values.
-   *
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
@@ -126,9 +122,9 @@ public class CipherUtil {
 
   /**
    * Returns a {@link Cipher} that can be used to encipher encoded values.
+   *
    * @param key the key used for encipher.
    * @return a {@link Cipher} that can be used for deciphering encoded values.
-   *
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
@@ -147,9 +143,7 @@ public class CipherUtil {
    *
    * @param encryptMode the mode for the {@link Cipher}.
    * @param key the key used for encipher.
-   *
    * @return a {@link Cipher} that can be used for enciphering / deciphering encoded values.
-   *
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
