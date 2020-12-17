@@ -3,7 +3,7 @@
 
 Lots of enhancements, bug fixes and performance improvements to the code base.
 
-Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010 for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation.
+Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, grimreaper, pk1010, Irarara, irisiflimsi, dluga93, melodub, dat-adi for all their work on this release.  Also big thanks to the translators building up the language support and the wiki editors for improving/growing the documentation.
 
 ## Highlights
 - Significant improvements in macro run times giving a 4x to 10x (and sometimes more) reduction in run times.
@@ -14,12 +14,20 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
   ```
 - ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - Several Export Screenshot bugs fixed.
-- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1845][i1845], [#2097][i2097]
+- Annoying bug in Resource Library where scroll bar coulnd't go down far enough fixed.
+- A number of Initiative improvements/enhancement: [#987][i987], [#1458][i1458], [#1479][i1479], [#1845][i1845], [#2097][i2097]
   - See wiki page [Introduction to Initiative](http://lmwcs.com/rptools/wiki/Introduction_to_Initiative)
 
 
 ## Enhancements
-- [#2237][i2237] MapTool is now packaged for ArchLinux
+- [#2345][i2345] `/ooc` chat command now displays Player name instead of current impersonation.  
+- [#2314][i2314] Output formatting refactored to use CSS classes and moved to a new MessageUtil class.  
+- [#2283][i2283] Basic support for SVG images added.
+- [#2271][i2271] Improved readability for output of chat commands /emote & /say to bring them inline with normal macro output. 
+- [#2256][i2256] Support for `data:` URIs in HTML5 windows (overlay, dialog5, html5).
+- [#2237][i2237] MapTool Builds now include package for ArchLinux.
+- [#2230][i2230] `getInfo("client")` function now includes details about Dialogs, Frames and Overlays.
+- [#2229][i2229] New `delim` parameter for `herolab.XPath()` function allows for returning a string list or JSON Array to address issues with content having commas in it.
 - [#2205][i2205] Improved efficiency of `onTokenMove` event handler with multiple tokens selected.
 - [#2199][i2199] Updated Dicelib 1.7.0 adds support for Shadowrun 5 dice rolls: `sr5(n)`, `sr5(n,g)`, `sr5e(n)`, `sr5(n,g)`
 - [#2188][i2188] New macro function `removeDrawing(MapName, DrawingID)` to remove drawings from map.
@@ -42,14 +50,29 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#987][i987] New events for initiative: `onInitiativeChange`, `onInitiativeChangeRequest`.  New system variable `init.denyChange`.
 
 ## Bug Fixes
-- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed.
-- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed.
+- [#2343][i2343] Trusted Prefix preference colors weren't being correctly saved nor used in chat output. Fixed.  
+- [#2335][i2335] Using `cp:` protocol with invalid resource could freeze client. Fixed.  
+- [#2321][i2321] With Individual Views option OFF, players could not see owned NPC tokens. Fixed.
+- [#2313][i2313] Switching to Player View with an Object flagged as VoFoW could cause an NPE. Fixed by fix for [#2242][i2242]  
+- [#2311][i2311] `movedOverToken()` throwing exception in beta. Fixed.
+- [#2287][i2287] Export screenshot broken in beta. Fixed. 
+- [#2270][i2270] Control for restricting impersonation of tokens by players was working opposite of indicated state. Fixed. 
+- [#2223][i2223] `onCampaignLoad` macros were no longer suppressing output when executed on load. Fixed. 
+- [#2221][i2221] Beta builds had OpenJDK icon instead of MT icon in menus for linux. Fixed. 
+- [#2215][i2215] Some previously working URIs were failing for playStream/Clip in beta. Fixed. 
+- [#2242][i2242] NullPointerException: Cannot invoke "java.awt.geom.Area.intersects(java.awt.geom.Rectangle2D)" because "fog" is null. Fixed. 
+- [#2211][i2211] Function `isNumber()` returning incorrect response on anything not a positive integer. Fixed. 
+- [#2192][i2192] Using function `movedOverDrawing()` with a template would throw an NPE. Fixed. 
+- [#2184][i2184] Initiative panel Lock Movement toggle was also changing Owner Permissions. Fixed. 
 - [#2178][i2178] Token opacity was broken in develop.  Fixed.
+- [#2177][i2177] Output of macroLinks was not being formatted properly.  Fixed.
 - [#2174][i2174] Ability to save startup settings broken by Java/packaging changes.  Restored.  Startup tab now has more explanation.
 - [#2152][i2152] Function `isNumber()` was returning true for empty strings. Fixed.
+- [#2151][i2151] Function `isNumber()` was returning true for empty strings. Fixed.
 - [#2119][i2119] Excessive processing of roll options was making macro execution slow. Changes improved speed by 10x or more.
 - [#2118][i2118] Importing large macrosets was very slow and used **a lot** of memory. Changes improved speed by 10:1 up to 150:1 for macro buttons with images.
 - [#2116][i2116] Failing to load a campaign incorrectly reported *"Could not save campaign."* Fixed.
+- [#2092][i2092] Spurious *on change selection* events were occuring and caused infinite loops under 1.7.0. Fixed.
 - [#2081][i2081] Universal VTT map import wasn't applying portal closed flag to enable/disable VBL on portals. Fixed.
 - [#2078][i2078] Event `onChangeToken` was being generated multiple times even when token wasn't changed. Was repeating indefinitely on impersonated tokens. Fixed.
 - [#2074][i2074] Updating overlay wasn't removing event handlers, e.g.`onChangeSelection`. Fixed.
@@ -97,11 +120,18 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#1863][i1863] HTML5 form submit was not allowed at document load. Fixed.
 - [#1737][i1737] Some CMYK JPEGs would appear as all black. Fixed.
 - [#1736][i1736] Variable names can now start with `tru`, `true`, `fal`, `fals`, and `false`.
+- [#1733][i1733] Embedded double quotes in JSON objects not handled correctly. Fixed.
 - [#1705][i1705] Map functions `getCurrentMapName(), getMapVisible() and setMapVisible()` would throw NPEs if campaign had no maps. Fixed.
+- [#1562][i1562] Accessing certain data from HeroLab files in the Edit Token dialog could thrown an exception. Fixed.
 - [#1560][i1560] Default property settings using assigment expressions, i.e.`{prop2 = prop1}`, would fail. Fixed.
+- [#1359][i1359] Map coordinates were appearing over token notes. Fixed.
+- [#755][i755] Scroll bar in Resource Library window wouldn't always go far enough to see all content. Fixed.
 - [#715][i715] Bad or missing remote repository would produce a Null Pointer Exception in the log but not inform the user. Fixed.
 
 ## Other
+- [#2280][i2280] Update to README.md for clarity of current processes. Fixed.
+- [#2279][i2279] CampaignDialog unit test failing under DE locale.  Fixed.
+- [#2244][i2244] Too much network debug output when using `gradlew run`.  Fixed.
 - [#2197][i2197] Build changes caused release builds to barf if release tags contained alpha chars(i.e. beta).  Fixed.
 - [#2135][i2135] Code cleanup: removed redundant null checks, tests that were always true/false, replaced anonymous inner classes with lambdas, etc.
 - [#2109][i2109] Build.gradle update to pull version from tag. Fixed.  Dev only.
@@ -114,16 +144,41 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 - [#1943][i1943] Updated to Parse 1.7.1 which adds ISO-8859-1 character support. Can now use accented characters in Token Properties and macros.
 - [#1907][i1907] Dicelib updated to 1.6.2 for fixes to `getRolled()` and `getNewRolls()`.
 
+[i2345]: https://github.com/RPTools/maptool/issues/2345
+[i2343]: https://github.com/RPTools/maptool/issues/2343
+[i2335]: https://github.com/RPTools/maptool/issues/2335
+[i2321]: https://github.com/RPTools/maptool/issues/2321
+[i2314]: https://github.com/RPTools/maptool/issues/2314
+[i2313]: https://github.com/RPTools/maptool/issues/2313
+[i2311]: https://github.com/RPTools/maptool/issues/2311
+[i2287]: https://github.com/RPTools/maptool/issues/2287
+[i2283]: https://github.com/RPTools/maptool/issues/2283
+[i2280]: https://github.com/RPTools/maptool/issues/2280
+[i2279]: https://github.com/RPTools/maptool/issues/2279
+[i2271]: https://github.com/RPTools/maptool/issues/2271
+[i2270]: https://github.com/RPTools/maptool/issues/2270
+[i2256]: https://github.com/RPTools/maptool/issues/2256
+[i2244]: https://github.com/RPTools/maptool/issues/2244
+[i2242]: https://github.com/RPTools/maptool/issues/2242
 [i2237]: https://github.com/RPTools/maptool/issues/2237
+[i2230]: https://github.com/RPTools/maptool/issues/2230
+[i2229]: https://github.com/RPTools/maptool/issues/2229
+[i2223]: https://github.com/RPTools/maptool/issues/2223
+[i2221]: https://github.com/RPTools/maptool/issues/2221
+[i2215]: https://github.com/RPTools/maptool/issues/2215
+[i2211]: https://github.com/RPTools/maptool/issues/2211
+[i2205]: https://github.com/RPTools/maptool/issues/2205
 [i2199]: https://github.com/RPTools/maptool/issues/2199
 [i2197]: https://github.com/RPTools/maptool/issues/2197
 [i2192]: https://github.com/RPTools/maptool/issues/2192
 [i2188]: https://github.com/RPTools/maptool/issues/2188
 [i2184]: https://github.com/RPTools/maptool/issues/2184
 [i2178]: https://github.com/RPTools/maptool/issues/2178
+[i2177]: https://github.com/RPTools/maptool/issues/2177
 [i2174]: https://github.com/RPTools/maptool/issues/2174
 [i2157]: https://github.com/RPTools/maptool/issues/2157
 [i2152]: https://github.com/RPTools/maptool/issues/2152
+[i2151]: https://github.com/RPTools/maptool/issues/2151
 [i2149]: https://github.com/RPTools/maptool/issues/2149
 [i2135]: https://github.com/RPTools/maptool/issues/2135
 [i2119]: https://github.com/RPTools/maptool/issues/2119
@@ -132,6 +187,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 [i2109]: https://github.com/RPTools/maptool/issues/2109
 [i2102]: https://github.com/RPTools/maptool/issues/2102
 [i2097]: https://github.com/RPTools/maptool/issues/2097
+[i2092]: https://github.com/RPTools/maptool/issues/2092
 [i2081]: https://github.com/RPTools/maptool/issues/2081
 [i2078]: https://github.com/RPTools/maptool/issues/2078
 [i2074]: https://github.com/RPTools/maptool/issues/2074
@@ -188,6 +244,7 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 [i1845]: https://github.com/RPTools/maptool/issues/1845
 [i1737]: https://github.com/RPTools/maptool/issues/1737
 [i1736]: https://github.com/RPTools/maptool/issues/1736
+[i1733]: https://github.com/RPTools/maptool/issues/1733
 [i1726]: https://github.com/RPTools/maptool/issues/1726
 [i1705]: https://github.com/RPTools/maptool/issues/1705
 [i1560]: https://github.com/RPTools/maptool/issues/1560
@@ -195,7 +252,9 @@ Many thanks to community developers merudo, selquest, nmeier, euank, ebudai, gri
 [i1458]: https://github.com/RPTools/maptool/issues/1458
 [i1479]: https://github.com/RPTools/maptool/issues/1479
 [i1362]: https://github.com/RPTools/maptool/issues/1362
+[i1359]: https://github.com/RPTools/maptool/issues/1359
 [i987]: https://github.com/RPTools/maptool/issues/987
+[i755]: https://github.com/RPTools/maptool/issues/755
 [i715]: https://github.com/RPTools/maptool/issues/715
 
 ---
