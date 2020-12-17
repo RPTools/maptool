@@ -29,7 +29,7 @@ public class MessageUtil {
   static final String CSS_AVAMSG_MESSAGE =
       ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
   static final String CSS_EMOTE_MESSAGE = ".emote .message { border-left-color: #7AC07A }";
-  static final String CSS_SAY_PREFIX = ".say .prefix, .say .trustedPrefix { font-weight: bold }";
+  static final String CSS_SAY_PREFIX = ".say .prefix, .say .trusted-prefix { font-weight: bold }";
   static final String CSS_SELF = ".self { font-style: italic }";
   static final String CSS_SYSTEM = ".system { color: blue; font-style: italic }";
   static final String CSS_WHISPER = ".whisper { color: blue }";
@@ -77,7 +77,7 @@ public class MessageUtil {
 
   public static String getFormattedOoc(String msg) {
     return "<div class='ooc'>"
-        + MapTool.getFrame().getCommandPanel().getIdentity()
+        + MapTool.getPlayer().getName()
         + ": "
         + applyChatColor("(( " + msg + " ))")
         + "</div>";
@@ -145,7 +145,7 @@ public class MessageUtil {
     StringBuilder sb = new StringBuilder();
 
     if (isTrusted && macroName != null && !MapTool.getPlayer().isGM()) {
-      sb.append("<span class='trustedPrefix' title='").append(macroName);
+      sb.append("<span class='trusted-prefix' title='").append(macroName);
       if (macroSource != null && macroSource.length() > 0) {
         sb.append("@").append(macroSource);
       }
