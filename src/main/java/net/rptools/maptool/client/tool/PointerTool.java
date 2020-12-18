@@ -1506,8 +1506,7 @@ public class PointerTool extends DefaultTool {
         if (token == null) {
           continue;
         }
-        token.setFlippedX(!token.isFlippedX());
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
       }
       MapTool.getFrame().refresh();
     }

@@ -164,7 +164,8 @@ public class Token extends BaseModel implements Cloneable {
     removeLightSource,
     addLightSource,
     setHasSight,
-    setSightType
+    setSightType,
+    flipX
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2624,6 +2625,9 @@ public class Token extends BaseModel implements Cloneable {
       case deleteMacro:
         deleteMacro((int) parameters[0]);
         macroChanged = true;
+        break;
+      case flipX:
+        setFlippedX(!isFlippedX());
         break;
     }
     if (lightChanged) {
