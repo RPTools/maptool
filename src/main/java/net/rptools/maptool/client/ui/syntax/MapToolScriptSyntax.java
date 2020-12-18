@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.syntax;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
@@ -118,10 +117,11 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     for (String dataType : DATA_TYPES) macroFunctionTokenMap.put(dataType, Token.DATA_TYPE);
 
     // Add all defined property names as "Variable"
-    for (List<TokenProperty> propsList : MapTool.getCampaign().getCampaignProperties().getTokenTypeMap().values()){
-      List<String> propertyNames = propsList.stream().map(TokenProperty::getName).collect(Collectors.toList());
-      for (String prop : propertyNames)
-        macroFunctionTokenMap.put(prop, Token.VARIABLE);
+    for (List<TokenProperty> propsList :
+        MapTool.getCampaign().getCampaignProperties().getTokenTypeMap().values()) {
+      List<String> propertyNames =
+          propsList.stream().map(TokenProperty::getName).collect(Collectors.toList());
+      for (String prop : propertyNames) macroFunctionTokenMap.put(prop, Token.VARIABLE);
     }
 
     // Add "Roll Options" as Reserved word
