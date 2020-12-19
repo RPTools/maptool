@@ -91,6 +91,12 @@ public class ImageManager {
 
     try {
       BROKEN_IMAGE = ImageUtil.getCompatibleImage(BROKEN_IMAGE_PNG);
+      // Write the broken image out to the asset cache
+      MD5Key brokenMD5Key = new MD5Key("broken");
+      Asset brokenAsset = new Asset("broken", ImageManager.BROKEN_IMAGE);
+
+      brokenAsset.setId(brokenMD5Key);
+      AssetManager.putInPersistentCache(brokenAsset);
     } catch (IOException ioe) {
       log.error("static for 'broken.png':  not resolved; IOException", ioe);
       BROKEN_IMAGE = ImageUtil.createCompatibleImage(10, 10, 0);

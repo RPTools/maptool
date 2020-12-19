@@ -39,6 +39,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -468,7 +469,7 @@ public class AssetManager {
    *
    * @param asset Asset to serialize
    */
-  private static void putInPersistentCache(final Asset asset) {
+  public static void putInPersistentCache(final Asset asset) {
 
     if (!usePersistentCache) {
       return;
