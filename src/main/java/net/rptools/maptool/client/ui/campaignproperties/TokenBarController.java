@@ -485,7 +485,8 @@ public class TokenBarController
     boolean hasImages = false;
     BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getSelectedItem(BARS);
     boolean hasUniqueUpdateName = false;
-    if(selectedBar != null) hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
+    if (selectedBar != null)
+      hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
     if (size > 0 && imageCount == size) {
       hasImages = true;
     } else if (size < 0 && imageCount == increments && increments > 0) {

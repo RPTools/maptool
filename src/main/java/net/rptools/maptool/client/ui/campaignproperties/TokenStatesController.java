@@ -438,7 +438,8 @@ public class TokenStatesController
             || formPanel.isSelected(SHOW_OTHERS);
     BooleanTokenOverlay selectedState = (BooleanTokenOverlay) formPanel.getSelectedItem(STATES);
     boolean hasUniqueUpdateName = false;
-    if(selectedState != null) hasUniqueUpdateName = selectedState.getName().equals(text) || !getNames().contains(text);
+    if (selectedState != null)
+      hasUniqueUpdateName = selectedState.getName().equals(text) || !getNames().contains(text);
     formPanel
         .getButton(ADD)
         .setEnabled(hasName && !getNames().contains(text) && hasImage && hasShow);
