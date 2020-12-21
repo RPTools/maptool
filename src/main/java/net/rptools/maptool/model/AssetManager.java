@@ -45,7 +45,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * This class handles the caching, loading, and downloading of assets. All assets are loaded through
  * this class.
@@ -54,11 +53,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class AssetManager {
 
-  /**
-   * {@link MD5Key} to use for assets trying to specify a location outside of asset cache.
-   */
+  /** {@link MD5Key} to use for assets trying to specify a location outside of asset cache. */
   public static final MD5Key BAD_ASSET_LOCATION_KEY = new MD5Key("bad-location");
-
 
   /** {@link Asset}s that are required and should never be removed. */
   private static final Set<MD5Key> REQUIRED_ASSETS = Set.of(BAD_ASSET_LOCATION_KEY);
@@ -96,7 +92,6 @@ public class AssetManager {
     Asset asset = new Asset(BAD_ASSET_LOCATION_KEY.toString(), new byte[] {});
     asset.setId(BAD_ASSET_LOCATION_KEY);
     putAsset(asset);
-
   }
 
   /**
@@ -235,15 +230,13 @@ public class AssetManager {
    */
   public static void putAsset(Asset asset) {
 
-
-
     try {
       if (sanitizeAssetId(asset.getId()) != asset.getId()) {
         // If a different asset is returned we know this asset is invalid so dont add it
         return;
       }
     } catch (IOException e) {
-        log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
+      log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
     }
 
     if (asset == null) {
@@ -311,8 +304,6 @@ public class AssetManager {
    */
   public static Asset getAsset(MD5Key id) {
 
-
-
     MD5Key assetId = null;
     try {
       assetId = sanitizeAssetId(id);
@@ -322,7 +313,6 @@ public class AssetManager {
     if (id == null) {
       return null;
     }
-
 
     Asset asset = assetMap.get(assetId);
 
@@ -364,14 +354,15 @@ public class AssetManager {
    * Checks the {@link Asset} id to ensure that the is {@link Asset} is valid.
    *
    * @param md5Key the {@link MD5Key} to check.
-   * @return The passed in {@code md5Key} if it is ok, otherwise the key of an {@link Asset} in the asset cache
-   * to use in its place.
+   * @return The passed in {@code md5Key} if it is ok, otherwise the key of an {@link Asset} in the
+   *     asset cache to use in its place.
    */
   private static MD5Key sanitizeAssetId(MD5Key md5Key) throws IOException {
     // Check to see that the asset path wont escape the asset cache directory.
     Path assetCachePath = cacheDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS);
     String assetCache = assetCachePath.toString() + "/";
-    Path assetPath = cacheDir.toPath().resolve(md5Key.toString()).toRealPath(LinkOption.NOFOLLOW_LINKS);
+    Path assetPath =
+        cacheDir.toPath().resolve(md5Key.toString()).toRealPath(LinkOption.NOFOLLOW_LINKS);
     String asset = assetPath.toString();
     if (!asset.startsWith(assetCache)) {
       return BAD_ASSET_LOCATION_KEY;
