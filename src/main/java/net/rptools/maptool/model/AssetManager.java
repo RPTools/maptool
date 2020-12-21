@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,10 +41,10 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 
 /**
  * This class handles the caching, loading, and downloading of assets. All assets are loaded through
@@ -51,6 +53,16 @@ import org.apache.logging.log4j.Logger;
  * @author RPTools Team
  */
 public class AssetManager {
+
+  /**
+   * {@link MD5Key} to use for assets trying to specify a location outside of asset cache.
+   */
+  public static final MD5Key BAD_ASSET_LOCATION_KEY = new MD5Key("bad-location");
+
+
+  /** {@link Asset}s that are required and should never be removed. */
+  private static final Set<MD5Key> REQUIRED_ASSETS = Set.of(BAD_ASSET_LOCATION_KEY);
+
   private static final Logger log = LogManager.getLogger(AssetManager.class);
 
   /** Assets are associated with the MD5 sum of their raw data */
@@ -80,6 +92,11 @@ public class AssetManager {
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
     usePersistentCache = true;
+    // Make sure we have an empty "bad-location" image in memory cache.
+    Asset asset = new Asset(BAD_ASSET_LOCATION_KEY.toString(), new byte[] {});
+    asset.setId(BAD_ASSET_LOCATION_KEY);
+    putAsset(asset);
+
   }
 
   /**
@@ -218,10 +235,20 @@ public class AssetManager {
    */
   public static void putAsset(Asset asset) {
 
+
+
+    try {
+      if (sanitizeAssetId(asset.getId()) != asset.getId()) {
+        // If a different asset is returned we know this asset is invalid so dont add it
+        return;
+      }
+    } catch (IOException e) {
+        log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
+    }
+
     if (asset == null) {
       return;
     }
-
     assetMap.put(asset.getId(), asset);
 
     // Invalid images are represented by empty assets.
@@ -284,20 +311,29 @@ public class AssetManager {
    */
   public static Asset getAsset(MD5Key id) {
 
+
+
+    MD5Key assetId = null;
+    try {
+      assetId = sanitizeAssetId(id);
+    } catch (IOException e) {
+      log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
+    }
     if (id == null) {
       return null;
     }
 
-    Asset asset = assetMap.get(id);
 
-    if (asset == null && usePersistentCache && assetIsInPersistentCache(id)) {
+    Asset asset = assetMap.get(assetId);
+
+    if (asset == null && usePersistentCache && assetIsInPersistentCache(assetId)) {
       // Guaranteed that asset is in the cache.
-      asset = getFromPersistentCache(id);
+      asset = getFromPersistentCache(assetId);
     }
 
-    if (asset == null && assetHasLocalReference(id)) {
+    if (asset == null && assetHasLocalReference(assetId)) {
 
-      File imageFile = getLocalReference(id);
+      File imageFile = getLocalReference(assetId);
 
       if (imageFile != null) {
 
@@ -308,7 +344,7 @@ public class AssetManager {
           asset = new Asset(name, data);
 
           // Just to be sure the image didn't change
-          if (!asset.getId().equals(id)) {
+          if (!asset.getId().equals(assetId)) {
             throw new IOException("Image reference did not match the requested image");
           }
 
@@ -325,12 +361,34 @@ public class AssetManager {
   }
 
   /**
+   * Checks the {@link Asset} id to ensure that the is {@link Asset} is valid.
+   *
+   * @param md5Key the {@link MD5Key} to check.
+   * @return The passed in {@code md5Key} if it is ok, otherwise the key of an {@link Asset} in the asset cache
+   * to use in its place.
+   */
+  private static MD5Key sanitizeAssetId(MD5Key md5Key) throws IOException {
+    // Check to see that the asset path wont escape the asset cache directory.
+    Path assetCachePath = cacheDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS);
+    String assetCache = assetCachePath.toString() + "/";
+    Path assetPath = cacheDir.toPath().resolve(md5Key.toString()).toRealPath(LinkOption.NOFOLLOW_LINKS);
+    String asset = assetPath.toString();
+    if (!asset.startsWith(assetCache)) {
+      return BAD_ASSET_LOCATION_KEY;
+    }
+
+    return md5Key;
+  }
+
+  /**
    * Remove the asset from the asset cache.
    *
    * @param id MD5 of the asset to remove
    */
   public static void removeAsset(MD5Key id) {
-    assetMap.remove(id);
+    if (!REQUIRED_ASSETS.contains(id)) {
+      assetMap.remove(id);
+    }
   }
 
   /**
@@ -469,7 +527,7 @@ public class AssetManager {
    *
    * @param asset Asset to serialize
    */
-  public static void putInPersistentCache(final Asset asset) {
+  private static void putInPersistentCache(final Asset asset) {
 
     if (!usePersistentCache) {
       return;
