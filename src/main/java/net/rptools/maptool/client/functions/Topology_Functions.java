@@ -53,19 +53,27 @@ import net.rptools.parser.function.AbstractFunction;
  *
  * <p>getVBL(jsonArray) :: Get the VBL for a given area and return as array of points
  *
+ * <p>drawMBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
+ * MBL
+ *
+ * <p>eraseMBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a Shape
+ * in MBL
+ *
+ * <p>getMBL(jsonArray) :: Get the MBL for a given area and return as array of points
+ *
  * <p>transferVBL(direction[, delete][, tokenId] :: move or copy VBL between token and VBL layer
  */
-public class VBL_Functions extends AbstractFunction {
+public class Topology_Functions extends AbstractFunction {
 
-  private static final VBL_Functions instance = new VBL_Functions();
+  private static final Topology_Functions instance = new Topology_Functions();
   private static final String[] paramTranslate = new String[] {"tx", "ty"};
   private static final String[] paramScale = new String[] {"sx", "sy"};
 
-  private VBL_Functions() {
+  private Topology_Functions() {
     super(0, 3, "drawVBL", "eraseVBL", "getVBL", "drawMBL", "eraseMBL", "getMBL", "getTokenVBL", "setTokenVBL", "transferVBL");
   }
 
-  public static VBL_Functions getInstance() {
+  public static Topology_Functions getInstance() {
     return instance;
   }
 
@@ -97,12 +105,12 @@ public class VBL_Functions extends AbstractFunction {
       JsonElement json =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
 
-      JsonArray vblArray;
+      JsonArray topologyArray;
       if (json.isJsonArray()) {
-        vblArray = json.getAsJsonArray();
+        topologyArray = json.getAsJsonArray();
       } else if (json.isJsonObject()) {
-        vblArray = new JsonArray();
-        vblArray.add(json.getAsJsonObject());
+        topologyArray = new JsonArray();
+        topologyArray.add(json.getAsJsonObject());
       } else {
         throw new ParserException(
             I18N.getText(
@@ -111,22 +119,22 @@ public class VBL_Functions extends AbstractFunction {
                 functionName));
       }
 
-      for (int i = 0; i < vblArray.size(); i++) {
-        JsonObject vblObject = vblArray.get(i).getAsJsonObject();
+      for (int i = 0; i < topologyArray.size(); i++) {
+        JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
 
-        Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
-        switch (vblShape) {
+        Shape topologyShape = Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
+        switch (topologyShape) {
           case RECTANGLE:
-            drawRectangleVBL(renderer, vblObject, erase, mode);
+            drawRectangleTopology(renderer, topologyObject, erase, mode);
             break;
           case POLYGON:
-            drawPolygonVBL(renderer, vblObject, erase, mode);
+            drawPolygonTopology(renderer, topologyObject, erase, mode);
             break;
           case CROSS:
-            drawCrossVBL(renderer, vblObject, erase, mode);
+            drawCrossTopology(renderer, topologyObject, erase, mode);
             break;
           case CIRCLE:
-            drawCircleVBL(renderer, vblObject, erase, mode);
+            drawCircleTopology(renderer, topologyObject, erase, mode);
             break;
           case NONE:
             break;
@@ -160,12 +168,12 @@ public class VBL_Functions extends AbstractFunction {
 
       JsonElement json =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
-      JsonArray vblArray;
+      JsonArray topologyArray;
       if (json.isJsonArray()) {
-        vblArray = json.getAsJsonArray();
+        topologyArray = json.getAsJsonArray();
       } else if (json.isJsonObject()) {
-        vblArray = new JsonArray();
-        vblArray.add(json.getAsJsonObject());
+        topologyArray = new JsonArray();
+        topologyArray.add(json.getAsJsonObject());
       } else {
         throw new ParserException(
             I18N.getText(
@@ -174,16 +182,16 @@ public class VBL_Functions extends AbstractFunction {
                 functionName));
       }
 
-      Area vblArea = null;
-      for (int i = 0; i < vblArray.size(); i++) {
-        JsonObject vblObject = vblArray.get(i).getAsJsonObject();
-        if (vblArea == null) {
-          vblArea = getVBL(renderer, vblObject, mode);
+      Area topologyArea = null;
+      for (int i = 0; i < topologyArray.size(); i++) {
+        JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
+        if (topologyArea == null) {
+          topologyArea = getTopology(renderer, topologyObject, mode);
         } else {
-          vblArea.add(getVBL(renderer, vblObject, mode));
+          topologyArea.add(getTopology(renderer, topologyObject, mode));
         }
       }
-      return getAreaPoints(vblArea, simpleJSON);
+      return getAreaPoints(topologyArea, simpleJSON);
     } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
@@ -268,16 +276,16 @@ public class VBL_Functions extends AbstractFunction {
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
-            tokenVBL.add(drawRectangleVBL(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(drawRectangleTopology(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case POLYGON:
-            tokenVBL.add(drawPolygonVBL(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(drawPolygonTopology(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case CROSS:
-            tokenVBL.add(drawCrossVBL(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(drawCrossTopology(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case CIRCLE:
-            tokenVBL.add(drawCircleVBL(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(drawCircleTopology(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case AUTO:
             tokenVBL = autoGenerateVBL(token, vblObject);
@@ -416,38 +424,38 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to draw a rectangle and render as VBL.
+   * Get the required parameters needed from the JSON to draw a rectangle and render as topology.
    *
    * @param renderer Reference to the ZoneRenderer. Can be null.
-   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
-   * @param erase Set to true to erase the rectangle in VBL, otherwise draw it.
+   * @param erase Set to true to erase the rectangle in the topology, otherwise draw it.
    * @param mode The topology mode to operate in.
-   * @return the VBL area if the renderer is null, and null otherwise.
+   * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawRectangleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawRectangleTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
-    String funcname = "drawVBL[Rectangle]";
+    String funcname = "drawTopology[Rectangle]";
     // Required Parameters
     String[] requiredParms = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
+    if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
     }
 
-    int x = getJSONint(vblObject, "x", funcname);
-    int y = getJSONint(vblObject, "y", funcname);
-    int w = getJSONint(vblObject, "w", funcname);
-    int h = getJSONint(vblObject, "h", funcname);
+    int x = getJSONint(topologyObject, "x", funcname);
+    int y = getJSONint(topologyObject, "y", funcname);
+    int w = getJSONint(topologyObject, "w", funcname);
+    int h = getJSONint(topologyObject, "h", funcname);
 
     // Optional Parameters
-    int fill = getJSONint(vblObject, "fill", funcname);
-    double s = getJSONdouble(vblObject, "scale", funcname);
-    double r = getJSONdouble(vblObject, "r", funcname);
-    double facing = getJSONdouble(vblObject, "facing", funcname);
-    float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.has("facing");
+    int fill = getJSONint(topologyObject, "fill", funcname);
+    double s = getJSONdouble(topologyObject, "scale", funcname);
+    double r = getJSONdouble(topologyObject, "r", funcname);
+    double facing = getJSONdouble(topologyObject, "facing", funcname);
+    float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
+    boolean useFacing = topologyObject.has("facing");
 
     if (t < 2) {
       t = 2;
@@ -496,7 +504,7 @@ public class VBL_Functions extends AbstractFunction {
     }
 
     AffineTransform atArea = new AffineTransform();
-    applyTranslate(funcname, atArea, vblObject, paramTranslate);
+    applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
     // Rotate the Polygon if requested
     if (useFacing || r != 0) {
@@ -506,16 +514,16 @@ public class VBL_Functions extends AbstractFunction {
 
       // Override rx,ry coords if supplied
       String rParms[] = {"rx", "ry"};
-      if (jsonKeysExist(vblObject, rParms, funcname)) {
-        rx = getJSONint(vblObject, "rx", funcname);
-        ry = getJSONint(vblObject, "ry", funcname);
+      if (jsonKeysExist(topologyObject, rParms, funcname)) {
+        rx = getJSONint(topologyObject, "rx", funcname);
+        ry = getJSONint(topologyObject, "ry", funcname);
       }
       if (useFacing) {
         r = -(facing + 90);
       }
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
-    applyScale(funcname, atArea, vblObject, paramScale);
+    applyScale(funcname, atArea, topologyObject, paramScale);
 
     if (!atArea.isIdentity()) {
       area.transform(atArea);
@@ -525,60 +533,60 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   private void applyTranslate(
-      String funcname, AffineTransform at, JsonObject vblObject, String[] params)
+      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
       throws ParserException {
-    if (jsonKeysExist(vblObject, params, funcname)) {
-      double tx = getJSONdouble(vblObject, "tx", funcname);
-      double ty = getJSONdouble(vblObject, "ty", funcname);
+    if (jsonKeysExist(topologyObject, params, funcname)) {
+      double tx = getJSONdouble(topologyObject, "tx", funcname);
+      double ty = getJSONdouble(topologyObject, "ty", funcname);
       at.translate(tx, ty);
     }
   }
 
   private void applyScale(
-      String funcname, AffineTransform at, JsonObject vblObject, String[] params)
+      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
       throws ParserException {
-    if (jsonKeysExist(vblObject, params, funcname)) {
-      double sx = getJSONdouble(vblObject, "sx", funcname);
-      double sy = getJSONdouble(vblObject, "sy", funcname);
+    if (jsonKeysExist(topologyObject, params, funcname)) {
+      double sx = getJSONdouble(topologyObject, "sx", funcname);
+      double sy = getJSONdouble(topologyObject, "sy", funcname);
       at.scale(sx, sy);
     }
   }
 
   /**
-   * Get the required parameters needed from the JSON to draw a Polygon and render as VBL.
+   * Get the required parameters needed from the JSON to draw a Polygon and render as topology.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
-   * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
-   * @return the VBL area if the renderer is null, and null otherwise.
+   * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawPolygonVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawPolygonTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
-    String funcname = "drawVBL[Polygon]";
+    String funcname = "drawTopology[Polygon]";
     String requiredParms[] = {"points"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
+    if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeA", "points", funcname));
     }
 
     // Get all the x,y coords for the Polygon, must have at least 2
-    JsonArray points = vblObject.get("points").getAsJsonArray();
+    JsonArray points = topologyObject.get("points").getAsJsonArray();
     if (points.size() < 2) {
       throw new ParserException(
           I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
     }
     // Optional Parameters
-    int fill = getJSONint(vblObject, "fill", funcname);
-    int close = getJSONint(vblObject, "close", funcname);
-    double r = getJSONdouble(vblObject, "r", funcname);
-    double facing = getJSONdouble(vblObject, "facing", funcname);
-    float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.has("facing");
+    int fill = getJSONint(topologyObject, "fill", funcname);
+    int close = getJSONint(topologyObject, "close", funcname);
+    double r = getJSONdouble(topologyObject, "r", funcname);
+    double facing = getJSONdouble(topologyObject, "facing", funcname);
+    float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
+    boolean useFacing = topologyObject.has("facing");
 
-    if (!vblObject.has("thickness")) {
+    if (!topologyObject.has("thickness")) {
       t = 2; // Set default thickness if no value is passed.
     }
 
@@ -642,7 +650,7 @@ public class VBL_Functions extends AbstractFunction {
       }
     }
     AffineTransform atArea = new AffineTransform();
-    applyTranslate(funcname, atArea, vblObject, paramTranslate);
+    applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
     // Rotate the Polygon if requested
     if (useFacing || r != 0) {
@@ -652,9 +660,9 @@ public class VBL_Functions extends AbstractFunction {
 
       // Override rx,ry coords if supplied
       String rParms[] = {"rx", "ry"};
-      if (jsonKeysExist(vblObject, rParms, funcname)) {
-        rx = getJSONint(vblObject, "rx", funcname);
-        ry = getJSONint(vblObject, "ry", funcname);
+      if (jsonKeysExist(topologyObject, rParms, funcname)) {
+        rx = getJSONint(topologyObject, "rx", funcname);
+        ry = getJSONint(topologyObject, "ry", funcname);
       }
       if (useFacing) {
         r = -(facing + 90);
@@ -662,7 +670,7 @@ public class VBL_Functions extends AbstractFunction {
 
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
-    applyScale(funcname, atArea, vblObject, paramScale);
+    applyScale(funcname, atArea, topologyObject, paramScale);
 
     if (!atArea.isIdentity()) {
       area.transform(atArea);
@@ -672,39 +680,39 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to draw two Polygon 'lines' and render as VBL.
+   * Get the required parameters needed from the JSON to draw two Polygon 'lines' and render as topology.
    * This is a convenience function to draw two lines perpendicular to each other to form a "cross"
    * commonly used to block LOS for objects like Trees but still show most of the image.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
-   * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
-   * @return the VBL area if the renderer is null, and null otherwise.
+   * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCrossVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawCrossTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
-    String funcname = "drawVBL[Cross]";
+    String funcname = "drawTopology[Cross]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
+    if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
     }
 
-    int x = getJSONint(vblObject, "x", funcname);
-    int y = getJSONint(vblObject, "y", funcname);
-    int w = getJSONint(vblObject, "w", funcname);
-    int h = getJSONint(vblObject, "h", funcname);
+    int x = getJSONint(topologyObject, "x", funcname);
+    int y = getJSONint(topologyObject, "y", funcname);
+    int w = getJSONint(topologyObject, "w", funcname);
+    int h = getJSONint(topologyObject, "h", funcname);
 
     // Optional Parameters
-    double s = getJSONdouble(vblObject, "scale", funcname);
-    double r = getJSONdouble(vblObject, "r", funcname);
-    double facing = getJSONdouble(vblObject, "facing", funcname);
-    float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.has("facing");
+    double s = getJSONdouble(topologyObject, "scale", funcname);
+    double r = getJSONdouble(topologyObject, "r", funcname);
+    double facing = getJSONdouble(topologyObject, "facing", funcname);
+    float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
+    boolean useFacing = topologyObject.has("facing");
 
     // Apply Scaling if requested
     if (s != 0) {
@@ -731,7 +739,7 @@ public class VBL_Functions extends AbstractFunction {
     area.add(new Area(stroke.createStrokedShape(line)));
 
     AffineTransform atArea = new AffineTransform();
-    applyTranslate(funcname, atArea, vblObject, paramTranslate);
+    applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
     // Rotate the Polygon if requested
     if (useFacing || r != 0) {
@@ -741,9 +749,9 @@ public class VBL_Functions extends AbstractFunction {
 
       // Override rx,ry coords if supplied
       String rParms[] = {"rx", "ry"};
-      if (jsonKeysExist(vblObject, rParms, funcname)) {
-        rx = getJSONint(vblObject, "rx", funcname);
-        ry = getJSONint(vblObject, "ry", funcname);
+      if (jsonKeysExist(topologyObject, rParms, funcname)) {
+        rx = getJSONint(topologyObject, "rx", funcname);
+        ry = getJSONint(topologyObject, "ry", funcname);
       }
       if (useFacing) {
         r = -(facing + 90);
@@ -751,7 +759,7 @@ public class VBL_Functions extends AbstractFunction {
 
       atArea.rotate(Math.toRadians(r), rx, ry);
     }
-    applyScale(funcname, atArea, vblObject, paramScale);
+    applyScale(funcname, atArea, topologyObject, paramScale);
 
     if (!atArea.isIdentity()) {
       area.transform(atArea);
@@ -762,38 +770,38 @@ public class VBL_Functions extends AbstractFunction {
 
   /**
    * Get the required parameters needed from the JSON to draw an approximate circle and render as
-   * VBL.
+   * topology.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
-   * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
-   * @return the VBL area if the renderer is null, and null otherwise.
+   * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCircleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawCircleTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
-    String funcname = "drawVBL[Circle]";
+    String funcname = "drawTopology[Circle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "radius", "sides"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
+    if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,radius,sides}", funcname));
     }
 
-    int x = getJSONint(vblObject, "x", funcname);
-    int y = getJSONint(vblObject, "y", funcname);
-    double radius = getJSONdouble(vblObject, "radius", funcname);
-    double sides = getJSONdouble(vblObject, "sides", funcname);
+    int x = getJSONint(topologyObject, "x", funcname);
+    int y = getJSONint(topologyObject, "y", funcname);
+    double radius = getJSONdouble(topologyObject, "radius", funcname);
+    double sides = getJSONdouble(topologyObject, "sides", funcname);
 
     // Optional Parameters
-    int fill = getJSONint(vblObject, "fill", funcname);
-    double rotation = getJSONdouble(vblObject, "r", funcname);
-    double facing = getJSONdouble(vblObject, "facing", funcname);
-    double scale = getJSONdouble(vblObject, "scale", funcname);
-    float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.has("facing");
+    int fill = getJSONint(topologyObject, "fill", funcname);
+    double rotation = getJSONdouble(topologyObject, "r", funcname);
+    double facing = getJSONdouble(topologyObject, "facing", funcname);
+    double scale = getJSONdouble(topologyObject, "scale", funcname);
+    float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
+    boolean useFacing = topologyObject.has("facing");
 
     // Lets set some sanity limits
     if (sides < 3) {
@@ -833,7 +841,7 @@ public class VBL_Functions extends AbstractFunction {
     }
 
     AffineTransform atArea = new AffineTransform();
-    applyTranslate(funcname, atArea, vblObject, paramTranslate);
+    applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
     // Rotate the Polygon if requested
     if (useFacing || rotation != 0) {
@@ -843,9 +851,9 @@ public class VBL_Functions extends AbstractFunction {
 
       // Override rx,ry coords if supplied
       String rParms[] = {"rx", "ry"};
-      if (jsonKeysExist(vblObject, rParms, funcname)) {
-        rx = getJSONint(vblObject, "rx", funcname);
-        ry = getJSONint(vblObject, "ry", funcname);
+      if (jsonKeysExist(topologyObject, rParms, funcname)) {
+        rx = getJSONint(topologyObject, "rx", funcname);
+        ry = getJSONint(topologyObject, "ry", funcname);
       }
       if (useFacing) {
         rotation = -(facing + 90);
@@ -853,7 +861,7 @@ public class VBL_Functions extends AbstractFunction {
 
       atArea.rotate(Math.toRadians(rotation), rx, ry);
     }
-    applyScale(funcname, atArea, vblObject, paramScale);
+    applyScale(funcname, atArea, topologyObject, paramScale);
 
     if (!atArea.isIdentity()) {
       area.transform(atArea);
@@ -863,38 +871,38 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to get/set VBL within a defined rectangle.
+   * Get the required parameters needed from the JSON to get/set topology within a defined rectangle.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject JsonObject containing all the coordinates and values needed to draw a
+   * @param topologyObject JsonObject containing all the coordinates and values needed to draw a
    *     rectangle.
    * @param mode The topology mode to operate in.
-   * @return the VBL area.
+   * @return the topology area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getVBL(ZoneRenderer renderer, JsonObject vblObject, Zone.TopologyMode mode) throws ParserException {
-    String funcname = "getVBL[Rectangle]";
+  private Area getTopology(ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode) throws ParserException {
+    String funcname = "getTopology[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
-    if (!jsonKeysExist(vblObject, requiredParms, funcname)) {
+    if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
     }
 
-    int x = getJSONint(vblObject, "x", funcname);
-    int y = getJSONint(vblObject, "y", funcname);
-    int w = getJSONint(vblObject, "w", funcname);
-    int h = getJSONint(vblObject, "h", funcname);
+    int x = getJSONint(topologyObject, "x", funcname);
+    int y = getJSONint(topologyObject, "y", funcname);
+    int w = getJSONint(topologyObject, "w", funcname);
+    int h = getJSONint(topologyObject, "h", funcname);
 
     // Optional Parameters
-    int fill = getJSONint(vblObject, "fill", funcname);
-    double s = getJSONdouble(vblObject, "scale", funcname);
-    double r = getJSONdouble(vblObject, "r", funcname);
-    double facing = getJSONdouble(vblObject, "facing", funcname);
-    float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.has("facing");
+    int fill = getJSONint(topologyObject, "fill", funcname);
+    double s = getJSONdouble(topologyObject, "scale", funcname);
+    double r = getJSONdouble(topologyObject, "r", funcname);
+    double facing = getJSONdouble(topologyObject, "facing", funcname);
+    float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
+    boolean useFacing = topologyObject.has("facing");
 
-    // Allow thickness of 0 and default to 0 to allow complete capture of VBL under a token.
+    // Allow thickness of 0 and default to 0 to allow complete capture of topology under a token.
     if (t < 0) {
       t = 0; // Set default thickness to 0 if null or negative
     }
@@ -942,9 +950,9 @@ public class VBL_Functions extends AbstractFunction {
 
       // Override rx,ry coords if supplied
       String[] rParms = {"rx", "ry"};
-      if (jsonKeysExist(vblObject, rParms, funcname)) {
-        rx = getJSONint(vblObject, "rx", funcname);
-        ry = getJSONint(vblObject, "ry", funcname);
+      if (jsonKeysExist(topologyObject, rParms, funcname)) {
+        rx = getJSONint(topologyObject, "rx", funcname);
+        ry = getJSONint(topologyObject, "ry", funcname);
       }
       if (useFacing) {
         r = -(facing + 90);
@@ -972,7 +980,7 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to get/set VBL within a defined rectangle.
+   * Get the required parameters needed from the JSON to get/set topology within a defined rectangle.
    *
    * @param area Area passed in to convert to path of points
    * @param simpleJSON Boolean to set output to array of points or key/value pairs

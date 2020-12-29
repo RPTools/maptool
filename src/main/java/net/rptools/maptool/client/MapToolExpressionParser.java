@@ -84,7 +84,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               getInfoFunction.getInstance(),
               TokenMoveFunctions.getInstance(),
               FogOfWarFunctions.getInstance(),
-              VBL_Functions.getInstance(),
+              Topology_Functions.getInstance(),
               ZoomFunctions.getInstance(),
               ParserPropertyFunctions.getInstance(),
               MathFunctions.getInstance(),
