@@ -17,6 +17,7 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Polygon;
@@ -35,6 +36,7 @@ import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -60,7 +62,7 @@ public class VBL_Functions extends AbstractFunction {
   private static final String[] paramScale = new String[] {"sx", "sy"};
 
   private VBL_Functions() {
-    super(0, 3, "drawVBL", "eraseVBL", "getVBL", "getTokenVBL", "setTokenVBL", "transferVBL");
+    super(0, 3, "drawVBL", "eraseVBL", "getVBL", "drawMBL", "eraseMBL", "getMBL", "getTokenVBL", "setTokenVBL", "transferVBL");
   }
 
   public static VBL_Functions getInstance() {
@@ -74,8 +76,9 @@ public class VBL_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    if (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) {
+    if (functionName.equals("drawVBL") || functionName.equals("eraseVBL") || functionName.equals("drawMBL") || functionName.equals("eraseMBL")) {
       boolean erase = false;
+      Zone.TopologyMode mode = (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
 
       if (parameters.size() != 1) {
         throw new ParserException(
@@ -87,7 +90,7 @@ public class VBL_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (functionName.equals("eraseVBL")) {
+      if (functionName.equals("eraseVBL") || functionName.equals("eraseMBL")) {
         erase = true;
       }
 
@@ -114,16 +117,16 @@ public class VBL_Functions extends AbstractFunction {
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
-            drawRectangleVBL(renderer, vblObject, erase);
+            drawRectangleVBL(renderer, vblObject, erase, mode);
             break;
           case POLYGON:
-            drawPolygonVBL(renderer, vblObject, erase);
+            drawPolygonVBL(renderer, vblObject, erase, mode);
             break;
           case CROSS:
-            drawCrossVBL(renderer, vblObject, erase);
+            drawCrossVBL(renderer, vblObject, erase, mode);
             break;
           case CIRCLE:
-            drawCircleVBL(renderer, vblObject, erase);
+            drawCircleVBL(renderer, vblObject, erase, mode);
             break;
           case NONE:
             break;
@@ -131,7 +134,8 @@ public class VBL_Functions extends AbstractFunction {
             break;
         }
       }
-    } else if (functionName.equals("getVBL")) {
+    } else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
+      Zone.TopologyMode mode = functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
@@ -174,9 +178,9 @@ public class VBL_Functions extends AbstractFunction {
       for (int i = 0; i < vblArray.size(); i++) {
         JsonObject vblObject = vblArray.get(i).getAsJsonObject();
         if (vblArea == null) {
-          vblArea = getVBL(renderer, vblObject);
+          vblArea = getVBL(renderer, vblObject, mode);
         } else {
-          vblArea.add(getVBL(renderer, vblObject));
+          vblArea.add(getVBL(renderer, vblObject, mode));
         }
       }
       return getAreaPoints(vblArea, simpleJSON);
@@ -264,16 +268,16 @@ public class VBL_Functions extends AbstractFunction {
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
-            tokenVBL.add(drawRectangleVBL(null, vblObject, false));
+            tokenVBL.add(drawRectangleVBL(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case POLYGON:
-            tokenVBL.add(drawPolygonVBL(null, vblObject, false));
+            tokenVBL.add(drawPolygonVBL(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case CROSS:
-            tokenVBL.add(drawCrossVBL(null, vblObject, false));
+            tokenVBL.add(drawCrossVBL(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case CIRCLE:
-            tokenVBL.add(drawCircleVBL(null, vblObject, false));
+            tokenVBL.add(drawCircleVBL(null, vblObject, false, Zone.TopologyMode.VBL));
             break;
           case AUTO:
             tokenVBL = autoGenerateVBL(token, vblObject);
@@ -359,7 +363,7 @@ public class VBL_Functions extends AbstractFunction {
       }
 
       if (vblFromToken) {
-        TokenVBL.renderVBL(renderer, token.getTransformedVBL(), false);
+        TokenVBL.renderTopology(renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL);
         if (delete) {
           token.setVBL(null);
         }
@@ -367,7 +371,7 @@ public class VBL_Functions extends AbstractFunction {
         Area vbl = TokenVBL.getVBL_underToken(renderer, token);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
         if (delete) {
-          TokenVBL.renderVBL(renderer, vbl, true);
+          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL);
         }
       }
     } else {
@@ -418,10 +422,11 @@ public class VBL_Functions extends AbstractFunction {
    * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it.
+   * @param mode The topology mode to operate in.
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawRectangleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
+  private Area drawRectangleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawVBL[Rectangle]";
     // Required Parameters
@@ -516,7 +521,7 @@ public class VBL_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderVBL(renderer, area, erase);
+    return TokenVBL.renderTopology(renderer, area, erase, mode);
   }
 
   private void applyTranslate(
@@ -546,10 +551,11 @@ public class VBL_Functions extends AbstractFunction {
    * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param mode The topology mode to operate in.
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawPolygonVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
+  private Area drawPolygonVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawVBL[Polygon]";
     String requiredParms[] = {"points"};
@@ -662,7 +668,7 @@ public class VBL_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderVBL(renderer, area, erase);
+    return TokenVBL.renderTopology(renderer, area, erase, mode);
   }
 
   /**
@@ -674,10 +680,11 @@ public class VBL_Functions extends AbstractFunction {
    * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param mode The topology mode to operate in.
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCrossVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
+  private Area drawCrossVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawVBL[Cross]";
     // Required Parameters
@@ -750,7 +757,7 @@ public class VBL_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderVBL(renderer, area, erase);
+    return TokenVBL.renderTopology(renderer, area, erase, mode);
   }
 
   /**
@@ -761,10 +768,11 @@ public class VBL_Functions extends AbstractFunction {
    * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
+   * @param mode The topology mode to operate in.
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCircleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
+  private Area drawCircleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawVBL[Circle]";
     // Required Parameters
@@ -851,7 +859,7 @@ public class VBL_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderVBL(renderer, area, erase);
+    return TokenVBL.renderTopology(renderer, area, erase, mode);
   }
 
   /**
@@ -860,10 +868,11 @@ public class VBL_Functions extends AbstractFunction {
    * @param renderer Reference to the ZoneRenderer
    * @param vblObject JsonObject containing all the coordinates and values needed to draw a
    *     rectangle.
+   * @param mode The topology mode to operate in.
    * @return the VBL area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getVBL(ZoneRenderer renderer, JsonObject vblObject) throws ParserException {
+  private Area getVBL(ZoneRenderer renderer, JsonObject vblObject, Zone.TopologyMode mode) throws ParserException {
     String funcname = "getVBL[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -945,7 +954,20 @@ public class VBL_Functions extends AbstractFunction {
       atArea.rotate(Math.toRadians(r), rx, ry);
       area.transform(atArea);
     }
-    area.intersect(renderer.getZone().getTopology());
+
+    switch (mode) {
+      case VBL:
+        area.intersect(renderer.getZone().getTopology());
+        break;
+      case MBL:
+        area.intersect(renderer.getZone().getTopologyTerrain());
+        break;
+      case COMBINED:
+        // Only returns the area where VBL+MBL overlap.
+        area.intersect(renderer.getZone().getTopology());
+        area.intersect(renderer.getZone().getTopologyTerrain());
+        break;
+    }
     return area;
   }
 
