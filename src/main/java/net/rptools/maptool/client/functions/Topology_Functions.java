@@ -17,7 +17,6 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Polygon;
@@ -70,7 +69,18 @@ public class Topology_Functions extends AbstractFunction {
   private static final String[] paramScale = new String[] {"sx", "sy"};
 
   private Topology_Functions() {
-    super(0, 3, "drawVBL", "eraseVBL", "getVBL", "drawMBL", "eraseMBL", "getMBL", "getTokenVBL", "setTokenVBL", "transferVBL");
+    super(
+        0,
+        3,
+        "drawVBL",
+        "eraseVBL",
+        "getVBL",
+        "drawMBL",
+        "eraseMBL",
+        "getMBL",
+        "getTokenVBL",
+        "setTokenVBL",
+        "transferVBL");
   }
 
   public static Topology_Functions getInstance() {
@@ -84,9 +94,15 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    if (functionName.equals("drawVBL") || functionName.equals("eraseVBL") || functionName.equals("drawMBL") || functionName.equals("eraseMBL")) {
+    if (functionName.equals("drawVBL")
+        || functionName.equals("eraseVBL")
+        || functionName.equals("drawMBL")
+        || functionName.equals("eraseMBL")) {
       boolean erase = false;
-      Zone.TopologyMode mode = (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
+      Zone.TopologyMode mode =
+          (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
+              ? Zone.TopologyMode.VBL
+              : Zone.TopologyMode.MBL;
 
       if (parameters.size() != 1) {
         throw new ParserException(
@@ -122,7 +138,8 @@ public class Topology_Functions extends AbstractFunction {
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
 
-        Shape topologyShape = Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
+        Shape topologyShape =
+            Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
         switch (topologyShape) {
           case RECTANGLE:
             drawRectangleTopology(renderer, topologyObject, erase, mode);
@@ -143,7 +160,8 @@ public class Topology_Functions extends AbstractFunction {
         }
       }
     } else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
-      Zone.TopologyMode mode = functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
+      Zone.TopologyMode mode =
+          functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
@@ -427,14 +445,15 @@ public class Topology_Functions extends AbstractFunction {
    * Get the required parameters needed from the JSON to draw a rectangle and render as topology.
    *
    * @param renderer Reference to the ZoneRenderer. Can be null.
-   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
-   *     rectangle.
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to
+   *     draw a rectangle.
    * @param erase Set to true to erase the rectangle in the topology, otherwise draw it.
    * @param mode The topology mode to operate in.
    * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawRectangleTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawRectangleTopology(
+      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawTopology[Rectangle]";
     // Required Parameters
@@ -556,14 +575,15 @@ public class Topology_Functions extends AbstractFunction {
    * Get the required parameters needed from the JSON to draw a Polygon and render as topology.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
-   *     rectangle.
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to
+   *     draw a rectangle.
    * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
    * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawPolygonTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawPolygonTopology(
+      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawTopology[Polygon]";
     String requiredParms[] = {"points"};
@@ -680,19 +700,20 @@ public class Topology_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to draw two Polygon 'lines' and render as topology.
-   * This is a convenience function to draw two lines perpendicular to each other to form a "cross"
-   * commonly used to block LOS for objects like Trees but still show most of the image.
+   * Get the required parameters needed from the JSON to draw two Polygon 'lines' and render as
+   * topology. This is a convenience function to draw two lines perpendicular to each other to form
+   * a "cross" commonly used to block LOS for objects like Trees but still show most of the image.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
-   *     rectangle.
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to
+   *     draw a rectangle.
    * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
    * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCrossTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawCrossTopology(
+      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawTopology[Cross]";
     // Required Parameters
@@ -773,14 +794,15 @@ public class Topology_Functions extends AbstractFunction {
    * topology.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param topologyObject The JsonObject containing all the coordinates and values to needed to draw a
-   *     rectangle.
+   * @param topologyObject The JsonObject containing all the coordinates and values to needed to
+   *     draw a rectangle.
    * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
    * @param mode The topology mode to operate in.
    * @return the topology area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCircleTopology(ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+  private Area drawCircleTopology(
+      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
       throws ParserException {
     String funcname = "drawTopology[Circle]";
     // Required Parameters
@@ -871,7 +893,8 @@ public class Topology_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to get/set topology within a defined rectangle.
+   * Get the required parameters needed from the JSON to get/set topology within a defined
+   * rectangle.
    *
    * @param renderer Reference to the ZoneRenderer
    * @param topologyObject JsonObject containing all the coordinates and values needed to draw a
@@ -880,7 +903,8 @@ public class Topology_Functions extends AbstractFunction {
    * @return the topology area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getTopology(ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode) throws ParserException {
+  private Area getTopology(ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode)
+      throws ParserException {
     String funcname = "getTopology[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -980,7 +1004,8 @@ public class Topology_Functions extends AbstractFunction {
   }
 
   /**
-   * Get the required parameters needed from the JSON to get/set topology within a defined rectangle.
+   * Get the required parameters needed from the JSON to get/set topology within a defined
+   * rectangle.
    *
    * @param area Area passed in to convert to path of points
    * @param simpleJSON Boolean to set output to array of points or key/value pairs
