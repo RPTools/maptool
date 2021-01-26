@@ -20,11 +20,11 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.maptool.client.MapTool;
@@ -132,7 +132,7 @@ public class Handshake {
 
   private static byte[] decode(byte[] bytes, SecretKeySpec passwordKey) {
     try {
-      Cipher cipher = CipherUtil.getInstance().createDecrypter(passwordKey);
+      Cipher cipher = CipherUtil.getInstance().createDecryptor(passwordKey);
       return cipher.doFinal(bytes);
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
@@ -209,7 +209,7 @@ public class Handshake {
 
       // First try to decode with the player password
       try {
-        Cipher playerCipher = CipherUtil.getInstance().createDecrypter(playerPasswordKey);
+        Cipher playerCipher = CipherUtil.getInstance().createDecryptor(playerPasswordKey);
         decrypted = playerCipher.doFinal(text);
       } catch (Exception ex) {
         playerEx = ex;
@@ -223,7 +223,7 @@ public class Handshake {
 
       if (request == null) {
         try {
-          Cipher gmCipher = CipherUtil.getInstance().createDecrypter(gmPasswordKey);
+          Cipher gmCipher = CipherUtil.getInstance().createDecryptor(gmPasswordKey);
           decrypted = gmCipher.doFinal(text);
           request = extractRequestDetails(decrypted, Role.GM);
         } catch (Exception ex) {
@@ -294,8 +294,8 @@ public class Handshake {
   }
 
   private static byte[] buildRequest(Request request)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          BadPaddingException, IllegalBlockSizeException {
+          throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(USERNAME_FIELD);
     sb.append(request.name);
@@ -304,8 +304,28 @@ public class Handshake {
     sb.append(request.version);
     sb.append("\n");
 
-    Cipher cipher = CipherUtil.getInstance().createEncrypter(request.password);
-    return cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
+    byte[] salt = CipherUtil.getInstance().createSalt();
+    Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, salt);
+
+
+    byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
+
+    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+
+    byte[] macSalt = CipherUtil.getInstance().createSalt();
+    byte[] mac = CipherUtil.getInstance().createSecretKeySpec(request.password, macSalt).getEncoded();
+
+    byteStream.write(salt.length);
+    byteStream.write(salt);
+    byteStream.write(cipherBytes.length);
+    byteStream.write(cipherBytes);
+    byteStream.write(macSalt.length);
+    byteStream.write(macSalt);
+    byteStream.write(mac.length);
+    byteStream.write(mac);
+
+
+    return byteStream.toByteArray();
   }
 
   public static class Request {

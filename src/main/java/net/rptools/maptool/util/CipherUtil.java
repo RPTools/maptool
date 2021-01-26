@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.util;
 
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +40,20 @@ public class CipherUtil {
 
   /** Logger used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+
+  /** The length of the generated key. */
+  public static final int DEFAULT_GENERATED_KEY_LEN = 128;
+
+  /** The default number of bytes to be used for the salt if it is not spcified. */
+  public static final int DEFAULT_SALT_SIZE = DEFAULT_GENERATED_KEY_LEN;
+
+
+  /** The number of iterations used for key generation. */
+  private static final int KEY_ITERATION_KEY_COUNT = 2000;
+
+  /** Key generation algorithm. */
+  private static final String KEY_GENERATION_ALGORITHM = "PBKDF2WithHmacSHA1";
+
 
   /**
    * Returns the singleton instance of {@code CipherUtil}.
@@ -65,7 +81,7 @@ public class CipherUtil {
   /**
    * Returns a {@link SecretKeySpec} from the supplied {@link String} key.
    *
-   * @param key the string containing the key.
+   * @param key the key used to encrypt/decrypt
    * @return the {@link SecretKeySpec}.
    */
   public synchronized SecretKeySpec createSecretKeySpec(String key) {
@@ -83,7 +99,7 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createDecrypter(String key)
+  public Cipher createDecryptor(String key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     return createCipher(Cipher.DECRYPT_MODE, createSecretKeySpec(key));
   }
@@ -102,6 +118,7 @@ public class CipherUtil {
     return createCipher(Cipher.ENCRYPT_MODE, createSecretKeySpec(key));
   }
 
+
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
    *
@@ -111,7 +128,7 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createDecrypter(SecretKeySpec key)
+  public Cipher createDecryptor(SecretKeySpec key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (!key.getAlgorithm().equals(CIPHER_ALGORITHM)) {
       throw new AssertionError(
@@ -154,4 +171,41 @@ public class CipherUtil {
     cipher.init(encryptMode, key);
     return cipher;
   }
+
+  public byte[] createSalt(int size) {
+    SecureRandom secureRandom = new SecureRandom();
+    byte salt[] = new byte[size];
+    secureRandom.nextBytes(salt);
+
+    return salt;
+  }
+
+  public byte[] createSalt() {
+    return createSalt(DEFAULT_SALT_SIZE);
+  }
+
+
+
+  public Cipher createEncryptor(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+    cipher.init(Cipher.ENCRYPT_MODE, createSecretKeySpec(key, salt));
+
+    return cipher;
+  }
+
+
+  public Cipher createDecryptor(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+    cipher.init(Cipher.DECRYPT_MODE, createSecretKeySpec(key, salt));
+
+    return cipher;
+  }
+
+  public Key createSecretKeySpec(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
+    SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
+
+    return factory.generateSecret(spec);
+  }
+
 }
