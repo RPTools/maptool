@@ -201,11 +201,11 @@ public class CipherUtil {
     return cipher;
   }
 
-  public Key createSecretKeySpec(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public SecretKeySpec createSecretKeySpec(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
 
-    return factory.generateSecret(spec);
+    return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM);
   }
 
 }
