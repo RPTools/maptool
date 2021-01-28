@@ -24,7 +24,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
@@ -51,13 +50,11 @@ public class CipherUtil {
   /** The default number of bytes to be used for the salt if it is not spcified. */
   public static final int DEFAULT_SALT_SIZE = DEFAULT_GENERATED_KEY_LEN;
 
-
   /** The number of iterations used for key generation. */
   private static final int KEY_ITERATION_KEY_COUNT = 2000;
 
   /** Key generation algorithm. */
   private static final String KEY_GENERATION_ALGORITHM = "PBKDF2WithHmacSHA1";
-
 
   /**
    * Returns the singleton instance of {@code CipherUtil}.
@@ -121,7 +118,6 @@ public class CipherUtil {
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     return createCipher(Cipher.ENCRYPT_MODE, createSecretKeySpec(key));
   }
-
 
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
@@ -188,24 +184,26 @@ public class CipherUtil {
     return createSalt(DEFAULT_SALT_SIZE);
   }
 
-
-
-  public Cipher createEncryptor(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+  public Cipher createEncryptor(String key, byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
     cipher.init(Cipher.ENCRYPT_MODE, createSecretKeySpec(key, salt));
 
     return cipher;
   }
 
-
-  public Cipher createDecryptor(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+  public Cipher createDecryptor(String key, byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
     cipher.init(Cipher.DECRYPT_MODE, createSecretKeySpec(key, salt));
 
     return cipher;
   }
 
-  public SecretKeySpec createSecretKeySpec(String key, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public SecretKeySpec createSecretKeySpec(String key, byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
 
@@ -221,12 +219,11 @@ public class CipherUtil {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
 
-
     SecretKeySpec key;
     try {
       key = createSecretKeySpec(password, salt);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-        throw new IOException(e);
+      throw new IOException(e);
     }
 
     byte[] mac = key.getEncoded();
@@ -258,7 +255,6 @@ public class CipherUtil {
     dataOutputStream.flush();
 
     return byteArrayOutputStream.toByteArray();
-
   }
 
   public boolean validateMac(byte[] macWithSalt, String password) {

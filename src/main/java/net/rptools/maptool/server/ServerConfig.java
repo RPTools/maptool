@@ -17,8 +17,6 @@ package net.rptools.maptool.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;
-import javax.crypto.spec.SecretKeySpec;
-import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 
 public class ServerConfig {
@@ -70,7 +68,6 @@ public class ServerConfig {
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
-
   }
 
   public String getHostPlayerId() {
@@ -107,7 +104,6 @@ public class ServerConfig {
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
     return config;
   }
-
 
   public String getGmPassword() {
     return gmPassword;

@@ -59,7 +59,8 @@ public class Handshake {
    * @return A player structure for the connected player or null on issues
    * @throws IOException if there is a problem reading from the socket.
    */
-  public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+  public static Player receiveHandshake(MapToolServer server, Socket s)
+      throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
     Response response = new Response();
     Request request =
@@ -92,13 +93,13 @@ public class Handshake {
     if (response.code == Code.OK) {
       player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-      String passwordToUse = player.isGM()
+      String passwordToUse =
+          player.isGM()
               ? MapTool.getServer().getConfig().getGmPassword()
               : MapTool.getServer().getConfig().getPlayerPassword();
 
       byte[] salt = CipherUtil.getInstance().createSalt();
-      SecretKeySpec passwordKey =
-              CipherUtil.getInstance().createSecretKeySpec(passwordToUse, salt);
+      SecretKeySpec passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, salt);
 
       byte[] challenge =
           encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
@@ -201,63 +202,61 @@ public class Handshake {
    * @param gmPassword
    * @return The decrypted {@link Request}.
    */
+  private static Request decodeRequest(Socket socket, String playerPassword, String gmPassword)
+      throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
-  private static Request decodeRequest(
-        Socket socket, String playerPassword, String gmPassword)
-          throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    socket.getInetAddress().getAddress();
+    InputStream inputStream = socket.getInputStream();
+    DataInputStream dis = new DataInputStream(inputStream);
 
-      socket.getInetAddress().getAddress();
-      InputStream inputStream = socket.getInputStream();
-      DataInputStream dis = new DataInputStream(inputStream);
+    byte[] decrypted = null;
+    Exception playerEx = null;
+    Exception gmEx = null;
 
-      byte[] decrypted = null;
-      Exception playerEx = null;
-      Exception gmEx = null;
+    // First retrieve the salt for the message
+    int saltLen = dis.readInt();
+    byte[] salt = dis.readNBytes(saltLen);
+    if (salt.length != saltLen) {
+      return null; // if the salt cant be read then the handshake is invalid
+    }
 
-      // First retrieve the salt for the message
-      int saltLen = dis.readInt();
-      byte[] salt = dis.readNBytes(saltLen);
-      if (salt.length != saltLen) {
-        return null; // if the salt cant be read then the handshake is invalid
-      }
+    // retrieve the cipher message
+    int messageLen = dis.readInt();
+    byte[] message = dis.readNBytes(messageLen);
+    if (message.length != messageLen) {
+      return null; // if the message cant be read then the handshake is invalid
+    }
 
-      // retrieve the cipher message
-      int messageLen = dis.readInt();
-      byte[] message = dis.readNBytes(messageLen);
-      if (message.length != messageLen) {
-        return null; // if the message cant be read then the handshake is invalid
-      }
-
-      byte[] mac = CipherUtil.getInstance().readMac(dis);
+    byte[] mac = CipherUtil.getInstance().readMac(dis);
 
     SecretKeySpec cipherKey = null;
     Role playerRole = null;
-      if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
+    if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
       playerRole = Role.PLAYER;
     } else if (CipherUtil.getInstance().validateMac(mac, gmPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
       playerRole = Role.GM;
     } else {
-      // If neither MAC checks out then return null Request which will be logged as invalid password.
+      // If neither MAC checks out then return null Request which will be logged as invalid
+      // password.
       return null;
     }
 
     Request request = null;
     try {
-        Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
-        decrypted = playerCipher.doFinal(message);
+      Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
+      decrypted = playerCipher.doFinal(message);
     } catch (Exception ex) {
-        log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
-        log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
-        return null;
+      log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
+      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
+      return null;
     }
 
     request = extractRequestDetails(decrypted, playerRole);
 
-      return request;
+    return request;
   }
-
 
   /**
    * Client side of the handshake
@@ -269,14 +268,13 @@ public class Handshake {
    * @return the response from the srever
    */
   public static Response sendHandshake(Request request, Socket s)
-          throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
+      throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
           NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
     byte[] reqBytes = buildRequest(request);
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.write(reqBytes);
     dos.flush();
-
 
     // wait for and read the challenge
     DataInputStream dis = new DataInputStream(s.getInputStream());
@@ -309,12 +307,12 @@ public class Handshake {
         return response;
       }
 
-
       SecretKeySpec key = CipherUtil.getInstance().createSecretKeySpec(request.password, salt);
       byte[] resp = decode(bytes, key);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
       byte[] responseSalt = CipherUtil.getInstance().createSalt();
-      SecretKeySpec responseKey = CipherUtil.getInstance().createSecretKeySpec(request.password, responseSalt);
+      SecretKeySpec responseKey =
+          CipherUtil.getInstance().createSecretKeySpec(request.password, responseSalt);
       byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(), responseKey);
       dos.writeInt(responseSalt.length);
       dos.write(responseSalt);
@@ -334,7 +332,7 @@ public class Handshake {
   }
 
   private static byte[] buildRequest(Request request)
-          throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
           BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(USERNAME_FIELD);
@@ -347,9 +345,7 @@ public class Handshake {
     byte[] salt = CipherUtil.getInstance().createSalt();
     Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, salt);
 
-
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
-
 
     byte[] mac = CipherUtil.getInstance().generateMacAndSalt(request.password);
 
@@ -362,7 +358,6 @@ public class Handshake {
     dataOutputStream.write(cipherBytes);
     dataOutputStream.write(mac);
     dataOutputStream.flush();
-
 
     return byteArrayOutputStream.toByteArray();
   }
