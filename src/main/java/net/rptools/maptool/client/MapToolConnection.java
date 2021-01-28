@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -57,7 +58,8 @@ public class MapToolConnection extends ClientConnection {
         | InvalidKeyException
         | BadPaddingException
         | NoSuchAlgorithmException
-        | NoSuchPaddingException e) {
+        | NoSuchPaddingException
+        | InvalidKeySpecException e) {
       MapTool.showError("Handshake.msg.encodeInitFail", e);
       return false;
     }
