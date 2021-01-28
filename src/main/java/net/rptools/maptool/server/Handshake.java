@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.clientserver.hessian.HessianUtils;
@@ -62,10 +63,20 @@ public class Handshake {
   public static Player receiveHandshake(MapToolServer server, Socket s)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
+    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+
+    // Send the initial salt we expect the first message to use as the MAC
+    byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
+    dos.writeInt(initialMacSalt.length);
+    dos.write(initialMacSalt);
+
     Response response = new Response();
     Request request =
         decodeRequest(
-            s, server.getConfig().getPlayerPassword(), server.getConfig().getGmPassword());
+            s,
+            server.getConfig().getPlayerPassword(),
+            server.getConfig().getGmPassword(),
+            initialMacSalt);
     if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -88,7 +99,6 @@ public class Handshake {
     }
 
     Player player = null;
-    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.writeInt(response.code);
     if (response.code == Code.OK) {
       player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
@@ -202,7 +212,8 @@ public class Handshake {
    * @param gmPassword
    * @return The decrypted {@link Request}.
    */
-  private static Request decodeRequest(Socket socket, String playerPassword, String gmPassword)
+  private static Request decodeRequest(
+      Socket socket, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
     socket.getInetAddress().getAddress();
@@ -228,6 +239,20 @@ public class Handshake {
     }
 
     byte[] mac = CipherUtil.getInstance().readMac(dis);
+    System.out.print("expected salt ");
+    for (byte b : expectedInitialMacSalt) {
+      System.out.print(String.format("%02x", b));
+    }
+    System.out.println();
+
+    System.out.print("sent salt     ");
+    for (byte b : CipherUtil.getInstance().getMacSalt(mac)) {
+      System.out.print(String.format("%02x", b));
+    }
+    System.out.println();
+    if (Arrays.compare(expectedInitialMacSalt, CipherUtil.getInstance().getMacSalt(mac)) != 0) {
+      return null; // handshake is invalid
+    }
 
     SecretKeySpec cipherKey = null;
     Role playerRole = null;
@@ -271,13 +296,24 @@ public class Handshake {
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
           NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
-    byte[] reqBytes = buildRequest(request);
+    DataInputStream dis = new DataInputStream(s.getInputStream());
+    // Read the salt we are expected to use for initial messages MAC
+    int macSaltLen = dis.readInt();
+    byte[] macSalt = dis.readNBytes(macSaltLen);
+
+    if (macSaltLen != macSalt.length) {
+      Response response = new Response();
+      response.code = Code.ERROR;
+      response.message = "";
+      return response;
+    }
+
+    byte[] reqBytes = buildRequest(request, macSalt);
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.write(reqBytes);
     dos.flush();
 
     // wait for and read the challenge
-    DataInputStream dis = new DataInputStream(s.getInputStream());
     int code = dis.readInt();
 
     if (code == Code.OK) {
@@ -331,7 +367,7 @@ public class Handshake {
     return (Response) input.readObject();
   }
 
-  private static byte[] buildRequest(Request request)
+  private static byte[] buildRequest(Request request, byte[] macSalt)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
           BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
@@ -347,7 +383,7 @@ public class Handshake {
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-    byte[] mac = CipherUtil.getInstance().generateMacAndSalt(request.password);
+    byte[] mac = CipherUtil.getInstance().generateMacWithSalt(request.password, macSalt);
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 

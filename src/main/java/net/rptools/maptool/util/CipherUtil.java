@@ -280,4 +280,15 @@ public class CipherUtil {
       return false;
     }
   }
+
+  public byte[] getMacSalt(byte[] macWithSalt) {
+    DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(macWithSalt));
+    try {
+      int saltLen = dataInputStream.readInt();
+      byte[] salt = dataInputStream.readNBytes(saltLen);
+      return salt;
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
 }
