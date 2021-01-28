@@ -20,10 +20,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.clientserver.hessian.HessianUtils;
@@ -104,10 +102,12 @@ public class Handshake {
 
       byte[] challenge =
           encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
+
       dos.writeInt(salt.length);
       dos.write(salt);
       dos.writeInt(challenge.length);
       dos.write(challenge);
+      dos.write(CipherUtil.getInstance().generateMacAndSalt(passwordToUse));
       dos.flush();
 
       // Now read the response
@@ -124,6 +124,10 @@ public class Handshake {
         return null; // If the message bytes can not be read then the handshake is invalid
       }
 
+      byte[] mac = CipherUtil.getInstance().readMac(dis);
+      if (!CipherUtil.getInstance().validateMac(mac, passwordToUse)) {
+        return null;
+      }
       passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, responseSalt);
       byte[] responseBytes = decode(bytes, passwordKey);
       String challengeResponse = new String(responseBytes);
@@ -224,28 +228,14 @@ public class Handshake {
         return null; // if the message cant be read then the handshake is invalid
       }
 
-      // retrieve the mac salt
-      int macSaltLen = dis.readInt();
-      byte[] macSalt = dis.readNBytes(macSaltLen);
-
-      // retrieve the mac
-      int macLen = dis.readInt();
-      byte[] mac = dis.readNBytes(macLen);
-    if (mac.length != macLen) {
-      return null; // if the mac cant be read then the handshake is invalid
-    }
-
-
-    Key playerMac = CipherUtil.getInstance().createSecretKeySpec(playerPassword, macSalt);
-    Key gmMac = CipherUtil.getInstance().createSecretKeySpec(gmPassword, macSalt);
+      byte[] mac = CipherUtil.getInstance().readMac(dis);
 
     SecretKeySpec cipherKey = null;
     Role playerRole = null;
-
-    if (Arrays.equals(playerMac.getEncoded(), mac)) {
+      if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
       playerRole = Role.PLAYER;
-    } else if (Arrays.equals(gmMac.getEncoded(), mac)) {
+    } else if (CipherUtil.getInstance().validateMac(mac, gmPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
       playerRole = Role.GM;
     } else {
@@ -259,7 +249,7 @@ public class Handshake {
         decrypted = playerCipher.doFinal(message);
     } catch (Exception ex) {
         log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
-        log.warn(I18N.getText("Handshake.msg.failedLoginDecode", ex));
+        log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
         return null;
     }
 
@@ -299,7 +289,8 @@ public class Handshake {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = "";
-        return response;      }
+        return response;
+      }
 
       int len = dis.readInt();
       byte[] bytes = dis.readNBytes(len);
@@ -309,6 +300,15 @@ public class Handshake {
         response.message = "";
         return response;
       }
+
+      byte[] mac = CipherUtil.getInstance().readMac(dis);
+      if (!CipherUtil.getInstance().validateMac(mac, request.password)) {
+        Response response = new Response();
+        response.code = Code.ERROR;
+        response.message = "";
+        return response;
+      }
+
 
       SecretKeySpec key = CipherUtil.getInstance().createSecretKeySpec(request.password, salt);
       byte[] resp = decode(bytes, key);
@@ -320,6 +320,7 @@ public class Handshake {
       dos.write(responseSalt);
       dos.writeInt(response.length);
       dos.write(response);
+      dos.write(CipherUtil.getInstance().generateMacAndSalt(request.password));
     } else {
       Response response = new Response();
       response.code = code;
@@ -350,8 +351,7 @@ public class Handshake {
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
 
-    byte[] macSalt = CipherUtil.getInstance().createSalt();
-    byte[] mac = CipherUtil.getInstance().createSecretKeySpec(request.password, macSalt).getEncoded();
+    byte[] mac = CipherUtil.getInstance().generateMacAndSalt(request.password);
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -360,9 +360,6 @@ public class Handshake {
     dataOutputStream.write(salt);
     dataOutputStream.writeInt(cipherBytes.length);
     dataOutputStream.write(cipherBytes);
-    dataOutputStream.writeInt(macSalt.length);
-    dataOutputStream.write(macSalt);
-    dataOutputStream.writeInt(mac.length);
     dataOutputStream.write(mac);
     dataOutputStream.flush();
 

@@ -14,14 +14,18 @@
  */
 package net.rptools.maptool.util;
 
+import java.io.*;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -208,4 +212,76 @@ public class CipherUtil {
     return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM);
   }
 
+  public byte[] generateMacAndSalt(String password) throws IOException {
+    byte[] salt = createSalt();
+    return generateMacWithSalt(password, salt);
+  }
+
+  public byte[] generateMacWithSalt(String password, byte[] salt) throws IOException {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+
+    SecretKeySpec key;
+    try {
+      key = createSecretKeySpec(password, salt);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        throw new IOException(e);
+    }
+
+    byte[] mac = key.getEncoded();
+
+    dataOutputStream.writeInt(salt.length);
+    dataOutputStream.write(salt);
+    dataOutputStream.writeInt(mac.length);
+    dataOutputStream.write(mac);
+    dataOutputStream.flush();
+    return byteArrayOutputStream.toByteArray();
+  }
+
+  public byte[] readMac(DataInputStream in) throws IOException {
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+    int saltLen = in.readInt();
+    byte[] salt = in.readNBytes(saltLen);
+
+    int macLen = in.readInt();
+    byte[] mac = in.readNBytes(macLen);
+
+    dataOutputStream.writeInt(saltLen);
+    dataOutputStream.write(salt);
+    dataOutputStream.writeInt(macLen);
+    dataOutputStream.write(mac);
+
+    dataOutputStream.flush();
+
+    return byteArrayOutputStream.toByteArray();
+
+  }
+
+  public boolean validateMac(byte[] macWithSalt, String password) {
+    DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(macWithSalt));
+    try {
+      int saltLen = dataInputStream.readInt();
+      byte[] salt = dataInputStream.readNBytes(saltLen);
+      if (saltLen != salt.length) {
+        log.warn(I18N.getText("Handshake.msg.failedLoginDecode"));
+        return false;
+      }
+      int macLen = dataInputStream.readInt();
+      byte[] mac = dataInputStream.readNBytes(macLen);
+      if (macLen != mac.length) {
+        log.warn(I18N.getText("Handshake.msg.failedLoginDecode"));
+        return false;
+      }
+      byte[] compareTo = generateMacWithSalt(password, salt);
+
+      return Arrays.compare(macWithSalt, compareTo) == 0;
+    } catch (IOException e) {
+      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), e);
+      return false;
+    }
+  }
 }
