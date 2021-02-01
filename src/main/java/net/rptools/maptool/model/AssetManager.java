@@ -362,6 +362,9 @@ public class AssetManager {
    *     asset cache to use in its place.
    */
   private static MD5Key sanitizeAssetId(MD5Key md5Key) throws IOException {
+    if (md5Key == null) {
+      return null;
+    }
 
     // Check to see that the asset path wont escape the asset cache directory.
     Path assetCachePath = cacheDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS);
