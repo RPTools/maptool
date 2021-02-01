@@ -91,7 +91,11 @@ public class AssetManager {
     // Make sure we have an empty "bad-location" image in memory cache.
     Asset asset = new Asset(BAD_ASSET_LOCATION_KEY.toString(), new byte[] {});
     asset.setId(BAD_ASSET_LOCATION_KEY);
-    putAsset(asset);
+    try {
+      putAsset(asset);
+    } catch (Exception e) {
+      // Since the bad location image is just the broken image we dont care if adding it fails
+    }
   }
 
   /**
@@ -358,9 +362,10 @@ public class AssetManager {
    *     asset cache to use in its place.
    */
   private static MD5Key sanitizeAssetId(MD5Key md5Key) throws IOException {
+
     // Check to see that the asset path wont escape the asset cache directory.
     Path assetCachePath = cacheDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS);
-    String assetCache = assetCachePath.toString() + "/";
+    String assetCache = assetCachePath.toString() + File.separator;
     Path assetPath =
         cacheDir.toPath().resolve(md5Key.toString()).toRealPath(LinkOption.NOFOLLOW_LINKS);
     String asset = assetPath.toString();

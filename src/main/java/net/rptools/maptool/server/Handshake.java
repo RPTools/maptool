@@ -239,17 +239,7 @@ public class Handshake {
     }
 
     byte[] mac = CipherUtil.getInstance().readMac(dis);
-    System.out.print("expected salt ");
-    for (byte b : expectedInitialMacSalt) {
-      System.out.print(String.format("%02x", b));
-    }
-    System.out.println();
 
-    System.out.print("sent salt     ");
-    for (byte b : CipherUtil.getInstance().getMacSalt(mac)) {
-      System.out.print(String.format("%02x", b));
-    }
-    System.out.println();
     if (Arrays.compare(expectedInitialMacSalt, CipherUtil.getInstance().getMacSalt(mac)) != 0) {
       return null; // handshake is invalid
     }
