@@ -284,18 +284,12 @@ public class PreferencesDialog extends JDialog {
     startupInfoLabel = panel.getLabel("startupInfoLabel");
 
     File appCfgFile = AppUtil.getAppCfgFile();
-    if (appCfgFile != null) {
-      String copyInfo = "";
-      if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
-        copyInfo =
-            I18N.getText(
-                "startup.preferences.info.manualCopy",
-                AppUtil.getDataDirAppCfgFile().toString(),
-                appCfgFile.toString());
-      }
-      String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
-      startupInfoLabel.setText(startupInfoMsg);
+    String copyInfo = "";
+    if (appCfgFile != null) { // Don't try to display message if running from dev.
+        copyInfo = I18N.getText("startup.preferences.info.manualCopy", appCfgFile.toString());
     }
+    String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
+    startupInfoLabel.setText(startupInfoMsg);
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
     languageModel.addAll(getLanguages());
@@ -952,33 +946,25 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
     // get JVM User Defaults/User override preferences
-    if (AppUtil.getAppCfgFile() == null) {
-      int ind = tabbedPane.indexOfTab("Startup");
-      if (ind >= 0) {
-        tabbedPane.removeTabAt(ind);
-      }
+    if (!UserJvmOptions.loadAppCfg()) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
     } else {
-      if (!UserJvmOptions.loadAppCfg()) {
-        tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
-      } else {
-        try {
+      try {
 
-          jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
-          jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
-          jvmXssTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.STACK_SIZE));
-          dataDirTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.DATA_DIR));
+        jvmXmxTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MAX_MEM));
+        jvmXmsTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.MIN_MEM));
+        jvmXssTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.STACK_SIZE));
+        dataDirTextField.setText(UserJvmOptions.getJvmOption(JVM_OPTION.DATA_DIR));
 
-          jvmDirect3dCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
-          jvmOpenGLCheckbox.setSelected(
-              UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
-          jvmInitAwtCheckbox.setSelected(
-              UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
+        jvmDirect3dCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
+        jvmOpenGLCheckbox.setSelected(UserJvmOptions.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
+        jvmInitAwtCheckbox.setSelected(
+            UserJvmOptions.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
 
-          jamLanguageOverrideComboBox.setSelectedItem(
-              UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-        } catch (Exception e) {
-          log.error("Unable to retrieve JVM user options!", e);
-        }
+        jamLanguageOverrideComboBox.setSelectedItem(
+            UserJvmOptions.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
+      } catch (Exception e) {
+        log.error("Unable to retrieve JVM user options!", e);
       }
     }
 
