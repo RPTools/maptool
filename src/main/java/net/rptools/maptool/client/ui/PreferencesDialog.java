@@ -286,7 +286,7 @@ public class PreferencesDialog extends JDialog {
     File appCfgFile = AppUtil.getAppCfgFile();
     String copyInfo = "";
     if (appCfgFile != null) { // Don't try to display message if running from dev.
-        copyInfo = I18N.getText("startup.preferences.info.manualCopy", appCfgFile.toString());
+      copyInfo = I18N.getText("startup.preferences.info.manualCopy", appCfgFile.toString());
     }
     String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
     startupInfoLabel.setText(startupInfoMsg);
