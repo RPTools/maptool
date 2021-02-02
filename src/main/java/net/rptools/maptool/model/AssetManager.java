@@ -240,7 +240,9 @@ public class AssetManager {
         return;
       }
     } catch (IOException e) {
-      log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
+      if (asset != null && !asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
+        log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
+      }
     }
 
     if (asset == null) {
