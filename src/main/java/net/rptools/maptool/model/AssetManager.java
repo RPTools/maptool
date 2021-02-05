@@ -88,14 +88,6 @@ public class AssetManager {
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
     usePersistentCache = true;
-    // Make sure we have an empty "bad-location" image in memory cache.
-    Asset asset = new Asset(BAD_ASSET_LOCATION_KEY.toString(), new byte[] {});
-    asset.setId(BAD_ASSET_LOCATION_KEY);
-    try {
-      putAsset(asset);
-    } catch (Exception e) {
-      // Since the bad location image is just the broken image we dont care if adding it fails
-    }
   }
 
   /**
