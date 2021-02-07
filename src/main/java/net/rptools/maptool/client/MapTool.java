@@ -1045,8 +1045,10 @@ public class MapTool {
     // Registered ?
     if (config.isServerRegistered() && !config.isPersonalServer()) {
       try {
-        int result = MapToolRegistry.registerInstance(config.getServerName(), config.getPort());
-        if (result == 3) {
+        MapToolRegistry.RegisterResponse result =
+            MapToolRegistry.getInstance()
+                .registerInstance(config.getServerName(), config.getPort());
+        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         }
         // TODO: I don't like this
@@ -1228,7 +1230,7 @@ public class MapTool {
     // Unregister ourselves
     if (server != null && server.getConfig().isServerRegistered() && !isPersonalServer) {
       try {
-        MapToolRegistry.unregisterInstance(server.getConfig().getPort());
+        MapToolRegistry.getInstance().unregisterInstance();
       } catch (Throwable t) {
         MapTool.showError("While unregistering server instance", t);
       }
