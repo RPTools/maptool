@@ -40,6 +40,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
+import net.rptools.maptool.client.MapToolRegistry.SeverConnectionDetails;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
@@ -171,7 +172,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
       @Override
       protected Object doInBackground() {
-        model = new RemoteServerTableModel(MapToolRegistry.findAllInstances());
+        model = new RemoteServerTableModel(MapToolRegistry.getInstance().findAllInstances());
         return null;
       }
 
@@ -266,7 +267,10 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     String externalAddress = "Unknown";
     try {
-      externalAddress = MapToolRegistry.getAddress();
+      externalAddress = MapToolRegistry.getInstance().getAddress();
+      if (externalAddress == null || externalAddress.length() == 0) {
+        externalAddress = "Unknown";
+      }
     } catch (Exception e) {
       // Oh well, might not be connected
     }
@@ -317,15 +321,14 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       getServerNameTextField().setText(serverName);
 
       // Do the lookup
-      String serverInfo = MapToolRegistry.findInstance(serverName);
-      if (serverInfo == null || serverInfo.length() == 0) {
+      SeverConnectionDetails serverInfo = MapToolRegistry.getInstance().findInstance(serverName);
+      if (serverInfo == null || serverInfo.address == null || serverInfo.address.length() == 0) {
         MapTool.showError(I18N.getText("ServerDialog.error.serverNotFound", serverName));
         return;
       }
-      String[] data = serverInfo.split(":");
-      hostname = data[0];
+      hostname = serverInfo.address;
       try {
-        port = Integer.parseInt(data[1]);
+        port = serverInfo.port;
       } catch (NumberFormatException nfe) {
         MapTool.showError("ServerDialog.error.portNumberException");
         return;
@@ -371,7 +374,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       for (String line : encodedData) {
         String[] row = line.split(":");
         if (row.length == 1) {
-          row = new String[] {row[0], "Pre 1.3"};
+          row = new String[] {row[0], "Unknown"};
         }
         data.add(row);
       }
