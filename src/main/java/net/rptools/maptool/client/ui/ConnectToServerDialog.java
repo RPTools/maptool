@@ -374,7 +374,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       for (String line : encodedData) {
         String[] row = line.split(":");
         if (row.length == 1) {
-          row = new String[] {row[0], "Pre 1.3"};
+          row = new String[] {row[0], "Unknown"};
         }
         data.add(row);
       }

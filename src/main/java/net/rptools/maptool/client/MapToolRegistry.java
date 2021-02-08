@@ -43,7 +43,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class MapToolRegistry {
-  private static final String SERVICE_URL = "httpstatic s://services-mt.rptools.net/";
+  private static final String SERVICE_URL = "https://services-mt.rptools.net";
   private static final String REGISTER_SERVER = SERVICE_URL + "/register-server";
   private static final String ACTIVE_SERVERS = SERVICE_URL + "/active-servers";
   private static final String SERVER_HEARTBEAT = SERVICE_URL + "/server-heartbeat";
@@ -55,7 +55,6 @@ public class MapToolRegistry {
   private String serverRegistrationId;
 
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
-
 
   private static MapToolRegistry instance = new MapToolRegistry();
 
@@ -85,7 +84,7 @@ public class MapToolRegistry {
 
     try {
       Response response = client.newCall(request).execute();
-      JsonObject json = JsonParser.parseString(response.body().toString()).getAsJsonObject();
+      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
       SeverConnectionDetails details = new SeverConnectionDetails();
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
@@ -105,10 +104,12 @@ public class MapToolRegistry {
 
     try {
       Response response = client.newCall(request).execute();
-      JsonArray array = JsonParser.parseString(response.body().toString()).getAsJsonArray();
+      JsonArray array = JsonParser.parseString(response.body().string()).getAsJsonArray();
       List<String> servers = new ArrayList<>();
       for (JsonElement ele : array) {
-        servers.add(ele.getAsString());
+        JsonObject jobj = ele.getAsJsonObject();
+        String val = jobj.get("name").getAsString() + ":" + jobj.get("version").getAsString();
+        servers.add(val);
       }
       return servers;
     } catch (IOException | NullPointerException e) {
@@ -122,7 +123,11 @@ public class MapToolRegistry {
     body.addProperty("name", id);
     body.addProperty("port", port);
     body.addProperty("address", getAddress());
-    body.addProperty("version", MapTool.getVersion());
+    if (MapTool.isDevelopment()) {
+      body.addProperty("version", "Dev");
+    } else {
+      body.addProperty("version", MapTool.getVersion());
+    }
     body.addProperty("clientId", MapTool.getClientId());
     Locale locale = Locale.getDefault();
     body.addProperty("country", locale.getCountry());
@@ -137,7 +142,7 @@ public class MapToolRegistry {
     RegisterResponse registerResponse;
     try {
       Response response = client.newCall(request).execute();
-      JsonObject json = JsonParser.parseString(response.body().toString()).getAsJsonObject();
+      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
 
       String status = json.get("status").getAsString();
       if ("ok".equals(status)) {
