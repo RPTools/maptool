@@ -83,7 +83,8 @@ public class MapToolRegistry {
     Request request = new Request.Builder().url(requestUrl).build();
 
     try (Response response = client.newCall(request).execute()) {
-      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();SeverConnectionDetails details = new SeverConnectionDetails();
+      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
+      SeverConnectionDetails details = new SeverConnectionDetails();
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
@@ -178,11 +179,11 @@ public class MapToolRegistry {
               @Override
               public void onResponse(@NotNull Call call, @NotNull Response response)
                   throws IOException {
-                  try{
-                    response.close();
-                  } catch (Exception e) {
-                    // Not much point doing anything...
-                  }
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
               }
             });
   }
@@ -212,11 +213,11 @@ public class MapToolRegistry {
               @Override
               public void onResponse(@NotNull Call call, @NotNull Response response)
                   throws IOException {
-                  try {
-                    response.close();
-                  } catch(Exception e) {
-                    // Not much point doing anything...
-                  }
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
               }
             });
   }
