@@ -241,6 +241,10 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return (JTextField) getComponent("@username");
   }
 
+  public JTextField getPasswordTextField() {
+    return (JTextField) getComponent("@password");
+  }
+
   public JTextField getPortTextField() {
     return (JTextField) getComponent("@port");
   }
@@ -261,6 +265,10 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     String username = getUsernameTextField().getText().trim();
     if (username.length() == 0) {
       MapTool.showError("ServerDialog.error.username"); // $NON-NLS-1$
+      return;
+    }
+    if (getPasswordTextField().getText().length() == 0) {
+      MapTool.showError("ServerDialog.error.noConnectPassword"); // $NON-NLS-1$
       return;
     }
     getUsernameTextField().setText(username);
