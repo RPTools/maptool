@@ -39,9 +39,9 @@ import org.apache.logging.log4j.Logger;
 public class Handshake {
 
   public interface Code {
-    public static final int UNKNOWN = 0;
-    public static final int OK = 1;
-    public static final int ERROR = 2;
+    int UNKNOWN = 0;
+    int OK = 1;
+    int ERROR = 2;
   }
 
   private static String USERNAME_FIELD = "username:";
@@ -154,6 +154,9 @@ public class Handshake {
       HessianOutput output = new HessianOutput(s.getOutputStream());
       output.getSerializerFactory().setAllowNonSerializable(true);
       output.writeObject(response);
+    } else {
+      dos.writeInt(response.message.length());
+      dos.writeBytes(response.message);
     }
     return player;
   }
@@ -294,7 +297,7 @@ public class Handshake {
     if (macSaltLen != macSalt.length) {
       Response response = new Response();
       response.code = Code.ERROR;
-      response.message = "";
+      response.message = I18N.getString("Handshake.msg.wrongPassword");
       return response;
     }
 
@@ -312,7 +315,7 @@ public class Handshake {
       if (salt.length != saltLen) {
         Response response = new Response();
         response.code = Code.ERROR;
-        response.message = "";
+        response.message = I18N.getString("Handshake.msg.wrongPassword");
         return response;
       }
 
@@ -321,7 +324,7 @@ public class Handshake {
       if (bytes.length != bytes.length) {
         Response response = new Response();
         response.code = Code.ERROR;
-        response.message = "";
+        response.message = I18N.getString("Handshake.msg.wrongPassword");
         return response;
       }
 
@@ -329,7 +332,7 @@ public class Handshake {
       if (!CipherUtil.getInstance().validateMac(mac, request.password)) {
         Response response = new Response();
         response.code = Code.ERROR;
-        response.message = "";
+        response.message = I18N.getString("Handshake.msg.wrongPassword");
         return response;
       }
 
@@ -348,7 +351,9 @@ public class Handshake {
     } else {
       Response response = new Response();
       response.code = code;
-      response.message = "";
+      int len = dis.readInt();
+      byte[] msg = dis.readNBytes(len);
+      response.message = new String(msg);
       return response;
     }
 
