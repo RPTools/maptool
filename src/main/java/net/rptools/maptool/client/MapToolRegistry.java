@@ -82,8 +82,7 @@ public class MapToolRegistry {
 
     Request request = new Request.Builder().url(requestUrl).build();
 
-    try {
-      Response response = client.newCall(request).execute();
+    try (Response response = client.newCall(request).execute()) {
       JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
       SeverConnectionDetails details = new SeverConnectionDetails();
 
@@ -102,8 +101,7 @@ public class MapToolRegistry {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder().url(ACTIVE_SERVERS).build();
 
-    try {
-      Response response = client.newCall(request).execute();
+    try (Response response = client.newCall(request).execute()) {
       JsonArray array = JsonParser.parseString(response.body().string()).getAsJsonArray();
       List<String> servers = new ArrayList<>();
       for (JsonElement ele : array) {
@@ -140,8 +138,7 @@ public class MapToolRegistry {
 
     Request request = new Request.Builder().url(REGISTER_SERVER).put(requestBody).build();
     RegisterResponse registerResponse;
-    try {
-      Response response = client.newCall(request).execute();
+    try (Response response = client.newCall(request).execute()) {
       JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
 
       String status = json.get("status").getAsString();
@@ -163,11 +160,12 @@ public class MapToolRegistry {
   public void unregisterInstance() {
     JsonObject body = new JsonObject();
     body.addProperty("id", serverRegistrationId);
+    body.addProperty("clientId", MapTool.getClientId());
 
     OkHttpClient client = new OkHttpClient();
     RequestBody requestBody = RequestBody.create(body.toString(), JSON);
 
-    Request request = new Request.Builder().url(SERVER_DISCONNECT).put(requestBody).build();
+    Request request = new Request.Builder().url(SERVER_DISCONNECT).patch(requestBody).build();
 
     client
         .newCall(request)
@@ -181,7 +179,11 @@ public class MapToolRegistry {
               @Override
               public void onResponse(@NotNull Call call, @NotNull Response response)
                   throws IOException {
-                // Nothing we don't care
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
               }
             });
   }
@@ -197,7 +199,7 @@ public class MapToolRegistry {
     OkHttpClient client = new OkHttpClient();
     RequestBody requestBody = RequestBody.create(body.toString(), JSON);
 
-    Request request = new Request.Builder().url(SERVER_HEARTBEAT).put(requestBody).build();
+    Request request = new Request.Builder().url(SERVER_HEARTBEAT).patch(requestBody).build();
 
     client
         .newCall(request)
@@ -211,7 +213,11 @@ public class MapToolRegistry {
               @Override
               public void onResponse(@NotNull Call call, @NotNull Response response)
                   throws IOException {
-                // Nothing we don't care
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
               }
             });
   }
