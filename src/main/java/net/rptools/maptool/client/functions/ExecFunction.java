@@ -25,7 +25,6 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
-import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
