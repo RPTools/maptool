@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,6 +228,17 @@ public class AssetManager {
       return;
     }
 
+    try {
+      if (sanitizeAssetId(asset.getId()) != asset.getId()) {
+        // If a different asset is returned we know this asset is invalid so dont add it
+        return;
+      }
+    } catch (IOException e) {
+      if (!asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
+        log.error(I18N.getText("msg.error.errorResolvingCacheDir", asset.getId(), e));
+      }
+    }
+
     assetMap.put(asset.getId(), asset);
 
     // Invalid images are represented by empty assets.
@@ -352,12 +361,10 @@ public class AssetManager {
     }
 
     // Check to see that the asset path wont escape the asset cache directory.
-    Path assetCachePath = cacheDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS);
-    String assetCache = assetCachePath.toString() + File.separator;
-    Path assetPath =
-        cacheDir.toPath().resolve(md5Key.toString()).toRealPath(LinkOption.NOFOLLOW_LINKS);
-    String asset = assetPath.toString();
-    if (!asset.startsWith(assetCache)) {
+    File inCache = cacheDir.getCanonicalFile().toPath().resolve(md5Key.toString()).toFile();
+    File toCheck = cacheDir.toPath().resolve(md5Key.toString()).toFile().getCanonicalFile();
+
+    if (!inCache.equals(toCheck)) {
       return BAD_ASSET_LOCATION_KEY;
     }
 
