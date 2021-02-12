@@ -226,20 +226,10 @@ public class AssetManager {
    */
   public static void putAsset(Asset asset) {
 
-    try {
-      if (sanitizeAssetId(asset.getId()) != asset.getId()) {
-        // If a different asset is returned we know this asset is invalid so dont add it
-        return;
-      }
-    } catch (IOException e) {
-      if (asset != null && !asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
-        log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
-      }
-    }
-
-    if (asset == null) {
+    if (asset == null || asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
       return;
     }
+
     assetMap.put(asset.getId(), asset);
 
     // Invalid images are represented by empty assets.
@@ -302,14 +292,15 @@ public class AssetManager {
    */
   public static Asset getAsset(MD5Key id) {
 
+    if (id == null) {
+      return null;
+    }
+
     MD5Key assetId = null;
     try {
       assetId = sanitizeAssetId(id);
     } catch (IOException e) {
-      log.error(I18N.getText("msg.error.errorResolvingCacheDir", e));
-    }
-    if (id == null) {
-      return null;
+      log.error(I18N.getText("msg.error.errorResolvingCacheDir", id, e));
     }
 
     Asset asset = assetMap.get(assetId);
