@@ -24,8 +24,7 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">/Users/cwisniew/Development/RPTools/maptool/src/main/resources/net/rptools/maptool/client/ui/forms/preferencesDialog.xml</at>
-   <at name="path">resources/net/rptools/maptool/client/ui/forms/preferencesDialog.xml</at>
+   <at name="id">/Users/cwisniew/Development/RPTools/maptool-sec-fix/src/main/resources/net/rptools/maptool/client/ui/forms/preferencesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
    <at name="colspecs">FILL:15DLU:GROW(1.0),FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -165,7 +164,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.604492819</at>
+                     <at name="id">embedded.1863697797</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -187,7 +186,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.59951255</at>
+                          <at name="id">embedded.1298550933</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2164,7 +2163,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.2029757438</at>
+                          <at name="id">embedded.1562638833</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2533,7 +2532,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1101255172</at>
+                          <at name="id">embedded.541597168</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2902,7 +2901,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.614145317</at>
+                          <at name="id">embedded.1734627527</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:23DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -4043,7 +4042,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.912555311</at>
+                          <at name="id">embedded.238592536</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -4412,7 +4411,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.505176181</at>
+                          <at name="id">embedded.1789370185</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5522,7 +5521,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1811465455</at>
+                          <at name="id">embedded.1161245053</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:23DLU:GROW(1.0),FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5949,7 +5948,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1311661656</at>
+                     <at name="id">embedded.936940009</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -6432,7 +6431,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1131714737</at>
+                     <at name="id">embedded.666512575</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -6454,7 +6453,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1338954292</at>
+                          <at name="id">embedded.470152529</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:MIN(20DLU;DEFAULT):NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:5DLU:NONE,FILL:MIN(20DLU;DEFAULT):NONE</at>
                           <at name="components">
@@ -6503,7 +6502,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">398</at>
+                                   <at name="width">236</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave</at>
                                    <at name="fill">
@@ -6598,7 +6597,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">398</at>
+                                   <at name="width">236</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.save.reminder</at>
                                    <at name="fill">
@@ -6715,7 +6714,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">398</at>
+                                   <at name="width">236</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat</at>
                                    <at name="fill">
@@ -6810,7 +6809,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">398</at>
+                                   <at name="width">236</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat.filename</at>
                                    <at name="fill">
@@ -6925,7 +6924,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">398</at>
+                                   <at name="width">236</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.directory.sync</at>
                                    <at name="fill">
@@ -7327,7 +7326,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.277075173</at>
+                          <at name="id">embedded.799673923</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                           <at name="components">
@@ -7349,7 +7348,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.594530109</at>
+                               <at name="id">embedded.1790420808</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -7453,7 +7452,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.fillselection</at>
                                         <at name="fill">
@@ -7514,7 +7513,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.cap</at>
                                         <at name="fill">
@@ -7714,7 +7713,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.228687163</at>
+                               <at name="id">embedded.1893954662</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8327,7 +8326,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.2046848551</at>
+                               <at name="id">embedded.1562141804</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8376,7 +8375,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.client.fitview</at>
                                         <at name="fill">
@@ -8571,7 +8570,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.116529740</at>
+                               <at name="id">embedded.1663328459</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8620,7 +8619,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.edit</at>
                                         <at name="fill">
@@ -8818,7 +8817,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1445639807</at>
+                               <at name="id">embedded.455152289</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8867,7 +8866,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.permissions</at>
                                         <at name="fill">
@@ -9065,7 +9064,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.646571198</at>
+                               <at name="id">embedded.347626446</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -9168,7 +9167,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">406</at>
+                                        <at name="width">245</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.upnp.timeout</at>
                                         <at name="fill">
@@ -9426,7 +9425,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1733494555</at>
+                          <at name="id">embedded.93041070</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -9475,7 +9474,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.width</at>
                                    <at name="fill">
@@ -9604,7 +9603,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.opacity</at>
                                    <at name="fill">
@@ -9665,7 +9664,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.autoexpose</at>
                                    <at name="fill">
@@ -9781,7 +9780,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.aura.opacity</at>
                                    <at name="fill">
@@ -9842,7 +9841,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.light.opacity</at>
                                    <at name="fill">
@@ -9971,7 +9970,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.opacity</at>
                                    <at name="fill">
@@ -10066,7 +10065,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">590</at>
+                                   <at name="width">428</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.color</at>
                                    <at name="fill">
@@ -10410,7 +10409,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.974535</at>
+                     <at name="id">embedded.366719598</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -11069,7 +11068,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1968304362</at>
+                     <at name="id">embedded.983878706</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0)</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -11091,7 +11090,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1920582626</at>
+                          <at name="id">embedded.492229363</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -11264,6 +11263,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="horizontalAlignment">4</at>
                                    <at name="selectionStart">2</at>
+                                   <at name="background" object="color">236,233,216</at>
+                                   <at name="editable">false</at>
                                    <at name="name">jvmXmxTextField</at>
                                    <at name="width">76</at>
                                    <at name="selectionEnd">2</at>
@@ -11323,6 +11324,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="horizontalAlignment">4</at>
                                    <at name="selectionStart">2</at>
+                                   <at name="background" object="color">236,233,216</at>
+                                   <at name="editable">false</at>
                                    <at name="name">jvmXmsTextField</at>
                                    <at name="width">76</at>
                                    <at name="selectionEnd">2</at>
@@ -11443,6 +11446,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="horizontalAlignment">4</at>
                                    <at name="selectionStart">2</at>
+                                   <at name="background" object="color">236,233,216</at>
+                                   <at name="editable">false</at>
                                    <at name="name">jvmXssTextField</at>
                                    <at name="width">76</at>
                                    <at name="selectionEnd">2</at>
@@ -11594,7 +11599,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.595461475</at>
+                          <at name="id">embedded.1308673386</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),CENTER:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -11645,6 +11650,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="name">jvmDirect3dCheckbox</at>
                                    <at name="width">17</at>
+                                   <at name="enabled">false</at>
                                    <at name="height">17</at>
                                   </object>
                                  </at>
@@ -11699,6 +11705,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="name">jvmOpenGLCheckbox</at>
                                    <at name="width">17</at>
+                                   <at name="enabled">false</at>
                                    <at name="height">17</at>
                                   </object>
                                  </at>
@@ -11933,6 +11940,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="name">jvmInitAwtCheckbox</at>
                                    <at name="width">17</at>
+                                   <at name="enabled">false</at>
                                    <at name="height">17</at>
                                   </object>
                                  </at>
@@ -12079,7 +12087,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.600463630</at>
+                          <at name="id">embedded.1729612314</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -12228,6 +12236,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
+                                   <at name="enabled">false</at>
                                    <at name="height">19</at>
                                    <at name="itemCount">1</at>
                                   </object>
@@ -12363,7 +12372,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.941562561</at>
+                          <at name="id">embedded.1504994640</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),LEFT:MAX(80DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -12474,6 +12483,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="horizontalAlignment">2</at>
                                    <at name="selectionStart">14</at>
+                                   <at name="background" object="color">236,233,216</at>
+                                   <at name="editable">false</at>
                                    <at name="name">dataDirTextField</at>
                                    <at name="width">156</at>
                                    <at name="selectionEnd">14</at>
@@ -12613,7 +12624,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1634358863</at>
+                          <at name="id">embedded.208570125</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                           <at name="components">
@@ -12663,7 +12674,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                     </object>
                                    </at>
                                    <at name="name">startupInfoLabel</at>
-                                   <at name="width">926</at>
+                                   <at name="width">603</at>
                                    <at name="text">startup.preferences.info</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -12899,7 +12910,7 @@ Disabled (default): show tooltips for macroLinks</at>
               </at>
              </object>
             </at>
-            <at name="width">1448</at>
+            <at name="width">1125</at>
             <at name="tabCount">5</at>
             <at name="height">852</at>
            </object>
