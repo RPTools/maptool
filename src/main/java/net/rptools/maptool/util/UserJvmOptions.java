@@ -71,7 +71,11 @@ public class UserJvmOptions {
     Configurations configurations = new Configurations();
     INIConfiguration iniConfiguration;
 
-    File cfgFile = AppUtil.getDataDirAppCfgFile();
+    File cfgFile = AppUtil.getAppCfgFile();
+
+    if (cfgFile == null) {
+      return false;
+    }
 
     configurationBuilder = configurations.iniBuilder(cfgFile);
 

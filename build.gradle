@@ -263,7 +263,6 @@ dependencies {
 
     // RPTool Libs
     implementation 'net.rptools.decktool:decktool:1.0.b1'
-    implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
     implementation 'com.github.RPTools:dicelib:1.7.0'
@@ -292,7 +291,7 @@ dependencies {
     implementation 'net.java.abeille:abeille-formsrt:2.0'
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
-    implementation 'com.caucho.hessian:hessian:3.1.6'
+    implementation 'com.caucho:hessian:4.0.63'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -357,6 +356,7 @@ dependencies {
 
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
+
 }
 
 

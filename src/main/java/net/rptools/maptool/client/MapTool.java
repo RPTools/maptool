@@ -677,7 +677,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new LocalPlayer("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -1045,8 +1045,10 @@ public class MapTool {
     // Registered ?
     if (config.isServerRegistered() && !config.isPersonalServer()) {
       try {
-        int result = MapToolRegistry.registerInstance(config.getServerName(), config.getPort());
-        if (result == 3) {
+        MapToolRegistry.RegisterResponse result =
+            MapToolRegistry.getInstance()
+                .registerInstance(config.getServerName(), config.getPort());
+        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         }
         // TODO: I don't like this
@@ -1160,7 +1162,9 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
+        "localhost",
+        config.getPort(),
+        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
@@ -1226,7 +1230,7 @@ public class MapTool {
     // Unregister ourselves
     if (server != null && server.getConfig().isServerRegistered() && !isPersonalServer) {
       try {
-        MapToolRegistry.unregisterInstance(server.getConfig().getPort());
+        MapToolRegistry.getInstance().unregisterInstance();
       } catch (Throwable t) {
         MapTool.showError("While unregistering server instance", t);
       }
@@ -1333,13 +1337,6 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
-
-    // Check to see status of start up configuration
-    if (AppSetup.didStartupPreferencesGetCopied()) {
-      MapTool.showInformation("startup.config.checkConfigMessage");
-    } else if (AppSetup.didCopyPreviousStartupPreferences()) {
-      MapTool.showInformation("startup.config.copiedPrevious");
-    }
   }
 
   /**
