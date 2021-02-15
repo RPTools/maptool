@@ -36,7 +36,7 @@ Resources
 
  - **Website:** http://rptools.net/ 
  - **Forums:**  http://forums.rptools.net 
- - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+ - **Wiki:**    https://wiki.rptools.info/index.php/Main_Page
  - **Discord:** https://discord.gg/gevEtpC
  
 
