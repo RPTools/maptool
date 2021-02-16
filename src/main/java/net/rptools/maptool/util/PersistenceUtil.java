@@ -466,9 +466,11 @@ public class PersistenceUtil {
       if (pakFile != null) pakFile.close();
     }
 
-    log.warn("Could not load campaign in the current format...  trying the legacy format.");
-    persistedCampaign = loadLegacyCampaign(campaignFile);
-    if (persistedCampaign == null) MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
+    // No longer try to load a legacy (very early 1.3 and before) campaign
+
+    if (persistedCampaign == null) {
+      MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
+    }
     return persistedCampaign;
   }
 
