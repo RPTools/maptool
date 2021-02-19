@@ -1786,6 +1786,9 @@ public class MapTool {
       // Update the ComponentUIs for all Components. This
       // needs to be invoked for all windows.
       // SwingUtilities.updateComponentTreeUI(rootWindow);
+    } else {
+      showMessage("msg.error.cantLoadTheme","msg.error.cantLoadThemeTitle", JOptionPane.WARNING_MESSAGE, AppUtil.getThemeName());
+      AppUtil.setThemeName(AppConstants.DEFAULT_THEME_NAME);
     }
     // }
   }
