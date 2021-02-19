@@ -42,6 +42,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 public class MessagePanel extends JPanel {
 
@@ -137,21 +138,20 @@ public class MessagePanel extends JPanel {
     style.addRule(
         "body { font-family: sans-serif; font-size: " + AppPreferences.getFontSize() + "pt}");
     style.addRule("div {margin-bottom: 5px}");
-    style.addRule("span.roll {background:#efefef}");
+    style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+    style.addRule(MessageUtil.getMessageCss());
     repaint();
   }
 
   public void setTrustedMacroPrefixColors(Color foreground, Color background) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("span.trustedPrefix {background: #")
-        .append(String.format("%06X", (background.getRGB() & 0xFFFFFF)));
-    sb.append("; color: #")
-        .append(String.format("%06X", (foreground.getRGB() & 0xFFFFFF)))
-        .append("}");
     StyleSheet style = document.getStyleSheet();
-    style.addRule(sb.toString());
+    String css =
+        String.format(
+            ".trusted-prefix { color: #%06X; background: #%06X }",
+            (foreground.getRGB() & 0xFFFFFF), (background.getRGB() & 0xFFFFFF));
+    style.addRule(css);
     repaint();
   }
 
@@ -244,7 +244,11 @@ public class MessagePanel extends JPanel {
 
             try {
               Element element = document.getElement("body");
-              document.insertBeforeEnd(element, "<div>" + output + "</div>");
+              if (!output.toLowerCase().startsWith("<div") || !output.endsWith("</div>")) {
+                document.insertBeforeEnd(element, "<div>" + output + "</div>");
+              } else {
+                document.insertBeforeEnd(element, output);
+              }
               if (!message.getSource().equals(MapTool.getPlayer().getName())) {
                 MapTool.playSound(SND_MESSAGE_RECEIVED);
               }

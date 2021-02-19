@@ -16,11 +16,9 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
@@ -201,27 +199,16 @@ public class HTMLFrameFactory {
 
     public void modelChanged(ModelChangeEvent event) {
       if (event.eventType == Event.TOKEN_CHANGED) {
-        final CommandPanel cpanel = MapTool.getFrame().getCommandPanel();
-
         List<Token> tokens; // could be receiving a list from putTokens()
+
         if (event.getArg() instanceof Token) {
           tokens = Collections.singletonList((Token) event.getArg());
-        } else tokens = (List<Token>) event.getArg();
-        Set<GUID> selectedTokens =
-            MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-        boolean selectedChange = false;
-        for (Token token : tokens) {
-          if (selectedTokens.contains(token.getId())) {
-            selectedChange = true;
-          }
-          if (token.getName().equals(cpanel.getIdentity())
-              || token.getId().equals(cpanel.getIdentityGUID())) {
-            impersonateToken();
-          }
-          tokenChanged(token);
+        } else {
+          tokens = (List<Token>) event.getArg();
         }
-        if (selectedChange) {
-          selectedListChanged();
+
+        for (Token token : tokens) {
+          tokenChanged(token);
         }
       }
     }

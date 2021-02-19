@@ -1,0 +1,15 @@
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=maptool
+pkgver=${MAPTOOL_VERSION//-/_}
+pkgrel=1
+pkgdesc="Virtual Tabletop for playing roleplaying games."
+arch=(x86_64)
+url="https://github.com/RPTools/maptool"
+license=('AGPL3')
+source=("maptool.rpm")
+md5sums=(SKIP)
+install=maptool.install
+
+package() {
+    cp -r opt/ "$pkgdir/"
+}

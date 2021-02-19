@@ -16,6 +16,8 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
@@ -53,6 +55,8 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
       }
     } catch (IOException ioe) {
       log.error("Handshake failure: " + ioe, ioe);
+    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+      e.printStackTrace();
     }
     return false;
   }

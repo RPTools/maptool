@@ -36,7 +36,7 @@ Resources
 
  - **Website:** http://rptools.net/ 
  - **Forums:**  http://forums.rptools.net 
- - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+ - **Wiki:**    https://wiki.rptools.info/index.php/Main_Page
  - **Discord:** https://discord.gg/gevEtpC
  
 
@@ -69,7 +69,7 @@ Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) 
 ```
 ./gradlew spotlessApply
 ```
-
+Also read the Wiki: https://github.com/RPTools/maptool/wiki/Contributor-Setup-Instructions-For-MapTool. Valuable information on contributing is only found there currently.
 
 Recommended IDE
 ----------------
