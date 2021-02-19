@@ -1779,7 +1779,7 @@ public class MapTool {
     // File f = AppUtil.getAppHome("config");
     // if (f.exists()) {
     // File f2 = new File(f, "Default.theme");
-    if (f2.exists() && Theme.loadTheme(f2)) {
+    if (f2 != null && f2.exists() && Theme.loadTheme(f2)) {
       // re-install the Tiny Look and Feel
       UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
