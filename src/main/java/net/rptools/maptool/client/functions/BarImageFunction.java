@@ -93,7 +93,7 @@ public class BarImageFunction extends AbstractFunction {
           I18N.getText("macro.function.barImage.notImage", functionName, barName));
     }
     // control flow should be the same with this code being outside of the if statement
-    if (size != null) {
+    if (size != null && size.intValue() != 0) {
       assetId.append("-");
       int i = Math.max(Math.min(size.intValue(), 500), 1);
       assetId.append(i);
