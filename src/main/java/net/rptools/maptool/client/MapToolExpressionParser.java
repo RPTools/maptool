@@ -58,6 +58,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               ReturnFunction.getInstance(),
               SoundFunctions.getInstance(),
               StateImageFunction.getInstance(),
+              BarImageFunction.getInstance(),
               StringFunctions.getInstance(),
               StrListFunctions.getInstance(),
               StrPropFunctions.getInstance(),
