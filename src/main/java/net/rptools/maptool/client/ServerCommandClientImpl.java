@@ -290,6 +290,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+    // Expose locally right away.
+    MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
     makeServerCall(COMMAND.exposeFoW, zoneGUID, area, selectedToks);
   }
 
@@ -389,7 +391,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
     long delay;
 
-    Object sleepSemaphore = new Object();
+    final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
       delay = millidelay;

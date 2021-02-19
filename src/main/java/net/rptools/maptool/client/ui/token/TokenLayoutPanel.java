@@ -24,8 +24,6 @@ import java.awt.TexturePaint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
@@ -58,33 +56,30 @@ public class TokenLayoutPanel extends JPanel {
 
   public TokenLayoutPanel() {
     addMouseWheelListener(
-        new MouseWheelListener() {
-          @Override
-          public void mouseWheelMoved(MouseWheelEvent e) {
-            int wheelMovement = e.getWheelRotation();
-            // Not for snap-to-scale
-            if (!token.isSnapToScale() || wheelMovement == 0) {
-              return;
-            }
-            double delta = wheelMovement > 0 ? -.1 : .1;
-            if (SwingUtil.isShiftDown(e)) {
-              // Nothing yet, as changing the facing isn't the right way to handle it --
-              // the image itself really should be rotated. And it's probably better to
-              // not simply store a Transform but to create a new image. We could
-              // store an AffineTransform until the dialog is closed and then create
-              // the new image. But the amount of rotation needs to be saved so
-              // that future adjustments can return back to the original image (as
-              // a way of reducing round off error from multiple rotations).
-            }
-            double scale = token.getSizeScale() + delta;
-            log.debug(() -> "wheel=" + wheelMovement + ", delta=" + delta);
-
-            // Range
-            scale = Math.max(.1, scale);
-            scale = Math.min(3, scale);
-            token.setSizeScale(scale);
-            repaint();
+        e -> {
+          int wheelMovement = e.getWheelRotation();
+          // Not for snap-to-scale
+          if (!token.isSnapToScale() || wheelMovement == 0) {
+            return;
           }
+          double delta = wheelMovement > 0 ? -.1 : .1;
+          if (SwingUtil.isShiftDown(e)) {
+            // Nothing yet, as changing the facing isn't the right way to handle it --
+            // the image itself really should be rotated. And it's probably better to
+            // not simply store a Transform but to create a new image. We could
+            // store an AffineTransform until the dialog is closed and then create
+            // the new image. But the amount of rotation needs to be saved so
+            // that future adjustments can return back to the original image (as
+            // a way of reducing round off error from multiple rotations).
+          }
+          double scale = token.getSizeScale() + delta;
+          log.debug(() -> "wheel=" + wheelMovement + ", delta=" + delta);
+
+          // Range
+          scale = Math.max(.1, scale);
+          scale = Math.min(3, scale);
+          token.setSizeScale(scale);
+          repaint();
         });
     addMouseListener(
         new MouseAdapter() {
@@ -183,7 +178,7 @@ public class TokenLayoutPanel extends JPanel {
     // If figure we need to calculate an additional offset for the token height
     double iso_ho = 0;
     if (token.getShape() == TokenShape.FIGURE) {
-      double th = token.getHeight() * Double.valueOf(tokenSize.width) / token.getWidth();
+      double th = token.getHeight() * (double) tokenSize.width / token.getWidth();
       iso_ho = tokenSize.height - th;
       tokenSize = new Rectangle(tokenSize.x, tokenSize.y - (int) iso_ho, tokenSize.width, (int) th);
     }

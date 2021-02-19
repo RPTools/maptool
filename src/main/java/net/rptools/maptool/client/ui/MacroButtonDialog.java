@@ -18,14 +18,13 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.GridView;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -108,7 +107,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private static final String READY = I18N.getText("Label.ready");
   private static final String SAVED = I18N.getText("Label.saved");
 
-  private static final HashSet<String> openMacroList = new HashSet<String>(4);
+  private static final Set<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);
@@ -254,56 +253,35 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private void installRunButton() {
     JButton button = (JButton) panel.getButton("runButton");
     button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(false);
+        e -> {
+          save(false);
 
-            if (properties.getApplyToTokens() || properties.getCommonMacro()) {
-              if (MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() > 0) {
-                properties.executeMacro(
-                    MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList());
-              }
-            } else {
-              properties.executeMacro();
+          if (properties.getApplyToTokens() || properties.getCommonMacro()) {
+            if (MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() > 0) {
+              properties.executeMacro(
+                  MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList());
             }
+          } else {
+            properties.executeMacro();
           }
         });
   }
 
   private void installApplyButton() {
     JButton button = (JButton) panel.getButton("applyButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(false);
-          }
-        });
+    button.addActionListener(e -> save(false));
   }
 
   private void installOKButton() {
     JButton button = (JButton) panel.getButton("okButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            save(true);
-          }
-        });
+    button.addActionListener(e -> save(true));
 
     // getRootPane().setDefaultButton(button);
   }
 
   private void installCancelButton() {
     JButton button = (JButton) panel.getButton("cancelButton");
-    button.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            cancel();
-          }
-        });
+    button.addActionListener(e -> cancel());
   }
 
   private void updateOpenMacroList(boolean addToList) {
@@ -326,15 +304,15 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     initI18NSupport();
     this.button = button;
     updateOpenMacroList(true);
-    this.isTokenMacro = button.getToken() == null ? false : true;
+    this.isTokenMacro = button.getToken() != null;
     this.properties = button.getProperties();
-    oldHashCode = properties.hashCodeForComparison();
 
     if (properties != null) {
+      oldHashCode = properties.hashCodeForComparison();
       Boolean playerCanEdit = !MapTool.getPlayer().isGM() && properties.getAllowPlayerEdits();
-      Boolean onGlobalPanel = properties.getSaveLocation().equals("Global");
-      Boolean allowEdits = onGlobalPanel || MapTool.getPlayer().isGM() || playerCanEdit;
-      Boolean isCommonMacro =
+      boolean onGlobalPanel = properties.getSaveLocation().equals("Global");
+      boolean allowEdits = onGlobalPanel || MapTool.getPlayer().isGM() || playerCanEdit;
+      boolean isCommonMacro =
           button.getPanelClass().equals("SelectionPanel")
               && MapTool.getFrame().getSelectionPanel().getCommonMacros().contains(properties);
       if (allowEdits) {
@@ -721,11 +699,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           .getSelectionPanel()
           .getCommonMacros()
           .contains(button.getProperties())) {
-        Boolean changeAllowPlayerEdits = false;
-        Boolean endingAllowPlayerEdits = false;
+        boolean changeAllowPlayerEdits = false;
+        boolean endingAllowPlayerEdits = false;
         if (startingAllowPlayerEdits) {
           if (!properties.getAllowPlayerEdits()) {
-            Boolean confirmDisallowPlayerEdits =
+            boolean confirmDisallowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.disallowPlayerEdits"));
             if (confirmDisallowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -736,7 +714,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
           }
         } else {
           if (properties.getAllowPlayerEdits()) {
-            Boolean confirmAllowPlayerEdits =
+            boolean confirmAllowPlayerEdits =
                 MapTool.confirm(I18N.getText("confirm.macro.allowPlayerEdits"));
             if (confirmAllowPlayerEdits) {
               changeAllowPlayerEdits = true;
@@ -746,17 +724,13 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             }
           }
         }
-        Boolean trusted = true;
+        boolean trusted = true;
         for (Token nextToken :
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-          if (AppUtil.playerOwns(nextToken)) {
-            trusted = true;
-          } else {
-            trusted = false;
-          }
+          trusted = AppUtil.playerOwns(nextToken);
           boolean isGM = MapTool.getPlayer().isGM();
           for (MacroButtonProperties nextMacro : nextToken.getMacroList(trusted)) {
-            if (isGM || (!isGM && nextMacro.getApplyToTokens())) {
+            if (isGM || nextMacro.getApplyToTokens()) {
               if (nextMacro.hashCodeForComparison() == oldHashCode) {
                 nextMacro.setLabel(properties.getLabel());
                 if (properties.getCompareGroup() && startingCompareGroup) {

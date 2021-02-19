@@ -24,10 +24,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class StringFunctions extends AbstractFunction {
   private int matchNo = 0;
@@ -71,7 +74,8 @@ public class StringFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     try {
       if (functionName.equals("replace")) {
@@ -227,12 +231,9 @@ public class StringFunctions extends AbstractFunction {
       if (functionName.equals("strformat")) {
         int size = parameters.size();
         if (size > 1) {
-          return format(
-              parameters.get(0).toString(),
-              parser.getVariableResolver(),
-              parameters.subList(1, size));
+          return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
         } else {
-          return format(parameters.get(0).toString(), parser.getVariableResolver(), null);
+          return format(parameters.get(0).toString(), resolver, null);
         }
       }
       if (functionName.equals("matches")) {
@@ -272,16 +273,9 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     if (functionName.equals("isNumber")) {
-      try {
-        BigDecimal.valueOf(Integer.parseInt(parameters.get(0).toString()));
+      if (NumberUtils.isParsable(parameters.get(0).toString())) {
         return BigDecimal.ONE;
-      } catch (NumberFormatException e) {
-        // Do nothing as we will try it as a double
-      }
-      try {
-        BigDecimal.valueOf(Double.parseDouble(parameters.get(0).toString()));
-        return BigDecimal.ONE;
-      } catch (NumberFormatException e) {
+      } else {
         return BigDecimal.ZERO;
       }
     }
@@ -291,8 +285,7 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
       }
-      return stringFind(
-          parser.getVariableResolver(), parameters.get(0).toString(), parameters.get(1).toString());
+      return stringFind(resolver, parameters.get(0).toString(), parameters.get(1).toString());
     }
     if (functionName.equals("getGroupCount")) {
       if (parameters.size() < 1) {
@@ -300,7 +293,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".groupCount");
       return resolver.getVariable(sb.toString());
@@ -311,7 +303,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 3, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0));
       sb.append(".m").append(parameters.get(1));
@@ -329,7 +320,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".matchCount");
       return resolver.getVariable(sb.toString());
@@ -381,12 +371,13 @@ public class StringFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
     }
     if (functionName.equals("capitalize")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      boolean treatNumbersSymbolsAsBoundaries = true;
+      if (parameters.size() == 2) {
+        treatNumbersSymbolsAsBoundaries =
+            FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
       }
-      return capitalize(parameters.get(0).toString());
+      return capitalize(parameters.get(0).toString(), treatNumbersSymbolsAsBoundaries);
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
@@ -397,21 +388,28 @@ public class StringFunctions extends AbstractFunction {
    * title case.
    *
    * @param str The string converted to title case.
+   * @param treatNumbersSymbolsAsBoundaries whether to count numbers and symbols such as ' as a word
+   *     boundary
    * @return The string converted to title case.
    */
-  private String capitalize(String str) {
-    Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
-    Matcher matcher = pattern.matcher(str);
+  private String capitalize(String str, boolean treatNumbersSymbolsAsBoundaries) {
+    if (treatNumbersSymbolsAsBoundaries) {
+      Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
+      Matcher matcher = pattern.matcher(str);
 
-    StringBuffer result = new StringBuffer();
-    while (matcher.find()) {
-      String word = matcher.group();
-      matcher.appendReplacement(result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      StringBuffer result = new StringBuffer();
+      while (matcher.find()) {
+        String word = matcher.group();
+        matcher.appendReplacement(
+            result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      }
+
+      matcher.appendTail(result);
+
+      return result.toString();
+    } else {
+      return WordUtils.capitalize(str);
     }
-
-    matcher.appendTail(result);
-
-    return result.toString();
   }
 
   /**

@@ -378,26 +378,19 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
 
     // Start off in the proper state.
     int state = Token.NULL;
-    switch (initialTokenType) {
-      case Token.COMMENT_MULTILINE:
-        state = MLC;
-        start = text.offset;
-        break;
+    if (initialTokenType == Token.COMMENT_MULTILINE) {
+      state = MLC;
+      start = text.offset;
 
-        /* No documentation comments */
-      default:
-        state = Token.NULL;
+      /* No documentation comments */
+    } else {
+      state = Token.NULL;
     }
 
     s = text;
-    try {
-      yyreset(zzReader);
-      yybegin(state);
-      return yylex();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-      return new TokenImpl();
-    }
+    yyreset(zzReader);
+    yybegin(state);
+    return yylex();
   }
 
   /**
@@ -567,7 +560,7 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
    * @return the next token
    * @exception java.io.IOException if any I/O-Error occurs
    */
-  public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
+  public org.fife.ui.rsyntaxtextarea.Token yylex() {
     int zzInput;
     int zzAction;
 

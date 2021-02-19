@@ -16,7 +16,9 @@ package net.rptools.maptool.model.drawing;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
@@ -61,7 +63,6 @@ public class ConeTemplate extends RadiusTemplate {
    */
   public void setDirection(Direction direction) {
     if (direction != null) this.direction = direction.name();
-    else direction = null;
   }
 
   /**
@@ -214,26 +215,32 @@ public class ConeTemplate extends RadiusTemplate {
     if ((getDirection() == Direction.NORTH || getDirection() == Direction.SOUTH) && x > y) return;
 
     // Only squares w/in the radius
-    if (distance <= getRadius()) {
+    if (distance > getRadius()) {
+      return;
+    }
+    for (Quadrant q : Quadrant.values()) {
+      if (withinQuadrant(q)) {
+        paintArea(g, xOff, yOff, gridSize, q);
+      }
+    }
+  }
 
-      // Paint the squares
-      if (getDirection() == Direction.SOUTH_EAST
-          || getDirection() == Direction.SOUTH
-          || getDirection() == Direction.EAST)
-        paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
-      if (getDirection() == Direction.NORTH_EAST
-          || getDirection() == Direction.NORTH
-          || getDirection() == Direction.EAST)
-        paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
-      if (getDirection() == Direction.SOUTH_WEST
-          || getDirection() == Direction.SOUTH
-          || getDirection() == Direction.WEST)
-        paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
-      if (getDirection() == Direction.NORTH_WEST
-          || getDirection() == Direction.NORTH
-          || getDirection() == Direction.WEST)
-        paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
-    } // endif
+  private boolean withinQuadrant(Quadrant q) {
+    Direction dir = getDirection();
+    switch (q) {
+      case SOUTH_EAST:
+        return dir == Direction.SOUTH || dir == Direction.EAST || dir == Direction.SOUTH_EAST;
+      case NORTH_EAST:
+        return dir == Direction.NORTH || dir == Direction.EAST || dir == Direction.NORTH_EAST;
+      case SOUTH_WEST:
+        return dir == Direction.SOUTH || dir == Direction.WEST || dir == Direction.SOUTH_WEST;
+      case NORTH_WEST:
+        return dir == Direction.NORTH || dir == Direction.WEST || dir == Direction.NORTH_WEST;
+      default:
+        throw new RuntimeException(
+            String.format(
+                "Quadrant must be SOUTH_EAST, NORTH_EAST, SOUTH_WEST, or NORTH_WEST, was %s", q));
+    }
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -242,7 +249,6 @@ public class ConeTemplate extends RadiusTemplate {
 
   /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
   public Rectangle getBounds() {
-
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
       // How does this happen ?! Anyway, try to use the current zone (since that's what we're
       // drawing anyway, seems reasonable
@@ -286,5 +292,46 @@ public class ConeTemplate extends RadiusTemplate {
     if (getDirection() == Direction.EAST || getDirection() == Direction.WEST)
       height += quadrantSize;
     return new Rectangle(x, y, width, height);
+  }
+
+  @Override
+  public Area getArea() {
+    if (getZoneId() == null) {
+      return new Area();
+    }
+    Zone zone = getCampaign().getZone(getZoneId());
+    if (zone == null) {
+      return new Area();
+    }
+    int gridSize = zone.getGrid().getSize();
+    int r = getRadius();
+    ZonePoint vertex = getVertex();
+    Area result = new Area();
+    for (int x = 0; x < r; x++) {
+      for (int y = 0; y < r; y++) {
+        // spine templates
+        if ((getDirection() == Direction.EAST || getDirection() == Direction.WEST) && y > x) {
+          continue;
+        }
+        if ((getDirection() == Direction.NORTH || getDirection() == Direction.SOUTH) && x > y) {
+          continue;
+        }
+        if (getDistance(x, y) > r) {
+          continue;
+        }
+
+        int xOff = x * gridSize;
+        int yOff = y * gridSize;
+        for (Quadrant q : Quadrant.values()) {
+          if (!withinQuadrant(q)) {
+            continue;
+          }
+          int rx = vertex.x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
+          int ry = vertex.y + getYMult(q) * yOff + ((getYMult(q) - 1) / 2) * gridSize;
+          result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
+        }
+      }
+    }
+    return result;
   }
 }

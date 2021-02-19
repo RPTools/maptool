@@ -33,10 +33,7 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-@SuppressWarnings("serial")
 public class ColorPicker extends JPanel {
   private final JFrame owner;
 
@@ -55,7 +52,7 @@ public class ColorPicker extends JPanel {
 
   private final PaintedPanel foregroundColor;
   private final PaintedPanel backgroundColor;
-  private final List<PaintedPanel> recentColors = new ArrayList<PaintedPanel>(16);
+  private final List<PaintedPanel> recentColors = new ArrayList<>(16);
   private final JToggleButton snapToggle;
   private final JToggleButton eraseToggle;
   private final JToggleButton squareCapToggle;
@@ -144,26 +141,22 @@ public class ColorPicker extends JPanel {
     penWidthSpinner = panel.getSpinner("penWidth");
     penWidthSpinner.setModel(new SpinnerNumberModel(3, 1, maxPenWidth, 1));
     penWidthSpinner.addChangeListener(
-        new ChangeListener() {
-          public void stateChanged(ChangeEvent e) {
-            try {
-              penWidthSpinner.commitEdit();
-            } catch (ParseException pe) {
-              pe.printStackTrace();
-            }
+        e -> {
+          try {
+            penWidthSpinner.commitEdit();
+          } catch (ParseException pe) {
+            pe.printStackTrace();
           }
         });
 
     transparencySpinner = panel.getSpinner("opacity");
     transparencySpinner.setModel(new SpinnerNumberModel(100, 1, 100, 1));
     transparencySpinner.addChangeListener(
-        new ChangeListener() {
-          public void stateChanged(ChangeEvent e) {
-            try {
-              transparencySpinner.commitEdit();
-            } catch (ParseException pe) {
-              pe.printStackTrace();
-            }
+        e -> {
+          try {
+            transparencySpinner.commitEdit();
+          } catch (ParseException pe) {
+            pe.printStackTrace();
           }
         });
     initialize();
@@ -267,7 +260,7 @@ public class ColorPicker extends JPanel {
     }
 
     @Override
-    public void mouseClicked(MouseEvent evt) {
+    public void mouseReleased(MouseEvent evt) {
       PaintedPanel comp = (PaintedPanel) evt.getSource();
 
       if (evt.getClickCount() == clickCount) {

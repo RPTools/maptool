@@ -18,7 +18,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -26,13 +25,17 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class HTMLPanelImageCache extends Dictionary<URL, Image> {
+
+  private static final Logger log = LogManager.getLogger();
 
   private final Map<String, Image> imageMap = new HashMap<String, Image>();
 
@@ -62,11 +65,12 @@ public class HTMLPanelImageCache extends Dictionary<URL, Image> {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          MapTool.showWarning("Can't find 'cp://" + key.toString() + "' in image cache?!", ioe);
+          log.error("HTMLPanelImageCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
         // Look for size request
-        int index = path.indexOf("-");
+        int index = path.indexOf('-');
         int size = -1;
         if (index >= 0) {
           String szStr = path.substring(index + 1);
@@ -89,8 +93,11 @@ public class HTMLPanelImageCache extends Dictionary<URL, Image> {
           image = img;
         }
       } else {
-        // Normal method
-        image = Toolkit.getDefaultToolkit().createImage(url);
+        try {
+          image = ImageIO.read(url);
+        } catch (IOException e) {
+          log.error("Unable to load image " + url, e);
+        }
       }
       imageMap.put(url.toString(), image);
     }

@@ -25,6 +25,7 @@ import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -47,12 +48,10 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
+  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
@@ -68,13 +67,20 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
 
     // Handle the All functions
     List<Token> tokens = new ArrayList<Token>();
-    boolean all = functionName.equals("addAllToInitiative");
-    boolean pcs = functionName.equals("addAllPCsToInitiative");
-    for (Token token : list.getZone().getTokens())
-      if ((all || token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs)
-          && (allowDuplicates || list.indexOf(token).isEmpty())) {
+    boolean all = functionName.equalsIgnoreCase("addAllToInitiative");
+    boolean pcs = functionName.equalsIgnoreCase("addAllPCsToInitiative");
+    for (Token token : list.getZone().getTokens()) {
+      if (!allowDuplicates && !list.indexOf(token).isEmpty()) {
+        continue;
+      }
+      if (all) {
         tokens.add(token);
-      } // endif
+      } else if (token.getType() == Type.PC && pcs) {
+        tokens.add(token);
+      } else if (token.getType() == Type.NPC && !pcs) {
+        tokens.add(token);
+      }
+    }
     list.insertTokens(tokens);
     return new BigDecimal(tokens.size());
   }

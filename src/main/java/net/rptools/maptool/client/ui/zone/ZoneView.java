@@ -20,7 +20,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -52,7 +51,6 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,31 +63,33 @@ public class ZoneView implements ModelChangeListener {
 
   // VISION
   /** Map each token to the area they can see by themselves. */
-  private final Map<GUID, Area> tokenVisibleAreaCache = new HashMap<GUID, Area>();
+  private final Map<GUID, Area> tokenVisibleAreaCache = new HashMap<>();
   /** Map each token to their current vision, depending on other lights. */
-  private final Map<GUID, Area> tokenVisionCache = new HashMap<GUID, Area>();
+  private final Map<GUID, Area> tokenVisionCache = new HashMap<>();
   /** Map lightSourceToken to the areaBySightMap. */
-  private final Map<GUID, Map<String, TreeMap<Double, Area>>> lightSourceCache =
-      new HashMap<GUID, Map<String, TreeMap<Double, Area>>>();
+  private final Map<GUID, Map<String, Map<Double, Area>>> lightSourceCache = new HashMap<>();
   /** Map light source type to all tokens with that type. */
-  private final Map<LightSource.Type, Set<GUID>> lightSourceMap =
-      new HashMap<LightSource.Type, Set<GUID>>();
+  private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
   /** Map each token to their map between sightType and set of lights. */
-  private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache =
-      new HashMap<GUID, Map<String, Set<DrawableLight>>>();
+  private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache = new HashMap<>();
   /** Map each token to their map between sightType and set of bright lights. */
-  private final Map<GUID, Map<String, Set<Area>>> brightLightCache =
-      new Hashtable<GUID, Map<String, Set<Area>>>();
+  private final Map<GUID, Map<String, Set<Area>>> brightLightCache = new Hashtable<>();
   /** Map the PlayerView to its visible area. */
-  private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap =
-      new HashMap<PlayerView, VisibleAreaMeta>();
-  /** Hold all of our lights combined by lumens. */
-  private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<Double, Area>();
+  private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
+  /** Hold all of our lights combined by lumens. Used for hard FoW reveal. */
+  private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<>();
+  /** Map each token to their personal bright light source area. */
+  private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<>();
+  /** Map each token to their personal drawable lights. */
+  private final Map<GUID, Set<DrawableLight>> personalDrawableLightCache = new HashMap<>();
 
   /** The digested topology of the map VBL, and possibly tokens VBL. */
   private AreaTree topologyTree;
   /** The VBL area of the zone VBL and the tokens VBL. */
   private Area tokenTopology;
+
+  /** Lumen for personal vision (darkvision). */
+  private static final double LUMEN_VISION = 100;
 
   /**
    * Construct ZoneView from zone. Build lightSourceMap, and add ZoneView to Zone as listener.
@@ -112,9 +112,6 @@ public class ZoneView implements ModelChangeListener {
     calculateVisibleArea(view);
     ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
 
-    // if (visible == null)
-    // System.out.println("ZoneView: visible == null. Please report this on our forum @
-    // forum.rptools.net. Thank you!");
     return visible != null ? visible.visibleArea : new Area();
   }
 
@@ -169,23 +166,23 @@ public class ZoneView implements ModelChangeListener {
   // }
 
   /**
-   * Return the lightSourceArea of the lightSourceToken, for the baseToken's sight type. Fill the
+   * Return the lightSourceArea of a lightSourceToken for a given sight type. Fill the
    * lightSourceCache entry if null.
    *
-   * @param baseToken the base token. Used to get the appropriate sight type.
+   * @param sightName the name of the sight type for which to get the light source area
    * @param lightSourceToken the token holding the light sources.
    * @return the lightSourceArea.
    */
-  private TreeMap<Double, Area> getLightSourceArea(Token baseToken, Token lightSourceToken) {
-    Map<String, TreeMap<Double, Area>> areaBySightMap =
-        lightSourceCache.get(lightSourceToken.getId());
+  private Map<Double, Area> getLightSourceArea(String sightName, Token lightSourceToken) {
+    GUID tokenId = lightSourceToken.getId();
+    Map<String, Map<Double, Area>> areaBySightMap = lightSourceCache.get(tokenId);
     if (areaBySightMap != null) {
-      TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(baseToken.getSightType());
+      Map<Double, Area> lightSourceArea = areaBySightMap.get(sightName);
       if (lightSourceArea != null) {
         return lightSourceArea;
       }
     } else {
-      areaBySightMap = new HashMap<String, TreeMap<Double, Area>>();
+      areaBySightMap = new HashMap<>();
       lightSourceCache.put(lightSourceToken.getId(), areaBySightMap);
     }
 
@@ -198,7 +195,7 @@ public class ZoneView implements ModelChangeListener {
       if (lightSource == null) {
         continue;
       }
-      SightType sight = MapTool.getCampaign().getSightType(baseToken.getSightType());
+      SightType sight = MapTool.getCampaign().getSightType(sightName);
       Area visibleArea =
           calculateLightSourceArea(
               lightSource, lightSourceToken, sight, attachedLightSource.getDirection());
@@ -216,7 +213,7 @@ public class ZoneView implements ModelChangeListener {
     }
 
     // Cache
-    areaBySightMap.put(baseToken.getSightType(), lightSourceAreaMap);
+    areaBySightMap.put(sightName, lightSourceAreaMap);
     return lightSourceAreaMap;
   }
 
@@ -281,13 +278,33 @@ public class ZoneView implements ModelChangeListener {
     }
     Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopologyTree());
 
-    if (visibleArea == null) {
-      return null;
+    if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
+      addLightSourceToCache(
+          visibleArea, p, lightSource, lightSourceToken, sight, direction, isPersonalLight);
     }
+    return visibleArea;
+  }
 
-    if (lightSource.getType() != LightSource.Type.NORMAL) {
-      return visibleArea;
-    }
+  /**
+   * Adds the light source as seen by a given sight to the corresponding cache. Lights with a color
+   * CSS value are stored in the drawableLightCache, while lights without are stored in
+   * brightLightCache.
+   *
+   * @param visibleArea the area visible from the light source token
+   * @param p the vision center of the light source token
+   * @param lightSource the light source
+   * @param lightSourceToken the light source token
+   * @param sight the sight
+   * @param direction the direction of the light source
+   */
+  private void addLightSourceToCache(
+      Area visibleArea,
+      Point p,
+      LightSource lightSource,
+      Token lightSourceToken,
+      SightType sight,
+      Direction direction,
+      boolean isPersonalLight) {
     // Keep track of colored light
     Set<DrawableLight> lightSet = new HashSet<DrawableLight>();
     Set<Area> brightLightSet = new HashSet<Area>();
@@ -300,7 +317,7 @@ public class ZoneView implements ModelChangeListener {
       lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
       lightArea.intersect(visibleArea);
 
-      if (light.getPaint() != null || isPersonalLight) {
+      if (light.getPaint() != null) {
         lightSet.add(new DrawableLight(lightSource.getType(), light.getPaint(), lightArea));
       } else {
         brightLightSet.add(lightArea);
@@ -314,27 +331,28 @@ public class ZoneView implements ModelChangeListener {
     // getDrawableLights() but the two flush() methods may be called from different threads. How to
     // verify this with Eclipse? Maybe the flush() methods should defer modifications to the
     // EventDispatchingThread?
-    Map<String, Set<DrawableLight>> lightMap = drawableLightCache.get(lightSourceToken.getId());
-    if (lightMap == null) {
-      lightMap = new HashMap<String, Set<DrawableLight>>();
-      drawableLightCache.put(lightSourceToken.getId(), lightMap);
-    }
-    if (lightMap.get(sight.getName()) != null) {
-      lightMap.get(sight.getName()).addAll(lightSet);
+    if (isPersonalLight) {
+      personalDrawableLightCache.put(lightSourceToken.getId(), lightSet);
     } else {
-      lightMap.put(sight.getName(), lightSet);
+      Map<String, Set<DrawableLight>> lightMap =
+          drawableLightCache.computeIfAbsent(lightSourceToken.getId(), k -> new HashMap<>());
+      if (lightMap.get(sight.getName()) != null) {
+        lightMap.get(sight.getName()).addAll(lightSet);
+      } else {
+        lightMap.put(sight.getName(), lightSet);
+      }
     }
-    Map<String, Set<Area>> brightLightMap = brightLightCache.get(lightSourceToken.getId());
-    if (brightLightMap == null) {
-      brightLightMap = new HashMap<String, Set<Area>>();
-      brightLightCache.put(lightSourceToken.getId(), brightLightMap);
-    }
-    if (brightLightMap.get(sight.getName()) != null) {
-      brightLightMap.get(sight.getName()).addAll(brightLightSet);
+    if (isPersonalLight) {
+      personalBrightLightCache.put(lightSourceToken.getId(), brightLightSet);
     } else {
-      brightLightMap.put(sight.getName(), brightLightSet);
+      Map<String, Set<Area>> brightLightMap =
+          brightLightCache.computeIfAbsent(lightSourceToken.getId(), k -> new HashMap<>());
+      if (brightLightMap.get(sight.getName()) != null) {
+        brightLightMap.get(sight.getName()).addAll(brightLightSet);
+      } else {
+        brightLightMap.put(sight.getName(), brightLightSet);
+      }
     }
-    return visibleArea;
   }
 
   /**
@@ -378,12 +396,13 @@ public class ZoneView implements ModelChangeListener {
     // Jamz TODO: add condition for daylight and darkness! Currently no darkness in daylight
     if (tokenVisibleArea != null && zone.getVisionType() == Zone.VisionType.NIGHT) {
       Rectangle2D origBounds = tokenVisibleArea.getBounds();
-      Area peronalLightArea = new Area();
       List<Token> lightSourceTokens = new ArrayList<Token>();
 
+      // Add the tokens from the lightSourceMap with normal (not aura) lights
       if (lightSourceMap.get(LightSource.Type.NORMAL) != null) {
         for (GUID lightSourceTokenId : lightSourceMap.get(LightSource.Type.NORMAL)) {
           Token lightSourceToken = zone.getToken(lightSourceTokenId);
+          // Verify if the token still exists
           if (lightSourceToken != null) {
             lightSourceTokens.add(lightSourceToken);
           }
@@ -399,16 +418,13 @@ public class ZoneView implements ModelChangeListener {
       // stopwatch.start();
       // Jamz: Iterate through all tokens and combine light areas by lumens
       CombineLightsSwingWorker workerThread =
-          new CombineLightsSwingWorker(token, lightSourceTokens);
+          new CombineLightsSwingWorker(token.getSightType(), lightSourceTokens);
       workerThread.execute();
       try {
         workerThread
             .get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish
         // before we go on
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ExecutionException e) {
+      } catch (InterruptedException | ExecutionException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
@@ -421,10 +437,15 @@ public class ZoneView implements ModelChangeListener {
             calculatePersonalLightSourceArea(
                 sight.getPersonalLightSource(), token, sight, Direction.CENTER);
         if (lightArea != null) {
-          peronalLightArea = new Area(tokenVisibleArea);
-          peronalLightArea.intersect(lightArea);
-
-          allLightAreaMap.put((double) 100, lightArea);
+          double lumens = sight.getPersonalLightSource().getLumens();
+          lumens = (lumens == 0) ? LUMEN_VISION : lumens;
+          // maybe some kind of imposed blindness?  Anyway, make sure to handle personal darkness..
+          if (lumens < 0) lumens = Math.abs(lumens) + .5;
+          if (allLightAreaMap.containsKey(lumens)) {
+            allLightAreaMap.get(lumens).add(lightArea);
+          } else {
+            allLightAreaMap.put(lumens, lightArea);
+          }
         }
       }
 
@@ -461,13 +482,13 @@ public class ZoneView implements ModelChangeListener {
   }
 
   private class CombineLightsSwingWorker extends SwingWorker<Void, List<Token>> {
-    private final Token baseToken;
+    private final String sightName;
     private final List<Token> lightSourceTokens;
     private final ExecutorService lightsThreadPool;
     private final long startTime = System.currentTimeMillis();
 
-    private CombineLightsSwingWorker(Token baseToken, List<Token> lightSourceTokens) {
-      this.baseToken = baseToken;
+    private CombineLightsSwingWorker(String sightName, List<Token> lightSourceTokens) {
+      this.sightName = sightName;
       this.lightSourceTokens = lightSourceTokens;
       lightsThreadPool = Executors.newCachedThreadPool();
     }
@@ -475,7 +496,7 @@ public class ZoneView implements ModelChangeListener {
     @Override
     protected Void doInBackground() throws Exception {
       for (Token lightSourceToken : lightSourceTokens) {
-        CombineLightsTask task = new CombineLightsTask(baseToken, lightSourceToken);
+        CombineLightsTask task = new CombineLightsTask(sightName, lightSourceToken);
         lightsThreadPool.submit(task);
       }
 
@@ -500,18 +521,18 @@ public class ZoneView implements ModelChangeListener {
    *     <p>A Callable task add to the ExecutorCompletionService to combine lights as a threaded
    *     task
    */
-  private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
-    private final Token baseToken;
+  private final class CombineLightsTask implements Callable<Map<Double, Area>> {
+    private final String sightName;
     private final Token lightSourceToken;
 
-    private CombineLightsTask(Token baseToken, Token lightSourceToken) {
-      this.baseToken = baseToken;
+    private CombineLightsTask(String sightName, Token lightSourceToken) {
+      this.sightName = sightName;
       this.lightSourceToken = lightSourceToken;
     }
 
     @Override
-    public TreeMap<Double, Area> call() throws Exception {
-      TreeMap<Double, Area> lightArea = getLightSourceArea(baseToken, lightSourceToken);
+    public Map<Double, Area> call() {
+      Map<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
         // Area tempArea = light.getValue();
@@ -576,10 +597,11 @@ public class ZoneView implements ModelChangeListener {
               if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                 continue;
               }
-              if (light.isOwnerOnly() && lightSource.getType() == LightSource.Type.AURA) {
-                if (!isOwner && !MapTool.getPlayer().isEffectiveGM()) {
-                  continue;
-                }
+              if (light.isOwnerOnly()
+                  && lightSource.getType() == LightSource.Type.AURA
+                  && !isOwner
+                  && !MapTool.getPlayer().isEffectiveGM()) {
+                continue;
               }
               lightList.add(new DrawableLight(type, light.getPaint(), visibleArea));
             }
@@ -595,31 +617,29 @@ public class ZoneView implements ModelChangeListener {
     lightSourceMap.clear();
 
     for (Token token : zone.getAllTokens()) {
-      if (token.hasLightSources() && token.isVisible())
-        if (!token.isVisibleOnlyToOwner()
-            || (token.isVisibleOnlyToOwner() && AppUtil.playerOwns(token))) {
+      if (token.hasLightSources() && token.isVisible()) {
+        if (!token.isVisibleOnlyToOwner() || AppUtil.playerOwns(token)) {
           for (AttachedLightSource als : token.getLightSources()) {
             LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
             if (lightSource == null) {
               continue;
             }
-            Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-            if (lightSet == null) {
-              lightSet = new HashSet<GUID>();
-              lightSourceMap.put(lightSource.getType(), lightSet);
-            }
+            Set<GUID> lightSet =
+                lightSourceMap.computeIfAbsent(lightSource.getType(), k -> new HashSet<>());
             lightSet.add(token.getId());
           }
         }
+      }
     }
   }
 
   /**
-   * Get the drawable lights from the drawableLightCache.
+   * Get the drawable lights from the drawableLightCache and from personalDrawableLightCache.
    *
+   * @param view the player view for which to get the personal bright lights.
    * @return the set of drawable lights.
    */
-  public Set<DrawableLight> getDrawableLights() {
+  public Set<DrawableLight> getDrawableLights(PlayerView view) {
     Set<DrawableLight> lightSet = new HashSet<DrawableLight>();
 
     for (Map<String, Set<DrawableLight>> map : drawableLightCache.values()) {
@@ -627,23 +647,41 @@ public class ZoneView implements ModelChangeListener {
         lightSet.addAll(set);
       }
     }
+    if (view != null && view.getTokens() != null) {
+      // Get the personal drawable lights of the tokens of the player view
+      for (Token token : view.getTokens()) {
+        Set<DrawableLight> lights = personalDrawableLightCache.get(token.getId());
+        if (lights != null) {
+          lightSet.addAll(lights);
+        }
+      }
+    }
     return lightSet;
   }
 
   /**
-   * Get the drawable lights from the brightLightCache.
+   * Get the drawable lights from the brightLightCache and from personalBrightLightCache.
    *
+   * @param view the player view for which to get the personal bright lights.
    * @return the set of bright lights.
    */
-  public Set<Area> getBrightLights() {
+  public Set<Area> getBrightLights(PlayerView view) {
     Set<Area> lightSet = new HashSet<Area>();
     // MJ: There seems to be contention for this cache, but that looks inconspicuous enough to
     // try this easy way out. Better: solve the synchronization issues.
-    Collection<Map<String, Set<Area>>> copy =
-        new ArrayList<Map<String, Set<Area>>>(brightLightCache.values());
+    List<Map<String, Set<Area>>> copy = new ArrayList<>(brightLightCache.values());
     for (Map<String, Set<Area>> map : copy) {
       for (Set<Area> set : map.values()) {
         lightSet.addAll(set);
+      }
+    }
+    if (view != null && view.getTokens() != null) {
+      // Get the personal bright lights of the tokens of the player view
+      for (Token token : view.getTokens()) {
+        Set<Area> areas = personalBrightLightCache.get(token.getId());
+        if (areas != null) {
+          lightSet.addAll(areas);
+        }
       }
     }
     return lightSet;
@@ -651,7 +689,7 @@ public class ZoneView implements ModelChangeListener {
 
   /**
    * Clear the tokenVisibleAreaCache, tokenVisionCache, lightSourceCache, visibleAreaMap,
-   * drawableLightCache, and brightLightCache.
+   * drawableLightCache, brightLightCache, and personal drawable/bright light caches.
    */
   public void flush() {
     tokenVisibleAreaCache.clear();
@@ -660,12 +698,14 @@ public class ZoneView implements ModelChangeListener {
     visibleAreaMap.clear();
     drawableLightCache.clear();
     brightLightCache.clear();
+    personalDrawableLightCache.clear();
+    personalBrightLightCache.clear();
   }
 
   /**
    * Flush the ZoneView cache of the token. Remove token from tokenVisibleAreaCache,
-   * drawableLightCache, and brightLightCache. Always clear tokenVisionCache, visibleAreaMap, and
-   * lightSourceCache.
+   * tokenVisionCache, lightSourceCache, drawableLightCache, brightLightCache, and personal light
+   * caches. Can clear tokenVisionCache and visibleAreaMap depending on the token.
    *
    * @param token the token to flush.
    */
@@ -677,21 +717,16 @@ public class ZoneView implements ModelChangeListener {
     lightSourceCache.remove(token.getId());
     drawableLightCache.remove(token.getId());
     brightLightCache.remove(token.getId());
-    visibleAreaMap.clear();
+    personalDrawableLightCache.remove(token.getId());
+    personalBrightLightCache.remove(token.getId());
 
     if (hadLightSource || token.hasLightSources()) {
       // Have to recalculate all token vision
       tokenVisionCache.clear();
-    }
-    if (token.getHasSight()) {
+      visibleAreaMap.clear();
+    } else if (token.getHasSight()) {
       visibleAreaMap.clear();
     }
-    // TODO: This fixes a bug with changing vision type, I don't like it though, it needs to be
-    // optimized back out
-    lightSourceCache.clear();
-    // TODO: This fixes a similar bug with turning lights off after moving a different npc token, I
-    // don't like it either...
-    tokenVisionCache.clear();
   }
 
   /**
@@ -718,11 +753,7 @@ public class ZoneView implements ModelChangeListener {
         view.isUsingTokenView()
             ? view.getTokens()
             : zone.getTokensFiltered(
-                new Filter() {
-                  public boolean matchToken(Token t) {
-                    return t.isToken() && t.getHasSight() && (isGMview || t.isVisible());
-                  }
-                });
+                t -> t.isToken() && t.getHasSight() && (isGMview || t.isVisible()));
 
     for (Token token : tokenList) {
       boolean weOwnIt = AppUtil.playerOwns(token);
@@ -733,7 +764,7 @@ public class ZoneView implements ModelChangeListener {
         }
       } else {
         // If we're viewing the map as a player and the token is not a PC, then skip it.
-        if (!isGMview && (token.getType() != Token.Type.PC)) {
+        if (!isGMview && token.getType() != Token.Type.PC && !AppUtil.ownedByOnePlayer(token)) {
           continue;
         }
       }
@@ -824,6 +855,10 @@ public class ZoneView implements ModelChangeListener {
       if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedVBL) {
         tokenVisionCache.clear();
         lightSourceCache.clear();
+        brightLightCache.clear();
+        drawableLightCache.clear();
+        personalBrightLightCache.clear();
+        personalDrawableLightCache.clear();
         visibleAreaMap.clear();
         topologyTree = null;
         tokenTopology = null;

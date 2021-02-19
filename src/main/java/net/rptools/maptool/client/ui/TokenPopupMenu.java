@@ -43,8 +43,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -401,25 +399,19 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     try {
       Constructor<SetHaloAction> standardColorActionConstructor =
           standardColorActionClass.getConstructor(
-              new Class[] {
-                TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class
-              });
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, Color.class, String.class);
       Constructor<SetColorChooserAction> customColorActionConstructor =
           customColorActionClass.getConstructor(
-              new Class[] {TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class});
+              TokenPopupMenu.class, ZoneRenderer.class, Set.class, String.class);
 
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
               standardColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")
-                  }));
+                  this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")));
       JCheckBoxMenuItem customMenu =
           new JCheckBoxMenuItem(
               customColorActionConstructor.newInstance(
-                  new Object[] {
-                    this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")
-                  }));
+                  this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")));
 
       if (selectedColor == null) {
         noneMenu.setSelected(true);
@@ -441,7 +433,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         JCheckBoxMenuItem item =
             new JCheckBoxMenuItem(
                 standardColorActionConstructor.newInstance(
-                    new Object[] {this, getRenderer(), selectedTokenSet, bgColor, displayName}));
+                    this, getRenderer(), selectedTokenSet, bgColor, displayName));
         item.setBackground(bgColor);
         item.setForeground(fgColor);
 
@@ -464,7 +456,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       return null;
     }
     JMenu stateMenu = I18N.createMenu("defaultTool.barMenu");
-    Collections.sort(overlays, BarTokenOverlay.COMPARATOR);
+    overlays.sort(BarTokenOverlay.COMPARATOR);
     for (BarTokenOverlay overlay : overlays) {
       createBarItem(overlay.getName(), stateMenu, getTokenUnderMouse());
     } // endfor
@@ -478,7 +470,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     stateMenu.addSeparator();
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(MapTool.getCampaign().getTokenStatesMap().values());
-    Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
+    overlays.sort(BooleanTokenOverlay.COMPARATOR);
 
     // Create the group menus first so that they can be placed at the top of the state menu
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();
@@ -525,7 +517,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     if (selectedTokenSet.size() == 1) {
       List<Integer> list =
           MapTool.getFrame().getInitiativePanel().getList().indexOf(getTokenUnderMouse());
-      int index = list.isEmpty() ? -1 : list.get(0).intValue();
+      int index = list.isEmpty() ? -1 : list.get(0);
       if (index >= 0) {
         if (isOwner) initiativeMenu.getMenuComponent(0).setEnabled(false);
         boolean hold =
@@ -560,7 +552,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   @SuppressWarnings("unused")
-  private static class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
+  private class PlayerOwnershipMenu extends JCheckBoxMenuItem implements ActionListener {
     private static final long serialVersionUID = -6109869878632628827L;
 
     private final Set<GUID> tokenSet;
@@ -585,7 +577,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         Token token = zone.getToken(guid);
 
         if (selected) {
-          for (Player player : (Iterable<Player>) MapTool.getPlayerList()) {
+          for (Player player : MapTool.getPlayerList()) {
             token.addOwner(player.getName());
           }
           token.removeOwner(name);
@@ -617,7 +609,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     JMenuItem item = new JMenuItem(new ChangeBarAction(bar));
     Object value = token.getState(bar);
     int percent = (int) (TokenBarFunction.getBigDecimalValue(value).doubleValue() * 100);
-    item.setText(bar + " (" + Integer.toString(percent) + "%)");
+    item.setText(bar + " (" + percent + "%)");
     menu.add(item);
     return item;
   }
@@ -760,12 +752,9 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       JCheckBox hide = new JCheckBox("Hide");
       hide.putClientProperty("JSlider", slider);
       hide.addChangeListener(
-          new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-              JSlider js = (JSlider) ((JCheckBox) e.getSource()).getClientProperty("JSlider");
-              js.setEnabled(!((JCheckBox) e.getSource()).isSelected());
-            }
+          e1 -> {
+            JSlider js = (JSlider) ((JCheckBox) e1.getSource()).getClientProperty("JSlider");
+            js.setEnabled(!((JCheckBox) e1.getSource()).isSelected());
           });
       labelPanel.add(hide, new CellConstraints(1, 3, CellConstraints.RIGHT, CellConstraints.TOP));
       slider.setPaintLabels(true);
@@ -892,17 +881,20 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
           init.insertToken(-1, token);
         } else {
           for (int i = list.length - 1; i >= 0; i--) {
-            int index = list[i].intValue();
+            int index = list[i];
+            if (index == -1) {
+              continue;
+            }
             if (name.equals("initiative.menu.remove")) {
-              if (index != -1) init.removeToken(index);
+              init.removeToken(index);
             } else if (name.equals("initiative.menu.hold")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(true);
+              init.getTokenInitiative(index).setHolding(true);
             } else if (name.equals("initiative.menu.resume")) {
-              if (index != -1) init.getTokenInitiative(index).setHolding(false);
+              init.getTokenInitiative(index).setHolding(false);
             } else if (name.equals("initiative.menu.setState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(input);
+              init.getTokenInitiative(index).setState(input);
             } else if (name.equals("initiative.menu.clearState")) {
-              if (index != -1) init.getTokenInitiative(index).setState(null);
+              init.getTokenInitiative(index).setState(null);
             } // endif
           } // endif
         } // endfor
@@ -1017,9 +1009,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         token.setLastPath(null);
 
         MapTool.serverCommand().putToken(zone.getId(), token);
-
-        // Cache clearing
-        getRenderer().flush(token);
       }
       getRenderer().repaint();
     }

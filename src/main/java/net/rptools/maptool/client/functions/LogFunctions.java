@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.Gson;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +58,8 @@ public class LogFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     if (!MapTool.getParser().isMacroTrusted()) {
@@ -94,11 +95,7 @@ public class LogFunctions extends AbstractFunction {
     List<LoggerResponse> loggerLevels = new ArrayList<>();
 
     for (Logger logger : logContext.getLoggers()) {
-      try {
-        loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
-      } catch (IOException ioe) {
-        log.error("Unable to get loggers from LogManager!", ioe);
-      }
+      loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
     }
 
     Gson gson = new Gson();
@@ -240,12 +237,12 @@ public class LogFunctions extends AbstractFunction {
   /*
    * A POJO to hold an Logger Config to marshal as a nice JSON object
    */
-  private final class LoggerResponse {
+  private static final class LoggerResponse {
 
     private final String name;
     private final String level;
 
-    public LoggerResponse(String name, String level) throws IOException {
+    public LoggerResponse(String name, String level) {
       this.name = name;
       this.level = level;
     }

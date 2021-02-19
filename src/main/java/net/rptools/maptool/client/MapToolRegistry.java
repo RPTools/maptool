@@ -14,95 +14,243 @@
  */
 package net.rptools.maptool.client;
 
-import com.caucho.hessian.client.HessianProxyFactory;
-import java.net.MalformedURLException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+import net.rptools.maptool.server.MapToolServer;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public class MapToolRegistry {
-  private static final String SERVICE_URL = "http://services.rptools.net/maptool_registry-1_3.php";
-  private static MapToolRegistryService service;
+  private static final String SERVICE_URL = "https://services-mt.rptools.net";
+  private static final String REGISTER_SERVER = SERVICE_URL + "/register-server";
+  private static final String ACTIVE_SERVERS = SERVICE_URL + "/active-servers";
+  private static final String SERVER_HEARTBEAT = SERVICE_URL + "/server-heartbeat";
+  private static final String SERVER_DISCONNECT = SERVICE_URL + "/server-disconnect";
+  private static final String SERVER_DETAILS = SERVICE_URL + "/server-details";
 
-  static {
-    HessianProxyFactory factory = new HessianProxyFactory();
-    factory.setChunkedPost(false);
-    try {
-      service = (MapToolRegistryService) factory.create(MapToolRegistryService.class, SERVICE_URL);
-    } catch (MalformedURLException mue) {
-      mue.printStackTrace();
+  private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+  private String serverRegistrationId;
+
+  private static final Logger log = LogManager.getLogger(MapToolServer.class);
+
+  private static MapToolRegistry instance = new MapToolRegistry();
+
+  public static MapToolRegistry getInstance() {
+    return instance;
+  }
+
+  public static class SeverConnectionDetails {
+    public String address;
+    public int port;
+  }
+
+  public enum RegisterResponse {
+    OK,
+    ERROR,
+    NAME_EXISTS
+  }
+
+  private MapToolRegistry() {}
+
+  public SeverConnectionDetails findInstance(String id) {
+    OkHttpClient client = new OkHttpClient();
+    String requestUrl =
+        HttpUrl.parse(SERVER_DETAILS).newBuilder().addQueryParameter("name", id).build().toString();
+
+    Request request = new Request.Builder().url(requestUrl).build();
+
+    try (Response response = client.newCall(request).execute()) {
+      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
+      SeverConnectionDetails details = new SeverConnectionDetails();
+
+      details.address = json.getAsJsonPrimitive("address").getAsString();
+      details.port = json.getAsJsonPrimitive("port").getAsInt();
+
+      return details;
+
+    } catch (IOException | NullPointerException e) {
+      log.error("Error fetching instance from server registry", e);
+      return new SeverConnectionDetails();
     }
   }
 
-  public static String findInstance(String id) {
-    checkService();
-    return service.findInstance(id);
-  }
+  public List<String> findAllInstances() {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder().url(ACTIVE_SERVERS).build();
 
-  public static List<String> findAllInstances() {
-    checkService();
-    return service.findAllInstances();
-  }
-
-  public static String getAddress() {
-    checkService();
-    return service.getAddress();
-  }
-
-  public static int registerInstance(String id, int port) {
-    checkService();
-    return service.registerInstance(id, port, MapTool.getVersion());
-  }
-
-  public static void unregisterInstance(int port) {
-    checkService();
-    service.unregisterInstance(port);
-  }
-
-  public static boolean testConnection(int port) {
-    checkService();
-    return service.testConnection(port);
-  }
-
-  public static void heartBeat(int port) {
-    checkService();
-    service.heartBeat(port);
-  }
-
-  private static void checkService() {
-    if (service == null) {
-      throw new RuntimeException("Service is not available");
+    try (Response response = client.newCall(request).execute()) {
+      JsonArray array = JsonParser.parseString(response.body().string()).getAsJsonArray();
+      List<String> servers = new ArrayList<>();
+      for (JsonElement ele : array) {
+        JsonObject jobj = ele.getAsJsonObject();
+        String val = jobj.get("name").getAsString() + ":" + jobj.get("version").getAsString();
+        servers.add(val);
+      }
+      return servers;
+    } catch (IOException | NullPointerException e) {
+      e.printStackTrace(); // TODO:
+      return List.of(); // Return empty list
     }
   }
 
-  public static void main(String[] args) throws Exception {
-    // long delay = 0;
-    //
-    // Thread.sleep(delay);
-    // System.out.println("Register");
-    // registerInstance("my test", 4444);
-    //
-    // Thread.sleep(delay);
-    // System.out.println("Heartbeat");
-    //
-    // heartBeat(4444);
-    //
-    // Thread.sleep(delay);
-    // System.out.println("Find: " + findInstance("my test"));
-    //
-    // Thread.sleep(delay);
-    // System.out.println("RERegister");
-    // registerInstance("my test", 4444);
-    //
-    // Thread.sleep(delay);
-    // System.out.println("Find: " + findInstance("my test"));
-    //
-    // Thread.sleep(delay);
-    // System.out.println("Find: " + findInstance("my test"));
-    //
-    // Thread.sleep(delay);
-    // System.out.println("UnRegister");
-    // unregisterInstance(4444);
+  public RegisterResponse registerInstance(String id, int port) {
+    JsonObject body = new JsonObject();
+    body.addProperty("name", id);
+    body.addProperty("port", port);
+    body.addProperty("address", getAddress());
+    if (MapTool.isDevelopment()) {
+      body.addProperty("version", "Dev");
+    } else {
+      body.addProperty("version", MapTool.getVersion());
+    }
+    body.addProperty("clientId", MapTool.getClientId());
+    Locale locale = Locale.getDefault();
+    body.addProperty("country", locale.getCountry());
+    body.addProperty("language", locale.getLanguage());
+    TimeZone timeZone = TimeZone.getDefault();
+    body.addProperty("timezone", timeZone.getID());
 
-    System.out.println("Test: " + testConnection(51234));
-    System.out.println("All instances: " + findAllInstances());
+    OkHttpClient client = new OkHttpClient();
+    RequestBody requestBody = RequestBody.create(body.toString(), JSON);
+
+    Request request = new Request.Builder().url(REGISTER_SERVER).put(requestBody).build();
+    RegisterResponse registerResponse;
+    try (Response response = client.newCall(request).execute()) {
+      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
+
+      String status = json.get("status").getAsString();
+      if ("ok".equals(status)) {
+        serverRegistrationId = json.get("serverId").getAsString();
+        registerResponse = RegisterResponse.OK;
+      } else if ("name-exists".equals(status)) {
+        registerResponse = RegisterResponse.NAME_EXISTS;
+      } else {
+        registerResponse = RegisterResponse.ERROR;
+      }
+    } catch (IOException | NullPointerException e) {
+      registerResponse = RegisterResponse.ERROR;
+    }
+
+    return registerResponse;
+  }
+
+  public void unregisterInstance() {
+    JsonObject body = new JsonObject();
+    body.addProperty("id", serverRegistrationId);
+    body.addProperty("clientId", MapTool.getClientId());
+
+    OkHttpClient client = new OkHttpClient();
+    RequestBody requestBody = RequestBody.create(body.toString(), JSON);
+
+    Request request = new Request.Builder().url(SERVER_DISCONNECT).patch(requestBody).build();
+
+    client
+        .newCall(request)
+        .enqueue(
+            new Callback() {
+              @Override
+              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                log.error("Error unregistering server ", e);
+              }
+
+              @Override
+              public void onResponse(@NotNull Call call, @NotNull Response response)
+                  throws IOException {
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
+              }
+            });
+  }
+
+  public void heartBeat() {
+    JsonObject body = new JsonObject();
+    body.addProperty("id", serverRegistrationId);
+    body.addProperty("clientId", MapTool.getClientId());
+    body.addProperty("address", getAddress());
+    body.addProperty("number_players", MapTool.getPlayerList().size());
+    body.addProperty("number_maps", MapTool.getCampaign().getZones().size());
+
+    OkHttpClient client = new OkHttpClient();
+    RequestBody requestBody = RequestBody.create(body.toString(), JSON);
+
+    Request request = new Request.Builder().url(SERVER_HEARTBEAT).patch(requestBody).build();
+
+    client
+        .newCall(request)
+        .enqueue(
+            new Callback() {
+              @Override
+              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                log.error("Error sending heart beat", e);
+              }
+
+              @Override
+              public void onResponse(@NotNull Call call, @NotNull Response response)
+                  throws IOException {
+                try {
+                  response.close();
+                } catch (Exception e) {
+                  // Not much point doing anything...
+                }
+              }
+            });
+  }
+
+  public String getAddress() {
+    String address = "";
+    List<String> ipCheckURLs;
+
+    try (InputStream ipCheckList =
+        getClass().getResourceAsStream("/net/rptools/maptool/client/network/ip-check.txt")) {
+      ipCheckURLs =
+          new BufferedReader(new InputStreamReader(ipCheckList, StandardCharsets.UTF_8))
+              .lines()
+              .map(String::trim)
+              .filter(s -> !s.startsWith("#"))
+              .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new AssertionError("Unable to read ip-check list.", e); // Shouldn't happen
+    }
+
+    for (String urlString : ipCheckURLs) {
+      try {
+        URL url = new URL(urlString);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+          String ip = reader.readLine();
+          if (ip != null && !ip.isEmpty()) {
+            address = ip;
+          }
+        }
+      } catch (Exception e) {
+        // ignore error and continue checking.
+      }
+    }
+    return address;
   }
 }

@@ -19,14 +19,17 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.commons.lang.StringUtils;
 
@@ -76,7 +79,8 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String function, List<Object> params)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String function, List<Object> params)
       throws ParserException {
 
     if ("getTableNames".equalsIgnoreCase(function)) {
@@ -88,11 +92,7 @@ public class LookupTableFunction extends AbstractFunction {
       }
       if ("json".equalsIgnoreCase(delim)) {
         JsonArray jsonArray = new JsonArray();
-        getTableList(MapTool.getPlayer().isGM())
-            .forEach(
-                (table) -> {
-                  jsonArray.add(table);
-                });
+        getTableList(MapTool.getPlayer().isGM()).forEach(jsonArray::add);
         return jsonArray;
       }
       return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
@@ -103,7 +103,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTableVisible", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getVisible() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("setTableVisible".equalsIgnoreCase(function)) {
 
@@ -114,7 +114,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getVisible() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTableAccess".equalsIgnoreCase(function)) {
 
@@ -122,7 +122,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTableAccess", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getAllowLookup() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("setTableAccess".equalsIgnoreCase(function)) {
 
@@ -133,7 +133,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(access));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getAllowLookup() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTableRoll".equalsIgnoreCase(function)) {
 
@@ -176,7 +176,7 @@ public class LookupTableFunction extends AbstractFunction {
         asset = getAssetFromString(params.get(4).toString());
       }
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.addEntry(Integer.valueOf(min), Integer.valueOf(max), value, asset);
+      lookupTable.addEntry(Integer.parseInt(min), Integer.parseInt(max), value, asset);
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
@@ -194,9 +194,7 @@ public class LookupTableFunction extends AbstractFunction {
         oldlist.stream()
             .filter((e) -> (e != entry))
             .forEachOrdered(
-                (e) -> {
-                  lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
-                });
+                (e) -> lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId()));
       }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
@@ -227,10 +225,8 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("deleteTable", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      if (lookupTable != null) {
-        MapTool.getCampaign().getLookupTableMap().remove(name);
-        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      }
+      MapTool.getCampaign().getLookupTableMap().remove(name);
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
     } else if ("getTableImage".equalsIgnoreCase(function)) {
@@ -240,12 +236,8 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       MD5Key img = lookupTable.getTableImage();
-      if (img == null) {
-        // Returning null causes an NPE when output is dumped to chat.
-        return "";
-      } else {
-        return img;
-      }
+      // Returning null causes an NPE when output is dumped to chat.
+      return Objects.requireNonNullElse(img, "");
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
@@ -265,12 +257,10 @@ public class LookupTableFunction extends AbstractFunction {
       String oldName = params.get(0).toString();
       String newName = params.get(1).toString();
       LookupTable oldTable = getMaptoolTable(oldName, function);
-      if (oldTable != null) {
-        LookupTable newTable = new LookupTable(oldTable);
-        newTable.setName(newName);
-        MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
-        MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      }
+      LookupTable newTable = new LookupTable(oldTable);
+      newTable.setName(newName);
+      MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
 
     } else if ("setTableEntry".equalsIgnoreCase(function)) {
@@ -287,7 +277,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       LookupEntry entry = lookupTable.getLookup(roll);
       if (entry == null) return 0; // no entry was found
-      int rollInt = Integer.valueOf(roll);
+      int rollInt = Integer.parseInt(roll);
       if (rollInt < entry.getMin() || rollInt > entry.getMax())
         return 0; // entry was found but doesn't match
       List<LookupEntry> oldlist = new ArrayList<>(lookupTable.getEntryList());
@@ -324,17 +314,35 @@ public class LookupTableFunction extends AbstractFunction {
         entryDetails.addProperty("assetid", "");
       }
       return entryDetails;
-
     } else if ("resetTablePicks".equalsIgnoreCase(function)) {
-
+      /*
+       * resetTablePicks(tblName) - reset all entries on a table
+       * resetTablePicks(tblName, entriesToReset) - reset specific entries from a String List with "," delim
+       * resetTablePicks(tblName, entriesToReset, delim) - use custom delimiter
+       * resetTablePicks(tblName, entriesToReset, "json") - entriesToReset is a JsonArray
+       */
       checkTrusted(function);
-      FunctionUtil.checkNumberParam("setTableVisible", params, 1, 1);
-      String name = params.get(0).toString();
-      LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.reset();
+      FunctionUtil.checkNumberParam(function, params, 1, 3);
+      String tblName = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(tblName, function);
+      if (params.size() > 1) {
+        String delim = (params.size() > 2) ? params.get(2).toString() : ",";
+        List<String> entriesToReset;
+        if (delim.equalsIgnoreCase("json")) {
+          JsonArray jsonArray = FunctionUtil.paramAsJsonArray(function, params, 1);
+          entriesToReset =
+              JSONMacroFunctions.getInstance()
+                  .getJsonArrayFunctions()
+                  .jsonArrayToListOfStrings(jsonArray);
+        } else {
+          entriesToReset = StrListFunctions.toList(params.get(1).toString(), delim);
+        }
+        lookupTable.reset(entriesToReset);
+      } else {
+        lookupTable.reset();
+      }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return "";
-
     } else if ("setTablePickOnce".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
@@ -344,7 +352,7 @@ public class LookupTableFunction extends AbstractFunction {
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.setPickOnce(FunctionUtil.getBooleanValue(pickonce));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-      return lookupTable.getPickOnce() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTablePickOnce".equalsIgnoreCase(function)) {
 
@@ -352,7 +360,7 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTablePickOnce", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getPickOnce() ? new BigDecimal(1) : new BigDecimal(0);
+      return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("getTablePicksLeft".equalsIgnoreCase(function)) {
 
@@ -403,7 +411,9 @@ public class LookupTableFunction extends AbstractFunction {
         } catch (NumberFormatException nfe) {
           return val;
         }
-      } else { // We want the image URI through tblImage or tableImage
+      } else if ("tableImage".equalsIgnoreCase(function)
+          || "tblImage"
+              .equalsIgnoreCase(function)) { // We want the image URI through tblImage or tableImage
 
         if (result.getImageId() == null) {
           return ""; // empty string if no image is found (#538)
@@ -427,6 +437,8 @@ public class LookupTableFunction extends AbstractFunction {
           assetId.append(i);
         }
         return assetId.toString();
+      } else {
+        throw new ParserException(I18N.getText("macro.function.general.unknownFunction", function));
       }
     }
   }
@@ -454,11 +466,8 @@ public class LookupTableFunction extends AbstractFunction {
     if (isGm) tables.addAll(MapTool.getCampaign().getLookupTableMap().keySet());
     else
       MapTool.getCampaign().getLookupTableMap().values().stream()
-          .filter((lt) -> (lt.getVisible()))
-          .forEachOrdered(
-              (lt) -> {
-                tables.add(lt.getName());
-              });
+          .filter(LookupTable::getVisible)
+          .forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
   }
 

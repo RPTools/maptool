@@ -292,7 +292,6 @@ public abstract class DefaultTool extends Tool
 
         token.setFacing(facing);
 
-        renderer.flush(token);
         MapTool.serverCommand().putToken(getZone().getId(), token);
       }
 
@@ -302,7 +301,7 @@ public abstract class DefaultTool extends Tool
     // ZOOM
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
-      direction = isKeyDown('z') ? direction : !direction; // XXX Why check for this?
+      direction = isKeyDown('z') == direction; // XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {

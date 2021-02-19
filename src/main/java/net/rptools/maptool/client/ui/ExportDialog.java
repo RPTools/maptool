@@ -21,7 +21,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Transparency;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -62,12 +61,13 @@ import org.apache.logging.log4j.Logger;
  * <p>This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of
  * the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  */
-@SuppressWarnings("serial")
 public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   //
   // Dialog/ UI related vars
   //
   private static final Logger log = LogManager.getLogger(ExportDialog.class);
+
+  private static final ExportDialog instance = new ExportDialog();
 
   /** the modal panel the user uses to select the screenshot options */
   private static FormPanel interactPanel;
@@ -139,7 +139,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  public static enum ExportRadioButtons {
+  public enum ExportRadioButtons {
     // Format of enum declaration:
     // [Abeille Forms Designer button name] (default checked, default enabled)
     // Button Group 1 (not that it matters for this controller)
@@ -165,12 +165,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           if (form.getRadioButton(button.toString()) == null) {
             throw new Exception("Export Dialog has a mis-matched enum: " + button.toString());
           }
-          button.addActionListener(
-              new ActionListener() {
-                public void actionPerformed(ActionEvent evt) {
-                  enforceButtonRules();
-                }
-              });
+          button.addActionListener(evt -> enforceButtonRules());
         } catch (Exception ex) {
           MapTool.showError("dialog.screenshot.radio.button.uiImplementationError", ex);
         }
@@ -238,7 +233,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  private static enum ExportLayers {
+  private enum ExportLayers {
     // enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
     LAYER_TOKEN(true),
     LAYER_HIDDEN(false),
@@ -376,13 +371,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     }
   }
 
-  public ExportDialog() throws Exception {
+  public static ExportDialog getInstance() {
+    return instance;
+  }
+
+  private ExportDialog() {
     super(MapTool.getFrame(), I18N.getText("action.exportScreenShot.title"), true);
-    if (instanceCount == 0) {
-      instanceCount++;
-    } else {
-      throw new Exception("Only one instance of ExportDialog allowed!");
-    }
 
     // The window uses about 1MB. Disposing frees this, but repeated uses
     // will cause more memory fragmentation.
@@ -405,34 +399,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     ExportRadioButtons.setForm(interactPanel);
     ExportLayers.setForm(interactPanel);
 
-    interactPanel
-        .getButton("exportButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                exportButtonAction();
-              }
-            });
-    interactPanel
-        .getButton("cancelButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                dispose();
-              }
-            });
-    interactPanel
-        .getButton("browseButton")
-        .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent evt) {
-                browseButtonAction();
-              }
-            });
-
-    // Run this once to make sure the dialog is in a good starting state.
-    ExportLayers.setDefaultChecked();
-    enforceButtonRules();
+    interactPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
+    interactPanel.getButton("cancelButton").addActionListener(evt -> dispose());
+    interactPanel.getButton("browseButton").addActionListener(evt -> browseButtonAction());
   }
 
   @Override
@@ -543,11 +512,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * @throws Exception if unable to take screen capture
    */
-  @SuppressWarnings("unused")
   public void screenCapture() throws Exception {
     MapTool.getFrame()
         .setStatusMessage(I18N.getString("dialog.screenshot.msg.GeneratingScreenshot"));
     ExportRadioButtons type = ExportRadioButtons.getType();
+    if (type == null) {
+      throw new Exception(I18N.getString("dialog.screenshot.error.invalidDialogSettings"));
+    }
     Player.Role role;
     try {
       switch (type) {
@@ -662,13 +633,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
     } catch (OutOfMemoryError e) {
       MapTool.showError("screenCapture() caught: Out Of Memory", e);
-    } catch (Exception ex) {
-      MapTool.showError("screenCapture() caught: ", ex);
     }
   }
 
   public Map<String, Boolean> getExportSettings() {
-    Map<String, Boolean> settings = new HashMap<String, Boolean>(16);
+    Map<String, Boolean> settings = new HashMap<>(16);
     FormAccessor fa = interactPanel.getFormAccessor();
     Iterator<?> iter = fa.beanIterator(true);
     while (iter.hasNext()) {
@@ -700,11 +669,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   public void setExportSettings(Map<String, Boolean> settings) {
     resetExportSettings();
     if (settings != null) {
-      for (String iter : settings.keySet()) {
-        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(iter);
+      for (var entry : settings.entrySet()) {
+        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(entry.getKey());
         if (jtb == null) {
-          log.warn("GUI component for export setting '" + iter + "' not found.");
-        } else jtb.setSelected(settings.get(iter));
+          log.warn("GUI component for export setting '" + entry.getKey() + "' not found.");
+        } else {
+          jtb.setSelected(entry.getValue());
+        }
       }
     }
   }
@@ -720,16 +691,14 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   /**
    * This is a preserves the layer settings on the Zone object. It should be followed by
    * restoreZone()
-   *
-   * @return the image to be saved to a file
    */
-  private static void setupZoneLayers() throws Exception, OutOfMemoryError {
+  private static void setupZoneLayers() throws OutOfMemoryError {
     final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
     //
     // Preserve settings
     //
-    // psuedo-layers
+    // pseudo-layers
     savedVision = zone.getVisionType();
     savedFog = zone.hasFog();
     savedBoard = zone.drawBoard();
@@ -751,11 +720,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     Zone.Layer.BACKGROUND.setEnabled(ExportLayers.LAYER_BACKGROUND.isChecked());
   }
 
-  /**
-   * This restores the layer settings on the Zone object. It should follow setupZoneLayers().
-   *
-   * @return the image to be saved to a file
-   */
+  /** This restores the layer settings on the Zone object. It should follow setupZoneLayers(). */
   private static void restoreZoneLayers() {
     zone.setHasFog(savedFog);
     zone.setVisionType(savedVision);
@@ -783,6 +748,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private PlayerView preScreenshot() throws Exception, OutOfMemoryError {
     assert (!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
 
+    // Save the original state of the renderer to restore later.
+    // Create a place to put the image, and
+    // set up the renderer to encompass the whole extents of the map.
+
+    origBounds = renderer.getBounds();
+    origScale = renderer.getZoneScale();
+
     setupZoneLayers();
     boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();
 
@@ -790,14 +762,15 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // This will be later modified by the fog (for players),
     // and by the tiling texture (for re-importing)
     //
-    PlayerView view = new PlayerView(viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM);
+    Player.Role viewRole = viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM;
+    PlayerView view = renderer.getPlayerView(viewRole, false);
     Rectangle extents = renderer.zoneExtents(view);
     try {
       // Clip to what the players know about (if applicable).
       // This keeps the player from exporting the map to learn which
       // direction has more 'stuff' in it.
-      if (viewAsPlayer) {
-        Rectangle fogE = renderer.fogExtents();
+      if (viewAsPlayer && renderer.getZone().hasFog()) {
+        Rectangle fogE = renderer.getZone().getExposedArea(view).getBounds();
         // MapTool.showError(fogE.x + " " + fogE.y + " " + fogE.width + " " + fogE.height);
         if ((fogE.width < 0) || (fogE.height < 0)) {
           MapTool.showError(
@@ -826,14 +799,14 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     if (drawBoard) {
       DrawablePaint paint = renderer.getZone().getBackgroundPaint();
       DrawableTexturePaint dummy = new DrawableTexturePaint();
-      Integer tileX = 0, tileY = 0;
+      int tileX = 0, tileY = 0;
 
       if (paint.getClass() == dummy.getClass()) {
         Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
         tileX = bgTexture.getWidth(null);
         tileY = bgTexture.getHeight(null);
-        Integer x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
-        Integer y = ((int) Math.floor((float) extents.y / tileY)) * tileY;
+        int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
+        int y = ((int) Math.floor((float) extents.y / tileY)) * tileY;
         extents.width = extents.width + (extents.x - x);
         extents.height = extents.height + (extents.y - y);
         extents.x = x;
@@ -841,16 +814,15 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
     }
 
-    // Save the original state of the renderer to restore later.
-    // Create a place to put the image, and
-    // set up the renderer to encompass the whole extents of the map.
-
-    origBounds = renderer.getBounds();
-    origScale = renderer.getZoneScale();
+    // Rescale the bounds to match the view scale
+    double scale = renderer.getScale();
+    extents.setLocation((int) (extents.x * scale), (int) (extents.y * scale));
+    extents.setSize((int) (extents.width * scale), (int) (extents.height * scale));
 
     // Setup the renderer to use the new extents
     Scale s = new Scale();
     s.setOffset(-extents.x, -extents.y);
+    s.setScale(scale);
     renderer.setZoneScale(s);
     renderer.setBounds(extents);
 
@@ -859,7 +831,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   }
 
   private void postScreenshot() {
-    assert waitingForPostScreenshot : "postScrenshot called withot preScreenshot";
+    assert waitingForPostScreenshot : "postScrenshot called without preScreenshot";
 
     renderer.setBounds(origBounds);
     renderer.setZoneScale(origScale);

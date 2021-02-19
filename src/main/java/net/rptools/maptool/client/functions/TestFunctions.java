@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TestFunctions extends AbstractFunction {
@@ -55,7 +56,8 @@ public class TestFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     switch (functionName) {
@@ -125,11 +127,10 @@ public class TestFunctions extends AbstractFunction {
   }
 
   private void runTests(Token token) {
-    Map<Integer, Object> macroPropertiesMap =
+    Map<Integer, MacroButtonProperties> macroPropertiesMap =
         token.getMacroPropertiesMap(MapTool.getParser().isMacroTrusted());
 
-    for (Object o : macroPropertiesMap.values()) {
-      MacroButtonProperties mbp = (MacroButtonProperties) o;
+    for (MacroButtonProperties mbp : macroPropertiesMap.values()) {
       if (mbp.getLabel().toLowerCase().startsWith("test:")) {
 
         failures = 0;

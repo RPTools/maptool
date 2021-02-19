@@ -375,7 +375,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         }
       }
       // Arrange
-      Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+      tokenList.sort(Zone.TOKEN_Z_ORDER_COMPARATOR);
 
       // Update
       int z = zone.getLargestZOrder() + 1;
@@ -423,16 +423,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone =
-        server
-            .getCampaign()
-            .getZone(
-                zoneGUID); // this can return a zone that's not in MapToolFrame.zoneRenderList???
+    Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.exposeArea(area, selectedToks);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.exposeFoW.name(), RPCContext.getCurrent().parameters);
+    forwardToClients();
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -516,7 +509,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       Zone zone = server.getCampaign().getZone(list.getZone().getId());
       zone.setInitiativeList(list);
     } else if (ownerPermission != null) {
-      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission.booleanValue());
+      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
     }
     forwardToAllClients();
   }
@@ -667,7 +660,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         }
       }
       // Arrange
-      Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+      tokenList.sort(Zone.TOKEN_Z_ORDER_COMPARATOR);
 
       // Update
       int z = zone.getSmallestZOrder() - 1;

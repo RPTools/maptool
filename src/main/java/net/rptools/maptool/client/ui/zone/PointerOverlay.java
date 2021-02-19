@@ -57,8 +57,7 @@ public class PointerOverlay implements ZoneOverlay {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();
 
-    for (int i = 0; i < pointerList.size(); i++) {
-      PointerPair p = pointerList.get(i);
+    for (PointerPair p : pointerList) {
       if (p.pointer.getZoneGUID().equals(zone.getId())) {
         ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
         ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
@@ -136,23 +135,19 @@ public class PointerOverlay implements ZoneOverlay {
   }
 
   public void removePointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        pointerList.remove(i);
-      }
-    }
+    pointerList.removeIf(pair -> pair.player.equals(player));
   }
 
   public Pointer getPointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        return pointerList.get(i).pointer;
+    for (PointerPair pointerPair : pointerList) {
+      if (pointerPair.player.equals(player)) {
+        return pointerPair.pointer;
       }
     }
     return null;
   }
 
-  private class PointerPair {
+  private static class PointerPair {
     Pointer pointer;
     String player;
 

@@ -25,7 +25,6 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
@@ -67,27 +66,23 @@ public class HTMLPane extends JEditorPane {
     setEditable(false);
 
     addHyperlinkListener(
-        new HyperlinkListener() {
-          public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: "
-                      + e.getEventType().toString()
-                      + " "
-                      + e.toString());
-            }
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-              if (e.getURL() != null) {
-                MapTool.showDocument(e.getURL().toString());
-              } else if (e.getDescription().startsWith("#")) {
-                scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
-              } else {
-                Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
-                if (m.matches()) {
-                  if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.runMacroLink(e.getDescription());
-                  }
-                }
+        e -> {
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "Responding to hyperlink event: "
+                    + e.getEventType().toString()
+                    + " "
+                    + e.toString());
+          }
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (e.getURL() != null) {
+              MapTool.showDocument(e.getURL().toString());
+            } else if (e.getDescription().startsWith("#")) {
+              scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+            } else {
+              Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
@@ -140,12 +135,7 @@ public class HTMLPane extends JEditorPane {
 
   /** Flushes any caching for the panel. */
   public void flush() {
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            editorKit.flush();
-          }
-        });
+    EventQueue.invokeLater(editorKit::flush);
   }
 
   /**
@@ -323,9 +313,7 @@ public class HTMLPane extends JEditorPane {
             HTMLDocument document = (HTMLDocument) getDocument();
             StyleSheet style = document.getStyleSheet();
             style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException e) {
-            // Do nothing
-          } catch (IOException e) {
+          } catch (ParserException | IOException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {

@@ -16,7 +16,6 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,9 +23,11 @@ import java.util.regex.Pattern;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 /**
  * Implements various string utility functions. <br>
@@ -65,41 +66,76 @@ public class StrListFunctions extends AbstractFunction {
     return instance;
   }
 
+  public abstract static class ListVisitor {
+    public abstract boolean visit(int pos, int start, int end);
+  }
+
+  public static List<String> toList(String listStr, String delim) {
+    List<String> list = new ArrayList<String>();
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int start, int end) {
+            list.add(listStr.substring(start, end));
+            return true;
+          }
+        });
+    return list;
+  }
+
+  private static Pattern PATTERN_FOR_EMPTY_SEPARATOR = Pattern.compile("(.)()", Pattern.DOTALL);
+  private static Pattern PATTERN_FOR_COMMA_SEPARATOR =
+      Pattern.compile("\\s*(.*?)\\s*\\,|\\s*(.*?)\\s*$", Pattern.DOTALL);
+  private static Pattern PATTERN_FOR_SEMICOLON_SEPARATOR =
+      Pattern.compile("\\s*(.*?)\\s*\\;|\\s*(.*?)\\s*$", Pattern.DOTALL);
+
   /**
    * Parses a list.
    *
    * @param listStr has the form "item1, item2, ..."
-   * @param list is populated with the list items.
    * @param delim is the list delimiter to use.
+   * @param visitor callback to receive list elements
+   * @return number of visits performed
    */
-  public static void parse(String listStr, List<String> list, String delim) {
-    if (StringUtils.isEmpty(listStr.trim())) return; // null strings have zero entries
-    String patt;
-    if (delim.equalsIgnoreCase("")) {
-      patt = "(.)()";
+  public static int parse(String listStr, String delim, ListVisitor visitor) {
+
+    if (StringUtils.isBlank(listStr)) return 0; // null strings have zero entries
+
+    Pattern pattern;
+    if (delim.isEmpty()) {
+      pattern = PATTERN_FOR_EMPTY_SEPARATOR;
+    } else if (",".equals(delim)) {
+      pattern = PATTERN_FOR_COMMA_SEPARATOR;
+    } else if (";".equals(delim)) {
+      pattern = PATTERN_FOR_SEMICOLON_SEPARATOR;
     } else {
+      // This pattern needs to be compiled with the DOTALL flag or line terminators might
+      // cause premature termination of the matcher.find() operations...
       String escDelim = fullyQuoteString(delim);
-      patt = "(.*?)" + escDelim + "|(.*)";
+      pattern = Pattern.compile("\\s*(.*?)\\s*" + escDelim + "|\\s*(.*?)\\s*$", Pattern.DOTALL);
     }
-    // This pattern needs to be compiled with the DOTALL flag or line terminators might
-    // cause premature termination of the matcher.find() operations...
-    Pattern pattern = Pattern.compile(patt, Pattern.DOTALL);
+
     Matcher matcher = pattern.matcher(listStr);
     boolean lastItem = false;
+    int index = 0;
     while (matcher.find()) {
       if (!lastItem) {
-        String grp = matcher.group(1);
-        if (grp == null) {
-          grp = matcher.group(2);
+        int from = matcher.start(1), to = matcher.end(1);
+        if (from < 0) {
+          from = matcher.start(2);
+          to = matcher.end(2);
           // We're here because there was no trailing delimiter in this match.
           // In this case, the next match will be empty, but we don't want to grab it.
           // (We do grab the final empty match if the string ended with the delimiter.)
           // This flag will prevent that.
           lastItem = true;
         }
-        list.add(grp.trim());
+        if (!visitor.visit(index++, from, to)) break;
       }
     }
+    return index;
   }
 
   /**
@@ -121,34 +157,32 @@ public class StrListFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     Object retval = "";
     String listStr = parameters.get(0).toString().trim();
     String lastParam = parameters.get(parameters.size() - 1).toString();
 
-    ArrayList<String> list = new ArrayList<String>();
-
-    if ("listGet".equalsIgnoreCase(functionName))
-      retval = listGet(parameters, listStr, lastParam, list);
+    if ("listGet".equalsIgnoreCase(functionName)) retval = listGet(parameters, listStr, lastParam);
     else if ("listDelete".equalsIgnoreCase(functionName))
-      retval = listDelete(parameters, listStr, lastParam, list);
+      retval = listDelete(parameters, listStr, lastParam);
     else if ("listCount".equalsIgnoreCase(functionName))
-      retval = listCount(parameters, listStr, lastParam, list);
+      retval = listCount(parameters, listStr, lastParam);
     else if ("listFind".equalsIgnoreCase(functionName))
-      retval = listFind(parameters, listStr, lastParam, list);
+      retval = listFind(parameters, listStr, lastParam);
     else if ("listContains".equalsIgnoreCase(functionName))
-      retval = listContains(parameters, listStr, lastParam, list);
+      retval = listContains(parameters, listStr, lastParam);
     else if ("listAppend".equalsIgnoreCase(functionName))
-      retval = listAppend(parameters, listStr, lastParam, list);
+      retval = listAppend(parameters, listStr, lastParam);
     else if ("listInsert".equalsIgnoreCase(functionName))
-      retval = listInsert(parameters, listStr, lastParam, list);
+      retval = listInsert(parameters, listStr, lastParam);
     else if ("listReplace".equalsIgnoreCase(functionName))
-      retval = listReplace(parameters, listStr, lastParam, list);
+      retval = listReplace(parameters, listStr, lastParam);
     else if ("listSort".equalsIgnoreCase(functionName))
-      retval = listSort(parameters, listStr, lastParam, list);
+      retval = listSort(parameters, listStr, lastParam);
     else if ("listFormat".equalsIgnoreCase(functionName))
-      retval = listFormat(parameters, listStr, lastParam, list);
+      retval = listFormat(parameters, listStr, lastParam);
 
     return retval;
   }
@@ -159,15 +193,11 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the elements
    * @return The item at position <code>index</code>, or <code>""</code> if out of bounds.
    * @throws ParameterException if an error occurs.
    */
-  public Object listGet(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listGet(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
@@ -177,21 +207,30 @@ public class StrListFunctions extends AbstractFunction {
         maxParams,
         parameters,
         new Class[] {null, BigDecimal.class, String.class});
-    if (parameters.size() == maxParams) delim = lastParam;
-    parse(listStr, list, delim);
+    String delim = parameters.size() == maxParams ? lastParam : ",";
 
     int index = ((BigDecimal) parameters.get(1)).intValue();
-    if (index >= 0 && index < list.size()) {
-      String value = list.get(index);
-      if (value != null) {
-        // convert to numeric value if possible
-        Integer intval = strToInt(value);
-        retval = (intval == null) ? value : new BigDecimal(intval);
-      } else {
-        retval = "";
-      }
+    final StringBuffer retval = new StringBuffer();
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (pos == index) {
+              retval.append(listStr, from, to);
+              return false;
+            }
+            return true;
+          }
+        });
+
+    if (retval.length() > 0) {
+      Integer intval = strToInt(retval.toString());
+      if (intval != null) return new BigDecimal(intval);
     }
-    return retval;
+    return retval.toString();
   }
 
   /**
@@ -200,15 +239,11 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return A new list with the item at position <code>index</code> deleted.
    * @throws ParameterException if an error occurs.
    */
-  public Object listDelete(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listDelete(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
@@ -218,27 +253,34 @@ public class StrListFunctions extends AbstractFunction {
         maxParams,
         parameters,
         new Class[] {null, BigDecimal.class, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
 
+    String delim = (parameters.size() == maxParams) ? lastParam : ",";
     int index = ((BigDecimal) parameters.get(1)).intValue();
     StringBuilder sb = new StringBuilder();
-    boolean inRange = (index >= 0 && index < list.size());
-    for (int i = 0; i < list.size(); i++) {
-      if (i != index) {
-        sb.append(list.get(i));
-        sb.append(delim);
-        sb.append(" ");
-      }
-    }
-    if (list.size() > (inRange ? 1 : 0)) {
-      // Delete the last delimiter and space
-      sb.delete(sb.length() - 1 - delim.length(), sb.length());
-    }
-    retval = sb.toString();
-    return retval;
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (pos < index) {
+              if (pos > 0) {
+                sb.append(delim);
+              }
+              sb.append(listStr, from, to);
+              return true;
+            }
+            if (pos == index) return true;
+            if (index > 0) {
+              sb.append(delim);
+            }
+            sb.append(listStr, from, listStr.length());
+            return false;
+          }
+        });
+
+    return sb.toString();
   }
 
   /**
@@ -247,27 +289,32 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return The number of entries in the list.
    * @throws ParameterException if an error occurs.
    */
-  public Object listCount(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listCount(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 1;
     int maxParams = minParams + 1;
     checkVaryingParameters(
         "listCount()", minParams, maxParams, parameters, new Class[] {null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
+    String delim = (parameters.size() == maxParams) ? lastParam : ",";
 
-    retval = new BigDecimal(list.size());
-    return retval;
+    MutableInt count = new MutableInt(0);
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            count.increment();
+            return true;
+          }
+        });
+
+    return new BigDecimal(count.intValue());
   }
 
   /**
@@ -276,35 +323,37 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return The index of the first occurence of <code>target</code>, or -1 if not found.
    * @throws ParameterException when an error occurs.
    */
-  public Object listFind(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listFind(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
     checkVaryingParameters(
         "listFind()", minParams, maxParams, parameters, new Class[] {null, null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
+    String delim = (parameters.size() == maxParams) ? lastParam : ",";
 
     String target = parameters.get(1).toString().trim();
-    int index;
-    for (index = 0; index < list.size(); index++) {
-      if (target.equalsIgnoreCase(list.get(index))) {
-        break;
-      }
-    }
-    if (index == list.size()) index = -1;
-    retval = new BigDecimal(index);
-    return retval;
+
+    MutableInt retVal = new MutableInt(-1);
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (target.equalsIgnoreCase(listStr.substring(from, to))) {
+              retVal.setValue(pos);
+              return false;
+            }
+            return true;
+          }
+        });
+
+    return new BigDecimal(retVal.intValue());
   }
 
   /**
@@ -313,34 +362,36 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return Number of occurrences of <code>target</code> in <code>list</code>.
    * @throws ParameterException when an error occurs.
    */
-  public Object listContains(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listContains(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
     checkVaryingParameters(
         "listContains()", minParams, maxParams, parameters, new Class[] {null, null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
+    String delim = (parameters.size() == maxParams) ? lastParam : ",";
 
     String target = parameters.get(1).toString().trim();
-    int numMatches = 0;
-    for (int index = 0; index < list.size(); index++) {
-      if (target.equalsIgnoreCase(list.get(index))) {
-        numMatches++;
-      }
-    }
-    retval = new BigDecimal(numMatches);
-    return retval;
+
+    MutableInt retval = new MutableInt(0);
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (target.equalsIgnoreCase(listStr.substring(from, to))) {
+              retval.increment();
+            }
+            return true;
+          }
+        });
+
+    return new BigDecimal(retval.intValue());
   }
 
   /**
@@ -349,35 +400,22 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> appended.
    * @throws ParameterException when an error occurs.
    */
-  public Object listAppend(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listAppend(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
     checkVaryingParameters(
         "listAppend()", minParams, maxParams, parameters, new Class[] {null, null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
 
+    String delim = parameters.size() == maxParams ? lastParam : ",";
     String target = parameters.get(1).toString().trim();
-    StringBuilder sb = new StringBuilder();
-    for (String item : list) {
-      sb.append(item);
-      sb.append(delim);
-      sb.append(" ");
-    }
-    sb.append(target);
-    retval = sb.toString();
-    return retval;
+
+    if (!StringUtils.isEmpty(listStr)) return listStr + delim + " " + target;
+    return target;
   }
 
   /**
@@ -386,16 +424,12 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> inserted before the item at position <code>index
    *     </code>
    * @throws ParameterException when an error occurs.
    */
-  public Object listInsert(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listInsert(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 3;
     int maxParams = minParams + 1;
@@ -405,35 +439,43 @@ public class StrListFunctions extends AbstractFunction {
         maxParams,
         parameters,
         new Class[] {null, BigDecimal.class, null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
 
+    String delim = parameters.size() == maxParams ? lastParam : ",";
     int index = ((BigDecimal) parameters.get(1)).intValue();
     String target = parameters.get(2).toString().trim();
-    StringBuilder sb = new StringBuilder();
-    if (list.size() == 0) {
-      if (index == 0) {
-        retval = target;
+
+    StringBuilder retValue = new StringBuilder();
+
+    int len =
+        parse(
+            listStr,
+            delim,
+            new ListVisitor() {
+              @Override
+              public boolean visit(int pos, int from, int to) {
+                if (pos > 0) {
+                  retValue.append(delim).append(" ");
+                }
+                if (pos == index) {
+                  retValue.append(target);
+                  retValue.append(delim).append(" ");
+                  retValue.append(listStr, from, listStr.length());
+                  return false;
+                }
+                retValue.append(listStr, from, to);
+                return true;
+              }
+            });
+
+    // still need to append?
+    if (len == index) {
+      if (retValue.length() > 0) {
+        retValue.append(delim).append(" ");
       }
-    } else {
-      for (int i = 0; i < list.size() + 1; i++) {
-        if (i == index) {
-          sb.append(target);
-          sb.append(delim);
-          sb.append(" ");
-        }
-        if (i < list.size()) {
-          sb.append(list.get(i));
-          sb.append(delim);
-          sb.append(" ");
-        }
-      }
-      sb.delete(sb.length() - 1 - delim.length(), sb.length()); // remove the trailing ", "
-      retval = sb.toString();
+      retValue.append(target);
     }
-    return retval;
+
+    return retValue.toString();
   }
 
   /**
@@ -442,15 +484,11 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
-   * @return A new list with the entry at <code>index</code> repaced by <code>target</code>
+   * @return A new list with the entry at <code>index</code> replaced by <code>target</code>
    * @throws ParameterException when an error occurs.
    */
-  public Object listReplace(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listReplace(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 3;
     int maxParams = minParams + 1;
@@ -460,29 +498,34 @@ public class StrListFunctions extends AbstractFunction {
         maxParams,
         parameters,
         new Class[] {null, BigDecimal.class, null, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
 
-    if (list.size() == 0) // can't replace if there are no entries
-    return retval;
+    String delim = parameters.size() == maxParams ? lastParam : ",";
 
     int index = ((BigDecimal) parameters.get(1)).intValue();
     String target = parameters.get(2).toString().trim();
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < list.size(); i++) {
-      if (i == index) {
-        sb.append(target);
-      } else {
-        sb.append(list.get(i));
-      }
-      sb.append(delim);
-      sb.append(" ");
-    }
-    sb.delete(sb.length() - 1 - delim.length(), sb.length()); // remove the trailing ", "
-    retval = sb.toString();
-    return retval;
+
+    StringBuilder retValue = new StringBuilder();
+
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (pos > 0) {
+              retValue.append(delim).append(" ");
+            }
+            if (pos == index) {
+              retValue.append(target);
+              retValue.append(listStr, to, listStr.length());
+              return false;
+            }
+            retValue.append(listStr, from, to);
+            return true;
+          }
+        });
+
+    return retValue.toString();
   }
 
   /**
@@ -491,15 +534,11 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return A new sorted list
    * @throws ParameterException if the number of parameters is incorrect
    */
-  public Object listSort(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listSort(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 2;
     int maxParams = minParams + 1;
@@ -511,27 +550,23 @@ public class StrListFunctions extends AbstractFunction {
         new Class[] {null, String.class, String.class});
 
     // Check params and parse the list
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
+    String delim = parameters.size() == maxParams ? lastParam : ",";
     String sortStr = (String) parameters.get(1);
-    parse(listStr, list, delim);
+
+    List<String> list = toList(listStr, delim);
 
     // Sort the list appropriately and construct the new list string
-    Collections.sort(list, new strComp(sortStr));
+    list.sort(new strComp(sortStr));
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder retVal = new StringBuilder();
     int size = list.size();
     for (int i = 0; i < size; i++) {
-      sb.append(list.get(i));
+      retVal.append(list.get(i));
       if (i < size - 1) {
-        sb.append(delim);
-        sb.append(" ");
+        retVal.append(delim).append(" ");
       }
     }
-    retval = sb.toString();
-
-    return retval;
+    return retVal.toString();
   }
 
   /**
@@ -540,15 +575,11 @@ public class StrListFunctions extends AbstractFunction {
    * @param parameters the parameters of the function call
    * @param listStr the String of the list
    * @param lastParam the last parameter
-   * @param list the list that will contain the parsed element
    * @return A string containing the formatted list.
    * @throws ParameterException if an error occurs.
    */
-  public Object listFormat(
-      List<Object> parameters, String listStr, String lastParam, List<String> list)
+  public Object listFormat(List<Object> parameters, String listStr, String lastParam)
       throws ParameterException {
-    Object retval = "";
-    String delim = ",";
 
     int minParams = 4;
     int maxParams = minParams + 1;
@@ -558,31 +589,32 @@ public class StrListFunctions extends AbstractFunction {
         maxParams,
         parameters,
         new Class[] {null, String.class, String.class, String.class, String.class});
-    if (parameters.size() == maxParams) {
-      delim = lastParam;
-    }
-    parse(listStr, list, delim);
+
+    String delim = parameters.size() == maxParams ? delim = lastParam : ",";
 
     String listFormat = parameters.get(1).toString();
     String entryFormat = parameters.get(2).toString();
     String separator = parameters.get(3).toString();
 
     StringBuilder sb = new StringBuilder();
-    boolean firstEntry = true;
-    for (String item : list) {
-      item = fullyQuoteString(item);
-      if (firstEntry) {
-        firstEntry = false;
-      } else {
-        sb.append(separator);
-      }
-      String entry = entryFormat;
-      entry = entry.replaceAll("\\%item", item);
-      sb.append(entry);
-    }
 
-    retval = listFormat.replaceFirst("\\%list", sb.toString());
-    return retval;
+    parse(
+        listStr,
+        delim,
+        new ListVisitor() {
+          @Override
+          public boolean visit(int pos, int from, int to) {
+            if (pos > 0) {
+              sb.append(separator);
+            }
+            String entry = fullyQuoteString(listStr.substring(from, to));
+            entry = entryFormat.replaceAll("\\%item", entry);
+            sb.append(entry);
+            return true;
+          }
+        });
+
+    return listFormat.replaceFirst("\\%list", sb.toString());
   }
 
   /** Custom comparator for string sorting */

@@ -51,4 +51,18 @@ public class ImageUtilTest {
     img = ImageUtil.getCompatibleImage("net/rptools/lib/image/icons/cross.png");
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.TRANSLUCENT);
   }
+
+  @Test
+  void testReadSvgAsBufferedImage() throws IOException {
+    Image img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/star.svg");
+    assertEquals(img.getWidth(null), 51);
+    assertEquals(img.getHeight(null), 48);
+  }
+
+  @Test
+  void testReadTiffAsBufferedImage() throws IOException {
+    Image img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/temple.tif");
+    assertEquals(img.getWidth(null), 583);
+    assertEquals(img.getHeight(null), 738);
+  }
 }

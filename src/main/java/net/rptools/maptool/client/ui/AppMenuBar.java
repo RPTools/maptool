@@ -15,9 +15,7 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -148,16 +146,14 @@ public class AppMenuBar extends JMenuBar {
         new RPCheckBoxMenuItem(AppActions.TOGGLE_WAYPOINT_FOG_REVEAL, menu);
 
     fowToggleMenuItem.addItemListener(
-        new ItemListener() {
-          public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) fowRevealToggleMenuItem.setEnabled(true);
-            else {
-              ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-              // Check in case no map exists. Fix #1572.
-              if (zr != null) {
-                zr.getZone().setWaypointExposureToggle(false);
-                fowRevealToggleMenuItem.setEnabled(false);
-              }
+        e -> {
+          if (e.getStateChange() == ItemEvent.SELECTED) fowRevealToggleMenuItem.setEnabled(true);
+          else {
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check in case no map exists. Fix #1572.
+            if (zr != null) {
+              zr.getZone().setWaypointExposureToggle(false);
+              fowRevealToggleMenuItem.setEnabled(false);
             }
           }
         });
@@ -343,17 +339,15 @@ public class AppMenuBar extends JMenuBar {
     button.setBorderPainted(false);
     button.setToolTipText(hidetooltip);
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            MapToolFrame frame = MapTool.getFrame();
-            ToolbarPanel toolbarPanel = frame.getToolbarPanel();
-            if (button.isSelected()) {
-              button.setToolTipText(unhidetooltip);
-              toolbarPanel.setVisible(false);
-            } else {
-              button.setToolTipText(hidetooltip);
-              toolbarPanel.setVisible(true);
-            }
+        e -> {
+          MapToolFrame frame = MapTool.getFrame();
+          ToolbarPanel toolbarPanel = frame.getToolbarPanel();
+          if (button.isSelected()) {
+            button.setToolTipText(unhidetooltip);
+            toolbarPanel.setVisible(false);
+          } else {
+            button.setToolTipText(hidetooltip);
+            toolbarPanel.setVisible(true);
           }
         });
     return button;

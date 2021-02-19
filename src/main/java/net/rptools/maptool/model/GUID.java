@@ -18,9 +18,10 @@ import com.withay.util.HexCode;
 import java.io.Serializable;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /** Global unique identificator object. */
-public class GUID extends Object implements Serializable, Comparable<GUID> {
+public class GUID implements Serializable, Comparable<GUID> {
   /** Serial version unique identifier. */
   private static final long serialVersionUID = 6361057925697403643L;
 
@@ -102,9 +103,9 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
   @Override
   public boolean equals(Object object) {
     if (object == null) {
-      return this == null;
+      return false;
     }
-    Class<? extends Object> objClass = object.getClass();
+    Class<?> objClass = object.getClass();
 
     GUID guid;
     try {
@@ -170,14 +171,24 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
     return new GUID(newGUID).getBytes();
   }
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * A fast check for whether a given argument is not a GUID.
+   *
+   * @param arg
+   * @return whether arg is not GUID (returning false != isGUID)
+   */
+  public static boolean isNotGUID(String arg) {
+    return arg.length() != GUID.GUID_LENGTH * 2;
+  }
+
+  public static void main(String[] args) {
     for (int i = 0; i < 10; i++) {
       GUID guid = new GUID();
       System.out.println("insert into sys_guids values ('" + guid.toString() + "');");
     }
   }
 
-  public int compareTo(GUID o) {
+  public int compareTo(@NotNull GUID o) {
     if (o != this) {
       for (int i = 0; i < GUID_LENGTH; i++) {
         if (this.baGUID[i] != o.baGUID[i]) return this.baGUID[i] - o.baGUID[i];

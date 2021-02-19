@@ -692,7 +692,7 @@ public class PackedFile implements AutoCloseable {
       String url = "jar:" + file.toURI().toURL().toExternalForm() + "!" + path;
       return new URL(url);
     } catch (MalformedURLException e) {
-      throw new IllegalArgumentException("Couldn't create a URL for path: '" + path + "'");
+      throw new IllegalArgumentException("Couldn't create a URL for path: '" + path + "'", e);
     }
   }
 

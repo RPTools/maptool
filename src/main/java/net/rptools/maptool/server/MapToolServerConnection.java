@@ -16,6 +16,8 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
@@ -53,6 +55,8 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
       }
     } catch (IOException ioe) {
       log.error("Handshake failure: " + ioe, ioe);
+    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+      e.printStackTrace();
     }
     return false;
   }
@@ -82,16 +86,15 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   public void connectionAdded(net.rptools.clientserver.simple.client.ClientConnection conn) {
     server.configureClientConnection(conn);
 
-    Player player = playerMap.get(conn.getId().toUpperCase());
-    for (String id : playerMap.keySet()) {
+    Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
+    for (Player player : playerMap.values()) {
       server
           .getConnection()
-          .callMethod(
-              conn.getId(), ClientCommand.COMMAND.playerConnected.name(), playerMap.get(id));
+          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player);
     }
     server
         .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), player);
+        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer);
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server

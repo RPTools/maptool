@@ -93,7 +93,7 @@ public class FogUtil {
         new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
     Collections.sort(segmentList);
 
-    List<Area> clearedAreaList = new LinkedList<Area>();
+    List<Area> clearedAreaList = new LinkedList<>();
     nextSegment:
     for (VisibleAreaSegment segment : segmentList) {
       Rectangle r = segment.getPath().getBounds();
@@ -195,7 +195,6 @@ public class FogUtil {
           if (tokenVision != null) {
             Set<GUID> filteredToks = new HashSet<GUID>();
             filteredToks.add(tokenClone.getId());
-            zone.exposeArea(tokenVision, tokenClone);
             MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
           }
         }
@@ -207,7 +206,6 @@ public class FogUtil {
         if (tokenVision != null) {
           Set<GUID> filteredToks = new HashSet<GUID>();
           filteredToks.add(token.getId());
-          zone.exposeArea(tokenVision, filteredToks);
           MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
         }
       }
@@ -239,7 +237,6 @@ public class FogUtil {
       if (tokenVision != null) {
         Set<GUID> filteredToks = new HashSet<GUID>();
         filteredToks.add(token.getId());
-        zone.exposeArea(tokenVision, token);
         MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
       }
 
@@ -410,9 +407,6 @@ public class FogUtil {
 
       timer.stop("exposeLastPath-" + token.getName());
       renderer.flush(tokenClone);
-      renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
-
-      zone.exposeArea(visionArea, token);
 
       filteredToks.clear();
       filteredToks.add(token.getId());
@@ -513,12 +507,12 @@ public class FogUtil {
                 new MouseMotionAdapter() {
                   @Override
                   public void mouseDragged(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });
@@ -526,12 +520,12 @@ public class FogUtil {
                 new MouseAdapter() {
                   @Override
                   public void mousePressed(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });

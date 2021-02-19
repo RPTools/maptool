@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
@@ -43,6 +42,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 public class MessagePanel extends JPanel {
 
@@ -81,20 +81,16 @@ public class MessagePanel extends JPanel {
           public void componentShown(ComponentEvent e) {}
         });
     textPane.addHyperlinkListener(
-        new HyperlinkListener() {
-          public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-              if (e.getURL() != null) {
-                MapTool.showDocument(e.getURL().toString());
-              } else if (e.getDescription().startsWith("#")) {
-                textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
-              } else {
-                Matcher m = URL_PATTERN.matcher(e.getDescription());
-                if (m.matches()) {
-                  if (m.group(1).equalsIgnoreCase("macro")) {
-                    MacroLinkFunction.getInstance().runMacroLink(e.getDescription());
-                  }
-                }
+        e -> {
+          if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            if (e.getURL() != null) {
+              MapTool.showDocument(e.getURL().toString());
+            } else if (e.getDescription().startsWith("#")) {
+              textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+            } else {
+              Matcher m = URL_PATTERN.matcher(e.getDescription());
+              if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
+                MacroLinkFunction.runMacroLink(e.getDescription());
               }
             }
           }
@@ -142,21 +138,20 @@ public class MessagePanel extends JPanel {
     style.addRule(
         "body { font-family: sans-serif; font-size: " + AppPreferences.getFontSize() + "pt}");
     style.addRule("div {margin-bottom: 5px}");
-    style.addRule("span.roll {background:#efefef}");
+    style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+    style.addRule(MessageUtil.getMessageCss());
     repaint();
   }
 
   public void setTrustedMacroPrefixColors(Color foreground, Color background) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("span.trustedPrefix {background: #")
-        .append(String.format("%06X", (background.getRGB() & 0xFFFFFF)));
-    sb.append("; color: #")
-        .append(String.format("%06X", (foreground.getRGB() & 0xFFFFFF)))
-        .append("}");
     StyleSheet style = document.getStyleSheet();
-    style.addRule(sb.toString());
+    String css =
+        String.format(
+            ".trusted-prefix { color: #%06X; background: #%06X }",
+            (foreground.getRGB() & 0xFFFFFF), (background.getRGB() & 0xFFFFFF));
+    style.addRule(css);
     repaint();
   }
 
@@ -167,11 +162,9 @@ public class MessagePanel extends JPanel {
 
   public void clearMessages() {
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            textPane.setText("<html><body id=\"body\"></body></html>");
-            ((MessagePanelEditorKit) textPane.getEditorKit()).flush();
-          }
+        () -> {
+          textPane.setText("<html><body id=\"body\"></body></html>");
+          ((MessagePanelEditorKit) textPane.getEditorKit()).flush();
         });
   }
 
@@ -184,85 +177,83 @@ public class MessagePanel extends JPanel {
 
   public void addMessage(final TextMessage message) {
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            String output;
+        () -> {
+          String output;
 
-            {
-              StringBuffer text = new StringBuffer();
-              Matcher m = roll_pattern.matcher(message.getMessage());
-              while (m.find()) {
-                HashSet<String> options = new HashSet<String>();
-                if (m.group(1) != null) {
-                  options.addAll(Arrays.asList(m.group(1).split(",")));
+          {
+            StringBuffer text = new StringBuffer();
+            Matcher m = roll_pattern.matcher(message.getMessage());
+            while (m.find()) {
+              HashSet<String> options = new HashSet<String>();
+              if (m.group(1) != null) {
+                options.addAll(Arrays.asList(m.group(1).split(",")));
 
-                  if (!options.contains("w") && !options.contains("g") && !options.contains("s"))
-                    ; // visible for everyone
-                  else if (options.contains("w:" + MapTool.getPlayer().getName().toLowerCase()))
-                    ; // visible for this player
-                  else if (options.contains("g") && MapTool.getPlayer().isGM()) ; // visible for GMs
-                  else if (options.contains("s")
-                      && message.getSource().equals(MapTool.getPlayer().getName()))
-                    ; // visible to the player who sent it
-                  else {
-                    m.appendReplacement(text, ""); // not visible for this player
-                    continue;
-                  }
+                if (!options.contains("w") && !options.contains("g") && !options.contains("s"))
+                  ; // visible for everyone
+                else if (options.contains("w:" + MapTool.getPlayer().getName().toLowerCase()))
+                  ; // visible for this player
+                else if (options.contains("g") && MapTool.getPlayer().isGM()) ; // visible for GMs
+                else if (options.contains("s")
+                    && message.getSource().equals(MapTool.getPlayer().getName()))
+                  ; // visible to the player who sent it
+                else {
+                  m.appendReplacement(text, ""); // not visible for this player
+                  continue;
                 }
-                String replacement = null;
-                if (m.group(3) != null) {
-                  if (!options.contains("st") && !options.contains("gt")
-                      || options.contains("st")
-                          && message.getSource().equals(MapTool.getPlayer().getName())
-                      || options.contains("gt") && MapTool.getPlayer().isGM())
-                    replacement = "<span class='roll' title='&#171; $2 &#187;'>$3</span>";
-                  else replacement = "$3";
-                } else if (options.contains("u")) replacement = "&#171; $2 &#187;";
-                else if (options.contains("r")) replacement = "$2";
-                else
-                  replacement =
-                      "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;";
-                m.appendReplacement(text, replacement);
               }
-              m.appendTail(text);
-              output = text.toString();
+              String replacement = null;
+              if (m.group(3) != null) {
+                if (!options.contains("st") && !options.contains("gt")
+                    || options.contains("st")
+                        && message.getSource().equals(MapTool.getPlayer().getName())
+                    || options.contains("gt") && MapTool.getPlayer().isGM())
+                  replacement = "<span class='roll' title='&#171; $2 &#187;'>$3</span>";
+                else replacement = "$3";
+              } else if (options.contains("u")) replacement = "&#171; $2 &#187;";
+              else if (options.contains("r")) replacement = "$2";
+              else
+                replacement =
+                    "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;";
+              m.appendReplacement(text, replacement);
             }
-            // Auto inline expansion for {HTTP|HTTPS} URLs
-            // output = output.replaceAll("(^|\\s|>|\002)(https?://[\\w.%-/~?&+#=]+)", "$1<a
-            // href='$2'>$2</a>");
-            output =
-                output.replaceAll(
-                    "(^|\\s|>|\002)(https?://[^<>\002\003]+)", "$1<a href='$2'>$2</a>");
+            m.appendTail(text);
+            output = text.toString();
+          }
+          // Auto inline expansion for {HTTP|HTTPS} URLs
+          // output = output.replaceAll("(^|\\s|>|\002)(https?://[\\w.%-/~?&+#=]+)", "$1<a
+          // href='$2'>$2</a>");
+          output =
+              output.replaceAll("(^|\\s|>|\002)(https?://[^<>\002\003]+)", "$1<a href='$2'>$2</a>");
 
-            if (!message.getSource().equals(MapTool.getPlayer().getName())) {
-              // TODO change this so 'macro' is case-insensitive
-              Matcher m =
-                  Pattern.compile(
-                          "href=([\"'])\\s*(macro://(?:[^/]*)/(?:[^?]*)(?:\\?(?:.*?))?)\\1\\s*",
-                          Pattern.CASE_INSENSITIVE)
-                      .matcher(output);
-              while (m.find()) {
-                MacroLinkFunction.getInstance().processMacroLink(m.group(2));
-              }
+          if (!message.getSource().equals(MapTool.getPlayer().getName())) {
+            // TODO change this so 'macro' is case-insensitive
+            Matcher m =
+                Pattern.compile(
+                        "href=([\"'])\\s*(macro://(?:[^/]*)/(?:[^?]*)(?:\\?(?:.*?))?)\\1\\s*",
+                        Pattern.CASE_INSENSITIVE)
+                    .matcher(output);
+            while (m.find()) {
+              MacroLinkFunction.getInstance().processMacroLink(m.group(2));
             }
-            // if rolls not being visible to this user result in an empty message, display nothing
-            // TODO The leading and trailing '.*' are probably not needed -- test this before
-            // removing them
-            if (!output.matches(".*\002\\s*\003.*")) {
-              output = output.replaceAll("\002|\003", "");
+          }
+          // if rolls not being visible to this user result in an empty message, display nothing
+          // TODO The leading and trailing '.*' are probably not needed -- test this before
+          // removing them
+          if (!output.matches(".*\002\\s*\003.*")) {
+            output = output.replaceAll("\002|\003", "");
 
-              try {
-                Element element = document.getElement("body");
+            try {
+              Element element = document.getElement("body");
+              if (!output.toLowerCase().startsWith("<div") || !output.endsWith("</div>")) {
                 document.insertBeforeEnd(element, "<div>" + output + "</div>");
-
-                if (!message.getSource().equals(MapTool.getPlayer().getName())) {
-                  MapTool.playSound(SND_MESSAGE_RECEIVED);
-                }
-              } catch (IOException ioe) {
-                ioe.printStackTrace();
-              } catch (BadLocationException ble) {
-                ble.printStackTrace();
+              } else {
+                document.insertBeforeEnd(element, output);
               }
+              if (!message.getSource().equals(MapTool.getPlayer().getName())) {
+                MapTool.playSound(SND_MESSAGE_RECEIVED);
+              }
+            } catch (IOException | BadLocationException ioe) {
+              ioe.printStackTrace();
             }
           }
         });

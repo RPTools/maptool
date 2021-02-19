@@ -19,7 +19,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import java.math.BigDecimal;
-import net.rptools.parser.ParserException;
 
 /** Class used to convert between json and MT Script types. */
 class JsonMTSTypeConversion {
@@ -127,7 +126,7 @@ class JsonMTSTypeConversion {
    * @param json the object tp convert to a {@link JsonElement}.
    * @return a {@link JsonElement} version of the object.
    */
-  JsonElement asClonedJsonElement(Object json) throws ParserException {
+  JsonElement asClonedJsonElement(Object json) {
     if (json instanceof JsonElement) {
       JsonElement jsonElement = (JsonElement) json;
       return jsonElement.deepCopy();
