@@ -259,9 +259,9 @@ public class ButtonGroup extends AbstractButtonGroup {
     return myButtons;
   }
 
-
   // A little helper to delete a token if the drop event was a move and not a copy
-  private void deleteOriginalTokenIfMove(DropTargetDropEvent event, MacroButtonProperties properties) {
+  private void deleteOriginalTokenIfMove(
+      DropTargetDropEvent event, MacroButtonProperties properties) {
     // this is for reversed behavior (copy as default), since the default event is ACTION_MOVE
     // replace ACTION_COPY with ACTION_MOVE to have moving be the default macro button drag action
     if (event.getDropAction() == DnDConstants.ACTION_COPY) {
