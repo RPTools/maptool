@@ -121,11 +121,19 @@ public class ButtonGroup extends AbstractButtonGroup {
               data.toolTip,
               data.displayHotKey);
 
+      // if a reference is needed when moving instead of copying
+      MacroButtonProperties oldMacroProps = new MacroButtonProperties(tempProperties);
+
       if (panelClass.equals("GlobalPanel")) {
         event.acceptDrop(event.getDropAction());
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("GlobalPanel", null)) {
+          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+            // but this is for reversed behavior (copy as default)
+            getArea().getPropertiesList().remove(oldMacroProps);
+            getArea().repaint();
+          }
           new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), tempProperties);
         }
       } else if (panelClass.equals("CampaignPanel")) {
@@ -133,6 +141,11 @@ public class ButtonGroup extends AbstractButtonGroup {
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("CampaignPanel", null)) {
+          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+            // but this is for reversed behavior (copy as default)
+            getArea().getPropertiesList().remove(oldMacroProps);
+            getArea().repaint();
+          }
           new MacroButtonProperties(
               panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), tempProperties);
         }
@@ -141,6 +154,11 @@ public class ButtonGroup extends AbstractButtonGroup {
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("GmPanel", null)) {
+          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+            // but this is for reversed behavior (copy as default)
+            getArea().getPropertiesList().remove(oldMacroProps);
+            getArea().repaint();
+          }
           new MacroButtonProperties(
               panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), tempProperties);
         }
@@ -156,6 +174,11 @@ public class ButtonGroup extends AbstractButtonGroup {
             for (Token nextToken :
                 MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
               if (!tempProperties.isDuplicateMacro("Token", nextToken)) {
+                if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+                  // but this is for reversed behavior (copy as default)
+                  getArea().getPropertiesList().remove(oldMacroProps);
+                  getArea().repaint();
+                }
                 new MacroButtonProperties(nextToken, nextToken.getMacroNextIndex(), tempProperties);
               }
             }
@@ -167,6 +190,11 @@ public class ButtonGroup extends AbstractButtonGroup {
             // original
             Token token = getToken();
             if (!tempProperties.isDuplicateMacro("Token", token)) {
+              if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+                // but this is for reversed behavior (copy as default)
+                getArea().getPropertiesList().remove(oldMacroProps);
+                getArea().repaint();
+              }
               new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
             }
           }
@@ -178,12 +206,18 @@ public class ButtonGroup extends AbstractButtonGroup {
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         Token token = getToken();
         if (!tempProperties.isDuplicateMacro("Token", token)) {
+          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
+            // but this is for reversed behavior (copy as default)
+            getArea().getPropertiesList().remove(oldMacroProps);
+            getArea().repaint();
+          }
           new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
         }
       } else {
         // if this happens, it's a bug
         throw new Exception(I18N.getText("msg.error.macro.buttonGroupDnDFail"));
       }
+
       // System.out.println("drop accepted");
       event.dropComplete(true);
     } catch (Exception e) {

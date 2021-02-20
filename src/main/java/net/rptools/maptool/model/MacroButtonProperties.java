@@ -124,6 +124,38 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setToolTip(toolTip);
   }
 
+  // exact copy constructor (including UUID!)
+  public MacroButtonProperties(MacroButtonProperties other) {
+    macroUUID = other.macroUUID; // IMPORTANT
+    setCommonMacro(other.commonMacro);
+    setIndex(other.index);
+    setColorKey(other.colorKey);
+    setHotKey(other.hotKey);
+    setCommand(other.command);
+    setLabel(other.label);
+    setGroup(other.group);
+    setSortby(other.sortby);
+    setAutoExecute(other.autoExecute);
+    setIncludeLabel(other.includeLabel);
+    setApplyToTokens(other.applyToTokens);
+    setFontColorKey(other.fontColorKey);
+    setFontSize(other.fontSize);
+    setMinWidth(other.minWidth);
+    setMaxWidth(other.maxWidth);
+    setButton(other.button);
+    setTokenId(other.tokenId);
+    setSaveLocation(other.saveLocation);
+    setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(other.displayHotKey);
+    setCompareGroup(other.compareGroup);
+    setCompareSortPrefix(other.compareSortPrefix);
+    setCompareCommand(other.compareCommand);
+    setCompareIncludeLabel(other.compareIncludeLabel);
+    setCompareAutoExecute(other.compareAutoExecute);
+    setCompareApplyToSelectedTokens(other.compareApplyToSelectedTokens);
+    setToolTip(other.toolTip);
+  }
+
   // constructor that creates a new instance, doesn't auto save
   public MacroButtonProperties(int index) {
     setIndex(index);
