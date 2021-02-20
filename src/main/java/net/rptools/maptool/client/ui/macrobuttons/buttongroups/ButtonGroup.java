@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.util.ArrayList;
@@ -129,11 +130,7 @@ public class ButtonGroup extends AbstractButtonGroup {
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("GlobalPanel", null)) {
-          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-            // but this is for reversed behavior (copy as default)
-            getArea().getPropertiesList().remove(oldMacroProps);
-            getArea().repaint();
-          }
+          deleteOriginalTokenIfMove(event, oldMacroProps);
           new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), tempProperties);
         }
       } else if (panelClass.equals("CampaignPanel")) {
@@ -141,11 +138,7 @@ public class ButtonGroup extends AbstractButtonGroup {
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("CampaignPanel", null)) {
-          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-            // but this is for reversed behavior (copy as default)
-            getArea().getPropertiesList().remove(oldMacroProps);
-            getArea().repaint();
-          }
+          deleteOriginalTokenIfMove(event, oldMacroProps);
           new MacroButtonProperties(
               panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), tempProperties);
         }
@@ -154,11 +147,7 @@ public class ButtonGroup extends AbstractButtonGroup {
         tempProperties.setGroup(
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         if (!tempProperties.isDuplicateMacro("GmPanel", null)) {
-          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-            // but this is for reversed behavior (copy as default)
-            getArea().getPropertiesList().remove(oldMacroProps);
-            getArea().repaint();
-          }
+          deleteOriginalTokenIfMove(event, oldMacroProps);
           new MacroButtonProperties(
               panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), tempProperties);
         }
@@ -174,11 +163,7 @@ public class ButtonGroup extends AbstractButtonGroup {
             for (Token nextToken :
                 MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
               if (!tempProperties.isDuplicateMacro("Token", nextToken)) {
-                if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-                  // but this is for reversed behavior (copy as default)
-                  getArea().getPropertiesList().remove(oldMacroProps);
-                  getArea().repaint();
-                }
+                deleteOriginalTokenIfMove(event, oldMacroProps);
                 new MacroButtonProperties(nextToken, nextToken.getMacroNextIndex(), tempProperties);
               }
             }
@@ -190,11 +175,7 @@ public class ButtonGroup extends AbstractButtonGroup {
             // original
             Token token = getToken();
             if (!tempProperties.isDuplicateMacro("Token", token)) {
-              if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-                // but this is for reversed behavior (copy as default)
-                getArea().getPropertiesList().remove(oldMacroProps);
-                getArea().repaint();
-              }
+              deleteOriginalTokenIfMove(event, oldMacroProps);
               new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
             }
           }
@@ -206,11 +187,7 @@ public class ButtonGroup extends AbstractButtonGroup {
             getMacroGroup()); // assign the group you are dropping it into, rather than the original
         Token token = getToken();
         if (!tempProperties.isDuplicateMacro("Token", token)) {
-          if (event.getDropAction() == 1) { // DnDConstants says 1 is copy,
-            // but this is for reversed behavior (copy as default)
-            getArea().getPropertiesList().remove(oldMacroProps);
-            getArea().repaint();
-          }
+          deleteOriginalTokenIfMove(event, oldMacroProps);
           new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
         }
       } else {
@@ -280,5 +257,16 @@ public class ButtonGroup extends AbstractButtonGroup {
       }
     }
     return myButtons;
+  }
+
+
+  // A little helper to delete a token if the drop event was a move and not a copy
+  private void deleteOriginalTokenIfMove(DropTargetDropEvent event, MacroButtonProperties properties) {
+    // this is for reversed behavior (copy as default), since the default event is ACTION_MOVE
+    // replace ACTION_COPY with ACTION_MOVE to have moving be the default macro button drag action
+    if (event.getDropAction() == DnDConstants.ACTION_COPY) {
+      getArea().getPropertiesList().remove(properties);
+      getArea().repaint();
+    }
   }
 }
