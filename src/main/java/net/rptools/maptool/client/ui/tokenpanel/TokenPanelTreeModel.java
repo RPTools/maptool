@@ -427,10 +427,8 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
       if (MapTool.getPlayer().isGM()) {
         return true;
       }
-      if (MapTool.getServerPolicy().isUseIndividualViews() || token.isVisibleOnlyToOwner()) {
-        if (!AppUtil.playerOwns(token)) {
-          return false;
-        }
+      if (!AppUtil.playerOwns(token)) {
+        return false;
       }
       return token.isVisible();
     }
