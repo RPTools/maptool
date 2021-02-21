@@ -33,6 +33,9 @@ import org.reflections.scanners.ResourcesScanner;
 
 /** Executes only the first time the application is run. */
 public class AppSetup {
+
+  private static boolean themesInstalled = false;
+
   private static final Logger log = LogManager.getLogger(AppSetup.class);
 
   public static void install() {
@@ -94,21 +97,24 @@ public class AppSetup {
    * searched on MapTool start for theme files.
    */
   public static void installDefaultUIThemes() {
-    Reflections reflections =
-        new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
-    Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
+    if (!themesInstalled) {
+      Reflections reflections =
+          new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
+      Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
 
-    for (String resourcePath : resourcePathSet) {
-      URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
-      String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
-      File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
+      for (String resourcePath : resourcePathSet) {
+        URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+        String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
+        File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
 
-      try {
-        log.info("Installing ui theme: " + resourceFile);
-        FileUtils.copyURLToFile(inputUrl, resourceFile);
-      } catch (IOException e) {
-        log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+        try {
+          log.info("Installing ui theme: " + resourceFile);
+          FileUtils.copyURLToFile(inputUrl, resourceFile);
+        } catch (IOException e) {
+          log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+        }
       }
+      themesInstalled = true;
     }
   }
 
