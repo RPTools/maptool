@@ -145,6 +145,7 @@ public class Handshake {
 
       if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
         response.policy = server.getPolicy();
+        response.role = player.getRole();
       } else {
         response.message = I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
         response.code = Code.ERROR;
@@ -321,7 +322,7 @@ public class Handshake {
 
       int len = dis.readInt();
       byte[] bytes = dis.readNBytes(len);
-      if (bytes.length != bytes.length) {
+      if (bytes.length != len) {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -359,7 +360,9 @@ public class Handshake {
 
     // If we are here the handshake succeeded so wait for the server policy
     HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
-    return (Response) input.readObject();
+    Response response = (Response) input.readObject();
+    MapTool.getPlayer().setRole(response.role);
+    return response;
   }
 
   private static byte[] buildRequest(Request request, byte[] macSalt)
@@ -415,6 +418,7 @@ public class Handshake {
     public int code;
     public String message;
     public ServerPolicy policy;
+    public Role role;
   }
 
   private static class HandshakeChallenge {
