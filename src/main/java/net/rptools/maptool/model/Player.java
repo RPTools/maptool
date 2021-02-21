@@ -44,7 +44,6 @@ public class Player {
     actualRole = role;
   }
 
-
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof Player)) {
