@@ -136,14 +136,6 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return accepted;
   }
 
-  public JComboBox getRoleComboBox() {
-    return (JComboBox) getComponent("@role");
-  }
-
-  public void initRoleComboBox() {
-    getRoleComboBox().setModel(new DefaultComboBoxModel(new String[] {"Player", "GM"}));
-  }
-
   public void initLocalServerList() {
     getLocalServerList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     getLocalServerList()
