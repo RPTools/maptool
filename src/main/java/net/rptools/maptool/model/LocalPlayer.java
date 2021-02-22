@@ -12,9 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
-import net.rptools.maptool.client.AppState;
+import main.java.net.rptools.maptool.client.AppState;
 
 /** Represents the local player. Its methods can depend on AppState and other local properties. */
 public class LocalPlayer extends Player {

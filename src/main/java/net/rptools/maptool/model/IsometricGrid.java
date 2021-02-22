@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -29,16 +29,16 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
-import net.rptools.maptool.util.GraphicsUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.AppState;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.tool.PointerTool;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.client.walker.WalkerMetric;
+import main.java.net.rptools.maptool.client.walker.ZoneWalker;
+import main.java.net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import main.java.net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
   /**
@@ -252,8 +252,8 @@ public class IsometricGrid extends Grid {
 
   @Override
   protected Area createCellShape(int size) {
-    int x[] = {(int) size, (int) size * 2, (int) size, 0};
-    int y[] = {0, (int) size / 2, (int) size, (int) size / 2};
+    int x[] = {size, size * 2, size, 0};
+    int y[] = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 

@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,8 +32,10 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenCopyDeleteFunctions extends AbstractFunction {
@@ -53,32 +54,42 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (!MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-    }
+    FunctionUtil.blockUntrustedMacro(functionName);
+    int psize = parameters.size();
 
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
     if (functionName.equals(COPY_FUNC)) {
-      return copyTokens(res, parameters);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
+
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
+      int nCopies = psize > 1 ? FunctionUtil.paramAsInteger(functionName, parameters, 1, false) : 1;
+      JsonObject newVals;
+      if (psize > 3) newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
+      else newVals = new JsonObject();
+
+      return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
 
     if (functionName.equals(REMOVE_FUNC)) {
-      return deleteToken(parameters);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+
+      return deleteToken(token);
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  private String deleteToken(List<Object> parameters) throws ParserException {
-    Token token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
-
-    if (token == null) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.unknownToken", REMOVE_FUNC, parameters.get(0)));
-    }
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+  /**
+   * Deletes the token.
+   *
+   * @param token the token
+   * @return a string describing which token got deleted
+   */
+  private String deleteToken(Token token) {
+    Zone zone = token.getZoneRenderer().getZone();
     MapTool.serverCommand().removeToken(zone.getId(), token.getId());
     return "Deleted token " + token.getId() + " (" + token.getName() + ")";
   }
@@ -88,81 +99,45 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
    * JsonObject updates: null) JsonArray copyToken(String tokenId, Number numCopies, String fromMap:
    * (""|currentMap()), JsonObject updates: null)
    *
+   * @param token the token to copy
+   * @param nCopies the number of copies
+   * @param newVals a json object holding the new values of the copies
    * @param res the MapToolVariableResolver
-   * @param param the list of parameters
    */
-  private Object copyTokens(MapToolVariableResolver res, List<Object> param)
+  private Object copyTokens(
+      MapToolVariableResolver res, Token token, int nCopies, JsonObject newVals)
       throws ParserException {
-    Token token;
-    int numberCopies = 1;
-    String zoneName = null;
-    JsonObject newVals = new JsonObject();
 
-    int size = param.size();
-    switch (size) {
-      default: // Come here with four or more parameters
-        throw new ParserException(
-            I18N.getText("macro.function.general.tooManyParam", COPY_FUNC, 4, size));
-      case 4:
-        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(param.get(3));
-        if (!json.isJsonObject()) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentTypeO", COPY_FUNC, 4));
-        }
-        newVals = json.getAsJsonObject();
-      case 3:
-        zoneName = param.get(2).toString();
-      case 2:
-        if (!(param.get(1) instanceof BigDecimal)) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.argumentTypeI", COPY_FUNC, 2, param.get(1).toString()));
-        }
-        numberCopies = ((BigDecimal) param.get(1)).intValue();
-      case 1:
-        token = FindTokenFunctions.findToken(param.get(0).toString(), zoneName);
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownTokenOnMap",
-                  COPY_FUNC,
-                  param.get(0).toString(),
-                  zoneName));
-        }
-        Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-        List<String> newTokens = new ArrayList<String>(numberCopies);
-        List<Token> allTokens = zone.getTokens();
-        for (int i = 0; i < numberCopies; i++) {
-          Token t = new Token(token);
+    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    List<String> newTokens = new ArrayList<>(nCopies);
+    List<Token> allTokens = zone.getTokens();
+    for (int i = 0; i < nCopies; i++) {
+      Token t = new Token(token);
 
-          if (allTokens != null) {
-            for (Token tok : allTokens) {
-              GUID tea = tok.getExposedAreaGUID();
-              if (tea != null && tea.equals(t.getExposedAreaGUID())) {
-                t.setExposedAreaGUID(new GUID());
-              }
-            }
+      // Make sure the exposedAreaGUID stays unique
+      if (allTokens != null) {
+        for (Token tok : allTokens) {
+          GUID tea = tok.getExposedAreaGUID();
+          if (tea != null && tea.equals(t.getExposedAreaGUID())) {
+            t.setExposedAreaGUID(new GUID());
           }
-          // setTokenValues() handles the naming of the new token and must be called even if
-          // nothing was passed for the updates parameter (newVals).
-          setTokenValues(t, newVals, zone, res);
+        }
+      }
+      // setTokenValues() handles the naming of the new token and must be called even if
+      // nothing was passed for the updates parameter (newVals).
+      setTokenValues(t, newVals, zone, res);
 
-          MapTool.serverCommand().putToken(zone.getId(), t);
-          newTokens.add(t.getId().toString());
-        }
-        MapTool.getFrame().getCurrentZoneRenderer().flushLight();
-        if (numberCopies == 1) {
-          return newTokens.get(0);
-        } else {
-          JsonArray jsonArray = new JsonArray();
-          for (String val : newTokens) {
-            jsonArray.add(val);
-          }
-          return jsonArray;
-        }
-      case 0:
-        throw new ParserException(
-            I18N.getText("macro.function.general.notEnoughParam", COPY_FUNC, 1, 0));
+      MapTool.serverCommand().putToken(zone.getId(), t);
+      newTokens.add(t.getId().toString());
+    }
+    if (nCopies == 1) {
+      return newTokens.get(0);
+    } else {
+      JsonArray jsonArray = new JsonArray();
+      for (String val : newTokens) {
+        jsonArray.add(val);
+      }
+      return jsonArray;
     }
   }
 
@@ -177,6 +152,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
    */
   private void setTokenValues(Token token, JsonObject vals, Zone zone, MapToolVariableResolver res)
       throws ParserException {
+    // Evaluates the content of the json
     JsonObject newVals = JSONMacroFunctions.getInstance().jsonEvaluate(vals, res).getAsJsonObject();
 
     // FJE Should we remove the keys as we process them? We could then warn the user
@@ -228,9 +204,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // Location...
     boolean useDistance = false; // FALSE means to multiple x,y values by grid size
     if (newVals.has("useDistance")) {
-      if (newVals.get("useDistance").getAsInt() != 0) {
-        useDistance = true;
-      }
+      useDistance = newVals.get("useDistance").getAsInt() != 0;
     }
     Grid grid =
         zone.getGrid(); // These won't change for a given execution; this could be more efficient
@@ -243,9 +217,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     boolean tokenMoved = false;
     boolean delta = false;
     if (newVals.has("delta")) {
-      if (newVals.get("delta").getAsInt() != 0) {
-        delta = true;
-      }
+      delta = newVals.get("delta").getAsInt() != 0;
     }
 
     // X

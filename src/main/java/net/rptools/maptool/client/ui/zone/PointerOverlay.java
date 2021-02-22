@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.util.GraphicsUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.maptool.client.ScreenPoint;
+import main.java.net.rptools.maptool.model.Pointer;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.ZonePoint;
+import main.java.net.rptools.maptool.util.GraphicsUtil;
 
 /**
  * Draws the various "pointer" shapes that users can call up using
@@ -57,8 +57,7 @@ public class PointerOverlay implements ZoneOverlay {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();
 
-    for (int i = 0; i < pointerList.size(); i++) {
-      PointerPair p = pointerList.get(i);
+    for (PointerPair p : pointerList) {
       if (p.pointer.getZoneGUID().equals(zone.getId())) {
         ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
         ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
@@ -136,23 +135,19 @@ public class PointerOverlay implements ZoneOverlay {
   }
 
   public void removePointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        pointerList.remove(i);
-      }
-    }
+    pointerList.removeIf(pair -> pair.player.equals(player));
   }
 
   public Pointer getPointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        return pointerList.get(i).pointer;
+    for (PointerPair pointerPair : pointerList) {
+      if (pointerPair.player.equals(player)) {
+        return pointerPair.pointer;
       }
     }
     return null;
   }
 
-  private class PointerPair {
+  private static class PointerPair {
     Pointer pointer;
     String player;
 

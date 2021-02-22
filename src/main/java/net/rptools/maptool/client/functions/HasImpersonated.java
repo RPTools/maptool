@@ -22,6 +22,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class HasImpersonated extends AbstractFunction {
@@ -36,7 +37,8 @@ public class HasImpersonated extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     int psize = parameters.size();
@@ -53,7 +55,7 @@ public class HasImpersonated extends AbstractFunction {
         MapTool.getFrame().getCommandPanel().clearGlobalIdentity();
         return "";
       } else {
-        Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, -1);
+        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, -1);
         MapTool.getFrame().getCommandPanel().setGlobalIdentity(token);
         return token.getName();
       }

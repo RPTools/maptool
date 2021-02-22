@@ -40,7 +40,7 @@ public class AdjustGridPanel extends JComponent
 
   private static final int MINIMUM_GRID_SIZE = 5;
 
-  private static enum Direction {
+  private enum Direction {
     Increase,
     Decrease
   }

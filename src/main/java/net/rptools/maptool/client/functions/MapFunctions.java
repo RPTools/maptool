@@ -25,6 +25,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class MapFunctions extends AbstractFunction {
@@ -49,11 +50,17 @@ public class MapFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equals("getCurrentMapName")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-      return MapTool.getFrame().getCurrentZoneRenderer().getZone().getName();
+      ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+      if (currentZR == null) {
+        throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+      } else {
+        return currentZR.getZone().getName();
+      }
     } else if (functionName.equals("setCurrentMap")) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
@@ -68,17 +75,28 @@ public class MapFunctions extends AbstractFunction {
         return getNamedMap(functionName, mapName).getZone().isVisible() ? "1" : "0";
       } else {
         // Return the visibility of the current map/zone
-        return MapTool.getFrame().getCurrentZoneRenderer().getZone().isVisible() ? "1" : "0";
+        ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+        if (currentZR == null) {
+          throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+        } else {
+          return currentZR.getZone().isVisible() ? "1" : "0";
+        }
       }
-
     } else if ("setMapVisible".equalsIgnoreCase(functionName)) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       boolean visible = FunctionUtil.getBooleanValue(parameters.get(0).toString());
-      Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+      Zone zone;
       if (parameters.size() > 1) {
         String mapName = parameters.get(1).toString();
         zone = getNamedMap(functionName, mapName).getZone();
+      } else {
+        ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+        if (currentZR == null) {
+          throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+        } else {
+          zone = currentZR.getZone();
+        }
       }
       // Set the zone and return the visibility of the current map/zone
       zone.setVisible(visible);
@@ -111,9 +129,10 @@ public class MapFunctions extends AbstractFunction {
       MapTool.serverCommand().putZone(newMap);
       return newMap.getName();
 
-    } else {
+    } else if ("getVisibleMapNames".equalsIgnoreCase(functionName)
+        || "getAllMapNames".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
-      boolean allMaps = functionName.equals("getAllMapNames");
+      boolean allMaps = functionName.equalsIgnoreCase("getAllMapNames");
 
       if (allMaps) checkTrusted(functionName);
 
@@ -132,6 +151,7 @@ public class MapFunctions extends AbstractFunction {
         return StringFunctions.getInstance().join(mapNames, delim);
       }
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

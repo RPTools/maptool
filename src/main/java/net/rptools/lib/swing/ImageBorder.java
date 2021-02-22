@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.swing.border.Border;
-import net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
 
 /** @author trevor */
 public class ImageBorder implements Border {
@@ -180,8 +180,8 @@ public class ImageBorder implements Border {
   }
 
   private int max(int i1, int i2, int i3) {
-    int bigger = i1 > i2 ? i1 : i2;
-    return bigger > i3 ? bigger : i3;
+    int bigger = Math.max(i1, i2);
+    return Math.max(bigger, i3);
   }
 
   @Override

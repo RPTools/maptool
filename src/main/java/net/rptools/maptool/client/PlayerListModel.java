@@ -12,13 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.AbstractListModel;
-import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
+import main.java.net.rptools.maptool.model.ObservableList;
+import main.java.net.rptools.maptool.model.Player;
 
 public class PlayerListModel extends AbstractListModel implements Observer {
 

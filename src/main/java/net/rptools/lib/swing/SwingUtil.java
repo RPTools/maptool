@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -30,14 +30,15 @@ import java.awt.Window;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.*;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.tool.MeasureTool;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.maptool.client.tool.MeasureTool;
 
 /** */
 public class SwingUtil {
@@ -287,9 +288,7 @@ public class SwingUtil {
         return (JComponent) c;
       }
       if (c instanceof Container) {
-        for (Component child : ((Container) c).getComponents()) {
-          componentQueue.add(child);
-        }
+        componentQueue.addAll(Arrays.asList(((Container) c).getComponents()));
       }
     }
     return null;

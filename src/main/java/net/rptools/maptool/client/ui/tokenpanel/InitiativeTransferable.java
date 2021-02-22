@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.tokenpanel;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import net.rptools.maptool.model.GUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +83,7 @@ public class InitiativeTransferable implements Transferable {
    *-------------------------------------------------------------------------------------------*/
 
   /** @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor) */
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
     if (INIT_TOKEN_FLAVOR.equals(flavor)) {
       return this;
     }

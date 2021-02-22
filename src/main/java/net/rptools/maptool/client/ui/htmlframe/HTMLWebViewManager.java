@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.Scene;
@@ -95,30 +96,65 @@ public class HTMLWebViewManager {
     }
 
     /**
-     * Receives a node sent by the JS Mutation Observer and attaches an event listener to it, if
-     * need be.
+     * Receives an added node sent by the JS Mutation Observer and attaches an event listener to it
+     * and its descendants, if need be. The elements affected are Anchors, Areas, Forms, Buttons,
+     * and Inputs.
      *
      * @param object the node sent by the Mutation Observer
      */
     public void handleAddedNode(Object object) {
-      if (object instanceof EventTarget && object instanceof HTMLElement) {
-        addEventListener((EventTarget) object);
-      }
-    }
-  }
+      if (object instanceof HTMLElement) {
+        HTMLElement addedNode = (HTMLElement) object;
 
-  /**
-   * Add an event listener to Anchors, Areas, Forms, Buttons, and Inputs.
-   *
-   * @param target the target that an event listener might be attached to
-   */
-  private void addEventListener(EventTarget target) {
-    if (target instanceof HTMLAnchorElement || target instanceof HTMLAreaElement) {
-      target.addEventListener("click", listenerA, false);
-    } else if (target instanceof HTMLFormElement) {
-      target.addEventListener("submit", listenerSubmit, false);
-    } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
-      target.addEventListener("click", listenerSubmit, false);
+        // Add listeners to the node itself.
+        if (addedNode instanceof EventTarget) {
+          EventTarget target = (EventTarget) addedNode;
+          if (addedNode instanceof HTMLAnchorElement || addedNode instanceof HTMLAreaElement) {
+            target.addEventListener("click", listenerA, true);
+          } else if (target instanceof HTMLFormElement) {
+            target.addEventListener("submit", listenerSubmit, true);
+          } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
+            target.addEventListener("click", listenerSubmit, true);
+          }
+        }
+
+        // Add listeners to the node's descendant as they don't trigger mutation observer.
+        NodeList nodeList;
+
+        // Add event handlers for <a> hyperlinks.
+        nodeList = addedNode.getElementsByTagName("a");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget node = (EventTarget) nodeList.item(i);
+          node.addEventListener("click", listenerA, true);
+        }
+
+        // Add event handlers for hyperlinks for maps.
+        nodeList = addedNode.getElementsByTagName("area");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget node = (EventTarget) nodeList.item(i);
+          node.addEventListener("click", listenerA, true);
+        }
+
+        // Set the "submit" handler to get the data on submission not based on buttons
+        nodeList = addedNode.getElementsByTagName("form");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("submit", listenerSubmit, true);
+        }
+
+        // Set the "submit" handler to get the data on submission based on input
+        nodeList = addedNode.getElementsByTagName("input");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, true);
+        }
+        // Set the "submit" handler to get the data on submission based on button
+        nodeList = addedNode.getElementsByTagName("button");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, true);
+        }
+      }
     }
   }
 
@@ -135,6 +171,7 @@ public class HTMLWebViewManager {
           + " https://ajax.googleapis.com " // Google CDN
           + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
           + " 'unsafe-inline' 'unsafe-eval' ; "
+          + " img-src * asset: ; "
           + " font-src https://fonts.gstatic.com 'self'"
           + "\">\n";
 
@@ -250,6 +287,9 @@ public class HTMLWebViewManager {
 
       // Replace the broken javascript form.submit method
       webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
+
+      // Add the MutationObserver to handle new nodes as they are added
+      webEngine.executeScript(SCRIPT_MUTATION_OBS);
     }
   }
 
@@ -342,9 +382,6 @@ public class HTMLWebViewManager {
 
   /** Handles the page after it has loaded. */
   void handlePage() {
-    // Add the MutationObserver to handle new nodes as they are added
-    webEngine.executeScript(SCRIPT_MUTATION_OBS);
-
     Document doc = webEngine.getDocument();
     NodeList nodeList;
 
@@ -373,39 +410,6 @@ public class HTMLWebViewManager {
       handleMetaTag((Element) nodeList.item(i));
     }
 
-    // Add event handlers for <a> hyperlinks.
-    nodeList = doc.getElementsByTagName("a");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      EventTarget node = (EventTarget) nodeList.item(i);
-      node.addEventListener("click", listenerA, false);
-    }
-
-    // Add event handlers for hyperlinks for maps.
-    nodeList = doc.getElementsByTagName("area");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      EventTarget node = (EventTarget) nodeList.item(i);
-      node.addEventListener("click", listenerA, false);
-    }
-
-    // Set the "submit" handler to get the data on submission not based on buttons
-    nodeList = doc.getElementsByTagName("form");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      EventTarget target = (EventTarget) nodeList.item(i);
-      target.addEventListener("submit", listenerSubmit, false);
-    }
-
-    // Set the "submit" handler to get the data on submission based on input
-    nodeList = doc.getElementsByTagName("input");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      EventTarget target = (EventTarget) nodeList.item(i);
-      target.addEventListener("click", listenerSubmit, false);
-    }
-    // Set the "submit" handler to get the data on submission based on button
-    nodeList = doc.getElementsByTagName("button");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      EventTarget target = (EventTarget) nodeList.item(i);
-      target.addEventListener("click", listenerSubmit, false);
-    }
     // Restores the previous scrolling.
     if (!scrollReset) {
       scrollTo(scrollX, scrollY);
@@ -567,8 +571,11 @@ public class HTMLWebViewManager {
     }
     if (form == null) return;
 
+    // formAction can override action
+    String formAction = target.getAttribute("formaction");
+    String action = (formAction == null || "".equals(formAction)) ? form.getAction() : formAction;
+
     // Check for non-macrolinktext action
-    String action = form.getAction();
     if (action == null || action.startsWith("javascript:")) {
       return;
     }
@@ -626,8 +633,52 @@ public class HTMLWebViewManager {
       } else continue; // skip elements not containing data
       addToObject(jObj, name, value);
     }
-    String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
-    doSubmit("json", action, data);
+
+    // Find the link data
+    Matcher m = MacroLinkFunction.LINK_DATA_PATTERN.matcher(action);
+    JsonElement linkData = null;
+    if (m.matches()) {
+      // Separate the action from the data
+      action = m.group(1);
+      linkData = MacroLinkFunction.getInstance().getLinkDataAsJson(m.group(2));
+    }
+
+    // Combines and encodes the form data with the link data
+    String data = getEncodedCombinedData(jObj, linkData);
+
+    // Form submit should be ran on EDT. Fixes #2056.
+    final String finalAction = action;
+    SwingUtilities.invokeLater(() -> doSubmit("json", finalAction, data));
+  }
+
+  /**
+   * Combines and encodes the form data with the link data. If there is no link data, uses the form
+   * data only. If the link data is a json, adds the form data as the "form" property. Otherwise,
+   * only uses the link data.
+   *
+   * @param formData the JsonObject containing the form data
+   * @param linkData the JsonElement containing the link data
+   * @return the encoded data
+   */
+  private String getEncodedCombinedData(JsonObject formData, JsonElement linkData) {
+    JsonObject jobjLinkData = null;
+    if (linkData != null && linkData.isJsonObject()) {
+      jobjLinkData = linkData.getAsJsonObject();
+    }
+
+    String combinedData;
+    if (linkData == null) {
+      // Returns the encoded json of the form data if there is no link data
+      combinedData = formData.toString();
+    } else if (jobjLinkData == null || jobjLinkData.has("form")) {
+      // Ignores the form data if the link data is not a json object or already has "form" field
+      combinedData = linkData.toString();
+    } else {
+      // Adds the form data to the json object link data
+      jobjLinkData.add("form", formData);
+      combinedData = jobjLinkData.toString();
+    }
+    return URLEncoder.encode(combinedData, StandardCharsets.UTF_8);
   }
 
   /**

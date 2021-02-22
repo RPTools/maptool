@@ -12,17 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.walker;
+package main.java.net.rptools.maptool.client.walker;
 
 import java.awt.geom.Area;
 import java.util.Collection;
 import java.util.Set;
-import net.rptools.maptool.client.ui.zone.RenderPathWorker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Token.TerrainModifierOperation;
-import net.rptools.maptool.model.TokenFootprint;
+import main.java.net.rptools.maptool.client.ui.zone.RenderPathWorker;
+import main.java.net.rptools.maptool.client.walker.astar.AStarCellPoint;
+import main.java.net.rptools.maptool.model.CellPoint;
+import main.java.net.rptools.maptool.model.Path;
+import main.java.net.rptools.maptool.model.Token.TerrainModifierOperation;
+import main.java.net.rptools.maptool.model.TokenFootprint;
 
 public interface ZoneWalker {
 

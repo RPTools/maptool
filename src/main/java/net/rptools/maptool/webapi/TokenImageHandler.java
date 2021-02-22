@@ -12,11 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.webapi;
+package main.java.net.rptools.maptool.webapi;
 
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.rptools.maptool.model.Asset;
@@ -30,7 +29,7 @@ public class TokenImageHandler extends AbstractHandler {
   @Override
   public void handle(
       String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-      throws IOException, ServletException {
+      throws IOException {
 
     String args[] = target.replaceAll("^/", "").split("/");
 

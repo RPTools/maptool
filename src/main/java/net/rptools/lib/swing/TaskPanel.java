@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,7 +29,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
 
 /*
  * $Id: TaskPanel.java 5381 2010-09-07 17:17:26Z azhrei_fje $
@@ -134,8 +134,6 @@ public class TaskPanel extends JPanel {
 
   private JPanel createTitlePanel(String title) {
 
-    // JPanel panel = new GradientPanel(new Color(0, 0, 100), Color.lightGray, new GridBagLayout())
-    // {
     JPanel panel =
         new JPanel(new GridBagLayout()) {
           @Override

@@ -43,11 +43,9 @@ public class ImpersonateMacro implements Macro {
     }
     // Figure out what we want to impersonate
     String name = macro;
-    int index = macro.indexOf(":");
-    if (index > 0) {
-      if (macro.substring(0, index).equalsIgnoreCase("lib")) {
-        index = macro.indexOf(":", index + 1);
-      }
+    int index = macro.indexOf(':');
+    if (index > 0 && macro.substring(0, index).equalsIgnoreCase("lib")) {
+      index = macro.indexOf(':', index + 1);
     }
     if (index > 0) {
       name = macro.substring(0, index).trim();
@@ -59,7 +57,11 @@ public class ImpersonateMacro implements Macro {
     }
     // Permission
     if (!canImpersonate(token)) {
-      MapTool.addLocalMessage(I18N.getText("impersonate.mustOwn", token.getName()));
+      if (token != null) {
+        MapTool.addLocalMessage(I18N.getText("impersonate.mustOwn", name));
+      } else {
+        MapTool.addLocalMessage(I18N.getText("msg.error.gmRequired"));
+      }
       return;
     }
     // Impersonate

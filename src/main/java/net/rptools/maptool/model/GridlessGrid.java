@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.walker.WalkerMetric;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.tool.PointerTool;
+import main.java.net.rptools.maptool.client.walker.WalkerMetric;
 
 public class GridlessGrid extends Grid {
   private static List<TokenFootprint> footprintList;

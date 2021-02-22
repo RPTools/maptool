@@ -48,9 +48,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
       if (impersonatePanel != null)
         panelVisible =
             (impersonatePanel.isVisible() && !impersonatePanel.isAutohide())
-                    || impersonatePanel.isAutohideShowing()
-                ? true
-                : false;
+                || impersonatePanel.isAutohideShowing();
     }
     // Only repaint the panel if its visible
     if (panelVisible && mtf != null && mtf.getCurrentZoneRenderer() != null) {

@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.transfer.ConsumerListener;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.maptool.transfer.ConsumerListener;
 import org.apache.commons.io.FileUtils;
 
 /**

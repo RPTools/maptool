@@ -12,37 +12,37 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.geom.Area;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.functions.ExecFunction;
-import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
-import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.ServerCommand;
-import net.rptools.maptool.server.ServerMethodHandler;
-import net.rptools.maptool.server.ServerPolicy;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.maptool.client.functions.ExecFunction;
+import main.java.net.rptools.maptool.client.functions.MacroLinkFunction;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.maptool.model.Campaign;
+import main.java.net.rptools.maptool.model.CampaignProperties;
+import main.java.net.rptools.maptool.model.ExposedAreaMetaData;
+import main.java.net.rptools.maptool.model.GUID;
+import main.java.net.rptools.maptool.model.InitiativeList;
+import main.java.net.rptools.maptool.model.Label;
+import main.java.net.rptools.maptool.model.MacroButtonProperties;
+import main.java.net.rptools.maptool.model.Pointer;
+import main.java.net.rptools.maptool.model.TextMessage;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.Zone.TopologyMode;
+import main.java.net.rptools.maptool.model.Zone.VisionType;
+import main.java.net.rptools.maptool.model.ZonePoint;
+import main.java.net.rptools.maptool.model.drawing.Drawable;
+import main.java.net.rptools.maptool.model.drawing.DrawnElement;
+import main.java.net.rptools.maptool.model.drawing.Pen;
+import main.java.net.rptools.maptool.server.ServerCommand;
+import main.java.net.rptools.maptool.server.ServerMethodHandler;
+import main.java.net.rptools.maptool.server.ServerPolicy;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -290,6 +290,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+    // Expose locally right away.
+    MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
     makeServerCall(COMMAND.exposeFoW, zoneGUID, area, selectedToks);
   }
 
@@ -389,7 +391,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
     long delay;
 
-    Object sleepSemaphore = new Object();
+    final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
       delay = millidelay;

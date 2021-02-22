@@ -240,11 +240,11 @@ public class MacroButton extends JButton implements MouseListener {
     if (SwingUtil.isShiftDown(event) || getProperties().getApplyToTokens()) {
       MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(selectedTokens);
     } else {
-      if (getPanelClass() == "SelectionPanel") {
+      if ("SelectionPanel".equals(getPanelClass())) {
         List<Token> affectedTokens = new ArrayList<Token>();
         if (getProperties().getCommonMacro()) {
           for (Token nextSelected : selectedTokens) {
-            Boolean isCommonToToken = false;
+            boolean isCommonToToken = false;
             for (MacroButtonProperties nextMacro : nextSelected.getMacroList(true)) {
               if (nextMacro.hashCodeForComparison() == getProperties().hashCodeForComparison()) {
                 isCommonToToken = true;

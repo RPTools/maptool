@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.util.Objects;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
@@ -96,7 +97,7 @@ public class StartServerDialogPreferences {
 
   // my addition
   public boolean getRestrictedImpersonation() {
-    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, true);
+    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, false);
   }
 
   public void setRestrictedImpersonation(boolean impersonation) {
@@ -171,10 +172,8 @@ public class StartServerDialogPreferences {
     // Tool tips works slightly differently as its a setting that has to be available
     // to the user to configure before the start server dialog. So if it has not been
     // specified we default to the users preferences.
-    if (useToolTipsForUnformattedRolls == null) {
-      return AppPreferences.getUseToolTipForInlineRoll();
-    }
-    return useToolTipsForUnformattedRolls;
+    return Objects.requireNonNullElseGet(
+        useToolTipsForUnformattedRolls, AppPreferences::getUseToolTipForInlineRoll);
   }
 
   public void setUseToolTipsForUnformattedRolls(boolean flag) {

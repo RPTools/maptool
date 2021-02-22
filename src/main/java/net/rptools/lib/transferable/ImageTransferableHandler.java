@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.transferable;
+package main.java.net.rptools.lib.transferable;
 
 import java.awt.Image;
 import java.awt.MediaTracker;
@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
 
 public class ImageTransferableHandler extends TransferableHandler {
   private enum Flavor {
@@ -37,7 +37,7 @@ public class ImageTransferableHandler extends TransferableHandler {
 
     DataFlavor flavor;
 
-    private Flavor(DataFlavor flavor) {
+    Flavor(DataFlavor flavor) {
       this.flavor = flavor;
     }
 

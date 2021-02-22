@@ -12,15 +12,15 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.Set;
-import net.rptools.lib.GeometryUtil;
-import net.rptools.lib.GeometryUtil.PointNode;
+import main.java.net.rptools.lib.GeometryUtil;
+import main.java.net.rptools.lib.GeometryUtil.PointNode;
 
 public class AreaMeta {
   Area area;
@@ -71,10 +71,8 @@ public class AreaMeta {
     PointNode pointNode = new PointNode(new Point2D.Double(x, y));
 
     // Don't add if we haven't moved
-    if (lastPointNode != null) {
-      if (lastPointNode.point.equals(pointNode.point)) {
-        return;
-      }
+    if (lastPointNode != null && lastPointNode.point.equals(pointNode.point)) {
+      return;
     }
     if (path == null) {
       path = new GeneralPath();

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 /**
  * Given a string describing the type of desired grid, this factory creates and returns an object of
@@ -53,7 +53,7 @@ public class GridFactory {
 
   public static String getGridType(Grid grid) {
     if (grid instanceof HexGridVertical) {
-      if (((HexGridVertical) grid).isIsometric()) return ISOMETRIC_HEX;
+      if (grid.isIsometric()) return ISOMETRIC_HEX;
       return HEX_VERT;
     }
     if (grid instanceof HexGridHorizontal) {

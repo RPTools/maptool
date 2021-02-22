@@ -23,8 +23,10 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ExtractHeroLab;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -39,7 +41,7 @@ public class HeroLabFunctions extends AbstractFunction {
   private HeroLabFunctions() {
     super(
         0,
-        2,
+        3,
         "herolab.getInfo",
         "herolab.getStatBlock",
         "herolab.hasChanged",
@@ -55,7 +57,8 @@ public class HeroLabFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (functionName.equals("herolab.getInfo")) {
       Token token;
@@ -73,7 +76,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -115,7 +118,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
 
         if (token == null) {
@@ -146,7 +149,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -178,7 +181,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -216,50 +219,35 @@ public class HeroLabFunctions extends AbstractFunction {
       }
 
     } else if (functionName.equals("herolab.XPath")) {
-      if (!MapTool.getParser().isMacroTrusted())
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-
-      if (parameters.size() > 2)
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-
-      if (parameters.isEmpty())
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
-
-      Token token = null;
-
-      if (parameters.size() == 2) {
-        token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
-
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken",
-                  functionName,
-                  parameters.get(0).toString()));
-        }
-      } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
-
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", functionName));
-        }
-      }
-
-      if (token.getHeroLabData() == null)
-        throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+      FunctionUtil.blockUntrustedMacro(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
 
       String xPathExpression = parameters.get(0).toString();
-      String result = token.getHeroLabData().parseXML(xPathExpression);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, -1);
+      String delim = parameters.size() == 3 ? parameters.get(2).toString() : ", ";
 
-      if (NumberUtils.isNumber(result))
-        return new BigDecimal(result).stripTrailingZeros().toPlainString();
-      else return result;
+      if (token.getHeroLabData() == null) {
+        throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+      }
+
+      if (delim.equalsIgnoreCase("json")) {
+        try {
+          return token.getHeroLabData().parseXmlToJson(xPathExpression);
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException(
+              I18N.getText("macro.function.herolab.xpath.invalid", xPathExpression), iae);
+        }
+      } else {
+        try {
+          String result = token.getHeroLabData().parseXML(xPathExpression, delim);
+          if (NumberUtils.isNumber(result))
+            return new BigDecimal(result).stripTrailingZeros().toPlainString();
+          else return result;
+        } catch (IllegalArgumentException iae) {
+          throw new IllegalArgumentException(
+              I18N.getText("macro.function.herolab.xpath.invalid", xPathExpression), iae);
+        }
+      }
     } else if (functionName.equals("herolab.getImage")) {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -287,7 +275,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
 
         if (token == null) {
@@ -323,7 +311,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -355,7 +343,7 @@ public class HeroLabFunctions extends AbstractFunction {
                   parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+        MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
@@ -373,6 +361,6 @@ public class HeroLabFunctions extends AbstractFunction {
       return token.getHeroLabData().getMinionMasterName();
     }
 
-    return "<ERROR>";
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

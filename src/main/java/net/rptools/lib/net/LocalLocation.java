@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.net;
+package main.java.net.rptools.lib.net;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;

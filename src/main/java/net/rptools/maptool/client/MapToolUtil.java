@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.security.SecureRandom;
@@ -24,19 +24,19 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.rptools.maptool.client.utilities.RandomSuffixFactory;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.drawing.DrawablePaint;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.util.StringUtil;
+import main.java.net.rptools.maptool.client.utilities.RandomSuffixFactory;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.drawing.DrawablePaint;
+import main.java.net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import main.java.net.rptools.maptool.util.StringUtil;
 
 public class MapToolUtil {
   private static final Random RAND = new SecureRandom();
 
-  private static RandomSuffixFactory randomSuffixFactory;
+  private static RandomSuffixFactory randomSuffixFactory = new RandomSuffixFactory();
   private static AtomicInteger nextTokenId = new AtomicInteger(1);
 
   /** The map of color names to color values */
@@ -87,10 +87,10 @@ public class MapToolUtil {
       "black", "white", "fuchsia", "aqua", "silver", "red", "lime", "blue", "yellow", "gray",
       "purple", "maroon", "navy", "olive", "green", "teal"
     };
-    for (int i = 0; i < html.length; i++) {
-      Color c = COLOR_MAP.get(html[i]);
+    for (String s : html) {
+      Color c = COLOR_MAP.get(s);
       assert c != null : "HTML color not in predefined list?";
-      COLOR_MAP_HTML.put(html[i], c);
+      COLOR_MAP_HTML.put(s, c);
     }
   }
 
@@ -172,9 +172,6 @@ public class MapToolUtil {
     if (newNum != null || random || zone.getTokenByName(newName) != null) {
 
       if (random) {
-        if (randomSuffixFactory == null) {
-          randomSuffixFactory = new RandomSuffixFactory();
-        }
         do {
           newNum = randomSuffixFactory.nextSuffixForToken(newName);
         } while (nameIsDuplicate(zone, newName, newNum, addNumToName, addNumToGM));

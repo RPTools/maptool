@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import net.rptools.lib.GeometryUtil;
+import main.java.net.rptools.lib.GeometryUtil;
 
 public class AreaFace {
 

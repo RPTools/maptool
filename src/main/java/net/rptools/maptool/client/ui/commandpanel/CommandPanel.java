@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.commandpanel;
+package main.java.net.rptools.maptool.client.ui.commandpanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,7 +27,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -60,31 +59,31 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolMacroContext;
-import net.rptools.maptool.client.functions.FindTokenFunctions;
-import net.rptools.maptool.client.macro.MacroManager;
-import net.rptools.maptool.client.ui.chat.ChatProcessor;
-import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
-import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
-import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
+import main.java.net.rptools.lib.AppEvent;
+import main.java.net.rptools.lib.AppEventListener;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.maptool.client.AppActions;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.AppStyle;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.MapToolMacroContext;
+import main.java.net.rptools.maptool.client.functions.FindTokenFunctions;
+import main.java.net.rptools.maptool.client.macro.MacroManager;
+import main.java.net.rptools.maptool.client.ui.chat.ChatProcessor;
+import main.java.net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
+import main.java.net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import main.java.net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.model.GUID;
+import main.java.net.rptools.maptool.model.ModelChangeEvent;
+import main.java.net.rptools.maptool.model.ModelChangeListener;
+import main.java.net.rptools.maptool.model.ObservableList;
+import main.java.net.rptools.maptool.model.TextMessage;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.Zone.Event;
+import main.java.net.rptools.maptool.util.ImageManager;
+import main.java.net.rptools.maptool.util.StringUtil;
 
 public class CommandPanel extends JPanel
     implements Observer, AppEventListener, ModelChangeListener {
@@ -464,12 +463,7 @@ public class CommandPanel extends JPanel
         emotePopupButton.setBorderPainted(false);
         emotePopupButton.setFocusPainted(false);
         emotePopupButton.setOpaque(false);
-        emotePopupButton.addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                emotePopup.show(emotePopupButton, 0, 0);
-              }
-            });
+        emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
@@ -651,12 +645,10 @@ public class CommandPanel extends JPanel
       MapTool.getEventDispatcher()
           .addListener(
               MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  commandTextArea.setFont(
-                      commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
-                  doLayout();
-                }
+              event -> {
+                commandTextArea.setFont(
+                    commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+                doLayout();
               });
     }
     return commandTextArea;
@@ -838,13 +830,7 @@ public class CommandPanel extends JPanel
       messagePanel = new MessagePanel();
       // Update whenever the preferences change
       MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              new AppEventListener() {
-                public void handleAppEvent(AppEvent event) {
-                  messagePanel.refreshRenderer();
-                }
-              });
+          .addListener(MapTool.PreferencesEvent.Changed, event -> messagePanel.refreshRenderer());
     }
     return messagePanel;
   }

@@ -12,15 +12,15 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.AttachedLightSource;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.client.AppStyle;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.model.AttachedLightSource;
+import main.java.net.rptools.maptool.model.LightSource;
+import main.java.net.rptools.maptool.model.Token;
 
 public class LightSourceIconOverlay implements ZoneOverlay {
 

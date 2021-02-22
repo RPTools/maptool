@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.*;
 import java.io.*;
@@ -21,8 +21,8 @@ import java.net.URL;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.swing.*;
-import net.rptools.lib.FileUtil;
-import net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.lib.FileUtil;
+import main.java.net.rptools.maptool.model.AssetManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +38,9 @@ public class AppSetup {
   public static void install() {
     try {
       // Only init once
-      if (!new File(AppConstants.UNZIP_DIR, "README").exists()) installDefaultTokens();
+      if (!new File(AppConstants.UNZIP_DIR, "README").exists()) {
+        installDefaultTokens();
+      }
     } catch (IOException ioe) {
       log.error(ioe);
     }
@@ -132,7 +134,7 @@ public class AppSetup {
     installLibrary(libraryName, unzipDir);
   }
 
-  public static void installLibrary(final String libraryName, final File root) throws IOException {
+  public static void installLibrary(final String libraryName, final File root) {
     // Add as a resource root
     AppPreferences.addAssetRoot(root);
     if (MapTool.getFrame() != null) {
@@ -146,28 +148,26 @@ public class AppSetup {
       if (licenseFile.exists()) {
         final File licenseFileFinal = licenseFile;
         EventQueue.invokeLater(
-            new Runnable() {
-              public void run() {
-                try {
-                  JTextPane pane = new JTextPane();
-                  pane.setPage(licenseFileFinal.toURI().toURL());
-                  JOptionPane.showMessageDialog(
-                      MapTool.getFrame(),
-                      pane,
-                      "License for " + libraryName,
-                      JOptionPane.INFORMATION_MESSAGE);
-                } catch (MalformedURLException e) {
-                  log.error("Could not load license file: " + licenseFileFinal, e);
-                } catch (IOException e) {
-                  log.error("Could not load license file: " + licenseFileFinal, e);
-                }
+            () -> {
+              try {
+                JTextPane pane = new JTextPane();
+                pane.setPage(licenseFileFinal.toURI().toURL());
+                JOptionPane.showMessageDialog(
+                    MapTool.getFrame(),
+                    pane,
+                    "License for " + libraryName,
+                    JOptionPane.INFORMATION_MESSAGE);
+              } catch (MalformedURLException e) {
+                log.error("Could not load license file: " + licenseFileFinal, e);
+              } catch (IOException e) {
+                log.error("Could not load license file: " + licenseFileFinal, e);
               }
             });
       }
     }
     new SwingWorker<Object, Object>() {
       @Override
-      protected Object doInBackground() throws Exception {
+      protected Object doInBackground() {
         AssetManager.searchForImageReferences(root, AppConstants.IMAGE_FILE_FILTER);
         return null;
       }

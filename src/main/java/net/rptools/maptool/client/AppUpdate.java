@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import main.java.net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -251,25 +251,22 @@ public class AppUpdate {
     log.info("assetDownloadSize: " + assetDownloadSize);
 
     Runnable updatethread =
-        new Runnable() {
-          @Override
-          public void run() {
-            try (InputStream stream = assetDownloadURL.openStream()) {
-              ProgressMonitorInputStream pmis =
-                  new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);
-              UIManager.put("ProgressMonitor.progressText", "New Update");
+        () -> {
+          try (InputStream stream = assetDownloadURL.openStream()) {
+            ProgressMonitorInputStream pmis =
+                new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);
+            UIManager.put("ProgressMonitor.progressText", "New Update");
 
-              ProgressMonitor pm = pmis.getProgressMonitor();
-              pm.setMillisToDecideToPopup(500);
-              pm.setMillisToPopup(500);
-              pm.setNote(assetDownloadURL.toString());
-              pm.setMinimum(0);
-              pm.setMaximum((int) assetDownloadSize);
+            ProgressMonitor pm = pmis.getProgressMonitor();
+            pm.setMillisToDecideToPopup(500);
+            pm.setMillisToPopup(500);
+            pm.setNote(assetDownloadURL.toString());
+            pm.setMinimum(0);
+            pm.setMaximum((int) assetDownloadSize);
 
-              FileUtils.copyInputStreamToFile(pmis, saveLocation);
-            } catch (IOException ioe) {
-              MapTool.showError("msg.error.failedSavingNewVersion", ioe);
-            }
+            FileUtils.copyInputStreamToFile(pmis, saveLocation);
+          } catch (IOException ioe) {
+            MapTool.showError("msg.error.failedSavingNewVersion", ioe);
           }
         };
 

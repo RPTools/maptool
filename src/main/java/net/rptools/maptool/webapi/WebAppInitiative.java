@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.webapi;
+package main.java.net.rptools.maptool.webapi;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -90,14 +90,10 @@ public class WebAppInitiative {
   private WebAppInitiative() {
     initiativeListener = new InitiativeListener();
     SwingUtilities.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            MapTool.getEventDispatcher()
-                .addListener(initiativeListener, MapTool.ZoneEvent.Activated);
-            initiativeListener.updateListeners();
-            System.out.println("Here...");
-          }
+        () -> {
+          MapTool.getEventDispatcher().addListener(initiativeListener, MapTool.ZoneEvent.Activated);
+          initiativeListener.updateListeners();
+          System.out.println("Here...");
         });
   }
 
@@ -215,10 +211,6 @@ public class WebAppInitiative {
 
     InitiativeList ilist = initiativeListener.initiativeList;
 
-    if (ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken())) {
-      return true;
-    }
-
-    return false;
+    return ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken());
   }
 }

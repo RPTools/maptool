@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib;
+package main.java.net.rptools.lib;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -149,8 +149,8 @@ public final class MD5Key implements Serializable {
    */
   private String encodeToHex(byte[] data) {
     StringBuilder strbuild = new StringBuilder();
-    for (int i = 0; i < data.length; i++) {
-      String hex = Integer.toHexString(data[i]);
+    for (byte datum : data) {
+      String hex = Integer.toHexString(datum);
       if (hex.length() < 2) {
         strbuild.append("0");
       }

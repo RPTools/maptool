@@ -117,6 +117,15 @@ public class InitiativePanel extends JPanel
   /** Flag indicating that the owners of tokens can only move their tokens when it is their turn. */
   private boolean movementLock;
 
+  /** Whether the {@link #SORT_LIST_ACTION} should use the reversed (Ascending) order */
+  private boolean initUseReverseSort;
+
+  /**
+   * The Next/Previous buttons can be disabled to prevent bypass of a framework's custom initiative
+   * functions
+   */
+  private boolean initPanelButtonsDisabled;
+
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
@@ -148,6 +157,8 @@ public class InitiativePanel extends JPanel
 
     ownerPermissions = MapTool.getCampaign().isInitiativeOwnerPermissions();
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
+    initUseReverseSort = MapTool.getCampaign().isInitiativeUseReverseSort();
+    initPanelButtonsDisabled = MapTool.getCampaign().isInitiativePanelButtonsDisabled();
 
     // Set up the list with an empty model
     displayList = new JList<TokenInitiative>();
@@ -184,7 +195,9 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.showTokenStates", SHOW_TOKEN_STATES_ACTION);
     I18N.setAction("initPanel.showInitStates", SHOW_INIT_STATE);
     I18N.setAction("initPanel.initStateSecondLine", INIT_STATE_SECOND_LINE);
+    I18N.setAction("initPanel.toggleReverseSort", TOGGLE_REVERSE_INIT_SORT_ORDER);
     I18N.setAction("initPanel.toggleHideNPCs", TOGGLE_HIDE_NPC_ACTION);
+    I18N.setAction("initPanel.togglePanelButtonsDisabled", TOGGLE_PANEL_BUTTONS_DISABLED_ACTION);
     I18N.setAction("initPanel.addPCs", ADD_PCS_ACTION);
     I18N.setAction("initPanel.addAll", ADD_ALL_ACTION);
     I18N.setAction("initPanel.remove", REMOVE_TOKEN_ACTION);
@@ -216,15 +229,20 @@ public class InitiativePanel extends JPanel
     displayList.setDragEnabled(hasGMPermission());
 
     // Set up the buttons
-    PREV_ACTION.setEnabled(hasGMPermission());
+    PREV_ACTION.setEnabled(hasGMPermission() && !isInitPanelButtonsDisabled());
     RESET_COUNTER_ACTION.setEnabled(hasGMPermission());
     NEXT_ACTION.setEnabled(
-        hasGMPermission() || (ownerPermissions && hasOwnerPermission(list.getCurrentToken())));
+        !isInitPanelButtonsDisabled()
+            && (hasGMPermission()
+                || (ownerPermissions && hasOwnerPermission(list.getCurrentToken()))));
 
     // Set up the menu
     popupMenu.removeAll();
     if (hasGMPermission()) {
       popupMenu.add(new JMenuItem(SORT_LIST_ACTION));
+      JCheckBoxMenuItem reverseSort = new JCheckBoxMenuItem(TOGGLE_REVERSE_INIT_SORT_ORDER);
+      reverseSort.setSelected(initUseReverseSort);
+      popupMenu.add(reverseSort);
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(MAKE_CURRENT_ACTION));
     } // endif
@@ -245,13 +263,16 @@ public class InitiativePanel extends JPanel
     popupMenu.add(item);
     if (hasGMPermission()) {
       hideNPCMenuItem = new JCheckBoxMenuItem(TOGGLE_HIDE_NPC_ACTION);
-      hideNPCMenuItem.setSelected(list == null ? false : list.isHideNPC());
+      hideNPCMenuItem.setSelected(list != null && list.isHideNPC());
       popupMenu.add(hideNPCMenuItem);
+      item = new JCheckBoxMenuItem(TOGGLE_PANEL_BUTTONS_DISABLED_ACTION);
+      item.setSelected(initPanelButtonsDisabled);
+      popupMenu.add(item);
       ownerPermissionsMenuItem = new JCheckBoxMenuItem(TOGGLE_OWNER_PERMISSIONS_ACTION);
-      ownerPermissionsMenuItem.setSelected(list == null ? false : ownerPermissions);
+      ownerPermissionsMenuItem.setSelected(list != null && ownerPermissions);
       popupMenu.add(ownerPermissionsMenuItem);
       movementLockMenuItem = new JCheckBoxMenuItem(TOGGLE_MOVEMENT_LOCK_ACTION);
-      movementLockMenuItem.setSelected(list == null ? false : movementLock);
+      movementLockMenuItem.setSelected(list != null && movementLock);
       popupMenu.add(movementLockMenuItem);
       popupMenu.addSeparator();
       popupMenu.add(new JMenuItem(ADD_PCS_ACTION));
@@ -277,8 +298,7 @@ public class InitiativePanel extends JPanel
   }
 
   private void updateRound() {
-    if (list.getRound() > 0)
-      round.setText(I18N.getText("initPanel.round") + " " + Integer.toString(list.getRound()));
+    if (list.getRound() > 0) round.setText(I18N.getText("initPanel.round") + " " + list.getRound());
     else round.setText("");
   }
 
@@ -300,15 +320,14 @@ public class InitiativePanel extends JPanel
       updateRound();
     }
     EventQueue.invokeLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            model.setList(list);
-            NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
-            if (list.getCurrent() >= 0) {
-              int index = model.getDisplayIndex(list.getCurrent());
-              if (index >= 0) displayList.ensureIndexIsVisible(index);
-            }
+        () -> {
+          model.setList(list);
+          NEXT_ACTION.setEnabled(
+              !isInitPanelButtonsDisabled()
+                  && (hasGMPermission() || hasOwnerPermission(list.getCurrentToken())));
+          if (list.getCurrent() >= 0) {
+            int index = model.getDisplayIndex(list.getCurrent());
+            if (index >= 0) displayList.ensureIndexIsVisible(index);
           }
         });
   }
@@ -405,6 +424,36 @@ public class InitiativePanel extends JPanel
     movementLock = anMovementLock;
   }
 
+  public boolean isInitUseReverseSort() {
+    return initUseReverseSort;
+  }
+
+  public void setInitUseReverseSort(boolean anInitUseReverseSort) {
+    initUseReverseSort = anInitUseReverseSort;
+  }
+
+  public boolean isInitPanelButtonsDisabled() {
+    return initPanelButtonsDisabled;
+  }
+
+  /**
+   * Updates the "Disable Panel Buttons" setting, and tweaks the Next/Previous button tooltips
+   * appropriately. Updates the view.
+   *
+   * @param initPanelButtonsDisabled
+   */
+  public void setInitPanelButtonsDisabled(boolean initPanelButtonsDisabled) {
+    this.initPanelButtonsDisabled = initPanelButtonsDisabled;
+    if (this.initPanelButtonsDisabled) {
+      NEXT_ACTION.putValue(Action.SHORT_DESCRIPTION, I18N.getText("initPanel.buttonsAreDisabled"));
+      PREV_ACTION.putValue(Action.SHORT_DESCRIPTION, I18N.getText("initPanel.buttonsAreDisabled"));
+    } else {
+      I18N.setAction("initPanel.next", NEXT_ACTION);
+      I18N.setAction("initPanel.prev", PREV_ACTION);
+    }
+    updateView();
+  }
+
   /**
    * Returns true if the passed token can not be moved because it is not the current token.
    *
@@ -439,14 +488,16 @@ public class InitiativePanel extends JPanel
   public void valueChanged(ListSelectionEvent e) {
     if (e != null && e.getValueIsAdjusting()) return;
     TokenInitiative ti = displayList.getSelectedValue();
-    boolean enabled = (ti != null && hasOwnerPermission(ti.getToken())) ? true : false;
+    boolean enabled = ti != null && hasOwnerPermission(ti.getToken());
     CLEAR_INIT_STATE_VALUE.setEnabled(enabled);
     SET_INIT_STATE_VALUE.setEnabled(enabled);
     TOGGLE_HOLD_ACTION.setEnabled(enabled);
     MAKE_CURRENT_ACTION.setEnabled(enabled && ti != list.getCurrentTokenInitiative());
 
     REMOVE_TOKEN_ACTION.setEnabled(enabled);
-    NEXT_ACTION.setEnabled(hasGMPermission() || hasOwnerPermission(list.getCurrentToken()));
+    NEXT_ACTION.setEnabled(
+        !isInitPanelButtonsDisabled()
+            && (hasGMPermission() || hasOwnerPermission(list.getCurrentToken())));
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -466,7 +517,8 @@ public class InitiativePanel extends JPanel
           && t.getType() != Type.NPC
           && AppPreferences.isShowInitGainMessage()) MapTool.addMessage(TextMessage.say(null, s));
       displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
-      NEXT_ACTION.setEnabled(hasOwnerPermission(list.getCurrentToken()));
+      NEXT_ACTION.setEnabled(
+          !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
     } else if (evt.getPropertyName().equals(InitiativeList.TOKENS_PROP)) {
       if ((evt.getOldValue() == null && evt.getNewValue() instanceof TokenInitiative)
           || (evt.getNewValue() == null & evt.getOldValue() instanceof TokenInitiative))
@@ -489,7 +541,7 @@ public class InitiativePanel extends JPanel
   @Override
   public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if ((Zone) event.getModel() == zone) {
+      if (event.getModel() == zone) {
         int oldSize = model.getSize();
         setList(((Zone) event.getModel()).getInitiativeList());
         if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
@@ -614,7 +666,30 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.sort();
+          list.sort(initUseReverseSort);
+        };
+      };
+
+  /** Toggle the Use Reverse Sort Order preference */
+  public final Action TOGGLE_REVERSE_INIT_SORT_ORDER =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          initUseReverseSort = ((JCheckBoxMenuItem) e.getSource()).isSelected();
+          MapTool.getCampaign().setInitiativeUseReverseSort(initUseReverseSort);
+          MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+        };
+      };
+
+  /** Enable/Disable the Next & Previous buttons on the Panel */
+  public final Action TOGGLE_PANEL_BUTTONS_DISABLED_ACTION =
+      new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          // use the setter to make sure related changes are applied to the panel
+          setInitPanelButtonsDisabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+          MapTool.getCampaign().setInitiativePanelButtonsDisabled(isInitPanelButtonsDisabled());
+          MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
         };
       };
 
@@ -713,9 +788,9 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          boolean op = !MapTool.getCampaign().isInitiativeMovementLock();
-          if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
-          MapTool.getCampaign().setInitiativeMovementLock(op);
+          boolean mvLock = !MapTool.getCampaign().isInitiativeMovementLock();
+          if (movementLockMenuItem != null) movementLockMenuItem.setSelected(mvLock);
+          MapTool.getCampaign().setInitiativeMovementLock(mvLock);
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
         };
       };
@@ -758,37 +833,22 @@ public class InitiativePanel extends JPanel
 
       if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
         SwingUtilities.invokeLater(
-            new Runnable() {
-              @Override
-              public void run() {
-                if (displayList.getSelectedValue() != null) {
-                  // Show the selected token on the map.
-                  Token token = displayList.getSelectedValue().getToken();
-                  ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-                  if (renderer == null
-                      || token == null
-                      || (!token.isToken() && !MapTool.getPlayer().isGM())
-                      || !AppUtil.playerOwns(token)) {
-                    return;
-                  }
-
-                  renderer.centerOn(token);
-                  renderer.maybeForcePlayersView();
-
-                  if (MapTool.getPlayer().isGM()) {
-                    // If the user is a GM, recenter on the token.
-                    renderer.centerOn(token);
-
-                    // Update player view if necessary
-                    if (token.isToken() && token.isVisible()) {
-                      renderer.maybeForcePlayersView();
-                    }
-                  } else if (renderer.getZone().isTokenVisible(token)) {
-                    // Not the GM, but the token is visible to the
-                    // ... what?
-                    renderer.centerOn(token);
-                  }
+            () -> {
+              if (displayList.getSelectedValue() != null) {
+                // Show the selected token on the map.
+                Token token = displayList.getSelectedValue().getToken();
+                ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+                if (renderer == null
+                    || token == null
+                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || !AppUtil.playerOwns(token)) {
+                  return;
                 }
+
+                renderer.clearSelectedTokens();
+                renderer.centerOn(token);
+                renderer.updateAfterSelection();
+                renderer.maybeForcePlayersView();
               }
             });
       } else if (SwingUtilities.isRightMouseButton(e)) {

@@ -12,17 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import javax.swing.AbstractListModel;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.InitiativeList.TokenInitiative;
-import net.rptools.maptool.model.Token.Type;
+import main.java.net.rptools.maptool.client.AppUtil;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.model.InitiativeList.TokenInitiative;
+import main.java.net.rptools.maptool.model.Token.Type;
 
 /**
  * This implements a list model for the for the panel. It removes all of the tokens that aren't

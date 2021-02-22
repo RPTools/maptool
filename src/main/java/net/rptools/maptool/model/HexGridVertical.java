@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -28,14 +28,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.tool.PointerTool;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.client.walker.WalkerMetric;
+import main.java.net.rptools.maptool.client.walker.ZoneWalker;
+import main.java.net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
+import main.java.net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /*
  * @formatter:off
@@ -54,11 +54,9 @@ public class HexGridVertical extends HexGrid {
   private static final int[] ALL_ANGLES =
       new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
-      new OffsetTranslator() {
-        public void translate(CellPoint originPoint, CellPoint offsetPoint) {
-          if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
-            offsetPoint.y++;
-          }
+      (originPoint, offsetPoint) -> {
+        if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+          offsetPoint.y++;
         }
       };
   private static int[]
@@ -293,8 +291,7 @@ public class HexGridVertical extends HexGrid {
     // Adjust to grid if token is an even number of grid cells
     double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
     double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide =
-        (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
 
     final AffineTransform at = new AffineTransform();
     final double coordinateOffsetX;

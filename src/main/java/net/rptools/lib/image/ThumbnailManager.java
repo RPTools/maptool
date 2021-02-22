@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.image;
+package main.java.net.rptools.lib.image;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -22,8 +22,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.swing.SwingUtil;
 import org.apache.commons.io.FileUtils;
 
 public class ThumbnailManager {

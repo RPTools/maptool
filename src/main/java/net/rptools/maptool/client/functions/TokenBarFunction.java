@@ -22,6 +22,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /** @author Jay */
@@ -40,34 +41,33 @@ public class TokenBarFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
+  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     String bar = (String) parameters.get(0);
     verifyBar(functionName, bar);
 
     if (functionName.equals("getBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getValue(token, bar);
     } else if (functionName.equals("setBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return setValue(token, bar, parameters.get(1));
     } else if (functionName.equals("isBarVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return isVisible(token, bar);
-    } else { // setBarVisible
+    } else if ("setBarVisible".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
       boolean visible = FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
-      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return setVisible(token, bar, visible);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package main.java.net.rptools.maptool.client.tool;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -25,7 +25,6 @@ import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -34,25 +33,23 @@ import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.swing.*;
-import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.swing.HTMLPanelRenderer;
-import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.*;
-import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneOverlay;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Player.Role;
-import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.util.GraphicsUtil;
-import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.maptool.client.*;
+import main.java.net.rptools.maptool.client.swing.HTMLPanelRenderer;
+import main.java.net.rptools.maptool.client.ui.*;
+import main.java.net.rptools.maptool.client.ui.zone.FogUtil;
+import main.java.net.rptools.maptool.client.ui.zone.PlayerView;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.model.*;
+import main.java.net.rptools.maptool.model.Player.Role;
+import main.java.net.rptools.maptool.model.Zone.Layer;
+import main.java.net.rptools.maptool.model.Zone.VisionType;
+import main.java.net.rptools.maptool.util.GraphicsUtil;
+import main.java.net.rptools.maptool.util.ImageManager;
+import main.java.net.rptools.maptool.util.StringUtil;
+import main.java.net.rptools.maptool.util.TokenUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +59,7 @@ import org.apache.logging.log4j.Logger;
  * the NumPad keys, and it handles positioning the Speech and Thought bubbles when the Spacebar is
  * held down (possibly in combination with Shift or Ctrl).
  */
-public class PointerTool extends DefaultTool implements ZoneOverlay {
+public class PointerTool extends DefaultTool {
   private static final long serialVersionUID = 8606021718606275084L;
   private static final Logger log = LogManager.getLogger(PointerTool.class);
 
@@ -124,15 +121,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             new Zone.Layer[] {
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
-            new LayerSelectionListener() {
-              public void layerSelected(Layer layer) {
-                if (renderer != null) {
-                  renderer.setActiveLayer(layer);
-                  MapTool.getFrame().setLastSelectedLayer(layer);
+            layer -> {
+              if (renderer != null) {
+                renderer.setActiveLayer(layer);
+                MapTool.getFrame().setLastSelectedLayer(layer);
 
-                  if (layer != Zone.Layer.TOKEN) {
-                    MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-                  }
+                if (layer != Layer.TOKEN) {
+                  MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
                 }
               }
             });
@@ -164,7 +159,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    */
   @Deprecated
   protected void addListeners_NOT_USED(JComponent comp) {
-    if (comp != null && comp instanceof ZoneRenderer) {
+    if (comp instanceof ZoneRenderer) {
       Grid grid = ((ZoneRenderer) comp).getZone().getGrid();
       addGridBasedKeys(grid, true);
     }
@@ -297,11 +292,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       }
 
       // Lee: fog exposure according to reveal type
-      if (zone.getWaypointExposureToggle()) FogUtil.exposeVisibleArea(renderer, exposeSet, false);
-      else {
+      if (!zone.getWaypointExposureToggle()) {
         FogUtil.exposeLastPath(renderer, exposeSet);
-        FogUtil.exposeVisibleArea(renderer, exposeSet, false);
       }
+      FogUtil.exposeVisibleArea(renderer, exposeSet, false);
     }
   }
 
@@ -1458,7 +1452,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
         // Jamz test move clients to view when using point (for GM only)...
         // TODO: Snap player view back when done?
-        if (MapTool.getPlayer().isGM() & type.equals(Pointer.Type.LOOK_HERE)) {
+        if (MapTool.getPlayer().isGM() && type.equals(Pointer.Type.LOOK_HERE)) {
           MapTool.serverCommand()
               .enforceZoneView(
                   renderer.getZone().getId(),
@@ -1523,14 +1517,16 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   // String[] firstPass = text.split('\n');
   // }
 
-  // //
-  // ZoneOverlay
-  /*
-   * (non-Javadoc)
+  /**
+   * Draws the PointerTool overlay. Includes selection box, token stack popup, statsheet, and
+   * notes/gm notes.
    *
-   * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
+   * @param g – the Graphics object
    */
-  public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
+  public void paintOverlay(Graphics2D g) {
+    if (renderer == null) {
+      return;
+    }
     Dimension viewSize = renderer.getSize();
     FontRenderContext fontRenderContext = g.getFontRenderContext();
 
@@ -1590,16 +1586,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           image =
               ImageManager.getImage(
                   portraitId,
-                  new ImageObserver() {
-                    public boolean imageUpdate(
-                        Image img, int infoflags, int x, int y, int width, int height) {
-                      // The image was loading, so now rebuild the portrait panel with the
-                      // real
-                      // image
-                      statSheet = null;
-                      renderer.repaint();
-                      return true;
-                    }
+                  (img, infoflags, x, y, width, height) -> {
+                    // The image was loading, so now rebuild the portrait panel with the
+                    // real
+                    // image
+                    statSheet = null;
+                    renderer.repaint();
+                    return true;
                   });
 
           imgSize = new Dimension(image.getWidth(), image.getHeight());
@@ -1647,16 +1640,14 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
               Object propertyValue =
                   tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
               resolver.flush();
-              if (propertyValue != null) {
-                if (propertyValue.toString().length() > 0) {
-                  String propName = property.getName();
-                  if (property.getShortName() != null) {
-                    propName = property.getShortName();
-                  }
-                  Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                  resolver.flush();
-                  propertyMap.put(propName, value != null ? value.toString() : "");
+              if (propertyValue != null && propertyValue.toString().length() > 0) {
+                String propName = property.getName();
+                if (property.getShortName() != null) {
+                  propName = property.getShortName();
                 }
+                Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                resolver.flush();
+                propertyMap.put(propName, value != null ? value.toString() : "");
               }
             }
           }

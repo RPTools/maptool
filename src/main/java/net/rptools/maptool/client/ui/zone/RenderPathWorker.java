@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.geom.Area;
 import java.util.Set;
 import javax.swing.SwingWorker;
-import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.Token.TerrainModifierOperation;
+import main.java.net.rptools.maptool.client.walker.ZoneWalker;
+import main.java.net.rptools.maptool.model.CellPoint;
+import main.java.net.rptools.maptool.model.Token.TerrainModifierOperation;
 
 public class RenderPathWorker extends SwingWorker<Void, Void> {
   // private static final Logger log = LogManager.getLogger(RenderPathWorker.class);
@@ -47,7 +47,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
   }
 
   @Override
-  protected Void doInBackground() throws Exception {
+  protected Void doInBackground() {
     walker.replaceLastWaypoint(endPoint, restrictMovement, terrainModifiersIgnored, tokenVBL);
     return null;
   }

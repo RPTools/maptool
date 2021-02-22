@@ -12,10 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.client.ScreenPoint;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 /**
  * This class represents a location based on the grid coordinates of a zone.

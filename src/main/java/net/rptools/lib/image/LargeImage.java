@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.image;
+package main.java.net.rptools.lib.image;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,8 +37,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.swing.SwingUtil;
 
 /**
  * Mechanism to view very, very large images in memory without taking up the memory. Works by
@@ -70,7 +70,7 @@ public class LargeImage {
   private final Map<Integer, BufferedImage> loadedChunkMap = new HashMap<Integer, BufferedImage>();
   List<Integer> usedChunkList = new ArrayList<Integer>();
 
-  public LargeImage(byte[] image, File cacheDir) throws IOException {}
+  public LargeImage(byte[] image, File cacheDir) {}
 
   public LargeImage(BufferedImage image, File cacheDir) throws IOException {
     info = loadInfo();
@@ -136,8 +136,7 @@ public class LargeImage {
   }
 
   private void flushChunkCache() {
-    Set<Integer> keySet = new HashSet<Integer>();
-    keySet.addAll(loadedChunkMap.keySet());
+    Set<Integer> keySet = new HashSet<Integer>(loadedChunkMap.keySet());
     for (Integer num : keySet) {
       if (!usedChunkList.contains(num)) {
         loadedChunkMap.remove(num);
@@ -256,7 +255,7 @@ public class LargeImage {
     return getId(ImageUtil.imageToBytes(image));
   }
 
-  private String getId(byte[] image) throws IOException {
+  private String getId(byte[] image) {
     return new MD5Key(image).toString();
   }
 

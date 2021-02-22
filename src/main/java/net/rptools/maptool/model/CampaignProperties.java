@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -26,24 +26,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ColorDotTokenOverlay;
-import net.rptools.maptool.client.ui.token.DiamondTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.OTokenOverlay;
-import net.rptools.maptool.client.ui.token.ShadedTokenOverlay;
-import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.TriangleTokenOverlay;
-import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.XTokenOverlay;
-import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.BarTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.ColorDotTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.DiamondTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.ImageTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.OTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.ShadedTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.TriangleTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.XTokenOverlay;
+import main.java.net.rptools.maptool.client.ui.token.YieldTokenOverlay;
 
 public class CampaignProperties {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
@@ -66,6 +66,12 @@ public class CampaignProperties {
   /** Flag indicating that owners can only move tokens when they have initiative */
   private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
 
+  /** Whether the default initiative sort order is reversed */
+  private boolean initiativeUseReverseSort = false;
+
+  /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
+  private boolean initiativePanelButtonsDisabled = false;
+
   public CampaignProperties() {
     init();
   }
@@ -73,8 +79,8 @@ public class CampaignProperties {
   public CampaignProperties(CampaignProperties properties) {
     tokenTypeMap = new HashMap<String, List<TokenProperty>>();
     for (Entry<String, List<TokenProperty>> entry : properties.tokenTypeMap.entrySet()) {
-      List<TokenProperty> typeList = new ArrayList<TokenProperty>();
-      typeList.addAll(properties.tokenTypeMap.get(entry.getKey()));
+      List<TokenProperty> typeList =
+          new ArrayList<TokenProperty>(properties.tokenTypeMap.get(entry.getKey()));
 
       tokenTypeMap.put(entry.getKey(), typeList);
     }
@@ -113,6 +119,8 @@ public class CampaignProperties {
 
     initiativeOwnerPermissions = properties.initiativeOwnerPermissions;
     initiativeMovementLock = properties.initiativeMovementLock;
+    initiativeUseReverseSort = properties.initiativeUseReverseSort;
+    initiativePanelButtonsDisabled = properties.initiativePanelButtonsDisabled;
 
     characterSheets = new HashMap<String, String>();
     if (properties.characterSheets == null || properties.characterSheets.isEmpty()) {
@@ -264,9 +272,10 @@ public class CampaignProperties {
 
     try {
       Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (String key : map.keySet()) {
+      for (var entry : map.entrySet()) {
+        String key = entry.getKey();
         Map<GUID, LightSource> lightSourceMap = new LinkedHashMap<GUID, LightSource>();
-        for (LightSource source : map.get(key)) {
+        for (LightSource source : entry.getValue()) {
           lightSourceMap.put(source.getId(), source);
         }
         lightSourcesMap.put(key, lightSourceMap);
@@ -418,6 +427,22 @@ public class CampaignProperties {
   /** @param initiativeMovementLock Setter for initiativeMovementLock */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     this.initiativeMovementLock = initiativeMovementLock;
+  }
+
+  public boolean isInitiativeUseReverseSort() {
+    return initiativeUseReverseSort;
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    this.initiativeUseReverseSort = initiativeUseReverseSort;
+  }
+
+  public boolean isInitiativePanelButtonsDisabled() {
+    return initiativePanelButtonsDisabled;
+  }
+
+  public void setInitiativePanelButtonsDisabled(boolean initiativePanelButtonsDisabled) {
+    this.initiativePanelButtonsDisabled = initiativePanelButtonsDisabled;
   }
 
   /**

@@ -12,17 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.util.ImageManager;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.AppUtil;
+import main.java.net.rptools.maptool.model.drawing.DrawableColorPaint;
+import main.java.net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import main.java.net.rptools.maptool.util.ImageManager;
 import org.apache.commons.io.FileUtils;
 
 public class ZoneFactory {

@@ -12,15 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.GUID;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.GUID;
 
 /** */
 public class TransferableAssetReference implements Transferable {
@@ -33,7 +31,7 @@ public class TransferableAssetReference implements Transferable {
     this.assetID = asset.getId();
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return assetID;
   }
 

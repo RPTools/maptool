@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 public class ClientCommand {
 
-  public static enum COMMAND {
+  public enum COMMAND {
     // @formatter:off
     startAssetTransfer,
     updateAssetTransfer,

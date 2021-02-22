@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.Component;
 import javax.swing.JPanel;
@@ -32,7 +32,7 @@ public class PositionalPanel extends JPanel {
 
     super.addImpl(comp, constraints, index);
 
-    if (((PositionalLayout.Position) constraints) == PositionalLayout.Position.CENTER) {
+    if (constraints == PositionalLayout.Position.CENTER) {
 
       setComponentZOrder(comp, getComponents().length - 1);
     } else {

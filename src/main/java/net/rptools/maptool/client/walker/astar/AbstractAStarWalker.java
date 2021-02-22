@@ -152,7 +152,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
 
         // Finally, add the Move Blocking Layer!
-        vbl.add((zone.getTopologyTerrain()));
+        vbl.add(zone.getTopologyTerrain());
       } else {
         vbl = zone.getTopologyTerrain();
       }
@@ -249,6 +249,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       AStarCellPoint goalCell = new AStarCellPoint(goal); // we allow reaching of target location
       AStarCellPoint startCell = new AStarCellPoint(start);
 
+      goalCell.setAStarCanceled(true);
       goalCell.parent = startCell;
 
       returnedCellPointList.add(goalCell);

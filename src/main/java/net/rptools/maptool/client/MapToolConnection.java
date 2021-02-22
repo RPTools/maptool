@@ -12,13 +12,19 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.io.IOException;
 import java.net.Socket;
-import net.rptools.clientserver.hessian.client.ClientConnection;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.server.Handshake;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import main.java.net.rptools.clientserver.hessian.client.ClientConnection;
+import main.java.net.rptools.maptool.model.Player;
+import main.java.net.rptools.maptool.server.Handshake;
 
 /** @author trevor */
 public class MapToolConnection extends ClientConnection {
@@ -41,11 +47,22 @@ public class MapToolConnection extends ClientConnection {
    */
   @Override
   public boolean sendHandshake(Socket s) throws IOException {
-    Handshake.Response response =
-        Handshake.sendHandshake(
-            new Handshake.Request(
-                player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()),
-            s);
+    Handshake.Response response = null;
+    try {
+      response =
+          Handshake.sendHandshake(
+              new Handshake.Request(
+                  player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()),
+              s);
+    } catch (IllegalBlockSizeException
+        | InvalidKeyException
+        | BadPaddingException
+        | NoSuchAlgorithmException
+        | NoSuchPaddingException
+        | InvalidKeySpecException e) {
+      MapTool.showError("Handshake.msg.encodeInitFail", e);
+      return false;
+    }
 
     if (response.code != Handshake.Code.OK) {
       MapTool.showError("ERROR: " + response.message);

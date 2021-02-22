@@ -136,9 +136,9 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 
   private ActionMap createActionMap(Map<KeyStroke, Action> keyActionMap) {
     ActionMap actionMap = new ActionMap();
-    for (KeyStroke keyStroke : keyActionMap.keySet()) {
-      actionMap.put(keyStroke.toString(), keyActionMap.get(keyStroke));
-      // System.out.println(keyStroke.toString() + ": " + keyActionMap.get(keyStroke).toString());
+    for (var keyAction : keyActionMap.entrySet()) {
+      actionMap.put(keyAction.getKey().toString(), keyAction.getValue());
+      // System.out.println(keyAction.getKey().toString() + ": " + keyAction.getValue().toString());
     }
     return actionMap;
   }

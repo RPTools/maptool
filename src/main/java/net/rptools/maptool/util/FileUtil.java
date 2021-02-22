@@ -84,12 +84,12 @@ public class FileUtil {
 
     // always round so that at least 3 numerics are displayed (###, ##.#, #.##)
     if (fileSizeInUnit
-            .divide(BigDecimal.valueOf(100.0), BigDecimal.ROUND_DOWN)
+            .divide(BigDecimal.valueOf(100.0), RoundingMode.DOWN)
             .compareTo(BigDecimal.ONE)
         >= 0) {
       val = fileSizeInUnit.setScale(0, ROUNDING_MODE).toString();
     } else if (fileSizeInUnit
-            .divide(BigDecimal.valueOf(10.0), BigDecimal.ROUND_DOWN)
+            .divide(BigDecimal.valueOf(10.0), RoundingMode.DOWN)
             .compareTo(BigDecimal.ONE)
         >= 0) {
       val = fileSizeInUnit.setScale(1, ROUNDING_MODE).toString();

@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
@@ -62,8 +63,7 @@ public class SubmitFormView extends FormView {
   }
 
   @Override
-  protected void submitData(String data) {
-
+  protected void submitData(String formData) {
     // Find the form
     Element formElement = null;
     for (Element e = getElement(); e != null; e = e.getParentElement()) {
@@ -73,45 +73,116 @@ public class SubmitFormView extends FormView {
       }
     }
 
-    if (formElement != null) {
-      AttributeSet att = formElement.getAttributes();
-      String action = "";
-      if (att.getAttribute(HTML.Attribute.ACTION) != null) {
-        action = att.getAttribute(HTML.Attribute.ACTION).toString();
-      }
-      String method = "get";
-      if (att.getAttribute(HTML.Attribute.METHOD) != null) {
-        method = att.getAttribute(HTML.Attribute.METHOD).toString().toLowerCase();
-      }
-      if (method.equals("json")) {
-        JsonObject jobj = new JsonObject();
-        String[] values = data.split("&"); // Is this safe? What if the data contains an "&"?
-        for (String v : values) {
-          String[] dataStr = v.split("=");
-          if (dataStr.length == 1) {
-            jobj.addProperty(URLDecoder.decode(dataStr[0], StandardCharsets.UTF_8), "");
-          } else {
-            String decodedKey = URLDecoder.decode(dataStr[0], StandardCharsets.UTF_8);
-            String decodedValue = URLDecoder.decode(dataStr[1], StandardCharsets.UTF_8);
-            try {
-              BigDecimal value = new BigDecimal(decodedValue);
-              jobj.addProperty(decodedKey, value);
-            } catch (NumberFormatException nfe) {
-              JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(decodedValue);
-              jobj.add(decodedKey, json);
-            }
-          }
-        }
-        data = URLEncoder.encode(jobj.toString(), StandardCharsets.UTF_8);
-      }
-      if (htmlPane != null) {
-        // Triggers the submit from the htmlPane
-        htmlPane.doSubmit(method, action, data);
+    if (formElement == null) {
+      return;
+    }
+
+    // Find the action
+    AttributeSet att = formElement.getAttributes();
+    String action = "";
+    if (att.getAttribute(HTML.Attribute.ACTION) != null) {
+      action = att.getAttribute(HTML.Attribute.ACTION).toString();
+    }
+
+    // Find the method
+    String method = "get";
+    if (att.getAttribute(HTML.Attribute.METHOD) != null) {
+      method = att.getAttribute(HTML.Attribute.METHOD).toString().toLowerCase();
+    }
+
+    // Find the link data
+    Matcher m = MacroLinkFunction.LINK_DATA_PATTERN.matcher(action);
+    String linkData = null;
+    if (m.matches()) {
+      // Separate the action from the data
+      action = m.group(1);
+      linkData = m.group(2);
+    }
+
+    // Combines and encodes the form data with the link data
+    String data = getEncodedCombinedData(formData, linkData, method);
+
+    if (htmlPane != null) {
+      // Triggers the submit from the htmlPane
+      htmlPane.doSubmit(method, action, data);
+    } else {
+      // Triggers the macroLink directly
+      MacroLinkFunction.runMacroLink(action + data);
+    }
+  }
+
+  /**
+   * Combines and encodes the form data with the link data. If there is no link data, uses the form
+   * data only. If the link data is a json, adds the form data as the "form" property. Otherwise,
+   * only uses the link data.
+   *
+   * @param formData the form data, encoded and delimited by "&"
+   * @param linkData the encoded data of the link
+   * @return the encoded data
+   */
+  private String getEncodedCombinedData(String formData, String linkData, String method) {
+    JsonElement jLinkData = MacroLinkFunction.getInstance().getLinkDataAsJson(linkData);
+
+    JsonObject jobjLinkData = null;
+    if (jLinkData != null && jLinkData.isJsonObject()) {
+      jobjLinkData = jLinkData.getAsJsonObject();
+    }
+
+    if (jLinkData != null && (jobjLinkData == null || jobjLinkData.has("form"))) {
+      // Ignores the form data if the link data is not a json object or already has "form" field
+      return URLEncoder.encode(jLinkData.toString(), StandardCharsets.UTF_8);
+    }
+
+    if ("json".equals(method)) {
+      JsonObject jobjFormData = getFormDataAsJson(formData);
+      if (jobjLinkData == null) {
+        // Returns the encoded json of the form data
+        return URLEncoder.encode(jobjFormData.toString(), StandardCharsets.UTF_8);
       } else {
-        // Triggers the macroLink directly
-        MacroLinkFunction.runMacroLink(action + data);
+        // Adds the form data to the link json and encodes it
+        jobjLinkData.add("form", jobjFormData);
+        return URLEncoder.encode(jobjLinkData.toString(), StandardCharsets.UTF_8);
+      }
+    } else {
+      if (jobjLinkData == null) {
+        // Returns the form data untouched
+        return formData;
+      } else {
+        // Decodes the form data, adds it to the json, and encodes the json
+        jobjLinkData.addProperty("form", URLDecoder.decode(formData, StandardCharsets.UTF_8));
+        return URLEncoder.encode(jobjLinkData.toString(), StandardCharsets.UTF_8);
       }
     }
+  }
+
+  /**
+   * Returns the form data as a JsonObject.
+   *
+   * @param data the form data, separated by "&"
+   * @return a json containing the form data
+   */
+  private JsonObject getFormDataAsJson(String data) {
+    JsonObject jobj = new JsonObject();
+    String[] values = data.split("&"); // Is this safe? What if the data contains an "&"?
+    for (String v : values) {
+      String[] dataStr = v.split("=");
+      String decodedKey = URLDecoder.decode(dataStr[0], StandardCharsets.UTF_8);
+      if (!decodedKey.isBlank()) {
+        if (dataStr.length == 1) {
+          jobj.addProperty(decodedKey, "");
+        } else {
+          String decodedValue = URLDecoder.decode(dataStr[1], StandardCharsets.UTF_8);
+          try {
+            BigDecimal value = new BigDecimal(decodedValue);
+            jobj.addProperty(decodedKey, value);
+          } catch (NumberFormatException nfe) {
+            JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(decodedValue);
+            jobj.add(decodedKey, json);
+          }
+        }
+      }
+    }
+    return jobj;
   }
 
   @Override
@@ -127,16 +198,12 @@ public class SubmitFormView extends FormView {
     if (formElement != null) {
       String imageMapName = data.replaceFirst("\\..*", "");
 
-      Map<String, String> fdata = new HashMap<String, String>();
-      fdata.putAll(getDataFrom(formElement, imageMapName));
+      Map<String, String> fdata = new HashMap<>(getDataFrom(formElement, imageMapName));
       StringBuilder sb = new StringBuilder();
-      for (String s : fdata.keySet()) {
-        if (sb.length() > 0) {
-          sb.append("&");
-        }
-        sb.append(s).append("=").append(fdata.get(s));
+      for (var entry : fdata.entrySet()) {
+        sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
       }
-      sb.append("&").append(data);
+      sb.append(data);
       submitData(sb.toString());
     } else {
       submitData(data);
@@ -144,7 +211,7 @@ public class SubmitFormView extends FormView {
   }
 
   private Map<String, String> getDataFrom(Element ele, String selectedImageMap) {
-    Map<String, String> vals = new HashMap<String, String>();
+    Map<String, String> vals = new HashMap<>();
 
     for (int i = 0; i < ele.getElementCount(); i++) {
       Element e = ele.getElement(i);
@@ -165,7 +232,7 @@ public class SubmitFormView extends FormView {
             getLog().error(e1.getStackTrace());
           }
         } else if (type == null && model instanceof ComboBoxModel) {
-          vals.put(name, ((ComboBoxModel) model).getSelectedItem().toString());
+          vals.put(name, ((ComboBoxModel<?>) model).getSelectedItem().toString());
         } else if ("text".equals(type)) {
           PlainDocument pd = (PlainDocument) model;
           try {

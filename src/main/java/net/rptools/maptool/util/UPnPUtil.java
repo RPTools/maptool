@@ -25,7 +25,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JDialog;
@@ -144,11 +143,11 @@ public class UPnPUtil {
           "UPnP Error - No Internet Gateway Devices found.<br><br>UPnP port mapping will not be available.");
       return false;
     }
-    for (InternetGatewayDevice gd : igds.keySet()) {
-      NetworkInterface ni = null;
+    for (var entry : igds.entrySet()) {
+      InternetGatewayDevice gd = entry.getKey();
+      NetworkInterface ni = entry.getValue();
       String localHostIP = "(NULL)";
       try {
-        ni = igds.get(gd);
         switch (ni.getInterfaceAddresses().size()) {
           case 0:
             log.error("IGD shows up in list of IGDs, but no NICs stored therein?!");
@@ -157,9 +156,7 @@ public class UPnPUtil {
             localHostIP = ni.getInterfaceAddresses().get(0).getAddress().getHostAddress();
             break;
           default:
-            for (Iterator<InterfaceAddress> iter = ni.getInterfaceAddresses().iterator();
-                iter.hasNext(); ) {
-              InterfaceAddress ifAddr = iter.next();
+            for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
               if (ifAddr.getAddress() instanceof Inet4Address) {
                 localHostIP = ifAddr.getAddress().getHostAddress();
                 if (log.isInfoEnabled())
@@ -206,8 +203,9 @@ public class UPnPUtil {
     if (igds == null || igds.isEmpty()) return true;
 
     int count = 0;
-    for (Iterator<InternetGatewayDevice> iter = igds.keySet().iterator(); iter.hasNext(); ) {
-      InternetGatewayDevice gd = iter.next();
+    for (var iter = igds.entrySet().iterator(); iter.hasNext(); ) {
+      var entry = iter.next();
+      InternetGatewayDevice gd = entry.getKey();
       try {
         ActionResponse actResp = gd.getSpecificPortMappingEntry(null, port, "TCP");
         if (actResp != null
@@ -221,11 +219,11 @@ public class UPnPUtil {
           if (unmapped) {
             count++;
             if (log.isInfoEnabled())
-              log.info("UPnP: Port unmapped from " + igds.get(gd).getDisplayName());
+              log.info("UPnP: Port unmapped from " + entry.getValue().getDisplayName());
             iter.remove();
           } else {
             if (log.isInfoEnabled())
-              log.info("UPnP: Failed to unmap port from " + igds.get(gd).getDisplayName());
+              log.info("UPnP: Failed to unmap port from " + entry.getValue().getDisplayName());
           }
         }
       } catch (IOException e) {

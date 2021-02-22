@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.ImageBorder;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.swing.ImageBorder;
 
 /** @author trevor */
 public class AppStyle {

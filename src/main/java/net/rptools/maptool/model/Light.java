@@ -12,10 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.geom.Area;
-import net.rptools.maptool.model.drawing.DrawablePaint;
+import main.java.net.rptools.maptool.model.drawing.DrawablePaint;
 
 public class Light {
   private DrawablePaint paint;

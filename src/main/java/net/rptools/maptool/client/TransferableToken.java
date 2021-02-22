@@ -12,13 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
-import net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Token;
 
 public class TransferableToken implements Transferable {
   public static final DataFlavor dataFlavor = new DataFlavor(Token.class, "Token");
@@ -29,7 +27,7 @@ public class TransferableToken implements Transferable {
     this.token = token;
   }
 
-  public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+  public Object getTransferData(DataFlavor flavor) {
     return token;
   }
 

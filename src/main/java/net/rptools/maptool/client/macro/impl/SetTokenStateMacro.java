@@ -139,7 +139,7 @@ public class SetTokenStateMacro implements Macro {
             + baseValue.getClass().getName();
 
     Boolean oldValue = (Boolean) baseValue;
-    Boolean newValue;
+    boolean newValue;
 
     if (value == null) {
       if (oldValue == null || oldValue.equals(Boolean.FALSE)) {
@@ -148,7 +148,7 @@ public class SetTokenStateMacro implements Macro {
         newValue = Boolean.FALSE;
       }
     } else {
-      newValue = Boolean.valueOf(value);
+      newValue = Boolean.parseBoolean(value);
     }
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, state, newValue);
 

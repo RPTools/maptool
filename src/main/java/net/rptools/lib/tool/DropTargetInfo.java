@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.tool;
+package main.java.net.rptools.lib.tool;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -24,7 +24,7 @@ import java.awt.dnd.DropTargetListener;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import net.rptools.lib.transferable.ImageTransferableHandler;
+import main.java.net.rptools.lib.transferable.ImageTransferableHandler;
 
 /**
  * This class will show a frame that accepts system drag-and-drop events it is a discovery tool

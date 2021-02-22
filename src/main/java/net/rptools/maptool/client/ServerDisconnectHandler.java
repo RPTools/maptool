@@ -12,13 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.io.IOException;
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CampaignFactory;
+import main.java.net.rptools.clientserver.simple.AbstractConnection;
+import main.java.net.rptools.clientserver.simple.DisconnectHandler;
+import main.java.net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.model.CampaignFactory;
 
 /** This class handles when the server inexplicably disconnects */
 public class ServerDisconnectHandler implements DisconnectHandler {

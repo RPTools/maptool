@@ -1,0 +1,57 @@
+# This workflow will build a Java project with Gradle for verification purposes
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build Verification
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature*
+      - release*
+  pull_request:
+    branches:
+      - main
+      - develop
+      - feature*
+      - release*
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "14"
+      - uses: axel-op/googlejavaformat-action@v3
+        with:
+          args: "--dry-run --skip-sorting-imports --replace"
+  build:
+    name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
+    runs-on:  ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+        java: [ '14' ]
+      fail-fast: false
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Cache Gradle
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      #- name: Junit Report to Annotations
+      #  uses: ashley-taylor/junit-report-annotations-action@v1.0
+      - name: Build with Gradle
+        uses: GabrielBB/xvfb-action@v1.0
+        with: 
+          run: ./gradlew build

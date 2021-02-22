@@ -110,6 +110,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   }
 
   private Icon setDrawPanelIcon(String key, boolean eraser) {
+    String streamName;
     try {
       switch (key) {
         case "panel.DrawExplorer.ShapeDrawable.Area":

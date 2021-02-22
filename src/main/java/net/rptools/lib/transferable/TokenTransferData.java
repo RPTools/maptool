@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.transferable;
+package main.java.net.rptools.lib.transferable;
 
 import java.awt.Point;
 import java.io.Serializable;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.ImageIcon;
-import net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.MD5Key;
 
 /**
  * Class used to transfer token information between applications. Used in Drag &amp; Drop. Some

@@ -144,6 +144,22 @@ public class HTMLOverlayPanel extends JFXPanel {
     front.setCursor(SwingUtil.swingCursorToFX(cursor));
   }
 
+  /**
+   * Runs the javascript on an overlay.
+   *
+   * @param name the name of the overlay
+   * @param script the script to run
+   * @return true if the overlay is found, and false otherwise
+   */
+  public boolean runScript(String name, String script) {
+    HTMLOverlayManager manager = getOverlay(name);
+    if (manager == null) {
+      return false;
+    }
+    Platform.runLater(() -> manager.getWebEngine().executeScript(script));
+    return true;
+  }
+
   /** @return whether all overlay WebViews have the default cursor. */
   public boolean areWebViewCursorsDefault() {
     for (HTMLOverlayManager overlay : overlays) {
@@ -360,7 +376,9 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   void passMouseEvent(MouseEvent e) {
     Component c = MapTool.getFrame().getCurrentZoneRenderer();
-    c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
+    if (c != null) {
+      c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
+    }
   }
 
   /**

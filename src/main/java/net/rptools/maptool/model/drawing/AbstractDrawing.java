@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -23,6 +24,7 @@ import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.image.ImageObserver;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 
@@ -80,6 +82,11 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   protected abstract void draw(Graphics2D g);
 
   protected abstract void drawBackground(Graphics2D g);
+
+  @VisibleForTesting
+  protected Campaign getCampaign() {
+    return MapTool.getCampaign();
+  }
 
   /**
    * Get the id for this AbstractDrawing.

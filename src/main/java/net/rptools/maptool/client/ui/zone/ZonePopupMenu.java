@@ -12,15 +12,15 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.model.Zone;
 
 public class ZonePopupMenu extends JPopupMenu {
 

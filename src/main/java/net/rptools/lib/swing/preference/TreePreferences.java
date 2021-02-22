@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing.preference;
+package main.java.net.rptools.lib.swing.preference;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
@@ -37,12 +37,7 @@ public class TreePreferences implements TreeSelectionListener {
     tree.getSelectionModel().addTreeSelectionListener(this);
 
     // Wait until the UI has been built to do this
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            restorePreferences();
-          }
-        });
+    EventQueue.invokeLater(this::restorePreferences);
   }
 
   private void restorePreferences() {

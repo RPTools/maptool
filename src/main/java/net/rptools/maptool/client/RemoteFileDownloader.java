@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.Component;
 import java.io.BufferedOutputStream;
@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import javax.swing.ProgressMonitor;
-import net.rptools.maptool.model.GUID;
+import main.java.net.rptools.maptool.model.GUID;
 
 public class RemoteFileDownloader {
   private final URL url;
@@ -66,14 +66,10 @@ public class RemoteFileDownloader {
     File tempFile = new File(tempDir + "/" + new GUID() + ".dat");
     tempFile.deleteOnExit();
 
-    InputStream in = null;
-    OutputStream out = null;
-
     ProgressMonitor monitor =
         new ProgressMonitor(parentComponent, "Downloading " + url, null, 0, length);
-    try {
-      in = conn.getInputStream();
-      out = new BufferedOutputStream(new FileOutputStream(tempFile));
+    try (InputStream in = conn.getInputStream();
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile))) {
 
       int buflen = 1024 * 30;
       int bytesRead = 0;
@@ -91,12 +87,6 @@ public class RemoteFileDownloader {
         // seconds");
       }
     } finally {
-      if (in != null) {
-        in.close();
-      }
-      if (out != null) {
-        out.close();
-      }
       monitor.close();
     }
     return tempFile;

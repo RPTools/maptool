@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import net.rptools.maptool.client.tool.PointerTool;
+import main.java.net.rptools.maptool.client.tool.PointerTool;
 
 public class MovementKey extends AbstractAction {
   private static final long serialVersionUID = -4103031698708914986L;

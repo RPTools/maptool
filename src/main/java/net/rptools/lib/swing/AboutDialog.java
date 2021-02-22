@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-import net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.language.I18N;
 
 @SuppressWarnings("serial")
 public class AboutDialog extends JDialog {
@@ -113,12 +113,7 @@ public class AboutDialog extends JDialog {
   private JButton getOkButton() {
     if (okButton == null) {
       okButton = new JButton(I18N.getText("Button.ok"));
-      okButton.addActionListener(
-          new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-              setVisible(false);
-            }
-          });
+      okButton.addActionListener(e -> setVisible(false));
     }
     return okButton;
   }

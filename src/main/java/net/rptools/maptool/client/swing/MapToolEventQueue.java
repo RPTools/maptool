@@ -38,11 +38,7 @@ import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
-  private static final JideOptionPane optionPane =
-      new JideOptionPane(
-          I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
-          JOptionPane.ERROR_MESSAGE,
-          JideOptionPane.CLOSE_OPTION);
+  private static JideOptionPane optionPane;
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
@@ -58,12 +54,14 @@ public class MapToolEventQueue extends EventQueue {
       super.dispatchEvent(event);
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
+      JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
       optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
       log.error(t, t);
+      JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); // $NON-NLS-1$
       optionPane.setDetails(toString(t));
       try {
@@ -82,6 +80,18 @@ public class MapToolEventQueue extends EventQueue {
         reportToSentryIO(thrown);
       }
     }
+  }
+
+  /** @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured. */
+  private static JideOptionPane getOptionPane() {
+    if (optionPane == null) {
+      optionPane =
+          new JideOptionPane(
+              I18N.getString("MapToolEventQueue.details"), // $NON-NLS-1$
+              JOptionPane.ERROR_MESSAGE,
+              JideOptionPane.CLOSE_OPTION);
+    }
+    return optionPane;
   }
 
   private static void displayPopup() {
@@ -160,7 +170,7 @@ public class MapToolEventQueue extends EventQueue {
       campaign =
           getInfoFunction
               .getInstance()
-              .childEvaluate(null, null, Collections.singletonList(command));
+              .childEvaluate(null, null, null, Collections.singletonList(command));
       MapTool.getParser().exitContext();
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();

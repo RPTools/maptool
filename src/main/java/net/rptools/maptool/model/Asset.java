@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import com.google.gson.JsonObject;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
@@ -25,10 +25,10 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.util.ImageManager;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.util.ImageManager;
 
 /** The binary representation of an image. */
 public class Asset {

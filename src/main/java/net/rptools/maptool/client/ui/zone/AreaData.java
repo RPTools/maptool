@@ -12,19 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import net.rptools.maptool.util.GraphicsUtil;
+import main.java.net.rptools.maptool.util.GraphicsUtil;
 
 public class AreaData {
   private static final int POINT_COUNT_THRESHOLD = 100;
@@ -53,14 +51,11 @@ public class AreaData {
   public List<AreaMeta> getAreaList(final Point centerPoint) {
     List<AreaMeta> areaMetaList = new ArrayList<AreaMeta>(metaList);
 
-    Collections.sort(
-        areaMetaList,
-        new Comparator<AreaMeta>() {
-          public int compare(AreaMeta o1, AreaMeta o2) {
-            Double d1 = centerPoint.distance(o1.getCenterPoint());
-            Double d2 = centerPoint.distance(o2.getCenterPoint());
-            return d1.compareTo(d2);
-          }
+    areaMetaList.sort(
+        (o1, o2) -> {
+          Double d1 = centerPoint.distance(o1.getCenterPoint());
+          Double d2 = centerPoint.distance(o2.getCenterPoint());
+          return d1.compareTo(d2);
         });
     return areaMetaList;
   }

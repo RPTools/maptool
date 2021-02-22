@@ -12,24 +12,24 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.macro;
+package main.java.net.rptools.maptool.client.macro;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolMacroContext;
-import net.rptools.maptool.client.functions.AbortFunction;
-import net.rptools.maptool.client.functions.AboutMacro;
-import net.rptools.maptool.client.functions.AssertFunction;
-import net.rptools.maptool.client.macro.impl.*;
-import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.StringUtil;
-import net.rptools.parser.ParserException;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.MapToolMacroContext;
+import main.java.net.rptools.maptool.client.functions.AbortFunction;
+import main.java.net.rptools.maptool.client.functions.AboutMacro;
+import main.java.net.rptools.maptool.client.functions.AssertFunction;
+import main.java.net.rptools.maptool.client.macro.impl.*;
+import main.java.net.rptools.maptool.client.ui.MapToolFrame;
+import main.java.net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.util.StringUtil;
+import main.java.net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,8 +101,7 @@ public class MacroManager {
   }
 
   public static Set<Macro> getRegisteredMacros() {
-    Set<Macro> ret = new HashSet<Macro>();
-    ret.addAll(MACROS.values());
+    Set<Macro> ret = new HashSet<Macro>(MACROS.values());
     return ret;
   }
 
@@ -130,6 +129,10 @@ public class MacroManager {
   public static void executeMacro(String command, MapToolMacroContext macroExecutionContext) {
     MacroContext context = new MacroContext();
     context.addTransform(command);
+    String macroButtonName =
+        macroExecutionContext == null
+            ? "chat"
+            : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
 
     try {
       command = preprocess(command);
@@ -140,7 +143,7 @@ public class MacroManager {
         recurseCount++;
 
         command = command.trim();
-        if (command == null || command.length() == 0) {
+        if (command.length() == 0) {
           return;
         }
         if (command.charAt(0) == '/') {
@@ -158,12 +161,7 @@ public class MacroManager {
         Macro macro = getRegisteredMacro(key);
         MacroDefinition def = macro.getClass().getAnnotation(MacroDefinition.class);
 
-        boolean trustedPath =
-            macroExecutionContext == null ? false : macroExecutionContext.isTrusted();
-        String macroButtonName =
-            macroExecutionContext == null
-                ? "<chat>"
-                : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
+        boolean trustedPath = macroExecutionContext != null && macroExecutionContext.isTrusted();
 
         // Preprocess line if required.
         if (def == null || def.expandRolls()) {
@@ -206,7 +204,8 @@ public class MacroManager {
       MapTool.addLocalMessage(afe.getMessage());
       return;
     } catch (ParserException e) {
-      MapTool.addLocalMessage(e.getMessage());
+      e.addMacro(macroButtonName);
+      MapTool.addErrorMessage(e);
       // These are not errors to worry about as they are usually user input errors so no need to log
       // them.
       return;

@@ -54,7 +54,7 @@ public class CampaignPanel extends AbstractMacroPanel {
     campProps.clear();
     for (MacroButtonProperties nextProp : startingProps) {
       if (!macroGroup.equals(nextProp.getGroup())) {
-        MapTool.getCampaign().saveMacroButtonProperty(nextProp);
+        MapTool.getCampaign().saveMacroButtonProperty(nextProp, false);
       }
     }
     MapTool.getFrame().getCampaignPanel().reset();

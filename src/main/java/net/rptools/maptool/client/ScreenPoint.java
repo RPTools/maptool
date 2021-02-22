@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.geom.Point2D;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.ZonePoint;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.model.ZonePoint;
 
 public class ScreenPoint extends Point2D.Double {
   public ScreenPoint(double x, double y) {

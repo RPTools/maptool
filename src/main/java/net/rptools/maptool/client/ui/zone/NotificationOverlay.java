@@ -12,16 +12,16 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Graphics2D;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.Animatable;
-import net.rptools.maptool.client.swing.AnimationManager;
-import net.rptools.maptool.util.GraphicsUtil;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.swing.Animatable;
+import main.java.net.rptools.maptool.client.swing.AnimationManager;
+import main.java.net.rptools.maptool.util.GraphicsUtil;
 
 public class NotificationOverlay implements ZoneOverlay, Animatable {
 

@@ -1,7 +1,6 @@
-| Branch  | Travis | AppVeyor | Localization |
-| :---    |  :--:  |  :--:    |   :--:       |
-| master  | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/master?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/master)
-| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
+| Current Development Status | Localization |
+| :--:                       |   :--:       |
+| ![Build Verification](../../workflows/Build%20Verification/badge.svg?branch=develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
 
 
 
@@ -37,7 +36,7 @@ Resources
 
  - **Website:** http://rptools.net/ 
  - **Forums:**  http://forums.rptools.net 
- - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+ - **Wiki:**    https://wiki.rptools.info/index.php/Main_Page
  - **Discord:** https://discord.gg/gevEtpC
  
 
@@ -70,7 +69,7 @@ Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) 
 ```
 ./gradlew spotlessApply
 ```
-
+Also read the Wiki: https://github.com/RPTools/maptool/wiki/Contributor-Setup-Instructions-For-MapTool. Valuable information on contributing is only found there currently.
 
 Recommended IDE
 ----------------

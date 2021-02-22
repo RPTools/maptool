@@ -14,16 +14,12 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
-import java.awt.Color;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.MessageUtil;
 
 @MacroDefinition(
     name = "say",
@@ -32,59 +28,20 @@ import net.rptools.maptool.model.Token;
 public class SayMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);
-    StringBuilder sb = new StringBuilder();
-    String identity = MapTool.getFrame().getCommandPanel().getIdentity();
-    sb.append("<table cellpadding=0><tr>");
+    String msg;
 
-    if (MapTool.getFrame().getCommandPanel().isImpersonating()
-        && AppPreferences.getShowAvatarInChat()) {
-      Token token;
-      GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-      if (guid != null)
-        token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-      else token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokenByName(identity);
-      if (token != null) {
-        MD5Key imageId = token.getPortraitImage();
-        if (imageId == null) {
-          imageId = token.getImageAssetId();
-        }
-        sb.append("<td valign='top' width='40' style=\"padding-right:5px\"><img src=\"asset://")
-            .append(imageId)
-            .append("-40\" ></td>");
-      } else {
-        sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
-      }
-    } else if (AppPreferences.getShowAvatarInChat()) {
-      sb.append("<td valign='top' width='46' style=\"padding-right:5px\"></td>");
+    if (executionContext != null) {
+      msg =
+          MessageUtil.getFormattedSay(
+              macro,
+              null,
+              MapTool.getParser().isMacroPathTrusted(),
+              executionContext.getName(),
+              executionContext.getSource());
+    } else {
+      msg = MessageUtil.getFormattedSay(macro, null, false, null, null);
     }
-    sb.append(
-        "<td valign=top style=\"padding-left: 5px; margin-right: 5px; border-left: 3px solid silver\">");
-    if (executionContext != null
-        && MapTool.getParser().isMacroPathTrusted()
-        && !MapTool.getPlayer().isGM()) {
-      sb.append("<span class='trustedPrefix' ")
-          .append("title='")
-          .append(executionContext.getName());
-      sb.append("@").append(executionContext.getSource()).append("'>");
-    }
-    sb.append("<b>").append(identity).append(":</b> ");
-    if (executionContext != null
-        && MapTool.getParser().isMacroPathTrusted()
-        && !MapTool.getPlayer().isGM()) {
-      sb.append("</span>");
-    }
-    Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
-    if (color != null) {
-      sb.append("<span style='color:#")
-          .append(String.format("%06X", (color.getRGB() & 0xFFFFFF)))
-          .append("'>");
-    }
-    sb.append(macro);
-    if (color != null) {
-      sb.append("</span>");
-    }
-    sb.append("</td>");
-    sb.append("</tr></table>");
-    MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
+
+    MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), msg));
   }
 }

@@ -12,12 +12,12 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
 
 public class ImageLabel {
 

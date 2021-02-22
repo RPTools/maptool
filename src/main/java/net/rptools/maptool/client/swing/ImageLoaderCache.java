@@ -18,22 +18,22 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ImageLoaderCache {
+
   private static final Logger log = LogManager.getLogger(ImageLoaderCache.class);
 
   private final Map<String, Image> imageMap = new HashMap<String, Image>();
@@ -58,11 +58,12 @@ public class ImageLoaderCache {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          MapTool.showWarning("Can't find 'cp://" + url.toString() + "' in image cache?!", ioe);
+          log.error("ImageLoaderCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
         // Look for size request
-        int index = path.indexOf("-");
+        int index = path.indexOf('-');
         int size = -1;
         if (index >= 0) {
           String szStr = path.substring(index + 1);
@@ -93,8 +94,11 @@ public class ImageLoaderCache {
         }
         return image;
       } else {
-        // Normal method
-        image = Toolkit.getDefaultToolkit().createImage(url);
+        try {
+          image = ImageIO.read(url);
+        } catch (IOException e) {
+          log.error("Unable to load image " + url, e);
+        }
       }
       imageMap.put(url.toString(), image);
     }

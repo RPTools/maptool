@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.functions.JSONMacroFunctionsOld;
+import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
@@ -40,8 +41,8 @@ class TestJSONMacroFunctions {
   public static final HashMap<String, JSONObject> o_samples = new HashMap<String, JSONObject>();
   public static final HashMap<String, JSONArray> a_samples = new HashMap<String, JSONArray>();
   // MT uses bigdecimal 0 and 1 as value for boolean operations
-  public static final BigDecimal _true = new BigDecimal(1);
-  public static final BigDecimal _false = new BigDecimal(0);
+  public static final BigDecimal _true = BigDecimal.ONE;
+  public static final BigDecimal _false = BigDecimal.ZERO;
   private static final Parser parser = new Parser();
 
   /** An alias to childEvaluate. */
@@ -49,7 +50,8 @@ class TestJSONMacroFunctions {
     List<Object> fparams = new ArrayList<Object>();
     fparams.add(json);
     fparams.addAll(keys);
-    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, function_name, fparams);
+    return JSONMacroFunctionsOld.getInstance()
+        .childEvaluate(parser, new MapVariableResolver(), function_name, fparams);
   }
 
   /**
@@ -62,7 +64,7 @@ class TestJSONMacroFunctions {
    */
   Object run(String functionName, Object... objs) throws ParserException {
     List<Object> params = new ArrayList<>(Arrays.asList(objs));
-    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, functionName, params);
+    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, null, functionName, params);
   }
 
   // @BeforeAll
@@ -166,8 +168,8 @@ class TestJSONMacroFunctions {
   // @Test
   // @DisplayName("JSONEmpty testing.")
   void testJSONEmpty() throws ParserException {
-    BigDecimal _true = new BigDecimal(1);
-    BigDecimal _false = new BigDecimal(0);
+    BigDecimal _true = BigDecimal.ONE;
+    BigDecimal _false = BigDecimal.ZERO;
     // explicit use of test fixtures
     assertEquals(_true, (BigDecimal) run("json.isEmpty", o_samples.get("o_empty")));
     assertEquals(_false, (BigDecimal) run("json.isEmpty", o_samples.get("o_nested")));

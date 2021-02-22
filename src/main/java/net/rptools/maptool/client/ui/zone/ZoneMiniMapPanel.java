@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,14 +27,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.util.ImageManager;
+import main.java.net.rptools.lib.swing.ImageBorder;
+import main.java.net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.maptool.client.AppStyle;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.model.ModelChangeEvent;
+import main.java.net.rptools.maptool.model.ModelChangeListener;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.util.ImageManager;
 
 /** */
 public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
@@ -199,7 +199,7 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
 
   ////
   // MOUSE HANDLER
-  private class MouseHandler extends MouseAdapter {
+  private static class MouseHandler extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
 

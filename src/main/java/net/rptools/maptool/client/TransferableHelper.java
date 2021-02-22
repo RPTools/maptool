@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -33,19 +33,19 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
-import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.transferable.FileTransferableHandler;
-import net.rptools.lib.transferable.GroupTokenTransferData;
-import net.rptools.lib.transferable.ImageTransferableHandler;
-import net.rptools.lib.transferable.MapToolTokenTransferData;
-import net.rptools.lib.transferable.TokenTransferData;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.StringUtil;
+import main.java.net.rptools.lib.MD5Key;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.transferable.FileTransferableHandler;
+import main.java.net.rptools.lib.transferable.GroupTokenTransferData;
+import main.java.net.rptools.lib.transferable.ImageTransferableHandler;
+import main.java.net.rptools.lib.transferable.MapToolTokenTransferData;
+import main.java.net.rptools.lib.transferable.TokenTransferData;
+import main.java.net.rptools.maptool.language.I18N;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.util.PersistenceUtil;
+import main.java.net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -186,7 +186,7 @@ public class TransferableHelper extends TransferHandler {
       // This *really* should be done using either the Strategy or Template patterns. Sigh.
 
       // EXISTING ASSET
-      if (o == null && transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
+      if (transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
         if (log.isInfoEnabled()) log.info("Selected: " + TransferableAsset.dataFlavor);
         o = handleTransferableAsset(transferable);
       }
@@ -449,12 +449,7 @@ public class TransferableHelper extends TransferHandler {
                 missingTokens);
         // if (EventQueue.isDispatchThread())
         // System.out.println("Yes, we are on the EDT already.");
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                MapTool.showWarning(message);
-              }
-            });
+        SwingUtilities.invokeLater(() -> MapTool.showWarning(message));
       } // endif
     } catch (IOException e) {
       MapTool.showError("TransferableHelper.error.ioException", e); // $NON-NLS-1$
@@ -483,9 +478,9 @@ public class TransferableHelper extends TransferHandler {
    */
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] transferFlavors) {
-    for (int j = 0; j < SUPPORTED_FLAVORS.length; j++) {
-      for (int i = 0; i < transferFlavors.length; i++) {
-        if (SUPPORTED_FLAVORS[j].equals(transferFlavors[i])) return true;
+    for (DataFlavor supportedFlavor : SUPPORTED_FLAVORS) {
+      for (DataFlavor transferFlavor : transferFlavors) {
+        if (supportedFlavor.equals(transferFlavor)) return true;
       }
     }
     return false;
@@ -600,7 +595,7 @@ public class TransferableHelper extends TransferHandler {
               Collections.singletonList(
                   new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
           // A token from the Resource Library is already fully configured.
-          configureTokens = Collections.singletonList(new Boolean(false));
+          configureTokens = Collections.singletonList(Boolean.FALSE);
         } catch (Exception e) {
           log.error("while using TransferableToken.dataFlavor", e); // $NON-NLS-1$
         }

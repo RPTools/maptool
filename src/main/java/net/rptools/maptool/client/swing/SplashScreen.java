@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import net.rptools.maptool.util.CreateVersionedInstallSplash;
 
 public class SplashScreen extends JFrame {
+
   private static int imgWidth = 490;
   private static int imgHeight = 290;
 
@@ -51,17 +52,14 @@ public class SplashScreen extends JFrame {
 
     Platform.setImplicitExit(false); // necessary to use JavaFX later
     Platform.runLater(
-        new Runnable() {
-          @Override
-          public void run() {
-            initFX(fxPanel, versionText);
-            int w = imgWidth;
-            int h = imgHeight;
-            int x = (screenSize.width - w) / 2;
-            int y = (screenSize.height - h) / 2;
-            setBounds(x, y, imgWidth, imgHeight);
-            setVisible(true);
-          }
+        () -> {
+          initFX(fxPanel, versionText);
+          int w = imgWidth;
+          int h = imgHeight;
+          int x = (screenSize.width - w) / 2;
+          int y = (screenSize.height - h) / 2;
+          setBounds(x, y, imgWidth, imgHeight);
+          setVisible(true);
         });
   }
 
@@ -69,6 +67,10 @@ public class SplashScreen extends JFrame {
     // This method is invoked on the JavaFX thread
     Group root = new Group();
     Scene scene = new Scene(root, Color.TRANSPARENT);
+
+    if (Character.isDigit(versionText.charAt(0))) {
+      versionText = "v" + versionText;
+    }
 
     Image splashImage =
         SwingFXUtils.toFXImage(

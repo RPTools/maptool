@@ -50,7 +50,38 @@ public class MacroButtonPrefs {
 
   public MacroButtonPrefs() {}
 
+  /**
+   * Adds multiple MacroButtonProperties to the Global macro panel, starting at the next appropriate
+   * index.
+   *
+   * @param toSave the list of button properties to add
+   */
+  public static void saveMacroButtonsAtNextIndex(List<MacroButtonProperties> toSave) {
+    for (MacroButtonProperties newProp : toSave) {
+      newProp.setIndex(getNextIndex());
+      savePreferences(newProp, false);
+    }
+    MapTool.getFrame().getGlobalPanel().reset();
+  }
+
+  /**
+   * Adds the given MacroButton to the Global panel, and causes the panel to refresh immediately.
+   *
+   * @param properties the macro to add
+   */
   public static void savePreferences(MacroButtonProperties properties) {
+    savePreferences(properties, true);
+  }
+
+  /**
+   * Adds the given MacroButton to the Global panel, optionally triggering a panel refresh upon
+   * completion. Panel reset should be requested unless multiple macros are being added at once, and
+   * the intention is to reset the panel after the batch.
+   *
+   * @param properties the macro to add
+   * @param resetFrame whether to reset the panel
+   */
+  public static void savePreferences(MacroButtonProperties properties, boolean resetFrame) {
     int index = properties.getIndex();
 
     // use zero padding to ensure proper ordering in the registry (otherwise 10 will come before 2
@@ -95,7 +126,9 @@ public class MacroButtonPrefs {
       prefs.put(PREF_MAX_WIDTH, properties.getMaxWidth());
       prefs.put(PREF_TOOLTIP, properties.getToolTip());
       prefs.flush();
-      MapTool.getFrame().getGlobalPanel().reset();
+      if (resetFrame) {
+        MapTool.getFrame().getGlobalPanel().reset();
+      }
     } catch (BackingStoreException e) {
       MapTool.showError("Problem saving Global macros?!", e);
     }

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package main.java.net.rptools.maptool.client;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -32,12 +32,9 @@ public class LaunchInstructions {
 
   public static void main(String[] args) {
     try {
-      // This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the
-      // System.property
-      AppUtil.getAppHome();
 
       long mem = Runtime.getRuntime().maxMemory();
-      String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
+      String msg = String.format(USAGE, mem / (1024 * 1024));
 
       /*
        * Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount maxMemory() reports will be 256MB. The actual amount seems to vary from PC to PC. 200MB seems to be a safe value

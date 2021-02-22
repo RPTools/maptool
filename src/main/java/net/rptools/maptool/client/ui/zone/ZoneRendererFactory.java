@@ -12,10 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.model.Zone;
 
 public class ZoneRendererFactory {
   /**

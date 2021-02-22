@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -25,17 +25,13 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
-import net.rptools.lib.CodeTimer;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawablesGroup;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.Pen;
+import java.util.*;
+import main.java.net.rptools.lib.CodeTimer;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.maptool.model.drawing.Drawable;
+import main.java.net.rptools.maptool.model.drawing.DrawablesGroup;
+import main.java.net.rptools.maptool.model.drawing.DrawnElement;
+import main.java.net.rptools.maptool.model.drawing.Pen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -198,7 +194,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     ListIterator<Tuple> iter = list.listIterator();
     while (iter.hasNext()) {
       Tuple tuple = iter.next();
-      if (tuple.equals(key)) {
+      if (tuple.key.equals(key)) {
         iter.remove();
         return tuple;
       }
@@ -316,8 +312,16 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return key.equals(obj.toString());
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Tuple tuple = (Tuple) o;
+      return Objects.equals(key, tuple.key);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(key);
     }
   }
 }

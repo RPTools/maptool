@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.walker;
+package main.java.net.rptools.maptool.client.walker;
 
 import java.awt.geom.Area;
 import java.util.ArrayList;
@@ -20,16 +20,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-import net.rptools.maptool.client.ui.zone.RenderPathWorker;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Token.TerrainModifierOperation;
-import net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.client.ui.zone.RenderPathWorker;
+import main.java.net.rptools.maptool.model.CellPoint;
+import main.java.net.rptools.maptool.model.Path;
+import main.java.net.rptools.maptool.model.Token.TerrainModifierOperation;
+import main.java.net.rptools.maptool.model.Zone;
 
 public abstract class AbstractZoneWalker implements ZoneWalker {
 
-  protected List<PartialPath> partialPaths =
-      Collections.synchronizedList(new ArrayList<PartialPath>());
+  protected final List<PartialPath> partialPaths = Collections.synchronizedList(new ArrayList<>());
   protected final Zone zone;
   protected boolean restrictMovement = false;
   protected Set<TerrainModifierOperation> terrainModifiersIgnored;
@@ -106,21 +105,18 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public Path<CellPoint> getPath() {
-    Path<CellPoint> path = new Path<CellPoint>();
-
-    PartialPath last = null;
+    Path<CellPoint> path = new Path<>();
 
     synchronized (partialPaths) {
-      for (PartialPath partial : partialPaths) {
-        if (partial.path != null && partial.path.size() > 1) {
-          path.addAllPathCells(partial.path.subList(0, partial.path.size() - 1));
+      if (!partialPaths.isEmpty()) {
+        path.addPathCell(partialPaths.get(0).start);
+        for (PartialPath partial : partialPaths) {
+          if (partial.path.size() > 1) {
+            // Remove duplicated cells (end of a path = start of next path)
+            path.addAllPathCells(partial.path.subList(1, partial.path.size()));
+          }
         }
-        last = partial;
       }
-    }
-
-    if (last != null) {
-      path.addPathCell(last.end);
     }
 
     for (CellPoint cp : path.getCellPath()) {

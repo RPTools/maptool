@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.utilities;
+package main.java.net.rptools.maptool.client.utilities;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -27,17 +27,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MapPropertiesDialog;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.GridFactory;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.Zone.TopologyMode;
-import net.rptools.maptool.model.ZoneFactory;
+import main.java.net.rptools.maptool.client.AppStyle;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.ui.MapPropertiesDialog;
+import main.java.net.rptools.maptool.model.Asset;
+import main.java.net.rptools.maptool.model.AssetManager;
+import main.java.net.rptools.maptool.model.GridFactory;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.Zone.Layer;
+import main.java.net.rptools.maptool.model.Zone.TopologyMode;
+import main.java.net.rptools.maptool.model.ZoneFactory;
 
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
@@ -78,7 +78,7 @@ public class DungeonDraftImporter {
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset = new Asset("LightSource", AppStyle.lightSourceIcon);
 
-  {
+  static {
     AssetManager.putAsset(lightSourceAsset);
   }
 
@@ -161,11 +161,22 @@ public class DungeonDraftImporter {
     if (doors != null) {
       doors.forEach(
           d -> {
-            JsonArray bounds = d.getAsJsonObject().get("bounds").getAsJsonArray();
-            Area vblArea =
-                new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
-            zone.addTopology(vblArea, TopologyMode.COMBINED);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            JsonObject jobj = d.getAsJsonObject();
+            boolean isClosed;
+            if (jobj.has("closed")) {
+              isClosed = jobj.get("closed").getAsBoolean();
+            } else {
+              isClosed = true;
+            }
+
+            if (isClosed) {
+              JsonArray bounds = jobj.get("bounds").getAsJsonArray();
+
+              Area vblArea =
+                  new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
+              zone.addTopology(vblArea, TopologyMode.COMBINED);
+              zone.addTopology(vblArea, TopologyMode.MBL);
+            }
           });
     }
 

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,17 +31,17 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import main.java.net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.swing.SwingUtil;
+import main.java.net.rptools.maptool.client.AppPreferences;
+import main.java.net.rptools.maptool.client.AppState;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.ScreenPoint;
+import main.java.net.rptools.maptool.client.tool.PointerTool;
+import main.java.net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import main.java.net.rptools.maptool.client.walker.WalkerMetric;
+import main.java.net.rptools.maptool.client.walker.ZoneWalker;
+import main.java.net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
@@ -365,7 +365,7 @@ public class SquareGrid extends Grid {
   }
 
   public static String decimalToAlphaCoord(int value) {
-    String result = new String();
+    String result = "";
     int temp;
     boolean isNegative = false;
 

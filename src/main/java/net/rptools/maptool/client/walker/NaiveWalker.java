@@ -12,15 +12,15 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.walker;
+package main.java.net.rptools.maptool.client.walker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.TokenFootprint;
-import net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.client.walker.astar.AStarCellPoint;
+import main.java.net.rptools.maptool.model.CellPoint;
+import main.java.net.rptools.maptool.model.TokenFootprint;
+import main.java.net.rptools.maptool.model.Zone;
 
 public class NaiveWalker extends AbstractZoneWalker {
   public NaiveWalker(Zone zone) {
@@ -37,7 +37,7 @@ public class NaiveWalker extends AbstractZoneWalker {
     int y = start.y;
 
     int count = 0;
-    while (true && count < 100) {
+    while (count < 100) {
       list.add(new CellPoint(x, y));
 
       if (x == end.x && y == end.y) {

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.imageio.ImageIO;
-import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.Pen;
+import main.java.net.rptools.lib.FileUtil;
+import main.java.net.rptools.maptool.client.AppUtil;
+import main.java.net.rptools.maptool.model.drawing.Drawable;
+import main.java.net.rptools.maptool.model.drawing.DrawnElement;
+import main.java.net.rptools.maptool.model.drawing.Pen;
 
 /** */
 public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
@@ -102,8 +102,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
     int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
 
-    Set<String> chunkCache = new HashSet<String>();
-    chunkCache.addAll(chunkMap.keySet());
+    Set<String> chunkCache = new HashSet<String>(chunkMap.keySet());
     int count = 0;
     for (int row = 0; row < verticalChunkCount; row++) {
       for (int col = 0; col < horizontalChunkCount; col++) {

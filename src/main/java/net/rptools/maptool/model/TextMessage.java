@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package main.java.net.rptools.maptool.model;
 
 import java.util.List;
 import java.util.ListIterator;
-import net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.MapTool;
 
 public class TextMessage {
   // Not an enum so that it can be hessian serialized

@@ -12,11 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.util.List;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Player;
+import main.java.net.rptools.maptool.model.Token;
 
 public class PlayerView {
   /** The role of the player (GM or PLAYER). */
@@ -61,7 +61,7 @@ public class PlayerView {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof PlayerView)) {
+    if (!(obj instanceof PlayerView)) {
       return false;
     }
     PlayerView other = (PlayerView) obj;

@@ -26,14 +26,11 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -44,13 +41,13 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,9 +55,16 @@ import org.apache.logging.log4j.Logger;
 /** @author Joe.Frazier */
 public class TokenMoveFunctions extends AbstractFunction {
 
+  /** macro name to call for the onTokenMove event */
+  public static final String ON_TOKEN_MOVE_COMPLETE_CALLBACK = "onTokenMove";
+  /** macro name to call for the onMultipleTokensMove event */
+  public static final String ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK = "onMultipleTokensMove";
+  /** variable to test for token move denial */
+  public static final String ON_TOKEN_MOVE_DENY_VARIABLE = "tokens.denyMove";
+  /** variable to contain number of tokens moved */
+  public static final String ON_TOKEN_MOVE_COUNT_VARIABLE = "tokens.moveCount";
+
   private static final TokenMoveFunctions instance = new TokenMoveFunctions();
-  private static final String ON_TOKEN_MOVE_COMPLETE_CALLBACK = "onTokenMove";
-  private static final String ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK = "onMultipleTokensMove";
   private static final String NO_GRID = "NO_GRID";
 
   private static final Logger log = LogManager.getLogger(TokenMoveFunctions.class);
@@ -75,10 +79,10 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    final Token tokenInContext =
-        ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+    final Token tokenInContext = ((MapToolVariableResolver) resolver).getTokenInContext();
     if (tokenInContext == null) {
       throw new ParserException(
           I18N.getText("macro.function.general.noImpersonated", functionName));
@@ -94,9 +98,9 @@ public class TokenMoveFunctions extends AbstractFunction {
               I18N.getText("macro.function.general.argumentTypeN", functionName, 1));
         }
         val = (BigDecimal) parameters.get(0);
-        useDistancePerCell = val != null && val.equals(BigDecimal.ZERO) ? false : true;
+        useDistancePerCell = !val.equals(BigDecimal.ZERO);
       }
-      Path<?> path = tokenInContext.getLastPath();
+      Path<? extends AbstractPoint> path = tokenInContext.getLastPath();
 
       List<Map<String, Integer>> pathPoints = getLastPathList(path, useDistancePerCell);
       return pathPointsToJSONArray(pathPoints);
@@ -136,18 +140,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       if (parameters.size() == 1) {
         BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
-        useFractionOnly =
-            fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+        useFractionOnly = fractionOnly == null || !fractionOnly.equals(BigDecimal.ZERO);
       }
 
       if (parameters.size() == 2) {
         BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
-        useFractionOnly =
-            fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+        useFractionOnly = fractionOnly == null || !fractionOnly.equals(BigDecimal.ZERO);
 
         BigDecimal terrainModifiers = (BigDecimal) parameters.get(1);
-        useTerrainModifiers =
-            terrainModifiers != null && terrainModifiers.equals(BigDecimal.ZERO) ? false : true;
+        useTerrainModifiers = terrainModifiers == null || !terrainModifiers.equals(BigDecimal.ZERO);
       }
 
       if (useFractionOnly) {
@@ -169,7 +170,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       if ((parameters.size() == 1) || parameters.size() == 2) {
         String targetToken = (String) parameters.get(0);
-        String jsonPath = (String) (parameters.size() == 2 ? parameters.get(1) : "");
+        String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
         target = zone.resolveToken(targetToken);
         if (target == null) {
           throw new ParserException(
@@ -191,7 +192,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
     }
-    return null;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   private List<Map<String, Integer>> crossedToken(
@@ -356,6 +357,9 @@ public class TokenMoveFunctions extends AbstractFunction {
         pointObj = new JsonObject();
         pointObj.addProperty("x", entry.get("x"));
         pointObj.addProperty("y", entry.get("y"));
+        if (entry.containsKey("fail")) {
+          pointObj.addProperty("fail", entry.get("fail"));
+        }
         jsonArr.add(pointObj);
       }
     else
@@ -374,7 +378,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private List<Map<String, Integer>> getLastPathList(
-      final Path<?> path, final boolean useDistancePerCell) {
+      final Path<? extends AbstractPoint> path, final boolean useDistancePerCell) {
     List<Map<String, Integer>> points = new ArrayList<Map<String, Integer>>();
     if (path != null) {
       Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
@@ -382,26 +386,31 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       log.debug("...in getLastPathList.  Loop over each path elements");
 
-      for (Object pathCells : path.getCellPath()) {
+      for (AbstractPoint pathCell : path.getCellPath()) {
         log.debug(
             "...in getLastPathList.  Converting each path item to a cell point or zone point.");
 
-        if (pathCells instanceof CellPoint) {
-          CellPoint cp = (CellPoint) pathCells;
+        if (pathCell instanceof CellPoint) {
+          CellPoint cp = (CellPoint) pathCell;
           if (useDistancePerCell) {
-            zp = zone.getGrid().convert((CellPoint) pathCells);
+            zp = zone.getGrid().convert((CellPoint) pathCell);
           } else {
             zp = cp;
           }
         } else {
-          zp = (ZonePoint) pathCells;
+          zp = pathCell;
         }
         if (zp != null) {
           log.debug("...in getLastPathList.  Got a point, adding to list.");
 
-          Map<String, Integer> tokenLocationPoint = new HashMap<String, Integer>();
-          tokenLocationPoint.put("x", Integer.valueOf(zp.x));
-          tokenLocationPoint.put("y", Integer.valueOf(zp.y));
+          Map<String, Integer> tokenLocationPoint = new HashMap<>();
+          if (pathCell.isAStarCanceled()) {
+            tokenLocationPoint.put("fail", 1);
+          }
+
+          tokenLocationPoint.put("x", zp.x);
+          tokenLocationPoint.put("y", zp.y);
+
           points.add(tokenLocationPoint);
         }
       }
@@ -409,93 +418,39 @@ public class TokenMoveFunctions extends AbstractFunction {
     return points;
   }
 
-  public static BigDecimal tokenMoved(
-      final Token originalToken, final Path<?> path, final List<GUID> filteredTokens) {
-    Token token = getMoveMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
+  /**
+   * Handles the {@value #ON_TOKEN_MOVE_COMPLETE_CALLBACK} macro event for each individual token,
+   * and returns a list of the tokens for which the movement was denied. Passes path information to
+   * the handler, and checks the value of {@value #ON_TOKEN_MOVE_DENY_VARIABLE} for a veto.
+   *
+   * <p>Note: To maintain backward-compatibility this event only fires a single handler. If more
+   * than one Lib:Token has a matching macro, the first one encountered is called - because this
+   * order is unpredictable, this is very much not encouraged.
+   *
+   * @param path the path token
+   * @param filteredTokens the tokens being moved (each one will be evaluated individually)
+   * @return the list of tokens from the given list that have their movement rejected
+   */
+  public static List<Token> callForIndividualTokenMoveVetoes(
+      final Path<?> path, final List<Token> filteredTokens) {
+    Token libToken = EventMacroUtil.getEventMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
+    List<Token> deniedTokens = new ArrayList<>();
+    if (libToken != null) {
+      final String macroTarget = ON_TOKEN_MOVE_COMPLETE_CALLBACK + "@" + libToken.getName();
+      List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
+      JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
+      String pathCoordinates = pathArr.toString();
+      Map<String, Object> varsToSet = new HashMap<>();
+      varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
 
-    List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
-    JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
-    String pathCoordinates = pathArr.toString();
-    // If we get here it is trusted so try to execute it.
-    if (token != null) {
-      try {
-        MapToolVariableResolver newResolver = new MapToolVariableResolver(null);
-        newResolver.setVariable("tokens.denyMove", 0);
-        newResolver.setVariable("tokens.moveCount", filteredTokens.size());
-        newResolver.setTokenIncontext(originalToken);
-        String resultVal =
-            MapTool.getParser()
-                .runMacro(
-                    newResolver,
-                    originalToken,
-                    ON_TOKEN_MOVE_COMPLETE_CALLBACK + "@" + token.getName(),
-                    pathCoordinates,
-                    false);
-        if (resultVal != null && !resultVal.equals("")) {
-          MapTool.addMessage(
-              new TextMessage(
-                  TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
-        }
-        BigDecimal denyMove = BigDecimal.ZERO;
-
-        if (newResolver.getVariable("tokens.denyMove") instanceof BigDecimal) {
-          denyMove = (BigDecimal) newResolver.getVariable("tokens.denyMove");
-        }
-        return (denyMove != null && denyMove.intValue() == 1) ? BigDecimal.ONE : BigDecimal.ZERO;
-      } catch (AbortFunctionException afe) {
-        // Do nothing
-      } catch (Exception e) {
-        MapTool.addLocalMessage(
-            "Error running "
-                + ON_TOKEN_MOVE_COMPLETE_CALLBACK
-                + " on "
-                + token.getName()
-                + " : "
-                + e.getMessage());
+      for (Token token : filteredTokens) {
+        boolean moveDenied =
+            EventMacroUtil.pollEventHandlerForVeto(
+                macroTarget, pathCoordinates, token, ON_TOKEN_MOVE_DENY_VARIABLE, varsToSet);
+        if (moveDenied) deniedTokens.add(token);
       }
     }
-    return BigDecimal.ZERO;
-  }
-
-  private static Token getMoveMacroToken(final String macroCallback) {
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      List<Token> tokenList =
-          zr.getZone()
-              .getTokensFiltered(
-                  new Zone.Filter() {
-                    public boolean matchToken(Token t) {
-                      return t.getName().toLowerCase().startsWith("lib:");
-                    }
-                  });
-      for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs
-        // then we are in
-        // its a trusted Lib:token so we can run the macro
-        if (token != null) {
-          if (token.isOwnedByAll()) {
-            continue;
-          } else {
-            Set<String> gmPlayers = new HashSet<String>();
-            for (Object o : MapTool.getPlayerList()) {
-              Player p = (Player) o;
-              if (p.isGM()) {
-                gmPlayers.add(p.getName());
-              }
-            }
-            for (String owner : token.getOwners()) {
-              if (!gmPlayers.contains(owner)) {
-                continue;
-              }
-            }
-          }
-        }
-        if (token.getMacro(macroCallback, false) != null) {
-          return token;
-        }
-      }
-    }
-    return null;
+    return deniedTokens;
   }
 
   private String getMovement(
@@ -583,49 +538,37 @@ public class TokenMoveFunctions extends AbstractFunction {
     return "";
   }
 
-  public static BigDecimal multipleTokensMoved(List<GUID> filteredTokens) {
-    Token token = getMoveMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
+  /**
+   * Handle the {@value #ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK} macro event, and determine
+   * whether the movement was denied. Passes the list of tokens to the handler, and checks the value
+   * of {@value #ON_TOKEN_MOVE_DENY_VARIABLE} for a veto.
+   *
+   * <p>Note: To maintain backward-compatibility, this event only fires a single handler. If more
+   * than one Lib:Token has a matching macro, the first one encountered is called - because this
+   * order is unpredictable, this is very much not encouraged.
+   *
+   * @param filteredTokens the tokens being moved
+   * @return true if the move has been vetoed, false otherwise
+   */
+  public static boolean callForMultiTokenMoveVeto(List<GUID> filteredTokens) {
+    Token token = EventMacroUtil.getEventMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
+    boolean moveDenied = false;
     if (token != null) {
-      try {
-        JsonArray json = new JsonArray();
-        for (GUID tokenGuid : filteredTokens) {
-          json.add(tokenGuid.toString());
-        }
-        MapToolVariableResolver newResolver = new MapToolVariableResolver(null);
-        newResolver.setVariable("tokens.denyMove", 0);
-        newResolver.setVariable("tokens.moveCount", filteredTokens.size());
-        String resultVal =
-            MapTool.getParser()
-                .runMacro(
-                    newResolver,
-                    null,
-                    ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK + "@" + token.getName(),
-                    json.toString(),
-                    false);
-        if (resultVal != null && !resultVal.equals("")) {
-          MapTool.addMessage(
-              new TextMessage(
-                  TextMessage.Channel.ALL, null, MapTool.getPlayer().getName(), resultVal, null));
-        }
-        BigDecimal denyMove = BigDecimal.ZERO;
-
-        if (newResolver.getVariable("tokens.denyMove") instanceof BigDecimal) {
-          denyMove = (BigDecimal) newResolver.getVariable("tokens.denyMove");
-        }
-        return (denyMove != null && denyMove.intValue() == 1) ? BigDecimal.ONE : BigDecimal.ZERO;
-      } catch (AbortFunctionException afe) {
-        // Do nothing
-      } catch (Exception e) {
-        MapTool.addLocalMessage(
-            "Error running "
-                + ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK
-                + " on "
-                + token.getName()
-                + " : "
-                + e.getMessage());
+      JsonArray json = new JsonArray();
+      for (GUID tokenGuid : filteredTokens) {
+        json.add(tokenGuid.toString());
       }
+      Map<String, Object> varsToSet = new HashMap<>();
+      varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
+      moveDenied =
+          EventMacroUtil.pollEventHandlerForVeto(
+              ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK + "@" + token.getName(),
+              json.toString(),
+              null,
+              ON_TOKEN_MOVE_DENY_VARIABLE,
+              varsToSet);
     }
-    return BigDecimal.ZERO;
+    return moveDenied;
   }
 
   private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {

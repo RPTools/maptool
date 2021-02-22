@@ -17,14 +17,16 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -40,10 +42,12 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.maptool.util.SysInfoProvider;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class getInfoFunction extends AbstractFunction {
@@ -73,7 +77,8 @@ public class getInfoFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> param)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
     String infoType = param.get(0).toString();
 
@@ -103,10 +108,8 @@ public class getInfoFunction extends AbstractFunction {
     JsonObject minfo = new JsonObject();
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
-    if (!MapTool.getParser().isMacroTrusted()) {
-      if (!zone.isVisible()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", "getInfo('map')"));
-      }
+    if (!MapTool.getParser().isMacroTrusted() && !zone.isVisible()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", "getInfo('map')"));
     }
 
     minfo.addProperty("name", zone.getName());
@@ -164,19 +167,48 @@ public class getInfoFunction extends AbstractFunction {
   private JsonObject getClientInfo() {
     JsonObject cinfo = new JsonObject();
 
-    cinfo.addProperty("face edge", AppPreferences.getFaceEdge() ? BigDecimal.ONE : BigDecimal.ZERO);
+    cinfo.addProperty("face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceEdge()));
     cinfo.addProperty(
-        "face vertex", AppPreferences.getFaceVertex() ? BigDecimal.ONE : BigDecimal.ZERO);
+        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceVertex()));
     cinfo.addProperty("portrait size", AppPreferences.getPortraitSize());
     cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
     cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
     cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
+    cinfo.addProperty("show avatar in chat", AppPreferences.getShowAvatarInChat());
+    cinfo.addProperty(
+        "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
+    cinfo.addProperty("use tooltips for inline rolls", AppPreferences.getUseToolTipForInlineRoll());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
-        "isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
+        "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));
     cinfo.addProperty("timeInMs", System.currentTimeMillis());
     cinfo.addProperty("timeDate", getTimeDate());
     cinfo.addProperty("isoTimeDate", getIsoTimeDate());
+
+    JsonObject dialogs = new JsonObject();
+    Set<String> dialogNames = HTMLDialog.getDialogNames();
+    for (String name : dialogNames) {
+      Optional<JsonObject> props = HTMLDialog.getDialogProperties(name);
+      props.ifPresent(jsonObject -> dialogs.add(name, jsonObject));
+    }
+    cinfo.add("dialogs", dialogs);
+
+    JsonObject frames = new JsonObject();
+    Set<String> frameNames = HTMLFrame.getFrameNames();
+    for (String name : frameNames) {
+      Optional<JsonObject> props = HTMLFrame.getFrameProperties(name);
+      props.ifPresent(jsonObject -> frames.add(name, jsonObject));
+    }
+    cinfo.add("frames", frames);
+
+    JsonObject overlays = new JsonObject();
+    ConcurrentSkipListSet<HTMLOverlayManager> registeredOverlays =
+        MapTool.getFrame().getOverlayPanel().getOverlays();
+    for (HTMLOverlayManager o : registeredOverlays) {
+      overlays.add(o.getName(), o.getProperties());
+    }
+    cinfo.add("overlays", overlays);
+
     if (MapTool.getParser().isMacroTrusted()) {
       getInfoOnTokensOfType(cinfo, "library tokens", "lib:", "libversion", "unknown");
       getInfoOnTokensOfType(cinfo, "image tokens", "image:", "libversion", "unknown");
@@ -266,10 +298,10 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.addProperty("id", c.getId().toString());
     cinfo.addProperty(
         "initiative movement locked",
-        cp.isInitiativeMovementLock() ? BigDecimal.ONE : BigDecimal.ZERO);
+        FunctionUtil.getDecimalForBoolean(cp.isInitiativeMovementLock()));
     cinfo.addProperty(
         "initiative owner permissions",
-        cp.isInitiativeOwnerPermissions() ? BigDecimal.ONE : BigDecimal.ZERO);
+        FunctionUtil.getDecimalForBoolean(cp.isInitiativeOwnerPermissions()));
 
     JsonObject zinfo = new JsonObject();
     for (Zone z : c.getZones()) {
@@ -370,7 +402,7 @@ public class getInfoFunction extends AbstractFunction {
    * @return the debug information.
    * @throws ParserException if an error occurs.
    */
-  private JsonObject getDebugInfo() throws ParserException {
+  private JsonObject getDebugInfo() {
     return sysInfoProvider.getSysInfoJSON();
   }
 }

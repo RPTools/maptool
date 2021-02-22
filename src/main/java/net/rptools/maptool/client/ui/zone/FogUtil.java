@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package main.java.net.rptools.maptool.client.ui.zone;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,22 +39,22 @@ import java.util.Random;
 import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import net.rptools.lib.CodeTimer;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.vbl.AreaOcean;
-import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
-import net.rptools.maptool.client.ui.zone.vbl.VisibleAreaSegment;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.GridCapabilities;
-import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Player.Role;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
+import main.java.net.rptools.lib.CodeTimer;
+import main.java.net.rptools.maptool.client.AppUtil;
+import main.java.net.rptools.maptool.client.MapTool;
+import main.java.net.rptools.maptool.client.ui.zone.vbl.AreaOcean;
+import main.java.net.rptools.maptool.client.ui.zone.vbl.AreaTree;
+import main.java.net.rptools.maptool.client.ui.zone.vbl.VisibleAreaSegment;
+import main.java.net.rptools.maptool.model.CellPoint;
+import main.java.net.rptools.maptool.model.ExposedAreaMetaData;
+import main.java.net.rptools.maptool.model.GUID;
+import main.java.net.rptools.maptool.model.Grid;
+import main.java.net.rptools.maptool.model.GridCapabilities;
+import main.java.net.rptools.maptool.model.Path;
+import main.java.net.rptools.maptool.model.Player.Role;
+import main.java.net.rptools.maptool.model.Token;
+import main.java.net.rptools.maptool.model.Zone;
+import main.java.net.rptools.maptool.model.ZonePoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -93,7 +93,7 @@ public class FogUtil {
         new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
     Collections.sort(segmentList);
 
-    List<Area> clearedAreaList = new LinkedList<Area>();
+    List<Area> clearedAreaList = new LinkedList<>();
     nextSegment:
     for (VisibleAreaSegment segment : segmentList) {
       Rectangle r = segment.getPath().getBounds();
@@ -195,7 +195,6 @@ public class FogUtil {
           if (tokenVision != null) {
             Set<GUID> filteredToks = new HashSet<GUID>();
             filteredToks.add(tokenClone.getId());
-            zone.exposeArea(tokenVision, tokenClone);
             MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
           }
         }
@@ -207,7 +206,6 @@ public class FogUtil {
         if (tokenVision != null) {
           Set<GUID> filteredToks = new HashSet<GUID>();
           filteredToks.add(token.getId());
-          zone.exposeArea(tokenVision, filteredToks);
           MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
         }
       }
@@ -239,7 +237,6 @@ public class FogUtil {
       if (tokenVision != null) {
         Set<GUID> filteredToks = new HashSet<GUID>();
         filteredToks.add(token.getId());
-        zone.exposeArea(tokenVision, token);
         MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
       }
 
@@ -410,9 +407,6 @@ public class FogUtil {
 
       timer.stop("exposeLastPath-" + token.getName());
       renderer.flush(tokenClone);
-      renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
-
-      zone.exposeArea(visionArea, token);
 
       filteredToks.clear();
       filteredToks.add(token.getId());
@@ -513,12 +507,12 @@ public class FogUtil {
                 new MouseMotionAdapter() {
                   @Override
                   public void mouseDragged(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });
@@ -526,12 +520,12 @@ public class FogUtil {
                 new MouseAdapter() {
                   @Override
                   public void mousePressed(MouseEvent e) {
-                    final long start = System.currentTimeMillis();
+                    final long start = System.nanoTime();
                     Dimension size = getSize();
                     int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
                     int y = (int) (e.getY() / (size.height / 2.0 / topSize) / 2);
                     theArea = FogUtil.calculateVisibility(x, y, vision, tree);
-                    System.out.println("Calc: " + (System.currentTimeMillis() - start));
+                    System.out.println("Calc: " + (System.nanoTime() - start));
                     repaint();
                   }
                 });

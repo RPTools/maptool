@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing;
+package main.java.net.rptools.lib.swing;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.IOException;
 import javax.swing.JToggleButton;
-import net.rptools.lib.image.ImageUtil;
+import main.java.net.rptools.lib.image.ImageUtil;
 
 @SuppressWarnings("serial")
 public class ImageToggleButton extends JToggleButton {

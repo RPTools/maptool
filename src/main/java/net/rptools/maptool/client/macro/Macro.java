@@ -12,9 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.macro;
+package main.java.net.rptools.maptool.client.macro;
 
-import net.rptools.maptool.client.MapToolMacroContext;
+import main.java.net.rptools.maptool.client.MapToolMacroContext;
 
 /** @author drice */
 public interface Macro {

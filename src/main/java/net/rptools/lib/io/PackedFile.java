@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.io;
+package main.java.net.rptools.lib.io;
 
 import com.thoughtworks.xstream.XStream;
 import java.io.BufferedInputStream;
@@ -43,10 +43,10 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import net.rptools.lib.CodeTimer;
-import net.rptools.lib.FileUtil;
-import net.rptools.lib.ModelVersionManager;
-import net.rptools.maptool.model.GUID;
+import main.java.net.rptools.lib.CodeTimer;
+import main.java.net.rptools.lib.FileUtil;
+import main.java.net.rptools.lib.ModelVersionManager;
+import main.java.net.rptools.maptool.model.GUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -692,7 +692,7 @@ public class PackedFile implements AutoCloseable {
       String url = "jar:" + file.toURI().toURL().toExternalForm() + "!" + path;
       return new URL(url);
     } catch (MalformedURLException e) {
-      throw new IllegalArgumentException("Couldn't create a URL for path: '" + path + "'");
+      throw new IllegalArgumentException("Couldn't create a URL for path: '" + path + "'", e);
     }
   }
 
