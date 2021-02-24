@@ -286,7 +286,11 @@ public class MacroButton extends JButton implements MouseListener {
     }
 
     public void dragGestureRecognized(DragGestureEvent dge) {
-      Transferable t = new TransferableMacroButton(MacroButton.this);
+      Transferable t =
+          new TransferableMacroButton(
+              MacroButton.this,
+              dge.getTriggerEvent().getModifiersEx(),
+              System.identityHashCode(panel));
       dge.startDrag(cursor, t, dsListener);
     }
   }

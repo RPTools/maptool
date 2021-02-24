@@ -159,7 +159,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   // constructor that creates a new instance, doesn't auto save
   public MacroButtonProperties(int index) {
     setIndex(index);
-    setColorKey("");
+    setColorKey("default");
     setHotKey(MacroButtonHotKeyManager.HOTKEYS[0]);
     setCommand("");
     setLabel("(new)");
