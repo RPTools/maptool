@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -311,58 +310,12 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
   @Override
   public String getFunctionSummary(String functionName) {
-    if (functionName == null) {
-      return null;
-    }
-
-    for (Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
-      if (functionName.equals(function.getKey())) {
-        FunctionDefinition funcDef = function.getValue();
-        String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
-          String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
-          String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
-          Token token = FindTokenFunctions.findToken(tokenName);
-          if (token != null) {
-            List<MacroButtonProperties> macros = token.getMacroList(false);
-            for (MacroButtonProperties macro : macros) {
-              if (macroName.equals(macro.getLabel())) {
-                return macro.getToolTip();
-              }
-            }
-          }
-        }
-      }
-    }
-    return null;
+    return getFunctionTooltip(functionName);
   }
 
   @Override
   public String getFunctionDescription(String functionName) {
-    if (functionName == null) {
-      return null;
-    }
-
-    for (Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
-      if (functionName.equals(function.getKey())) {
-        final FunctionDefinition funcDef = function.getValue();
-        final String fullMacroName = funcDef.macroName;
-        if (fullMacroName != null && fullMacroName.indexOf('@') > 0) {
-          final String tokenName = fullMacroName.substring(fullMacroName.indexOf('@') + 1);
-          final String macroName = fullMacroName.substring(0, fullMacroName.indexOf('@'));
-          final Token token = FindTokenFunctions.findToken(tokenName);
-          if (token != null) {
-            final List<MacroButtonProperties> macros = token.getMacroList(false);
-            for (MacroButtonProperties macro : macros) {
-              if (macroName.equals(macro.getLabel())) {
-                return "(Token " + tokenName + ")";
-              }
-            }
-          }
-        }
-      }
-    }
-    return null;
+    return getFunctionLocation(functionName);
   }
 
   /**

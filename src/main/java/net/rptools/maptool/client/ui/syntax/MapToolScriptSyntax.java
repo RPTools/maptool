@@ -161,13 +161,13 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
         for (var entry : macroMap.entrySet()) {
           String macro = entry.getKey();
-          if (entry.getValue().equals(UserDefinedMacroFunctions.class.getName())) {
-            macroFunctionTokenMap.put(macro, Token.ANNOTATION);
-          } else {
-            macroFunctionTokenMap.put(macro, Token.FUNCTION);
-          }
-
+          macroFunctionTokenMap.put(macro, Token.FUNCTION);
           log.debug("Adding \"" + entry + "\" macro function to syntax highlighting.");
+        }
+
+        // Add UDFs
+        for (var udf : UserDefinedMacroFunctions.getInstance().getAliases()) {
+          macroFunctionTokenMap.put(udf, Token.ANNOTATION);
         }
       }
     }
