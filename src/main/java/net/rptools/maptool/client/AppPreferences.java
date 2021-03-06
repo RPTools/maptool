@@ -449,8 +449,8 @@ public class AppPreferences {
 
   private static final String KEY_SKIP_AUTO_UPDATE = "skipAutoUpdate";
   private static final boolean DEFAULT_SKIP_AUTO_UPDATE = false;
-  private static final String KEY_SKIP_AUTO_UPDATE_COMMIT = "skipAutoUpdateCommit";
-  private static final String DEFAULT_SKIP_AUTO_UPDATE_COMMIT = "";
+  private static final String KEY_SKIP_AUTO_UPDATE_RELEASE = "skipAutoUpdateRelease";
+  private static final String DEFAULT_SKIP_AUTO_UPDATE_RELEASE = "";
 
   private static final String KEY_ALLOW_EXTERNAL_MACRO_ACCESS = "allowExternalMacroAccess";
   private static final boolean DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS = false;
@@ -914,12 +914,12 @@ public class AppPreferences {
     prefs.putBoolean(KEY_SKIP_AUTO_UPDATE, value);
   }
 
-  public static String getSkipAutoUpdateCommit() {
-    return prefs.get(KEY_SKIP_AUTO_UPDATE_COMMIT, DEFAULT_SKIP_AUTO_UPDATE_COMMIT);
+  public static String getSkipAutoUpdateRelease() {
+    return prefs.get(KEY_SKIP_AUTO_UPDATE_RELEASE, DEFAULT_SKIP_AUTO_UPDATE_RELEASE);
   }
 
-  public static void setSkipAutoUpdateCommit(String commit) {
-    prefs.put(KEY_SKIP_AUTO_UPDATE_COMMIT, commit);
+  public static void setSkipAutoUpdateRelease(String releaseId) {
+    prefs.put(KEY_SKIP_AUTO_UPDATE_RELEASE, releaseId);
   }
 
   public static boolean getAllowExternalMacroAccess() {
