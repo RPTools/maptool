@@ -19,6 +19,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.AdditionalFunctionDescription;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +50,16 @@ public class MapToolScriptAutoComplete {
     for (String macro : MapTool.getParser().listAllMacroFunctions().keySet())
       provider.addCompletion(
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
+
+    // Add UDFs
+    UserDefinedMacroFunctions udfManager = UserDefinedMacroFunctions.getInstance();
+    for (String udf : udfManager.getAliases())
+      provider.addCompletion(
+          new BasicCompletion(
+              provider,
+              udf,
+              udfManager.getFunctionDescription(udf),
+              udfManager.getFunctionSummary(udf)));
 
     // Add "Special Variables" as Data Type
     for (String dataType : MapToolScriptSyntax.DATA_TYPES)
