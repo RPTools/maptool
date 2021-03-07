@@ -31,6 +31,10 @@ public class LocalPlayer extends Player {
     }
   }
 
+  public void setRole(Role role) {
+    super.setRole(role);
+  }
+
   /** @return whether the player is a GM using GM view. */
   public boolean isEffectiveGM() {
     return isGM() && !AppState.isShowAsPlayer();
