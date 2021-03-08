@@ -301,6 +301,10 @@ public class LookupTableFunction extends AbstractFunction {
       LookupEntry entry = lookupTable.getLookup(roll);
       if (entry == null) return ""; // no entry was found
 
+      int rollInt = Integer.parseInt(roll);
+      if (rollInt < entry.getMin() || rollInt > entry.getMax())
+        return ""; // entry was found but doesn't match
+
       JsonObject entryDetails = new JsonObject();
       entryDetails.addProperty("min", entry.getMin());
       entryDetails.addProperty("max", entry.getMax());
