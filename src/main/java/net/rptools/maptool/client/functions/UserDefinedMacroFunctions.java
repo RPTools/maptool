@@ -29,7 +29,9 @@ import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.EventMacroUtil;
@@ -337,7 +339,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
    * Get the tooltip from the macro button mapped to the given defined function
    *
    * @param functionName the UDF name
-   * @return the evaluated tooltip, or null if no corresponding macro button can be found
+   * @return the evaluated tooltip, an appropriate "summary not available" message if no
+   *     corresponding macro button can be found, or null if the given functionName is not a valid
+   *     UDF
    */
   public String getFunctionTooltip(String functionName) {
     if (functionName == null) {
@@ -349,16 +353,38 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       if (macroParts.length != 2) return null;
       String macroName = macroParts[0];
       String macroLocation = macroParts[1];
-      try {
-        Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
-        MacroButtonProperties buttonProps = libToken.getMacro(macroName, false);
-        return (buttonProps == null) ? null : buttonProps.getEvaluatedToolTip();
-      } catch (ParserException e) {
-        // this means we couldn't find the unique macro used in the mapping - may want a warning
-        // instead of null?
-        return null;
+      MacroButtonProperties buttonProps;
+      if ("CAMPAIGN".equalsIgnoreCase(macroLocation)) {
+        // campaign macro
+        List<MacroButtonProperties> mbps = MapTool.getCampaign().getMacroButtonPropertiesArray();
+        buttonProps =
+            mbps.stream().filter(m -> m.getLabel().equals(macroName)).findFirst().orElse(null);
+      } else if ("GM".equalsIgnoreCase(macroLocation)) {
+        // GM macro
+        List<MacroButtonProperties> mbps = MapTool.getCampaign().getGmMacroButtonPropertiesArray();
+        buttonProps =
+            mbps.stream().filter(m -> m.getLabel().equals(macroName)).findFirst().orElse(null);
+      } else if ("GLOBAL".equalsIgnoreCase(macroLocation)) {
+        // Global macro
+        List<MacroButtonProperties> mbps = MacroButtonPrefs.getButtonProperties();
+        buttonProps =
+            mbps.stream().filter(m -> m.getLabel().equals(macroName)).findFirst().orElse(null);
+      } else {
+        // token macro
+        try {
+          Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
+          buttonProps = (libToken == null) ? null : libToken.getMacro(macroName, false);
+        } catch (ParserException e) {
+          // duplicate lib:token, not a Lib:token, not visible to player, etc.
+          return I18N.getText(
+              "msg.error.udf.tooltip.loading", theDef.macroName, e.getLocalizedMessage());
+        }
       }
+      return (buttonProps == null)
+          ? I18N.getText("msg.error.udf.tooltip.missingTarget", theDef.macroName)
+          : buttonProps.getEvaluatedToolTip();
     } else {
+      log.warn("Looking up tooltip for {}, but that UDF that doesn't exist?", functionName);
       return null;
     }
   }
