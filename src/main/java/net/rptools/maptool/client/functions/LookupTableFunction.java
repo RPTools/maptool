@@ -298,7 +298,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       String roll = params.get(1).toString();
-      LookupEntry entry = lookupTable.getLookup(roll);
+      LookupEntry entry = lookupTable.getLookupDirect(roll);
       if (entry == null) return ""; // no entry was found
 
       int rollInt = Integer.parseInt(roll);
@@ -309,7 +309,7 @@ public class LookupTableFunction extends AbstractFunction {
       entryDetails.addProperty("min", entry.getMin());
       entryDetails.addProperty("max", entry.getMax());
       entryDetails.addProperty("value", entry.getValue());
-      entryDetails.addProperty("picked", entry.getValue());
+      entryDetails.addProperty("picked", entry.getPicked() == null ? false : entry.getPicked());
 
       MD5Key imageId = entry.getImageId();
       if (imageId != null) {
