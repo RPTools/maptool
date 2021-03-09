@@ -953,7 +953,7 @@ public class PreferencesDialog extends JDialog {
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(I18N.getString("Label.startup")), false);
     } else {
       try {
 
