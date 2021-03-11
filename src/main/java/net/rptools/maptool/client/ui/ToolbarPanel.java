@@ -100,29 +100,33 @@ public class ToolbarPanel extends JToolBar {
 
     pointerGroupButton = createPointerGroupButton();
     add(pointerGroupButton);
-    drawButton = createButton(
-                    "net/rptools/maptool/client/image/tool/draw-blue.png",
-                    "net/rptools/maptool/client/image/tool/draw-blue-off.png",
-                    createDrawPanel(),
-                    I18N.getText("tools.drawing.tooltip"));
+    drawButton =
+        createButton(
+            "net/rptools/maptool/client/image/tool/draw-blue.png",
+            "net/rptools/maptool/client/image/tool/draw-blue-off.png",
+            createDrawPanel(),
+            I18N.getText("tools.drawing.tooltip"));
     add(drawButton);
-    templateButton = createButton(
+    templateButton =
+        createButton(
             "net/rptools/maptool/client/image/tool/temp-blue.png",
             "net/rptools/maptool/client/image/tool/temp-blue-off.png",
             createTemplatePanel(),
             I18N.getText("tools.template.tooltip"));
     add(templateButton);
-    fogButton = createButton(
-                    "net/rptools/maptool/client/image/tool/fog-blue.png",
-                    "net/rptools/maptool/client/image/tool/fog-blue-off.png",
-                    createFogPanel(),
-                    I18N.getText("tools.fog.tooltip"));
+    fogButton =
+        createButton(
+            "net/rptools/maptool/client/image/tool/fog-blue.png",
+            "net/rptools/maptool/client/image/tool/fog-blue-off.png",
+            createFogPanel(),
+            I18N.getText("tools.fog.tooltip"));
     add(fogButton);
-    topologyButton = createButton(
-                    "net/rptools/maptool/client/image/tool/eye-blue.png",
-                    "net/rptools/maptool/client/image/tool/eye-blue-off.png",
-                    createTopologyPanel(),
-                    I18N.getText("tools.topo.tooltip"));
+    topologyButton =
+        createButton(
+            "net/rptools/maptool/client/image/tool/eye-blue.png",
+            "net/rptools/maptool/client/image/tool/eye-blue-off.png",
+            createTopologyPanel(),
+            I18N.getText("tools.topo.tooltip"));
     add(topologyButton);
 
     add(vertSplit);
@@ -135,18 +139,19 @@ public class ToolbarPanel extends JToolBar {
     add(Box.createGlue());
 
     // the Volume icon
-    add(createMuteButton(
-                      "net/rptools/maptool/client/image/audio/mute.png",
-                      "net/rptools/maptool/client/image/audio/volume.png",
-                      I18N.getText("tools.mute.tooltip"),
-                      I18N.getText("tools.unmute.tooltip")));
+    add(
+        createMuteButton(
+            "net/rptools/maptool/client/image/audio/mute.png",
+            "net/rptools/maptool/client/image/audio/volume.png",
+            I18N.getText("tools.mute.tooltip"),
+            I18N.getText("tools.unmute.tooltip")));
 
     // the Volume slider
     final int MAX_SLIDER = 10;
     final int INIT_VALUE = (int) Math.round(MediaPlayerAdapter.getGlobalVolume() * MAX_SLIDER);
     JSlider jslider = new JSlider(0, MAX_SLIDER, INIT_VALUE);
     jslider.addChangeListener(
-            e -> MediaPlayerAdapter.setGlobalVolume((double) jslider.getValue() / MAX_SLIDER));
+        e -> MediaPlayerAdapter.setGlobalVolume((double) jslider.getValue() / MAX_SLIDER));
 
     // Create the label table
     Hashtable labelTable = new Hashtable();
@@ -165,28 +170,31 @@ public class ToolbarPanel extends JToolBar {
     // Jamz: Adding new Token Selection option buttons
     // Default selected button created with reference to set selection true
     final JToggleButton tokenSelectionButtonAll =
-            createTokenSelectionButton(
-                      "net/rptools/maptool/client/image/tool/select-all-blue.png",
-                      "net/rptools/maptool/client/image/tool/select-all-blue-off.png",
-                      I18N.getText("tools.token.fow.all.tooltip"),
-                      TokenSelection.ALL);
+        createTokenSelectionButton(
+            "net/rptools/maptool/client/image/tool/select-all-blue.png",
+            "net/rptools/maptool/client/image/tool/select-all-blue-off.png",
+            I18N.getText("tools.token.fow.all.tooltip"),
+            TokenSelection.ALL);
 
-    add(createTokenSelectionButton(
-                      "net/rptools/maptool/client/image/tool/select-me-blue.png",
-                      "net/rptools/maptool/client/image/tool/select-me-blue-off.png",
-                      I18N.getText("tools.token.fow.gm.tooltip"),
-                      TokenSelection.GM));
+    add(
+        createTokenSelectionButton(
+            "net/rptools/maptool/client/image/tool/select-me-blue.png",
+            "net/rptools/maptool/client/image/tool/select-me-blue-off.png",
+            I18N.getText("tools.token.fow.gm.tooltip"),
+            TokenSelection.GM));
     add(tokenSelectionButtonAll);
-    add(createTokenSelectionButton(
-                      "net/rptools/maptool/client/image/tool/select-pc-blue.png",
-                      "net/rptools/maptool/client/image/tool/select-pc-blue-off.png",
-                      I18N.getText("tools.token.fow.pc.tooltip"),
-                      TokenSelection.PC));
-    add(createTokenSelectionButton(
-                      "net/rptools/maptool/client/image/tool/select-npc-blue.png",
-                      "net/rptools/maptool/client/image/tool/select-npc-blue-off.png",
-                      I18N.getText("tools.token.fow.npc.tooltip"),
-                      TokenSelection.NPC));
+    add(
+        createTokenSelectionButton(
+            "net/rptools/maptool/client/image/tool/select-pc-blue.png",
+            "net/rptools/maptool/client/image/tool/select-pc-blue-off.png",
+            I18N.getText("tools.token.fow.pc.tooltip"),
+            TokenSelection.PC));
+    add(
+        createTokenSelectionButton(
+            "net/rptools/maptool/client/image/tool/select-npc-blue.png",
+            "net/rptools/maptool/client/image/tool/select-npc-blue-off.png",
+            I18N.getText("tools.token.fow.npc.tooltip"),
+            TokenSelection.NPC));
 
     add(Box.createHorizontalStrut(10));
     add(new JSeparator(JSeparator.VERTICAL));
@@ -241,27 +249,27 @@ public class ToolbarPanel extends JToolBar {
     return topologyButton;
   }
 
-  public int getOptionsPanelIndex() { return getComponentIndex(horizontalSpacer) + 1; }
+  public int getOptionsPanelIndex() {
+    return getComponentIndex(horizontalSpacer) + 1;
+  }
 
-  private JToggleButton createPointerGroupButton()
-  {
+  private JToggleButton createPointerGroupButton() {
     final OptionPanel pointerGroupOptionPanel = createPointerPanel();
     final JToggleButton pointerGroupButton =
-            createButton(
-                    "net/rptools/maptool/client/image/tool/pointer-blue.png",
-                    "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
-                    pointerGroupOptionPanel,
-                    I18N.getText("tools.interaction.tooltip"));
+        createButton(
+            "net/rptools/maptool/client/image/tool/pointer-blue.png",
+            "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
+            pointerGroupOptionPanel,
+            I18N.getText("tools.interaction.tooltip"));
 
+    final SidePanel aiPanel = new SidePanel();
+    aiPanel.add(AI_Tool.class);
+    aiPanel.add(AI_UseVblTool.class);
 
-      final SidePanel aiPanel = new SidePanel();
-      aiPanel.add(AI_Tool.class);
-      aiPanel.add(AI_UseVblTool.class);
-
-      pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
-      pointerGroupOptionPanel.add(aiPanel);
-      pointerGroupButton.setSelected(true);
-      pointerGroupOptionPanel.activate();
+    pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
+    pointerGroupOptionPanel.add(aiPanel);
+    pointerGroupButton.setSelected(true);
+    pointerGroupOptionPanel.activate();
 
     return pointerGroupButton;
   }
@@ -376,7 +384,6 @@ public class ToolbarPanel extends JToolBar {
             // This is has only an effect when the panel is used in fullscreen mode.
             optionPanel.setSize(panel.getPreferredSize());
           }
-
         });
     try {
       button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
@@ -501,8 +508,6 @@ public class ToolbarPanel extends JToolBar {
           });
       add(tool);
     }
-
-
 
     protected void activate() {
       if (currentTool == null) {
