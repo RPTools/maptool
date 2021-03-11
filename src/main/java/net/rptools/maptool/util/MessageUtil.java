@@ -164,6 +164,6 @@ public class MessageUtil {
     if (color == null) {
       return str;
     }
-    return String.format("<font color='#%06X'>%s</font>", (color.getRGB() & 0xFFFFFF), str);
+    return String.format("<span style='color:#%06X'>%s</span>", (color.getRGB() & 0xFFFFFF), str);
   }
 }
