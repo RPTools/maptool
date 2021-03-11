@@ -22,6 +22,7 @@ import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.function.Function;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.BasicCompletion;
@@ -53,13 +54,17 @@ public class MapToolScriptAutoComplete {
 
     // Add UDFs
     UserDefinedMacroFunctions udfManager = UserDefinedMacroFunctions.getInstance();
-    for (String udf : udfManager.getAliases())
+    for (String udf : udfManager.getAliases()) {
+      // when the tooltip is blank, pass null through to the AutoComplete window so it can insert
+      // the appropriate "No desc available" text.
+      final String udfSummary = udfManager.getFunctionSummary(udf);
       provider.addCompletion(
           new BasicCompletion(
               provider,
               udf,
               udfManager.getFunctionDescription(udf),
-              udfManager.getFunctionSummary(udf)));
+              (StringUtils.isBlank(udfSummary)) ? null : udfSummary));
+    }
 
     // Add "Special Variables" as Data Type
     for (String dataType : MapToolScriptSyntax.DATA_TYPES)
