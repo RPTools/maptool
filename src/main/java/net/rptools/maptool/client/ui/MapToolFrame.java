@@ -1657,8 +1657,7 @@ public class MapToolFrame extends DefaultDockableHolder
     this.setVisible(false);
   }
 
-  public void showFullScreenTools()
-  {
+  public void showFullScreenTools() {
     fullScreenToolPanel = new JPanel();
     fullScreenToolPanel.setOpaque(false);
     fullScreenToolPanel.add(toolbarPanel.getPointerGroupButton());
@@ -1668,32 +1667,31 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
     fullScreenToolPanel.add(toolbarPanel.createZoneSelectionButton());
 
-    var initiativeButton = new JButton(new ImageIcon(
-            getClass()
+    var initiativeButton =
+        new JButton(
+            new ImageIcon(
+                getClass()
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/arrow_menu.png")));
 
-    initiativeButton.addActionListener((e) -> {
-      if(initiativePanel.isVisible())
-        initiativePanel.setVisible(false);
-      else
-        initiativePanel.setVisible(true);
-    });
+    initiativeButton.addActionListener(
+        (e) -> {
+          if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
+          else initiativePanel.setVisible(true);
+        });
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size
     boolean first = true;
     Dimension size = null;
-    for(var component: fullScreenToolPanel.getComponents()) {
-      if(!(component instanceof AbstractButton))
-        continue;
+    for (var component : fullScreenToolPanel.getComponents()) {
+      if (!(component instanceof AbstractButton)) continue;
 
-      var btn = (AbstractButton)component;
-      if(first) {
+      var btn = (AbstractButton) component;
+      if (first) {
         first = false;
         size = btn.getSize();
-      } else
-        btn.setPreferredSize(size);
+      } else btn.setPreferredSize(size);
 
       btn.setText(null);
     }
@@ -1703,7 +1701,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
     var optionPanel = toolbarPanel.getOptionPanel();
     // set size of optionpanel to only necessary size
-    for (Component comp : optionPanel.getComponents() ) {
+    for (Component comp : optionPanel.getComponents()) {
       if (comp.isVisible()) {
         optionPanel.setSize(comp.getPreferredSize());
       }
@@ -1712,19 +1710,17 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(optionPanel, PositionalLayout.Position.N);
     zoneRendererPanel.setComponentZOrder(optionPanel, 0);
 
-    //ensure that initiativePanel has enough width to diplay the current round
+    // ensure that initiativePanel has enough width to diplay the current round
     var iniList = initiativePanel.getList();
     var roundWasZero = iniList.getRound() == 0;
-    if(roundWasZero)
-      iniList.setRound(10);
+    if (roundWasZero) iniList.setRound(10);
 
     size = initiativePanel.getPreferredSize();
-    size.height = zoneRendererPanel.getHeight()/2;
+    size.height = zoneRendererPanel.getHeight() / 2;
 
     initiativePanel.setSize(size);
 
-    if(roundWasZero)
-      iniList.setRound(0);
+    if (roundWasZero) iniList.setRound(0);
 
     initiativePanel.setVisible(false);
 
@@ -1739,11 +1735,12 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
 
     JToggleButton buttons[] = {
-            toolbarPanel.getTopologyButton(), toolbarPanel.getFogButton(),
-            toolbarPanel.getTemplateButton(), toolbarPanel.getDrawButton(),
-            toolbarPanel.getPointerGroupButton() };
+      toolbarPanel.getTopologyButton(), toolbarPanel.getFogButton(),
+      toolbarPanel.getTemplateButton(), toolbarPanel.getDrawButton(),
+      toolbarPanel.getPointerGroupButton()
+    };
 
-    for(var button: buttons) {
+    for (var button : buttons) {
       button.setPreferredSize(null);
       toolbarPanel.add(button, 0);
     }
@@ -1754,7 +1751,6 @@ public class MapToolFrame extends DefaultDockableHolder
     initiativePanel.setVisible(true);
     initiativeFrame.add(initiativePanel);
   }
-
 
   public boolean isFullScreen() {
     return fullScreenFrame != null;
