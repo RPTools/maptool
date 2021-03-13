@@ -1710,17 +1710,10 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(optionPanel, PositionalLayout.Position.N);
     zoneRendererPanel.setComponentZOrder(optionPanel, 0);
 
-    // ensure that initiativePanel has enough width to diplay the current round
-    var iniList = initiativePanel.getList();
-    var roundWasZero = iniList.getRound() == 0;
-    if (roundWasZero) iniList.setRound(10);
-
     size = initiativePanel.getPreferredSize();
     size.height = zoneRendererPanel.getHeight() / 2;
 
     initiativePanel.setSize(size);
-
-    if (roundWasZero) iniList.setRound(0);
 
     initiativePanel.setVisible(false);
 
