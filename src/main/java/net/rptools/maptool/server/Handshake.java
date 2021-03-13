@@ -361,10 +361,8 @@ public class Handshake {
     // If we are here the handshake succeeded so wait for the server policy
     HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
     Response response = (Response) input.readObject();
-    if(response.role != null)
-      MapTool.getPlayer().setRole(response.role);
-    else
-      MapTool.getPlayer().setRole(Role.PLAYER);
+    if (response.role != null) MapTool.getPlayer().setRole(response.role);
+    else MapTool.getPlayer().setRole(Role.PLAYER);
 
     return response;
   }
