@@ -97,7 +97,7 @@ public class StartServerDialogPreferences {
 
   // my addition
   public boolean getRestrictedImpersonation() {
-    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, true);
+    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, false);
   }
 
   public void setRestrictedImpersonation(boolean impersonation) {

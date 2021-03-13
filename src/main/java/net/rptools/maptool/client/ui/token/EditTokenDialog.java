@@ -1428,7 +1428,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             return;
           }
 
-          xmlStatblockRSyntaxTextArea.setText(heroLabData.parseXML(searchText, ", "));
+          String results;
+          try {
+            results = heroLabData.parseXML(searchText, ", ");
+          } catch (IllegalArgumentException exception) {
+            results = I18N.getText("macro.function.herolab.xpath.invalid", searchText);
+          }
+          xmlStatblockRSyntaxTextArea.setText(results);
           xmlStatblockRSyntaxTextArea.setCaretPosition(0);
         });
 

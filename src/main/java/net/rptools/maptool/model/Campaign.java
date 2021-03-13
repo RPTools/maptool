@@ -63,8 +63,9 @@ public class Campaign {
   private static transient ExportDialog exportInfo =
       null; // transient so it is not written out; entire element ignore when reading
 
-  private static ExportDialog
-      exportDialog; // this is the new export dialog (different name for upward compatibility)
+  private static ExportDialog exportDialog =
+      ExportDialog
+          .getInstance(); // this is the new export dialog (different name for upward compatibility)
   private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output

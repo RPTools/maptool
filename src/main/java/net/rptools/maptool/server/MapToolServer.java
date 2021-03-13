@@ -182,7 +182,7 @@ public class MapToolServer {
 
   private class HeartbeatThread extends Thread {
     private boolean stop = false;
-    private static final int HEARTBEAT_DELAY = 7 * 60 * 1000; // 7 minutes
+    private static final int HEARTBEAT_DELAY = 10 * 60 * 1000; // 10 minutes
     private static final int HEARTBEAT_FLUX = 20 * 1000; // 20 seconds
 
     private boolean ever_had_an_error = false;
@@ -198,7 +198,7 @@ public class MapToolServer {
         try {
           Thread.sleep(HEARTBEAT_DELAY + (int) (HEARTBEAT_FLUX * random.nextFloat()));
           // Pulse
-          MapToolRegistry.heartBeat(config.getPort());
+          MapToolRegistry.getInstance().heartBeat();
           // If the heartbeat worked, reset the counter if the last one failed
           if (errors != 0) {
             String msg = I18N.getText("msg.info.heartbeat.registrySuccess", errors);
