@@ -443,9 +443,10 @@ public class InitiativeList implements Serializable {
         getPCS().fireIndexedPropertyChange(TOKENS_PROP, index, ti, null);
       } // endif
     } // endwhile
+    // update the server if any actual change was made, otherwise just decrement holdUpdate
     if (updateNeeded) {
       finishUnitOfWork();
-    } else if (holdUpdate == 1) {
+    } else {
       holdUpdate -= 1; // Do no updates.
       LOGGER.debug("finishUnitOfWork() - no update");
     } // endif
