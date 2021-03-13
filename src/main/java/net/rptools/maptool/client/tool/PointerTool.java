@@ -1307,8 +1307,11 @@ public class PointerTool extends DefaultTool {
             }
           }
         });
-    actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
-    actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK), new FlipTokenVerticalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   /**
