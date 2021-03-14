@@ -15,10 +15,7 @@
 package net.rptools.common.expression;
 
 import net.rptools.common.expression.function.*;
-import net.rptools.parser.Expression;
-import net.rptools.parser.Parser;
-import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableResolver;
+import net.rptools.parser.*;
 import net.rptools.parser.transform.RegexpStringTransformer;
 import net.rptools.parser.transform.StringLiteralTransformer;
 
@@ -136,6 +133,14 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[sS][rR]4[gG](\\d+)\\b", "sr4($1, $2)"},
         new String[] {"\\b(\\d+)[sS][rR]4\\b", "sr4($1)"},
 
+        // Shadowrun 5 Edge or Exploding Test
+        new String[] {"\\b(\\d+)[sS][rR]5[eE][gG](\\d+)\\b", "sr5e($1, $2)"},
+        new String[] {"\\b(\\d+)[sS][rR]5[eE]\\b", "sr5e($1)"},
+
+        // Shadowrun 5 Normal Test
+        new String[] {"\\b(\\d+)[sS][rR]5[gG](\\d+)\\b", "sr5($1, $2)"},
+        new String[] {"\\b(\\d+)[sS][rR]5\\b", "sr5($1)"},
+
         // Subtract X with minimum of Y
         new String[] {
           "\\b(\\d+)[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower($1, $2, $3, $4)"
@@ -175,16 +180,9 @@ public class ExpressionParser {
     this(DICE_PATTERNS);
   }
 
-  public ExpressionParser(VariableResolver resolver) {
-    this(DICE_PATTERNS, resolver);
-  }
-
   public ExpressionParser(String[][] regexpTransforms) {
-    this(regexpTransforms, null);
-  }
 
-  public ExpressionParser(String[][] regexpTransforms, VariableResolver resolver) {
-    parser = new Parser(resolver, true);
+    parser = createParser();
 
     parser.addFunction(new CountSuccessDice());
     parser.addFunction(new DropRoll());
@@ -198,6 +196,8 @@ public class ExpressionParser {
     parser.addFunction(new UbiquityRoll());
     parser.addFunction(new ShadowRun4Dice());
     parser.addFunction(new ShadowRun4ExplodeDice());
+    parser.addFunction(new ShadowRun5Dice());
+    parser.addFunction(new ShadowRun5ExplodeDice());
     parser.addFunction(new Roll());
     parser.addFunction(new ExplodingSuccessDice());
     parser.addFunction(new OpenTestDice());
@@ -215,15 +215,24 @@ public class ExpressionParser {
     parser.addTransformer(slt.getReplaceTransformer());
   }
 
+  protected Parser createParser() {
+    return new Parser();
+  }
+
   public Parser getParser() {
     return parser;
   }
 
   public Result evaluate(String expression) throws ParserException {
-    return evaluate(expression, true);
+    return evaluate(expression, new MapVariableResolver(), true);
   }
 
-  public Result evaluate(String expression, boolean makeDeterministic) throws ParserException {
+  public Result evaluate(String expression, VariableResolver resolver) throws ParserException {
+    return evaluate(expression, resolver, true);
+  }
+
+  public Result evaluate(String expression, VariableResolver resolver, boolean makeDeterministic)
+      throws ParserException {
     Result ret = new Result(expression);
     RunData oldData = RunData.hasCurrent() ? RunData.getCurrent() : null;
     try {
@@ -236,13 +245,12 @@ public class ExpressionParser {
       RunData.setCurrent(newRunData);
 
       synchronized (parser) {
-        Expression xp = parser.parseExpression(expression);
-
-        if (makeDeterministic) {
-          xp = xp.getDeterministicExpression();
-        }
-        ret.setDetailExpression(xp.format());
-        ret.setValue(xp.evaluate());
+        final Expression xp =
+            makeDeterministic
+                ? parser.parseExpression(expression).getDeterministicExpression(resolver)
+                : parser.parseExpression(expression);
+        ret.setDetailExpression(() -> xp.format());
+        ret.setValue(xp.evaluate(resolver));
         ret.setRolled(newRunData.getRolled());
       }
     } finally {

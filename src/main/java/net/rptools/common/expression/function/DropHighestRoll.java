@@ -17,6 +17,7 @@ package net.rptools.common.expression.function;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.parser.Parser;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 import net.rptools.parser.function.EvaluationException;
 
@@ -27,7 +28,8 @@ public class DropHighestRoll extends AbstractNumberFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws EvaluationException {
     int n = 0;
     int times = ((BigDecimal) parameters.get(n++)).intValue();

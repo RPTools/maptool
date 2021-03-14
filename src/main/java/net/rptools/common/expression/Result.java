@@ -19,10 +19,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class Result {
   private final String expression;
-  private String detailExpression;
+  private Supplier<String> detailExpression;
   private Object value;
   private String description;
   private List<Integer> rolled;
@@ -38,10 +39,10 @@ public class Result {
   }
 
   public String getDetailExpression() {
-    return detailExpression;
+    return detailExpression != null ? detailExpression.get() : "";
   }
 
-  public void setDetailExpression(String detailExpression) {
+  public void setDetailExpression(Supplier<String> detailExpression) {
     this.detailExpression = detailExpression;
   }
 
