@@ -26,6 +26,14 @@ import net.rptools.parser.function.EvaluationException;
 
 public class ExpressionParserTest extends TestCase {
 
+  /**
+   * Make sure these tests aren't using mock RunData instances that might still be Current.
+   * Safeguard against possible problematic interleaving if tests get run in parallel.
+   */
+  public void setUp() {
+    RunData.setCurrent(null);
+  }
+
   public void testEvaluate() throws ParserException {
     Result result = new ExpressionParser().evaluate("100+4d1*10");
 

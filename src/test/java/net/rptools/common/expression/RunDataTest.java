@@ -14,6 +14,8 @@
  */
 package net.rptools.common.expression;
 
+import java.util.ArrayList;
+import java.util.List;
 import junit.framework.TestCase;
 
 public class RunDataTest extends TestCase {
@@ -34,5 +36,18 @@ public class RunDataTest extends TestCase {
       int value = runData.randomInt(10, 20);
       assertTrue(String.format("Value outside range: %s", value), 10 <= value && value <= 20);
     }
+  }
+
+  public void testParentChild() {
+    List<Integer> allRolls = new ArrayList<>();
+    RunData parent = new RunData(null);
+    RunData child = parent.createChildRunData(null);
+
+    allRolls.add(parent.randomInt(20));
+    for (int i = 0; i < 4; i++) {
+      allRolls.add(child.randomInt(20));
+    }
+
+    assertEquals(allRolls, parent.getRolled());
   }
 }
