@@ -1029,9 +1029,13 @@ public class MapToolLineParser {
         String b = " ".repeat(Math.max(0, parserRecurseDepth - 1)) + expression;
         log.debug(b);
       }
+      List<Integer> origRolled = List.copyOf(rolled);
       Result res = expressionParser.evaluate(expression, resolver, makeDeterministic);
-      rolled.addAll(res.getRolled());
-      newRolls.addAll(res.getRolled());
+      // if rolled has changed, we've been in a context that has updated it already
+      if (origRolled.equals(rolled)) {
+        rolled.addAll(res.getRolled());
+        newRolls.addAll(res.getRolled());
+      }
 
       return res;
     } catch (AbortFunctionException e) {
