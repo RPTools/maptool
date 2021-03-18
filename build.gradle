@@ -319,8 +319,6 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.2'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.6.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.2'
 
     implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
 
