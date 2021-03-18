@@ -43,9 +43,10 @@ public class RunDataMockForTesting extends RunData {
    *
    * @param result the Result object, required by {@link RunData}
    * @param rolls the pre-configured queue of rolls
+   * @param parent the parent RunData instance, to whom all rolls will be reported
    */
-  private RunDataMockForTesting(Result result, Queue<Integer> rolls) {
-    super(result);
+  private RunDataMockForTesting(Result result, Queue<Integer> rolls, RunData parent) {
+    super(result, parent);
     toRoll = rolls;
   }
 
@@ -59,7 +60,7 @@ public class RunDataMockForTesting extends RunData {
    */
   @Override
   public RunData createChildRunData(Result childResult) {
-    return new RunDataMockForTesting(childResult, toRoll);
+    return new RunDataMockForTesting(childResult, toRoll, this);
   }
 
   /**
@@ -75,7 +76,7 @@ public class RunDataMockForTesting extends RunData {
       throw new ArrayIndexOutOfBoundsException(
           "Requested more rolls than were provided to the RunDataMock");
     log.fine("Providing next pre-configured roll: " + next);
-    rolled.add(next);
+    recordRolled(next);
     return next;
   }
 

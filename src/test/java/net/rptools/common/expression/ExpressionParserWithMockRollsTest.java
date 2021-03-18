@@ -17,6 +17,7 @@ package net.rptools.common.expression;
 import java.math.BigDecimal;
 import junit.framework.TestCase;
 import net.rptools.parser.ParserException;
+import org.junit.After;
 
 /**
  * An alternative test suite that evaluates dice expressions against specific known roll sequences.
@@ -31,6 +32,12 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
   private void setUpMockRunData(int[] rolls) {
     RunDataMockForTesting mockRD = new RunDataMockForTesting(new Result(""), rolls);
     RunData.setCurrent(mockRD);
+  }
+
+  /** Clear the RunData after each test, in case we leave a mock instance as Current. */
+  @After
+  public void clearRunData() {
+    RunData.setCurrent(null);
   }
 
   public void testEvaluate_ShadowRun4NonGlich25() throws ParserException {
