@@ -120,6 +120,11 @@ public class HexGridVertical extends HexGrid {
 
   @Override
   public int[] getFacingAngles() {
+    if (FACING_ANGLES == null) {
+      boolean faceEdges = AppPreferences.getFaceEdge();
+      boolean faceVertices = AppPreferences.getFaceVertex();
+      setFacings(faceEdges, faceVertices);
+    }
     return FACING_ANGLES;
   }
 
