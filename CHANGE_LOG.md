@@ -1,3 +1,51 @@
+# MapTool 1.8.4
+Focus on bug fixes related to 1.8.3 release.
+
+#Bug Fixes
+- [#2470][i2470] Fixed typo in JSON results of `getMacroProps()`.
+- [#2449][i2449] Text color in `<p>` elements could be overridden by other elements in chat. Fixed.
+- [#2444][i2444] Rolls from `json.objrolls()` were not showing in `getRolled()` and `getNewRolls()`. Fixed.
+- [#2442][i2442] `getTableEntry()` returned incorrect results when passed out-of-bound roll values. Fixed.
+- [#2441][i2441] Executing `[h: return(0)]` directly would produce an error. Fixed.
+- [#2436][i2436] Auto-complete summary field was not showing tooltips for UDFs on GM/Campaign panels.
+- [#2432][i2432] MapTool was being registered as default handler for `.zip` files. Fixed.
+- [#2426][i2426] Exception thrown by Prefrences dialog when language file had a translation for `Label.startup` string. Fixed.
+- [#2424][i2424] Changing token states in onInitiative events breaks initiative list synchronization between server and clients. Fixed.
+- [#2422][i2422] UDFs no longer recognized by code-completion. Fixed.
+- [#2416][i2416] Setting facing for tokens on hex maps could throw an exception.  Fixed.
+- [#2411][i2411] Probable fix for TimSort Illegal Argument Exceptions from vision calculations.
+- [#2408][i2408] Preferences was still trying to write to config file. Fixed.
+- [#2402][i2402] Map Explorer was showing all NPC tokens to Players. Fixed.
+- [#2393][i2393] Version update wasn't tracking versions correctly causing it to prompt for update to same version. Fixed.
+- [#2394][i2394] Player could login as GM with Player password. Fixed. Client role is now determined by password used.  
+- [#2392][i2392] MapTool would refuse to start when a custom theme is specified in prefs but was missing from datadir. Fixed.
+
+## Other
+- [#2475][i2475] Updated DiceLib to 1.7.1 for fix to [#2444][i2444]
+- [#2474][i2474] Updated Twelve Monkeys imageio plugins to 3.64.
+- [#2399][i2399] Updated GitHub README.MD
+
+[i2475]: https://github.com/RPTools/maptool/pull/2475
+[i2474]: https://github.com/RPTools/maptool/issues/2474
+[i2470]: https://github.com/RPTools/maptool/issues/2470
+[i2449]: https://github.com/RPTools/maptool/issues/2449
+[i2444]: https://github.com/RPTools/maptool/issues/2444
+[i2442]: https://github.com/RPTools/maptool/issues/2442
+[i2441]: https://github.com/RPTools/maptool/issues/2441
+[i2436]: https://github.com/RPTools/maptool/issues/2436
+[i2432]: https://github.com/RPTools/maptool/issues/2432
+[i2426]: https://github.com/RPTools/maptool/issues/2426
+[i2424]: https://github.com/RPTools/maptool/issues/2424
+[i2422]: https://github.com/RPTools/maptool/issues/2422
+[i2416]: https://github.com/RPTools/maptool/issues/2416
+[i2411]: https://github.com/RPTools/maptool/issues/2411
+[i2408]: https://github.com/RPTools/maptool/issues/2408
+[i2402]: https://github.com/RPTools/maptool/issues/2402
+[i2399]: https://github.com/RPTools/maptool/issues/2399
+[i2394]: https://github.com/RPTools/maptool/issues/2394
+[i2393]: https://github.com/RPTools/maptool/issues/2393
+[i2392]: https://github.com/RPTools/maptool/issues/2392
+
 # Maptool 1.8.0
 **MapTool now uses Java 14 from AdoptOpenJDK.**
 
