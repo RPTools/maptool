@@ -14,7 +14,11 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -28,16 +32,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.io.StringReader;
+import java.util.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
@@ -87,6 +83,10 @@ public class Token extends BaseModel implements Cloneable {
 
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID;
+
+  /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
+  private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
+      new Gson().getAdapter(JsonObject.class);
 
   public enum TokenShape {
     TOP_DOWN("Top down"),
@@ -1733,7 +1733,29 @@ public class Token extends BaseModel implements Cloneable {
     if (val == null) {
       return "";
     }
-    // First we try convert it to a JSON array. Fixes #2057.
+    if (val.toString().trim().startsWith("{")) {
+      /*
+       * The normal Gson evaluator was too lenient in identifying JSON objects, so we had to move
+       * that lower (see #1560). But we would really like to avoid the performance cost of
+       * attempting to parse anything that actually is a proper JSON, so let's try a stricter
+       * evaluation process here first (see #2396).
+       */
+      try {
+        try (JsonReader reader = new JsonReader(new StringReader(val.toString()))) {
+          JsonObject result = strictGsonObjectAdapter.read(reader);
+          // in case of a situation like {"a": 1}{"b": 2}, the above would have stopped at the first
+          // complete object.  This next line will throw an exception on finding another top-level
+          // object, allowing us to move on with other evaluation.
+          reader.hasNext();
+          if (result.isJsonObject()) {
+            return result;
+          }
+        }
+      } catch (IOException e) {
+        // deliberately ignored - continue parsing
+      }
+    }
+    // try to convert it to a JSON array. Fixes #2057.
     if (val.toString().trim().startsWith("[")) {
       JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
       if (json.isJsonArray()) {
@@ -1753,7 +1775,7 @@ public class Token extends BaseModel implements Cloneable {
       }
       val = MapTool.getParser().parseLine(resolver, this, val.toString());
     } catch (ParserException pe) {
-      // pe.printStackTrace();
+      log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
       val = val.toString();
     }
     if (val == null) {
