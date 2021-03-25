@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,35 +108,32 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       // latch.await();
       BufferedImage img = ImageManager.getImageAndWait(assetId);
 
-      Asset asset = AssetManager.getAsset(assetId);
-      if (asset != null && asset.getImage() != null) {
-        if (scaleW > 0 || scaleH > 0) {
-          switch (scaleW) {
-            case -1:
-              scaleW = img.getWidth();
-              break;
-            case 0:
-              scaleW = img.getWidth() * scaleH / img.getHeight();
-              break;
-          }
-          switch (scaleH) {
-            case -1:
-              scaleH = img.getHeight();
-              break;
-            case 0:
-              scaleH = img.getHeight() * scaleW / img.getWidth();
-              break;
-          }
-          BufferedImage bimg = new BufferedImage(scaleW, scaleH, BufferedImage.TRANSLUCENT);
-          Graphics2D g = bimg.createGraphics();
-          g.drawImage(img, 0, 0, scaleW, scaleH, null);
-          g.dispose();
-          data = ImageUtil.imageToBytes(bimg, "png"); // assume png because translucent.
-        } else data = asset.getImage();
-      } else {
-        log.error("Could not find asset: " + assetId);
-        data = new byte[] {};
+      if (scaleW > 0 || scaleH > 0) {
+        switch (scaleW) {
+          case -1:
+            scaleW = img.getWidth();
+            break;
+          case 0:
+            scaleW = img.getWidth() * scaleH / img.getHeight();
+            break;
+        }
+        switch (scaleH) {
+          case -1:
+            scaleH = img.getHeight();
+            break;
+          case 0:
+            scaleH = img.getHeight() * scaleW / img.getWidth();
+            break;
+        }
+        BufferedImage bimg = new BufferedImage(scaleW, scaleH, BufferedImage.TRANSLUCENT);
+        Graphics2D g = bimg.createGraphics();
+        g.drawImage(img, 0, 0, scaleW, scaleH, null);
+        g.dispose();
+        img = bimg;
       }
+
+      data = ImageUtil.imageToBytes(img, "png"); // assume png because translucent.
+
       return new ByteArrayInputStream(data);
     }
   }
