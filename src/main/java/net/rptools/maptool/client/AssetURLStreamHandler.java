@@ -27,8 +27,6 @@ import java.util.Map;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Support "asset://" in Swing components
@@ -36,8 +34,6 @@ import org.apache.logging.log4j.Logger;
  * @author Azhrei
  */
 public class AssetURLStreamHandler extends URLStreamHandler {
-
-  private static final Logger log = LogManager.getLogger(AssetURLStreamHandler.class);
 
   @Override
   protected URLConnection openConnection(URL u) {
@@ -70,7 +66,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
       final MD5Key assetId = new MD5Key(strAssetId);
       String query = url.getQuery();
-      Map<String, String> var = new HashMap<String, String>();
+      Map<String, String> var = new HashMap<>();
 
       while (query != null && query.length() > 1) {
         int delim = query.indexOf('=');
@@ -93,38 +89,19 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       scaleW = var.get("width") != null ? Integer.parseInt(var.get("width")) : scaleW;
       scaleH = var.get("height") != null ? Integer.parseInt(var.get("height")) : scaleH;
 
-      // Need to make sure the image is available
-      // TODO: Create a AssetManager.getAssetAndWait(id) and put this block in it
-      // final CountDownLatch latch = new CountDownLatch(1);
-      // AssetManager.getAssetAsynchronously(assetId, new AssetAvailableListener() {
-      // public void assetAvailable(MD5Key key) {
-      // if (key.equals(assetId)) {
-      // latch.countDown();
-      // }
-      // }
-      // });
-
-      byte[] data = null;
-      // latch.await();
       BufferedImage img = ImageManager.getImageAndWait(assetId);
 
       if (scaleW > 0 || scaleH > 0) {
-        switch (scaleW) {
-          case -1:
-            scaleW = img.getWidth();
-            break;
-          case 0:
-            scaleW = img.getWidth() * scaleH / img.getHeight();
-            break;
-        }
-        switch (scaleH) {
-          case -1:
-            scaleH = img.getHeight();
-            break;
-          case 0:
-            scaleH = img.getHeight() * scaleW / img.getWidth();
-            break;
-        }
+        scaleW = switch (scaleW) {
+          case -1 -> img.getWidth();
+          case 0 -> img.getWidth() * scaleH / img.getHeight();
+          default -> scaleW;
+        };
+        scaleH = switch (scaleH) {
+          case -1 -> img.getHeight();
+          case 0 -> img.getHeight() * scaleW / img.getWidth();
+          default -> scaleH;
+        };
         BufferedImage bimg = new BufferedImage(scaleW, scaleH, BufferedImage.TRANSLUCENT);
         Graphics2D g = bimg.createGraphics();
         g.drawImage(img, 0, 0, scaleW, scaleH, null);
@@ -132,7 +109,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
         img = bimg;
       }
 
-      data = ImageUtil.imageToBytes(img, "png"); // assume png because translucent.
+      byte[] data = ImageUtil.imageToBytes(img, "png"); // assume png because translucent.
 
       return new ByteArrayInputStream(data);
     }
