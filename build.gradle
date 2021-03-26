@@ -324,6 +324,8 @@ dependencies {
 
     implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
 
+    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp
+
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
