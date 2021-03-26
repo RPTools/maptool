@@ -66,7 +66,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
       final MD5Key assetId = new MD5Key(strAssetId);
       String query = url.getQuery();
-      Map<String, String> var = new HashMap<>();
+      Map<String, String> var = new HashMap<String, String>();
 
       while (query != null && query.length() > 1) {
         int delim = query.indexOf('=');
@@ -92,16 +92,22 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       BufferedImage img = ImageManager.getImageAndWait(assetId);
 
       if (scaleW > 0 || scaleH > 0) {
-        scaleW = switch (scaleW) {
-          case -1 -> img.getWidth();
-          case 0 -> img.getWidth() * scaleH / img.getHeight();
-          default -> scaleW;
-        };
-        scaleH = switch (scaleH) {
-          case -1 -> img.getHeight();
-          case 0 -> img.getHeight() * scaleW / img.getWidth();
-          default -> scaleH;
-        };
+        switch (scaleW) {
+          case -1:
+            scaleW = img.getWidth();
+            break;
+          case 0:
+            scaleW = img.getWidth() * scaleH / img.getHeight();
+            break;
+        }
+        switch (scaleH) {
+          case -1:
+            scaleH = img.getHeight();
+            break;
+          case 0:
+            scaleH = img.getHeight() * scaleW / img.getWidth();
+            break;
+        }
         BufferedImage bimg = new BufferedImage(scaleW, scaleH, BufferedImage.TRANSLUCENT);
         Graphics2D g = bimg.createGraphics();
         g.drawImage(img, 0, 0, scaleW, scaleH, null);
