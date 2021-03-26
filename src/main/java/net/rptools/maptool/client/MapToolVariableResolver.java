@@ -97,6 +97,7 @@ public class MapToolVariableResolver implements VariableResolver {
     try {
       this.setVariable("macro.args", "");
       this.setVariable("macro.catchAbort", BigDecimal.ZERO);
+      this.setVariable("macro.return", BigDecimal.ZERO);
       this.setVariable("macro.catchAssert", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
       this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE, 0);
@@ -333,8 +334,12 @@ public class MapToolVariableResolver implements VariableResolver {
   }
 
   protected void updateTokenProperty(Token token, String varname, String value) {
-    MapTool.serverCommand()
-        .updateTokenProperty(tokenInContext, Token.Update.setProperty, varname, value);
+    // this logic allows unit tests to execute MT script that changes token properties
+    // there should be no other context where we have no server of any kind
+    if (MapTool.serverCommand() != null)
+      MapTool.serverCommand()
+          .updateTokenProperty(tokenInContext, Token.Update.setProperty, varname, value);
+    else token.setProperty(varname, value);
   }
 
   @Override
