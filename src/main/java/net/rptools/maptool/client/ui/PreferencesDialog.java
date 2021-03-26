@@ -161,16 +161,22 @@ public class PreferencesDialog extends JDialog {
           // Warn the user that they changed JVM options and need to restart MapTool for
           // them to take affect.
           // Also warn user to double check settings...
+          /* This cant happen until jpackager allows startup parameters outside of app
+             see https://github.com/RPTools/maptool/issues/2174
           if (jvmValuesChanged) {
             if (!MapTool.confirm("msg.confirm.jvm.options")) {
               return;
             }
           }
+           */
 
           boolean close = true;
+          /* This cant happen until jpackager allows startup parameters outside of app
+             see https://github.com/RPTools/maptool/issues/2174
           if (jvmValuesChanged) {
             close = UserJvmOptions.saveAppCfg();
           }
+           */
 
           if (close) {
             setVisible(false);
@@ -947,7 +953,7 @@ public class PreferencesDialog extends JDialog {
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(I18N.getString("Label.startup")), false);
     } else {
       try {
 
