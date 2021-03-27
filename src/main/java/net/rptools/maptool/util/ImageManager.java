@@ -304,15 +304,18 @@ public class ImageManager {
               ImageUtil.createCompatibleImage(
                   ImageUtil.bytesToImage(asset.getImage(), asset.getName()), hints);
         } catch (Throwable t) {
-          log.error(
-              "BackgroundImageLoader.run("
-                  + asset.getName()
-                  + ","
-                  + asset.getImageExtension()
-                  + ", "
-                  + asset.getId()
-                  + "): image not resolved",
-              t);
+          if (!AssetManager.BAD_ASSET_LOCATION_KEY.toString().equals(asset.getId())) {
+            // Don't bother logging cache miss of internal bad location asset
+            log.error(
+                "BackgroundImageLoader.run("
+                    + asset.getName()
+                    + ","
+                    + asset.getImageExtension()
+                    + ", "
+                    + asset.getId()
+                    + "): image not resolved",
+                t);
+          }
           image = BROKEN_IMAGE;
         }
       }

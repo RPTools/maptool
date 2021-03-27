@@ -18,14 +18,10 @@ import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,10 +33,10 @@ import org.reflections.scanners.ResourcesScanner;
 
 /** Executes only the first time the application is run. */
 public class AppSetup {
-  private static final Logger log = LogManager.getLogger(AppSetup.class);
 
-  private static boolean startupPreferencesFromPrevious = false;
-  private static boolean startupPreferencesCopied = false;
+  private static boolean themesInstalled = false;
+
+  private static final Logger log = LogManager.getLogger(AppSetup.class);
 
   public static void install() {
     try {
@@ -54,70 +50,6 @@ public class AppSetup {
 
     installDefaultMacroEditorThemes();
     installPredefinedProperties();
-    copyConfigFile();
-  }
-
-  private static void copyConfigFile() {
-    File userDirAppConfig = AppUtil.getDataDirAppCfgFile();
-    File appConfig = AppUtil.getAppCfgFile();
-
-    if (appConfig == null) {
-      log.info("Not running from install skipping config file copy");
-      return;
-    }
-
-    if (userDirAppConfig.exists()) {
-      try (InputStream uis = new FileInputStream(userDirAppConfig);
-          InputStream pis = new FileInputStream(appConfig)) {
-        MD5Key userDirConfigMD5 = new MD5Key(uis);
-        MD5Key packageDirConfigMD5 = new MD5Key(pis);
-
-        if (!userDirConfigMD5.equals(packageDirConfigMD5)) {
-          Files.copy(
-              userDirAppConfig.toPath(), appConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
-          startupPreferencesFromPrevious = true;
-          log.info("Startup configuration file copied from previous version.");
-        }
-      } catch (IOException e) {
-        if (AppUtil.MAC_OS_X || AppUtil.LINUX_OR_UNIX) {
-          MapTool.showInformation(
-              I18N.getText(
-                  "msg.error.copyingStartupConfig.unixLike",
-                  userDirAppConfig.toString(),
-                  appConfig.toString()));
-        } else {
-          MapTool.showError("msg.error.copyingStartupConfig", e);
-        }
-      }
-    } else { // Configuration in user data dir does not exist.
-      try {
-        if (appConfig.exists()) {
-          Files.copy(appConfig.toPath(), userDirAppConfig.toPath());
-          startupPreferencesCopied = true;
-          log.info("Startup configuration file copied from install.");
-        }
-      } catch (IOException e) {
-        MapTool.showError("msg.error.copyingStartupConfig", e);
-      }
-    }
-  }
-
-  /**
-   * Returns {@code true} if the start up preferences were copied from a previous version.
-   *
-   * @return {@code true} if the start up preferences were copied from a previous version.
-   */
-  public static boolean didCopyPreviousStartupPreferences() {
-    return startupPreferencesFromPrevious;
-  }
-
-  /**
-   * Returns {@code true} if the start up preferences were copied from the install.
-   *
-   * @eturn {@code true} if the start up preferences were copied from the install.
-   */
-  public static boolean didStartupPreferencesGetCopied() {
-    return startupPreferencesCopied;
   }
 
   public static void installDefaultTokens() throws IOException {
@@ -165,21 +97,24 @@ public class AppSetup {
    * searched on MapTool start for theme files.
    */
   public static void installDefaultUIThemes() {
-    Reflections reflections =
-        new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
-    Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
+    if (!themesInstalled) {
+      Reflections reflections =
+          new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
+      Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
 
-    for (String resourcePath : resourcePathSet) {
-      URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
-      String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
-      File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
+      for (String resourcePath : resourcePathSet) {
+        URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+        String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
+        File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
 
-      try {
-        log.info("Installing ui theme: " + resourceFile);
-        FileUtils.copyURLToFile(inputUrl, resourceFile);
-      } catch (IOException e) {
-        log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+        try {
+          log.info("Installing ui theme: " + resourceFile);
+          FileUtils.copyURLToFile(inputUrl, resourceFile);
+        } catch (IOException e) {
+          log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+        }
       }
+      themesInstalled = true;
     }
   }
 
