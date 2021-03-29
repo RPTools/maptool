@@ -403,12 +403,13 @@ public class HTMLOverlayPanel extends JFXPanel {
    * Run all callback macros for "onTokenChanged".
    *
    * @param token the token that have changed
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    */
-  public void doTokenChanged(Token token) {
+  public void doTokenChanged(Token token, Token.Update update, String[] parameters) {
     for (HTMLOverlayManager overlay : overlays) {
-      if (overlay.getWebView().isVisible()) {
-        HTMLPanelContainer.tokenChanged(token, overlay.macroCallbacks());
-      }
+      HTMLPanelContainer.tokenChanged(token, update, parameters, overlay.macroCallbacks());
     }
   }
 

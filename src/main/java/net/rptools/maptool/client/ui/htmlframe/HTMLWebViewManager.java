@@ -445,6 +445,7 @@ public class HTMLWebViewManager {
     NamedNodeMap attr = node.getAttributes();
     Node rel = attr.getNamedItem("rel");
     Node type = attr.getNamedItem("type");
+    Node version = attr.getNamedItem("version");
     Node href = attr.getNamedItem("href");
 
     if (rel != null && type != null && href != null) {
@@ -470,7 +471,11 @@ public class HTMLWebViewManager {
         } else if (rel.getTextContent().equalsIgnoreCase("onChangeSelection")) {
           doRegisterMacro("onChangeSelection", content);
         } else if (rel.getTextContent().equalsIgnoreCase("onChangeToken")) {
-          doRegisterMacro("onChangeToken", content);
+          if (version != null && "2".equals(version.getTextContent())) {
+            doRegisterMacro("onChangeToken_2", content);
+          } else {
+            doRegisterMacro("onChangeToken", content);
+          }
         }
       }
     }

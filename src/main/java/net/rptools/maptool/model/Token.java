@@ -177,7 +177,8 @@ public class Token extends BaseModel implements Cloneable {
     setHasSight,
     setSightType,
     flipX,
-    flipY
+    flipY,
+    editToken
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2467,15 +2468,18 @@ public class Token extends BaseModel implements Cloneable {
     boolean lightChanged = false;
     boolean macroChanged = false;
     boolean panelLookChanged = false; // appearance of token in a panel changed
+    List<String> parameterStrings = new ArrayList<String>();
     switch (update) {
       case setState:
         setState(parameters[0].toString(), parameters[1]);
+        parameterStrings.add(parameters[0].toString());
         break;
       case setAllStates:
         setAllStates(parameters[0]);
         break;
       case setPropertyType:
         setPropertyType(parameters[0].toString());
+        parameterStrings.add(parameters[0].toString());
         break;
       case setPC:
         setType(Type.PC);
@@ -2513,9 +2517,12 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setProperty:
         setProperty(parameters[0].toString(), parameters[1].toString());
+        parameterStrings.add(parameters[0].toString());
+        parameterStrings.add(parameters[1].toString());
         break;
       case resetProperty:
         resetProperty(parameters[0].toString());
+        parameterStrings.add(parameters[0].toString());
         break;
       case setZOrder:
         setZOrder((int) parameters[0]);
@@ -2537,6 +2544,7 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case addOwner:
         addOwner(parameters[0].toString());
+        parameterStrings.add(parameters[0].toString());
         break;
       case setScaleX:
         setSnapToScale(false);
@@ -2553,9 +2561,11 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setNotes:
         setNotes(parameters[0].toString());
+        parameterStrings.add(parameters[0].toString());
         break;
       case setGMNotes:
         setGMNotes(parameters[0].toString());
+        parameterStrings.add(parameters[0].toString());
         break;
       case setX:
         if (hasLightSources()) {
@@ -2581,13 +2591,16 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setLabel:
         setLabel((String) parameters[0]);
+        parameterStrings.add((String) parameters[0]);
         break;
       case setName:
         setName((String) parameters[0]);
+        parameterStrings.add((String) parameters[0]);
         panelLookChanged = true;
         break;
       case setGMName:
         setGMName((String) parameters[0]);
+        parameterStrings.add((String) parameters[0]);
         panelLookChanged = true;
         break;
       case setVisible:
@@ -2619,6 +2632,7 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        parameterStrings.add((String) parameters[0]);
         panelLookChanged = true;
         break;
       case setPortraitImage:
@@ -2658,6 +2672,7 @@ public class Token extends BaseModel implements Cloneable {
           lightChanged = true;
         }
         setSightType((String) parameters[0]);
+        parameterStrings.add((String) parameters[0]);
         break;
       case saveMacro:
         saveMacro((MacroButtonProperties) parameters[0]);
@@ -2687,6 +2702,7 @@ public class Token extends BaseModel implements Cloneable {
     if (panelLookChanged) {
       zone.tokenPanelChanged(this);
     }
-    zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+    // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+    zone.tokenChanged(this, update, parameterStrings.toArray(String[]::new));
   }
 }

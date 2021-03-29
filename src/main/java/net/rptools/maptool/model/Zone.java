@@ -824,9 +824,16 @@ public class Zone extends BaseModel {
    * Fire the event TOKEN_CHANGED
    *
    * @param token the token that changed
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    */
-  public void tokenChanged(Token token) {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+  public void tokenChanged(Token token, Token.Update update, String[] parameters) {
+    Object[] arg = new Object[parameters.length + 2];
+    System.arraycopy(parameters, 0, arg, 2, parameters.length);
+    arg[0] = token;
+    arg[1] = update;
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, arg));
   }
 
   /**
@@ -1324,8 +1331,9 @@ public class Zone extends BaseModel {
    * </code> or <code>Event.TOKEN_CHANGED</code>).
    *
    * @param token the Token to be added to this zone
+   * @param update the update source
    */
-  public void putToken(Token token) {
+  public void putToken(Token token, Token.Update update) {
     boolean newToken = !tokenMap.containsKey(token.getId());
 
     tokenMap.put(token.getId(), token);
@@ -1338,8 +1346,18 @@ public class Zone extends BaseModel {
     if (newToken) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
     } else {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+      fireModelChangeEvent(
+          new ModelChangeEvent(this, Event.TOKEN_CHANGED, new Object[] {token, update}));
     }
+  }
+
+  /**
+   * {@link #putToken(Token, Token.Update)}
+   *
+   * @param token the Token to be added to this zone
+   */
+  public void putToken(Token token) {
+    putToken(token, null);
   }
 
   /**
@@ -1348,7 +1366,7 @@ public class Zone extends BaseModel {
    * @param token the token that was edited
    */
   public void editToken(Token token) {
-    putToken(token);
+    putToken(token, Token.Update.editToken);
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_EDITED, token));
   }
   /**

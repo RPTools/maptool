@@ -330,12 +330,7 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      String encoded;
-      // Shouldn't this use '&#59;' like
-      // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
-      encoded = parameters.get(0).toString().replaceAll(";", "&semi;");
-      encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8);
-      return encoded;
+      return urlEncodeString(parameters.get(0).toString());
     }
     if (functionName.equals("decode")) {
       if (parameters.size() < 1) {
@@ -381,6 +376,21 @@ public class StringFunctions extends AbstractFunction {
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
+  }
+
+  /**
+   * Helper method to encode (URL) a string. Used by the 'encode' macro function.
+   *
+   * @param toEncode string to encode
+   * @return encoded string
+   */
+  public static String urlEncodeString(String toEncode) {
+    String encoded;
+    // Shouldn't this use '&#59;' like
+    // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
+    encoded = toEncode.replaceAll(";", "&semi;");
+    encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8);
+    return encoded;
   }
 
   /**

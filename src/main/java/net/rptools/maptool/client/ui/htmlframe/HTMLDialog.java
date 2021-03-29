@@ -317,13 +317,14 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * Run all callback macros for "onChangeToken".
    *
    * @param token the token that changed.
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    */
-  public static void doTokenChanged(Token token) {
+  public static void doTokenChanged(Token token, Token.Update update, String[] parameters) {
     if (token != null) {
       for (HTMLDialog dialog : dialogs.values()) {
-        if (dialog.isVisible()) {
-          HTMLPanelContainer.tokenChanged(token, dialog.macroCallbacks());
-        }
+        HTMLPanelContainer.tokenChanged(token, update, parameters, dialog.macroCallbacks());
       }
     }
   }

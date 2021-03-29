@@ -297,13 +297,14 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * Run all callback macros for "onChangeToken".
    *
    * @param token the token that changed.
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    */
-  public static void doTokenChanged(Token token) {
+  public static void doTokenChanged(Token token, Token.Update update, String[] parameters) {
     if (token != null) {
       for (HTMLFrame frame : frames.values()) {
-        if (frame.isVisible()) {
-          HTMLPanelContainer.tokenChanged(token, frame.macroCallbacks);
-        }
+        HTMLPanelContainer.tokenChanged(token, update, parameters, frame.macroCallbacks);
       }
     }
   }

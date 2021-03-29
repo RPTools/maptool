@@ -300,6 +300,7 @@ public class HTMLPane extends JEditorPane {
     void handleLinkTag(MutableAttributeSet attributes) {
       Object rel = attributes.getAttribute(HTML.Attribute.REL);
       Object type = attributes.getAttribute(HTML.Attribute.TYPE);
+      Object version = attributes.getAttribute(HTML.Attribute.VERSION);
       Object href = attributes.getAttribute(HTML.Attribute.HREF);
 
       if (rel != null && type != null && href != null) {
@@ -322,7 +323,11 @@ public class HTMLPane extends JEditorPane {
           } else if (rel.toString().equalsIgnoreCase("onChangeSelection")) {
             doRegisterMacro("onChangeSelection", href.toString());
           } else if (rel.toString().equalsIgnoreCase("onChangeToken")) {
-            doRegisterMacro("onChangeToken", href.toString());
+            if (version != null && "2".equals(version.toString())) {
+              doRegisterMacro("onChangeToken_2", href.toString());
+            } else {
+              doRegisterMacro("onChangeToken", href.toString());
+            }
           }
         }
       }
