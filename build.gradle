@@ -32,6 +32,14 @@ def appSemVer = ""
 
 // Custom properties
 ext {
+
+    gdxVersion = '1.9.15-SNAPSHOT'
+    roboVMVersion = '2.3.12'
+    box2DLightsVersion = '1.5'
+    ashleyVersion = '1.7.3'
+    aiVersion = '1.8.2'
+    gdxControllersVersion = '2.1.0'
+
     // Get tag and commit info from Git to use for version numbering
     def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
     def head = grgit.head()
@@ -233,6 +241,9 @@ repositories {
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
+    google()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
 
@@ -357,6 +368,12 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    implementation "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 }
 
 

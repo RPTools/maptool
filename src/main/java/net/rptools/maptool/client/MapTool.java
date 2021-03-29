@@ -57,6 +57,7 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.box2d.DesktopLauncher;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -172,6 +173,7 @@ public class MapTool {
   private static String lastWhisperer;
 
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
+  private static DesktopLauncher MapToolLwjglApplication;
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
   private static boolean debug = false;
@@ -182,6 +184,8 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
+  private static boolean startLibGDX = false;
+  public static boolean libgdxLoaded = false;
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -1257,6 +1261,23 @@ public class MapTool {
     return clientFrame;
   }
 
+  public static DesktopLauncher getApp() {
+    return MapToolLwjglApplication;
+  }
+
+  public static void loadBox2dTest() {
+    if (MapToolLwjglApplication == null) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          MapToolLwjglApplication = new DesktopLauncher(clientFrame);
+          libgdxLoaded = true;
+        }
+      });
+    } else if (!MapToolLwjglApplication.isVisible()) {
+      MapToolLwjglApplication.setVisible(true);
+    }
+  }
+
   private static void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         defaults -> {
@@ -1566,6 +1587,7 @@ public class MapTool {
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
     cmdOptions.addOption("F", "file", true, "load campaign on startup");
 
+
     CommandLineParser cmdParser = new DefaultParser();
     CommandLine cmd = null;
     boolean listMacros = false;
@@ -1752,6 +1774,23 @@ public class MapTool {
 
     // Draw frame contents on resize
     tk.setDynamicLayout(true);
+
+    // Add a LibGDX App/window for testing
+    if (startLibGDX) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          MapToolLwjglApplication = new DesktopLauncher(clientFrame);
+          libgdxLoaded = true;
+        }
+      });
+
+      // LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+      // cfg.title = MapToolGame.TITLE;
+      // cfg.width = MapToolGame.SCREEN_WIDTH;
+      // cfg.height = MapToolGame.SCREEN_HEIGHT;
+      //
+      // MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
+    }
 
     EventQueue.invokeLater(
         () -> {
