@@ -2008,7 +2008,7 @@ public class AppActions {
     public static final DefaultClientAction SHOW_BOX2D_TEST =
             new DefaultClientAction() {
         {
-            init("Show/Hide jfx");
+            init("Show jfx");
             //init("Show Box2D Test");
         }
 

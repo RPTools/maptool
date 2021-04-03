@@ -50,11 +50,7 @@ public class NativeRenderingCanvas {
     private final ChangeListener<? super Bounds> resizeListener;
 
     private ByteBuffer oldRawByteBuffer;
-    private ByteBuffer newRawByteBuffer;
     private PixelBuffer<ByteBuffer> pixelBuffer;
-
-    private final Viewport emptyViewport = new Viewport();
-    private Viewport nrViewport = emptyViewport;
 
     private int width;
     private int height;
@@ -77,6 +73,7 @@ public class NativeRenderingCanvas {
         imageView.fitHeightProperty().bind(canvasPane.heightProperty());
         imageView.setPreserveRatio(true);
         imageView.setPickOnBounds(true);
+        imageView.setMouseTransparent(true);
 
         canvasPane.getChildren().add(imageView);
 
@@ -87,7 +84,7 @@ public class NativeRenderingCanvas {
             if(width <= 0 || height <= 0)
                 return;;
 
-            render(nrViewport.withSize(width, height));
+            nativeRenderer.createCanvas(width, height);
 
         };
 
@@ -157,7 +154,6 @@ public class NativeRenderingCanvas {
      * before the NativeRenderingCanvas instance can be used again.
      */
     public void dispose() {
-        nrViewport = emptyViewport;
 
         canvasPane.boundsInLocalProperty().removeListener(resizeListener);
 
@@ -183,23 +179,6 @@ public class NativeRenderingCanvas {
      */
     public Node getRoot() {
         return canvasPane;
-    }
-
-    private void render(Viewport viewport) {
-        if (viewport.isEmpty() || viewport.getWidth() <= 0 || viewport.getHeight() <= 0)
-            return;
-
-        renderAction(viewport, nrViewport);
-    }
-
-    // Can be called on any thread.
-    private void renderAction(Viewport newViewport, Viewport oldViewport) {
-        if (newViewport != oldViewport) {
-            if (newViewport.getWidth() != oldViewport.getWidth() || newViewport.getHeight() != oldViewport.getHeight()) {
-                nativeRenderer.createCanvas(newViewport.getWidth(), newViewport.getHeight());
-            }
-        }
-        //nativeRenderer.moveTo(newViewport.getMinX(), newViewport.getMinY());
     }
 
     // Must be called on JavaFX application thread.

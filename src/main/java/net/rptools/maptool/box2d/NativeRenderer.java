@@ -1,6 +1,5 @@
 package net.rptools.maptool.box2d;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -80,6 +79,8 @@ public class NativeRenderer implements InputProcessor {
         checkSizeChange();
 
         app = new LwjglApplication(box, config, canvas);
+        Gdx.graphics.setContinuousRendering(false);
+        Gdx.graphics.requestRendering();
     }
 
     public void dispose() {

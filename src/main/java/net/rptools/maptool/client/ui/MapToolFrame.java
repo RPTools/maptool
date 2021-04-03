@@ -51,6 +51,8 @@ import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
@@ -426,7 +428,7 @@ public class MapToolFrame extends DefaultDockableHolder
     // zoneMiniMapPanel.setSize(100, 100);
 
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
-    zoneRendererPanel.setBackground(Color.black);
+    //zoneRendererPanel.setBackground(Color.black);
     // zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
     // zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
@@ -489,15 +491,16 @@ public class MapToolFrame extends DefaultDockableHolder
 
     Platform.runLater(()->{
       var root = new StackPane();
+
       var panel = new JPanel();
       var dummyCanvas = new Canvas();
       panel.add(dummyCanvas);
       final SwingNode swingNode = new SwingNode();
       swingNode.setVisible(false);
 
-        SwingUtilities.invokeLater(() -> {
+   //     SwingUtilities.invokeLater(() -> {
         swingNode.setContent(panel);
-        });
+    //    });
 
 
       var canvas = new NativeRenderingCanvas(dummyCanvas);
@@ -506,21 +509,26 @@ public class MapToolFrame extends DefaultDockableHolder
       label.setMouseTransparent(true);
       label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
 
+/*
+      WebView browser = new WebView();
+      WebEngine webEngine = browser.getEngine();
+      webEngine.load("https://www.youtube.com/embed/18pRUdKNlGw?rel=0&autoplay=1");
+      root.getChildren().add(browser);
 
-
-      root.getChildren().addAll(/*swingNode,*/ canvas.getRoot(),
-              label);
+ */
+      root.getChildren().addAll(/*swingNode,*/ canvas.getRoot(),label);
 
       Scene scene = new Scene(root);
       jfxPanel.setScene(scene);
     });
     zoneRendererPanel.add(jfxPanel, PositionalLayout.Position.CENTER);
-    zoneRendererPanel.setComponentZOrder(jfxPanel, 0);
-    jfxPanel.setVisible(false);
+    //zoneRendererPanel.setComponentZOrder(jfxPanel, 0);
+
+//    jfxPanel.setVisible(false);
   }
 
   public void addJfx(){
-    jfxPanel.setSize(zoneRendererPanel.getSize());
+    //jfxPanel.setSize(zoneRendererPanel.getSize());
     jfxPanel.setVisible(!jfxPanel.isVisible());
   }
 

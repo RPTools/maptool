@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+
+import com.badlogic.gdx.Gdx;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.ImageBorder;
@@ -902,6 +904,13 @@ public class ZoneRenderer extends JComponent
     }
   }
 
+  @Override
+  public void repaint() {
+    super.repaint();
+    if(Gdx.graphics != null)
+      Gdx.graphics.requestRendering();
+  }
+
   public PlayerView getPlayerView() {
     return getPlayerView(MapTool.getPlayer().getEffectiveRole());
   }
@@ -1115,6 +1124,9 @@ public class ZoneRenderer extends JComponent
    * @param view PlayerView object that describes whether the view is a Player or GM view
    */
   public void renderZone(Graphics2D g2d, PlayerView view) {
+    if(MapTool.getFrame().getJfxPanel().isVisible())
+      return;
+
     timer.start("setup");
     g2d.setFont(AppStyle.labelFont);
     Object oldAA = SwingUtil.useAntiAliasing(g2d);
@@ -1215,6 +1227,7 @@ public class ZoneRenderer extends JComponent
 
     // Rendering pipeline
     if (zone.drawBoard()) {
+      Rectangle fill = new Rectangle(getWidth(), getHeight());
       timer.start("board");
       renderBoard(g2d, view);
       timer.stop("board");
