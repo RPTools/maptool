@@ -23,16 +23,8 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -43,10 +35,17 @@ import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
+
+import javafx.application.Platform;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -58,6 +57,7 @@ import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.box2d.DesktopLauncher;
+import net.rptools.maptool.box2d.NativeRenderingCanvas;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -1779,7 +1779,7 @@ public class MapTool {
     if (startLibGDX) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          MapToolLwjglApplication = new DesktopLauncher(clientFrame);
+          //MapToolLwjglApplication = new DesktopLauncher(clientFrame);
           libgdxLoaded = true;
         }
       });
@@ -1791,6 +1791,7 @@ public class MapTool {
       //
       // MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
     }
+
 
     EventQueue.invokeLater(
         () -> {

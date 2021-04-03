@@ -27,6 +27,7 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,13 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
+
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
@@ -53,6 +61,7 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
+import net.rptools.maptool.box2d.NativeRenderingCanvas;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.AppConstants;
@@ -223,6 +232,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private final GlobalPanel globalPanel = new GlobalPanel();
   private final SelectionPanel selectionPanel = new SelectionPanel();
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
+  private final JFXPanel jfxPanel =  new JFXPanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
@@ -436,6 +446,7 @@ public class MapToolFrame extends DefaultDockableHolder
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
 
+
     // Put it all together
     setJMenuBar(menuBar);
     add(BorderLayout.NORTH, toolbarPanel);
@@ -475,7 +486,44 @@ public class MapToolFrame extends DefaultDockableHolder
     chatTyperTimers.addObserver(chatTyperObserver);
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
+
+    Platform.runLater(()->{
+      var root = new StackPane();
+      var panel = new JPanel();
+      var dummyCanvas = new Canvas();
+      panel.add(dummyCanvas);
+      final SwingNode swingNode = new SwingNode();
+      swingNode.setVisible(false);
+
+        SwingUtilities.invokeLater(() -> {
+        swingNode.setContent(panel);
+        });
+
+
+      var canvas = new NativeRenderingCanvas(dummyCanvas);
+
+      javafx.scene.control.Label label = new Label("This is JavaFX");
+      label.setMouseTransparent(true);
+      label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
+
+
+
+      root.getChildren().addAll(/*swingNode,*/ canvas.getRoot(),
+              label);
+
+      Scene scene = new Scene(root);
+      jfxPanel.setScene(scene);
+    });
+    zoneRendererPanel.add(jfxPanel, PositionalLayout.Position.CENTER);
+    zoneRendererPanel.setComponentZOrder(jfxPanel, 0);
+    jfxPanel.setVisible(false);
   }
+
+  public void addJfx(){
+    jfxPanel.setSize(zoneRendererPanel.getSize());
+    jfxPanel.setVisible(!jfxPanel.isVisible());
+  }
+
 
   public ChatNotificationTimers getChatNotificationTimers() {
     return chatTyperTimers;
@@ -878,6 +926,12 @@ public class MapToolFrame extends DefaultDockableHolder
     }
     return zoomStatusBar;
   }
+
+  public JFXPanel getJfxPanel() {
+    return jfxPanel;
+  }
+
+
 
   public AssetCacheStatusBar getAssetCacheStatusBar() {
     if (assetCacheStatusBar == null) {
