@@ -73,7 +73,6 @@ public class NativeRenderingCanvas {
         imageView.fitHeightProperty().bind(canvasPane.heightProperty());
         imageView.setPreserveRatio(true);
         imageView.setPickOnBounds(true);
-        imageView.setMouseTransparent(true);
 
         canvasPane.getChildren().add(imageView);
 

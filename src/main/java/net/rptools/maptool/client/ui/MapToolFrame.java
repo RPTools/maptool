@@ -425,11 +425,11 @@ public class MapToolFrame extends DefaultDockableHolder
     statusPanel.addPanel(new SpacerStatusBar(25));
 
     zoneMiniMapPanel = new ZoneMiniMapPanel();
-    // zoneMiniMapPanel.setSize(100, 100);
+    //zoneMiniMapPanel.setSize(100, 100);
 
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
     //zoneRendererPanel.setBackground(Color.black);
-    // zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
+    //zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
     // zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
@@ -524,7 +524,7 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(jfxPanel, PositionalLayout.Position.CENTER);
     //zoneRendererPanel.setComponentZOrder(jfxPanel, 0);
 
-//    jfxPanel.setVisible(false);
+    jfxPanel.setVisible(false);
   }
 
   public void addJfx(){
