@@ -492,16 +492,22 @@ public class MapToolFrame extends DefaultDockableHolder
     Platform.runLater(()->{
       var root = new StackPane();
 
+
+      //var frame = new JFrame();
+      //frame.setSize(640, 480);
       var panel = new JPanel();
+
       var dummyCanvas = new Canvas();
       panel.add(dummyCanvas);
+      //frame.add(dummyCanvas);
+      //frame.setVisible(true);
       final SwingNode swingNode = new SwingNode();
-      swingNode.setVisible(false);
+      //swingNode.setVisible(false);
 
-   //     SwingUtilities.invokeLater(() -> {
+   //   SwingUtilities.invokeLater(() -> {
         swingNode.setContent(panel);
     //    });
-
+//
 
       var canvas = new NativeRenderingCanvas(dummyCanvas);
 

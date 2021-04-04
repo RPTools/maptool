@@ -71,8 +71,8 @@ public class NativeRenderingCanvas {
         imageView.imageProperty().bind(fxImage);
         imageView.fitWidthProperty().bind(canvasPane.widthProperty());
         imageView.fitHeightProperty().bind(canvasPane.heightProperty());
-        imageView.setPreserveRatio(true);
-        imageView.setPickOnBounds(true);
+        //imageView.setPreserveRatio(true);
+        //imageView.setPickOnBounds(true);
 
         canvasPane.getChildren().add(imageView);
 

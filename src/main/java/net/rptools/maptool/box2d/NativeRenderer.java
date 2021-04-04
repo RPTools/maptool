@@ -59,6 +59,7 @@ public class NativeRenderer implements InputProcessor {
             return;
 
         oldConfig = newConfig;
+
         SwingUtilities.invokeLater(()->canvas.setSize(oldConfig.width, oldConfig.height));
     }
 
@@ -67,20 +68,24 @@ public class NativeRenderer implements InputProcessor {
         if (app != null)
             return;
 
-        canvas.setVisible(false);
+        //canvas.setVisible(false);
+        checkSizeChange();
 
         var config = new LwjglApplicationConfiguration();
         config.allowSoftwareMode = true;
         config.forceExit = false;
+        //config.width = oldConfig.width;
+        //config.height = newConfig.height;
 
-        var box = new Box2dLightTest();
-        box.setJfxRenderer(this);
-        gdxInput = box;
-        checkSizeChange();
+        //var appListender = new OrthographicCameraExample();
+        var appListender = new MapToolRenderer();
+        appListender.setJfxRenderer(this);
+        //gdxInput = box;
 
-        app = new LwjglApplication(box, config, canvas);
-        Gdx.graphics.setContinuousRendering(false);
-        Gdx.graphics.requestRendering();
+
+        app = new LwjglApplication(appListender, config, canvas);
+        //Gdx.graphics.setContinuousRendering(false);
+        //Gdx.graphics.requestRendering();
     }
 
     public void dispose() {
