@@ -14,16 +14,12 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +59,7 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
+import net.rptools.maptool.box2d.MapToolRenderer;
 import net.rptools.maptool.box2d.NativeRenderingCanvas;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ClientAction;
@@ -490,54 +487,43 @@ public class MapToolFrame extends DefaultDockableHolder
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
 
     Platform.runLater(()->{
-      var root = new StackPane();
+      var gdxCanvas = new Canvas();
+
+      var frame = new JFrame();
+      frame.setSize(getSize());
+      frame.add(gdxCanvas);
+      frame.setVisible(true);
 
 
-      //var frame = new JFrame();
-      //frame.setSize(640, 480);
+/*
       var panel = new JPanel();
+      panel.add(gdxCanvas);
+      panel.setSize(getSize());
+      SwingNode swingNode = new SwingNode();
+      swingNode.setContent(panel);
+*/
 
-      var dummyCanvas = new Canvas();
-      panel.add(dummyCanvas);
-      //frame.add(dummyCanvas);
-      //frame.setVisible(true);
-      final SwingNode swingNode = new SwingNode();
-      //swingNode.setVisible(false);
-
-   //   SwingUtilities.invokeLater(() -> {
-        swingNode.setContent(panel);
-    //    });
-//
-
-      var canvas = new NativeRenderingCanvas(dummyCanvas);
 
       javafx.scene.control.Label label = new Label("This is JavaFX");
       label.setMouseTransparent(true);
       label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
 
-/*
-      WebView browser = new WebView();
-      WebEngine webEngine = browser.getEngine();
-      webEngine.load("https://www.youtube.com/embed/18pRUdKNlGw?rel=0&autoplay=1");
-      root.getChildren().add(browser);
+      var canvas = new NativeRenderingCanvas(gdxCanvas);
 
- */
-      root.getChildren().addAll(/*swingNode,*/ canvas.getRoot(),label);
+      var root = new StackPane();
+      root.getChildren().addAll(/*swingNode, */canvas.getRoot(),label);
 
       Scene scene = new Scene(root);
       jfxPanel.setScene(scene);
     });
     zoneRendererPanel.add(jfxPanel, PositionalLayout.Position.CENTER);
-    //zoneRendererPanel.setComponentZOrder(jfxPanel, 0);
 
     jfxPanel.setVisible(false);
   }
 
   public void addJfx(){
-    //jfxPanel.setSize(zoneRendererPanel.getSize());
     jfxPanel.setVisible(!jfxPanel.isVisible());
   }
-
 
   public ChatNotificationTimers getChatNotificationTimers() {
     return chatTyperTimers;

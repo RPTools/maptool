@@ -60,6 +60,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.box2d.MapToolRenderer;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
@@ -791,21 +792,25 @@ public class ZoneRenderer extends JComponent
   public void moveViewBy(int dx, int dy) {
 
     setViewOffset(getViewOffsetX() + dx, getViewOffsetY() + dy);
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomReset(int x, int y) {
     zoneScale.zoomReset(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomIn(int x, int y) {
     zoneScale.zoomIn(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomOut(int x, int y) {
     zoneScale.zoomOut(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void setView(int x, int y, double scale) {
@@ -814,6 +819,7 @@ public class ZoneRenderer extends JComponent
 
     zoneScale.setScale(scale);
     MapTool.getFrame().getZoomStatusBar().update();
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void enforceView(int x, int y, double scale, int gmWidth, int gmHeight) {
@@ -834,6 +840,7 @@ public class ZoneRenderer extends JComponent
 
     setScale(scale);
     centerOn(new ZonePoint(x, y));
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void restoreView() {
@@ -842,6 +849,7 @@ public class ZoneRenderer extends JComponent
 
     centerOn(previousZonePoint);
     setScale(previousScale);
+    MapToolRenderer.getInstance().setScale(zoneScale);
   }
 
   public void forcePlayersView() {

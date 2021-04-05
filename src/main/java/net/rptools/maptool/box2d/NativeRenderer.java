@@ -68,20 +68,16 @@ public class NativeRenderer implements InputProcessor {
         if (app != null)
             return;
 
-        //canvas.setVisible(false);
         checkSizeChange();
 
         var config = new LwjglApplicationConfiguration();
         config.allowSoftwareMode = true;
         config.forceExit = false;
-        //config.width = oldConfig.width;
-        //config.height = newConfig.height;
+        LwjglApplicationConfiguration.disableAudio = true;
 
-        //var appListender = new OrthographicCameraExample();
-        var appListender = new MapToolRenderer();
+        var appListender = MapToolRenderer.getInstance();
         appListender.setJfxRenderer(this);
         //gdxInput = box;
-
 
         app = new LwjglApplication(appListender, config, canvas);
         //Gdx.graphics.setContinuousRendering(false);
