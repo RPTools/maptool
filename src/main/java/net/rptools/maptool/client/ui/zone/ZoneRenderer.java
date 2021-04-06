@@ -60,7 +60,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.box2d.MapToolRenderer;
+import net.rptools.maptool.box2d.GdxRenderer;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
@@ -792,25 +792,25 @@ public class ZoneRenderer extends JComponent
   public void moveViewBy(int dx, int dy) {
 
     setViewOffset(getViewOffsetX() + dx, getViewOffsetY() + dy);
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomReset(int x, int y) {
     zoneScale.zoomReset(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomIn(int x, int y) {
     zoneScale.zoomIn(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void zoomOut(int x, int y) {
     zoneScale.zoomOut(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void setView(int x, int y, double scale) {
@@ -819,7 +819,7 @@ public class ZoneRenderer extends JComponent
 
     zoneScale.setScale(scale);
     MapTool.getFrame().getZoomStatusBar().update();
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void enforceView(int x, int y, double scale, int gmWidth, int gmHeight) {
@@ -840,7 +840,7 @@ public class ZoneRenderer extends JComponent
 
     setScale(scale);
     centerOn(new ZonePoint(x, y));
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void restoreView() {
@@ -849,7 +849,7 @@ public class ZoneRenderer extends JComponent
 
     centerOn(previousZonePoint);
     setScale(previousScale);
-    MapToolRenderer.getInstance().setScale(zoneScale);
+    GdxRenderer.getInstance().setScale(zoneScale);
   }
 
   public void forcePlayersView() {
@@ -892,16 +892,23 @@ public class ZoneRenderer extends JComponent
     PlayerView pl = getPlayerView();
     timer.stop("paintComponent:createView");
 
-    renderZone(g2d, pl);
-    int noteVPos = 20;
-    if (!zone.isVisible() && pl.isGMView()) {
-      GraphicsUtil.drawBoxedString(
-          g2d, "Map not visible to players", getSize().width / 2, noteVPos);
-      noteVPos += 20;
+    if(MapTool.getFrame().getJfxPanel().isVisible()) {
+      // zoneoverlays and gridcoordinates are still drawn with Graphics2D
+      renderOverlays(g2d, pl);
+      return;
+    } else {
+      renderZone(g2d, pl);
+      int noteVPos = 20;
+      if (!zone.isVisible() && pl.isGMView()) {
+        GraphicsUtil.drawBoxedString(
+                g2d, "Map not visible to players", getSize().width / 2, noteVPos);
+        noteVPos += 20;
+      }
+      if (AppState.isShowAsPlayer()) {
+        GraphicsUtil.drawBoxedString(g2d, "Player View", getSize().width / 2, noteVPos);
+      }
     }
-    if (AppState.isShowAsPlayer()) {
-      GraphicsUtil.drawBoxedString(g2d, "Player View", getSize().width / 2, noteVPos);
-    }
+
     if (timer.isEnabled()) {
       String results = timer.toString();
       MapTool.getProfilingNoteFrame().addText(results);
@@ -1132,9 +1139,6 @@ public class ZoneRenderer extends JComponent
    * @param view PlayerView object that describes whether the view is a Player or GM view
    */
   public void renderZone(Graphics2D g2d, PlayerView view) {
-    if(MapTool.getFrame().getJfxPanel().isVisible())
-      return;
-
     timer.start("setup");
     g2d.setFont(AppStyle.labelFont);
     Object oldAA = SwingUtil.useAntiAliasing(g2d);
@@ -1420,6 +1424,25 @@ public class ZoneRenderer extends JComponent
       renderPlayerVisionOverlay(g2d, view);
       timer.stop("visionOverlayPlayer");
     }
+
+    renderOverlays(g2d, view);
+    // g2d.setColor(Color.red);
+    // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
+    // Area area = new
+    // Area(meta.getArea().getBounds()).createTransformedArea(AffineTransform.getScaleInstance(getScale(),
+    // getScale()));
+    // area =
+    // area.createTransformedArea(AffineTransform.getTranslateInstance(zoneScale.getOffsetX(),
+    // zoneScale.getOffsetY()));
+    // g2d.draw(area);
+    // }
+    SwingUtil.restoreAntiAliasing(g2d, oldAA);
+    if (resetClip) {
+      g2d.setClip(null);
+    }
+  }
+
+  private void renderOverlays(Graphics2D g2d, PlayerView view) {
     timer.start("overlays");
     for (ZoneOverlay overlay : overlayList) {
       String msg = null;
@@ -1443,20 +1466,6 @@ public class ZoneRenderer extends JComponent
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
-    // g2d.setColor(Color.red);
-    // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
-    // Area area = new
-    // Area(meta.getArea().getBounds()).createTransformedArea(AffineTransform.getScaleInstance(getScale(),
-    // getScale()));
-    // area =
-    // area.createTransformedArea(AffineTransform.getTranslateInstance(zoneScale.getOffsetX(),
-    // zoneScale.getOffsetY()));
-    // g2d.draw(area);
-    // }
-    SwingUtil.restoreAntiAliasing(g2d, oldAA);
-    if (resetClip) {
-      g2d.setClip(null);
-    }
   }
 
   private void delayRendering(ItemRenderer renderer) {
@@ -2028,6 +2037,11 @@ public class ZoneRenderer extends JComponent
     return zoneView.getVisibleArea(token);
   }
 
+  public String getLoadingProgress() {
+    return loadingProgress;
+  }
+
+
   public boolean isLoading() {
     if (isLoaded) {
       // We're done, until the cache is cleared
@@ -2151,7 +2165,7 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private Set<SelectionSet> getOwnedMovementSet(PlayerView view) {
+  public Set<SelectionSet> getOwnedMovementSet(PlayerView view) {
     Set<SelectionSet> movementSet = new HashSet<SelectionSet>();
     for (SelectionSet selection : selectionSetMap.values()) {
       if (selection.getPlayerId().equals(MapTool.getPlayer().getName())) {
@@ -2161,7 +2175,7 @@ public class ZoneRenderer extends JComponent
     return movementSet;
   }
 
-  private Set<SelectionSet> getUnOwnedMovementSet(PlayerView view) {
+  public Set<SelectionSet> getUnOwnedMovementSet(PlayerView view) {
     Set<SelectionSet> movementSet = new HashSet<SelectionSet>();
     for (SelectionSet selection : selectionSetMap.values()) {
       if (!selection.getPlayerId().equals(MapTool.getPlayer().getName())) {

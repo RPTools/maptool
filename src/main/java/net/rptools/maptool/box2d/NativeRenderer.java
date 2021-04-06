@@ -1,6 +1,5 @@
 package net.rptools.maptool.box2d;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -75,7 +74,7 @@ public class NativeRenderer implements InputProcessor {
         config.forceExit = false;
         LwjglApplicationConfiguration.disableAudio = true;
 
-        var appListender = MapToolRenderer.getInstance();
+        var appListender = GdxRenderer.getInstance();
         appListender.setJfxRenderer(this);
         //gdxInput = box;
 
