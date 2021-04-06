@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -61,6 +62,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int width;
     private int height;
     private BitmapFont font;
+    private GlyphLayout glyphLayout;
     private CodeTimer timer;
 
     public GdxRenderer() {
@@ -81,6 +83,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
+        glyphLayout = new GlyphLayout();
         initialized = true;
         initializeZoneResources();
     }
@@ -155,7 +158,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             drawBoxedString("Player View", width / 2, height - noteVPos);
         }
 
-        drawBoxedString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 20);
+        drawBoxedString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
 
         hudBatch.end();
 
@@ -396,7 +399,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void drawBoxedString(String text, int centerX, int centerY) {
-        font.draw(hudBatch, text, centerX, centerY);
+        glyphLayout.setText(font, text);
+        font.draw(hudBatch, text, centerX-glyphLayout.width/2, centerY+glyphLayout.height/2);
     }
 
     private void renderBoard() {
