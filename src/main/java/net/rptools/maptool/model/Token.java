@@ -1106,6 +1106,23 @@ public class Token extends BaseModel implements Cloneable {
     return assetId;
   }
 
+  public MD5Key getTokenImageAssetId() {
+    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null)
+      return getImageAssetId();
+
+    LookupTable lookupTable =  MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
+    if(lookupTable == null)
+      return getImageAssetId();
+
+    try {
+      LookupTable.LookupEntry result = lookupTable.getLookup(getFacing().toString());
+       if (result != null)  return result.getImageId();
+
+    } catch (ParserException p) { /* do nothing  */ }
+
+    return getImageAssetId();
+  }
+
   /**
    * Store the token image, and set the native Width and Height.
    *

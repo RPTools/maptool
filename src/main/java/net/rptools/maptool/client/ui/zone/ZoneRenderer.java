@@ -340,6 +340,11 @@ public class ZoneRenderer extends JComponent
     // repaintDebouncer.dispatch();
   }
 
+  public List<Token> getShowPathList() {
+    return showPathList;
+  }
+
+
   /**
    * Resets the token panels, fire onTokenSelection, repaints. The impersonation panel is only reset
    * if no token is currently impersonated.
@@ -3810,7 +3815,7 @@ public class ZoneRenderer extends JComponent
     return true;
   }
 
-  private boolean canSeeMarker(Token token) {
+  public boolean canSeeMarker(Token token) {
     return MapTool.getPlayer().isGM() || !StringUtil.isEmpty(token.getNotes());
   }
 
