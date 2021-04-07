@@ -106,7 +106,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         glyphLayout = new GlyphLayout();
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
-        vfxManager.addEffect(vfxEffect);
+        //vfxManager.addEffect(vfxEffect);
 
         initialized = true;
         initializeZoneResources();
@@ -126,8 +126,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void resize(int width, int height) {
         this.width = width;
         this.height = height;
-        updateCam();
         vfxManager.resize(width, height);
+        updateCam();
+
     }
 
     private void updateCam() {
@@ -148,20 +149,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void render() {
         vfxManager.cleanUpBuffers();
-
-        // Begin render to an off-screen buffer.
         vfxManager.beginInputCapture();
         doRendering();
         vfxManager.endInputCapture();
-
-        // Apply the effects chain to the captured frame.
-        // In our case, only one effect (gaussian blur) will be applied.
         vfxManager.applyEffects();
-
-        copyFramebufferToJfx();
-        // Render result to the screen.
         vfxManager.renderToScreen();
-
+        copyFramebufferToJfx();
     }
 
     private void doRendering() {
@@ -173,6 +166,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return;
 
         initializeTimer();
+        setScale(zoneRenderer.getZoneScale());
 
         timer.start("paintComponent:createView");
         PlayerView playerView = zoneRenderer.getPlayerView();
@@ -522,7 +516,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // get token image sprite, using image table if present
             var imageKey = token.getTokenImageAssetId();
-            var image = sprites.get(imageKey);
+            Sprite image = sprites.get(imageKey);
             if (image == null)
                 continue;
 
@@ -531,11 +525,18 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.start("tokenlist-1a");
             Rectangle footprintBounds = token.getBounds(zone);
             image.setPosition(footprintBounds.x, -footprintBounds.y - footprintBounds.height);
-            image.setSize(footprintBounds.width, footprintBounds.height);
+            var factorX = footprintBounds.width/image.getWidth();
+            var factorY = footprintBounds.height/image.getHeight();
+
+            var factor = Math.min(factorX, factorY);
+
+            image.setSize(image.getWidth()*factor, image.getHeight()*factor);
+            image.setOriginCenter();
 
             // Rotated
-            if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN)
-                image.setRotation(-token.getFacing() - 90);
+            if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
+                image.setRotation(token.getFacing() + 90);
+            }
 
             timer.stop("tokenlist-1a");
 
@@ -585,12 +586,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 footprintBounds = token.getBounds(zone);*/
             }
             timer.stop("tokenlist-5a");
-/*
+
             timer.start("tokenlist-6");
             // Position
             // For Isometric Grid we alter the height offset
-            double iso_ho = 0;
-            Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+            float iso_ho = 0;
+ /*           Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
             if (token.getShape() == Token.TokenShape.FIGURE) {
                 double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
                 iso_ho = footprintBounds.height - th;
@@ -604,6 +605,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
             SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 */
+            if (token.isSnapToScale()) {
+                var offsetx = (image.getWidth() < footprintBounds.width
+                                        ? (footprintBounds.width - image.getWidth()) / 2 : 0);
+                var offsety = (image.getHeight() < footprintBounds.height
+                                        ? (footprintBounds.height - image.getHeight()) / 2 : 0);
+
+                image.setPosition(image.getX() + offsetx, image.getY() + offsety + iso_ho);
+            }
+
+
 
             timer.stop("tokenlist-6");
 /*
@@ -1096,7 +1107,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
         }).start();
 
-
+        zoneView = new ZoneView(zone);
+        zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
     }
 
     public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle) {
@@ -1122,8 +1134,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         newZone.addModelChangeListener(this);
 
         zone = newZone;
-        zoneView = new ZoneView(zone);
-        zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
+
         initializeZoneResources();
     }
 
