@@ -4,29 +4,22 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.crashinvaders.vfx.VfxManager;
+import com.crashinvaders.vfx.effects.*;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.ImageLabel;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
-import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
-import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
-import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.Scale;
-import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
@@ -35,44 +28,33 @@ import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.GraphicsUtil;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.*;
+
 import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.util.*;
+import java.awt.geom.Area;
 import java.util.List;
+import java.util.*;
 
 public class GdxRenderer extends ApplicationAdapter implements AppEventListener, ModelChangeListener {
 
     private static final Logger log = LogManager.getLogger(GdxRenderer.class);
 
     private static GdxRenderer _instance;
+    private final Map<MD5Key, Sprite> sprites = new HashMap<>();
     //from renderToken:
     private Area visibleScreenArea;
     private Area exposedFogArea;
-
-
-    public static GdxRenderer getInstance() {
-        if (_instance == null)
-            _instance = new GdxRenderer();
-        return _instance;
-    }
-
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
     private ZoneView zoneView;
     private Sprite background;
     private MD5Key mapAssetId;
-    private final Map<MD5Key, Sprite> sprites = new HashMap<>();
     private int offsetX = 0;
     private int offsetY = 0;
     private float zoom = 1.0f;
-
     // general resources
     private OrthographicCamera cam;
     private OrthographicCamera hudCam;
@@ -85,9 +67,26 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private BitmapFont font;
     private GlyphLayout glyphLayout;
     private CodeTimer timer;
+    private VfxManager vfxManager;
+    private ChainVfxEffect vfxEffect;
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    }
+
+    public static GdxRenderer getInstance() {
+        if (_instance == null)
+            _instance = new GdxRenderer();
+        return _instance;
+    }
+
+    public static void main(String[] args) {
+        LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+        cfg.title = "MapTool libgdx Test!";
+        cfg.width = 800;
+        cfg.height = 600;
+
+        new LwjglApplication(new GdxRenderer(), cfg);
     }
 
     @Override
@@ -105,6 +104,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
         glyphLayout = new GlyphLayout();
+        vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
+        vfxEffect = new BloomEffect();
+        vfxManager.addEffect(vfxEffect);
+
         initialized = true;
         initializeZoneResources();
     }
@@ -114,6 +117,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         batch.dispose();
         hudBatch.dispose();
         font.dispose();
+        vfxManager.dispose();
+        vfxEffect.dispose();
         disposeZoneResources();
     }
 
@@ -122,8 +127,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         this.width = width;
         this.height = height;
         updateCam();
+        vfxManager.resize(width, height);
     }
-
 
     private void updateCam() {
         cam.viewportWidth = width;
@@ -142,8 +147,27 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void render() {
+        vfxManager.cleanUpBuffers();
+
+        // Begin render to an off-screen buffer.
+        vfxManager.beginInputCapture();
+        doRendering();
+        vfxManager.endInputCapture();
+
+        // Apply the effects chain to the captured frame.
+        // In our case, only one effect (gaussian blur) will be applied.
+        vfxManager.applyEffects();
+
+        copyFramebufferToJfx();
+        // Render result to the screen.
+        vfxManager.renderToScreen();
+
+    }
+
+    private void doRendering() {
         Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 
         if (zone == null)
             return;
@@ -184,8 +208,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudBatch.end();
 
         collectTimerResults();
-
-        copyFramebufferToJfx();
     }
 
     private void collectTimerResults() {
@@ -212,6 +234,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (jfxRenderer != null) {
             Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
             jfxRenderer.setGdxBuffer(pixmap.getPixels());
+
             pixmap.dispose();
         }
     }
@@ -434,7 +457,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void drawBoxedString(String text, int centerX, int centerY) {
         glyphLayout.setText(font, text);
-        font.draw(hudBatch, text, centerX-glyphLayout.width/2, centerY+glyphLayout.height/2);
+        font.draw(hudBatch, text, centerX - glyphLayout.width / 2, centerY + glyphLayout.height / 2);
     }
 
     private void renderBoard() {
@@ -507,7 +530,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             timer.start("tokenlist-1a");
             Rectangle footprintBounds = token.getBounds(zone);
-            image.setPosition(footprintBounds.x, - footprintBounds.y - footprintBounds.height);
+            image.setPosition(footprintBounds.x, -footprintBounds.y - footprintBounds.height);
             image.setSize(footprintBounds.width, footprintBounds.height);
 
             // Rotated
@@ -992,15 +1015,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         jfxRenderer = renderer;
     }
 
-    public static void main(String[] args) {
-        LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-        cfg.title = "MapTool libgdx Test!";
-        cfg.width = 800;
-        cfg.height = 600;
-
-        new LwjglApplication(new GdxRenderer(), cfg);
-    }
-
     private void disposeZoneResources() {
         if (!initialized)
             return;
@@ -1078,14 +1092,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         pix.dispose();
                     }
                 });
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
         }).start();
 
 
     }
 
-    public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle)
-    {
+    public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle) {
         var awtRect = new java.awt.Rectangle();
         awtRect.x = (int) rectangle.x;
         awtRect.y = (int) rectangle.y;

@@ -6,60 +6,41 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import javafx.application.Platform;
 
 import javax.swing.*;
-import java.awt.Canvas;
+import java.awt.*;
 import java.nio.ByteBuffer;
 
 public class NativeRenderer implements InputProcessor {
-    private class RendererConfig {
-        public int width;
-        public int height;
-        public int currentBufferIndex;
-        public int singleBufferSize;
-        public ByteBuffer renderBuffer;
-        byte[] flippedBuffer;
-    }
-
-
+    public static final int BufferCount = 2;
+    public static final int BytePerInt = 4;
     private ByteBuffer gdxBuffer;
     private RendererConfig oldConfig;
     private RendererConfig newConfig;
-
-
-    public static final int BufferCount = 2;
-    public static final int BytePerInt = 4;
-
     private InputProcessor gdxInput;
     private Canvas canvas;
     private LwjglApplication app;
     private NativeRenderingCanvas nativeCanvas;
-
     public NativeRenderer(Canvas dummyCanvas, NativeRenderingCanvas nativeRenderingCanvas) {
         canvas = dummyCanvas;
         nativeCanvas = nativeRenderingCanvas;
     }
 
-    // Initialization and disposal:
-
     public void setGdxBuffer(ByteBuffer buffer) {
+        gdxBuffer = buffer;
+        fixColors();
+        flip();
 
-       //synchronized (this) {
-          gdxBuffer = buffer;
-            fixColors();
-            flip();
-            var bufferIndex = render();
-            Platform.runLater(() -> nativeCanvas.renderUpdate(oldConfig.renderBuffer, bufferIndex, oldConfig.width, oldConfig.height));
-            checkSizeChange();
-        //}
+        var bufferIndex = render();
+        Platform.runLater(() -> nativeCanvas.renderUpdate(oldConfig.renderBuffer, bufferIndex, oldConfig.width, oldConfig.height));
+        checkSizeChange();
     }
 
-    private void checkSizeChange()
-    {
-        if(newConfig == oldConfig)
+    private void checkSizeChange() {
+        if (newConfig == oldConfig)
             return;
 
         oldConfig = newConfig;
 
-        SwingUtilities.invokeLater(()->canvas.setSize(oldConfig.width, oldConfig.height));
+        SwingUtilities.invokeLater(() -> canvas.setSize(oldConfig.width, oldConfig.height));
     }
 
     // on mac this must be called when the canvas is isDisplayable
@@ -87,8 +68,6 @@ public class NativeRenderer implements InputProcessor {
         app.stop();
     }
 
-    // Canvas creation and rendering:
-
     public void createCanvas(int width, int height) {
         var cfg = new RendererConfig();
 
@@ -105,12 +84,16 @@ public class NativeRenderer implements InputProcessor {
         init();
     }
 
+    // Canvas creation and rendering:
+
     private void fixColors() {
         //fix colors RGBA -> BGRA
-        for (int i = 0; i < gdxBuffer.capacity(); i += BytePerInt) {
-            var red = gdxBuffer.get(i);
-            gdxBuffer.put(i, gdxBuffer.get(i + 2));
-            gdxBuffer.put(i + 2, red);
+        if (gdxBuffer != null) {
+            for (int i = 0; i < gdxBuffer.capacity(); i += BytePerInt) {
+                var red = gdxBuffer.get(i);
+                gdxBuffer.put(i, gdxBuffer.get(i + 2));
+                gdxBuffer.put(i + 2, red);
+            }
         }
     }
 
@@ -125,7 +108,6 @@ public class NativeRenderer implements InputProcessor {
         }
     }
 
-
     public int render() {
         oldConfig.currentBufferIndex += 1;
         if (oldConfig.currentBufferIndex >= BufferCount) oldConfig.currentBufferIndex = 0;
@@ -137,6 +119,8 @@ public class NativeRenderer implements InputProcessor {
             oldConfig.renderBuffer.put(oldConfig.flippedBuffer);
             oldConfig.renderBuffer.rewind();
         }
+
+
         return oldConfig.currentBufferIndex;
     }
 
@@ -198,5 +182,14 @@ public class NativeRenderer implements InputProcessor {
 
     public void pause() {
         app.stop();
+    }
+
+    private class RendererConfig {
+        public int width;
+        public int height;
+        public int currentBufferIndex;
+        public int singleBufferSize;
+        public ByteBuffer renderBuffer;
+        byte[] flippedBuffer;
     }
 }
