@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.*;
 import net.rptools.lib.AppEvent;
@@ -34,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.util.List;
 import java.util.*;
 
@@ -69,6 +72,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private CodeTimer timer;
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
+    private ShapeRenderer shape;
+
+    private Vector3 tmpWorldCoord;
+    private Vector3 tmpScreenCoord;
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -100,6 +107,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudCam = new OrthographicCamera();
         hudCam.setToOrtho(false);
 
+        shape = new ShapeRenderer();
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
@@ -107,6 +115,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
         //vfxManager.addEffect(vfxEffect);
+
+        tmpWorldCoord = new Vector3();
+        tmpScreenCoord = new Vector3();
 
         initialized = true;
         initializeZoneResources();
@@ -119,6 +130,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         font.dispose();
         vfxManager.dispose();
         vfxEffect.dispose();
+        shape.dispose();
         disposeZoneResources();
     }
 
@@ -159,13 +171,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void doRendering() {
         Gdx.gl.glClearColor(0, 0, 0, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
 
 
         if (zone == null)
             return;
 
         initializeTimer();
+        if(zoneRenderer == null)
+            return;
+
         setScale(zoneRenderer.getZoneScale());
 
         timer.start("paintComponent:createView");
@@ -174,6 +189,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         batch.setProjectionMatrix(cam.combined);
         hudBatch.setProjectionMatrix(hudCam.combined);
+        shape.setProjectionMatrix(cam.combined);
 
         batch.begin();
 
@@ -275,9 +291,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("drawableObjects");
             // }
         }
+        batch.end();
         timer.start("grid");
         renderGrid(view);
         timer.stop("grid");
+        batch.begin();
 
         if (Zone.Layer.OBJECT.isEnabled()) {
             // ... Images on the object layer are always ABOVE the grid.
@@ -444,6 +462,129 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderGrid(PlayerView view) {
+   /*     int gridSize = (int) (zone.getGrid().getSize() * 1/cam.zoom);
+        if (!AppState.isShowGrid() || gridSize < ZoneRenderer.MIN_GRID_SIZE) {
+            return;
+        }
+        var grid = zone.getGrid();
+        if(grid instanceof  GridlessGrid) {
+            // do nothing
+        } else if(grid instanceof  HexGrid) {
+
+        } else if(grid instanceof SquareGrid) {
+            renderGrid((SquareGrid) grid);
+        } else if (grid instanceof  IsometricGrid) {
+
+        }
+*/
+
+        int gridSize = (int) (zone.getGrid().getSize() * zoneRenderer.getScale());
+
+        if (!AppState.isShowGrid() || gridSize < ZoneRenderer.MIN_GRID_SIZE) {
+            return;
+        }
+        var scale = zoneRenderer.getScale();
+
+        float gridWidth = (float) (zone.getGrid().getCellWidth() * scale);
+        float gridHeight = (float) (zone.getGrid().getCellHeight() * scale);
+
+        java.awt.Color gridColor = new java.awt.Color(zone.getGridColor());
+
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.identity();
+
+        shape.setColor(gridColor.getRed(), gridColor.getGreen(), gridColor.getBlue(), 4f);
+        float[] gridVertices = areaToVertices(zone.getGrid().getCellShape());
+
+        float transX = ((width / gridWidth) + 1) * -gridWidth;
+
+        var x = cam.position.x - cam.viewportWidth/2;
+        var y = cam.position.y - cam.viewportHeight/2;
+
+        var startCol = (((int) (x / gridWidth))-1) * gridWidth - offsetX + 1;
+        var startRow = (((int) (y / gridHeight))-1) * gridHeight - offsetY;
+
+
+        //for (int h = 0; h <= height / gridHeight + 1; h++) {
+        for (var row = startRow; row < y + height + 2 * gridHeight; row += gridHeight) {
+            for (var col = startCol; col < x + cam.viewportWidth + gridSize; col += gridWidth) {
+                shape.identity();
+                shape.translate(col , height + row, 0);
+                shape.polygon(gridVertices);
+            }
+        }
+
+        shape.end();
+    }
+
+    private void renderGrid(SquareGrid grid) {
+        double scale = zoneRenderer.getScale();
+        double gridSize = grid.getSize() * scale;
+
+        var camX = cam.position.x - cam.viewportWidth * cam.zoom/2;
+        var camY = cam.position.y - cam.viewportHeight * cam.zoom/2;
+
+        var hudHeight = hudCam.viewportHeight * hudCam.zoom;
+        var hudWidth = hudCam.viewportWidth * hudCam.zoom;
+        var hudX = hudCam.position.x - hudCam.viewportWidth * hudCam.zoom/2;
+        var hudY = hudCam.position.y - hudCam.viewportHeight * hudCam.zoom/2;
+
+
+        shape.setColor(Color.BLACK);
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        //g.setColor(new java.awt.Color(getZone().getGridColor()));
+
+       // float offX = (float) (grid.getOffsetX() * scale);
+        int offY = (int) (zoneRenderer.getViewOffsetY() % gridSize - grid.getOffsetY() * scale);
+
+        float startCol = (int) ((int) (hudX / gridSize) * gridSize) + grid.getOffsetX();
+        float startRow = (int) ((int) (camY / gridSize) * gridSize);
+
+        tmpWorldCoord.x = startCol;
+        tmpWorldCoord.y = startRow;
+        tmpWorldCoord.z = 0;
+        tmpScreenCoord = cam.project(tmpWorldCoord);
+        tmpWorldCoord = hudCam.unproject(tmpScreenCoord);
+
+        startCol = tmpWorldCoord.x;
+        startRow = tmpWorldCoord.y;
+
+        var lineWidth = AppState.getGridSize();
+
+    /*    for (float row = startRow; row > bounds.y + gridSize; row -= gridSize) {
+                shape.rectLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY), lineWidth);
+        }*/
+        for (float col = startCol; col < startCol + width + gridSize; col += gridSize) {
+                shape.rectLine(col, hudY, col, hudY + height, lineWidth);
+        }
+        shape.end();
+    }
+
+    private float[] areaToVertices(Area area) {
+        if (area.isEmpty())
+            return new float[0];
+
+        PathIterator iterator = area.getPathIterator(null);
+        float[] floats = new float[60];
+        float[] vertices = new float[1000];
+        int count1 = 0;
+
+        while (!iterator.isDone()) {
+            int type = iterator.currentSegment(floats);
+
+            if (type != PathIterator.SEG_CLOSE) {
+                vertices[count1++] = floats[0];
+                vertices[count1++] = floats[1];
+            }
+            iterator.next();
+        }
+
+        float[] finalVertices = new float[count1];
+        System.arraycopy(vertices, 0, finalVertices, 0, count1);
+
+        return finalVertices;
     }
 
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
