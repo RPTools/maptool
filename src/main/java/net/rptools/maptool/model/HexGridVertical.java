@@ -230,22 +230,22 @@ public class HexGridVertical extends HexGrid {
   }
 
   @Override
-  protected double getRendererSizeV(ZoneRenderer renderer) {
+  public double getRendererSizeV(ZoneRenderer renderer) {
     return renderer.getSize().getHeight();
   }
 
   @Override
-  protected double getRendererSizeU(ZoneRenderer renderer) {
+  public double getRendererSizeU(ZoneRenderer renderer) {
     return renderer.getSize().getWidth();
   }
 
   @Override
-  protected int getOffV(ZoneRenderer renderer) {
+  public int getOffV(ZoneRenderer renderer) {
     return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
   }
 
   @Override
-  protected int getOffU(ZoneRenderer renderer) {
+  public int getOffU(ZoneRenderer renderer) {
     return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
   }
 

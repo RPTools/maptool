@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector3;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.*;
@@ -18,6 +19,7 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -32,11 +34,16 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.util.encoders.Hex;
 
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
 
@@ -49,6 +56,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     //from renderToken:
     private Area visibleScreenArea;
     private Area exposedFogArea;
+
+    //renderFog
+    // Private cache variables just for renderFog() and no one else. :)
+    Integer fogX = null;
+    Integer fogY = null;
+    Texture fogBufferTexture;
+    Pixmap fogPaintPixmap;
+    Color fogPaintColor = new Color();
+
+    /**
+     * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
+     * needs to be flushed in the case of switching views
+     */
+    private boolean flushFog = true;
+
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
@@ -73,6 +95,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
     private ShapeRenderer shape;
+    private EarClippingTriangulator triangulator = new EarClippingTriangulator();
 
     private Vector3 tmpWorldCoord;
     private Vector3 tmpScreenCoord;
@@ -449,6 +472,166 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderFog(PlayerView view) {
+        Dimension size = zoneRenderer.getSize();
+        Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
+        Area combined = null;
+
+        // Optimization for panning
+        if (!flushFog
+                && fogX != null
+                && fogY != null
+                && (fogX != zoneRenderer.getViewOffsetX() || fogY != zoneRenderer.getViewOffsetY())) {
+            flushFog = true;
+        }
+        boolean cacheNotValid =
+                (fogBufferTexture == null
+                        || fogBufferTexture.getWidth() != size.width
+                        || fogBufferTexture.getHeight() != size.height);
+        timer.start("renderFog");
+        if (flushFog || cacheNotValid) {
+            timer.start("renderFog-allocateBufferedImage");
+            var fogBuffer = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+            timer.stop("renderFog-allocateBufferedImage");
+            fogX = zoneRenderer.getViewOffsetX();
+            fogY = zoneRenderer.getViewOffsetY();
+
+            timer.start("renderFog-fill");
+            // Fill
+            float scale = (float)zoneRenderer.getScale();
+
+            fogBuffer.setBlending(Pixmap.Blending.None);
+            if(fogPaintPixmap != null) {
+                var pix = fogPaintPixmap;
+                var w = pix.getWidth();
+                var h = pix.getHeight();
+                fogBuffer.drawPixmap(pix,fogX, fogY, w, h, 0, 0, (int)(w*scale), (int)(h*scale));
+                //buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
+                //buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this
+
+            } else {
+                var color = fogPaintColor;
+                fogBuffer.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
+            }
+
+
+            // fixes the GM exposed area view.
+            fogBuffer.fillRectangle(0, 0, size.width, size.height);
+            timer.stop("renderFog-fill");
+
+ /*           // Cut out the exposed area
+            AffineTransform af = new AffineTransform();
+            af.translate(fogX, fogY);
+            af.scale(scale, scale);
+*/
+
+            timer.start("renderFog-visibleArea");
+            Area visibleArea = zoneView.getVisibleArea(view);
+            timer.stop("renderFog-visibleArea");
+
+            String msg = null;
+            if (timer.isEnabled()) {
+                List<Token> list = view.getTokens();
+                msg = "renderFog-combined(" + (list == null ? 0 : list.size()) + ")";
+            }
+            timer.start(msg);
+            combined = zone.getExposedArea(view);
+            timer.stop(msg);
+
+            timer.start("renderFogArea");
+            Area exposedArea = null;
+            Area tempArea = new Area();
+            boolean combinedView =
+                    !zoneView.isUsingVision()
+                            || MapTool.isPersonalServer()
+                            || !MapTool.getServerPolicy().isUseIndividualFOW()
+                            || view.isGMView();
+
+            if (view.getTokens() != null) {
+                // if there are tokens selected combine the areas, then, if individual FOW is enabled
+                // we pass the combined exposed area to build the soft FOW and visible area.
+                for (Token tok : view.getTokens()) {
+                    ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+                    exposedArea = meta.getExposedAreaHistory();
+                    tempArea.add(new Area(exposedArea));
+                }
+                if (combinedView) {
+                    var triangles = triangulator.computeTriangles(areaToVertices(combined));
+                    for(int i = 0; i< triangles.size; i+=6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
+                            triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
+
+                    renderFogArea(fogBuffer, view, combined, visibleArea);
+                    renderFogOutline(fogBuffer, view, combined);
+                } else {
+                    // 'combined' already includes the area encompassed by 'tempArea', so just
+                    // use 'combined' instead in this block of code?
+                    tempArea.add(combined);
+
+                    var triangles = triangulator.computeTriangles(areaToVertices(tempArea));
+                    for(int i = 0; i< triangles.size; i+=6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
+                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
+                    renderFogArea(fogBuffer, view, tempArea, visibleArea);
+                    renderFogOutline(fogBuffer, view, tempArea);
+                }
+            } else {
+                // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
+                // exposed area's to build the soft FOW.
+                if (combinedView) {
+                    if (combined.isEmpty()) {
+                        combined = zone.getExposedArea();
+                    }
+                    var triangles = triangulator.computeTriangles(areaToVertices(combined));
+                    for(int i = 0; i< triangles.size; i+=6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
+                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
+                    renderFogArea(fogBuffer, view, combined, visibleArea);
+                    renderFogOutline(fogBuffer, view, combined);
+                } else {
+                    Area myCombined = new Area();
+                    List<Token> myToks = zone.getTokens();
+                    for (Token tok : myToks) {
+                        if (!AppUtil.playerOwns(
+                                tok)) { // Only here if !isGMview() so should the tokens already be in
+                            // PlayerView.getTokens()?
+                            continue;
+                        }
+                        ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+                        exposedArea = meta.getExposedAreaHistory();
+                        myCombined.add(new Area(exposedArea));
+                    }
+                    var triangles = triangulator.computeTriangles(areaToVertices(myCombined));
+                    for(int i = 0; i< triangles.size; i+=6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
+                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
+                    renderFogArea(fogBuffer, view, myCombined, visibleArea);
+                    renderFogOutline(fogBuffer, view, myCombined);
+                }
+            }
+            // renderFogArea(buffG, view, combined, visibleArea);
+            timer.stop("renderFogArea");
+
+            // timer.start("renderFogOutline");
+            // renderFogOutline(buffG, view, combined);
+            // timer.stop("renderFogOutline");
+
+            flushFog = false;
+            if(fogBufferTexture != null) {
+                fogBufferTexture.dispose();
+            }
+            fogBufferTexture = new Texture(fogBuffer);
+            fogBuffer.dispose();
+        }
+        timer.stop("renderFog");
+        batch.setProjectionMatrix(hudCam.combined);
+        batch.draw(fogBufferTexture, 0, 0);
+        batch.setProjectionMatrix(cam.combined);
+    }
+
+    private void renderFogArea(Pixmap fogBuffer, PlayerView view, Area tempArea, Area visibleArea) {
+    }
+
+    private void renderFogOutline(Pixmap fogBuffer, PlayerView view, Area combined) {
     }
 
     private void renderLabels(PlayerView view) {
@@ -475,12 +658,115 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if(grid instanceof  GridlessGrid) {
             // do nothing
         } else if(grid instanceof  HexGrid) {
-
+            renderGrid((HexGrid)grid);
         } else if(grid instanceof SquareGrid) {
             renderGrid((SquareGrid) grid);
         } else if (grid instanceof  IsometricGrid) {
-
+            renderGrid((IsometricGrid)grid);
         }
+    }
+
+    private void renderGrid(HexGrid grid) {
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.identity();
+
+        Color.argb8888ToColor(tmpColor, zone.getGridColor());
+
+        shape.setColor(tmpColor);
+        var path = grid.createShape(zoneRenderer.getScale());
+        var vertices = pathToVertices(path);
+
+        int offU = grid.getOffU(zoneRenderer);
+        int offV = grid.getOffV(zoneRenderer);
+        int count = 0;
+
+        Gdx.gl.glLineWidth(AppState.getGridSize());
+
+        for (double v = offV % (grid.getScaledMinorRadius() * 2) - (grid.getScaledMinorRadius() * 2);
+             v < grid.getRendererSizeV(zoneRenderer);
+             v += grid.getScaledMinorRadius()) {
+            double offsetU = (int) ((count & 1) == 0 ? 0 : -(grid.getScaledEdgeProjection() + grid.getScaledEdgeLength()));
+            count++;
+
+            double start =
+                    offU % (2 * grid.getScaledEdgeLength() + 2 * grid.getScaledEdgeProjection())
+                            - (2 * grid.getScaledEdgeLength() + 2 * grid.getScaledEdgeProjection());
+            double end = grid.getRendererSizeU(zoneRenderer) + 2 * grid.getScaledEdgeLength() + 2 * grid.getScaledEdgeProjection();
+            double incr = 2 * grid.getScaledEdgeLength() + 2 * grid.getScaledEdgeProjection();
+            for (double u = start; u < end; u += incr) {
+                float transX = 0;
+                float transY = 0;
+                if(grid instanceof HexGridVertical) {
+                    transX = (float)(u + offsetU);
+                    transY = height - (float)v;
+                }
+                else {
+                    transX = (float)v;
+                    transY = height - (float)(u + offsetU);
+                }
+
+                shape.translate(transX, transY, 0);
+                shape.polyline(vertices);
+                shape.translate(-transX, -transY, 0);
+            }
+        }
+
+        shape.end();
+    }
+
+    private void renderGrid(IsometricGrid grid) {
+        var scale = (float)zoneRenderer.getScale();
+        int gridSize = (int) (grid.getSize() * scale);
+
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.identity();
+
+        Color.argb8888ToColor(tmpColor, zone.getGridColor());
+
+        shape.setColor(tmpColor);
+
+        var x = hudCam.position.x - hudCam.viewportWidth/2;
+        var y = hudCam.position.y - hudCam.viewportHeight/2;
+        var w = hudCam.viewportWidth;
+        var h = hudCam.viewportHeight;
+
+        double isoHeight = grid.getSize() * scale;
+        double isoWidth = grid.getSize() * 2 * scale;
+
+        int offX = (int) (zoneRenderer.getViewOffsetX() % isoWidth + grid.getOffsetX() * scale) + 1;
+        int offY = (int) (zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale) + 1;
+
+        int startCol = (int) ((int) (x / isoWidth) * isoWidth);
+        int startRow = (int) ((int) (y / gridSize) * gridSize);
+
+        for (double row = startRow; row < y + h + gridSize; row += gridSize) {
+            for (double col = startCol; col < x + w + isoWidth; col += isoWidth) {
+                drawHatch(grid, (int) (col + offX), h - (int) (row + offY));
+            }
+        }
+
+        for (double row = startRow - (isoHeight / 2);
+             row < y + h + gridSize;
+             row += gridSize) {
+            for (double col = startCol - (isoWidth / 2);
+                 col < x + w + isoWidth;
+                 col += isoWidth) {
+                drawHatch(grid, (int) (col + offX), h - (int) (row + offY));
+            }
+        }
+        shape.end();
+    }
+
+    private void drawHatch(IsometricGrid grid, float x, float y) {
+        double isoWidth = grid.getSize() * zoneRenderer.getScale();
+        int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
+
+        var lineWidth = AppState.getGridSize();
+
+        shape.rectLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize, lineWidth);
+        shape.rectLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize, lineWidth);
     }
 
     private void renderGrid(SquareGrid grid) {
@@ -522,6 +808,28 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return new float[0];
 
         PathIterator iterator = area.getPathIterator(null);
+        float[] floats = new float[60];
+        float[] vertices = new float[1000];
+        int count1 = 0;
+
+        while (!iterator.isDone()) {
+            int type = iterator.currentSegment(floats);
+
+            if (type != PathIterator.SEG_CLOSE) {
+                vertices[count1++] = floats[0];
+                vertices[count1++] = floats[1];
+            }
+            iterator.next();
+        }
+
+        float[] finalVertices = new float[count1];
+        System.arraycopy(vertices, 0, finalVertices, 0, count1);
+
+        return finalVertices;
+    }
+
+    private float[] pathToVertices(GeneralPath path) {
+        PathIterator iterator = path.getPathIterator(null);
         float[] floats = new float[60];
         float[] vertices = new float[1000];
         int count1 = 0;
@@ -616,23 +924,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             if (image == null)
                 continue;
 
+            image.setSize(image.getTexture().getWidth(), image.getTexture().getHeight());
+
             timer.stop("tokenlist-1b");
 
             timer.start("tokenlist-1a");
             Rectangle footprintBounds = token.getBounds(zone);
             image.setPosition(footprintBounds.x, -footprintBounds.y - footprintBounds.height);
-            var factorX = footprintBounds.width/image.getWidth();
-            var factorY = footprintBounds.height/image.getHeight();
-
-            var factor = Math.min(factorX, factorY);
-
-            image.setSize(image.getWidth()*factor, image.getHeight()*factor);
-            image.setOriginCenter();
-
-            // Rotated
-            if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                image.setRotation(token.getFacing() + 90);
-            }
 
             timer.stop("tokenlist-1a");
 
@@ -667,19 +965,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             image.setFlip(token.isFlippedX(), token.isFlippedY());
             timer.stop("tokenlist-5");
 
+            image.setOriginCenter();
+
             timer.start("tokenlist-5a");
             if (token.isFlippedIso()) {
-                //FIXME: later
-                /*
-                if (flipIsoImageMap.get(token) == null) {
-                    workImage = IsometricGrid.isoImage(workImage);
-                    flipIsoImageMap.put(token, workImage);
-                } else {
-                    workImage = flipIsoImageMap.get(token);
-                }
-                token.setHeight(workImage.getHeight());
-                token.setWidth(workImage.getWidth());
-                footprintBounds = token.getBounds(zone);*/
+                image.setRotation(45);
+                image.setSize(image.getWidth(), image.getHeight()/2);
+                token.setHeight((int)image.getHeight());
+                token.setWidth((int)image.getWidth());
+                footprintBounds = token.getBounds(zone);
             }
             timer.stop("tokenlist-5a");
 
@@ -687,9 +981,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             // Position
             // For Isometric Grid we alter the height offset
             float iso_ho = 0;
- /*           Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+
             if (token.getShape() == Token.TokenShape.FIGURE) {
-                double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
+                float th = token.getHeight() * (float) footprintBounds.width / token.getWidth();
                 iso_ho = footprintBounds.height - th;
                 footprintBounds =
                         new Rectangle(
@@ -697,10 +991,22 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 footprintBounds.y - (int) iso_ho,
                                 footprintBounds.width,
                                 (int) th);
-                iso_ho = iso_ho * getScale();
+                iso_ho = iso_ho * (float)zoneRenderer.getScale();
             }
-            SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-*/
+
+            var factorX = footprintBounds.width/image.getWidth();
+            var factorY = footprintBounds.height/image.getHeight();
+
+            var factor = Math.min(factorX, factorY);
+
+            image.setSize(image.getWidth()*factor, image.getHeight()*factor);
+            image.setOriginCenter();
+
+            // Rotated
+            if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
+                image.setRotation(token.getFacing() + 90);
+            }
+
             if (token.isSnapToScale()) {
                 var offsetx = (image.getWidth() < footprintBounds.width
                                         ? (footprintBounds.width - image.getWidth()) / 2 : 0);
@@ -1129,6 +1435,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         cam.zoom = 1.0f;
         offsetX = 0;
         offsetY = 0;
+        fogX = null;
+        fogY = null;
 
         Gdx.app.postRunnable(() -> {
             updateCam();
@@ -1142,6 +1450,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 sprite.getTexture().dispose();
             }
             sprites.clear();
+            fogPaintColor = null;
+            if(fogPaintPixmap != null)
+                fogPaintPixmap.dispose();
+            fogPaintPixmap = null;
+            if(fogBufferTexture != null)
+                fogBufferTexture.dispose();
+            fogBufferTexture = null;
         });
     }
 
@@ -1177,6 +1492,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 pix.dispose();
             });
         }
+        var fogPaint = zone.getFogPaint();
+        if (fogPaint instanceof DrawableTexturePaint) {
+            var texturePaint = (DrawableTexturePaint) fogPaint;
+            var image = texturePaint.getAsset().getImage();
+            Gdx.app.postRunnable(() -> {
+                fogPaintPixmap = new Pixmap(image, 0, image.length);
+            });
+        }
+        if (fogPaint instanceof DrawableColorPaint) {
+            var colorPaint = (DrawableColorPaint) fogPaint;
+            var colorValue = colorPaint.getColor();
+            Color.argb8888ToColor(fogPaintColor, colorValue);
+        }
+
         mapAssetId = zone.getMapAssetId();
 
         // FIXME: zonechanges during wait for resources
@@ -1238,8 +1567,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void modelChanged(ModelChangeEvent event) {
         // for now quick and dirty
-        disposeZoneResources();
-        initializeZoneResources();
+        //disposeZoneResources();
+        //initializeZoneResources();
     }
 
     public void setScale(Scale scale) {

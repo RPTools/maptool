@@ -145,6 +145,12 @@ public abstract class HexGrid extends Grid {
     return minorRadius;
   }
 
+  public double getScaledMinorRadius() { return scaledMinorRadius; }
+
+  public double getScaledEdgeProjection() { return scaledEdgeProjection; }
+
+  public double getScaledEdgeLength() { return scaledEdgeLength; }
+
   public void setMinorRadius(double minorRadius) {
     this.minorRadius = minorRadius;
   }
@@ -256,9 +262,9 @@ public abstract class HexGrid extends Grid {
     super.setSize(size);
   }
 
-  protected void createShape(double scale) {
+  public GeneralPath createShape(double scale) {
     if (lastScale == scale && scaledHex != null) {
-      return;
+      return scaledHex;
     }
     scaledMinorRadius = minorRadius * scale;
     scaledEdgeLength = edgeLength * scale;
@@ -267,6 +273,7 @@ public abstract class HexGrid extends Grid {
     scaledHex = createHalfShape(scaledMinorRadius, scaledEdgeProjection, scaledEdgeLength);
 
     lastScale = scale;
+    return scaledHex;
   }
 
   private GeneralPath createShape(double minorRadius, double edgeProjection, double edgeLength) {
@@ -397,13 +404,13 @@ public abstract class HexGrid extends Grid {
 
   protected abstract void setGridDrawTranslation(Graphics2D g, double u, double v);
 
-  protected abstract double getRendererSizeU(ZoneRenderer renderer);
+  public abstract double getRendererSizeU(ZoneRenderer renderer);
 
-  protected abstract double getRendererSizeV(ZoneRenderer renderer);
+  public abstract double getRendererSizeV(ZoneRenderer renderer);
 
-  protected abstract int getOffV(ZoneRenderer renderer);
+  public abstract int getOffV(ZoneRenderer renderer);
 
-  protected abstract int getOffU(ZoneRenderer renderer);
+  public abstract int getOffU(ZoneRenderer renderer);
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
