@@ -4,6 +4,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import javafx.application.Platform;
+import net.rptools.maptool.client.ui.zone.GdxRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -94,6 +95,8 @@ public class NativeRenderer implements InputProcessor {
                 var red = gdxBuffer.get(i);
                 gdxBuffer.put(i, gdxBuffer.get(i + 2));
                 gdxBuffer.put(i + 2, red);
+                // set alpha to 1
+                gdxBuffer.put(i+3, (byte)0xff);
             }
         }
     }

@@ -53,7 +53,6 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.box2d.GdxRenderer;
 import net.rptools.maptool.box2d.NativeRenderingCanvas;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ClientAction;

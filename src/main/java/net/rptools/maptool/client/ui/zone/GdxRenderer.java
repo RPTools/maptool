@@ -1,9 +1,10 @@
-package net.rptools.maptool.box2d;
+package net.rptools.maptool.client.ui.zone;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,39 +12,33 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector3;
 import com.crashinvaders.vfx.VfxManager;
-import com.crashinvaders.vfx.effects.*;
+import com.crashinvaders.vfx.effects.BloomEffect;
+import com.crashinvaders.vfx.effects.ChainVfxEffect;
+import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.Scale;
-import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.util.encoders.Hex;
 
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
-import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
 
@@ -53,29 +48,18 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private static GdxRenderer _instance;
     private final Map<MD5Key, Sprite> sprites = new HashMap<>();
+    //renderFog
+    Texture fogBufferTexture;
     //from renderToken:
     private Area visibleScreenArea;
     private Area exposedFogArea;
-
-    //renderFog
-    // Private cache variables just for renderFog() and no one else. :)
-    Integer fogX = null;
-    Integer fogY = null;
-    Texture fogBufferTexture;
-    Pixmap fogPaintPixmap;
-    Color fogPaintColor = new Color();
-
-    /**
-     * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
-     * needs to be flushed in the case of switching views
-     */
-    private boolean flushFog = true;
 
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
     private ZoneView zoneView;
     private Sprite background;
+    private Sprite fog;
     private MD5Key mapAssetId;
     private int offsetX = 0;
     private int offsetY = 0;
@@ -95,11 +79,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
     private ShapeRenderer shape;
-    private EarClippingTriangulator triangulator = new EarClippingTriangulator();
+    private VfxFrameBuffer fogBuffer;
+    private Integer fogX;
+    private Integer fogY;
 
     private Vector3 tmpWorldCoord;
     private Vector3 tmpScreenCoord;
     private Color tmpColor;
+    private boolean flushFog = true;
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -136,6 +123,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
         glyphLayout = new GlyphLayout();
+        fogBuffer = new VfxFrameBuffer(Pixmap.Format.RGBA8888);
+        fogBuffer.initialize(width, height);
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
         //vfxManager.addEffect(vfxEffect);
@@ -143,9 +132,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpWorldCoord = new Vector3();
         tmpScreenCoord = new Vector3();
         tmpColor = new Color();
+        fogBuffer.addRenderer(new VfxFrameBuffer.BatchRendererAdapter(batch));
+        fogBuffer.addRenderer(new VfxFrameBuffer.ShapeRendererAdapter(shape));
 
         initialized = true;
-        initializeZoneResources();
+        initializeZoneResources(zone);
     }
 
     @Override
@@ -164,6 +155,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         this.width = width;
         this.height = height;
         vfxManager.resize(width, height);
+        fogBuffer.initialize(width, height);
+        // this texture is bound to the buffer
+        fogBufferTexture = null;
         updateCam();
 
     }
@@ -195,15 +189,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void doRendering() {
-        Gdx.gl.glClearColor(0, 0, 0, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
         if (zone == null)
             return;
 
         initializeTimer();
-        if(zoneRenderer == null)
+        if (zoneRenderer == null)
             return;
 
         setScale(zoneRenderer.getZoneScale());
@@ -472,8 +466,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderFog(PlayerView view) {
-        Dimension size = zoneRenderer.getSize();
-        Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
+
+
         Area combined = null;
 
         // Optimization for panning
@@ -485,44 +479,57 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
         boolean cacheNotValid =
                 (fogBufferTexture == null
-                        || fogBufferTexture.getWidth() != size.width
-                        || fogBufferTexture.getHeight() != size.height);
+                        || fogBufferTexture.getWidth() != width
+                        || fogBufferTexture.getHeight() != height);
         timer.start("renderFog");
         if (flushFog || cacheNotValid) {
+
+
+            fogBuffer.begin();
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+            batch.setProjectionMatrix(cam.combined);
+
             timer.start("renderFog-allocateBufferedImage");
-            var fogBuffer = new Pixmap(width, height, Pixmap.Format.RGBA8888);
             timer.stop("renderFog-allocateBufferedImage");
             fogX = zoneRenderer.getViewOffsetX();
             fogY = zoneRenderer.getViewOffsetY();
 
             timer.start("renderFog-fill");
             // Fill
-            float scale = (float)zoneRenderer.getScale();
+            if(fog == null)
+                fog = paintToSprite(zone.getFogPaint());
 
+            fillViewportWith(fog);
+
+            batch.end();
+            shape.begin(ShapeRenderer.ShapeType.Filled);
+            shape.setProjectionMatrix(cam.combined);
+
+            shape.setColor(Color.BLUE);
+            shape.circle(0, 0, 50);
+            shape.end();
+            batch.begin();
+/*
             fogBuffer.setBlending(Pixmap.Blending.None);
-            if(fogPaintPixmap != null) {
+            if (fogPaintPixmap != null) {
                 var pix = fogPaintPixmap;
                 var w = pix.getWidth();
                 var h = pix.getHeight();
-                fogBuffer.drawPixmap(pix,fogX, fogY, w, h, 0, 0, (int)(w*scale), (int)(h*scale));
+                fillViewportWith();
+                fogBuffer.drawPixmap(pix, fogX, fogY, w, h, 0, 0, (int) (w * scale), (int) (h * scale));
                 //buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
                 //buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this
 
             } else {
-                var color = fogPaintColor;
-                fogBuffer.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
+                fogBuffer.setColor(fogPaintColor);
             }
 
 
             // fixes the GM exposed area view.
             fogBuffer.fillRectangle(0, 0, size.width, size.height);
             timer.stop("renderFog-fill");
-
- /*           // Cut out the exposed area
-            AffineTransform af = new AffineTransform();
-            af.translate(fogX, fogY);
-            af.scale(scale, scale);
-*/
 
             timer.start("renderFog-visibleArea");
             Area visibleArea = zoneView.getVisibleArea(view);
@@ -556,23 +563,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 }
                 if (combinedView) {
                     var triangles = triangulator.computeTriangles(areaToVertices(combined));
-                    for(int i = 0; i< triangles.size; i+=6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
-                            triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
+                    for (int i = 0; i < triangles.size; i += 6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
+                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
 
-                    renderFogArea(fogBuffer, view, combined, visibleArea);
-                    renderFogOutline(fogBuffer, view, combined);
+                    renderFogArea(view, combined, visibleArea);
+                    renderFogOutline(view, combined);
                 } else {
                     // 'combined' already includes the area encompassed by 'tempArea', so just
                     // use 'combined' instead in this block of code?
                     tempArea.add(combined);
 
                     var triangles = triangulator.computeTriangles(areaToVertices(tempArea));
-                    for(int i = 0; i< triangles.size; i+=6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
-                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
-                    renderFogArea(fogBuffer, view, tempArea, visibleArea);
-                    renderFogOutline(fogBuffer, view, tempArea);
+                    for (int i = 0; i < triangles.size; i += 6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
+                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    renderFogArea(view, tempArea, visibleArea);
+                    renderFogOutline(view, tempArea);
                 }
             } else {
                 // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
@@ -582,11 +589,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         combined = zone.getExposedArea();
                     }
                     var triangles = triangulator.computeTriangles(areaToVertices(combined));
-                    for(int i = 0; i< triangles.size; i+=6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
-                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
-                    renderFogArea(fogBuffer, view, combined, visibleArea);
-                    renderFogOutline(fogBuffer, view, combined);
+                    for (int i = 0; i < triangles.size; i += 6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
+                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    renderFogArea(view, combined, visibleArea);
+                    renderFogOutline(view, combined);
                 } else {
                     Area myCombined = new Area();
                     List<Token> myToks = zone.getTokens();
@@ -601,37 +608,37 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         myCombined.add(new Area(exposedArea));
                     }
                     var triangles = triangulator.computeTriangles(areaToVertices(myCombined));
-                    for(int i = 0; i< triangles.size; i+=6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i+1), triangles.get(i+2),
-                                triangles.get(i+3), triangles.get(i+4), triangles.get(i+5));
-                    renderFogArea(fogBuffer, view, myCombined, visibleArea);
-                    renderFogOutline(fogBuffer, view, myCombined);
+                    for (int i = 0; i < triangles.size; i += 6)
+                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
+                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    renderFogArea(view, myCombined, visibleArea);
+                    renderFogOutline(view, myCombined);
                 }
             }
-            // renderFogArea(buffG, view, combined, visibleArea);
             timer.stop("renderFogArea");
-
-            // timer.start("renderFogOutline");
-            // renderFogOutline(buffG, view, combined);
-            // timer.stop("renderFogOutline");
-
+*/
             flushFog = false;
-            if(fogBufferTexture != null) {
-                fogBufferTexture.dispose();
-            }
-            fogBufferTexture = new Texture(fogBuffer);
-            fogBuffer.dispose();
+
+            fogBuffer.end();
+
+            if(fogBufferTexture == null)
+                fogBufferTexture = fogBuffer.getTexture();
         }
-        timer.stop("renderFog");
+
         batch.setProjectionMatrix(hudCam.combined);
-        batch.draw(fogBufferTexture, 0, 0);
+        var batchColor = batch.getColor();
+        batch.setColor(batchColor.r, batchColor.g, batchColor.b, view.isGMView() ? .6f : 1f);
+        batch.draw(fogBufferTexture, 0, 0, width, height, 0, 0,
+                fogBufferTexture.getWidth(), fogBufferTexture.getHeight(), false, true);
+        batch.setColor(batchColor);
         batch.setProjectionMatrix(cam.combined);
+        timer.stop("renderFog");
     }
 
-    private void renderFogArea(Pixmap fogBuffer, PlayerView view, Area tempArea, Area visibleArea) {
+    private void renderFogArea(PlayerView view, Area tempArea, Area visibleArea) {
     }
 
-    private void renderFogOutline(Pixmap fogBuffer, PlayerView view, Area combined) {
+    private void renderFogOutline(PlayerView view, Area combined) {
     }
 
     private void renderLabels(PlayerView view) {
@@ -648,21 +655,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void renderGrid(PlayerView view) {
         var grid = zone.getGrid();
-        var scale = (float)zoneRenderer.getScale();
+        var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
 
         if (!AppState.isShowGrid() || gridSize < ZoneRenderer.MIN_GRID_SIZE) {
             return;
         }
 
-        if(grid instanceof  GridlessGrid) {
+        if (grid instanceof GridlessGrid) {
             // do nothing
-        } else if(grid instanceof  HexGrid) {
-            renderGrid((HexGrid)grid);
-        } else if(grid instanceof SquareGrid) {
+        } else if (grid instanceof HexGrid) {
+            renderGrid((HexGrid) grid);
+        } else if (grid instanceof SquareGrid) {
             renderGrid((SquareGrid) grid);
-        } else if (grid instanceof  IsometricGrid) {
-            renderGrid((IsometricGrid)grid);
+        } else if (grid instanceof IsometricGrid) {
+            renderGrid((IsometricGrid) grid);
         }
     }
 
@@ -697,13 +704,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             for (double u = start; u < end; u += incr) {
                 float transX = 0;
                 float transY = 0;
-                if(grid instanceof HexGridVertical) {
-                    transX = (float)(u + offsetU);
-                    transY = height - (float)v;
-                }
-                else {
-                    transX = (float)v;
-                    transY = height - (float)(u + offsetU);
+                if (grid instanceof HexGridVertical) {
+                    transX = (float) (u + offsetU);
+                    transY = height - (float) v;
+                } else {
+                    transX = (float) v;
+                    transY = height - (float) (u + offsetU);
                 }
 
                 shape.translate(transX, transY, 0);
@@ -716,7 +722,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderGrid(IsometricGrid grid) {
-        var scale = (float)zoneRenderer.getScale();
+        var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
 
         shape.begin(ShapeRenderer.ShapeType.Filled);
@@ -727,8 +733,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         shape.setColor(tmpColor);
 
-        var x = hudCam.position.x - hudCam.viewportWidth/2;
-        var y = hudCam.position.y - hudCam.viewportHeight/2;
+        var x = hudCam.position.x - hudCam.viewportWidth / 2;
+        var y = hudCam.position.y - hudCam.viewportHeight / 2;
         var w = hudCam.viewportWidth;
         var h = hudCam.viewportHeight;
 
@@ -770,7 +776,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderGrid(SquareGrid grid) {
-        var scale = (float)zoneRenderer.getScale();
+        var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
 
         shape.begin(ShapeRenderer.ShapeType.Filled);
@@ -781,13 +787,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         shape.setColor(tmpColor);
 
-        var x = hudCam.position.x - hudCam.viewportWidth/2;
-        var y = hudCam.position.y - hudCam.viewportHeight/2;
+        var x = hudCam.position.x - hudCam.viewportWidth / 2;
+        var y = hudCam.position.y - hudCam.viewportHeight / 2;
         var w = hudCam.viewportWidth;
         var h = hudCam.viewportHeight;
 
-        var offX = (int) (zoneRenderer.getViewOffsetX() % gridSize + grid.getOffsetX() * scale) +1;
-        var offY = (int) (zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale) +1;
+        var offX = (int) (zoneRenderer.getViewOffsetX() % gridSize + grid.getOffsetX() * scale) + 1;
+        var offY = (int) (zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale) + 1;
 
         var startCol = ((int) (x / gridSize) * gridSize);
         var startRow = ((int) (y / gridSize) * gridSize);
@@ -795,10 +801,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var lineWidth = AppState.getGridSize();
 
         for (float row = startRow; row < y + h + gridSize; row += gridSize)
-            shape.rectLine(x,(int)(h - (row + offY)) , x + w,(int)(h - (row + offY)), lineWidth);
+            shape.rectLine(x, (int) (h - (row + offY)), x + w, (int) (h - (row + offY)), lineWidth);
 
         for (float col = startCol; col < x + w + gridSize; col += gridSize)
-            shape.rectLine((int)(col + offX), y, (int) (col + offX), y + h, lineWidth);
+            shape.rectLine((int) (col + offX), y, (int) (col + offX), y + h, lineWidth);
 
         shape.end();
     }
@@ -862,20 +868,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (!zone.drawBoard())
             return;
 
-        if (background != null) {
-            var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
-            startX = (int) (startX / background.getWidth()) * background.getWidth() - background.getWidth();
-            var endX = cam.position.x + cam.viewportWidth / 2 * zoom;
-            var startY = (cam.position.y - cam.viewportHeight * zoom / 2);
-            startY = (int) (startY / background.getHeight()) * background.getHeight() - background.getHeight();
-            var endY = (cam.position.y + cam.viewportHeight / 2 * zoom);
+        if (background == null)
+            background = paintToSprite(zone.getBackgroundPaint());
 
-            for (var i = startX; i < endX; i += background.getWidth())
-                for (var j = startY; j < endY; j += background.getHeight()) {
-                    background.setPosition(i, j);
-                    background.draw(batch);
-                }
-        }
+        fillViewportWith(background);
 
         if (mapAssetId != null) {
             var map = sprites.get(mapAssetId);
@@ -884,6 +880,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 map.draw(batch);
             }
         }
+    }
+
+    private void fillViewportWith(Sprite fill) {
+        var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
+        startX = (int) (startX / fill.getWidth()) * fill.getWidth() - fill.getWidth();
+        var endX = cam.position.x + cam.viewportWidth / 2 * zoom;
+        var startY = (cam.position.y - cam.viewportHeight * zoom / 2);
+        startY = (int) (startY / fill.getHeight()) * fill.getHeight() - fill.getHeight();
+        var endY = (cam.position.y + cam.viewportHeight / 2 * zoom);
+
+        for (var i = startX; i < endX; i += fill.getWidth())
+            for (var j = startY; j < endY; j += fill.getHeight()) {
+                fill.setPosition(i, j);
+                fill.draw(batch);
+            }
     }
 
     private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
@@ -970,9 +981,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.start("tokenlist-5a");
             if (token.isFlippedIso()) {
                 image.setRotation(45);
-                image.setSize(image.getWidth(), image.getHeight()/2);
-                token.setHeight((int)image.getHeight());
-                token.setWidth((int)image.getWidth());
+                image.setSize(image.getWidth(), image.getHeight() / 2);
+                token.setHeight((int) image.getHeight());
+                token.setWidth((int) image.getWidth());
                 footprintBounds = token.getBounds(zone);
             }
             timer.stop("tokenlist-5a");
@@ -991,15 +1002,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 footprintBounds.y - (int) iso_ho,
                                 footprintBounds.width,
                                 (int) th);
-                iso_ho = iso_ho * (float)zoneRenderer.getScale();
+                iso_ho = iso_ho * (float) zoneRenderer.getScale();
             }
 
-            var factorX = footprintBounds.width/image.getWidth();
-            var factorY = footprintBounds.height/image.getHeight();
+            var factorX = footprintBounds.width / image.getWidth();
+            var factorY = footprintBounds.height / image.getHeight();
 
             var factor = Math.min(factorX, factorY);
 
-            image.setSize(image.getWidth()*factor, image.getHeight()*factor);
+            image.setSize(image.getWidth() * factor, image.getHeight() * factor);
             image.setOriginCenter();
 
             // Rotated
@@ -1009,13 +1020,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             if (token.isSnapToScale()) {
                 var offsetx = (image.getWidth() < footprintBounds.width
-                                        ? (footprintBounds.width - image.getWidth()) / 2 : 0);
+                        ? (footprintBounds.width - image.getWidth()) / 2 : 0);
                 var offsety = (image.getHeight() < footprintBounds.height
-                                        ? (footprintBounds.height - image.getHeight()) / 2 : 0);
+                        ? (footprintBounds.height - image.getHeight()) / 2 : 0);
 
                 image.setPosition(image.getX() + offsetx, image.getY() + offsety + iso_ho);
             }
-
 
 
             timer.stop("tokenlist-6");
@@ -1446,67 +1456,28 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 background.getTexture().dispose();
             }
 
+            var fog = this.fog;
+            this.fog = null;
+            if (fog != null) {
+                fog.getTexture().dispose();
+            }
+
             for (var sprite : sprites.values()) {
                 sprite.getTexture().dispose();
             }
             sprites.clear();
-            fogPaintColor = null;
-            if(fogPaintPixmap != null)
-                fogPaintPixmap.dispose();
-            fogPaintPixmap = null;
-            if(fogBufferTexture != null)
-                fogBufferTexture.dispose();
+
             fogBufferTexture = null;
         });
     }
 
-    private void initializeZoneResources() {
-        if (zone == null || !initialized)
+    private void initializeZoneResources(Zone newZone) {
+        if (newZone == null || !initialized)
             return;
 
-        var backgroundPaint = zone.getBackgroundPaint();
-        if (backgroundPaint instanceof DrawableTexturePaint) {
-            var texturePaint = (DrawableTexturePaint) backgroundPaint;
-            var image = texturePaint.getAsset().getImage();
-            Gdx.app.postRunnable(() -> {
-                var pix = new Pixmap(image, 0, image.length);
-                background = new Sprite(new Texture(pix));
-                background.setSize(pix.getWidth(), pix.getHeight());
-                background.setPosition(0, -1 * background.getHeight());
-                pix.dispose();
-            });
-        }
-        if (backgroundPaint instanceof DrawableColorPaint) {
-            var colorPaint = (DrawableColorPaint) backgroundPaint;
-            var colorValue = colorPaint.getColor();
-            var color = new Color();
-            Color.argb8888ToColor(color, colorValue);
-            Gdx.app.postRunnable(() -> {
-                var pix = new Pixmap(64, 64, Pixmap.Format.RGBA8888);
-
-                pix.setColor(color);
-                pix.fill();
-                background = new Sprite(new Texture(pix));
-                background.setSize(pix.getWidth(), pix.getHeight());
-                background.setPosition(0, -1 * background.getHeight());
-                pix.dispose();
-            });
-        }
-        var fogPaint = zone.getFogPaint();
-        if (fogPaint instanceof DrawableTexturePaint) {
-            var texturePaint = (DrawableTexturePaint) fogPaint;
-            var image = texturePaint.getAsset().getImage();
-            Gdx.app.postRunnable(() -> {
-                fogPaintPixmap = new Pixmap(image, 0, image.length);
-            });
-        }
-        if (fogPaint instanceof DrawableColorPaint) {
-            var colorPaint = (DrawableColorPaint) fogPaint;
-            var colorValue = colorPaint.getColor();
-            Color.argb8888ToColor(fogPaintColor, colorValue);
-        }
-
-        mapAssetId = zone.getMapAssetId();
+        zoneView = new ZoneView(newZone);
+        zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
+        mapAssetId = newZone.getMapAssetId();
 
         // FIXME: zonechanges during wait for resources
         new Thread(() -> {
@@ -1518,7 +1489,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 // create sprites for all assets
                 //TODO: create textureAtlas ?
                 Gdx.app.postRunnable(() -> {
-                    for (var assetId : zone.getAllAssetIds()) {
+                    for (var assetId : newZone.getAllAssetIds()) {
                         var bytes = AssetManager.getAsset(assetId).getImage();
 
                         var pix = new Pixmap(bytes, 0, bytes.length);
@@ -1531,6 +1502,41 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             } catch (InterruptedException e) {
             }
         }).start();
+
+        zone = newZone;
+    }
+
+    private Sprite paintToSprite(DrawablePaint paint) {
+        if (paint instanceof DrawableTexturePaint) {
+            var texturePaint = (DrawableTexturePaint) paint;
+            var image = texturePaint.getAsset().getImage();
+            var pix = new Pixmap(image, 0, image.length);
+            var sprite = new Sprite(new Texture(pix));
+            sprite.setSize(pix.getWidth(), pix.getHeight());
+            sprite.setPosition(0, -1 * sprite.getHeight());
+            pix.dispose();
+            return sprite;
+        }
+        if (paint instanceof DrawableColorPaint) {
+            var colorPaint = (DrawableColorPaint) paint;
+            var colorValue = colorPaint.getColor();
+            var color = new Color();
+            Color.argb8888ToColor(color, colorValue);
+            var pix = new Pixmap(64, 64, Pixmap.Format.RGBA8888);
+
+            pix.setColor(color);
+            pix.fill();
+            var sprite = new Sprite(new Texture(pix));
+            sprite.setSize(pix.getWidth(), pix.getHeight());
+            sprite.setPosition(0, -1 * sprite.getHeight());
+            pix.dispose();
+            return sprite;
+        }
+        return null;
+    }
+
+    private void fillArea(Pixmap pix, Area area) {
+
     }
 
     public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle) {
@@ -1547,21 +1553,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (event.getId() != MapTool.ZoneEvent.Activated)
             return;
 
-        if (zone != null) {
-            disposeZoneResources();
-            zone.removeModelChangeListener(this);
-        }
+        var oldZone = zone;
         // first disable rendering during intitialisation;
         zone = null;
 
+        if (oldZone != null) {
+            disposeZoneResources();
+            oldZone.removeModelChangeListener(this);
+        }
+
         var newZone = (Zone) event.getNewValue();
         newZone.addModelChangeListener(this);
-
-        zoneView = new ZoneView(newZone);
-        zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
+        initializeZoneResources(newZone);
+        // just in case we are running before create was called and hence initializeZoneResources does nothing
         zone = newZone;
-
-        initializeZoneResources();
     }
 
     @Override
