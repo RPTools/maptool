@@ -98,6 +98,6 @@ public class ReturnFunction extends AbstractFunction implements DefinesSpecialVa
 
   @Override
   public String[] getSpecialVariables() {
-    return new String[] {"macro.return"};
+    return new String[] {"macro.return", "macro.catchReturn"};
   }
 }

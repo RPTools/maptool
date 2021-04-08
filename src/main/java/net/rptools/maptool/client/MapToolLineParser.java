@@ -1050,7 +1050,7 @@ public class MapToolLineParser {
       return result;
     } catch (ReturnFunctionException e) {
       log.debug(e);
-      boolean catchReturn = BigDecimal.ONE.equals(resolver.getVariable("macro.return"));
+      boolean catchReturn = BigDecimal.ONE.equals(resolver.getVariable("macro.catchReturn"));
       if (!catchReturn) throw e;
 
       // return an empty result to not collide with tooltips

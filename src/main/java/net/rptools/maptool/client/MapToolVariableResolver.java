@@ -98,6 +98,7 @@ public class MapToolVariableResolver implements VariableResolver {
       this.setVariable("macro.args", "");
       this.setVariable("macro.catchAbort", BigDecimal.ZERO);
       this.setVariable("macro.return", BigDecimal.ZERO);
+      this.setVariable("macro.catchReturn", BigDecimal.ZERO);
       this.setVariable("macro.catchAssert", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
       this.setVariable(TokenMoveFunctions.ON_TOKEN_MOVE_DENY_VARIABLE, 0);
