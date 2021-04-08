@@ -76,6 +76,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private Vector3 tmpWorldCoord;
     private Vector3 tmpScreenCoord;
+    private Color tmpColor;
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -118,6 +119,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         tmpWorldCoord = new Vector3();
         tmpScreenCoord = new Vector3();
+        tmpColor = new Color();
 
         initialized = true;
         initializeZoneResources();
@@ -462,11 +464,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderGrid(PlayerView view) {
-   /*     int gridSize = (int) (zone.getGrid().getSize() * 1/cam.zoom);
+        var grid = zone.getGrid();
+        var scale = (float)zoneRenderer.getScale();
+        int gridSize = (int) (grid.getSize() * scale);
+
         if (!AppState.isShowGrid() || gridSize < ZoneRenderer.MIN_GRID_SIZE) {
             return;
         }
-        var grid = zone.getGrid();
+
         if(grid instanceof  GridlessGrid) {
             // do nothing
         } else if(grid instanceof  HexGrid) {
@@ -476,89 +481,39 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         } else if (grid instanceof  IsometricGrid) {
 
         }
-*/
-
-        int gridSize = (int) (zone.getGrid().getSize() * zoneRenderer.getScale());
-
-        if (!AppState.isShowGrid() || gridSize < ZoneRenderer.MIN_GRID_SIZE) {
-            return;
-        }
-        var scale = zoneRenderer.getScale();
-
-        float gridWidth = (float) (zone.getGrid().getCellWidth() * scale);
-        float gridHeight = (float) (zone.getGrid().getCellHeight() * scale);
-
-        java.awt.Color gridColor = new java.awt.Color(zone.getGridColor());
-
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setProjectionMatrix(hudCam.combined);
-        shape.identity();
-
-        shape.setColor(gridColor.getRed(), gridColor.getGreen(), gridColor.getBlue(), 4f);
-        float[] gridVertices = areaToVertices(zone.getGrid().getCellShape());
-
-        float transX = ((width / gridWidth) + 1) * -gridWidth;
-
-        var x = cam.position.x - cam.viewportWidth/2;
-        var y = cam.position.y - cam.viewportHeight/2;
-
-        var startCol = (((int) (x / gridWidth))-1) * gridWidth - offsetX + 1;
-        var startRow = (((int) (y / gridHeight))-1) * gridHeight - offsetY;
-
-
-        //for (int h = 0; h <= height / gridHeight + 1; h++) {
-        for (var row = startRow; row < y + height + 2 * gridHeight; row += gridHeight) {
-            for (var col = startCol; col < x + cam.viewportWidth + gridSize; col += gridWidth) {
-                shape.identity();
-                shape.translate(col , height + row, 0);
-                shape.polygon(gridVertices);
-            }
-        }
-
-        shape.end();
     }
 
     private void renderGrid(SquareGrid grid) {
-        double scale = zoneRenderer.getScale();
-        double gridSize = grid.getSize() * scale;
+        var scale = (float)zoneRenderer.getScale();
+        int gridSize = (int) (grid.getSize() * scale);
 
-        var camX = cam.position.x - cam.viewportWidth * cam.zoom/2;
-        var camY = cam.position.y - cam.viewportHeight * cam.zoom/2;
-
-        var hudHeight = hudCam.viewportHeight * hudCam.zoom;
-        var hudWidth = hudCam.viewportWidth * hudCam.zoom;
-        var hudX = hudCam.position.x - hudCam.viewportWidth * hudCam.zoom/2;
-        var hudY = hudCam.position.y - hudCam.viewportHeight * hudCam.zoom/2;
-
-
-        shape.setColor(Color.BLACK);
-        shape.setProjectionMatrix(hudCam.combined);
         shape.begin(ShapeRenderer.ShapeType.Filled);
-        //g.setColor(new java.awt.Color(getZone().getGridColor()));
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.identity();
 
-       // float offX = (float) (grid.getOffsetX() * scale);
-        int offY = (int) (zoneRenderer.getViewOffsetY() % gridSize - grid.getOffsetY() * scale);
+        Color.argb8888ToColor(tmpColor, zone.getGridColor());
 
-        float startCol = (int) ((int) (hudX / gridSize) * gridSize) + grid.getOffsetX();
-        float startRow = (int) ((int) (camY / gridSize) * gridSize);
+        shape.setColor(tmpColor);
 
-        tmpWorldCoord.x = startCol;
-        tmpWorldCoord.y = startRow;
-        tmpWorldCoord.z = 0;
-        tmpScreenCoord = cam.project(tmpWorldCoord);
-        tmpWorldCoord = hudCam.unproject(tmpScreenCoord);
+        var x = hudCam.position.x - hudCam.viewportWidth/2;
+        var y = hudCam.position.y - hudCam.viewportHeight/2;
+        var w = hudCam.viewportWidth;
+        var h = hudCam.viewportHeight;
 
-        startCol = tmpWorldCoord.x;
-        startRow = tmpWorldCoord.y;
+        var offX = (int) (zoneRenderer.getViewOffsetX() % gridSize + grid.getOffsetX() * scale) +1;
+        var offY = (int) (zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale) +1;
+
+        var startCol = ((int) (x / gridSize) * gridSize);
+        var startRow = ((int) (y / gridSize) * gridSize);
 
         var lineWidth = AppState.getGridSize();
 
-    /*    for (float row = startRow; row > bounds.y + gridSize; row -= gridSize) {
-                shape.rectLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY), lineWidth);
-        }*/
-        for (float col = startCol; col < startCol + width + gridSize; col += gridSize) {
-                shape.rectLine(col, hudY, col, hudY + height, lineWidth);
-        }
+        for (float row = startRow; row < y + h + gridSize; row += gridSize)
+            shape.rectLine(x,(int)(h - (row + offY)) , x + w,(int)(h - (row + offY)), lineWidth);
+
+        for (float col = startCol; col < x + w + gridSize; col += gridSize)
+            shape.rectLine((int)(col + offX), y, (int) (col + offX), y + h, lineWidth);
+
         shape.end();
     }
 
@@ -1247,9 +1202,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             } catch (InterruptedException e) {
             }
         }).start();
-
-        zoneView = new ZoneView(zone);
-        zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
     }
 
     public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle) {
@@ -1270,10 +1222,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             disposeZoneResources();
             zone.removeModelChangeListener(this);
         }
+        // first disable rendering during intitialisation;
+        zone = null;
 
         var newZone = (Zone) event.getNewValue();
         newZone.addModelChangeListener(this);
 
+        zoneView = new ZoneView(newZone);
+        zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
         zone = newZone;
 
         initializeZoneResources();
