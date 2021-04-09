@@ -12,7 +12,11 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Bezier;
+import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.FloatArray;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.BloomEffect;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
@@ -42,6 +46,17 @@ import java.awt.geom.PathIterator;
 import java.util.List;
 import java.util.*;
 
+/**
+ * Done:
+ * - Board
+ * - Grids
+ *
+ * Bugs:
+ * - y offset of VerticalHexgrid is wrong
+ * - ismetric mode for token does't work
+ */
+
+
 public class GdxRenderer extends ApplicationAdapter implements AppEventListener, ModelChangeListener {
 
     private static final Logger log = LogManager.getLogger(GdxRenderer.class);
@@ -50,6 +65,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private final Map<MD5Key, Sprite> sprites = new HashMap<>();
     //renderFog
     Texture fogBufferTexture;
+    private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
     private Area exposedFogArea;
@@ -64,6 +80,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int offsetX = 0;
     private int offsetY = 0;
     private float zoom = 1.0f;
+
     // general resources
     private OrthographicCamera cam;
     private OrthographicCamera hudCam;
@@ -82,11 +99,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private VfxFrameBuffer fogBuffer;
     private Integer fogX;
     private Integer fogY;
+    private EarClippingTriangulator triangulator;
 
+    //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord;
     private Vector3 tmpScreenCoord;
     private Color tmpColor;
-    private boolean flushFog = true;
+    private float[] floatsFromArea;
+    private FloatArray tmpFloat;
+    private Vector2 tmpVectorOut;
+    private Vector2 tmpVector;
+    private Vector2 tmpVector0;
+    private Vector2 tmpVector1;
+    private Vector2 tmpVector2;
+    private Vector2 tmpVector3;
+
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -96,15 +123,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (_instance == null)
             _instance = new GdxRenderer();
         return _instance;
-    }
-
-    public static void main(String[] args) {
-        LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-        cfg.title = "MapTool libgdx Test!";
-        cfg.width = 800;
-        cfg.height = 600;
-
-        new LwjglApplication(new GdxRenderer(), cfg);
     }
 
     @Override
@@ -125,6 +143,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         glyphLayout = new GlyphLayout();
         fogBuffer = new VfxFrameBuffer(Pixmap.Format.RGBA8888);
         fogBuffer.initialize(width, height);
+        triangulator = new EarClippingTriangulator();
+
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
         //vfxManager.addEffect(vfxEffect);
@@ -132,6 +152,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpWorldCoord = new Vector3();
         tmpScreenCoord = new Vector3();
         tmpColor = new Color();
+        tmpFloat = new FloatArray();
+        floatsFromArea = new float[6];
+        tmpVector = new Vector2();
+        tmpVector0 = new Vector2();
+        tmpVector1 = new Vector2();
+        tmpVector2 = new Vector2();
+        tmpVector3 = new Vector2();
+        tmpVectorOut = new Vector2();
+
         fogBuffer.addRenderer(new VfxFrameBuffer.BatchRendererAdapter(batch));
         fogBuffer.addRenderer(new VfxFrameBuffer.ShapeRendererAdapter(shape));
 
@@ -486,7 +515,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
             fogBuffer.begin();
-            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
             batch.setProjectionMatrix(cam.combined);
@@ -506,30 +535,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             batch.end();
             shape.begin(ShapeRenderer.ShapeType.Filled);
             shape.setProjectionMatrix(cam.combined);
-
-            shape.setColor(Color.BLUE);
-            shape.circle(0, 0, 50);
-            shape.end();
-            batch.begin();
-/*
-            fogBuffer.setBlending(Pixmap.Blending.None);
-            if (fogPaintPixmap != null) {
-                var pix = fogPaintPixmap;
-                var w = pix.getWidth();
-                var h = pix.getHeight();
-                fillViewportWith();
-                fogBuffer.drawPixmap(pix, fogX, fogY, w, h, 0, 0, (int) (w * scale), (int) (h * scale));
-                //buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
-                //buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this
-
-            } else {
-                fogBuffer.setColor(fogPaintColor);
-            }
-
-
-            // fixes the GM exposed area view.
-            fogBuffer.fillRectangle(0, 0, size.width, size.height);
-            timer.stop("renderFog-fill");
 
             timer.start("renderFog-visibleArea");
             Area visibleArea = zoneView.getVisibleArea(view);
@@ -553,6 +558,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             || !MapTool.getServerPolicy().isUseIndividualFOW()
                             || view.isGMView();
 
+            shape.setColor(Color.CLEAR);
+
             if (view.getTokens() != null) {
                 // if there are tokens selected combine the areas, then, if individual FOW is enabled
                 // we pass the combined exposed area to build the soft FOW and visible area.
@@ -562,11 +569,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tempArea.add(new Area(exposedArea));
                 }
                 if (combinedView) {
-                    var triangles = triangulator.computeTriangles(areaToVertices(combined));
-                    for (int i = 0; i < triangles.size; i += 6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
-                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
-
+                    fillArea(combined);
                     renderFogArea(view, combined, visibleArea);
                     renderFogOutline(view, combined);
                 } else {
@@ -574,10 +577,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     // use 'combined' instead in this block of code?
                     tempArea.add(combined);
 
-                    var triangles = triangulator.computeTriangles(areaToVertices(tempArea));
-                    for (int i = 0; i < triangles.size; i += 6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
-                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    fillArea(tempArea);
                     renderFogArea(view, tempArea, visibleArea);
                     renderFogOutline(view, tempArea);
                 }
@@ -588,10 +588,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (combined.isEmpty()) {
                         combined = zone.getExposedArea();
                     }
-                    var triangles = triangulator.computeTriangles(areaToVertices(combined));
-                    for (int i = 0; i < triangles.size; i += 6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
-                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    fillArea(combined);
                     renderFogArea(view, combined, visibleArea);
                     renderFogOutline(view, combined);
                 } else {
@@ -607,16 +604,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         exposedArea = meta.getExposedAreaHistory();
                         myCombined.add(new Area(exposedArea));
                     }
-                    var triangles = triangulator.computeTriangles(areaToVertices(myCombined));
-                    for (int i = 0; i < triangles.size; i += 6)
-                        fogBuffer.fillTriangle(triangles.get(i), triangles.get(i + 1), triangles.get(i + 2),
-                                triangles.get(i + 3), triangles.get(i + 4), triangles.get(i + 5));
+                    fillArea(myCombined);
                     renderFogArea(view, myCombined, visibleArea);
                     renderFogOutline(view, myCombined);
                 }
             }
             timer.stop("renderFogArea");
-*/
+
+            shape.end();
+            batch.begin();
             flushFog = false;
 
             fogBuffer.end();
@@ -1535,8 +1531,73 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         return null;
     }
 
-    private void fillArea(Pixmap pix, Area area) {
+    private void fillArea(Area area) {
+        if (area.isEmpty())
+            return;
 
+        var pointsPerBezier = 10.0f;
+
+        for (var it = area.getPathIterator(null); !it.isDone(); it.next())  {
+            int type = it.currentSegment(floatsFromArea);
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    System.out.println("Move to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+                    tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
+
+                    break;
+                case PathIterator.SEG_CLOSE:
+//                    tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
+                    var indicies =  triangulator.computeTriangles(tmpFloat.items, 0, tmpFloat.size);
+                    for (int i = 0; i < indicies.size - 2; i = i + 3)
+                    {
+                        float x1 = tmpFloat.get(indicies.get(i) * 2);
+                        float y1 = tmpFloat.get((indicies.get(i) * 2) + 1);
+
+                        float x2 = tmpFloat.get((indicies.get(i + 1)) * 2);
+                        float y2 = tmpFloat.get((indicies.get(i + 1) * 2) + 1);
+
+                        float x3 = tmpFloat.get(indicies.get(i + 2) * 2);
+                        float y3 = tmpFloat.get((indicies.get(i + 2) * 2) + 1);
+
+                        shape.triangle(x1, y1, x2, y2, x3, y3);
+                    }
+                    tmpFloat.clear();
+                    break;
+                case PathIterator.SEG_LINETO:
+                    System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+                    tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
+                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
+
+                    tmpVector0.set(tmpFloat.get(tmpFloat.size-2), tmpFloat.get(tmpFloat.size-1));
+                    tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
+                    tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
+                    for(var i = 1; i <= pointsPerBezier; i++) {
+                        Bezier.quadratic(tmpVectorOut, i / pointsPerBezier, tmpVector0, tmpVector1, tmpVector2, tmpVector);
+                        tmpFloat.add(tmpVectorOut.x, tmpVectorOut.y);
+                    }
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    System.out.println("cubic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
+                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] +
+                            "), (" + floatsFromArea[4] + ", " + floatsFromArea[5] + ")");
+
+                    tmpVector0.set(tmpFloat.get(tmpFloat.size-2), tmpFloat.get(tmpFloat.size-1));
+                    tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
+                    tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
+                    tmpVector3.set(floatsFromArea[4], -floatsFromArea[5]);
+                    for(var i = 1; i <= pointsPerBezier; i++) {
+                        Bezier.cubic(tmpVectorOut, i / pointsPerBezier, tmpVector0, tmpVector1, tmpVector2, tmpVector3, tmpVector);
+                        tmpFloat.add(tmpVectorOut.x, tmpVectorOut.y);
+                    }
+                    break;
+                default:
+                    System.out.println("Type: " + type);
+            }
+        }
     }
 
     public java.awt.Rectangle toAwtRect(com.badlogic.gdx.math.Rectangle rectangle) {
@@ -1571,9 +1632,37 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void modelChanged(ModelChangeEvent event) {
+        Object evt = event.getEvent();
+
+        if (evt == Zone.Event.TOPOLOGY_CHANGED) {
+            flushFog();
+            //flushLight();
+            return;
+        }
+        if (evt == Zone.Event.FOG_CHANGED) {
+            flushFog = true;
+            return;
+        }
+        /*
+        if (evt == Zone.Event.TOKEN_CHANGED
+                || evt == Zone.Event.TOKEN_REMOVED
+                || evt == Zone.Event.TOKEN_ADDED) {
+            if (event.getArg() instanceof List<?>) {
+                @SuppressWarnings("unchecked")
+                List<Token> list = (List<Token>) (event.getArg());
+                for (Token token : list) {
+                    zoneRenderer.flush(token);
+                }
+            } else {
+                zoneRenderer.flush((Token) event.getArg());
+            }
+        }*/
+
+        var currentZone = zone;
+
         // for now quick and dirty
-        //disposeZoneResources();
-        //initializeZoneResources();
+        disposeZoneResources();
+        initializeZoneResources(currentZone);
     }
 
     public void setScale(Scale scale) {
@@ -1582,4 +1671,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         zoom = (float) (1f / scale.getScale());
         updateCam();
     }
+
+    public void flushFog() { flushFog = true; }
+
 }

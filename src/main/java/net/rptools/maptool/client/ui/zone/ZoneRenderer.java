@@ -778,6 +778,7 @@ public class ZoneRenderer extends JComponent
     flushFog = true;
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
+    GdxRenderer.getInstance().flushFog();
   }
 
   /** @return the Zone */
