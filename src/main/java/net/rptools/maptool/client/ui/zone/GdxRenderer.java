@@ -98,7 +98,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Integer fogY;
     private EarClippingTriangulator triangulator;
     private Texture greyLabelTexture;
+    private Texture blueLabelTexture;
+    private Texture darkGreyLabelTexture;
     private NinePatch greyLabel;
+    private NinePatch blueLabel;
+    private NinePatch darkGreyLabel;
 
     //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord;
@@ -147,8 +151,18 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/grayLabelbox.png"));
         greyLabelTexture = new Texture(pix);
         pix.dispose();
-        var topBottom = greyLabelTexture.getHeight()/2 - 1;
-        greyLabel = new NinePatch(greyLabelTexture, 10, 10, 0, 0);
+
+        pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/blueLabelbox.png"));
+        blueLabelTexture = new Texture(pix);
+        pix.dispose();
+
+        pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/darkGreyLabelbox.png"));
+        darkGreyLabelTexture = new Texture(pix);
+        pix.dispose();
+
+        greyLabel = new NinePatch(greyLabelTexture, 10, 10, 10, 10);
+        blueLabel = new NinePatch(blueLabelTexture, 10, 10, 10, 10);
+        darkGreyLabel = new NinePatch(darkGreyLabelTexture, 10, 10, 10, 10);
 
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
@@ -182,6 +196,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxEffect.dispose();
         shape.dispose();
         greyLabelTexture.dispose();
+        blueLabelTexture.dispose();
+        darkGreyLabelTexture.dispose();
         disposeZoneResources();
     }
 
@@ -251,14 +267,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         renderZone(playerView);
         batch.end();
 
-        glyphLayout.setText(font, "test");
-
-
-
         hudBatch.begin();
-        //hudBatch.draw(greyLabelTexture, 20,20);
-        greyLabel.draw(hudBatch, 20, 20 , 100, 100);
-        font.draw(hudBatch, "test", 20, 20);
+        hudBatch.setProjectionMatrix(hudCam.combined);
 
         if (zoneRenderer.isLoading())
             drawBoxedString(hudBatch, zoneRenderer.getLoadingProgress(), width / 2, height / 2);
@@ -275,15 +285,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             drawBoxedString(hudBatch, "Player View", width / 2, height - noteVPos);
         }
 
-        drawBoxedString(hudBatch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
+        drawString(hudBatch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
 
         hudBatch.end();
-
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setProjectionMatrix(hudCam.combined);
-        shape.setColor(Color.BLUE);
-        shape.rect(20,20, glyphLayout.width, glyphLayout.height);
-        shape.end();
 
         collectTimerResults();
     }
@@ -901,6 +905,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
     }
 
+    public void drawString(SpriteBatch batch, String text, float centerX, float centerY) {
+        drawBoxedString(batch, text, centerX, centerY, SwingUtilities.CENTER, null, Color.WHITE);
+    }
+
     public void drawBoxedString(SpriteBatch batch, String text, float centerX, float centerY) {
         drawBoxedString(batch, text, centerX, centerY, SwingUtilities.CENTER);
     }
@@ -915,16 +923,17 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         if (text == null) text = "";
 
+
         glyphLayout.setText(font, text);
         var strWidth = glyphLayout.width;
 
+        var fontHeight = font.getLineHeight();
+
         var width = strWidth + BOX_PADDINGX * 2;
-        var height = glyphLayout.height + BOX_PADDINGY * 2;
+        var height = fontHeight + BOX_PADDINGY * 2;
 
-        var boxY  = y - glyphLayout.height / 2 - BOX_PADDINGY;
-        var textY = y + glyphLayout.height /2 + BOX_PADDINGY;
+        y = y - fontHeight/ 2 - BOX_PADDINGY;
 
-        y = y - glyphLayout.height / 2 - BOX_PADDINGY;
         switch (justification) {
             case SwingUtilities.CENTER:
                 x = x - strWidth / 2 - BOX_PADDINGX;
@@ -937,15 +946,17 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         // Box
-        background.draw(batch, x, y, width, height);
+        if(background != null)
+            background.draw(batch, x, y, width, height);
 
         // Renderer message
-        //var oldColor = batch.getColor();
-        //batch.setColor(foreground);
-        float textX = x + BOX_PADDINGX;
 
-        font.draw(batch, text, textX, textY);
-        //batch.setColor(oldColor);
+        var textX = x + BOX_PADDINGX;
+        var textY = y + height - BOX_PADDINGY - font.getAscent();
+        tmpColor.set(font.getColor());
+        font.setColor(foreground);
+        font.draw(batch, glyphLayout, textX, textY);
+        font.setColor(tmpColor);
     }
 
     private void renderBoard() {
