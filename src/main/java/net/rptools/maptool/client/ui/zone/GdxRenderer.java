@@ -20,12 +20,10 @@ import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.box2d.NativeRenderer;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -811,6 +809,25 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderLabels(PlayerView view) {
+        timer.start("labels-1");
+
+        for (Label label : zone.getLabels()) {
+            timer.start("labels-1.1");
+            Color.argb8888ToColor(tmpColor, label.getForegroundColor().getRGB());
+            if (label.isShowBackground()) {
+                drawBoxedString(batch,
+                                label.getLabel(),
+                                label.getX(),
+                                -label.getY(),
+                                SwingUtilities.CENTER,
+                                greyLabel,
+                                tmpColor);
+            } else {
+                drawString(batch, label.getLabel(), label.getX(), -label.getY(), tmpColor);
+            }
+            timer.stop("labels-1.1");
+        }
+        timer.stop("labels-1");
     }
 
     private void showBlockedMoves(PlayerView view, Set<ZoneRenderer.SelectionSet> unOwnedMovementSet) {
@@ -1092,6 +1109,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
     }
 
+    public void drawString(SpriteBatch batch, String text, float centerX, float centerY, Color foreground) {
+        drawBoxedString(batch, text, centerX, centerY, SwingUtilities.CENTER, null, foreground);
+    }
+
     public void drawString(SpriteBatch batch, String text, float centerX, float centerY) {
         drawBoxedString(batch, text, centerX, centerY, SwingUtilities.CENTER, null, Color.WHITE);
     }
@@ -1140,10 +1161,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var textX = x + BOX_PADDINGX;
         var textY = y + height - BOX_PADDINGY - font.getAscent();
-        tmpColor.set(font.getColor());
+
         font.setColor(foreground);
-        font.draw(batch, glyphLayout, textX, textY);
-        font.setColor(tmpColor);
+        font.draw(batch, text, textX, textY);
     }
 
     private void renderBoard() {
