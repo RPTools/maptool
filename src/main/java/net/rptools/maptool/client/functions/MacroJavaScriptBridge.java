@@ -14,14 +14,11 @@
  */
 package net.rptools.maptool.client.functions;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.*;
 import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
