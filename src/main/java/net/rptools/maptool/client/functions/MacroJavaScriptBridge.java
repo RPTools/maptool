@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.*;
 import javax.script.ScriptException;
-import jdk.nashorn.api.scripting.JSObject;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -88,21 +87,6 @@ public class MacroJavaScriptBridge extends AbstractFunction {
       return BigDecimal.valueOf((Long) val);
     } else if (val instanceof Double) {
       return BigDecimal.valueOf((Double) val);
-    } else if (val instanceof JSObject) {
-      JSObject jsObject = (JSObject) val;
-      if (jsObject.isArray()) {
-        JsonArray arr = new JsonArray();
-        for (Object o : jsObject.values()) {
-          arr.add(0);
-        }
-        return arr;
-      } else {
-        JsonObject obj = new JsonObject();
-        for (String key : jsObject.keySet()) {
-          obj.add(key, JSONMacroFunctions.getInstance().asJsonElement(jsObject.getMember(key)));
-        }
-        return obj;
-      }
     } else {
       return val;
     }
