@@ -77,6 +77,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int offsetX = 0;
     private int offsetY = 0;
     private float zoom = 1.0f;
+    private boolean renderZone = false;
 
     // general resources
     private OrthographicCamera cam;
@@ -140,6 +141,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudCam.setToOrtho(false);
 
         shape = new ShapeRenderer();
+        shape.setAutoShapeType(true);
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
@@ -232,7 +234,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void render() {
         vfxManager.cleanUpBuffers();
         vfxManager.beginInputCapture();
-        doRendering();
+        try {
+            doRendering();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         vfxManager.endInputCapture();
         vfxManager.applyEffects();
         vfxManager.renderToScreen();
@@ -243,7 +249,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (zone == null)
+        if (zone == null || !renderZone)
             return;
 
         initializeTimer();
@@ -395,6 +401,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
         }
         if (Zone.Layer.TOKEN.isEnabled()) {
+            batch.end();
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            shape.begin();
+
             timer.start("lights");
             renderLights(view);
             timer.stop("lights");
@@ -402,6 +412,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.start("auras");
             renderAuras(view);
             timer.stop("auras");
+
+            shape.end();
+            batch.begin();
         }
 
         /*
@@ -526,20 +539,102 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderPlayerVisionOverlay(PlayerView view) {
+     /* //  This doesn't seem to have any effect ??
+     if (zone.hasFog()) {
+            Area clip = new Area(new Rectangle(getSize().width, getSize().height));
+
+            Area viewArea = new Area(exposedFogArea);
+            List<Token> tokens = view.getTokens();
+            if (tokens != null && !tokens.isEmpty()) {
+                for (Token tok : tokens) {
+                    ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+                    viewArea.add(exposedMeta.getExposedAreaHistory());
+                }
+            }
+            if (!viewArea.isEmpty()) {
+                clip.intersect(new Area(viewArea.getBounds2D()));
+            }
+            // Note: the viewArea doesn't need to be transform()'d because exposedFogArea has been
+            // already.
+            g2.setClip(clip);
+        }*/
+        renderVisionOverlay(view);
     }
 
     private void renderGMVisionOverlay(PlayerView view) {
+        renderVisionOverlay(view);
+    }
+
+    private void renderVisionOverlay(PlayerView view) {
+        var tokenUnderMouse = zoneRenderer.getTokenUnderMouse();
+        Area currentTokenVisionArea = zoneRenderer.getVisibleArea(tokenUnderMouse);
+        if (currentTokenVisionArea == null) {
+            return;
+        }
+        Area combined = new Area(currentTokenVisionArea);
+        ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tokenUnderMouse.getExposedAreaGUID());
+
+        Area tmpArea = new Area(meta.getExposedAreaHistory());
+        tmpArea.add(zone.getExposedArea());
+        if (zone.hasFog()) {
+            if (tmpArea.isEmpty()) {
+                return;
+            }
+            combined.intersect(tmpArea);
+        }
+        boolean isOwner = AppUtil.playerOwns(tokenUnderMouse);
+        boolean tokenIsPC = tokenUnderMouse.getType() == Token.Type.PC;
+        boolean strictOwnership =
+                MapTool.getServerPolicy() != null && MapTool.getServerPolicy().useStrictTokenManagement();
+        boolean showVisionAndHalo = isOwner || view.isGMView() || (tokenIsPC && !strictOwnership);
+        // String player = MapTool.getPlayer().getName();
+        // System.err.print("tokenUnderMouse.ownedBy(" + player + "): " + isOwner);
+        // System.err.print(", tokenIsPC: " + tokenIsPC);
+        // System.err.print(", isGMView(): " + view.isGMView());
+        // System.err.println(", strictOwnership: " + strictOwnership);
+
+        /*
+         * The vision arc and optional halo-filled visible area shouldn't be shown to everyone. If we are in GM view, or if we are the owner of the token in question, or if the token is a PC and
+         * strict token ownership is off... then the vision arc should be displayed.
+         */
+        if (showVisionAndHalo) {
+            batch.end();
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            shape.begin();
+            shape.setColor(Color.WHITE);
+            shape.set(ShapeRenderer.ShapeType.Line);
+            paintArea(combined);
+            renderHaloArea(combined);
+            shape.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+            batch.begin();
+        }
+    }
+
+    private void renderHaloArea(Area visible) {
+        var tokenUnderMouse = zoneRenderer.getTokenUnderMouse();
+        if (tokenUnderMouse == null)
+            return;
+
+        boolean useHaloColor =
+                tokenUnderMouse.getHaloColor() != null && AppPreferences.getUseHaloColorOnVisionOverlay();
+        if (tokenUnderMouse.getVisionOverlayColor() != null || useHaloColor) {
+            java.awt.Color visionColor =
+                    useHaloColor ? tokenUnderMouse.getHaloColor() : tokenUnderMouse.getVisionOverlayColor();
+
+            shape.setColor(visionColor.getRed() / 255f, visionColor.getGreen() / 255f,
+                    visionColor.getBlue() / 255f, AppPreferences.getHaloOverlayOpacity() / 255f);
+            shape.set(ShapeRenderer.ShapeType.Filled);
+            paintArea(visible);
+        }
     }
 
     private void renderRenderables() {
     }
 
     private void renderFog(PlayerView view) {
-
-
         Area combined = null;
 
-        // Optimization for panning
         if (!flushFog
                 && fogX != null
                 && fogY != null
@@ -723,18 +818,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void renderAuras(PlayerView view) {
         var alpha = AppPreferences.getAuraOverlayOpacity() / 255.0f;
-        batch.end();
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.set(ShapeRenderer.ShapeType.Filled);
         timer.start("auras-4");
-        tmpColor.set(shape.getColor());
 
         var auraColor = shape.getColor();
         for (DrawableLight light : zoneRenderer.getZoneView().getLights(LightSource.Type.AURA)) {
             var paint = light.getPaint();
-            if(paint != null && paint instanceof DrawableColorPaint) {
-                var colorPaint = (DrawableColorPaint)paint;
+            if (paint != null && paint instanceof DrawableColorPaint) {
+                var colorPaint = (DrawableColorPaint) paint;
                 Color.argb8888ToColor(auraColor, colorPaint.getColor());
                 auraColor.a = alpha;
             } else {
@@ -745,14 +837,83 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         timer.stop("auras-4");
-        shape.setColor(tmpColor);
-        shape.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
-        batch.begin();
     }
 
     private void renderLights(PlayerView view) {
+        timer.start("lights-2");
+
+        var alpha = AppPreferences.getLightOverlayOpacity() / 255.0f;
+        timer.stop("lights-2");
+
+
+        timer.start("lights-3");
+        // Organize
+        Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
+        for (DrawableLight light : zoneRenderer.getZoneView().getDrawableLights(view)) {
+            // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
+            if (light.getType() == LightSource.Type.NORMAL) {
+                if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
+                    List<Area> areaList =
+                            colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
+                    areaList.add(new Area(light.getArea()));
+                }
+            }
+        }
+        timer.stop("lights-3");
+
+        timer.start("lights-4");
+        // Combine same colors to avoid ugly overlap
+        // Avoid combining _all_ of the lights as the area adds are very expensive, just combine those
+        // that overlap
+        // Jamz TODO: Check this and make sure proper order is happening
+        for (var paint : colorMap.keySet()) {
+            var areaList = colorMap.get(paint);
+            List<Area> sourceList = new LinkedList<Area>(areaList);
+            areaList.clear();
+
+            outter:
+            while (sourceList.size() > 0) {
+                Area area = sourceList.remove(0);
+
+                for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
+                    Area currArea = iter.next();
+
+                    if (currArea.getBounds().intersects(area.getBounds())) {
+                        iter.remove();
+                        area.add(currArea);
+                        sourceList.add(area);
+                        continue outter;
+                    }
+                }
+                // If we are here, we didn't find any other area to merge with
+                areaList.add(area);
+            }
+            // Cut out the bright light
+            if (areaList.size() > 0) {
+                for (Area area : areaList) {
+                    for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
+                        area.subtract(brightArea);
+                    }
+                }
+            }
+
+            if (paint instanceof DrawableColorPaint) {
+                var colorPaint = (DrawableColorPaint) paint;
+                Color.argb8888ToColor(tmpColor, colorPaint.getColor());
+
+            } else if(paint instanceof java.awt.Color) {
+                Color.argb8888ToColor(tmpColor, ((java.awt.Color)paint).getRGB());
+            } else {
+                System.out.println("unexpected color type");
+                continue;
+            }
+            tmpColor.a = alpha;
+            shape.setColor(tmpColor);
+            shape.set(ShapeRenderer.ShapeType.Filled);
+            for(var area: areaList)
+                paintArea(area);
+        }
+        timer.stop("lights-4");
     }
 
     private void renderGrid(PlayerView view) {
@@ -1668,12 +1829,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    System.out.println("Move to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+//                    System.out.println("Move to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
                     tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
 
                     break;
                 case PathIterator.SEG_CLOSE:
-                    System.out.println("Close");
+//                    System.out.println("Close");
                     if (shape.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
                         var indicies = triangulator.computeTriangles(tmpFloat.items, 0, tmpFloat.size);
                         for (int i = 0; i < indicies.size - 2; i = i + 3) {
@@ -1694,12 +1855,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tmpFloat.clear();
                     break;
                 case PathIterator.SEG_LINETO:
-                    System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+//                    System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
                     tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
                     break;
                 case PathIterator.SEG_QUADTO:
-                    System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
-                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
+//                    System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
+//                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
 
                     tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
                     tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
@@ -1710,9 +1871,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     }
                     break;
                 case PathIterator.SEG_CUBICTO:
-                    System.out.println("cubic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
-                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] +
-                            "), (" + floatsFromArea[4] + ", " + floatsFromArea[5] + ")");
+//                    System.out.println("cubic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
+//                            "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] +
+//                            "), (" + floatsFromArea[4] + ", " + floatsFromArea[5] + ")");
 
                     tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
                     tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
@@ -1724,7 +1885,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     }
                     break;
                 default:
-                    System.out.println("Type: " + type);
+//                    System.out.println("Type: " + type);
             }
         }
     }
@@ -1747,7 +1908,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var oldZone = zone;
         // first disable rendering during intitialisation;
-        zone = null;
+        renderZone = false;
 
         if (oldZone != null) {
             disposeZoneResources();
@@ -1759,6 +1920,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         initializeZoneResources(newZone);
         // just in case we are running before create was called and hence initializeZoneResources does nothing
         zone = newZone;
+        renderZone = true;
     }
 
     @Override

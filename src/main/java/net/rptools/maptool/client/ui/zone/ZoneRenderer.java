@@ -2903,6 +2903,8 @@ public class ZoneRenderer extends JComponent
     return list;
   }
 
+  public Token getTokenUnderMouse() { return tokenUnderMouse; }
+
   public Zone.Layer getActiveLayer() {
     return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
   }
