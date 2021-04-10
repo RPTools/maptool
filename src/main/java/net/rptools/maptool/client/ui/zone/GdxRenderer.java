@@ -2,15 +2,9 @@ package net.rptools.maptool.client.ui.zone;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.EarClippingTriangulator;
@@ -25,7 +19,9 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.swing.ImageLabel;
 import net.rptools.maptool.box2d.NativeRenderer;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -39,6 +35,7 @@ import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
@@ -50,7 +47,7 @@ import java.util.*;
  * Done:
  * - Board
  * - Grids
- *
+ * <p>
  * Bugs:
  * - y offset of VerticalHexgrid is wrong
  * - ismetric mode for token does't work
@@ -69,11 +66,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     //from renderToken:
     private Area visibleScreenArea;
     private Area exposedFogArea;
+    private PlayerView lastView;
 
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
-    private ZoneView zoneView;
     private Sprite background;
     private Sprite fog;
     private MD5Key mapAssetId;
@@ -100,6 +97,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Integer fogX;
     private Integer fogY;
     private EarClippingTriangulator triangulator;
+    private Texture greyLabelTexture;
+    private NinePatch greyLabel;
 
     //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord;
@@ -145,6 +144,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         fogBuffer.initialize(width, height);
         triangulator = new EarClippingTriangulator();
 
+        var pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/grayLabelbox.png"));
+        greyLabelTexture = new Texture(pix);
+        pix.dispose();
+        var topBottom = greyLabelTexture.getHeight()/2 - 1;
+        greyLabel = new NinePatch(greyLabelTexture, 10, 10, 0, 0);
+
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new BloomEffect();
         //vfxManager.addEffect(vfxEffect);
@@ -176,6 +181,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxManager.dispose();
         vfxEffect.dispose();
         shape.dispose();
+        greyLabelTexture.dispose();
         disposeZoneResources();
     }
 
@@ -245,25 +251,39 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         renderZone(playerView);
         batch.end();
 
+        glyphLayout.setText(font, "test");
+
+
+
         hudBatch.begin();
+        //hudBatch.draw(greyLabelTexture, 20,20);
+        greyLabel.draw(hudBatch, 20, 20 , 100, 100);
+        font.draw(hudBatch, "test", 20, 20);
+
         if (zoneRenderer.isLoading())
-            drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2, height / 2);
+            drawBoxedString(hudBatch, zoneRenderer.getLoadingProgress(), width / 2, height / 2);
         else if (MapTool.getCampaign().isBeingSerialized())
-            drawBoxedString("    Please Wait    ", width / 2, height / 2);
+            drawBoxedString(hudBatch, "    Please Wait    ", width / 2, height / 2);
 
         int noteVPos = 20;
         if (!zone.isVisible() && playerView.isGMView()) {
-            drawBoxedString(
+            drawBoxedString(hudBatch,
                     "Map not visible to players", width / 2, height - noteVPos);
             noteVPos += 20;
         }
         if (AppState.isShowAsPlayer()) {
-            drawBoxedString("Player View", width / 2, height - noteVPos);
+            drawBoxedString(hudBatch, "Player View", width / 2, height - noteVPos);
         }
 
-        drawBoxedString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
+        drawBoxedString(hudBatch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
 
         hudBatch.end();
+
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.setProjectionMatrix(hudCam.combined);
+        shape.setColor(Color.BLUE);
+        shape.rect(20,20, glyphLayout.width, glyphLayout.height);
+        shape.end();
 
         collectTimerResults();
     }
@@ -297,15 +317,33 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
     }
 
+    public void invalidateCurrentViewCache() {
+        flushFog = true;
+        //   renderedLightMap = null;
+        //    renderedAuraMap = null;
+        visibleScreenArea = null;
+        lastView = null;
+
+        var zoneView = zoneRenderer.getZoneView();
+        if (zoneView != null) {
+            zoneView.flush();
+        }
+    }
+
     private void renderZone(PlayerView view) {
         if (zoneRenderer.isLoading() || MapTool.getCampaign().isBeingSerialized())
             return;
 
+        if (lastView != null && !lastView.equals(view)) {
+            invalidateCurrentViewCache();
+        }
+        lastView = view;
+
         // Calculations
         timer.start("calcs-1");
-        if (visibleScreenArea == null && zoneView.isUsingVision()) {
+        if (visibleScreenArea == null && zoneRenderer.getZoneView().isUsingVision()) {
             timer.start("ZoneRenderer-getVisibleArea");
-            visibleScreenArea = zoneView.getVisibleArea(view);
+            visibleScreenArea = zoneRenderer.getZoneView().getVisibleArea(view);
             timer.stop("ZoneRenderer-getVisibleArea");
         }
 
@@ -511,11 +549,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || fogBufferTexture.getWidth() != width
                         || fogBufferTexture.getHeight() != height);
         timer.start("renderFog");
-        if (flushFog || cacheNotValid) {
+      //  if (flushFog || cacheNotValid)
+        {
 
 
             fogBuffer.begin();
-            Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
             batch.setProjectionMatrix(cam.combined);
@@ -526,10 +564,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             fogY = zoneRenderer.getViewOffsetY();
 
             timer.start("renderFog-fill");
+
+
             // Fill
-            if(fog == null)
+            if (fog == null)
                 fog = paintToSprite(zone.getFogPaint());
 
+            var color = fog.getColor();
+            fog.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
             fillViewportWith(fog);
 
             batch.end();
@@ -537,7 +579,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             shape.setProjectionMatrix(cam.combined);
 
             timer.start("renderFog-visibleArea");
-            Area visibleArea = zoneView.getVisibleArea(view);
+            Area visibleArea = zoneRenderer.getZoneView().getVisibleArea(view);
             timer.stop("renderFog-visibleArea");
 
             String msg = null;
@@ -553,7 +595,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             Area exposedArea = null;
             Area tempArea = new Area();
             boolean combinedView =
-                    !zoneView.isUsingVision()
+                    !zoneRenderer.getZoneView().isUsingVision()
                             || MapTool.isPersonalServer()
                             || !MapTool.getServerPolicy().isUseIndividualFOW()
                             || view.isGMView();
@@ -569,17 +611,17 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tempArea.add(new Area(exposedArea));
                 }
                 if (combinedView) {
-                    fillArea(combined);
-                    renderFogArea(view, combined, visibleArea);
-                    renderFogOutline(view, combined);
+                    paintArea(combined);
+                    renderFogArea(combined, visibleArea);
+                    renderFogOutline();
                 } else {
                     // 'combined' already includes the area encompassed by 'tempArea', so just
                     // use 'combined' instead in this block of code?
                     tempArea.add(combined);
 
-                    fillArea(tempArea);
-                    renderFogArea(view, tempArea, visibleArea);
-                    renderFogOutline(view, tempArea);
+                    paintArea(tempArea);
+                    renderFogArea(tempArea, visibleArea);
+                    renderFogOutline();
                 }
             } else {
                 // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
@@ -588,9 +630,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (combined.isEmpty()) {
                         combined = zone.getExposedArea();
                     }
-                    fillArea(combined);
-                    renderFogArea(view, combined, visibleArea);
-                    renderFogOutline(view, combined);
+                    paintArea(combined);
+                    renderFogArea(combined, visibleArea);
+                    renderFogOutline();
                 } else {
                     Area myCombined = new Area();
                     List<Token> myToks = zone.getTokens();
@@ -604,9 +646,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         exposedArea = meta.getExposedAreaHistory();
                         myCombined.add(new Area(exposedArea));
                     }
-                    fillArea(myCombined);
-                    renderFogArea(view, myCombined, visibleArea);
-                    renderFogOutline(view, myCombined);
+                    paintArea(myCombined);
+                    renderFogArea(myCombined, visibleArea);
+                    renderFogOutline();
                 }
             }
             timer.stop("renderFogArea");
@@ -617,24 +659,58 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             fogBuffer.end();
 
-            if(fogBufferTexture == null)
+            if (fogBufferTexture == null)
                 fogBufferTexture = fogBuffer.getTexture();
         }
 
         batch.setProjectionMatrix(hudCam.combined);
-        var batchColor = batch.getColor();
-        batch.setColor(batchColor.r, batchColor.g, batchColor.b, view.isGMView() ? .6f : 1f);
         batch.draw(fogBufferTexture, 0, 0, width, height, 0, 0,
                 fogBufferTexture.getWidth(), fogBufferTexture.getHeight(), false, true);
-        batch.setColor(batchColor);
+
         batch.setProjectionMatrix(cam.combined);
         timer.stop("renderFog");
     }
 
-    private void renderFogArea(PlayerView view, Area tempArea, Area visibleArea) {
+    private void renderFogArea(Area softFog, Area visibleArea) {
+        if (zoneRenderer.getZoneView().isUsingVision()) {
+            if (visibleArea != null && !visibleArea.isEmpty()) {
+                //shape.setColor(Color.BLUE);
+                shape.setColor(0, 0, 0, AppPreferences.getFogOverlayOpacity() / 255.0f);
+
+                // Fill in the exposed area
+                paintArea(softFog);
+
+                shape.setColor(Color.CLEAR);
+
+                paintArea(visibleArea);
+            } else {
+                //shape.setColor(Color.BLUE);
+                shape.setColor(0, 0, 0, 80 / 255.0f);
+                paintArea(softFog);
+            }
+        } else {
+            paintArea(softFog);
+        }
     }
 
-    private void renderFogOutline(PlayerView view, Area combined) {
+    private void renderFogOutline() {
+        if (visibleScreenArea == null)
+            return;
+
+        var currentType = shape.getCurrentType();
+        if (shape.getCurrentType() != ShapeRenderer.ShapeType.Line) {
+            shape.end();
+            shape.begin(ShapeRenderer.ShapeType.Line);
+        }
+
+        Gdx.gl.glLineWidth(1);
+        shape.setColor(Color.BLACK);
+        paintArea(visibleScreenArea);
+
+        if (shape.getCurrentType() != currentType) {
+            shape.end();
+            shape.begin(currentType);
+        }
     }
 
     private void renderLabels(PlayerView view) {
@@ -709,7 +785,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 }
 
                 shape.translate(transX, transY, 0);
-                shape.polyline(vertices);
+                shape.polyline(vertices.items, 0, vertices.size);
                 shape.translate(-transX, -transY, 0);
             }
         }
@@ -805,59 +881,71 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         shape.end();
     }
 
-    private float[] areaToVertices(Area area) {
-        if (area.isEmpty())
-            return new float[0];
-
-        PathIterator iterator = area.getPathIterator(null);
-        float[] floats = new float[60];
-        float[] vertices = new float[1000];
-        int count1 = 0;
-
-        while (!iterator.isDone()) {
-            int type = iterator.currentSegment(floats);
-
-            if (type != PathIterator.SEG_CLOSE) {
-                vertices[count1++] = floats[0];
-                vertices[count1++] = floats[1];
-            }
-            iterator.next();
-        }
-
-        float[] finalVertices = new float[count1];
-        System.arraycopy(vertices, 0, finalVertices, 0, count1);
-
-        return finalVertices;
-    }
-
-    private float[] pathToVertices(GeneralPath path) {
+    private FloatArray pathToVertices(GeneralPath path) {
         PathIterator iterator = path.getPathIterator(null);
-        float[] floats = new float[60];
-        float[] vertices = new float[1000];
-        int count1 = 0;
+
+        tmpFloat.clear();
 
         while (!iterator.isDone()) {
-            int type = iterator.currentSegment(floats);
+            int type = iterator.currentSegment(floatsFromArea);
 
             if (type != PathIterator.SEG_CLOSE) {
-                vertices[count1++] = floats[0];
-                vertices[count1++] = floats[1];
+                tmpFloat.add(floatsFromArea[0], floatsFromArea[1]);
             }
             iterator.next();
         }
 
-        float[] finalVertices = new float[count1];
-        System.arraycopy(vertices, 0, finalVertices, 0, count1);
-
-        return finalVertices;
+        return tmpFloat;
     }
 
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
     }
 
-    private void drawBoxedString(String text, int centerX, int centerY) {
+    public void drawBoxedString(SpriteBatch batch, String text, float centerX, float centerY) {
+        drawBoxedString(batch, text, centerX, centerY, SwingUtilities.CENTER);
+    }
+
+    public void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification) {
+        drawBoxedString(batch, text, x, y, justification, greyLabel, Color.BLACK);
+    }
+
+    private void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification, NinePatch background, Color foreground)  {
+        final int BOX_PADDINGX = 10;
+        final int BOX_PADDINGY = 2;
+
+        if (text == null) text = "";
+
         glyphLayout.setText(font, text);
-        font.draw(hudBatch, text, centerX - glyphLayout.width / 2, centerY + glyphLayout.height / 2);
+        var strWidth = glyphLayout.width;
+
+        var width = strWidth + BOX_PADDINGX * 2;
+        var height = glyphLayout.height + BOX_PADDINGY * 2;
+
+        var boxY  = y - glyphLayout.height / 2 - BOX_PADDINGY;
+        var textY = y + glyphLayout.height /2 + BOX_PADDINGY;
+
+        y = y - glyphLayout.height / 2 - BOX_PADDINGY;
+        switch (justification) {
+            case SwingUtilities.CENTER:
+                x = x - strWidth / 2 - BOX_PADDINGX;
+                break;
+            case SwingUtilities.RIGHT:
+                x = x - strWidth - BOX_PADDINGX;
+                break;
+            case SwingUtilities.LEFT:
+                break;
+        }
+
+        // Box
+        background.draw(batch, x, y, width, height);
+
+        // Renderer message
+        //var oldColor = batch.getColor();
+        //batch.setColor(foreground);
+        float textX = x + BOX_PADDINGX;
+
+        font.draw(batch, text, textX, textY);
+        //batch.setColor(oldColor);
     }
 
     private void renderBoard() {
@@ -946,7 +1034,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 var awtRect = toAwtRect(image.getBoundingRectangle());
 
                 // Vision visibility
-                if (!isGMView && token.isToken() && zoneView.isUsingVision()) {
+                if (!isGMView && token.isToken() && zoneRenderer.getZoneView().isUsingVision()) {
                     if (!GraphicsUtil.intersects(visibleScreenArea, new Area(awtRect))) {
                         continue;
                     }
@@ -1040,7 +1128,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Finally render the token image
             timer.start("tokenlist-7");
-            if (!isGMView && zoneView.isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
+            if (!isGMView && zoneRenderer.getZoneView().isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
                 Area cb = zone.getGrid().getTokenCellArea(toAwtRect(image.getBoundingRectangle()));
                 if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
                     // the cell intersects visible area so
@@ -1049,7 +1137,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     image.draw(batch);
                     image.setAlpha(oldAlpha);
                 }
-            } else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
+            } else if (!isGMView && zoneRenderer.getZoneView().isUsingVision() && token.isAlwaysVisible()) {
                 // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
                 Area cb = zone.getGrid().getTokenCellArea(toAwtRect(image.getBoundingRectangle()));
                 if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
@@ -1471,7 +1559,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (newZone == null || !initialized)
             return;
 
-        zoneView = new ZoneView(newZone);
         zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
         mapAssetId = newZone.getMapAssetId();
 
@@ -1531,13 +1618,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         return null;
     }
 
-    private void fillArea(Area area) {
+    private void paintArea(Area area) {
         if (area.isEmpty())
             return;
 
         var pointsPerBezier = 10.0f;
 
-        for (var it = area.getPathIterator(null); !it.isDone(); it.next())  {
+        tmpFloat.clear();
+
+        for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
             int type = it.currentSegment(floatsFromArea);
 
             switch (type) {
@@ -1547,20 +1636,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
                     break;
                 case PathIterator.SEG_CLOSE:
-//                    tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
-                    var indicies =  triangulator.computeTriangles(tmpFloat.items, 0, tmpFloat.size);
-                    for (int i = 0; i < indicies.size - 2; i = i + 3)
-                    {
-                        float x1 = tmpFloat.get(indicies.get(i) * 2);
-                        float y1 = tmpFloat.get((indicies.get(i) * 2) + 1);
+                    System.out.println("Close");
+                    if (shape.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
+                        var indicies = triangulator.computeTriangles(tmpFloat.items, 0, tmpFloat.size);
+                        for (int i = 0; i < indicies.size - 2; i = i + 3) {
+                            float x1 = tmpFloat.get(indicies.get(i) * 2);
+                            float y1 = tmpFloat.get((indicies.get(i) * 2) + 1);
 
-                        float x2 = tmpFloat.get((indicies.get(i + 1)) * 2);
-                        float y2 = tmpFloat.get((indicies.get(i + 1) * 2) + 1);
+                            float x2 = tmpFloat.get((indicies.get(i + 1)) * 2);
+                            float y2 = tmpFloat.get((indicies.get(i + 1) * 2) + 1);
 
-                        float x3 = tmpFloat.get(indicies.get(i + 2) * 2);
-                        float y3 = tmpFloat.get((indicies.get(i + 2) * 2) + 1);
+                            float x3 = tmpFloat.get(indicies.get(i + 2) * 2);
+                            float y3 = tmpFloat.get((indicies.get(i + 2) * 2) + 1);
 
-                        shape.triangle(x1, y1, x2, y2, x3, y3);
+                            shape.triangle(x1, y1, x2, y2, x3, y3);
+                        }
+                    } else {
+                        shape.polyline(tmpFloat.items, 0, tmpFloat.size);
                     }
                     tmpFloat.clear();
                     break;
@@ -1572,10 +1664,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
                             "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
 
-                    tmpVector0.set(tmpFloat.get(tmpFloat.size-2), tmpFloat.get(tmpFloat.size-1));
+                    tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
                     tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
                     tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
-                    for(var i = 1; i <= pointsPerBezier; i++) {
+                    for (var i = 1; i <= pointsPerBezier; i++) {
                         Bezier.quadratic(tmpVectorOut, i / pointsPerBezier, tmpVector0, tmpVector1, tmpVector2, tmpVector);
                         tmpFloat.add(tmpVectorOut.x, tmpVectorOut.y);
                     }
@@ -1585,11 +1677,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] +
                             "), (" + floatsFromArea[4] + ", " + floatsFromArea[5] + ")");
 
-                    tmpVector0.set(tmpFloat.get(tmpFloat.size-2), tmpFloat.get(tmpFloat.size-1));
+                    tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
                     tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
                     tmpVector2.set(floatsFromArea[2], -floatsFromArea[3]);
                     tmpVector3.set(floatsFromArea[4], -floatsFromArea[5]);
-                    for(var i = 1; i <= pointsPerBezier; i++) {
+                    for (var i = 1; i <= pointsPerBezier; i++) {
                         Bezier.cubic(tmpVectorOut, i / pointsPerBezier, tmpVector0, tmpVector1, tmpVector2, tmpVector3, tmpVector);
                         tmpFloat.add(tmpVectorOut.x, tmpVectorOut.y);
                     }
@@ -1611,6 +1703,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void handleAppEvent(AppEvent event) {
+        System.out.println("AppEvent:" + event.getId());
+
         if (event.getId() != MapTool.ZoneEvent.Activated)
             return;
 
@@ -1633,7 +1727,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void modelChanged(ModelChangeEvent event) {
         Object evt = event.getEvent();
-
+        System.out.println("ModelChangend: " + evt);
         if (evt == Zone.Event.TOPOLOGY_CHANGED) {
             flushFog();
             //flushLight();
@@ -1672,6 +1766,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         updateCam();
     }
 
-    public void flushFog() { flushFog = true; }
+    public void flushFog() {
+        flushFog = true;
+        visibleScreenArea = null;
+    }
 
 }

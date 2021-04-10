@@ -737,6 +737,7 @@ public class ZoneRenderer extends JComponent
     renderedAuraMap = null;
 
     zoneView.flush(token);
+    GdxRenderer.getInstance().flushFog();
   }
 
   /** @return the ZoneView */
@@ -922,13 +923,6 @@ public class ZoneRenderer extends JComponent
       }
       timer.clear();
     }
-  }
-
-  @Override
-  public void repaint() {
-    super.repaint();
-    if(Gdx.graphics != null)
-      Gdx.graphics.requestRendering();
   }
 
   public PlayerView getPlayerView() {
