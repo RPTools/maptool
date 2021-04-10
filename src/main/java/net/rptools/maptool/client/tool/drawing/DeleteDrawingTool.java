@@ -34,6 +34,7 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.model.ZonePoint;
 
 /** Tool for deleting drawings. */
 public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, MouseListener {
@@ -103,7 +104,8 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
     for (var element : drawableList) {
       var drawable = element.getDrawable();
       var id = drawable.getId();
-      if (drawable.getBounds().contains(e.getPoint())) {
+      ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      if (drawable.getBounds().contains(pos.x, pos.y)) {
         if (!selectedDrawings.contains(id)) selectedDrawings.add(id);
         else selectedDrawings.remove(id);
         break;
@@ -130,12 +132,24 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
 
     g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
     g.setPaint(AppStyle.selectionBoxFill);
-    g.fillRoundRect(box.x, box.y, box.width, box.height, 10, 10);
+    g.fillRoundRect(
+        box.x + renderer.getViewOffsetX(),
+        box.y + renderer.getViewOffsetY(),
+        box.width,
+        box.height,
+        10,
+        10);
     g.setComposite(composite);
 
     g.setColor(AppStyle.selectionBoxOutline);
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g.drawRoundRect(box.x, box.y, box.width, box.height, 10, 10);
+    g.drawRoundRect(
+        box.x + renderer.getViewOffsetX(),
+        box.y + renderer.getViewOffsetY(),
+        box.width,
+        box.height,
+        10,
+        10);
 
     g.setStroke(stroke);
   }
