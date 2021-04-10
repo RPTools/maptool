@@ -19,7 +19,6 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.ImageLabel;
 import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
@@ -65,6 +64,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
+
     private Area exposedFogArea;
     private PlayerView lastView;
 
@@ -243,7 +243,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
         if (zone == null)
             return;
 
@@ -262,7 +261,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         shape.setProjectionMatrix(cam.combined);
 
         batch.begin();
-
 
         renderZone(playerView);
         batch.end();
@@ -324,7 +322,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void invalidateCurrentViewCache() {
         flushFog = true;
         //   renderedLightMap = null;
-        //    renderedAuraMap = null;
+
         visibleScreenArea = null;
         lastView = null;
 
@@ -553,7 +551,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || fogBufferTexture.getWidth() != width
                         || fogBufferTexture.getHeight() != height);
         timer.start("renderFog");
-      //  if (flushFog || cacheNotValid)
+        //  if (flushFog || cacheNotValid)
         {
 
 
@@ -724,6 +722,34 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderAuras(PlayerView view) {
+        var alpha = AppPreferences.getAuraOverlayOpacity() / 255.0f;
+        batch.end();
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        timer.start("auras-4");
+        tmpColor.set(shape.getColor());
+
+        var auraColor = shape.getColor();
+        for (DrawableLight light : zoneRenderer.getZoneView().getLights(LightSource.Type.AURA)) {
+            var paint = light.getPaint();
+            if(paint != null && paint instanceof DrawableColorPaint) {
+                var colorPaint = (DrawableColorPaint)paint;
+                Color.argb8888ToColor(auraColor, colorPaint.getColor());
+                auraColor.a = alpha;
+            } else {
+                auraColor.set(1, 1, 1, 0.59f);
+            }
+            shape.setColor(auraColor);
+            paintArea(light.getArea());
+        }
+
+        timer.stop("auras-4");
+        shape.setColor(tmpColor);
+        shape.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        batch.begin();
     }
 
     private void renderLights(PlayerView view) {
@@ -917,7 +943,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         drawBoxedString(batch, text, x, y, justification, greyLabel, Color.BLACK);
     }
 
-    private void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification, NinePatch background, Color foreground)  {
+    private void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification, NinePatch background, Color foreground) {
         final int BOX_PADDINGX = 10;
         final int BOX_PADDINGY = 2;
 
@@ -932,7 +958,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var width = strWidth + BOX_PADDINGX * 2;
         var height = fontHeight + BOX_PADDINGY * 2;
 
-        y = y - fontHeight/ 2 - BOX_PADDINGY;
+        y = y - fontHeight / 2 - BOX_PADDINGY;
 
         switch (justification) {
             case SwingUtilities.CENTER:
@@ -946,7 +972,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         // Box
-        if(background != null)
+        if (background != null)
             background.draw(batch, x, y, width, height);
 
         // Renderer message
