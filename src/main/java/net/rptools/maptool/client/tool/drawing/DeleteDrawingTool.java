@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.image.ImageUtil;
@@ -40,7 +39,8 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
 
 /** Tool for deleting drawings. */
-public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, MouseListener, AppEventListener {
+public class DeleteDrawingTool extends DefaultTool
+    implements ZoneOverlay, MouseListener, AppEventListener {
 
   @Serial private static final long serialVersionUID = -8846217296437736953L;
 
@@ -125,8 +125,7 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
 
     for (var id : selectedDrawings) {
       var drawnElement = renderer.getZone().getDrawnElement(id);
-      if(drawnElement == null)
-        continue;
+      if (drawnElement == null) continue;
 
       drawBox(g, drawnElement.getDrawable().getBounds());
     }
@@ -145,25 +144,24 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
 
     var x = (int) screenPoint.x;
     var y = (int) screenPoint.y;
-    var w = (int)(box.width * scale);
-    var h = (int)(box.height * scale);
+    var w = (int) (box.width * scale);
+    var h = (int) (box.height * scale);
 
     g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
     g.setPaint(AppStyle.selectionBoxFill);
-    g.fillRoundRect(x, y, w, h,10,10);
+    g.fillRoundRect(x, y, w, h, 10, 10);
     g.setComposite(composite);
 
     g.setColor(AppStyle.selectionBoxOutline);
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g.drawRoundRect(x, y, w, h,10,10);
+    g.drawRoundRect(x, y, w, h, 10, 10);
 
     g.setStroke(stroke);
   }
 
   @Override
   public void handleAppEvent(AppEvent event) {
-    if (event.getId() != MapTool.ZoneEvent.Activated)
-      return;
+    if (event.getId() != MapTool.ZoneEvent.Activated) return;
 
     selectedDrawings.clear();
   }
