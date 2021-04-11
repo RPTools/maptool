@@ -274,7 +274,7 @@ public class TransferableHelper extends TransferHandler {
         o = handleImage(url, "URL_FLAVOR_PLAIN", transferable);
       }
       if (o != null) {
-        if (o instanceof List<?>)  assets = (List<Object>) o;
+        if (o instanceof List<?>) assets = (List<Object>) o;
         else assets.add(o);
       }
     } catch (Exception e) {
@@ -414,9 +414,8 @@ public class TransferableHelper extends TransferHandler {
           } else {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) // `null' means no image available
-              assets.add(temp);
-            else if (log.isInfoEnabled())
-              log.info("No image available for " + url);
+            assets.add(temp);
+            else if (log.isInfoEnabled()) log.info("No image available for " + url);
           }
         }
       }
@@ -438,7 +437,7 @@ public class TransferableHelper extends TransferHandler {
       return true;
     }
 
-    switch(ftype) {
+    switch (ftype) {
       case "text/html":
       case "text/markdown":
       case "text/plain":
