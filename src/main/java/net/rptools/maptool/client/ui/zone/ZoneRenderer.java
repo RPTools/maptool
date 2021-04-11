@@ -3203,6 +3203,7 @@ public class ZoneRenderer extends JComponent
 
       // create a per token Graphics object - normally clipped, unless always visible
       Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);
+
       Graphics2D tokenG =
           (Graphics2D)
               (isTokenInNeedOfClipping(token, tokenCellArea, isGMView)
@@ -3782,7 +3783,7 @@ public class ZoneRenderer extends JComponent
    * @param isGMView whether it is the view of a GM
    * @return true if the token is need of clipping, false otherwise
    */
-  private boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
+  protected boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
 
     // can view everything or zone is not using vision = no clipping needed
     if (isGMView || !zoneView.isUsingVision()) return false;
