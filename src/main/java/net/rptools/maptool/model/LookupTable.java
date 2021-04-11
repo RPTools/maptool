@@ -323,7 +323,8 @@ public class LookupTable {
   }
 
   /**
-   * Set whether a table as Pick Once (true/false). Automatically resets the pick once status of entries.
+   * Set whether a table as Pick Once (true/false). Automatically resets the pick once status of
+   * entries.
    *
    * @param pickOnce - Boolean
    */
