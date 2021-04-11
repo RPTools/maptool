@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.FloatArray;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.BloomEffect;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
+import com.crashinvaders.vfx.effects.FxaaEffect;
+import com.crashinvaders.vfx.effects.NfaaEffect;
 import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
@@ -34,6 +36,8 @@ import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import javax.swing.*;
 import java.awt.*;
@@ -172,7 +176,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         darkGreyLabel = new NinePatch(darkGreyLabelTexture, 10, 10, 10, 10);
 
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
-        vfxEffect = new BloomEffect();
+        vfxEffect = new FxaaEffect();
         //vfxManager.addEffect(vfxEffect);
 
         tmpWorldCoord = new Vector3();
@@ -217,7 +221,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         this.height = height;
         vfxManager.resize(width, height);
         fogBuffer.initialize(width, height);
-        // this texture is bound to the buffer
 
         updateCam();
 
@@ -1465,9 +1468,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
             image.setColor(Color.WHITE);
             timer.stop("tokenlist-7");
-/*
+
             timer.start("tokenlist-8");
 
+            batch.end();
+
+            shape.begin();
+            shape.setProjectionMatrix(cam.combined);
             // Facing ?
             // TODO: Optimize this by doing it once per token per facing
             if (token.hasFacing()) {
@@ -1485,19 +1492,25 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
                         }
 
-                        double fx = location.x + location.scaledWidth / 2;
-                        double fy = location.y + location.scaledHeight / 2;
+                        float fx = x + (float) origBounds.getWidth()/zoom / 2;
+                        float fy = y + (float) origBounds.getHeight()/zoom / 2;
 
-                        tokenG.translate(fx, fy);
+
+                        shape.translate(fx, -fy, 0);
                         if (token.getFacing() < 0) {
-                            tokenG.setColor(java.awt.Color.yellow);
+                            shape.setColor(Color.YELLOW);
                         } else {
-                            tokenG.setColor(TRANSLUCENT_YELLOW);
+                            shape.setColor(1, 1, 0, 0.5f);
+
                         }
-                        tokenG.fill(arrow);
-                        tokenG.setColor(java.awt.Color.darkGray);
-                        tokenG.draw(arrow);
-                        tokenG.translate(-fx, -fy);
+                        shape.set(ShapeRenderer.ShapeType.Filled);
+                        var arrowArea = new Area(arrow);
+                        paintArea(arrowArea);
+                        shape.setColor(Color.DARK_GRAY);
+                        shape.set(ShapeRenderer.ShapeType.Line);
+                        paintArea(arrowArea);
+                        shape.translate(-fx, fy, 0);
+
                         break;
                     case TOP_DOWN:
                         if (AppPreferences.getForceFacingArrow() == false) {
@@ -1508,22 +1521,25 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         if (zone.getGrid().isIsometric()) {
                             arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
                         }
+                        arrowArea = new Area(arrow);
 
-                        double cx = location.x + location.scaledWidth / 2;
-                        double cy = location.y + location.scaledHeight / 2;
+                        float cx = x + (float)origBounds.getWidth() / 2;
+                        float cy = y + (float)origBounds.getHeight() / 2;
 
-                        tokenG.translate(cx, cy);
-                        tokenG.setColor(java.awt.Color.yellow);
-                        tokenG.fill(arrow);
-                        tokenG.setColor(java.awt.Color.darkGray);
-                        tokenG.draw(arrow);
-                        tokenG.translate(-cx, -cy);
+                        shape.translate(cx, -cy, 0);
+                        shape.setColor(Color.YELLOW);
+                        shape.set(ShapeRenderer.ShapeType.Filled);
+                        paintArea(arrowArea);
+                        shape.setColor(Color.DARK_GRAY);
+                        shape.set(ShapeRenderer.ShapeType.Line);
+                        paintArea(arrowArea);
+                        shape.translate(-cx, cy, 0);
                         break;
                     case SQUARE:
                         if (zone.getGrid().isIsometric()) {
                             arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
-                            cx = location.x + location.scaledWidth / 2;
-                            cy = location.y + location.scaledHeight / 2;
+                            cx = x + (float)origBounds.getWidth() / 2;
+                            cy = y + (float)origBounds.getHeight() / 2;
                         } else {
                             int facing = token.getFacing();
                             while (facing < 0) {
@@ -1534,13 +1550,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             facing %= 360;
                             arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
-                            cx = location.x + location.scaledWidth / 2;
-                            cy = location.y + location.scaledHeight / 2;
+                            cx = x + (float)origBounds.getWidth() / 2;
+                            cy = y + (float)origBounds.getHeight() / 2;
 
                             // Find the edge of the image
                             // TODO: Man, this is horrible, there's gotta be a better way to do this
-                            double xp = location.scaledWidth / 2;
-                            double yp = location.scaledHeight / 2;
+                            double xp = origBounds.getWidth() / 2;
+                            double yp = origBounds.getHeight() / 2;
                             if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
                                 xp = (int) (yp / Math.tan(Math.toRadians(facing)));
                                 if (facing > 180) {
@@ -1558,17 +1574,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             cy -= yp;
                         }
 
-                        tokenG.translate(cx, cy);
-                        tokenG.setColor(java.awt.Color.yellow);
-                        tokenG.fill(arrow);
-                        tokenG.setColor(java.awt.Color.darkGray);
-                        tokenG.draw(arrow);
-                        tokenG.translate(-cx, -cy);
+                        arrowArea = new Area(arrow);
+                        shape.translate(cx, -cy, 0);
+                        shape.setColor(Color.YELLOW);
+                        shape.set(ShapeRenderer.ShapeType.Filled);
+                        paintArea(arrowArea);
+                        shape.setColor(Color.DARK_GRAY);
+                        shape.set(ShapeRenderer.ShapeType.Line);
+                        paintArea(arrowArea);
+                        shape.translate(-cx, cy, 0);
                         break;
+
                 }
             }
             timer.stop("tokenlist-8");
-
+            shape.end();
+            batch.begin();
+/*
             timer.start("tokenlist-9");
             // Set up the graphics so that the overlay can just be painted.
             Graphics2D locg =
@@ -1826,6 +1848,51 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);*/
     }
+
+    protected Shape getFigureFacingArrow(int angle, int size) {
+        int base = (int) (size * .75);
+        int width = (int) (size * .35);
+
+        var facingArrow = new GeneralPath();
+        facingArrow.moveTo(base, -width);
+        facingArrow.lineTo(size, 0);
+        facingArrow.lineTo(base, width);
+        facingArrow.lineTo(base, -width);
+
+        return facingArrow.createTransformedShape(
+                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+    }
+
+    // TODO: I don't like this hardwiring
+    protected Shape getCircleFacingArrow(int angle, int size) {
+        int base = (int) (size * .75);
+        int width = (int) (size * .35);
+
+        var facingArrow = new GeneralPath();
+        facingArrow.moveTo(base, -width);
+        facingArrow.lineTo(size, 0);
+        facingArrow.lineTo(base, width);
+        facingArrow.lineTo(base, -width);
+
+        return facingArrow.createTransformedShape(
+                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+    }
+
+    // TODO: I don't like this hardwiring
+    protected Shape getSquareFacingArrow(int angle, int size) {
+        int base = (int) (size * .75);
+        int width = (int) (size * .35);
+
+        var facingArrow = new GeneralPath();
+        facingArrow.moveTo(0, 0);
+        facingArrow.lineTo(-(size - base), -width);
+        facingArrow.lineTo(-(size - base), width);
+        facingArrow.lineTo(0, 0);
+
+        return facingArrow.createTransformedShape(
+                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+    }
+
 
     private void paintClipped(Sprite image, Area bounds, Area clip) {
 

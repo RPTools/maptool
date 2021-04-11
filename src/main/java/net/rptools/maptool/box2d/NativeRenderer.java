@@ -54,8 +54,7 @@ public class NativeRenderer implements InputProcessor {
         var config = new LwjglApplicationConfiguration();
         config.allowSoftwareMode = true;
         config.forceExit = false;
-        config.samples = 4;
-        LwjglApplicationConfiguration.disableAudio = true;
+         LwjglApplicationConfiguration.disableAudio = true;
 
         var appListender = GdxRenderer.getInstance();
         appListender.setJfxRenderer(this);
