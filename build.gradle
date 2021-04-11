@@ -141,7 +141,6 @@ runtime {
                'jdk.dynalink',
                'jdk.jfr',
                'jdk.jsobject',
-               'org.graalvm.js',
                'jdk.unsupported',
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
