@@ -256,6 +256,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    //    Gdx.gl.glEnable(GL11.GL_LINE_SMOOTH);
+    //    Gdx.gl.glHint(GL11.GL_LINE_SMOOTH_HINT, GL20.GL_NICEST);
 
         if (zone == null || !renderZone)
             return;
@@ -665,8 +668,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
             fogBuffer.begin();
+            Gdx.gl.glClearColor(0,0,0,0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+            batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
             batch.setProjectionMatrix(cam.combined);
 
             timer.start("renderFog-allocateBufferedImage");
@@ -681,9 +685,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             if (fog == null)
                 fog = paintToSprite(zone.getFogPaint());
 
+            batch.setColor(Color.WHITE);
             var color = fog.getColor();
             fog.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
+            batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
             fillViewportWith(fog);
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
             batch.end();
             shape.begin(ShapeRenderer.ShapeType.Filled);
@@ -773,6 +780,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         batch.setProjectionMatrix(hudCam.combined);
+        batch.setColor(Color.WHITE);
         batch.draw(fogBuffer.getTexture(), 0, 0, width, height, 0, 0,
                 width, height, false, true);
 
@@ -871,62 +879,30 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderLights(PlayerView view) {
-/*        timer.start("lights-2");
+        if(zone.getVisionType() != Zone.VisionType.NIGHT)
+            return;
 
+        fogBuffer.begin();
+        Gdx.gl.glClearColor(0,0,0,0);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        shape.setProjectionMatrix(cam.combined);
+
+        timer.start("lights-2");
         var alpha = AppPreferences.getLightOverlayOpacity() / 255.0f;
         timer.stop("lights-2");
 
-
         timer.start("lights-3");
-        // Organize
         Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
         for (DrawableLight light : zoneRenderer.getZoneView().getDrawableLights(view)) {
             // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
-            if (light.getType() == LightSource.Type.NORMAL) {
-                if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
-                    List<Area> areaList =
-                            colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
-                    areaList.add(new Area(light.getArea()));
-                }
-            }
-        }
-        timer.stop("lights-3");
 
-        timer.start("lights-4");
-        // Combine same colors to avoid ugly overlap
-        // Avoid combining _all_ of the lights as the area adds are very expensive, just combine those
-        // that overlap
-        // Jamz TODO: Check this and make sure proper order is happening
-        for (var paint : colorMap.keySet()) {
-            var areaList = colorMap.get(paint);
-            List<Area> sourceList = new LinkedList<Area>(areaList);
-            areaList.clear();
+            var drawablePaint = light.getPaint();
 
-            outter:
-            while (sourceList.size() > 0) {
-                Area area = sourceList.remove(0);
+            if (light.getType() != LightSource.Type.NORMAL || drawablePaint == null)
+                continue;
 
-                for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
-                    Area currArea = iter.next();
-
-                    if (currArea.getBounds().intersects(area.getBounds())) {
-                        iter.remove();
-                        area.add(currArea);
-                        sourceList.add(area);
-                        continue outter;
-                    }
-                }
-                // If we are here, we didn't find any other area to merge with
-                areaList.add(area);
-            }
-            // Cut out the bright light
-            if (areaList.size() > 0) {
-                for (Area area : areaList) {
-                    for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
-                        area.subtract(brightArea);
-                    }
-                }
-            }
+            var paint = drawablePaint.getPaint();
 
             if (paint instanceof DrawableColorPaint) {
                 var colorPaint = (DrawableColorPaint) paint;
@@ -941,10 +917,28 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             tmpColor.a = alpha;
             shape.setColor(tmpColor);
             shape.set(ShapeRenderer.ShapeType.Filled);
-            for(var area: areaList)
-                paintArea(area);
+            paintArea(light.getArea());
         }
-        timer.stop("lights-4");*/
+        timer.stop("lights-3");
+
+        //clear the bright areas
+        timer.start("lights-4");
+        for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
+            shape.setColor(Color.CLEAR);
+            paintArea(brightArea);
+        }
+        timer.stop("lights-4");
+        fogBuffer.end();
+        shape.end();
+        batch.begin();
+        batch.setProjectionMatrix(hudCam.combined);
+        batch.draw(fogBuffer.getTexture(), 0, 0, width, height, 0, 0,
+                width, height, false, true);
+
+        batch.setProjectionMatrix(cam.combined);
+        batch.end();
+        shape.begin();
+
     }
 
     private void renderGrid(PlayerView view) {
