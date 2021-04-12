@@ -444,6 +444,7 @@ public class TransferableHelper extends TransferHandler {
       case "application/pdf":
       case "text/javascript":
       case "text/css":
+      case "application/json":
         return true;
     }
 
