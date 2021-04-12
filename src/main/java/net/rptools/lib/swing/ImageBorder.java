@@ -40,6 +40,7 @@ public class ImageBorder implements Border {
   private int bottomMargin;
   private int leftMargin;
   private int rightMargin;
+  private String imagePath;
 
   public ImageBorder(String imagePath) {
     try {
@@ -60,6 +61,8 @@ public class ImageBorder implements Border {
       ioe.printStackTrace();
     }
   }
+
+  public String getImagePath() { return imagePath; }
 
   public int getTopMargin() {
     return topMargin;

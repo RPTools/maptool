@@ -6,10 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Bezier;
-import com.badlogic.gdx.math.EarClippingTriangulator;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.BloomEffect;
@@ -22,12 +20,21 @@ import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
+import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
+import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
+import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
+import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
+import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -893,7 +900,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.stop("lights-2");
 
         timer.start("lights-3");
-        Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
         for (DrawableLight light : zoneRenderer.getZoneView().getDrawableLights(view)) {
             // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
 
@@ -1255,7 +1261,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("tokenlist-1b");
 
             timer.start("tokenlist-1a");
-            Rectangle footprintBounds = token.getBounds(zone);
+            java.awt.Rectangle footprintBounds = token.getBounds(zone);
 
             timer.stop("tokenlist-1a");
             timer.start("tokenlist-1d");
@@ -1336,12 +1342,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             // Position
             // For Isometric Grid we alter the height offset
             float iso_ho = 0;
-            Dimension imgSize = new Dimension((int)image.getWidth(), (int)image.getHeight());
+            java.awt.Dimension imgSize = new java.awt.Dimension((int)image.getWidth(), (int)image.getHeight());
             if (token.getShape() == Token.TokenShape.FIGURE) {
                 float th = token.getHeight() * (float) footprintBounds.width / token.getWidth();
                 iso_ho = footprintBounds.height - th;
                 footprintBounds =
-                        new Rectangle(
+                        new java.awt.Rectangle(
                                 footprintBounds.x,
                                 footprintBounds.y - (int) iso_ho,
                                 footprintBounds.width,
@@ -1480,7 +1486,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 && AppPreferences.getForceFacingArrow() == false) {
                             break;
                         }
-                        Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+                        java.awt.Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
                         if (!zone.getGrid().isIsometric()) {
                             arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
@@ -1584,22 +1590,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("tokenlist-8");
             shape.end();
             batch.begin();
-/*
+
             timer.start("tokenlist-9");
-            // Set up the graphics so that the overlay can just be painted.
-            Graphics2D locg =
-                    (Graphics2D)
-                            tokenG.create(
-                                    (int) tokenBounds.getBounds().getX(),
-                                    (int) tokenBounds.getBounds().getY(),
-                                    (int) tokenBounds.getBounds().getWidth(),
-                                    (int) tokenBounds.getBounds().getHeight());
-            Rectangle bounds =
-                    new Rectangle(
-                            0,
-                            0,
-                            (int) tokenBounds.getBounds().getWidth(),
-                            (int) tokenBounds.getBounds().getHeight());
 
             // Check each of the set values
             for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
@@ -1609,11 +1601,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     overlay = (AbstractTokenOverlay) stateValue;
                 }
                 if (overlay == null
-                        || overlay.isMouseover() && token != tokenUnderMouse
+                        || overlay.isMouseover() && token != zoneRenderer.getTokenUnderMouse()
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-                overlay.paintOverlay(locg, token, bounds, stateValue);
+                renderTokenOverlay(overlay, token, image.getBoundingRectangle(), stateValue);
             }
             timer.stop("tokenlist-9");
 
@@ -1623,58 +1615,40 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 Object barValue = token.getState(bar);
                 BarTokenOverlay overlay = MapTool.getCampaign().getTokenBarsMap().get(bar);
                 if (overlay == null
-                        || overlay.isMouseover() && token != tokenUnderMouse
+                        || overlay.isMouseover() && token != zoneRenderer.getTokenUnderMouse()
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-
-                overlay.paintOverlay(locg, token, bounds, barValue);
+                renderTokenOverlay(overlay, token, image.getBoundingRectangle(), barValue);
             } // endfor
-            locg.dispose();
             timer.stop("tokenlist-10");
 
             timer.start("tokenlist-11");
             // Keep track of which tokens have been drawn so we can perform post-processing on them later
             // (such as selection borders and names/labels)
-            if (zoneRenderer.getActiveLayer().equals(token.getLayer())) {
-                tokenPostProcessing.add(token);
-            }
+            if (!zoneRenderer.getActiveLayer().equals(token.getLayer()))
+                continue;
+
             timer.stop("tokenlist-11");
-*/
-        }
- /*
-        timer.start("tokenlist-12");
-        boolean useIF = MapTool.getServerPolicy().isUseIndividualFOW();
-        // Selection and labels
-        for (Token token : tokenPostProcessing) {
-            ZoneRenderer.TokenLocation location = tokenLocationCache.get(token);
-            if (location == null) {
-                continue;
-            }
-            Area bounds = location.bounds;
+            timer.start("tokenlist-12");
 
-            // TODO: This isn't entirely accurate as it doesn't account for the actual text
-            // to be in the clipping bounds, but I'll fix that later
-            if (!bounds.getBounds().intersects(clipBounds)) {
-                continue;
-            }
-            Rectangle footprintBounds = token.getBounds(zone);
+            boolean useIF = MapTool.getServerPolicy().isUseIndividualFOW();
 
-            boolean isSelected = selectedTokenSet.contains(token.getId());
+            // Selection and labels
+
+
+            boolean isSelected = zoneRenderer.getSelectedTokenSet().contains(token.getId());
             if (isSelected) {
-                ScreenPoint sp = ScreenPoint.fromZonePoint(this, footprintBounds.x, footprintBounds.y);
-                double width = footprintBounds.width * getScale();
-                double height = footprintBounds.height * getScale();
 
                 ImageBorder selectedBorder =
                         token.isStamp() ? AppStyle.selectedStampBorder : AppStyle.selectedBorder;
-                if (highlightCommonMacros.contains(token)) {
+                if (zoneRenderer.getHighlightCommonMacros().contains(token)) {
                     selectedBorder = AppStyle.commonMacroBorder;
                 }
                 if (!AppUtil.playerOwns(token)) {
                     selectedBorder = AppStyle.selectedUnownedBorder;
                 }
-                if (useIF && !token.isStamp() && zoneView.isUsingVision()) {
+                if (useIF && !token.isStamp() && zoneRenderer.getZoneView().isUsingVision()) {
                     Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
                     if (tool
                             instanceof
@@ -1687,26 +1661,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 }
                 if (token.hasFacing()
                         && (token.getShape() == Token.TokenShape.TOP_DOWN || token.isStamp())) {
-                    AffineTransform oldTransform = clippedG.getTransform();
+                    
 
-                    // Rotated
-                    clippedG.translate(sp.x, sp.y);
-                    clippedG.rotate(
-                            Math.toRadians(-token.getFacing() - 90),
-                            width / 2 - (token.getAnchor().x * scale),
-                            height / 2 - (token.getAnchor().y * scale)); // facing defaults to down, or -90
-                    // degrees
-                    selectedBorder.paintAround(clippedG, 0, 0, (int) width, (int) height);
+                    //shape.rotate(image.getOriginX(), image.getOriginY(), 0, token.getFacing() + 90);
+                    
+                    renderImageBorderAround(selectedBorder, image.getBoundingRectangle());
 
-                    clippedG.setTransform(oldTransform);
+
+                    //shape.rotate(image.getOriginX(), image.getOriginY(), 0, - token.getFacing() - 90);
                 } else {
-                    selectedBorder.paintAround(clippedG, (int) sp.x, (int) sp.y, (int) width, (int) height);
+                    renderImageBorderAround(selectedBorder, image.getBoundingRectangle());
                 }
                 // Remove labels from the cache if the corresponding tokens are deselected
-            } else if (!AppState.isShowTokenNames()) {
-                labelRenderingCache.remove(token.getId());
             }
-
+/*
             // Token names and labels
             boolean showCurrentTokenLabel = AppState.isShowTokenNames() || token == tokenUnderMouse;
 
@@ -1803,10 +1771,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 background,
                                 foreground,
                                 tokId));
-            }
-        }
-        timer.stop("tokenlist-12");
+            }*/
+                timer.stop("tokenlist-12");
 
+        }
+
+
+
+/*
         timer.start("tokenlist-13");
         // Stacks
         if (!tokenList.isEmpty()
@@ -1843,7 +1815,101 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);*/
     }
 
-    protected Shape getFigureFacingArrow(int angle, int size) {
+    private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
+        var leftMargin = border.getLeftMargin();
+        var rightMargin = border.getRightMargin();
+        var topMargin = border.getTopMargin();
+        var bottomMargin = border.getBottomMargin();
+
+        var x = bounds.x - leftMargin;
+        var y = bounds.y - bottomMargin;
+        var width = bounds.width + leftMargin + rightMargin;
+        var height = bounds.height + topMargin + bottomMargin;
+
+   /*     // Draw Corners
+        g.drawImage(
+                topLeft, x + leftMargin - topLeft.getWidth(), y + topMargin - topLeft.getHeight(), null);
+        g.drawImage(topRight, x + width - rightMargin, y + topMargin - topRight.getHeight(), null);
+        g.drawImage(
+                bottomLeft, x + leftMargin - bottomLeft.getWidth(), y + height - bottomMargin, null);
+        g.drawImage(bottomRight, x + width - rightMargin, y + height - bottomMargin, null);
+
+        // Draw top
+
+        int i;
+        int max = width - rightMargin;
+
+        // Hopefully the compiler is doing subexpression optimization! ;-)
+        java.awt.Rectangle topEdge, botEdge, lftEdge, rgtEdge;
+        topEdge =
+                new java.awt.Rectangle(
+                        x + leftMargin,
+                        y + topMargin - top.getHeight(),
+                        width - leftMargin - rightMargin,
+                        top.getHeight());
+        botEdge =
+                new java.awt.Rectangle(
+                        x + leftMargin,
+                        y + height - bottomMargin,
+                        width - leftMargin - rightMargin,
+                        top.getHeight());
+        lftEdge =
+                new java.awt.Rectangle(
+                        x + leftMargin - left.getWidth(),
+                        y + topMargin,
+                        left.getWidth(),
+                        height - topMargin - bottomMargin);
+        rgtEdge =
+                new java.awt.Rectangle(
+                        x + width - rightMargin,
+                        y + topMargin,
+                        right.getWidth(),
+                        height - topMargin - bottomMargin);
+
+        java.awt.Rectangle.intersect(topEdge, r, topEdge);
+        java.awt.Rectangle.intersect(botEdge, r, botEdge);
+        java.awt.Rectangle.intersect(lftEdge, r, lftEdge);
+        java.awt.Rectangle.intersect(rgtEdge, r, rgtEdge);
+
+        // Top
+        if (!topEdge.isEmpty()) {
+            g.setClip(topEdge);
+            for (i = leftMargin; i < max; i += top.getWidth()) {
+                g.drawImage(top, x + i, y + topMargin - top.getHeight(), null);
+            }
+        }
+
+        // Bottom
+        if (!botEdge.isEmpty()) {
+            g.setClip(botEdge);
+            for (i = leftMargin; i < max; i += bottom.getWidth()) {
+                g.drawImage(bottom, x + i, y + height - bottomMargin, null);
+            }
+        }
+
+        // Left
+        if (!lftEdge.isEmpty()) {
+            g.setClip(lftEdge);
+            max = height - bottomMargin;
+            for (i = topMargin; i < max; i += left.getHeight()) {
+                g.drawImage(left, x + leftMargin - left.getWidth(), y + i, null);
+            }
+        }
+
+        // Right
+        if (!rgtEdge.isEmpty()) {
+            g.setClip(rgtEdge);
+            for (i = topMargin; i < max; i += right.getHeight()) {
+                g.drawImage(right, x + width - rightMargin, y + i, null);
+            }
+        }
+        g.setClip(oldClip);*/
+    }
+
+    private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {
+    }
+
+    protected java.awt.Shape getFigureFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
 
@@ -1858,7 +1924,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     // TODO: I don't like this hardwiring
-    protected Shape getCircleFacingArrow(int angle, int size) {
+    protected java.awt.Shape getCircleFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
 
@@ -1873,7 +1939,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     // TODO: I don't like this hardwiring
-    protected Shape getSquareFacingArrow(int angle, int size) {
+    protected java.awt.Shape getSquareFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
 
