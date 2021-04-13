@@ -142,7 +142,6 @@ runtime {
                'jdk.dynalink',
                'jdk.jfr',
                'jdk.jsobject',
-               'jdk.scripting.nashorn',
                'jdk.unsupported',
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
@@ -304,6 +303,8 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+    implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
+    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.0.0.2'
 
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
