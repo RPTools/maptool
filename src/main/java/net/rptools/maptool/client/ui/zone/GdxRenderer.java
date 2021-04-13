@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.BloomEffect;
@@ -113,12 +114,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Integer fogX;
     private Integer fogY;
     private EarClippingTriangulator triangulator;
-    private Texture greyLabelTexture;
-    private Texture blueLabelTexture;
-    private Texture darkGreyLabelTexture;
-    private NinePatch greyLabel;
+    private com.badlogic.gdx.assets.AssetManager manager;
+    private TextureAtlas atlas;
+
+    private NinePatch grayLabel;
     private NinePatch blueLabel;
-    private NinePatch darkGreyLabel;
+    private NinePatch darkGrayLabel;
 
     //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord;
@@ -133,6 +134,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Vector2 tmpVector2;
     private Vector2 tmpVector3;
     private Area tmpArea;
+    private TiledDrawable tmpTile = new TiledDrawable();
 
 
     public GdxRenderer() {
@@ -147,6 +149,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
+        manager = new com.badlogic.gdx.assets.AssetManager();
+
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
 
@@ -166,21 +170,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         fogBuffer.initialize(width, height);
         triangulator = new EarClippingTriangulator();
 
-        var pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/grayLabelbox.png"));
-        greyLabelTexture = new Texture(pix);
-        pix.dispose();
-
-        pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/blueLabelbox.png"));
-        blueLabelTexture = new Texture(pix);
-        pix.dispose();
-
-        pix = new Pixmap(Gdx.files.internal("net/rptools/maptool/client/image/darkGreyLabelbox.png"));
-        darkGreyLabelTexture = new Texture(pix);
-        pix.dispose();
-
-        greyLabel = new NinePatch(greyLabelTexture, 10, 10, 10, 10);
-        blueLabel = new NinePatch(blueLabelTexture, 10, 10, 10, 10);
-        darkGreyLabel = new NinePatch(darkGreyLabelTexture, 10, 10, 10, 10);
 
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new FxaaEffect();
@@ -205,20 +194,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         itemRenderList = new LinkedList<>();
 
         initialized = true;
+
+        loadAssets();
         initializeZoneResources(zone);
     }
 
     @Override
     public void dispose() {
+        manager.dispose();
         batch.dispose();
         hudBatch.dispose();
         font.dispose();
         vfxManager.dispose();
         vfxEffect.dispose();
         shape.dispose();
-        greyLabelTexture.dispose();
-        blueLabelTexture.dispose();
-        darkGreyLabelTexture.dispose();
         disposeZoneResources();
     }
 
@@ -250,6 +239,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void render() {
+        manager.finishLoading();
+        if(atlas == null)
+            atlas = manager.get(ATLAS, TextureAtlas.class);
+
+        if(blueLabel == null)
+            blueLabel = atlas.createPatch("blueLabelbox");
+
+        if(grayLabel == null)
+            grayLabel = atlas.createPatch("grayLabelbox");
+
+        if(darkGrayLabel == null)
+            darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
+
+
         vfxManager.cleanUpBuffers();
         vfxManager.beginInputCapture();
         doRendering();
@@ -259,13 +262,18 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         copyFramebufferToJfx();
     }
 
+    private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
+
+    private void loadAssets() {
+        manager.load(ATLAS, TextureAtlas.class);
+    }
+
     private void doRendering() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-    //    Gdx.gl.glEnable(GL11.GL_LINE_SMOOTH);
-    //    Gdx.gl.glHint(GL11.GL_LINE_SMOOTH_HINT, GL20.GL_NICEST);
+
 
         if (zone == null || !renderZone)
             return;
@@ -285,6 +293,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         shape.setProjectionMatrix(cam.combined);
 
         batch.begin();
+
+
+
 
         renderZone(playerView);
         batch.end();
@@ -310,7 +321,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         drawString(hudBatch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
 
         hudBatch.end();
-
         collectTimerResults();
     }
 
@@ -849,7 +859,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 label.getX(),
                                 -label.getY(),
                                 SwingUtilities.CENTER,
-                                greyLabel,
+                                grayLabel,
                                 tmpColor);
             } else {
                 drawString(batch, label.getLabel(), label.getX(), -label.getY(), tmpColor);
@@ -1136,7 +1146,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     public void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification) {
-        drawBoxedString(batch, text, x, y, justification, greyLabel, Color.BLACK);
+        drawBoxedString(batch, text, x, y, justification, grayLabel, Color.BLACK);
     }
 
     private void drawBoxedString(SpriteBatch batch, String text, float x, float y, int justification, NinePatch background, Color foreground) {
@@ -1168,8 +1178,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         // Box
-        if (background != null)
+        if (background != null) {
             background.draw(batch, x, y, width, height);
+        }
 
         // Renderer message
 
@@ -1815,7 +1826,30 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);*/
     }
 
+    private void intersect(Rectangle src, Rectangle dst) {
+        float x1 = Math.max(src.x, dst.x);
+        float y1 = Math.max(src.y, dst.y);
+        float x2 = Math.min(src.x, dst.x);
+        float y2 = Math.min(src.y, dst.y);
+        dst.set(x1, y1, x2-x1, y2-y1);
+    }
+
     private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
+        var imagePath = border.getImagePath();
+        var index = imagePath.indexOf("border/");
+        var bordername = imagePath.substring(index);
+
+        var topRight = atlas.findRegion(bordername + "/tr");
+        var top = atlas.findRegion(bordername + "/top");
+        var topLeft = atlas.findRegion(bordername + "/tl");
+        var left = atlas.findRegion(bordername + "/left");
+        var bottomLeft = atlas.findRegion(bordername + "/bl");
+        var bottom = atlas.findRegion(bordername + "/bottom");
+        var bottomRight = atlas.findRegion(bordername + "/br");
+        var right = atlas.findRegion(bordername + "/right");
+
+
+        //x,y is bottom left of the rectangle
         var leftMargin = border.getLeftMargin();
         var rightMargin = border.getRightMargin();
         var topMargin = border.getTopMargin();
@@ -1826,84 +1860,24 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var width = bounds.width + leftMargin + rightMargin;
         var height = bounds.height + topMargin + bottomMargin;
 
-   /*     // Draw Corners
-        g.drawImage(
-                topLeft, x + leftMargin - topLeft.getWidth(), y + topMargin - topLeft.getHeight(), null);
-        g.drawImage(topRight, x + width - rightMargin, y + topMargin - topRight.getHeight(), null);
-        g.drawImage(
-                bottomLeft, x + leftMargin - bottomLeft.getWidth(), y + height - bottomMargin, null);
-        g.drawImage(bottomRight, x + width - rightMargin, y + height - bottomMargin, null);
 
-        // Draw top
+        // Draw Corners
+        batch.draw(bottomLeft , x + leftMargin - bottomLeft.originalWidth, y + topMargin - bottomLeft.originalHeight);
+        batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.originalHeight);
+        batch.draw(topLeft, x + leftMargin - topLeft.originalWidth, y + height - bottomMargin);
+        batch.draw(topRight , x + width - rightMargin, y + height - bottomMargin);
 
-        int i;
-        int max = width - rightMargin;
+        tmpTile.setRegion(top);
+        tmpTile.draw(batch, x + leftMargin, y + height - bottomMargin, width - leftMargin - rightMargin, top.originalHeight);
 
-        // Hopefully the compiler is doing subexpression optimization! ;-)
-        java.awt.Rectangle topEdge, botEdge, lftEdge, rgtEdge;
-        topEdge =
-                new java.awt.Rectangle(
-                        x + leftMargin,
-                        y + topMargin - top.getHeight(),
-                        width - leftMargin - rightMargin,
-                        top.getHeight());
-        botEdge =
-                new java.awt.Rectangle(
-                        x + leftMargin,
-                        y + height - bottomMargin,
-                        width - leftMargin - rightMargin,
-                        top.getHeight());
-        lftEdge =
-                new java.awt.Rectangle(
-                        x + leftMargin - left.getWidth(),
-                        y + topMargin,
-                        left.getWidth(),
-                        height - topMargin - bottomMargin);
-        rgtEdge =
-                new java.awt.Rectangle(
-                        x + width - rightMargin,
-                        y + topMargin,
-                        right.getWidth(),
-                        height - topMargin - bottomMargin);
+        tmpTile.setRegion(bottom);
+        tmpTile.draw(batch, x + leftMargin, y + topMargin - bottom.originalHeight, width - leftMargin - rightMargin, bottom.originalHeight);
 
-        java.awt.Rectangle.intersect(topEdge, r, topEdge);
-        java.awt.Rectangle.intersect(botEdge, r, botEdge);
-        java.awt.Rectangle.intersect(lftEdge, r, lftEdge);
-        java.awt.Rectangle.intersect(rgtEdge, r, rgtEdge);
+        tmpTile.setRegion(left);
+        tmpTile.draw(batch, x + leftMargin - left.originalWidth, y + topMargin, left.originalWidth, height - topMargin - bottomMargin);
 
-        // Top
-        if (!topEdge.isEmpty()) {
-            g.setClip(topEdge);
-            for (i = leftMargin; i < max; i += top.getWidth()) {
-                g.drawImage(top, x + i, y + topMargin - top.getHeight(), null);
-            }
-        }
-
-        // Bottom
-        if (!botEdge.isEmpty()) {
-            g.setClip(botEdge);
-            for (i = leftMargin; i < max; i += bottom.getWidth()) {
-                g.drawImage(bottom, x + i, y + height - bottomMargin, null);
-            }
-        }
-
-        // Left
-        if (!lftEdge.isEmpty()) {
-            g.setClip(lftEdge);
-            max = height - bottomMargin;
-            for (i = topMargin; i < max; i += left.getHeight()) {
-                g.drawImage(left, x + leftMargin - left.getWidth(), y + i, null);
-            }
-        }
-
-        // Right
-        if (!rgtEdge.isEmpty()) {
-            g.setClip(rgtEdge);
-            for (i = topMargin; i < max; i += right.getHeight()) {
-                g.drawImage(right, x + width - rightMargin, y + i, null);
-            }
-        }
-        g.setClip(oldClip);*/
+        tmpTile.setRegion(right);
+        tmpTile.draw(batch, x + width - rightMargin, y + topMargin, right.originalWidth, height - topMargin - bottomMargin);
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {

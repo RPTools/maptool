@@ -23,7 +23,7 @@ import net.rptools.lib.image.ImageUtil;
 
 /** @author trevor */
 public class ImageBorder implements Border {
-  public static final ImageBorder GRAY = new ImageBorder("net/rptools/maptool/client/image/border/gray");
+  public static final ImageBorder GRAY = new ImageBorder("net/rptools/maptool/client/image/border/gray2");
   public static final ImageBorder RED = new ImageBorder("net/rptools/maptool/client/image/border/red");
   public static final ImageBorder BLUE = new ImageBorder("net/rptools/maptool/client/image/border/blue");
 
@@ -44,6 +44,7 @@ public class ImageBorder implements Border {
 
   public ImageBorder(String imagePath) {
     try {
+      this.imagePath = imagePath;
       topRight = ImageUtil.getCompatibleImage(imagePath + "/tr.png");
       top = ImageUtil.getCompatibleImage(imagePath + "/top.png");
       topLeft = ImageUtil.getCompatibleImage(imagePath + "/tl.png");
