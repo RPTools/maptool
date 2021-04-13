@@ -23,9 +23,9 @@ import net.rptools.lib.image.ImageUtil;
 
 /** @author trevor */
 public class ImageBorder implements Border {
-  public static final ImageBorder GRAY = new ImageBorder("net/rptools/lib/swing/image/border/gray");
-  public static final ImageBorder RED = new ImageBorder("net/rptools/lib/swing/image/border/red");
-  public static final ImageBorder BLUE = new ImageBorder("net/rptools/lib/swing/image/border/blue");
+  public static final ImageBorder GRAY = new ImageBorder("net/rptools/maptool/client/image/border/gray");
+  public static final ImageBorder RED = new ImageBorder("net/rptools/maptool/client/image/border/red");
+  public static final ImageBorder BLUE = new ImageBorder("net/rptools/maptool/client/image/border/blue");
 
   private BufferedImage topRight;
   private BufferedImage top;
