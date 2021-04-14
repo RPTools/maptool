@@ -21,8 +21,8 @@ apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = 16
+targetCompatibility = 16
 
 
 // Used by gradle assemble & run tasks
@@ -230,7 +230,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
@@ -300,7 +300,7 @@ dependencies {
     implementation 'com.withay:withay-util:1.0'
     implementation 'xmlpull:xmlpull:1.1.3.1'
     implementation 'xpp3:xpp3_min:1.1.4c'
-    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.16'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
     implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
