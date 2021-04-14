@@ -2,19 +2,15 @@ package net.rptools.maptool.client.ui.zone;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.crashinvaders.vfx.VfxManager;
-import com.crashinvaders.vfx.effects.BloomEffect;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
 import com.crashinvaders.vfx.effects.FxaaEffect;
-import com.crashinvaders.vfx.effects.NfaaEffect;
 import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
@@ -33,25 +29,20 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.*;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
@@ -75,15 +66,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private final Map<MD5Key, Sprite> sprites = new HashMap<>();
     private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
     //renderFog
-
+    private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
     private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
-
     private Area exposedFogArea;
     private PlayerView lastView;
     private List<ItemRenderer> itemRenderList;
-
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
@@ -94,7 +83,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int offsetY = 0;
     private float zoom = 1.0f;
     private boolean renderZone = false;
-
     // general resources
     private OrthographicCamera cam;
     private OrthographicCamera hudCam;
@@ -116,11 +104,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private EarClippingTriangulator triangulator;
     private com.badlogic.gdx.assets.AssetManager manager;
     private TextureAtlas atlas;
-
     private NinePatch grayLabel;
     private NinePatch blueLabel;
     private NinePatch darkGrayLabel;
-
     //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord;
     private Vector3 tmpScreenCoord;
@@ -133,9 +119,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Vector2 tmpVector1;
     private Vector2 tmpVector2;
     private Vector2 tmpVector3;
+    private Matrix4 tmpMatrix = new Matrix4();
     private Area tmpArea;
     private TiledDrawable tmpTile = new TiledDrawable();
-
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -240,16 +226,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void render() {
         manager.finishLoading();
-        if(atlas == null)
+        if (atlas == null)
             atlas = manager.get(ATLAS, TextureAtlas.class);
 
-        if(blueLabel == null)
+        if (blueLabel == null)
             blueLabel = atlas.createPatch("blueLabelbox");
 
-        if(grayLabel == null)
+        if (grayLabel == null)
             grayLabel = atlas.createPatch("grayLabelbox");
 
-        if(darkGrayLabel == null)
+        if (darkGrayLabel == null)
             darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
 
 
@@ -261,8 +247,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxManager.renderToScreen();
         copyFramebufferToJfx();
     }
-
-    private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
 
     private void loadAssets() {
         manager.load(ATLAS, TextureAtlas.class);
@@ -292,13 +276,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudBatch.setProjectionMatrix(hudCam.combined);
         shape.setProjectionMatrix(cam.combined);
 
-        batch.begin();
-
-
-
-
         renderZone(playerView);
-        batch.end();
+
 
         hudBatch.begin();
         hudBatch.setProjectionMatrix(hudCam.combined);
@@ -374,6 +353,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             invalidateCurrentViewCache();
         }
         lastView = view;
+        itemRenderList.clear();
 
         // Calculations
         timer.start("calcs-1");
@@ -384,6 +364,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         exposedFogArea = new Area(zone.getExposedArea());
         timer.stop("calcs-2");
 
+        batch.begin();
         renderBoard();
 
         if (Zone.Layer.BACKGROUND.isEnabled()) {
@@ -411,7 +392,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
         batch.end();
         timer.start("grid");
+        shape.begin();
         renderGrid(view);
+        shape.end();
         timer.stop("grid");
         batch.begin();
 
@@ -545,11 +528,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             // So if one moving token is on top of another moving token, at least the textual identifiers
             // will be
             // visible.
+            batch.end();
+            hudBatch.begin();
+            hudBatch.setProjectionMatrix(hudCam.combined);
             timer.start("token name/labels");
             renderRenderables();
             timer.stop("token name/labels");
+            hudBatch.end();
         }
 
+        shape.begin();
         // if (zone.visionType ...)
         if (view.isGMView()) {
             timer.start("visionOverlayGM");
@@ -560,6 +548,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             renderPlayerVisionOverlay(view);
             timer.stop("visionOverlayPlayer");
         }
+        shape.end();
     }
 
     private void updateVisibleArea() {
@@ -630,16 +619,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
          * strict token ownership is off... then the vision arc should be displayed.
          */
         if (showVisionAndHalo) {
-            batch.end();
-
-            shape.begin();
             shape.setColor(Color.WHITE);
             shape.set(ShapeRenderer.ShapeType.Line);
             paintArea(combined);
             renderHaloArea(combined);
-            shape.end();
-
-            batch.begin();
         }
     }
 
@@ -677,7 +660,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             flushFog = true;
         }
         boolean cacheNotValid =
-                ( fogBuffer.getTexture().getWidth() != width
+                (fogBuffer.getTexture().getWidth() != width
                         || fogBuffer.getTexture().getHeight() != height);
         timer.start("renderFog");
         //  if (flushFog || cacheNotValid)
@@ -685,7 +668,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
             fogBuffer.begin();
-            Gdx.gl.glClearColor(0,0,0,0);
+            Gdx.gl.glClearColor(0, 0, 0, 0);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
             batch.setProjectionMatrix(cam.combined);
@@ -855,12 +838,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             Color.argb8888ToColor(tmpColor, label.getForegroundColor().getRGB());
             if (label.isShowBackground()) {
                 drawBoxedString(batch,
-                                label.getLabel(),
-                                label.getX(),
-                                -label.getY(),
-                                SwingUtilities.CENTER,
-                                grayLabel,
-                                tmpColor);
+                        label.getLabel(),
+                        label.getX(),
+                        -label.getY(),
+                        SwingUtilities.CENTER,
+                        grayLabel,
+                        tmpColor);
             } else {
                 drawString(batch, label.getLabel(), label.getX(), -label.getY(), tmpColor);
             }
@@ -896,11 +879,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderLights(PlayerView view) {
-        if(zone.getVisionType() != Zone.VisionType.NIGHT)
+        if (zone.getVisionType() != Zone.VisionType.NIGHT)
             return;
 
         fogBuffer.begin();
-        Gdx.gl.glClearColor(0,0,0,0);
+        Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         shape.setProjectionMatrix(cam.combined);
@@ -924,8 +907,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 var colorPaint = (DrawableColorPaint) paint;
                 Color.argb8888ToColor(tmpColor, colorPaint.getColor());
 
-            } else if(paint instanceof java.awt.Color) {
-                Color.argb8888ToColor(tmpColor, ((java.awt.Color)paint).getRGB());
+            } else if (paint instanceof java.awt.Color) {
+                Color.argb8888ToColor(tmpColor, ((java.awt.Color) paint).getRGB());
             } else {
                 System.out.println("unexpected color type");
                 continue;
@@ -978,8 +961,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderGrid(HexGrid grid) {
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setProjectionMatrix(hudCam.combined);
+        shape.set(ShapeRenderer.ShapeType.Line);
         shape.identity();
 
         Color.argb8888ToColor(tmpColor, zone.getGridColor());
@@ -1021,16 +1003,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 shape.translate(-transX, -transY, 0);
             }
         }
-
-        shape.end();
     }
 
     private void renderGrid(IsometricGrid grid) {
         var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
 
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setProjectionMatrix(hudCam.combined);
         shape.identity();
 
         Color.argb8888ToColor(tmpColor, zone.getGridColor());
@@ -1066,7 +1044,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 drawHatch(grid, (int) (col + offX), h - (int) (row + offY));
             }
         }
-        shape.end();
     }
 
     private void drawHatch(IsometricGrid grid, float x, float y) {
@@ -1083,8 +1060,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
 
-        shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setProjectionMatrix(hudCam.combined);
+        shape.set(ShapeRenderer.ShapeType.Filled);
         shape.identity();
 
         Color.argb8888ToColor(tmpColor, zone.getGridColor());
@@ -1109,8 +1085,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         for (float col = startCol; col < x + w + gridSize; col += gridSize)
             shape.rectLine((int) (col + offX), y, (int) (col + offX), y + h, lineWidth);
-
-        shape.end();
     }
 
     private FloatArray pathToVertices(GeneralPath path) {
@@ -1227,7 +1201,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
         boolean isGMView = view.isGMView(); // speed things up
 
-        if(visibleScreenArea == null)
+        if (visibleScreenArea == null)
             return;
 
         Set<GUID> tempVisTokens = new HashSet<GUID>();
@@ -1338,7 +1312,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         var pix = new Pixmap(bytes, 0, bytes.length);
                         image = new Sprite(new Texture(pix));
                         pix.dispose();
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                     isoSprites.put(assetId, image);
                 } else {
                     image = isoSprites.get(assetId);
@@ -1353,7 +1328,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             // Position
             // For Isometric Grid we alter the height offset
             float iso_ho = 0;
-            java.awt.Dimension imgSize = new java.awt.Dimension((int)image.getWidth(), (int)image.getHeight());
+            java.awt.Dimension imgSize = new java.awt.Dimension((int) image.getWidth(), (int) image.getHeight());
             if (token.getShape() == Token.TokenShape.FIGURE) {
                 float th = token.getHeight() * (float) footprintBounds.width / token.getWidth();
                 iso_ho = footprintBounds.height - th;
@@ -1383,21 +1358,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             }
             float tx = x + offsetx;
-            float ty = y +  offsety + iso_ho;
+            float ty = y + offsety + iso_ho;
 
             // Snap
             var scaleX = 1f;
             var scaleY = 1f;
             if (token.isSnapToScale()) {
-                scaleX = imgSize.width/image.getWidth();
-                scaleY = imgSize.height/image.getHeight();
+                scaleX = imgSize.width / image.getWidth();
+                scaleY = imgSize.height / image.getHeight();
             } else {
                 if (token.getShape() == Token.TokenShape.FIGURE) {
-                    scaleX = footprintBounds.width/image.getHeight();
-                    scaleY = footprintBounds.width/image.getWidth();
+                    scaleX = footprintBounds.width / image.getHeight();
+                    scaleY = footprintBounds.width / image.getWidth();
                 } else {
-                    scaleX = footprintBounds.width/image.getWidth();
-                    scaleY = footprintBounds.height/image.getHeight();
+                    scaleX = footprintBounds.width / image.getWidth();
+                    scaleY = footprintBounds.height / image.getHeight();
                 }
             }
             image.setSize(scaleX * image.getWidth(), scaleY * image.getHeight());
@@ -1408,7 +1383,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Rotated
             if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                var originX =  image.getWidth() / 2 - token.getAnchorX();
+                var originX = image.getWidth() / 2 - token.getAnchorX();
                 var originY = image.getHeight() / 2 + token.getAnchorY();
                 image.setOrigin(originX, originY);
                 image.setRotation(token.getFacing() + 90);
@@ -1444,7 +1419,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Finally render the token image
             timer.start("tokenlist-7");
-            image.setColor(1,1,1,opacity);
+            image.setColor(1, 1, 1, opacity);
             if (!isGMView && zoneRenderer.getZoneView().isUsingVision() && (token.getShape() == Token.TokenShape.FIGURE)) {
                 if (zone.getGrid().checkCenterRegion(tokenCellArea.getBounds(), visibleScreenArea)) {
                     // if we can see the centre, draw the whole token
@@ -1472,7 +1447,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             } else {
                 // fallthrough normal token rendered against visible area
 
-                if(zoneRenderer.isTokenInNeedOfClipping(token, tokenCellArea, isGMView)) {
+                if (zoneRenderer.isTokenInNeedOfClipping(token, tokenCellArea, isGMView)) {
                     paintClipped(image, tokenCellArea, cellArea);
                 } else
                     image.draw(batch);
@@ -1503,8 +1478,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
                         }
 
-                        float fx = x + (float) origBounds.getWidth()/zoom / 2;
-                        float fy = y + (float) origBounds.getHeight()/zoom / 2;
+                        float fx = x + (float) origBounds.getWidth() / zoom / 2;
+                        float fy = y + (float) origBounds.getHeight() / zoom / 2;
 
 
                         shape.translate(fx, -fy, 0);
@@ -1534,8 +1509,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         }
                         arrowArea = new Area(arrow);
 
-                        float cx = x + (float)origBounds.getWidth() / 2;
-                        float cy = y + (float)origBounds.getHeight() / 2;
+                        float cx = x + (float) origBounds.getWidth() / 2;
+                        float cy = y + (float) origBounds.getHeight() / 2;
 
                         shape.translate(cx, -cy, 0);
                         shape.setColor(Color.YELLOW);
@@ -1549,8 +1524,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     case SQUARE:
                         if (zone.getGrid().isIsometric()) {
                             arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
-                            cx = x + (float)origBounds.getWidth() / 2;
-                            cy = y + (float)origBounds.getHeight() / 2;
+                            cx = x + (float) origBounds.getWidth() / 2;
+                            cy = y + (float) origBounds.getHeight() / 2;
                         } else {
                             int facing = token.getFacing();
                             while (facing < 0) {
@@ -1561,8 +1536,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             facing %= 360;
                             arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
-                            cx = x + (float)origBounds.getWidth() / 2;
-                            cy = y + (float)origBounds.getHeight() / 2;
+                            cx = x + (float) origBounds.getWidth() / 2;
+                            cy = y + (float) origBounds.getHeight() / 2;
 
                             // Find the edge of the image
                             // TODO: Man, this is horrible, there's gotta be a better way to do this
@@ -1647,7 +1622,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Selection and labels
 
-
+            var tokenRectangle = token.getBounds(zone);
+            var gdxTokenRectangle = new Rectangle(tokenRectangle.x,
+                    -tokenRectangle.y - tokenRectangle.height,
+                    tokenRectangle.width,
+                    tokenRectangle.height);
             boolean isSelected = zoneRenderer.getSelectedTokenSet().contains(token.getId());
             if (isSelected) {
 
@@ -1672,119 +1651,37 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 }
                 if (token.hasFacing()
                         && (token.getShape() == Token.TokenShape.TOP_DOWN || token.isStamp())) {
-                    
 
-                    //shape.rotate(image.getOriginX(), image.getOriginY(), 0, token.getFacing() + 90);
-                    
-                    renderImageBorderAround(selectedBorder, image.getBoundingRectangle());
+             /*     TODO: figure out how to rotate the selected border
+                    tmpMatrix.idt();
 
+                    tmpMatrix.rotate(image.getX() + image.getOriginX(),
+                            image.getY() + image.getOriginY(), 0, token.getFacing() + 90);
+                    batch.setTransformMatrix(tmpMatrix);*/
+                    renderImageBorderAround(selectedBorder, gdxTokenRectangle);
+                    //      tmpMatrix.idt();
+                    //      batch.setTransformMatrix(tmpMatrix);
 
-                    //shape.rotate(image.getOriginX(), image.getOriginY(), 0, - token.getFacing() - 90);
                 } else {
-                    renderImageBorderAround(selectedBorder, image.getBoundingRectangle());
+                    renderImageBorderAround(selectedBorder, gdxTokenRectangle);
                 }
                 // Remove labels from the cache if the corresponding tokens are deselected
             }
-/*
+
             // Token names and labels
-            boolean showCurrentTokenLabel = AppState.isShowTokenNames() || token == tokenUnderMouse;
+            boolean showCurrentTokenLabel = AppState.isShowTokenNames() || token == zoneRenderer.getTokenUnderMouse();
 
             // if policy does not auto-reveal FoW, check if fog covers the token (slow)
             if (showCurrentTokenLabel
                     && !isGMView
-                    && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())
+                    && (!zoneRenderer.getZoneView().isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())
                     && !zone.isTokenVisible(token)) {
                 showCurrentTokenLabel = false;
             }
             if (showCurrentTokenLabel) {
-                GUID tokId = token.getId();
-                int offset = 3; // Keep it from tramping on the token border.
-                ImageLabel background;
-                java.awt.Color foreground;
-
-                if (token.isVisible()) {
-                    if (token.getType() == Token.Type.NPC) {
-                        background = GraphicsUtil.BLUE_LABEL;
-                        foreground = java.awt.Color.WHITE;
-                    } else {
-                        background = GraphicsUtil.GREY_LABEL;
-                        foreground = java.awt.Color.BLACK;
-                    }
-                } else {
-                    background = GraphicsUtil.DARK_GREY_LABEL;
-                    foreground = java.awt.Color.WHITE;
-                }
-                String name = token.getName();
-                if (isGMView && token.getGMName() != null && !StringUtil.isEmpty(token.getGMName())) {
-                    name += " (" + token.getGMName() + ")";
-                }
-                if (!view.equals(lastView) || !labelRenderingCache.containsKey(tokId)) {
-                    // if ((lastView != null && !lastView.equals(view)) ||
-                    // !labelRenderingCache.containsKey(tokId)) {
-                    boolean hasLabel = false;
-
-                    // Calculate image dimensions
-                    FontMetrics fm = g.getFontMetrics();
-                    Font f = g.getFont();
-                    int strWidth = SwingUtilities.computeStringWidth(fm, name);
-
-                    int width = strWidth + GraphicsUtil.BOX_PADDINGX * 2;
-                    int height = fm.getHeight() + GraphicsUtil.BOX_PADDINGY * 2;
-                    int labelHeight = height;
-
-                    // If token has a label (in addition to name).
-                    if (token.getLabel() != null && token.getLabel().trim().length() > 0) {
-                        hasLabel = true;
-                        height = height * 2; // Double the image height for two boxed strings.
-                        int labelWidth =
-                                SwingUtilities.computeStringWidth(fm, token.getLabel())
-                                        + GraphicsUtil.BOX_PADDINGX * 2;
-                        width = Math.max(width, labelWidth);
-                    }
-
-                    // Set up the image
-                    BufferedImage labelRender = new BufferedImage(width, height, Transparency.TRANSLUCENT);
-                    Graphics2D gLabelRender = labelRender.createGraphics();
-                    gLabelRender.setFont(f); // Match font used in the main graphics context.
-                    gLabelRender.setRenderingHints(g.getRenderingHints()); // Match rendering style.
-
-                    // Draw name and label to image
-                    if (hasLabel) {
-                        GraphicsUtil.drawBoxedString(
-                                gLabelRender,
-                                token.getLabel(),
-                                width / 2,
-                                height - (labelHeight / 2),
-                                SwingUtilities.CENTER,
-                                background,
-                                foreground);
-                    }
-                    GraphicsUtil.drawBoxedString(
-                            gLabelRender,
-                            name,
-                            width / 2,
-                            labelHeight / 2,
-                            SwingUtilities.CENTER,
-                            background,
-                            foreground);
-
-                    // Add image to cache
-                    labelRenderingCache.put(tokId, labelRender);
-                }
-                // Create LabelRenderer using cached label.
-                Rectangle r = bounds.getBounds();
-                delayRendering(
-                        new ZoneRenderer.LabelRenderer(
-                                name,
-                                r.x + r.width / 2,
-                                r.y + r.height + offset,
-                                SwingUtilities.CENTER,
-                                background,
-                                foreground,
-                                tokId));
-            }*/
-                timer.stop("tokenlist-12");
-
+                itemRenderList.add(new LabelRenderer(token, isGMView));
+            }
+            timer.stop("tokenlist-12");
         }
 
 
@@ -1826,13 +1723,75 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);*/
     }
 
-    private void intersect(Rectangle src, Rectangle dst) {
-        float x1 = Math.max(src.x, dst.x);
-        float y1 = Math.max(src.y, dst.y);
-        float x2 = Math.min(src.x, dst.x);
-        float y2 = Math.min(src.y, dst.y);
-        dst.set(x1, y1, x2-x1, y2-y1);
+    private class LabelRenderer implements ItemRenderer
+    {
+        private final boolean isGMView;
+        private Token token;
+
+        public LabelRenderer(Token token, boolean isGMView) {
+            this.token = token;
+            this.isGMView = isGMView;
+        }
+
+        @Override
+        public void render() {
+            int offset = 3; // Keep it from tramping on the token border.
+            NinePatch background;
+            Color foreground;
+
+            if (token.isVisible()) {
+                if (token.getType() == Token.Type.NPC) {
+                    background = blueLabel;
+                    foreground = Color.WHITE;
+                } else {
+                    background = grayLabel;
+                    foreground = Color.BLACK;
+                }
+            } else {
+                background = darkGrayLabel;
+                foreground = Color.WHITE;
+            }
+            String name = token.getName();
+            if (isGMView && token.getGMName() != null && !StringUtil.isEmpty(token.getGMName())) {
+                name += " (" + token.getGMName() + ")";
+            }
+
+
+            // Calculate image dimensions
+
+            float labelHeight = font.getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
+
+
+            java.awt.Rectangle r = token.getBounds(zone);
+            tmpWorldCoord.x = r.x + r.width / 2;
+            tmpWorldCoord.y = (r.y + r.height + offset + labelHeight*zoom / 2) * -1;
+            tmpWorldCoord.z = 0;
+            tmpScreenCoord = cam.project(tmpWorldCoord);
+
+            drawBoxedString(
+                    hudBatch,
+                    name,
+                    tmpScreenCoord.x,
+                    tmpScreenCoord.y,
+                    SwingUtilities.CENTER,
+                    background,
+                    foreground);
+
+            var label = token.getLabel();
+
+            // Draw name and label to image
+            if (label != null && label.trim().length() > 0) {
+                drawBoxedString(hudBatch,
+                        label,
+                        tmpScreenCoord.x,
+                        tmpScreenCoord.y - labelHeight,
+                        SwingUtilities.CENTER,
+                        background,
+                        foreground);
+            }
+        }
     }
+
 
     private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
         var imagePath = border.getImagePath();
@@ -1862,10 +1821,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
         // Draw Corners
-        batch.draw(bottomLeft , x + leftMargin - bottomLeft.originalWidth, y + topMargin - bottomLeft.originalHeight);
+
+
+        batch.draw(bottomLeft, x + leftMargin - bottomLeft.originalWidth, y + topMargin - bottomLeft.originalHeight);
         batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.originalHeight);
         batch.draw(topLeft, x + leftMargin - topLeft.originalWidth, y + height - bottomMargin);
-        batch.draw(topRight , x + width - rightMargin, y + height - bottomMargin);
+        batch.draw(topRight, x + width - rightMargin, y + height - bottomMargin);
 
         tmpTile.setRegion(top);
         tmpTile.draw(batch, x + leftMargin, y + height - bottomMargin, width - leftMargin - rightMargin, top.originalHeight);
@@ -1894,7 +1855,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         facingArrow.lineTo(base, -width);
 
         return facingArrow.createTransformedShape(
-                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
 
     // TODO: I don't like this hardwiring
@@ -1909,7 +1870,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         facingArrow.lineTo(base, -width);
 
         return facingArrow.createTransformedShape(
-                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
 
     // TODO: I don't like this hardwiring
@@ -1924,7 +1885,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         facingArrow.lineTo(0, 0);
 
         return facingArrow.createTransformedShape(
-                                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+                AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
 
 
@@ -1953,7 +1914,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         shape.end();
 
         var handle = Gdx.files.absolute("screenshot.png");
-        if(!handle.exists()) {
+        if (!handle.exists()) {
             var pix = Pixmap.createFromFrameBuffer(0, 0, width, height);
             PixmapIO.writePNG(handle, pix, DEFAULT_COMPRESSION, true);
             pix.dispose();
@@ -1975,7 +1936,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var wsrc = image.getWidth() / zoom;
         var hsrc = image.getHeight() / zoom;
 
-        batch.draw(fogBuffer.getTexture(), x, y, w, h, (int)tmpScreenCoord.x, (int)tmpScreenCoord.y, (int)wsrc, (int)hsrc, false, true);
+        batch.draw(fogBuffer.getTexture(), x, y, w, h, (int) tmpScreenCoord.x, (int) tmpScreenCoord.y, (int) wsrc, (int) hsrc, false, true);
     }
 
     private void renderPath(Path lastPath, TokenFootprint footprint) {
@@ -2098,12 +2059,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
- //                   System.out.println("Move to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+                    //                   System.out.println("Move to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
                     tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
 
                     break;
                 case PathIterator.SEG_CLOSE:
- //                   System.out.println("Close");
+                    //                   System.out.println("Close");
                     tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
                     if (shape.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
                         var indicies = triangulator.computeTriangles(tmpFloat.items, 0, tmpFloat.size);
@@ -2125,12 +2086,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tmpFloat.clear();
                     break;
                 case PathIterator.SEG_LINETO:
-  //                  System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
+                    //                  System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
                     tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
                     break;
                 case PathIterator.SEG_QUADTO:
-  //                  System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
-  //                          "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
+                    //                  System.out.println("quadratic bezier with: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] +
+                    //                          "), (" + floatsFromArea[2] + ", " + floatsFromArea[3] + ")");
 
                     tmpVector0.set(tmpFloat.get(tmpFloat.size - 2), tmpFloat.get(tmpFloat.size - 1));
                     tmpVector1.set(floatsFromArea[0], -floatsFromArea[1]);
