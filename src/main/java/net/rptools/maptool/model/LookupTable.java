@@ -108,6 +108,25 @@ public class LookupTable {
     return entry;
   }
 
+  /**
+   * Accepts a string containing a valid dice expression or integer which is evaluated and then the
+   * matching entry in the table is returned without filtering for picked entries.
+   *
+   * @param roll A string containing a dice expression or integer.
+   * @return A LookupEntry matching the roll.
+   */
+  public LookupEntry getLookupDirect(String roll) throws ParserException {
+    LookupEntry entry;
+
+    if (roll == null) {
+      return (null);
+    }
+
+    entry = getStandardLookup(roll);
+
+    return entry;
+  }
+
   private LookupEntry getStandardLookup(String roll) throws ParserException {
     int tableResult = 0;
     LookupEntry retEntry = null;

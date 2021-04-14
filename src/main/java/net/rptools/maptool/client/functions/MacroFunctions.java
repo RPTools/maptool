@@ -172,7 +172,7 @@ public class MacroFunctions extends AbstractFunction {
       props.addProperty("minWidth", mbp.getMinWidth());
       props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
       props.addProperty("command", mbp.getCommand());
-      props.addProperty("maxWith", mbp.getMaxWidth());
+      props.addProperty("maxWidth", mbp.getMaxWidth());
       props.addProperty("tooltip", mbp.getToolTip() == null ? "" : mbp.getToolTip());
       props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
