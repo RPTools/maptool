@@ -17,7 +17,6 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
-apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -97,10 +96,6 @@ spotless {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.5"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
 
 // org.openjfx.javafxplugin
 javafx {
