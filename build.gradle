@@ -429,6 +429,7 @@ task copyPackageExtras(type: Copy) {
     from('package/license/')
     into('build/libs/')
     include('*')
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 javadoc {
