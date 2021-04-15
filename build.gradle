@@ -6,7 +6,7 @@
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.0.1"
-    id "com.diffplug.gradle.spotless" version "3.28.0"
+    id "com.diffplug.gradle.spotless" version "5.12.1"
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.runtime' version '1.11.4'
 }
