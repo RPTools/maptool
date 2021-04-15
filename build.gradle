@@ -376,6 +376,7 @@ task uberJar(type: Jar) {
 
     baseName project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     manifest {
         attributes 'Implementation-Title': project.name + developerRelease,
