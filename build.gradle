@@ -6,7 +6,7 @@
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.0.1"
-    id "com.diffplug.gradle.spotless" version "3.28.0"
+    id "com.diffplug.spotless" version "5.0.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.runtime' version '1.11.4'
 }
@@ -16,13 +16,12 @@ apply plugin: 'base'
 apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'com.diffplug.gradle.spotless'
-apply plugin: 'jacoco'
+apply plugin: 'com.diffplug.spotless'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = 16
+targetCompatibility = 16
 
 
 // Used by gradle assemble & run tasks
@@ -97,10 +96,6 @@ spotless {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.5"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
 
 // org.openjfx.javafxplugin
 javafx {
@@ -111,7 +106,7 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -142,7 +137,6 @@ runtime {
                'jdk.dynalink',
                'jdk.jfr',
                'jdk.jsobject',
-               'jdk.scripting.nashorn',
                'jdk.unsupported',
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
@@ -154,7 +148,7 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -231,7 +225,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
@@ -301,9 +295,11 @@ dependencies {
     implementation 'com.withay:withay-util:1.0'
     implementation 'xmlpull:xmlpull:1.1.3.1'
     implementation 'xpp3:xpp3_min:1.1.4c'
-    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.16'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+    implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
+    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.0.0.2'
 
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
