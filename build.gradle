@@ -39,6 +39,7 @@ ext {
     ashleyVersion = '1.7.3'
     aiVersion = '1.8.2'
     gdxControllersVersion = '2.1.0'
+    shapedrawerVersion = '2.4.0'
 
     // Get tag and commit info from Git to use for version numbering
     def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
@@ -376,6 +377,7 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
     implementation 'com.crashinvaders.vfx:gdx-vfx-core:0.5.0'
     implementation 'com.crashinvaders.vfx:gdx-vfx-effects:0.5.0'
+    implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
 }
 
 

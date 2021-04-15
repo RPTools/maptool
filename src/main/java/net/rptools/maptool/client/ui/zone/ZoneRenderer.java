@@ -3774,6 +3774,10 @@ public class ZoneRenderer extends JComponent
     visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
   }
 
+  protected Map<Token, Set<Token>> getTokenStackMap() {
+    return tokenStackMap;
+  }
+
   /**
    * Returns whether the token should be clipped, depending on its bounds, the view, and the visible
    * screen area.
