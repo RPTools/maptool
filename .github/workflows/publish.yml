@@ -31,17 +31,17 @@ jobs:
       with:
         distribution: 'adopt'
         java-version: ${{ matrix.java }}
-    - name: Cache Gradle
-      uses: actions/cache@v1
+    #- name: Cache Gradle
+      #uses: actions/cache@v1
       # Cache only seems to work on ubuntu right now...
-      if: matrix.os == 'ubuntu-latest'
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+      #if: matrix.os == 'ubuntu-latest'
+      #with:
+        #path: ~/.gradle/caches
+        #key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        #restore-keys: |
+          #${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew jpackage --stacktrace
+      run: ./gradlew jpackage --stacktrace --debug  
     - name: Copy the RPM to the location required to build the ArchLinux package
       if: matrix.os == 'ubuntu-latest'
       run: cp releases/maptool-*.rpm package/archlinux/maptool/maptool.rpm
