@@ -37,8 +37,8 @@ jobs:
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        #restore-keys: |
+          #${{ runner.os }}-gradle-
     - name: Build with Gradle
       run: ./gradlew jpackage --stacktrace
     - name: Copy the RPM to the location required to build the ArchLinux package
