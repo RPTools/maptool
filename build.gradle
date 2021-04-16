@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.0.1"
     id "com.diffplug.spotless" version "5.0.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.11.4'
+    id 'org.beryx.runtime' version '1.12.4'
 }
 
 // Apply the java plugin to add support for Java
@@ -99,7 +99,7 @@ spotless {
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '14'
+    version = '16'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
@@ -157,7 +157,7 @@ runtime {
                 //'--temp', 'releases/temp-files',
                 '--verbose',
                 '--description', project.description,
-                '--copyright', 'Copyright 2000-2020 RPTools.net',
+                '--copyright', 'Copyright 2000-2021 RPTools.net',
                 '--license-file', 'package/license/COPYING.AFFERO',
                 '--app-version', appSemVer,
                 '--vendor', vendor,
@@ -177,7 +177,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_windows_hotspot_14.0.2_12.zip');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_windows_hotspot_16_36.zip');
             }
         }
 
@@ -188,14 +188,14 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_mac_hotspot_14.0.2_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
             }
         }
 
         if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
             resourceDir = file('package/linux')
-            imageOptions += ['--icon', project.name + developerRelease + '.png']
+            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
                     '--linux-menu-group', 'Game',
                     '--linux-shortcut'
@@ -213,7 +213,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_linux_hotspot_16_36.tar.gz');
             }
         }
     }
@@ -376,6 +376,7 @@ task uberJar(type: Jar) {
 
     baseName project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     manifest {
         attributes 'Implementation-Title': project.name + developerRelease,
@@ -429,6 +430,7 @@ task copyPackageExtras(type: Copy) {
     from('package/license/')
     into('build/libs/')
     include('*')
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 javadoc {
