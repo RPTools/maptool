@@ -207,11 +207,9 @@ public class TokenLocationFunctions extends AbstractFunction {
         Grid grid = toZone.getGrid();
 
         ZonePoint zp = grid.convert(new CellPoint(x, y));
-        x = zp.x;
-        y = zp.y;
 
-        token.setX(x);
-        token.setY(y);
+        token.setX(zp.x);
+        token.setY(zp.y);
         token.setZOrder(z);
         MapTool.serverCommand().putToken(toZone.getId(), token);
         MapTool.serverCommand().removeToken(fromZone.getId(), token.getId());

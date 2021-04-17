@@ -29,6 +29,7 @@ targetCompatibility = 14
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss8M"]
 def appSemVer = ""
+def winUpgradeUUID = UUID.randomUUID().toString();
 
 // Custom properties
 ext {
@@ -110,7 +111,7 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor, "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -170,7 +171,7 @@ runtime {
         ]
 
         if (osdetector.os.is('windows')) {
-            println "Setting Windows installer options"
+            println "Setting Windows installer options with upgrade uuid = " + winUpgradeUUID
             resourceDir = file('package/windows')
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
@@ -179,7 +180,7 @@ runtime {
                     '--win-shortcut',
                     '--win-menu',
                     '--win-menu-group', vendor,
-                    '--win-upgrade-uuid', 'e58a0cbe-ca04-11ea-87d0-0242ac130003'
+                    '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
                 jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_windows_hotspot_14.0.2_12.zip');
