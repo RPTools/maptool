@@ -208,6 +208,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxManager.resize(width, height);
         backBuffer.initialize(width, height);
 
+
         updateCam();
 
     }
@@ -262,6 +263,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
+        //this happens sometimes when starting with ide (non-debug)
+        if(batch.isDrawing())
+            batch.end();
         batch.begin();
 
         if (zone == null || !renderZone)
@@ -1137,6 +1141,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void fillViewportWith(Sprite fill) {
+
+
         var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
         startX = (int) (startX / fill.getWidth()) * fill.getWidth() - fill.getWidth();
         var endX = cam.position.x + cam.viewportWidth / 2 * zoom;
@@ -1144,11 +1150,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         startY = (int) (startY / fill.getHeight()) * fill.getHeight() - fill.getHeight();
         var endY = (cam.position.y + cam.viewportHeight / 2 * zoom);
 
+        tmpTile.setRegion(new TextureRegion(fill.getTexture()));
+        tmpTile.draw(batch, startX, startY, endX - startX, endY - startY);
+
+ /*
         for (var i = startX; i < endX; i += fill.getWidth())
             for (var j = startY; j < endY; j += fill.getHeight()) {
                 fill.setPosition(i, j);
                 fill.draw(batch);
-            }
+            } */
     }
 
     private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
