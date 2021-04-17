@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
 import com.crashinvaders.vfx.effects.FxaaEffect;
@@ -49,13 +50,13 @@ import java.util.*;
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
 /**
- * Done:
- * - Board
- * - Grids
- * <p>
+ * The coordinates in the model are y-down, x-left.
+ * The world coordinates are y-up, x-left. I moved the world to the 4th quadrant of the
+ * coordinate system. So if you would draw a token t awt at (x,y) you have to draw it at (x, -y - t.width)
+ *
  * Bugs:
  * - y offset of VerticalHexgrid is wrong
- * - ismetric mode for token does't work
+ * - Imageborders are not rotated
  */
 
 
@@ -66,6 +67,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private static GdxRenderer _instance;
     private final Map<MD5Key, Sprite> sprites = new HashMap<>();
     private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
+    private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
+
     //renderFog
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
     private boolean flushFog = true;
@@ -73,7 +76,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Area visibleScreenArea;
     private Area exposedFogArea;
     private PlayerView lastView;
-    private List<ItemRenderer> itemRenderList;
+    private List<ItemRenderer> itemRenderList = new LinkedList<>();
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
@@ -93,14 +96,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int width;
     private int height;
     private BitmapFont font;
-    private GlyphLayout glyphLayout;
+    private GlyphLayout glyphLayout = new GlyphLayout();
     private CodeTimer timer;
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
     private VfxFrameBuffer backBuffer;
     private Integer fogX;
     private Integer fogY;
-    private com.badlogic.gdx.assets.AssetManager manager;
+    private com.badlogic.gdx.assets.AssetManager manager = new com.badlogic.gdx.assets.AssetManager();
     private TextureAtlas atlas;
     private NinePatch grayLabel;
     private NinePatch blueLabel;
@@ -109,19 +112,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private ShapeDrawer drawer;
 
     //temorary objects. Stored here to avoid garbage collection;
-    private Vector3 tmpWorldCoord;
-    private Vector3 tmpScreenCoord;
-    private Color tmpColor;
-    private float[] floatsFromArea;
-    private FloatArray tmpFloat;
-    private Vector2 tmpVectorOut;
-    private Vector2 tmpVector;
-    private Vector2 tmpVector0;
-    private Vector2 tmpVector1;
-    private Vector2 tmpVector2;
-    private Vector2 tmpVector3;
+    private Vector3 tmpWorldCoord = new Vector3();
+    private Vector3 tmpScreenCoord = new Vector3();
+    private Color tmpColor = new Color();
+    private float[] floatsFromArea = new float[6];
+    private FloatArray tmpFloat = new FloatArray();
+    private Vector2 tmpVector = new Vector2();
+    private Vector2 tmpVectorOut = new Vector2();
+    private Vector2 tmpVector0 = new Vector2();
+    private Vector2 tmpVector1 = new Vector2();
+    private Vector2 tmpVector2 = new Vector2();
+    private Vector2 tmpVector3 = new Vector2();
     private Matrix4 tmpMatrix = new Matrix4();
-    private Area tmpArea;
+    private Area tmpArea = new Area();
     private TiledDrawable tmpTile = new TiledDrawable();
 
 
@@ -137,8 +140,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
-        manager = new com.badlogic.gdx.assets.AssetManager();
-
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
 
@@ -150,10 +151,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         batch = new PolygonSpriteBatch();
         font = new BitmapFont();
-        glyphLayout = new GlyphLayout();
+
         backBuffer = new VfxFrameBuffer(Pixmap.Format.RGBA8888);
         backBuffer.initialize(width, height);
 
+        //TODO: Add it to the texture atlas
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.drawPixel(0, 0);
@@ -162,28 +164,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         TextureRegion region = new TextureRegion(onePixel, 0, 0, 1, 1);
         drawer = new ShapeDrawer(batch, region);
 
-
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
         vfxEffect = new FxaaEffect();
         //vfxManager.addEffect(vfxEffect);
 
-        tmpWorldCoord = new Vector3();
-        tmpScreenCoord = new Vector3();
-        tmpColor = new Color();
-        tmpFloat = new FloatArray();
-        floatsFromArea = new float[6];
-        tmpVector = new Vector2();
-        tmpVector0 = new Vector2();
-        tmpVector1 = new Vector2();
-        tmpVector2 = new Vector2();
-        tmpVector3 = new Vector2();
-        tmpVectorOut = new Vector2();
-        tmpArea = new Area();
-
         backBuffer.addRenderer(new VfxFrameBuffer.BatchRendererAdapter(batch));
-
-        itemRenderList = new LinkedList<>();
-
         initialized = true;
 
         loadAssets();
@@ -258,10 +243,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void doRendering() {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        ScreenUtils.clear(Color.CLEAR);
+        batch.enableBlending();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         //this happens sometimes when starting with ide (non-debug)
         if(batch.isDrawing())
@@ -281,12 +265,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         PlayerView playerView = zoneRenderer.getPlayerView();
         timer.stop("paintComponent:createView");
 
-        batch.setProjectionMatrix(cam.combined);
+        setProjectionMatrix(cam.combined);
 
         renderZone(playerView);
 
 
-        batch.setProjectionMatrix(hudCam.combined);
+        setProjectionMatrix(hudCam.combined);
 
         if (zoneRenderer.isLoading())
             drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2, height / 2);
@@ -524,10 +508,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             // will be
             // visible.
 
-            batch.setProjectionMatrix(hudCam.combined);
+            setProjectionMatrix(hudCam.combined);
             timer.start("token name/labels");
             renderRenderables();
             timer.stop("token name/labels");
+            setProjectionMatrix(cam.combined);
         }
 
         // if (zone.visionType ...)
@@ -655,10 +640,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         //  if (flushFog || cacheNotValid)
         {
             backBuffer.begin();
-            Gdx.gl.glClearColor(0, 0, 0, 0);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            ScreenUtils.clear(Color.CLEAR);
             batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
-            batch.setProjectionMatrix(cam.combined);
+            setProjectionMatrix(cam.combined);
 
             timer.start("renderFog-allocateBufferedImage");
             timer.stop("renderFog-allocateBufferedImage");
@@ -675,9 +659,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             batch.setColor(Color.WHITE);
             var color = fog.getColor();
             fog.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
-            batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
             fillViewportWith(fog);
-            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
             timer.start("renderFog-visibleArea");
             Area visibleArea = zoneRenderer.getZoneView().getVisibleArea(view);
@@ -755,35 +737,42 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("renderFogArea");
 
             flushFog = false;
-
+            createScreenShot("fog");
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             backBuffer.end();
 
         }
 
-        batch.setProjectionMatrix(hudCam.combined);
+        setProjectionMatrix(hudCam.combined);
         batch.setColor(Color.WHITE);
         batch.draw(backBuffer.getTexture(), 0, 0, width, height, 0, 0,
                 width, height, false, true);
 
-        batch.setProjectionMatrix(cam.combined);
+        setProjectionMatrix(cam.combined);
         timer.stop("renderFog");
+    }
+
+    private void setProjectionMatrix(Matrix4 matrix) {
+        batch.setProjectionMatrix(matrix);
+        drawer.update();
     }
 
     private void renderFogArea(Area softFog, Area visibleArea) {
         if (zoneRenderer.getZoneView().isUsingVision()) {
             if (visibleArea != null && !visibleArea.isEmpty()) {
-                //shape.setColor(Color.BLUE);
                 drawer.setColor(0, 0, 0, AppPreferences.getFogOverlayOpacity() / 255.0f);
 
                 // Fill in the exposed area
                 fill(softFog);
 
+                //batch.setColor(Color.CLEAR);
                 drawer.setColor(Color.CLEAR);
 
                 fill(visibleArea);
             } else {
                 drawer.setColor(0, 0, 0, 80 / 255.0f);
                 fill(softFog);
+                drawer.setColor(Color.WHITE);
             }
         } else {
             fill(softFog);
@@ -849,8 +838,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return;
 
         backBuffer.begin();
-        Gdx.gl.glClearColor(0, 0, 0, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        ScreenUtils.clear(Color.CLEAR);
+        setProjectionMatrix(cam.combined);
+        batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
+        drawer.update();
 
         timer.start("lights-2");
         var alpha = AppPreferences.getLightOverlayOpacity() / 255.0f;
@@ -890,13 +881,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             fill(brightArea);
         }
         timer.stop("lights-4");
+        createScreenShot("light");
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         backBuffer.end();
 
-        batch.setProjectionMatrix(hudCam.combined);
+        setProjectionMatrix(hudCam.combined);
         batch.draw(backBuffer.getTexture(), 0, 0, width, height, 0, 0,
                 width, height, false, true);
 
-        batch.setProjectionMatrix(cam.combined);
+        setProjectionMatrix(cam.combined);
     }
 
     private void renderGrid(PlayerView view) {
@@ -1150,9 +1143,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         startY = (int) (startY / fill.getHeight()) * fill.getHeight() - fill.getHeight();
         var endY = (cam.position.y + cam.viewportHeight / 2 * zoom);
 
+        batch.setColor(fill.getColor());
         tmpTile.setRegion(new TextureRegion(fill.getTexture()));
         tmpTile.draw(batch, startX, startY, endX - startX, endY - startY);
-
+        batch.setColor(Color.WHITE);
  /*
         for (var i = startX; i < endX; i += fill.getWidth())
             for (var j = startY; j < endY; j += fill.getHeight()) {
@@ -1657,7 +1651,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("tokenlist-12");
         }
 
-/*
         timer.start("tokenlist-13");
 
         var tokenStackMap = zoneRenderer.getTokenStackMap();
@@ -1667,22 +1660,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
             if (tokenStackMap != null) { // FIXME Needed to prevent NPE but how can it be null?
                 for (Token token : tokenStackMap.keySet()) {
-                    Area bounds = zoneRenderer.getTokenBounds(token);
-                    if (bounds == null) {
-                        // token is offscreen
-                        continue;
-                    }
-                    BufferedImage stackImage = AppStyle.stackImage;
-                    clippedG.drawImage(
+                    var tokenRectangle = token.getBounds(zone);
+                    var stackImage = fetch("stack");
+                    batch.draw(
                             stackImage,
-                            bounds.getBounds().x + bounds.getBounds().width - stackImage.getWidth() + 2,
-                            bounds.getBounds().y - 2,
-                            null);
+                            tokenRectangle.x + tokenRectangle.width - stackImage.getRegionWidth() + 2,
+                            -tokenRectangle.y - stackImage.getRegionHeight() + 2);
                 }
             }
         }
         timer.stop("tokenlist-13");
- */
     }
 
     private class LabelRenderer implements ItemRenderer
@@ -1753,20 +1740,32 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
     }
 
+    private TextureRegion fetch(String regionName) {
+        var region = fetchedRegions.get(regionName);
+        if(region != null)
+            return  region;
+
+        region = atlas.findRegion(regionName);
+        fetchedRegions.put(regionName, region);
+
+        return region;
+    }
 
     private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
         var imagePath = border.getImagePath();
         var index = imagePath.indexOf("border/");
         var bordername = imagePath.substring(index);
 
-        var topRight = atlas.findRegion(bordername + "/tr");
-        var top = atlas.findRegion(bordername + "/top");
-        var topLeft = atlas.findRegion(bordername + "/tl");
-        var left = atlas.findRegion(bordername + "/left");
-        var bottomLeft = atlas.findRegion(bordername + "/bl");
-        var bottom = atlas.findRegion(bordername + "/bottom");
-        var bottomRight = atlas.findRegion(bordername + "/br");
-        var right = atlas.findRegion(bordername + "/right");
+
+
+        var topRight = fetch(bordername + "/tr");
+        var top = fetch(bordername + "/top");
+        var topLeft = fetch(bordername + "/tl");
+        var left = fetch(bordername + "/left");
+        var bottomLeft = fetch(bordername + "/bl");
+        var bottom = fetch(bordername + "/bottom");
+        var bottomRight = fetch(bordername + "/br");
+        var right = fetch(bordername + "/right");
 
 
         //x,y is bottom left of the rectangle
@@ -1784,22 +1783,22 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         // Draw Corners
 
 
-        batch.draw(bottomLeft, x + leftMargin - bottomLeft.originalWidth, y + topMargin - bottomLeft.originalHeight);
-        batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.originalHeight);
-        batch.draw(topLeft, x + leftMargin - topLeft.originalWidth, y + height - bottomMargin);
+        batch.draw(bottomLeft, x + leftMargin - bottomLeft.getRegionWidth(), y + topMargin - bottomLeft.getRegionHeight());
+        batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.getRegionHeight());
+        batch.draw(topLeft, x + leftMargin - topLeft.getRegionWidth(), y + height - bottomMargin);
         batch.draw(topRight, x + width - rightMargin, y + height - bottomMargin);
 
         tmpTile.setRegion(top);
-        tmpTile.draw(batch, x + leftMargin, y + height - bottomMargin, width - leftMargin - rightMargin, top.originalHeight);
+        tmpTile.draw(batch, x + leftMargin, y + height - bottomMargin, width - leftMargin - rightMargin, top.getRegionHeight());
 
         tmpTile.setRegion(bottom);
-        tmpTile.draw(batch, x + leftMargin, y + topMargin - bottom.originalHeight, width - leftMargin - rightMargin, bottom.originalHeight);
+        tmpTile.draw(batch, x + leftMargin, y + topMargin - bottom.getRegionHeight(), width - leftMargin - rightMargin, bottom.getRegionHeight());
 
         tmpTile.setRegion(left);
-        tmpTile.draw(batch, x + leftMargin - left.originalWidth, y + topMargin, left.originalWidth, height - topMargin - bottomMargin);
+        tmpTile.draw(batch, x + leftMargin - left.getRegionWidth(), y + topMargin, left.getRegionWidth(), height - topMargin - bottomMargin);
 
         tmpTile.setRegion(right);
-        tmpTile.draw(batch, x + width - rightMargin, y + topMargin, right.originalWidth, height - topMargin - bottomMargin);
+        tmpTile.draw(batch, x + width - rightMargin, y + topMargin, right.getRegionWidth(), height - topMargin - bottomMargin);
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {
@@ -1853,10 +1852,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void paintClipped(Sprite image, Area bounds, Area clip) {
 
         backBuffer.begin();
-        Gdx.gl.glClearColor(0, 0, 0, 0);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        ScreenUtils.clear(Color.CLEAR);
 
-        batch.setProjectionMatrix(cam.combined);
+        setProjectionMatrix(cam.combined);
 
         image.draw(batch);
 
@@ -1867,13 +1865,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpArea.subtract(clip);
         fill(tmpArea);
 
-    /*    var handle = Gdx.files.absolute("screenshot.png");
-        if (!handle.exists()) {
-            batch.flush();
-            var pix = Pixmap.createFromFrameBuffer(0, 0, width, height);
-            PixmapIO.writePNG(handle, pix, DEFAULT_COMPRESSION, true);
-            pix.dispose();
-        }*/
         backBuffer.end();
 
         tmpWorldCoord.x = image.getX();
@@ -1897,6 +1888,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     public void setJfxRenderer(NativeRenderer renderer) {
         jfxRenderer = renderer;
+    }
+
+    private void createScreenShot(String fileName) {
+        var handle = Gdx.files.absolute(fileName + ".png");
+        if (!handle.exists()) {
+            batch.flush();
+            var pix = Pixmap.createFromFrameBuffer(0, 0, width, height);
+            PixmapIO.writePNG(handle, pix, DEFAULT_COMPRESSION, true);
+            pix.dispose();
+        }
     }
 
     private void disposeZoneResources() {
@@ -2108,6 +2109,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return;
         }
         if (evt == Zone.Event.TOKEN_CHANGED) {
+            updateVisibleArea();
             return;
         }
         /*
