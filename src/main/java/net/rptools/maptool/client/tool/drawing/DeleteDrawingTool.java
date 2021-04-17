@@ -100,7 +100,7 @@ public class DeleteDrawingTool extends DefaultTool
     super.mouseClicked(e);
     var zone = renderer.getZone();
 
-    var multiSelect = e.isControlDown();
+    var multiSelect = e.isShiftDown();
 
     if (!multiSelect) selectedDrawings.clear();
 
