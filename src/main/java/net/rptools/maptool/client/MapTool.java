@@ -1158,13 +1158,11 @@ public class MapTool {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
-    String username = System.getProperty("user.name", "Player");
-
     // Connect to server
     MapTool.createConnection(
         "localhost",
         config.getPort(),
-        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
+        new LocalPlayer("Player", Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
