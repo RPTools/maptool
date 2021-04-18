@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JLabel;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
@@ -258,11 +259,7 @@ public class ButtonGroup extends AbstractButtonGroup {
       DropTargetDropEvent event, MacroButtonProperties oldProperties, TransferData oldData) {
     // which modifier keys were held (1024 = none, 1088 = shift, 1152 = ctrl, 1536 = alt)
     if ((oldData.transferModifiers == 1152)
-        ^ (System.getProperty("os.name").toLowerCase().contains("mac")
-            && oldData.transferModifiers == 1536)) {
-      // second check is a hack, admittedly, and there is
-      // most likely a better way to check if you're on mac
-
+        ^ (AppUtil.MAC_OS_X && oldData.transferModifiers == 1536)) {
       // explicit copy
       event.acceptDrop(DnDConstants.ACTION_COPY);
     } else if (oldData.transferModifiers == 1088) {
