@@ -378,6 +378,8 @@ dependencies {
     implementation 'com.crashinvaders.vfx:gdx-vfx-core:0.5.0'
     implementation 'com.crashinvaders.vfx:gdx-vfx-effects:0.5.0'
     implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 }
 
 

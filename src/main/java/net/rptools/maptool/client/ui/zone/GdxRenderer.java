@@ -2,9 +2,15 @@ package net.rptools.maptool.client.ui.zone;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -29,6 +35,7 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -44,8 +51,11 @@ import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.*;
+import java.text.NumberFormat;
 import java.util.*;
+import java.util.List;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
@@ -71,6 +81,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     //renderFog
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
+    private final String FONT_NORMAL = "normalFont.ttf";
+    private final String FONT_DISTANCE = "distanceFont.ttf";
+
     private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
@@ -95,7 +108,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private boolean initialized = false;
     private int width;
     private int height;
-    private BitmapFont font;
+    private BitmapFont normalFont;
+    private BitmapFont distanceFont;
+    private float distanceFontScale = 0;
+
     private GlyphLayout glyphLayout = new GlyphLayout();
     private CodeTimer timer;
     private VfxManager vfxManager;
@@ -126,6 +142,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Matrix4 tmpMatrix = new Matrix4();
     private Area tmpArea = new Area();
     private TiledDrawable tmpTile = new TiledDrawable();
+    private float pointsPerBezier = 10f;
+    private boolean showAstarDebugging;
 
 
     public GdxRenderer() {
@@ -140,6 +158,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
+        var resolver = new InternalFileHandleResolver();
+        manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+        manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
 
@@ -150,7 +172,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudCam.setToOrtho(false);
 
         batch = new PolygonSpriteBatch();
-        font = new BitmapFont();
 
         backBuffer = new VfxFrameBuffer(Pixmap.Format.RGBA8888);
         backBuffer.initialize(width, height);
@@ -159,13 +180,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.drawPixel(0, 0);
-        onePixel = new Texture(pixmap); //remember to dispose of later
+        onePixel = new Texture(pixmap);
         pixmap.dispose();
         TextureRegion region = new TextureRegion(onePixel, 0, 0, 1, 1);
         drawer = new ShapeDrawer(batch, region);
 
         vfxManager = new VfxManager(Pixmap.Format.RGBA8888);
-        vfxEffect = new FxaaEffect();
+        //vfxEffect = new FxaaEffect();
         //vfxManager.addEffect(vfxEffect);
 
         backBuffer.addRenderer(new VfxFrameBuffer.BatchRendererAdapter(batch));
@@ -179,7 +200,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void dispose() {
         manager.dispose();
         batch.dispose();
-        font.dispose();
         vfxManager.dispose();
         vfxEffect.dispose();
         disposeZoneResources();
@@ -228,6 +248,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (darkGrayLabel == null)
             darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
 
+        if (normalFont == null)
+            normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
+
+        ensureCorrectDistanceFont();
 
         vfxManager.cleanUpBuffers();
         vfxManager.beginInputCapture();
@@ -238,8 +262,35 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         copyFramebufferToJfx();
     }
 
+    private void ensureCorrectDistanceFont() {
+        if(zone == null)
+            return;
+
+        var fontScale = (float) zone.getGrid().getSize() / 50; // Font size of 12 at grid size 50 is default
+
+        if(fontScale == this.distanceFontScale && distanceFont != null)
+            return;
+
+        if(distanceFont != null)
+            manager.unload(FONT_DISTANCE);
+
+        var fontParams = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+        fontParams.fontFileName =  "net/rptools/maptool/client/fonts/OpenSans-Bold.ttf";
+        fontParams.fontParameters.size = (int) (12 * fontScale);
+        manager.load(FONT_DISTANCE, BitmapFont.class, fontParams);
+        manager.finishLoading();
+        distanceFont = manager.get(FONT_DISTANCE, BitmapFont.class);
+        distanceFontScale = fontScale;
+    }
+
+
     private void loadAssets() {
         manager.load(ATLAS, TextureAtlas.class);
+
+        var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
+        mySmallFont.fontFileName =  "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
+        mySmallFont.fontParameters.size = 12;
+        manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
     }
 
     private void doRendering() {
@@ -323,7 +374,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     public void invalidateCurrentViewCache() {
         flushFog = true;
-        //   renderedLightMap = null;
 
         updateVisibleArea();
         lastView = null;
@@ -737,7 +787,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             timer.stop("renderFogArea");
 
             flushFog = false;
-            createScreenShot("fog");
+            //createScreenShot("fog");
             batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             backBuffer.end();
 
@@ -810,6 +860,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void showBlockedMoves(PlayerView view, Set<ZoneRenderer.SelectionSet> unOwnedMovementSet) {
+        //TODO: implement
     }
 
     private void renderAuras(PlayerView view) {
@@ -849,8 +900,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         timer.start("lights-3");
         for (DrawableLight light : zoneRenderer.getZoneView().getDrawableLights(view)) {
-            // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
-
             var drawablePaint = light.getPaint();
 
             if (light.getType() != LightSource.Type.NORMAL || drawablePaint == null)
@@ -881,7 +930,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             fill(brightArea);
         }
         timer.stop("lights-4");
-        createScreenShot("light");
+        //createScreenShot("light");
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         backBuffer.end();
 
@@ -1055,6 +1104,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
+        // TODO: implement
     }
 
     public void drawString(String text, float centerX, float centerY, Color foreground) {
@@ -1080,10 +1130,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (text == null) text = "";
 
 
-        glyphLayout.setText(font, text);
+        glyphLayout.setText(normalFont, text);
         var strWidth = glyphLayout.width;
 
-        var fontHeight = font.getLineHeight();
+        var fontHeight = normalFont.getLineHeight();
 
         var width = strWidth + BOX_PADDINGX * 2;
         var height = fontHeight + BOX_PADDINGY * 2;
@@ -1109,10 +1159,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         // Renderer message
 
         var textX = x + BOX_PADDINGX;
-        var textY = y + height - BOX_PADDINGY - font.getAscent();
+        var textY = y + height - BOX_PADDINGY - normalFont.getAscent();
 
-        font.setColor(foreground);
-        font.draw(batch, text, textX, textY);
+        normalFont.setColor(foreground);
+        normalFont.draw(batch, text, textX, textY);
     }
 
     private void renderBoard() {
@@ -1405,8 +1455,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             timer.start("tokenlist-8");
 
-            // Facing ?
-            // TODO: Optimize this by doing it once per token per facing
+            // Facing
             if (token.hasFacing()) {
                 Token.TokenShape tokenType = token.getShape();
                 switch (tokenType) {
@@ -1496,7 +1545,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             int facing = token.getFacing();
                             while (facing < 0) {
                                 facing += 360;
-                            } // TODO: this should really be done in Token.setFacing() but I didn't want to take
+                            }
+                            // TODO: this should really be done in Token.setFacing() but I didn't want to take
                             // the chance
                             // of breaking something, so change this when it's safe to break stuff
                             facing %= 360;
@@ -1708,7 +1758,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Calculate image dimensions
 
-            float labelHeight = font.getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
+            float labelHeight = normalFont.getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
 
 
             java.awt.Rectangle r = token.getBounds(zone);
@@ -1802,8 +1852,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {
+        //TODO: Implement
     }
 
+    // FIXME: I don't like this hardwiring
     protected java.awt.Shape getFigureFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
@@ -1818,7 +1870,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
 
-    // TODO: I don't like this hardwiring
+    // FIXME: I don't like this hardwiring
     protected java.awt.Shape getCircleFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
@@ -1833,7 +1885,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
 
-    // TODO: I don't like this hardwiring
+    // FIXME: I don't like this hardwiring
     protected java.awt.Shape getSquareFacingArrow(int angle, int size) {
         int base = (int) (size * .75);
         int width = (int) (size * .35);
@@ -1883,7 +1935,253 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         batch.draw(backBuffer.getTexture(), x, y, w, h, (int) tmpScreenCoord.x, (int) tmpScreenCoord.y, (int) wsrc, (int) hsrc, false, true);
     }
 
-    private void renderPath(Path lastPath, TokenFootprint footprint) {
+    private void renderPath(Path path, TokenFootprint footprint) {
+        if (path == null) {
+            return;
+        }
+
+
+        if (path.getCellPath().isEmpty()) {
+            return;
+        }
+        Grid grid = zone.getGrid();
+
+        // log.info("Rendering path..." + System.currentTimeMillis());
+
+        java.awt.Rectangle footprintBounds = footprint.getBounds(grid);
+        if (path.getCellPath().get(0) instanceof CellPoint) {
+            timer.start("renderPath-1");
+            CellPoint previousPoint = null;
+            Point previousHalfPoint = null;
+
+            Path<CellPoint> pathCP = (Path<CellPoint>) path;
+            List<CellPoint> cellPath = pathCP.getCellPath();
+
+            Set<CellPoint> pathSet = new HashSet<CellPoint>();
+            List<ZonePoint> waypointList = new LinkedList<ZonePoint>();
+            for (CellPoint p : cellPath) {
+                pathSet.addAll(footprint.getOccupiedCells(p));
+
+                if (pathCP.isWaypoint(p) && previousPoint != null) {
+                    ZonePoint zp = grid.convert(p);
+                    zp.x += footprintBounds.width / 2;
+                    zp.y += footprintBounds.height / 2;
+                    waypointList.add(zp);
+                }
+                previousPoint = p;
+            }
+
+            // Don't show the final path point as a waypoint, it's redundant, and ugly
+            if (waypointList.size() > 0) {
+                waypointList.remove(waypointList.size() - 1);
+            }
+            timer.stop("renderPath-1");
+            // log.info("pathSet size: " + pathSet.size());
+
+            timer.start("renderPath-2");
+            Dimension cellOffset = zone.getGrid().getCellOffset();
+            for (CellPoint p : pathSet) {
+                ZonePoint zp = grid.convert(p);
+                zp.x += grid.getCellWidth() / 2 + cellOffset.width;
+                zp.y += grid.getCellHeight() / 2 + cellOffset.height;
+                highlightCell(zp, getCellHighlight(), 1.0f);
+            }
+            if (AppState.getShowMovementMeasurements()) {
+                double cellAdj = grid.isHex() ? 2.5 : 2;
+                for (CellPoint p : cellPath) {
+                    ZonePoint zp = grid.convert(p);
+                    zp.x += grid.getCellWidth() / cellAdj + cellOffset.width;
+                    zp.y += grid.getCellHeight() / cellAdj + cellOffset.height;
+                    addDistanceText(
+                            zp, 1.0f, (float)p.getDistanceTraveled(zone), (float)p.getDistanceTraveledWithoutTerrain());
+                }
+            }
+            int w = 0;
+            for (ZonePoint p : waypointList) {
+                ZonePoint zp = new ZonePoint(p.x + cellOffset.width, p.y + cellOffset.height);
+                highlightCell(zp, fetch("redDot"), .333f);
+            }
+
+            // Line path
+            if (grid.getCapabilities().isPathLineSupported()) {
+                ZonePoint lineOffset;
+                if (grid.isHex()) {
+                    lineOffset = new ZonePoint(0, 0);
+                } else {
+                    lineOffset =
+                            new ZonePoint(
+                                    footprintBounds.x + footprintBounds.width / 2 - grid.getOffsetX(),
+                                    footprintBounds.y + footprintBounds.height / 2 - grid.getOffsetY());
+                }
+
+                int xOffset = (int) (lineOffset.x);
+                int yOffset = (int) (lineOffset.y);
+
+                drawer.setColor(Color.BLUE);
+
+                previousPoint = null;
+                tmpFloat.clear();
+                for (CellPoint p : cellPath) {
+                    if (previousPoint != null) {
+                        ZonePoint ozp = grid.convert(previousPoint);
+                        int ox = ozp.x;
+                        int oy = ozp.y;
+
+                        ZonePoint dzp = grid.convert(p);
+                        int dx = dzp.x;
+                        int dy = dzp.y;
+
+
+                        int halfx = ((ox + dx) / 2);
+                        int halfy = ((oy + dy) / 2);
+                        Point halfPoint = new Point(halfx, halfy);
+
+                        if (previousHalfPoint != null) {
+                            int x1 = previousHalfPoint.x + xOffset;
+                            int y1 = previousHalfPoint.y + yOffset;
+
+                            int x2 = ox + xOffset;
+                            int y2 = oy + yOffset;
+
+                            int xh = halfPoint.x + xOffset;
+                            int yh = halfPoint.y + yOffset;
+
+                            tmpVector0.set(x1, -y1);
+                            tmpVector1.set(x2, -y2);
+                            tmpVector2.set(xh, -yh);
+
+
+                            for (var i = 1; i <= pointsPerBezier; i++) {
+                                Bezier.quadratic(tmpVectorOut, i / pointsPerBezier, tmpVector0, tmpVector1, tmpVector2, tmpVector);
+                                tmpFloat.add(tmpVectorOut.x, tmpVectorOut.y);
+                            }
+                        }
+                        previousHalfPoint = halfPoint;
+                    }
+                    previousPoint = p;
+                }
+                drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, true);
+            }
+            drawer.setColor(Color.WHITE);
+            timer.stop("renderPath-2");
+        } else {
+            timer.start("renderPath-3");
+            // Zone point/gridless path
+
+            // Line
+            var highlight = tmpColor;
+            highlight.set(1,1,1,80/255f);
+            var highlightStroke = 9f;
+
+            ScreenPoint lastPoint = null;
+
+            Path<ZonePoint> pathZP = (Path<ZonePoint>) path;
+            List<ZonePoint> pathList = pathZP.getCellPath();
+            for (ZonePoint zp : pathList) {
+                if (lastPoint == null) {
+                    lastPoint =
+                            ScreenPoint.fromZonePointRnd(
+                                    zoneRenderer,
+                                    zp.x + (footprintBounds.width / 2) * footprint.getScale(),
+                                    zp.y + (footprintBounds.height / 2) * footprint.getScale());
+                    continue;
+                }
+                ScreenPoint nextPoint =
+                        ScreenPoint.fromZonePoint(
+                                zoneRenderer,
+                                zp.x + (footprintBounds.width / 2) * footprint.getScale(),
+                                zp.y + (footprintBounds.height / 2) * footprint.getScale());
+
+
+                drawer.line((float)lastPoint.x, -(float)lastPoint.y,
+                        (float)nextPoint.x, -(float)nextPoint.y, highlight, highlightStroke);
+
+                drawer.line((float)lastPoint.x, -(float)lastPoint.y,
+                        (float)nextPoint.x, -(float)nextPoint.y, Color.BLUE, drawer.getDefaultLineWidth());
+                lastPoint = nextPoint;
+            }
+
+            // Waypoints
+            boolean originPoint = true;
+            for (ZonePoint p : pathList) {
+                // Skip the first point (it's the path origin)
+                if (originPoint) {
+                    originPoint = false;
+                    continue;
+                }
+
+                // Skip the final point
+                if (p == pathList.get(pathList.size() - 1)) {
+                    continue;
+                }
+                p =
+                        new ZonePoint(
+                                 (p.x + (footprintBounds.width / 2)),
+                                 (p.y + (footprintBounds.height / 2)));
+                highlightCell(p, fetch("redDot"), .333f);
+            }
+            timer.stop("renderPath-3");
+        }
+    }
+
+    private TextureRegion getCellHighlight() {
+        if(zone.getGrid() instanceof SquareGrid)
+            return fetch("whiteBorder");
+        if(zone.getGrid() instanceof HexGrid)
+            return fetch("hexBorder");
+        if(zone.getGrid() instanceof IsometricGrid)
+            return fetch("isoBorder");
+
+        return null;
+    }
+
+    private void addDistanceText(ZonePoint point, float size, float distance, float distanceWithoutTerrain) {
+        if(distance == 0)
+            return;
+
+        Grid grid = zone.getGrid();
+        float cwidth = (float)grid.getCellWidth();
+        float cheight = (float)grid.getCellHeight();
+
+        float iwidth = cwidth * size;
+        float iheight = cheight * size;
+
+        var cellX = (point.x - iwidth / 2);
+        var cellY = (-point.y + iheight / 2) + distanceFont.getLineHeight();
+
+        // Draw distance for each cell
+        var textOffset = 7 * distanceFontScale; // 7 pixels at 100% zoom & grid size of 50
+
+        String distanceText = NumberFormat.getInstance().format(distance);
+        if (log.isDebugEnabled() || showAstarDebugging) {
+            distanceText += " (" + NumberFormat.getInstance().format(distanceWithoutTerrain) + ")";
+            //fontSize = (int) (fontSize * 0.75);
+        }
+
+        glyphLayout.setText(distanceFont, distanceText);
+
+        var textWidth = glyphLayout.width;
+
+        distanceFont.setColor(Color.BLACK);
+
+        // log.info("Text: [" + distanceText + "], width: " + textWidth + ", font size: " + fontSize +
+        // ", offset: " + textOffset + ", fontScale: " + fontScale+ ", getScale(): " + getScale());
+
+        distanceFont.draw(batch, distanceText, cellX + cwidth - textWidth - textOffset, cellY - cheight /*- textOffset*/);
+    }
+
+    private void highlightCell(ZonePoint zp, TextureRegion image, float size) {
+        Grid grid = zone.getGrid();
+        float cwidth = (float)grid.getCellWidth() * size;
+        float cheight = (float)grid.getCellHeight() * size;
+
+        float rotation = 0;
+        if(zone.getGrid() instanceof HexGridHorizontal)
+            rotation = 90;
+
+        batch.draw(image, zp.x - cwidth / 2, -zp.y - cheight / 2,
+                0, 0, cwidth, cheight,
+                1f, 1f, rotation);
     }
 
     public void setJfxRenderer(NativeRenderer renderer) {
@@ -2011,8 +2309,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void paintArea(Area area, boolean fill) {
         if (area == null || area.isEmpty())
             return;
-
-        var pointsPerBezier = 10.0f;
 
         tmpFloat.clear();
 
