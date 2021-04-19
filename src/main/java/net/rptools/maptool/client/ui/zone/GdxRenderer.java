@@ -33,8 +33,9 @@ import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
+import net.rptools.maptool.client.ui.token.*;
+import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.*;
@@ -53,9 +54,11 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Flow;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
@@ -859,7 +862,296 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.stop("labels-1");
     }
 
-    private void showBlockedMoves(PlayerView view, Set<ZoneRenderer.SelectionSet> unOwnedMovementSet) {
+    private void showBlockedMoves(PlayerView view, Set<ZoneRenderer.SelectionSet> movementSet) {
+       var selectionSetMap = zoneRenderer.getSelectionSetMap();
+        if (selectionSetMap.isEmpty()) {
+            return;
+        }
+
+        boolean clipInstalled = false;
+        for (ZoneRenderer.SelectionSet set : movementSet) {
+         Token keyToken = zone.getToken(set.getKeyToken());
+            if (keyToken == null) {
+                // It was removed ?
+                selectionSetMap.remove(set.getKeyToken());
+                continue;
+            }
+            // Hide the hidden layer
+            if (keyToken.getLayer() == Zone.Layer.GM && !view.isGMView()) {
+                continue;
+            }
+            ZoneWalker walker = set.getWalker();
+
+            for (GUID tokenGUID : set.getTokens()) {
+                Token token = zone.getToken(tokenGUID);
+
+                // Perhaps deleted?
+                if (token == null) {
+                    continue;
+                }
+
+                // Don't bother if it's not visible
+                if (!token.isVisible() && !view.isGMView()) {
+                    continue;
+                }
+
+                // ... or if it's visible only to the owner and that's not us!
+                if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+                    continue;
+                }
+
+                // ... or there are no lights/visibleScreen and you are not the owner or gm and there is fow
+                // or vision
+                if (!view.isGMView()
+                        && !AppUtil.playerOwns(token)
+                        && visibleScreenArea == null
+                        && zone.hasFog()
+                        && zoneRenderer.getZoneView().isUsingVision()) {
+                    continue;
+                }
+
+                // ... or if it doesn't have an image to display. (Hm, should still show *something*?)
+                Asset asset = AssetManager.getAsset(token.getImageAssetId());
+                if (asset == null) {
+                    continue;
+                }
+
+                // OPTIMIZE: combine this with the code in renderTokens()
+                java.awt.Rectangle footprintBounds = token.getBounds(zone);
+
+
+                // get token image, using image table if present
+                Sprite image = sprites.get(token.getImageAssetId());
+                if(image == null)
+                    continue;
+
+                // Vision visibility
+                boolean isOwner = view.isGMView() || AppUtil.playerOwns(token); // ||
+                // set.getPlayerId().equals(MapTool.getPlayer().getName());
+                if (!view.isGMView() && visibleScreenArea != null && !isOwner) {
+                    // FJE Um, why not just assign the clipping area at the top of the routine?
+                    //TODO: Path clipping
+                    if (!clipInstalled) {
+                        // Only show the part of the path that is visible
+                  //      Area visibleArea = new Area(g.getClipBounds());
+                  //      visibleArea.intersect(visibleScreenArea);
+
+                  //      g = (Graphics2D) g.create();
+                  //      g.setClip(new GeneralPath(visibleArea));
+
+                        clipInstalled = true;
+                        // System.out.println("Adding Clip: " + MapTool.getPlayer().getName());
+                    }
+                }
+               // Show path only on the key token on token layer that are visible to the owner or gm while
+                // fow and vision is on
+                if (token == keyToken && !token.isStamp()) {
+                    renderPath(
+                            walker != null ? walker.getPath() : set.getGridlessPath(),
+                            token.getFootprint(zone.getGrid()));
+                }
+
+                // Show current Blocked Movement directions for A*
+                if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
+                    Collection<AStarCellPoint> checkPoints = walker.getCheckedPoints();
+                    // Color currentColor = g.getColor();
+                    for (AStarCellPoint acp : checkPoints) {
+                        Set<Point2D> validMoves = acp.getValidMoves();
+
+                        for (Point2D point : validMoves) {
+                            ZonePoint zp = acp.offsetZonePoint(zoneRenderer.getZone().getGrid(), point.getX(), point.getY());
+                            double r = (zp.x - 1) * 45;
+                            showBlockedMoves(zp, r, AppStyle.blockMoveImage, 1.0f);
+                        }
+                    }
+                }
+/*                // handle flipping
+                BufferedImage workImage = image;
+                if (token.isFlippedX() || token.isFlippedY()) {
+                    workImage =
+                            new BufferedImage(image.getWidth(), image.getHeight(), image.getTransparency());
+
+                    int workW = image.getWidth() * (token.isFlippedX() ? -1 : 1);
+                    int workH = image.getHeight() * (token.isFlippedY() ? -1 : 1);
+                    int workX = token.isFlippedX() ? image.getWidth() : 0;
+                    int workY = token.isFlippedY() ? image.getHeight() : 0;
+
+                    Graphics2D wig = workImage.createGraphics();
+                    wig.drawImage(image, workX, workY, workW, workH, null);
+                    wig.dispose();
+                }
+                // on the iso plane
+                if (token.isFlippedIso()) {
+                    if (flipIsoImageMap.get(token) == null) {
+                        workImage = IsometricGrid.isoImage(workImage);
+                    } else {
+                        workImage = flipIsoImageMap.get(token);
+                    }
+                    token.setHeight(workImage.getHeight());
+                    token.setWidth(workImage.getWidth());
+                    footprintBounds = token.getBounds(zone);
+                }
+                // Draw token
+                double iso_ho = 0;
+                Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+                if (token.getShape() == Token.TokenShape.FIGURE) {
+                    double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
+                    iso_ho = footprintBounds.height - th;
+                    footprintBounds =
+                            new java.awt.Rectangle(
+                                    footprintBounds.x,
+                                    footprintBounds.y - (int) iso_ho,
+                                    footprintBounds.width,
+                                    (int) th);
+                    iso_ho = iso_ho * getScale();
+                }
+                SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+
+                int offsetx = 0;
+                int offsety = 0;
+                if (token.isSnapToScale()) {
+                    offsetx =
+                            (int)
+                                    (imgSize.width < footprintBounds.width
+                                            ? (footprintBounds.width - imgSize.width) / 2 * getScale()
+                                            : 0);
+                    offsety =
+                            (int)
+                                    (imgSize.height < footprintBounds.height
+                                            ? (footprintBounds.height - imgSize.height) / 2 * getScale()
+                                            : 0);
+                }
+                int tx = x + offsetx;
+                int ty = y + offsety + (int) iso_ho;
+
+                AffineTransform at = new AffineTransform();
+                at.translate(tx, ty);
+
+                if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
+                    at.rotate(
+                            Math.toRadians(-token.getFacing() - 90),
+                            scaledWidth / 2 - token.getAnchor().x * scale - offsetx,
+                            scaledHeight / 2
+                                    - token.getAnchor().y * scale
+                                    - offsety); // facing defaults to down, or -90 degrees
+                }
+                if (token.isSnapToScale()) {
+                    at.scale(
+                            (double) imgSize.width / workImage.getWidth(),
+                            (double) imgSize.height / workImage.getHeight());
+                    at.scale(getScale(), getScale());
+                } else {
+                    if (token.getShape() == Token.TokenShape.FIGURE) {
+                        at.scale(
+                                (double) scaledWidth / workImage.getWidth(),
+                                (double) scaledWidth / workImage.getWidth());
+                    } else {
+                        at.scale(
+                                (double) scaledWidth / workImage.getWidth(),
+                                (double) scaledHeight / workImage.getHeight());
+                    }
+                }
+
+                g.drawImage(workImage, at, this);
+
+                // Other details
+                if (token == keyToken) {
+                    java.awt.Rectangle bounds = new java.awt.Rectangle(tx, ty, imgSize.width, imgSize.height);
+                    bounds.width *= getScale();
+                    bounds.height *= getScale();
+
+                    Grid grid = zone.getGrid();
+                    boolean checkForFog =
+                            MapTool.getServerPolicy().isUseIndividualFOW() && zoneView.isUsingVision();
+                    boolean showLabels = isOwner;
+                    if (checkForFog) {
+                        Path<? extends AbstractPoint> path =
+                                set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
+                        List<? extends AbstractPoint> thePoints = path.getCellPath();
+
+                       // now that we have the last point, we can check to see if it's gridless or not. If not
+                       // gridless, get the last point the token was at and see if the token's footprint is inside
+                       // the visible area to show the label.
+
+                        if (thePoints.isEmpty()) {
+                            showLabels = false;
+                        } else {
+                            AbstractPoint lastPoint = thePoints.get(thePoints.size() - 1);
+
+                            java.awt.Rectangle tokenRectangle = null;
+                            if (lastPoint instanceof CellPoint) {
+                                tokenRectangle = token.getFootprint(grid).getBounds(grid, (CellPoint) lastPoint);
+                            } else {
+                                java.awt.Rectangle tokBounds = token.getBounds(zone);
+                                tokenRectangle = new java.awt.Rectangle();
+                                tokenRectangle.setBounds(
+                                        lastPoint.x,
+                                        lastPoint.y,
+                                        (int) tokBounds.getWidth(),
+                                        (int) tokBounds.getHeight());
+                            }
+                            showLabels = showLabels || zoneView.getVisibleArea(view).intersects(tokenRectangle);
+                        }
+                    } else {
+                        boolean hasFog = zone.hasFog();
+                        boolean fogIntersects = exposedFogArea.intersects(bounds);
+                        showLabels = showLabels || (visibleScreenArea == null && !hasFog); // no vision - fog
+                        showLabels =
+                                showLabels
+                                        || (visibleScreenArea == null && hasFog && fogIntersects); // no vision + fog
+                        showLabels =
+                                showLabels
+                                        || (visibleScreenArea != null
+                                        && visibleScreenArea.intersects(bounds)
+                                        && fogIntersects); // vision
+                    }
+                    if (showLabels) {
+                        // if the token is visible on the screen it will be in the location cache
+                        if (tokenLocationCache.containsKey(token)) {
+                            y += 10 + scaledHeight;
+                            x += scaledWidth / 2;
+
+                            if (!token.isStamp() && AppState.getShowMovementMeasurements()) {
+                                String distance = "";
+                                if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
+                                    // grid.isPathingSupported()
+                                    double distanceTraveled = walker.getDistance();
+                                    if (distanceTraveled >= 0) {
+                                        distance = NumberFormat.getInstance().format(distanceTraveled);
+                                    }
+                                } else {
+                                    double c = 0;
+                                    ZonePoint lastPoint = null;
+                                    for (ZonePoint zp : set.gridlessPath.getCellPath()) {
+                                        if (lastPoint == null) {
+                                            lastPoint = zp;
+                                            continue;
+                                        }
+                                        int a = lastPoint.x - zp.x;
+                                        int b = lastPoint.y - zp.y;
+                                        c += Math.hypot(a, b);
+                                        lastPoint = zp;
+                                    }
+                                    c /= zone.getGrid().getSize(); // Number of "cells"
+                                    c *= zone.getUnitsPerCell(); // "actual" distance traveled
+                                    distance = NumberFormat.getInstance().format(c);
+                                }
+                                if (!distance.isEmpty()) {
+                                    delayRendering(new ZoneRenderer.LabelRenderer(distance, x, y));
+                                    y += 20;
+                                }
+                            }
+                            if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
+                                delayRendering(new ZoneRenderer.LabelRenderer(set.getPlayerId(), x, y));
+                            }
+                        } // !token.isStamp()
+                    } // showLabels
+                } // token == keyToken*/
+            }
+        }
+    }
+
+    private void showBlockedMoves(ZonePoint zp, double r, BufferedImage blockMoveImage, float v) {
         //TODO: implement
     }
 
@@ -1852,6 +2144,134 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {
+        if(overlay instanceof MultipleImageBarTokenOverlay)
+            renderTokenOverlay((MultipleImageBarTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof SingleImageBarTokenOverlay)
+            renderTokenOverlay((SingleImageBarTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof DrawnBarTokenOverlay)
+            renderTokenOverlay((DrawnBarTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof TwoToneBarTokenOverlay)
+            renderTokenOverlay((TwoToneBarTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof TwoImageBarTokenOverlay)
+            renderTokenOverlay((TwoImageBarTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof ImageTokenOverlay)
+            renderTokenOverlay((ImageTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowImageTokenOverlay)
+            renderTokenOverlay((FlowImageTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof CornerImageTokenOverlay)
+            renderTokenOverlay((CornerImageTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof XTokenOverlay)
+            renderTokenOverlay((XTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowColorDotTokenOverlay)
+            renderTokenOverlay((FlowColorDotTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowTriangleTokenOverlay)
+            renderTokenOverlay((FlowTriangleTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowDiamondTokenOverlay)
+            renderTokenOverlay((FlowDiamondTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowColorSquareTokenOverlay)
+            renderTokenOverlay((FlowColorSquareTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof FlowYieldTokenOverlay)
+            renderTokenOverlay((FlowYieldTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof YieldTokenOverlay)
+            renderTokenOverlay((YieldTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof OTokenOverlay)
+            renderTokenOverlay((OTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof ColorDotTokenOverlay)
+            renderTokenOverlay((ColorDotTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof DiamondTokenOverlay)
+            renderTokenOverlay((DiamondTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof TriangleTokenOverlay)
+            renderTokenOverlay((TriangleTokenOverlay)overlay, token, bounds, barValue);
+        else if(overlay instanceof CrossTokenOverlay)
+            renderTokenOverlay((CrossTokenOverlay)overlay, token, bounds, barValue);
+    }
+
+    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(OTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
+        //TODO: Implement
+    }
+    private void renderTokenOverlay(CrossTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    {
         //TODO: Implement
     }
 

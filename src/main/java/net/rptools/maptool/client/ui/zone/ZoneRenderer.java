@@ -284,6 +284,8 @@ public class ZoneRenderer extends JComponent
   public void setAutoResizeStamp(boolean value) {
     this.autoResizeStamp = value;
   }
+  
+  public Map<GUID, SelectionSet> getSelectionSetMap() { return selectionSetMap; }
 
   public boolean isAutoResizeStamp() {
     return autoResizeStamp;
