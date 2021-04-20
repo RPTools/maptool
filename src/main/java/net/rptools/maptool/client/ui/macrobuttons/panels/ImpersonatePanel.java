@@ -57,7 +57,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
       if (currentlyImpersonating && getToken() != null) {
         Token token = getToken();
         mtf.getFrame(MTFrame.IMPERSONATED).setFrameIcon(token.getIcon(16, 16));
-        mtf.getFrame(MTFrame.IMPERSONATED).setTitle(getTitle(token));
+        mtf.setFrameTitle(MTFrame.IMPERSONATED, getTitle(token));
         addArea(getTokenId());
       } else if (selectedTokenList.size() != 1) {
         return;
@@ -122,7 +122,9 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
         .setFrameIcon(new ImageIcon(AppStyle.impersonatePanelImage));
-    MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setTitle(Tab.IMPERSONATED.title);
+    MapTool.getFrame()
+        .setFrameTitle(
+            MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));
     if (getTokenId() == null) {
       currentlyImpersonating = false;
     }
