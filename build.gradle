@@ -320,8 +320,12 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.6.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 
     implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
+
+    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
