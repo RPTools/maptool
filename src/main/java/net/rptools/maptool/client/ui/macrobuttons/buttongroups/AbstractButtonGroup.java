@@ -301,9 +301,9 @@ public abstract class AbstractButtonGroup extends JPanel
           } else if (SwingUtilities.isLeftMouseButton(event) && SwingUtil.isShiftDown(event)) {
             // impersonate token toggle
             if (token.isBeingImpersonated()) {
-              MapTool.getFrame().getCommandPanel().quickCommit("/im");
+              MapTool.getFrame().getCommandPanel().commitCommand("/im");
             } else {
-              MapTool.getFrame().getCommandPanel().quickCommit("/im " + tokenId, false);
+              MapTool.getFrame().getCommandPanel().commitCommand("/im " + tokenId);
             }
           }
         }

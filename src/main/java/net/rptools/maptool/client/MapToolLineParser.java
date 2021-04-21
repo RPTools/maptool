@@ -1029,9 +1029,13 @@ public class MapToolLineParser {
         String b = " ".repeat(Math.max(0, parserRecurseDepth - 1)) + expression;
         log.debug(b);
       }
+      List<Integer> origRolled = List.copyOf(rolled);
       Result res = expressionParser.evaluate(expression, resolver, makeDeterministic);
-      rolled.addAll(res.getRolled());
-      newRolls.addAll(res.getRolled());
+      // if rolled has changed, we've been in a context that has updated it already
+      if (origRolled.equals(rolled)) {
+        rolled.addAll(res.getRolled());
+        newRolls.addAll(res.getRolled());
+      }
 
       return res;
     } catch (AbortFunctionException e) {
@@ -1041,16 +1045,6 @@ public class MapToolLineParser {
 
       // return an empty result to not collide with tooltips
       // when catching an abort
-      Result result = new Result("");
-      result.setValue("");
-      return result;
-    } catch (ReturnFunctionException e) {
-      log.debug(e);
-      boolean catchReturn = BigDecimal.ONE.equals(resolver.getVariable("macro.return"));
-      if (!catchReturn) throw e;
-
-      // return an empty result to not collide with tooltips
-      // when catching a return
       Result result = new Result("");
       result.setValue("");
       return result;

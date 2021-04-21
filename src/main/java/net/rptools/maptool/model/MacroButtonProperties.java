@@ -449,10 +449,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String oldText = commandArea.getText();
 
       if (getIncludeLabel()) {
-        String commandToExecute = getLabel();
-        commandArea.setText(impersonatePrefix + commandToExecute);
-
-        MapTool.getFrame().getCommandPanel().commitCommand();
+        MapTool.getFrame().getCommandPanel().commitCommand(impersonatePrefix + getLabel());
       }
 
       String commandsToExecute[] = parseMultiLineCommand(getCommand());
@@ -463,7 +460,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String loc;
       for (String command : commandsToExecute) {
         // If we aren't auto execute, then append the text instead of replace it
-        commandArea.setText(impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command);
+        command = impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command;
         if (getAutoExecute()) {
           boolean trusted = false;
           if (allowPlayerEdits == null) {
@@ -494,7 +491,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             loc = MapToolLineParser.CHAT_INPUT;
           }
           MapToolMacroContext newMacroContext = new MapToolMacroContext(label, loc, trusted, index);
-          MapTool.getFrame().getCommandPanel().commitCommand(newMacroContext);
+          MapTool.getFrame().getCommandPanel().commitCommand(command, newMacroContext);
+        } else {
+          commandArea.setText(command);
         }
       }
       commandArea.requestFocusInWindow();
