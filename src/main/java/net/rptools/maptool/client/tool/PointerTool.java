@@ -1309,6 +1309,11 @@ public class PointerTool extends DefaultTool {
             }
           }
         });
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   /**
@@ -1494,6 +1499,38 @@ public class PointerTool extends DefaultTool {
         }
       }
       isSpaceDown = false;
+    }
+  }
+
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      }
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      }
+      MapTool.getFrame().refresh();
     }
   }
 
