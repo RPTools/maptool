@@ -144,6 +144,10 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       return resolver.getVariable("macro.return");
     }
 
+    if (output == null) {
+      return "";
+    }
+
     String stripOutput = output.replaceAll("(?s)<!--.*?-->", ""); // Strip comments
     if (stripOutput.trim().length() == 0) {
       output = resolver.getVariable("macro.return").toString();
