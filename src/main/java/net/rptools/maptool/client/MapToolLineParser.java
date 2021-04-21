@@ -1048,16 +1048,6 @@ public class MapToolLineParser {
       Result result = new Result("");
       result.setValue("");
       return result;
-    } catch (ReturnFunctionException e) {
-      log.debug(e);
-      boolean catchReturn = BigDecimal.ONE.equals(resolver.getVariable("macro.return"));
-      if (!catchReturn) throw e;
-
-      // return an empty result to not collide with tooltips
-      // when catching a return
-      Result result = new Result("");
-      result.setValue("");
-      return result;
     } catch (AssertFunctionException e) {
       log.debug(e);
       boolean catchAssert = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAssert"));
