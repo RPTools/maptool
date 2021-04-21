@@ -108,7 +108,7 @@ public class XTokenOverlay extends BooleanTokenOverlay {
    *
    * @return Returns the current value of stroke.
    */
-  protected BasicStroke getStroke() {
+  public BasicStroke getStroke() {
     return stroke;
   }
 

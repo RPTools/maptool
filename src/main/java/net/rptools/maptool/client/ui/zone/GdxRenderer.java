@@ -43,6 +43,7 @@ import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -1505,7 +1506,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         Set<GUID> tempVisTokens = new HashSet<GUID>();
 
-        List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
         for (Token token : tokenList) {
             if (token.getShape() != Token.TokenShape.FIGURE && figuresOnly && !token.isAlwaysVisible()) {
                 continue;
@@ -1900,7 +1900,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-                renderTokenOverlay(overlay, token, image.getBoundingRectangle(), stateValue);
+                renderTokenOverlay(overlay, token, origBounds, stateValue);
             }
             timer.stop("tokenlist-9");
 
@@ -1914,7 +1914,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-                renderTokenOverlay(overlay, token, image.getBoundingRectangle(), barValue);
+                renderTokenOverlay(overlay, token, origBounds, barValue);
             } // endfor
             timer.stop("tokenlist-10");
 
@@ -2143,136 +2143,159 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpTile.draw(batch, x + width - rightMargin, y + topMargin, right.getRegionWidth(), height - topMargin - bottomMargin);
     }
 
-    private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle bounds, Object barValue) {
+    private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
         if(overlay instanceof MultipleImageBarTokenOverlay)
-            renderTokenOverlay((MultipleImageBarTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((MultipleImageBarTokenOverlay)overlay, token, bounds, value);
         else if(overlay instanceof SingleImageBarTokenOverlay)
-            renderTokenOverlay((SingleImageBarTokenOverlay)overlay, token, bounds, barValue);
-        else if(overlay instanceof DrawnBarTokenOverlay)
-            renderTokenOverlay((DrawnBarTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((SingleImageBarTokenOverlay)overlay, token, bounds, value);
         else if(overlay instanceof TwoToneBarTokenOverlay)
-            renderTokenOverlay((TwoToneBarTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((TwoToneBarTokenOverlay)overlay, token, bounds, value);
+        else if(overlay instanceof DrawnBarTokenOverlay)
+            renderTokenOverlay((DrawnBarTokenOverlay)overlay, token, bounds, value);
         else if(overlay instanceof TwoImageBarTokenOverlay)
-            renderTokenOverlay((TwoImageBarTokenOverlay)overlay, token, bounds, barValue);
-        else if(overlay instanceof ImageTokenOverlay)
-            renderTokenOverlay((ImageTokenOverlay)overlay, token, bounds, barValue);
-        else if(overlay instanceof FlowImageTokenOverlay)
-            renderTokenOverlay((FlowImageTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((TwoImageBarTokenOverlay)overlay, token, bounds, value);
+        else if(overlay instanceof  BooleanTokenOverlay)
+            renderTokenOverlay((BooleanTokenOverlay)overlay, token, bounds, value);
+    }
+
+    private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Rectangle2D bounds, Object value)
+    {
+        if (!FunctionUtil.getBooleanValue(value))
+            return;
+
+        if(overlay instanceof FlowImageTokenOverlay)
+            renderTokenOverlay((FlowImageTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof CornerImageTokenOverlay)
-            renderTokenOverlay((CornerImageTokenOverlay)overlay, token, bounds, barValue);
-        else if(overlay instanceof XTokenOverlay)
-            renderTokenOverlay((XTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((CornerImageTokenOverlay)overlay, token, bounds);
+        else if(overlay instanceof ImageTokenOverlay)
+            renderTokenOverlay((ImageTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof FlowColorDotTokenOverlay)
-            renderTokenOverlay((FlowColorDotTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((FlowColorDotTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof FlowTriangleTokenOverlay)
-            renderTokenOverlay((FlowTriangleTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((FlowTriangleTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof FlowDiamondTokenOverlay)
-            renderTokenOverlay((FlowDiamondTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((FlowDiamondTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof FlowColorSquareTokenOverlay)
-            renderTokenOverlay((FlowColorSquareTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((FlowColorSquareTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof FlowYieldTokenOverlay)
-            renderTokenOverlay((FlowYieldTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((FlowYieldTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof YieldTokenOverlay)
-            renderTokenOverlay((YieldTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((YieldTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof OTokenOverlay)
-            renderTokenOverlay((OTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((OTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof ColorDotTokenOverlay)
-            renderTokenOverlay((ColorDotTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((ColorDotTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof DiamondTokenOverlay)
-            renderTokenOverlay((DiamondTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((DiamondTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof TriangleTokenOverlay)
-            renderTokenOverlay((TriangleTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((TriangleTokenOverlay)overlay, token, bounds);
         else if(overlay instanceof CrossTokenOverlay)
-            renderTokenOverlay((CrossTokenOverlay)overlay, token, bounds, barValue);
+            renderTokenOverlay((CrossTokenOverlay)overlay, token);
+        else if(overlay instanceof XTokenOverlay)
+            renderTokenOverlay((XTokenOverlay)overlay, token, bounds);
     }
 
-    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
-    {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+
+    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(OTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(OTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
     }
-    private void renderTokenOverlay(CrossTokenOverlay overlay, Token token, Rectangle bounds, Object barValue)
+    private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token, Rectangle2D bounds)
     {
         //TODO: Implement
+    }
+    private void renderTokenOverlay(CrossTokenOverlay overlay, Token token)
+    {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, overlay.getOpacity()/100);
+        var stroke = overlay.getStroke();
+
+        drawer.setColor(tmpColor);
+        drawer.line(x, y + h/2f,x + w,  y + h/2f, stroke.getLineWidth());
+        drawer.line(x + w/2f, y,x + w/2f, y + h, stroke.getLineWidth());
+        drawer.setColor(Color.WHITE);
     }
 
     // FIXME: I don't like this hardwiring
