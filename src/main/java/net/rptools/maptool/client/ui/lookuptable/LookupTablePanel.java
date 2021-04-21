@@ -85,9 +85,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
               }
               MapTool.getFrame()
                   .getCommandPanel()
-                  .getCommandTextArea()
-                  .setText("/tbl \"" + lookupTable.getName() + "\"");
-              MapTool.getFrame().getCommandPanel().commitCommand();
+                  .commitCommand("/tbl \"" + lookupTable.getName() + "\"");
             }
           }
         });

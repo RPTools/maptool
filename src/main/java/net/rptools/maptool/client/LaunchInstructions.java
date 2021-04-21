@@ -32,9 +32,6 @@ public class LaunchInstructions {
 
   public static void main(String[] args) {
     try {
-      // This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the
-      // System.property
-      AppUtil.getAppHome();
 
       long mem = Runtime.getRuntime().maxMemory();
       String msg = String.format(USAGE, mem / (1024 * 1024));

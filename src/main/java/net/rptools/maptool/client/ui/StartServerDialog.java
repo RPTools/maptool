@@ -26,6 +26,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
 
@@ -40,6 +41,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useIndividualViews;
   private JCheckBox autoRevealOnMovement;
   private JCheckBox playersCanRevealVision;
+  private JButton generateGMPassword;
+  private JButton generatePlayerPassword;
+  private JTextField gmPassword;
+  private JTextField playerPassword;
 
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
@@ -59,6 +64,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     useIndividualViews = (JCheckBox) getComponent("@useIndividualViews");
     autoRevealOnMovement = (JCheckBox) getComponent("@autoRevealOnMovement");
     playersCanRevealVision = (JCheckBox) getComponent("@playersCanRevealVision");
+    generateGMPassword = (JButton) getComponent("@generateGMPassword");
+    generatePlayerPassword = (JButton) getComponent("@generatePlayerPassword");
+    gmPassword = (JTextField) getComponent("@GMPassword");
+    playerPassword = (JTextField) getComponent("@playerPassword");
 
     useIndividualFOW.setEnabled(prefs.getUseIndividualViews());
     useIndividualViews.addItemListener(
@@ -93,8 +102,31 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     movementMetricCombo.setModel(movementMetricModel);
     movementMetricCombo.addItemListener(
         e -> prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem()));
+
+    generateGMPassword.addActionListener(
+        l -> {
+          PasswordGenerator passwordGenerator = new PasswordGenerator();
+          String password = passwordGenerator.getPassword();
+          gmPassword.setText(password);
+        });
+
+    generatePlayerPassword.addActionListener(
+        l -> {
+          PasswordGenerator passwordGenerator = new PasswordGenerator();
+          String password = passwordGenerator.getPassword();
+          playerPassword.setText(password);
+        });
+
     getRootPane().setDefaultButton(getOKButton());
     dialog.showDialog();
+  }
+
+  public JButton getGenerateGMPasswordButton() {
+    return (JButton) getComponent("@generateGMPassword");
+  }
+
+  public JButton getGeneratePlayerPasswordButton() {
+    return (JButton) getComponent("@generatePlayerPassword");
   }
 
   public JTextField getPortTextField() {
@@ -144,6 +176,14 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
             e -> {
               if (getPortTextField().getText().length() == 0) {
                 MapTool.showError("ServerDialog.error.port");
+                return;
+              }
+              if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
+                MapTool.showError("ServerDialog.error.passwordMissing");
+                return;
+              }
+              if (gmPassword.getText().equals(playerPassword.getText())) {
+                MapTool.showError("ServerDialog.error.passwordMustDiffer");
                 return;
               }
               try {
