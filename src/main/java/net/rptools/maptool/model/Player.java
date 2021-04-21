@@ -16,6 +16,7 @@ package net.rptools.maptool.model;
 
 /** @author trevor */
 public class Player {
+
   public enum Role {
     PLAYER,
     GM
@@ -35,6 +36,11 @@ public class Player {
     this.name = name;
     this.role = role.name();
     this.password = password;
+    actualRole = role;
+  }
+
+  protected void setRole(Role role) {
+    this.role = role.name();
     actualRole = role;
   }
 

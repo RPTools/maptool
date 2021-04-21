@@ -569,19 +569,10 @@ public class MapToolFrame extends DefaultDockableHolder
     // Main panel
     getDockingManager().getWorkspace().add(rendererBorderPanel);
 
-    // Docked frames
-    getDockingManager().addFrame(getFrame(MTFrame.CONNECTIONS));
-    getDockingManager().addFrame(getFrame(MTFrame.TOKEN_TREE));
-    getDockingManager().addFrame(getFrame(MTFrame.INITIATIVE));
-    getDockingManager().addFrame(getFrame(MTFrame.IMAGE_EXPLORER));
-    getDockingManager().addFrame(getFrame(MTFrame.DRAW_TREE));
-    getDockingManager().addFrame(getFrame(MTFrame.CHAT));
-    getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
-    getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
-    getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN));
-    getDockingManager().addFrame(getFrame(MTFrame.GM));
-    getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
-    getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
+    // Add all dockable frames
+    for (DockableFrame frame : frameMap.values()) {
+      getDockingManager().addFrame(frame);
+    }
 
     try {
       getDockingManager()
@@ -598,6 +589,12 @@ public class MapToolFrame extends DefaultDockableHolder
       // incorrectly
       // reporting screen size as zero.
       MapTool.showError("msg.error.layoutParse", e);
+    }
+
+    // Update frame titles to their localized names. This needs to be done after the layout is
+    // loaded otherwise the titles default to English
+    for (MTFrame mtFrame : frameMap.keySet()) {
+      setFrameTitle(mtFrame, I18N.getText(mtFrame.getPropertyName()));
     }
   }
 
@@ -684,6 +681,21 @@ public class MapToolFrame extends DefaultDockableHolder
     frame.add(component);
     frame.addDockableFrameListener(new MapToolDockListener());
     return frame;
+  }
+
+  /**
+   * Updates the window title, tab title, and side title of the given frame
+   *
+   * @param mtFrame The frame to set the title of
+   * @param title The new title
+   */
+  public void setFrameTitle(MTFrame mtFrame, String title) {
+    DockableFrame frame = getFrame(mtFrame);
+    if (frame != null) {
+      frame.setTitle(title);
+      frame.setTabTitle(title);
+      frame.setSideTitle(title);
+    }
   }
 
   public LookupTablePanel getLookupTablePanel() {
