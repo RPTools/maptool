@@ -30,6 +30,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -181,18 +182,29 @@ public class TokenVBL {
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
+    return renderTopology(renderer, area, erase, renderer.getZone().getTopologyMode());
+  }
+
+  /**
+   * This is a convenience method to send the VBL Area to be rendered to the server
+   *
+   * @param renderer Reference to the ZoneRenderer
+   * @param area A valid Area containing VBL polygons
+   * @param erase Set to true to erase the VBL, otherwise draw it
+   * @return the untouched area if the renderer is null, and null otherwise
+   */
+  public static Area renderTopology(
+      ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyMode topologyMode) {
     if (renderer == null) {
       return area;
     }
 
     if (erase) {
-      renderer.getZone().removeTopology(area);
-      MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+      renderer.getZone().removeTopology(area, topologyMode);
+      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyMode);
     } else {
-      renderer.getZone().addTopology(area);
-      MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+      renderer.getZone().addTopology(area, topologyMode);
+      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyMode);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
