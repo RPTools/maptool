@@ -20,11 +20,11 @@ import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
-import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -203,7 +203,7 @@ public class ExecFunction extends AbstractFunction {
     Function function = parser.getFunction(functionName);
     MapTool.getParser().enterTrustedContext(functionName, "execFunction");
     try {
-      function.evaluate(parser, new MapVariableResolver(), functionName, execArgs);
+      function.evaluate(parser, new MapToolVariableResolver(null), functionName, execArgs);
     } catch (ParserException ignored) {
     }
     MapTool.getParser().exitContext();

@@ -43,7 +43,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
-import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -1046,10 +1045,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     @Override
     public void actionPerformed(ActionEvent e) {
       String identity = getTokenUnderMouse().getName();
-      String command = "/im " + identity + ":" + speech;
-      JTextComponent commandArea = MapTool.getFrame().getCommandPanel().getCommandTextArea();
-      commandArea.setText(command);
-      MapTool.getFrame().getCommandPanel().commitCommand();
+      MapTool.getFrame().getCommandPanel().commitCommand("/im " + identity + ":" + speech);
     }
   }
 }

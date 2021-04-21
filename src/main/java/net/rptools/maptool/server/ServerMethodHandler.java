@@ -438,7 +438,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void getAsset(MD5Key assetID) {
-    if (assetID == null || assetID.toString().length() == 0) {
+    if (assetID == null) {
       return;
     }
     try {
