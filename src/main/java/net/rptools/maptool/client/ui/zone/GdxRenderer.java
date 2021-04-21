@@ -3,20 +3,19 @@ package net.rptools.maptool.client.ui.zone;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
-import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
-import com.crashinvaders.vfx.effects.FxaaEffect;
 import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
@@ -57,9 +56,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.Flow;
+import java.util.*;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
@@ -67,7 +65,7 @@ import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
  * The coordinates in the model are y-down, x-left.
  * The world coordinates are y-up, x-left. I moved the world to the 4th quadrant of the
  * coordinate system. So if you would draw a token t awt at (x,y) you have to draw it at (x, -y - t.width)
- *
+ * <p>
  * Bugs:
  * - y offset of VerticalHexgrid is wrong
  * - Imageborders are not rotated
@@ -117,7 +115,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private float distanceFontScale = 0;
 
     private GlyphLayout glyphLayout = new GlyphLayout();
-    private CodeTimer timer;
+    private CodeTimer timer = new CodeTimer("GdxRenderer.renderZone");
+    ;
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
     private VfxFrameBuffer backBuffer;
@@ -267,19 +266,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void ensureCorrectDistanceFont() {
-        if(zone == null)
+        if (zone == null)
             return;
 
         var fontScale = (float) zone.getGrid().getSize() / 50; // Font size of 12 at grid size 50 is default
 
-        if(fontScale == this.distanceFontScale && distanceFont != null)
+        if (fontScale == this.distanceFontScale && distanceFont != null)
             return;
 
-        if(distanceFont != null)
+        if (distanceFont != null)
             manager.unload(FONT_DISTANCE);
 
         var fontParams = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        fontParams.fontFileName =  "net/rptools/maptool/client/fonts/OpenSans-Bold.ttf";
+        fontParams.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Bold.ttf";
         fontParams.fontParameters.size = (int) (12 * fontScale);
         manager.load(FONT_DISTANCE, BitmapFont.class, fontParams);
         manager.finishLoading();
@@ -292,7 +291,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         manager.load(ATLAS, TextureAtlas.class);
 
         var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
-        mySmallFont.fontFileName =  "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
+        mySmallFont.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
         mySmallFont.fontParameters.size = 12;
         manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
     }
@@ -303,7 +302,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         //this happens sometimes when starting with ide (non-debug)
-        if(batch.isDrawing())
+        if (batch.isDrawing())
             batch.end();
         batch.begin();
 
@@ -359,9 +358,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void initializeTimer() {
-        if (timer == null) {
-            timer = new CodeTimer("ZoneRenderer.renderZone");
-        }
         timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
         timer.clear();
         timer.setThreshold(10);
@@ -582,11 +578,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void updateVisibleArea() {
-        if (zoneRenderer.getZoneView().isUsingVision()) {
-            timer.start("ZoneRenderer-getVisibleArea");
-            visibleScreenArea = zoneRenderer.getZoneView().getVisibleArea(zoneRenderer.getPlayerView());
-            timer.stop("ZoneRenderer-getVisibleArea");
-        }
+        //    if (zoneRenderer.getZoneView().isUsingVision()) {
+        timer.start("ZoneRenderer-getVisibleArea");
+        visibleScreenArea = zoneRenderer.getZoneView().getVisibleArea(zoneRenderer.getPlayerView());
+        timer.stop("ZoneRenderer-getVisibleArea");
+        //    }
     }
 
     private void renderPlayerVisionOverlay(PlayerView view) {
@@ -864,14 +860,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void showBlockedMoves(PlayerView view, Set<ZoneRenderer.SelectionSet> movementSet) {
-       var selectionSetMap = zoneRenderer.getSelectionSetMap();
+        var selectionSetMap = zoneRenderer.getSelectionSetMap();
         if (selectionSetMap.isEmpty()) {
             return;
         }
 
         boolean clipInstalled = false;
         for (ZoneRenderer.SelectionSet set : movementSet) {
-         Token keyToken = zone.getToken(set.getKeyToken());
+            Token keyToken = zone.getToken(set.getKeyToken());
             if (keyToken == null) {
                 // It was removed ?
                 selectionSetMap.remove(set.getKeyToken());
@@ -923,7 +919,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
                 // get token image, using image table if present
                 Sprite image = sprites.get(token.getImageAssetId());
-                if(image == null)
+                if (image == null)
                     continue;
 
                 // Vision visibility
@@ -934,17 +930,17 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     //TODO: Path clipping
                     if (!clipInstalled) {
                         // Only show the part of the path that is visible
-                  //      Area visibleArea = new Area(g.getClipBounds());
-                  //      visibleArea.intersect(visibleScreenArea);
+                        //      Area visibleArea = new Area(g.getClipBounds());
+                        //      visibleArea.intersect(visibleScreenArea);
 
-                  //      g = (Graphics2D) g.create();
-                  //      g.setClip(new GeneralPath(visibleArea));
+                        //      g = (Graphics2D) g.create();
+                        //      g.setClip(new GeneralPath(visibleArea));
 
                         clipInstalled = true;
                         // System.out.println("Adding Clip: " + MapTool.getPlayer().getName());
                     }
                 }
-               // Show path only on the key token on token layer that are visible to the owner or gm while
+                // Show path only on the key token on token layer that are visible to the owner or gm while
                 // fow and vision is on
                 if (token == keyToken && !token.isStamp()) {
                     renderPath(
@@ -1776,9 +1772,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
                         if (token.getFacing() < 0) {
-                        //    shape.setColor(Color.YELLOW);
+                            //    shape.setColor(Color.YELLOW);
                         } else {
-                       //     shape.setColor(1, 1, 0, 0.5f);
+                            //     shape.setColor(1, 1, 0, 0.5f);
 
                         }
                         //shape.set(ShapeRenderer.ShapeType.Filled);
@@ -1790,7 +1786,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
                         //shape.set(ShapeRenderer.ShapeType.Line);
                         draw(arrowArea);
-
 
 
                         break;
@@ -2014,78 +2009,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.stop("tokenlist-13");
     }
 
-    private class LabelRenderer implements ItemRenderer
-    {
-        private final boolean isGMView;
-        private Token token;
-
-        public LabelRenderer(Token token, boolean isGMView) {
-            this.token = token;
-            this.isGMView = isGMView;
-        }
-
-        @Override
-        public void render() {
-            int offset = 3; // Keep it from tramping on the token border.
-            NinePatch background;
-            Color foreground;
-
-            if (token.isVisible()) {
-                if (token.getType() == Token.Type.NPC) {
-                    background = blueLabel;
-                    foreground = Color.WHITE;
-                } else {
-                    background = grayLabel;
-                    foreground = Color.BLACK;
-                }
-            } else {
-                background = darkGrayLabel;
-                foreground = Color.WHITE;
-            }
-            String name = token.getName();
-            if (isGMView && token.getGMName() != null && !StringUtil.isEmpty(token.getGMName())) {
-                name += " (" + token.getGMName() + ")";
-            }
-
-
-            // Calculate image dimensions
-
-            float labelHeight = normalFont.getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
-
-
-            java.awt.Rectangle r = token.getBounds(zone);
-            tmpWorldCoord.x = r.x + r.width / 2;
-            tmpWorldCoord.y = (r.y + r.height + offset + labelHeight*zoom / 2) * -1;
-            tmpWorldCoord.z = 0;
-            tmpScreenCoord = cam.project(tmpWorldCoord);
-
-            drawBoxedString(
-                    name,
-                    tmpScreenCoord.x,
-                    tmpScreenCoord.y,
-                    SwingUtilities.CENTER,
-                    background,
-                    foreground);
-
-            var label = token.getLabel();
-
-            // Draw name and label to image
-            if (label != null && label.trim().length() > 0) {
-                drawBoxedString(
-                        label,
-                        tmpScreenCoord.x,
-                        tmpScreenCoord.y - labelHeight,
-                        SwingUtilities.CENTER,
-                        background,
-                        foreground);
-            }
-        }
-    }
-
     private TextureRegion fetch(String regionName) {
         var region = fetchedRegions.get(regionName);
-        if(region != null)
-            return  region;
+        if (region != null)
+            return region;
 
         region = atlas.findRegion(regionName);
         fetchedRegions.put(regionName, region);
@@ -2097,7 +2024,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var imagePath = border.getImagePath();
         var index = imagePath.indexOf("border/");
         var bordername = imagePath.substring(index);
-
 
 
         var topRight = fetch(bordername + "/tr");
@@ -2144,143 +2070,117 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
-        if(overlay instanceof MultipleImageBarTokenOverlay)
-            renderTokenOverlay((MultipleImageBarTokenOverlay)overlay, token, bounds, value);
-        else if(overlay instanceof SingleImageBarTokenOverlay)
-            renderTokenOverlay((SingleImageBarTokenOverlay)overlay, token, bounds, value);
-        else if(overlay instanceof TwoToneBarTokenOverlay)
-            renderTokenOverlay((TwoToneBarTokenOverlay)overlay, token, bounds, value);
-        else if(overlay instanceof DrawnBarTokenOverlay)
-            renderTokenOverlay((DrawnBarTokenOverlay)overlay, token, bounds, value);
-        else if(overlay instanceof TwoImageBarTokenOverlay)
-            renderTokenOverlay((TwoImageBarTokenOverlay)overlay, token, bounds, value);
-        else if(overlay instanceof  BooleanTokenOverlay)
-            renderTokenOverlay((BooleanTokenOverlay)overlay, token, bounds, value);
+        if (overlay instanceof MultipleImageBarTokenOverlay)
+            renderTokenOverlay((MultipleImageBarTokenOverlay) overlay, token, bounds, value);
+        else if (overlay instanceof SingleImageBarTokenOverlay)
+            renderTokenOverlay((SingleImageBarTokenOverlay) overlay, token, bounds, value);
+        else if (overlay instanceof TwoToneBarTokenOverlay)
+            renderTokenOverlay((TwoToneBarTokenOverlay) overlay, token, bounds, value);
+        else if (overlay instanceof DrawnBarTokenOverlay)
+            renderTokenOverlay((DrawnBarTokenOverlay) overlay, token, bounds, value);
+        else if (overlay instanceof TwoImageBarTokenOverlay)
+            renderTokenOverlay((TwoImageBarTokenOverlay) overlay, token, bounds, value);
+        else if (overlay instanceof BooleanTokenOverlay)
+            renderTokenOverlay((BooleanTokenOverlay) overlay, token, bounds, value);
     }
 
-    private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Rectangle2D bounds, Object value)
-    {
+    private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
         if (!FunctionUtil.getBooleanValue(value))
             return;
 
-        if(overlay instanceof FlowImageTokenOverlay)
-            renderTokenOverlay((FlowImageTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof CornerImageTokenOverlay)
-            renderTokenOverlay((CornerImageTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof ImageTokenOverlay)
-            renderTokenOverlay((ImageTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof FlowColorDotTokenOverlay)
-            renderTokenOverlay((FlowColorDotTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof FlowTriangleTokenOverlay)
-            renderTokenOverlay((FlowTriangleTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof FlowDiamondTokenOverlay)
-            renderTokenOverlay((FlowDiamondTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof FlowColorSquareTokenOverlay)
-            renderTokenOverlay((FlowColorSquareTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof FlowYieldTokenOverlay)
-            renderTokenOverlay((FlowYieldTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof YieldTokenOverlay)
-            renderTokenOverlay((YieldTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof OTokenOverlay)
-            renderTokenOverlay((OTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof ColorDotTokenOverlay)
-            renderTokenOverlay((ColorDotTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof DiamondTokenOverlay)
-            renderTokenOverlay((DiamondTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof TriangleTokenOverlay)
-            renderTokenOverlay((TriangleTokenOverlay)overlay, token, bounds);
-        else if(overlay instanceof CrossTokenOverlay)
-            renderTokenOverlay((CrossTokenOverlay)overlay, token);
-        else if(overlay instanceof XTokenOverlay)
-            renderTokenOverlay((XTokenOverlay)overlay, token, bounds);
+        if (overlay instanceof FlowImageTokenOverlay)
+            renderTokenOverlay((FlowImageTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof CornerImageTokenOverlay)
+            renderTokenOverlay((CornerImageTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof ImageTokenOverlay)
+            renderTokenOverlay((ImageTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof FlowColorDotTokenOverlay)
+            renderTokenOverlay((FlowColorDotTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof FlowTriangleTokenOverlay)
+            renderTokenOverlay((FlowTriangleTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof FlowDiamondTokenOverlay)
+            renderTokenOverlay((FlowDiamondTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof FlowColorSquareTokenOverlay)
+            renderTokenOverlay((FlowColorSquareTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof FlowYieldTokenOverlay)
+            renderTokenOverlay((FlowYieldTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof YieldTokenOverlay)
+            renderTokenOverlay((YieldTokenOverlay) overlay, token, bounds);
+        else if (overlay instanceof OTokenOverlay)
+            renderTokenOverlay((OTokenOverlay) overlay, token);
+        else if (overlay instanceof ColorDotTokenOverlay)
+            renderTokenOverlay((ColorDotTokenOverlay) overlay, token);
+        else if (overlay instanceof DiamondTokenOverlay)
+            renderTokenOverlay((DiamondTokenOverlay) overlay, token);
+        else if (overlay instanceof TriangleTokenOverlay)
+            renderTokenOverlay((TriangleTokenOverlay) overlay, token);
+        else if (overlay instanceof CrossTokenOverlay)
+            renderTokenOverlay((CrossTokenOverlay) overlay, token);
+        else if (overlay instanceof XTokenOverlay)
+            renderTokenOverlay((XTokenOverlay) overlay, token, bounds);
     }
 
-    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
-    {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
-    {
+    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
-    {
+    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
-    {
+    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue)
-    {
+    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(OTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
+
+    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
-    private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
-        //TODO: Implement
-    }
-    private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
-        //TODO: Implement
-    }
-    private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token, Rectangle2D bounds)
-    {
-        //TODO: Implement
-    }
-    private void renderTokenOverlay(CrossTokenOverlay overlay, Token token)
-    {
+
+    private void renderTokenOverlay(OTokenOverlay overlay, Token token) {
         var bounds = token.getBounds(zone);
         var x = bounds.x;
         var y = -bounds.y - bounds.height;
@@ -2289,12 +2189,125 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var color = overlay.getColor();
         Color.argb8888ToColor(tmpColor, color.getRGB());
-        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, overlay.getOpacity()/100);
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+
+        var stroke = overlay.getStroke();
+        var lineWidth = stroke.getLineWidth();
+
+        var centerX = x + w/2f;
+        var centerY = y + h/2f;
+        var radiusX = w/2f - lineWidth/2f;
+        var radiusY = h/2f - lineWidth/2f;
+
+        drawer.setColor(tmpColor);
+        drawer.ellipse(centerX, centerY, radiusX,radiusY, 0, lineWidth );
+        drawer.setColor(Color.WHITE);
+    }
+
+    private void renderTokenOverlay(ColorDotTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+
+        var size = w * 0.1f;
+        var offset = w * 0.8f;
+
+        var posX = x + size;
+        var posY = y + size;
+
+        switch (overlay.getCorner()) {
+            case SOUTH_EAST:
+                posX += offset;
+                break;
+            case SOUTH_WEST:
+                break;
+            case NORTH_EAST:
+                posX += offset;
+                posY += offset;
+                break;
+            case NORTH_WEST:
+                posY += offset;
+                break;
+        }
+
+        drawer.setColor(tmpColor);
+        drawer.filledEllipse(posX, posY, size, size);
+        drawer.setColor(Color.WHITE);
+    }
+
+    private void renderTokenOverlay(DiamondTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+        var stroke = overlay.getStroke();
+
+        var hc = w / 2f;
+        var vc = h / 2f;
+
+        var floats = new float[] {
+                x, y + vc,
+                x + hc, y,
+                x + w, y + vc,
+                x + hc, y + h,
+        };
+
+        drawer.setColor(tmpColor);
+        drawer.path(floats, stroke.getLineWidth(), JoinType.POINTY, false);
+        drawer.setColor(Color.WHITE);
+    }
+
+    private void renderTokenOverlay(TriangleTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+        var stroke = overlay.getStroke();
+
+        var hc = w / 2f;
+        var vc = h * (1 - 0.866f);
+
+        var floats = new float[] {
+           x, y + vc,
+           x + w, y + vc,
+           x + hc, y + h,
+        };
+
+        drawer.setColor(tmpColor);
+        drawer.path(floats, stroke.getLineWidth(), JoinType.POINTY, false);
+        drawer.setColor(Color.WHITE);
+    }
+
+    private void renderTokenOverlay(CrossTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
         var stroke = overlay.getStroke();
 
         drawer.setColor(tmpColor);
-        drawer.line(x, y + h/2f,x + w,  y + h/2f, stroke.getLineWidth());
-        drawer.line(x + w/2f, y,x + w/2f, y + h, stroke.getLineWidth());
+        drawer.line(x, y + h / 2f, x + w, y + h / 2f, stroke.getLineWidth());
+        drawer.line(x + w / 2f, y, x + w / 2f, y + h, stroke.getLineWidth());
         drawer.setColor(Color.WHITE);
     }
 
@@ -2342,7 +2355,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         return facingArrow.createTransformedShape(
                 AffineTransform.getRotateInstance(-Math.toRadians(angle)));
     }
-
 
     private void paintClipped(Sprite image, Area bounds, Area clip) {
 
@@ -2436,7 +2448,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     zp.x += grid.getCellWidth() / cellAdj + cellOffset.width;
                     zp.y += grid.getCellHeight() / cellAdj + cellOffset.height;
                     addDistanceText(
-                            zp, 1.0f, (float)p.getDistanceTraveled(zone), (float)p.getDistanceTraveledWithoutTerrain());
+                            zp, 1.0f, (float) p.getDistanceTraveled(zone), (float) p.getDistanceTraveledWithoutTerrain());
                 }
             }
             int w = 0;
@@ -2513,7 +2525,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // Line
             var highlight = tmpColor;
-            highlight.set(1,1,1,80/255f);
+            highlight.set(1, 1, 1, 80 / 255f);
             var highlightStroke = 9f;
 
             ScreenPoint lastPoint = null;
@@ -2536,11 +2548,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                 zp.y + (footprintBounds.height / 2) * footprint.getScale());
 
 
-                drawer.line((float)lastPoint.x, -(float)lastPoint.y,
-                        (float)nextPoint.x, -(float)nextPoint.y, highlight, highlightStroke);
+                drawer.line((float) lastPoint.x, -(float) lastPoint.y,
+                        (float) nextPoint.x, -(float) nextPoint.y, highlight, highlightStroke);
 
-                drawer.line((float)lastPoint.x, -(float)lastPoint.y,
-                        (float)nextPoint.x, -(float)nextPoint.y, Color.BLUE, drawer.getDefaultLineWidth());
+                drawer.line((float) lastPoint.x, -(float) lastPoint.y,
+                        (float) nextPoint.x, -(float) nextPoint.y, Color.BLUE, drawer.getDefaultLineWidth());
                 lastPoint = nextPoint;
             }
 
@@ -2559,8 +2571,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 }
                 p =
                         new ZonePoint(
-                                 (p.x + (footprintBounds.width / 2)),
-                                 (p.y + (footprintBounds.height / 2)));
+                                (p.x + (footprintBounds.width / 2)),
+                                (p.y + (footprintBounds.height / 2)));
                 highlightCell(p, fetch("redDot"), .333f);
             }
             timer.stop("renderPath-3");
@@ -2568,23 +2580,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private TextureRegion getCellHighlight() {
-        if(zone.getGrid() instanceof SquareGrid)
+        if (zone.getGrid() instanceof SquareGrid)
             return fetch("whiteBorder");
-        if(zone.getGrid() instanceof HexGrid)
+        if (zone.getGrid() instanceof HexGrid)
             return fetch("hexBorder");
-        if(zone.getGrid() instanceof IsometricGrid)
+        if (zone.getGrid() instanceof IsometricGrid)
             return fetch("isoBorder");
 
         return null;
     }
 
     private void addDistanceText(ZonePoint point, float size, float distance, float distanceWithoutTerrain) {
-        if(distance == 0)
+        if (distance == 0)
             return;
 
         Grid grid = zone.getGrid();
-        float cwidth = (float)grid.getCellWidth();
-        float cheight = (float)grid.getCellHeight();
+        float cwidth = (float) grid.getCellWidth();
+        float cheight = (float) grid.getCellHeight();
 
         float iwidth = cwidth * size;
         float iheight = cheight * size;
@@ -2615,11 +2627,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void highlightCell(ZonePoint zp, TextureRegion image, float size) {
         Grid grid = zone.getGrid();
-        float cwidth = (float)grid.getCellWidth() * size;
-        float cheight = (float)grid.getCellHeight() * size;
+        float cwidth = (float) grid.getCellWidth() * size;
+        float cheight = (float) grid.getCellHeight() * size;
 
         float rotation = 0;
-        if(zone.getGrid() instanceof HexGridHorizontal)
+        if (zone.getGrid() instanceof HexGridHorizontal)
             rotation = 90;
 
         batch.draw(image, zp.x - cwidth / 2, -zp.y - cheight / 2,
@@ -2770,7 +2782,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (fill) {
                         drawer.filledPolygon(tmpFloat.toArray());
                     } else {
-                            drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, true);
+                        drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, true);
                     }
                     tmpFloat.clear();
                     break;
@@ -2887,5 +2899,72 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private interface ItemRenderer {
         void render();
+    }
+
+    private class LabelRenderer implements ItemRenderer {
+        private final boolean isGMView;
+        private Token token;
+
+        public LabelRenderer(Token token, boolean isGMView) {
+            this.token = token;
+            this.isGMView = isGMView;
+        }
+
+        @Override
+        public void render() {
+            int offset = 3; // Keep it from tramping on the token border.
+            NinePatch background;
+            Color foreground;
+
+            if (token.isVisible()) {
+                if (token.getType() == Token.Type.NPC) {
+                    background = blueLabel;
+                    foreground = Color.WHITE;
+                } else {
+                    background = grayLabel;
+                    foreground = Color.BLACK;
+                }
+            } else {
+                background = darkGrayLabel;
+                foreground = Color.WHITE;
+            }
+            String name = token.getName();
+            if (isGMView && token.getGMName() != null && !StringUtil.isEmpty(token.getGMName())) {
+                name += " (" + token.getGMName() + ")";
+            }
+
+
+            // Calculate image dimensions
+
+            float labelHeight = normalFont.getLineHeight() + GraphicsUtil.BOX_PADDINGY * 2;
+
+
+            java.awt.Rectangle r = token.getBounds(zone);
+            tmpWorldCoord.x = r.x + r.width / 2;
+            tmpWorldCoord.y = (r.y + r.height + offset + labelHeight * zoom / 2) * -1;
+            tmpWorldCoord.z = 0;
+            tmpScreenCoord = cam.project(tmpWorldCoord);
+
+            drawBoxedString(
+                    name,
+                    tmpScreenCoord.x,
+                    tmpScreenCoord.y,
+                    SwingUtilities.CENTER,
+                    background,
+                    foreground);
+
+            var label = token.getLabel();
+
+            // Draw name and label to image
+            if (label != null && label.trim().length() > 0) {
+                drawBoxedString(
+                        label,
+                        tmpScreenCoord.x,
+                        tmpScreenCoord.y - labelHeight,
+                        SwingUtilities.CENTER,
+                        background,
+                        foreground);
+            }
+        }
     }
 }
