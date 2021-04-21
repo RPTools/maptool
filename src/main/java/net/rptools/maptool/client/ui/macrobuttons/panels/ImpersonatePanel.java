@@ -80,7 +80,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
               new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent event) {
-                  MapTool.getFrame().getCommandPanel().quickCommit("/im " + t.getId(), false);
+                  MapTool.getFrame().getCommandPanel().commitCommand("/im " + t.getId());
                 }
               });
           button.setBackground(null);
@@ -203,7 +203,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
         new MouseAdapter() {
           @Override
           public void mouseClicked(MouseEvent event) {
-            MapTool.getFrame().getCommandPanel().quickCommit("/im");
+            MapTool.getFrame().getCommandPanel().commitCommand("/im");
           }
         });
     button.setBackground(null);
