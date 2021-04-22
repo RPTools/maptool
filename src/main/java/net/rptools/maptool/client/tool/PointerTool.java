@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.swing.*;
+import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
@@ -50,6 +51,7 @@ import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -1307,6 +1309,11 @@ public class PointerTool extends DefaultTool {
             }
           }
         });
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   /**
@@ -1495,6 +1502,38 @@ public class PointerTool extends DefaultTool {
     }
   }
 
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      }
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      }
+      MapTool.getFrame().refresh();
+    }
+  }
+
   // class WrappedText
   // {
   // int lineCount;
@@ -1619,6 +1658,10 @@ public class PointerTool extends DefaultTool {
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
         if (AppPreferences.getShowStatSheet()) {
+          CodeTimer timer = new CodeTimer("statSheet");
+          timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+          timer.setThreshold(5);
+          timer.start("allProps");
           for (TokenProperty property :
               MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
             if (property.isShowOnStatSheet()) {
@@ -1628,28 +1671,26 @@ public class PointerTool extends DefaultTool {
               if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
                 continue;
               }
+              timer.start(property.getName());
               MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-              // TODO: is the double resolution of properties necessary here. I kept
-              // it, but it
-              // seems wasteful and I can't figure out any reason that the first
-              // resolution can't be
-              // used
-              // below.
               resolver.initialize();
               resolver.setAutoPrompt(false);
               Object propertyValue =
                   tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
               resolver.flush();
               if (propertyValue != null && propertyValue.toString().length() > 0) {
-                String propName = property.getName();
-                if (property.getShortName() != null) {
-                  propName = property.getShortName();
-                }
-                Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-                resolver.flush();
-                propertyMap.put(propName, value != null ? value.toString() : "");
+                String propName = property.getShortName();
+                if (StringUtils.isEmpty(propName)) propName = property.getName();
+                propertyMap.put(propName, propertyValue.toString());
               }
+              timer.stop(property.getName());
             }
+          }
+          timer.stop("allProps");
+          if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
+            String results = timer.toString();
+            MapTool.getProfilingNoteFrame().addText(results);
+            if (log.isDebugEnabled()) log.debug(results);
           }
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {

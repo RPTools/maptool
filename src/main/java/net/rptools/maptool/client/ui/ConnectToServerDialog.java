@@ -22,10 +22,8 @@ import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JTabbedPane;
@@ -134,14 +132,6 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
   public boolean accepted() {
     return accepted;
-  }
-
-  public JComboBox getRoleComboBox() {
-    return (JComboBox) getComponent("@role");
-  }
-
-  public void initRoleComboBox() {
-    getRoleComboBox().setModel(new DefaultComboBoxModel(new String[] {"Player", "GM"}));
   }
 
   public void initLocalServerList() {

@@ -55,8 +55,8 @@ public class ImageUtilTest {
   @Test
   void testReadSvgAsBufferedImage() throws IOException {
     Image img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/star.svg");
-    assertEquals(img.getWidth(null), 51);
-    assertEquals(img.getHeight(null), 48);
+    assertEquals(img.getWidth(null), 255);
+    assertEquals(img.getHeight(null), 240);
   }
 
   @Test
