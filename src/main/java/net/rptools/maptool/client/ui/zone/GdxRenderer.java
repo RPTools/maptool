@@ -2095,17 +2095,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         else if (overlay instanceof ImageTokenOverlay)
             renderTokenOverlay((ImageTokenOverlay) overlay, token, bounds);
         else if (overlay instanceof FlowColorDotTokenOverlay)
-            renderTokenOverlay((FlowColorDotTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof FlowTriangleTokenOverlay)
-            renderTokenOverlay((FlowTriangleTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof FlowDiamondTokenOverlay)
-            renderTokenOverlay((FlowDiamondTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof FlowColorSquareTokenOverlay)
-            renderTokenOverlay((FlowColorSquareTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof FlowYieldTokenOverlay)
-            renderTokenOverlay((FlowYieldTokenOverlay) overlay, token, bounds);
+            renderTokenOverlay((FlowColorDotTokenOverlay) overlay, token);
         else if (overlay instanceof YieldTokenOverlay)
-            renderTokenOverlay((YieldTokenOverlay) overlay, token, bounds);
+            renderTokenOverlay((YieldTokenOverlay) overlay, token);
         else if (overlay instanceof OTokenOverlay)
             renderTokenOverlay((OTokenOverlay) overlay, token);
         else if (overlay instanceof ColorDotTokenOverlay)
@@ -2117,7 +2109,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         else if (overlay instanceof CrossTokenOverlay)
             renderTokenOverlay((CrossTokenOverlay) overlay, token);
         else if (overlay instanceof XTokenOverlay)
-            renderTokenOverlay((XTokenOverlay) overlay, token, bounds);
+            renderTokenOverlay((XTokenOverlay) overlay, token);
+        else if (overlay instanceof ShadedTokenOverlay)
+            renderTokenOverlay((ShadedTokenOverlay) overlay, token);
+    }
+
+    private void renderTokenOverlay(ShadedTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        tmpColor.set(1, 1, 1, overlay.getOpacity() / 100);
+        //FIXME: this should change the transparency of the token. Test this when tokendrawing is moved to backbuffer
+        drawer.setColor(tmpColor);
+        drawer.filledRectangle(x, y, w, h);
+        drawer.setColor(Color.WHITE);
     }
 
     private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
@@ -2152,32 +2160,65 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(XTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
+    private void renderTokenOverlay(XTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+
+        var stroke = overlay.getStroke();
+
+        drawer.setColor(tmpColor);
+        drawer.line(x, y, x+w, y+h, stroke.getLineWidth());
+        drawer.line(x, y+h, x+w, y, stroke.getLineWidth());
+        drawer.setColor(Color.WHITE);
     }
 
-    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
+    private void renderTokenOverlay(FlowColorDotTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
+        drawer.setColor(tmpColor);
+        Shape s = overlay.getShape(bounds, token);
+        fill(new Area(s));
+        drawer.setColor(Color.WHITE);
     }
 
-    private void renderTokenOverlay(FlowTriangleTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
+    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
 
-    private void renderTokenOverlay(FlowDiamondTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
+        var color = overlay.getColor();
+        Color.argb8888ToColor(tmpColor, color.getRGB());
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
 
-    private void renderTokenOverlay(FlowColorSquareTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
+        var stroke = overlay.getStroke();
+        var hc = w / 2f;
+        var vc = h * (1 - 0.134f);
 
-    private void renderTokenOverlay(FlowYieldTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
+        var floats = new float[] {
+                x, y + vc,
+                x + w, y + vc,
+                x + hc, y,
+        };
 
-    private void renderTokenOverlay(YieldTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
+        drawer.setColor(tmpColor);
+        drawer.path(floats, stroke.getLineWidth(), JoinType.POINTY, false);
+        drawer.setColor(Color.WHITE);
     }
 
     private void renderTokenOverlay(OTokenOverlay overlay, Token token) {

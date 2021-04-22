@@ -62,7 +62,7 @@ public class FlowColorSquareTokenOverlay extends FlowColorDotTokenOverlay {
    *     net.rptools.maptool.model.Token)
    */
   @Override
-  protected Shape getShape(Rectangle bounds, Token token) {
+  public Shape getShape(Rectangle bounds, Token token) {
     return getFlow().getStateBounds2D(bounds, token, getName());
   }
 }
