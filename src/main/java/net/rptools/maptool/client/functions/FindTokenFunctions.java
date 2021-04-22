@@ -410,8 +410,8 @@ public class FindTokenFunctions extends AbstractFunction {
     JsonArray layers = null;
     if (!jobj.has("layer")) {
       layers = new JsonArray();
-      layers.add(Zone.Layer.TOKEN.toString());
-      layers.add(Zone.Layer.GM.toString());
+      layers.add(Zone.Layer.TOKEN.name());
+      layers.add(Zone.Layer.GM.name());
     } else {
       Object o = jobj.get("layer");
       if (o instanceof JsonArray) {
