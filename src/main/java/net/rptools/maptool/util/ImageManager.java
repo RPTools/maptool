@@ -23,8 +23,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
@@ -51,7 +49,6 @@ public class ImageManager {
 
   /** Cache of images loaded for assets. */
   private static final Map<MD5Key, BufferedImage> imageMap = new HashMap<MD5Key, BufferedImage>();
-  private static final Map<MD5Key, byte[]> textureMap = new HashMap<MD5Key, byte[]>();
 
   /** Additional Soft-reference Cache of images that allows best . */
   private static final Map<MD5Key, BufferedImage> backupImageMap =
@@ -66,13 +63,12 @@ public class ImageManager {
 
   /** The buffered "?" image to display while transferring the image. */
   public static BufferedImage TRANSFERING_IMAGE;
-  public static Texture TRANSFERING_TEXTURE;
+
 
   /** The broken image, a "X" is used for all situations where the asset or image was invalid. */
   private static final String BROKEN_IMAGE_PNG = "net/rptools/maptool/client/image/broken.png";
 
   public static BufferedImage BROKEN_IMAGE;
-  public static Texture BROKEN_TEXTURE;
 
   /** Small and large thread pools for background processing of asset raw image data. */
   private static ExecutorService smallImageLoader = Executors.newFixedThreadPool(1);
@@ -247,45 +243,6 @@ public class ImageManager {
     imageMap.remove(assetId);
   }
 
-  public static byte[] getTexture(MD5Key assetId, ImageObserver... observers) {
-    return getTexture(assetId, null, observers);
-  }
-
-  public static byte[] getTexture(MD5Key assetId, Map<String, Object> hints, ImageObserver... observers) {
-    // Ugg, can't load textures before libgdx app is loaded...
-    if (TRANSFERING_TEXTURE == null)
-      TRANSFERING_TEXTURE = new Texture(Gdx.files.internal(UNKNOWN_IMAGE_PNG));
-
-    if (BROKEN_TEXTURE == null)
-      BROKEN_TEXTURE = new Texture(Gdx.files.internal(BROKEN_IMAGE_PNG));
-
-    if (assetId == null) {
-      return null;
-    }
-
-    synchronized (imageLoaderMutex) {
-      byte[] texture = textureMap.get(assetId);
-
-      if (texture != null) {
-        // System.out.println("here... ");
-        return texture;
-      }
-      // Make note that we're currently processing it
-      // textureMap.put(assetId, TRANSFERING_TEXTURE);
-
-      // Make sure we are informed when it's done loading
-      addObservers(assetId, observers);
-
-      // Force a load of the asset, this will trigger a transfer if the
-      // asset is not available locally
-      if (texture == null) {
-        AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
-      }
-
-      return null;
-    }
-  }
-
   /**
    * Add observers, and associated hints for image loading, to be notified when the asset has
    * completed loading.
@@ -301,51 +258,6 @@ public class ImageManager {
         imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
     observerSet.addAll(Arrays.asList(observers));
   }
-
-  private static class BackgroundTextureLoader implements Runnable {
-    private final Asset asset;
-
-    /**
-     * Create a background image loader to load the asset image using the hints provided.
-     *
-     * @param asset
-     *            Asset to load
-     */
-    public BackgroundTextureLoader(Asset asset) {
-      this.asset = asset;
-    }
-
-    /**
-     * Load the asset raw texture data and notify observers that the image is loaded.
-     */
-    public void run() {
-      log.debug("Loading asset: " + asset.getId());
-      byte[] texture = textureMap.get(asset.getId());
-
-      if ((texture != null) || !MapTool.libgdxLoaded) {
-        // We've somehow already loaded this texture
-        log.debug("Texture wasn't in transit: " + asset.getId());
-        return;
-      }
-
-      try {
-        assert asset.getImage() != null : "asset.getImage() for " + asset.toString() + "returns null?!";
-        texture = asset.getImage();
-      } catch (Exception e) {
-        log.error("BackgroundTextureLoader.run(" + asset.getName() + "," + asset.getId()
-                + "): texture not resolved", e);
-        System.out.println("BackgroundTextureLoader.run(" + asset.getName() + "," + asset.getId()
-                + "): texture not resolved :: " + e);
-        // texture = BROKEN_TEXTURE;
-      }
-
-      synchronized (imageLoaderMutex) {
-        // Replace placeholder with actual image
-        textureMap.put(asset.getId(), texture);
-      }
-    }
-  }
-
 
   /**
    * Load the asset's raw image data into a BufferedImage.
