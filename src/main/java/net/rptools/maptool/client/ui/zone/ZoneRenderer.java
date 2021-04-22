@@ -791,6 +791,18 @@ public class ZoneRenderer extends JComponent
     setViewOffset(getViewOffsetX() + dx, getViewOffsetY() + dy);
   }
 
+  public void moveViewByCells(int dx, int dy) {
+    int gridSize = (int) (zone.getGrid().getSize() * getScale());
+
+    int rawXOffset = getViewOffsetX() + dx * gridSize;
+    int rawYOffset = getViewOffsetY() + dy * gridSize;
+
+    int snappedXOffset = rawXOffset - rawXOffset % gridSize;
+    int snappedYOffset = rawYOffset - rawYOffset % gridSize;
+
+    setViewOffset(snappedXOffset, snappedYOffset);
+  }
+
   public void zoomReset(int x, int y) {
     zoneScale.zoomReset(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
