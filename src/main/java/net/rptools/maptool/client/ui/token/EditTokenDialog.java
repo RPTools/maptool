@@ -1834,12 +1834,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 selectedText = source.getText();
               }
               // TODO: Combine this with the code in MacroButton
-              JTextComponent commandArea =
-                  MapTool.getFrame().getCommandPanel().getCommandTextArea();
-
-              commandArea.setText("/emit " + selectedText);
-              commandArea.requestFocusInWindow();
-              MapTool.getFrame().getCommandPanel().commitCommand();
+              MapTool.getFrame().getCommandPanel().commitCommand("/emit " + selectedText);
+              MapTool.getFrame().getCommandPanel().getCommandTextArea().requestFocusInWindow();
             });
         menu.add(sendAsEmoteItem);
         menu.show((JComponent) e.getSource(), e.getX(), e.getY());

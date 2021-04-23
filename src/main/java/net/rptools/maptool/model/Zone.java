@@ -82,15 +82,15 @@ public class Zone extends BaseModel {
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
-    TOKEN("Token"),
-    GM("Hidden"),
-    OBJECT("Object"),
-    BACKGROUND("Background");
+    TOKEN(),
+    GM(),
+    OBJECT(),
+    BACKGROUND();
 
     private String displayName;
 
-    Layer(String displayName) {
-      this.displayName = displayName;
+    Layer() {
+      displayName = I18N.getString("layer." + name().toLowerCase());
     }
 
     @Override
