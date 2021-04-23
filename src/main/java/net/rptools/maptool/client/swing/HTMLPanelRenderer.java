@@ -14,12 +14,13 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
+import java.util.Collections;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JTextPane;
-import javax.swing.text.Document;
+import javax.swing.text.*;
+import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
 
@@ -68,5 +69,40 @@ public class HTMLPanelRenderer extends JTextPane {
 
   public void render(Graphics g, int x, int y) {
     rendererPane.paintComponent(g, this, null, x, y, size.width, size.height);
+  }
+
+  @Override
+  public boolean contains(Point p) {
+    return super.contains(p.x - getX(), p.y - getY());
+  }
+
+  public void clickAt(Point p) {
+    Point localPoint = new Point(p.x - getX(), p.y - getY());
+    Desktop desktop = java.awt.Desktop.getDesktop();
+    Document doc = getDocument();
+    int pos = viewToModel2D(localPoint);
+
+    if (pos >= 0) {
+      HTMLDocument hdoc = (HTMLDocument) doc;
+      HTMLDocument.RunElement el = (HTMLDocument.RunElement) hdoc.getCharacterElement(pos);
+
+      String href = null;
+      for (Object name : Collections.list(el.getAttributeNames())) {
+        Object value = el.getAttribute(name);
+        if (!(value instanceof SimpleAttributeSet)) continue;
+
+        SimpleAttributeSet attributes = (SimpleAttributeSet) value;
+        href = (String) attributes.getAttribute(HTML.Attribute.HREF);
+      }
+
+      if (href != null) {
+        try {
+          java.net.URI uri = new java.net.URI(href);
+          desktop.browse(uri);
+        } catch (Exception ev) {
+          System.err.println(ev.getMessage());
+        }
+      }
+    }
   }
 }

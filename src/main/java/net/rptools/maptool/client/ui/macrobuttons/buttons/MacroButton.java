@@ -272,7 +272,8 @@ public class MacroButton extends JButton implements MouseListener {
   private void makeDraggable(Cursor cursor) {
     dragSource = DragSource.getDefaultDragSource();
     dgListener = new DGListener(cursor);
-    dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, dgListener);
+    dragSource.createDefaultDragGestureRecognizer(
+        this, DnDConstants.ACTION_COPY_OR_MOVE, dgListener);
     dsListener = new DSListener();
   }
 
@@ -285,7 +286,11 @@ public class MacroButton extends JButton implements MouseListener {
     }
 
     public void dragGestureRecognized(DragGestureEvent dge) {
-      Transferable t = new TransferableMacroButton(MacroButton.this);
+      Transferable t =
+          new TransferableMacroButton(
+              MacroButton.this,
+              dge.getTriggerEvent().getModifiersEx(),
+              System.identityHashCode(panel));
       dge.startDrag(cursor, t, dsListener);
     }
   }

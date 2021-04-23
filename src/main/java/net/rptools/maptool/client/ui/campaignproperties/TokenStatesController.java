@@ -436,12 +436,16 @@ public class TokenStatesController
         formPanel.isSelected(SHOW_GM)
             || formPanel.isSelected(SHOW_OWNER)
             || formPanel.isSelected(SHOW_OTHERS);
+    BooleanTokenOverlay selectedState = (BooleanTokenOverlay) formPanel.getSelectedItem(STATES);
+    boolean hasUniqueUpdateName = false;
+    if (selectedState != null)
+      hasUniqueUpdateName = selectedState.getName().equals(text) || !getNames().contains(text);
     formPanel
         .getButton(ADD)
         .setEnabled(hasName && !getNames().contains(text) && hasImage && hasShow);
     formPanel
         .getButton(UPDATE)
-        .setEnabled(hasName && formPanel.getSelectedItem(STATES) != null && hasShow);
+        .setEnabled(hasName && hasUniqueUpdateName && selectedState != null && hasShow);
   }
 
   /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
