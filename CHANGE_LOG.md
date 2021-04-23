@@ -1,3 +1,34 @@
+# MapTool 1.8.5
+Focus on bug fixes related to previous 1.8 releases plus an improvement to the macro editor.
+
+#Enhancements
+- [#2352][i2352] Token property names now get syntax highlighting
+
+#Bug Fixes
+- [#2522][i2522] Installs will no longer remove previous version.
+- [#2513][i2513] `return(0,0)` could fail to return if `macro.return` was set to 1. Fixed.
+- [#2511][i2511] Using `setTablePickOnce()` on older tables wasn't reset the picked status for entries. Fixed.
+- [#2506][i2506] Assets with empty ID ("") could be stuck as transferring. Fixed.
+- [#2490][i2490] Some assets were being loading with incorrect color space.  Fixed.
+- [#2480][i2480] Inline expansion of URLs wasn't stopping at whitespace. Fixed.
+- [#2471][i2471] Mixed case in build config could createa separate AppHome and log directories. Fixed. 
+- [#2423][i2423] Servers were dropping from server registry.  Fixed.
+- [#2396][i2396] JSON token properties would error silently when referenced by other properties. Fixed.  
+- [#2382][i2382] `moveTokenToMap()` between maps with different distance/cell would put tokens in wrong place. Fixed. 
+
+[i2522]: https://github.com/RPTools/maptool/pull/2522
+[i2513]: https://github.com/RPTools/maptool/pull/2513
+[i2511]: https://github.com/RPTools/maptool/pull/2511
+[i2506]: https://github.com/RPTools/maptool/pull/2506
+[i2490]: https://github.com/RPTools/maptool/pull/2490
+[i2480]: https://github.com/RPTools/maptool/pull/2480
+[i2471]: https://github.com/RPTools/maptool/pull/2471
+[i2423]: https://github.com/RPTools/maptool/pull/2423
+[i2396]: https://github.com/RPTools/maptool/pull/2396
+[i2396]: https://github.com/RPTools/maptool/pull/2396
+[i2382]: https://github.com/RPTools/maptool/pull/2382
+[i2352]: https://github.com/RPTools/maptool/pull/2352
+
 # MapTool 1.8.4
 Focus on bug fixes related to 1.8.3 release.
 
