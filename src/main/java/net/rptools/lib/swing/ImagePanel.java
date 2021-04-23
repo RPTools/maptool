@@ -392,7 +392,8 @@ public class ImagePanel extends JComponent
     if (width < gridSize + gridPadding.width * 2) {
       rowCount = model.getImageCount();
     } else {
-      rowCount = model.getImageCount() / (width / itemWidth);
+      int itemsPerRow = width / itemWidth;
+      rowCount = (int) Math.ceil(model.getImageCount() / (float) itemsPerRow);
     }
     int height = rowCount * itemHeight;
     return new Dimension(width, height);

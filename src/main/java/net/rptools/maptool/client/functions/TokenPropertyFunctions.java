@@ -918,14 +918,14 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   public static Zone.Layer getLayer(String layerName) throws ParserException {
     Zone.Layer layer;
-    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.toString())) {
+    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.name())) {
       layer = Zone.Layer.TOKEN;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.name())) {
       layer = Zone.Layer.BACKGROUND;
-    } else if (layerName.equalsIgnoreCase("gm")
-        || layerName.equalsIgnoreCase(Zone.Layer.GM.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.GM.name())
+        || layerName.equalsIgnoreCase("hidden")) {
       layer = Zone.Layer.GM;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.name())) {
       layer = Zone.Layer.OBJECT;
     } else {
       throw new ParserException(

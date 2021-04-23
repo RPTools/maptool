@@ -14,21 +14,20 @@
  */
 package net.rptools.maptool.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.jayway.jsonpath.JsonPath;
+import com.google.gson.*;
 import java.io.*;
 import java.net.*;
-import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,26 +35,19 @@ public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
   private static final String GIT_HUB_RELEASES = "github.api.releases";
+  private static final String GIT_HUB_LATEST_RELEASE = "github.api.releases.latest";
   private static final String GIT_HUB_OAUTH_TOKEN =
       "github.api.oauth.token"; // Grants read-only access to public information
 
   /**
    * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
-   * the update should not be ignored, give a prompt to update. If current version is a release,
-   * update to the most recent release. If the current version is a pre-release, update to the most
-   * recent version (pre-release or release).
+   * the update should not be ignored, give a prompt to update.
    *
    * @return has an update been made
    */
   public static boolean gitHubReleases() {
     // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.getSkipAutoUpdate()) return false;
-    String strURL = getProperty(GIT_HUB_RELEASES);
-    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
-
-    String jarCommit;
-    String latestGitHubReleaseCommit;
-    String latestGitHubReleaseTagName;
 
     // Default for Linux?
     String DOWNLOAD_EXTENSION = ".deb";
@@ -63,78 +55,54 @@ public class AppUpdate {
     if (AppUtil.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
     else if (AppUtil.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
 
-    // Get current commit from JAR Manifest
-    jarCommit = getCommitSHA();
-
-    // If we don't have a commit attribute from JAR, we're done!
-    if (jarCommit == null) {
-      log.info("No commit SHA (running in DEVELOPMENT mode?): " + strRequest);
+    String runningVersion = getImplementationVersion();
+    if (StringUtils.isBlank(runningVersion)) {
+      log.info("Blank implementation version detected, not checking for updates.");
       return false;
     }
 
-    String strReleases = getReleases();
-    // If can't access the list of releases, we're done
-    if (strReleases == null) return false;
-
-    JsonObject release;
-    try {
-      // Get pre-release information regarding MapTool version from github list
-      String path = "$.[?(@.target_commitish == '" + jarCommit + "')].prerelease";
-      List<Boolean> listMatches = JsonPath.parse(strReleases).read(path);
-      boolean prerelease = listMatches.isEmpty() || listMatches.get(0);
-
-      if (prerelease) {
-        JsonArray releasesArray =
-            JSONMacroFunctions.getInstance().asJsonElement(strReleases).getAsJsonArray();
-        release = releasesArray.get(0).getAsJsonObject(); // the latest release is at top of list
-      } else {
-        path = "$.[?(@.prerelease == false)]";
-        listMatches = JsonPath.parse(strReleases).read(path); // get sublist of releases
-        release =
-            JSONMacroFunctions.getInstance().asJsonElement(listMatches.get(0)).getAsJsonObject();
-      }
-      latestGitHubReleaseCommit = release.get("target_commitish").getAsString();
-      log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
-      latestGitHubReleaseTagName = release.get("tag_name").getAsString();
-      log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
-    } catch (Exception e) {
-      log.error("Unable to parse JSON payload from GitHub...", e);
+    Optional<JsonObject> latestReleaseOpt = getLatestReleaseInfo();
+    if (latestReleaseOpt.isEmpty()) return false;
+    JsonObject latestRelease = latestReleaseOpt.get();
+    if (!latestRelease.has("id") || !latestRelease.has("tag_name")) {
+      log.info("Github payload missing required fields??? Aborting update check.");
+      return false;
+    }
+    String latestReleaseId = latestRelease.get("id").getAsString();
+    String latestReleaseVersion = latestRelease.get("tag_name").getAsString();
+    if (StringUtils.isBlank(latestReleaseVersion)) {
+      log.info("Unable to detect latest version from GitHub payload, aborting comparison.");
       return false;
     }
 
-    // If the commits are the same or we were told to skip this update, we're done!
-    if (jarCommit.equals(latestGitHubReleaseCommit)
-        || AppPreferences.getSkipAutoUpdateCommit().equals(latestGitHubReleaseCommit)) return false;
+    if (!AppPreferences.getSkipAutoUpdateRelease().equals(latestReleaseId)
+        && ModelVersionManager.isBefore(runningVersion, latestReleaseVersion)) {
+      JsonArray releaseAssets = latestRelease.get("assets").getAsJsonArray();
 
-    JsonArray releaseAssets = release.get("assets").getAsJsonArray();
-    String assetDownloadURL = null;
-    JsonObject asset;
+      for (JsonElement elem : releaseAssets) {
+        JsonObject asset = elem.getAsJsonObject();
+        String assetName = asset.get("name").getAsString();
+        log.info("Asset: {}", assetName);
 
-    for (int i = 0; i < releaseAssets.size(); ++i) {
-      asset = releaseAssets.get(i).getAsJsonObject();
-
-      log.info("Asset: " + asset.get("name").getAsString());
-
-      if (asset.get("name").getAsString().toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
-        assetDownloadURL = asset.get("browser_download_url").getAsString();
-        final long assetDownloadSize = asset.get("size").getAsLong();
-
-        if (assetDownloadURL != null) {
-          log.info("Download: " + assetDownloadURL);
-
-          try {
-            URL url = new URL(assetDownloadURL);
-            String commit = latestGitHubReleaseCommit;
-            String tagName = latestGitHubReleaseTagName;
-            SwingUtilities.invokeLater(
-                () -> {
-                  if (showMessage(commit, tagName)) downloadFile(url, assetDownloadSize);
-                });
-          } catch (MalformedURLException e) {
-            log.error("Error with URL " + assetDownloadURL, e);
+        if (assetName.toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
+          JsonElement assetDownloadElem = asset.get("browser_download_url");
+          JsonElement assetSizeElem = asset.get("size");
+          if (assetDownloadElem != null && assetSizeElem != null) {
+            String assetDownloadURL = assetDownloadElem.getAsString();
+            final long assetDownloadSize = assetSizeElem.getAsLong();
+            log.info("Download URL: {}", assetDownloadURL);
+            try {
+              URL url = new URL(assetDownloadURL);
+              SwingUtilities.invokeLater(
+                  () -> {
+                    if (showMessage(latestReleaseId, latestReleaseVersion))
+                      downloadFile(url, assetDownloadSize);
+                  });
+            } catch (MalformedURLException e) {
+              log.error("Error with download URL.", e);
+            }
+            return true;
           }
-
-          return true;
         }
       }
     }
@@ -165,10 +133,41 @@ public class AppUpdate {
   }
 
   /**
+   * Get the release info from the GitHub /releases/latest endpoint. The GitHub API docs define
+   * "latest" as:
+   *
+   * <blockquote>
+   *
+   * ...the most recent non-prerelease, no-draft release, sorted by the `created_at` attribute. The
+   * `created_at` attribute is the date of the commit used for the release, and not the date when
+   * the release was drafted or published.
+   *
+   * </blockquote>
+   *
+   * @return a JsonObject representing the latest release, if one could be retrieved
+   */
+  private static Optional<JsonObject> getLatestReleaseInfo() {
+    String strURL = getProperty(GIT_HUB_LATEST_RELEASE);
+    try {
+      Request request = new Request.Builder().url(strURL).build();
+      Response response = new OkHttpClient().newCall(request).execute();
+      String bodyStr = response.body().string();
+      return Optional.of(JsonParser.parseString(bodyStr).getAsJsonObject());
+    } catch (IOException e) {
+      log.error("Unable to reach {}: {}", strURL, e.getLocalizedMessage());
+      return Optional.empty();
+    } catch (IllegalStateException e1) {
+      log.error("Error parsing JSON response from releases/latest.", e1);
+      return Optional.empty();
+    }
+  }
+
+  /**
    * Get the latest commit SHA from MANIFEST.MF
    *
    * @return the String of the commit SHA, or null if IOException
    */
+  @Deprecated
   public static String getCommitSHA() {
     String jarCommit = "";
 
@@ -189,7 +188,35 @@ public class AppUpdate {
     return jarCommit;
   }
 
-  private static boolean showMessage(String commit, String tagName) {
+  /**
+   * Inspects the Manifest to get the Implementation Version of the currently running MapTool
+   * application. This Manifest property is set by gradle to the current git tag at build time, so
+   * it makes a good value for comparison in release version checks.
+   *
+   * @return the version of MT currently running (as determined from the Manifest)
+   */
+  public static String getImplementationVersion() {
+    String version;
+    ClassLoader cl = MapTool.class.getClassLoader();
+    try {
+      URL url = cl.getResource("META-INF/MANIFEST.MF");
+      Manifest manifest = new Manifest(url.openStream());
+
+      Attributes attr = manifest.getMainAttributes();
+      version = attr.getValue("Implementation-Version");
+      log.info("Implementation-Version from Manifest: " + version);
+      version = ModelVersionManager.cleanVersionNumber(version);
+      log.info("Cleaned version: " + version);
+    } catch (IOException e) {
+      log.error(
+          "No Implementation-Version attribute found in MANIFEST.MF, skip looking for updates...",
+          e);
+      return null;
+    }
+    return version;
+  }
+
+  private static boolean showMessage(String releaseId, String tagName) {
     JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
 
     String title = I18N.getText("Update.title");
@@ -215,7 +242,7 @@ public class AppUpdate {
 
     if (dontAsk) AppPreferences.setSkipAutoUpdate(true);
 
-    if (result == JOptionPane.CANCEL_OPTION) AppPreferences.setSkipAutoUpdateCommit(commit);
+    if (result == JOptionPane.CANCEL_OPTION) AppPreferences.setSkipAutoUpdateRelease(releaseId);
 
     return (result == JOptionPane.YES_OPTION);
   }

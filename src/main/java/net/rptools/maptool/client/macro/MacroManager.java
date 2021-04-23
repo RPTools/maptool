@@ -22,6 +22,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.client.functions.AboutMacro;
 import net.rptools.maptool.client.functions.AssertFunction;
+import net.rptools.maptool.client.functions.ReturnFunction;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -197,7 +198,7 @@ public class MacroManager {
         context.addTransform(command);
         continue;
       }
-    } catch (AbortFunction.AbortFunctionException afe) {
+    } catch (AbortFunction.AbortFunctionException | ReturnFunction.ReturnFunctionException fe) {
       // Do nothing, just silently exit
       return;
     } catch (AssertFunction.AssertFunctionException afe) {

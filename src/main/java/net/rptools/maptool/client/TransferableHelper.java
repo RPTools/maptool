@@ -18,10 +18,12 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -285,8 +287,14 @@ public class TransferableHelper extends TransferHandler {
     for (Object working : assets) {
       if (working instanceof Asset) {
         Asset asset = (Asset) working;
-        if (!AssetManager.hasAsset(asset)) AssetManager.putAsset(asset);
-        if (!MapTool.getCampaign().containsAsset(asset)) MapTool.serverCommand().putAsset(asset);
+        if (!asset.getId().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
+          if (!AssetManager.hasAsset(asset)) {
+            AssetManager.putAsset(asset);
+          }
+          if (!MapTool.getCampaign().containsAsset(asset)) {
+            MapTool.serverCommand().putAsset(asset);
+          }
+        }
       }
     }
     return assets;
@@ -400,14 +408,47 @@ public class TransferableHelper extends TransferHandler {
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
         } else {
-          Asset temp = AssetManager.createAsset(url);
-          if (temp != null) // `null' means no image available
-          assets.add(temp);
-          else if (log.isInfoEnabled()) log.info("No image available for " + url);
+          if (!checkValidType(url)) {
+            MapTool.showError("dragdrop.unsupportedType");
+            assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
+          } else {
+            Asset temp = AssetManager.createAsset(url);
+            if (temp != null) // `null' means no image available
+            assets.add(temp);
+            else if (log.isInfoEnabled()) log.info("No image available for " + url);
+          }
         }
       }
     }
     return assets;
+  }
+
+  private static boolean checkValidType(URL url) throws IOException {
+    String ftype = Files.probeContentType(new File(url.getPath()).toPath());
+    if (ftype == null) {
+      return false;
+    }
+
+    if (ftype.startsWith("audio/")) {
+      return true;
+    }
+
+    if (ftype.startsWith("image/")) {
+      return true;
+    }
+
+    switch (ftype) {
+      case "text/html":
+      case "text/markdown":
+      case "text/plain":
+      case "application/pdf":
+      case "text/javascript":
+      case "text/css":
+      case "application/json":
+        return true;
+    }
+
+    return false;
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)

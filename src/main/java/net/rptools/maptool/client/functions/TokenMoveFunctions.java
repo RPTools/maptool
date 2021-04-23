@@ -170,7 +170,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
       if ((parameters.size() == 1) || parameters.size() == 2) {
         String targetToken = (String) parameters.get(0);
-        String jsonPath = (String) (parameters.size() == 2 ? parameters.get(1) : "");
+        String jsonPath = parameters.size() == 2 ? parameters.get(1).toString() : "";
         target = zone.resolveToken(targetToken);
         if (target == null) {
           throw new ParserException(

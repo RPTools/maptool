@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import javax.imageio.ImageIO;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.maptool.model.Token;
 import net.tsc.servicediscovery.ServiceGroup;
@@ -54,20 +55,18 @@ public class AppConstants {
   public static final int NOTE_PORTRAIT_SIZE = 200;
   public static final int ASSET_SEARCH_LIMIT = 1000;
 
+  public static final String[] IMAGE_FILES = ImageIO.getReaderFormatNames();
   public static final FilenameFilter IMAGE_FILE_FILTER =
       (dir, name) -> {
         name = name.toLowerCase();
-        // I can drop TIFF files into TokenTool and it works. Should that extension be
-        // added here? The question is really whether the Java2D libraries can read TIFF
-        // or my desktop GUI is converting the image during the drop operation... FJE
-        return name.endsWith(".bmp")
-            || name.endsWith(".png")
-            || name.endsWith(".gif")
-            || name.endsWith(".jpg")
-            || name.endsWith(".jpeg")
-            ||
-            // name.endsWith(".pdf") || name.endsWith(".por") ||
-            name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
+        for (String suffix : IMAGE_FILES) {
+          if (name.endsWith("." + suffix)) {
+            return true;
+          }
+        }
+        return
+        // name.endsWith(".pdf") || name.endsWith(".por") ||
+        name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
       };
 
   public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";

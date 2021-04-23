@@ -20,8 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
@@ -29,6 +28,7 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 
 /**
  * Represents a JDialog holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
@@ -85,6 +85,15 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       return dialogs.get(name).isVisible();
     }
     return false;
+  }
+
+  /**
+   * Gets an unmodifiable set view of the names of all known dialogs.
+   *
+   * @return the dialog names
+   */
+  public static Set<String> getDialogNames() {
+    return Collections.unmodifiableSet(dialogs.keySet());
   }
 
   /**
@@ -246,9 +255,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * Return a json with the width, height, temporary variable and title of the dialog
    *
    * @param name The name of the frame.
-   * @return A json with the width, height, temporary, title, and value of dialog
+   * @return A json with the width, height, temporary, title, and value of dialog, if one was found
    */
-  public static Object getDialogProperties(String name) {
+  public static Optional<JsonObject> getDialogProperties(String name) {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
       JsonObject dialogProperties = new JsonObject();
@@ -256,9 +265,16 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialogProperties.addProperty("width", dialog.getWidth());
       dialogProperties.addProperty("height", dialog.getHeight());
       dialogProperties.addProperty(
-          "temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+          "temporary", FunctionUtil.getDecimalForBoolean(dialog.getTemporary()));
       dialogProperties.addProperty("title", dialog.getTitle());
-
+      dialogProperties.addProperty(
+          "visible", FunctionUtil.getDecimalForBoolean(dialog.isVisible()));
+      dialogProperties.addProperty(
+          "noframe", FunctionUtil.getDecimalForBoolean(dialog.isUndecorated()));
+      dialogProperties.addProperty("input", FunctionUtil.getDecimalForBoolean(dialog.input));
+      dialogProperties.addProperty(
+          "closebutton", FunctionUtil.getDecimalForBoolean(dialog.isAncestorOf(dialog.closePanel)));
+      dialogProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(dialog.isHTML5));
       Object dialogValue = dialog.getValue();
       if (dialogValue == null) {
         dialogValue = "";
@@ -273,9 +289,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       }
       dialogProperties.add("value", JSONMacroFunctions.getInstance().asJsonElement(dialogValue));
 
-      return dialogProperties;
+      return Optional.of(dialogProperties);
     } else {
-      return "";
+      return Optional.empty();
     }
   }
 
