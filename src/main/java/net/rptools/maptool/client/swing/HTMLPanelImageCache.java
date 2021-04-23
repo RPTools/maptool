@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -26,9 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,33 +59,11 @@ public class HTMLPanelImageCache extends Dictionary<URL, Image> {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          log.error("HTMLPanelImageCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          log.debug("HTMLPanelImageCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
           return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
-        // Look for size request
-        int index = path.indexOf('-');
-        int size = -1;
-        if (index >= 0) {
-          String szStr = path.substring(index + 1);
-          path = path.substring(0, index);
-          size = Integer.parseInt(szStr);
-        }
-        image = ImageManager.getImageAndWait(new MD5Key(path));
-
-        if (size > 0) {
-          Dimension sz = new Dimension(image.getWidth(null), image.getHeight(null));
-          SwingUtil.constrainTo(sz, size);
-
-          BufferedImage img =
-              new BufferedImage(sz.width, sz.height, ImageUtil.pickBestTransparency(image));
-          Graphics2D g = img.createGraphics();
-          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-          g.drawImage(image, 0, 0, sz.width, sz.height, null);
-          g.dispose();
-
-          image = img;
-        }
+        image = ImageManager.getImageFromUrl(url);
       } else {
         try {
           image = ImageIO.read(url);
