@@ -17,6 +17,7 @@ package net.rptools.maptool.util;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -218,6 +219,124 @@ public class ImageManager {
       AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
       return TRANSFERING_IMAGE;
     }
+  }
+
+  /**
+   * Returns an image from an asset:// URL.<br>
+   * The returned image may be scaled based on parameters in the URL:<br>
+   * <b>width</b> - Query parameter. Desired width in px.<br>
+   * <b>height</b> - Query parameter. Desired height in px.<br>
+   * <b>size</b> - A suffix added after the asset id in the form of "-size" where size is a value
+   * indicating the size in px to scale the largest side of the image to, maintaining aspect ratio.
+   * This parameter is ignored if a width or height are present.<br>
+   * (ex. asset://9e9687c80a3c9796b328711df6bd67cf-50)<br>
+   * All parameters expect an integer >0. Any invalid value (a value <= 0 or non-integer) will
+   * result in {@code BROKEN_IMAGE} being returned. Images are only scaled down and if any parameter
+   * exceeds the image's native size the image will be returned unscaled.
+   *
+   * @param url URL to an asset
+   * @return the image, scaled if indicated by the URL, or {@code BROKEN_IMAGE} if url is null, the
+   *     URL protocol is not asset://, or it has invalid parameter values.
+   */
+  public static BufferedImage getImageFromUrl(URL url) {
+    if (url == null || !url.getProtocol().equals("asset")) {
+      return BROKEN_IMAGE;
+    }
+
+    String id = url.getHost();
+    String query = url.getQuery();
+    BufferedImage image;
+    int imageW, imageH, scaleW = -1, scaleH = -1, size = -1;
+
+    // Get size parameter
+    int szIndex = id.indexOf('-');
+    if (szIndex != -1) {
+      String szStr = id.substring(szIndex + 1);
+      id = id.substring(0, szIndex);
+      try {
+        size = Integer.parseInt(szStr);
+      } catch (NumberFormatException nfe) {
+        // Do nothing
+      }
+      if (size <= 0) {
+        return BROKEN_IMAGE;
+      }
+    }
+
+    // Get query parameters
+    if (query != null && !query.isEmpty()) {
+      HashMap<String, String> params = new HashMap<>();
+
+      for (String param : query.split("&")) {
+        if (param.isBlank()) continue;
+
+        int eqIndex = param.indexOf("=");
+        if (eqIndex != -1) {
+          String k, v;
+          k = param.substring(0, eqIndex).trim();
+          v = param.substring(eqIndex + 1).trim();
+          params.put(k, v);
+        } else {
+          params.put(param.trim(), "");
+        }
+      }
+
+      if (params.containsKey("width")) {
+        size = -1; // Don't use size param if width is present
+        try {
+          scaleW = Integer.parseInt(params.get("width"));
+        } catch (NumberFormatException nfe) {
+          // Do nothing
+        }
+        if (scaleW <= 0) {
+          return BROKEN_IMAGE;
+        }
+      }
+
+      if (params.containsKey("height")) {
+        size = -1; // Don't use size param if height is present
+        try {
+          scaleH = Integer.parseInt(params.get("height"));
+        } catch (NumberFormatException nfe) {
+          // Do nothing
+        }
+        if (scaleH <= 0) {
+          return BROKEN_IMAGE;
+        }
+      }
+    }
+
+    image = getImageAndWait(new MD5Key(id), null);
+    imageW = image.getWidth();
+    imageH = image.getHeight();
+
+    // We only want to scale down, so if scaleW or ScaleH are too large just return the image
+    if (scaleW > imageW || scaleH > imageH) {
+      return image;
+    }
+
+    // Note: size will never be >0 if height or width parameters are present
+    if (size > 0) {
+      if (imageW > imageH) {
+        scaleW = size;
+      } else if (imageH > imageW) {
+        scaleH = size;
+      } else {
+        scaleW = scaleH = size;
+      }
+    }
+
+    if ((scaleW > 0 && imageW > scaleW) || (scaleH > 0 && imageH > scaleH)) {
+      // Maintain aspect ratio if one dimension isn't given
+      if (scaleW <= 0) {
+        scaleW = Math.max((int) ((double) scaleH / imageH * imageW), 1);
+      } else if (scaleH <= 0) {
+        scaleH = Math.max((int) ((double) scaleW / imageW * imageH), 1);
+      }
+      image = ImageUtil.scaleBufferedImage(image, scaleW, scaleH);
+    }
+
+    return image;
   }
 
   /**
