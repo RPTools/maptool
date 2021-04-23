@@ -483,6 +483,10 @@ public class TokenBarController
             || formPanel.isSelected(SHOW_OWNER)
             || formPanel.isSelected(SHOW_OTHERS);
     boolean hasImages = false;
+    BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getSelectedItem(BARS);
+    boolean hasUniqueUpdateName = false;
+    if (selectedBar != null)
+      hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
     if (size > 0 && imageCount == size) {
       hasImages = true;
     } else if (size < 0 && imageCount == increments && increments > 0) {
@@ -495,7 +499,7 @@ public class TokenBarController
         .setEnabled(hasName && !getNames().contains(text) && hasImages && hasShow);
     formPanel
         .getButton(UPDATE)
-        .setEnabled(hasName && formPanel.getSelectedItem(BARS) != null && hasShow && hasImages);
+        .setEnabled(hasName && hasUniqueUpdateName && selectedBar != null && hasShow && hasImages);
   }
 
   /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
