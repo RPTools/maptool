@@ -5,7 +5,7 @@
 // Access Git info from build script
 plugins {
     id "application"
-    id "org.ajoberstar.grgit" version "4.0.1"
+    id "org.ajoberstar.grgit" version "4.1.0"
     id "com.diffplug.spotless" version "5.0.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.runtime' version '1.12.4'
@@ -273,13 +273,13 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.31.v20200723'
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.40.v20210413'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.40.v20210413'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.40.v20210413'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
@@ -329,7 +329,7 @@ dependencies {
     implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.2'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
