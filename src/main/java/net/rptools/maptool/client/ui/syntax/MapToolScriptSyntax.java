@@ -14,13 +14,16 @@
  */
 package net.rptools.maptool.client.ui.syntax;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.model.InitiativeList;
+import net.rptools.maptool.model.TokenProperty;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -112,6 +115,14 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
     // Add "Special Variables" as Data Type
     for (String dataType : DATA_TYPES) macroFunctionTokenMap.put(dataType, Token.DATA_TYPE);
+
+    // Add all defined property names as "Variable"
+    for (List<TokenProperty> propsList :
+        MapTool.getCampaign().getCampaignProperties().getTokenTypeMap().values()) {
+      List<String> propertyNames =
+          propsList.stream().map(TokenProperty::getName).collect(Collectors.toList());
+      for (String prop : propertyNames) macroFunctionTokenMap.put(prop, Token.VARIABLE);
+    }
 
     // Add "Roll Options" as Reserved word
     for (String reservedWord : RESERVED_WORDS)
