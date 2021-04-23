@@ -432,11 +432,23 @@ public class PointerTool extends DefaultTool {
     }
   }
 
+  private boolean handledByHover(Point p) {
+    if (!isShowingHover) return false;
+
+    if (htmlRenderer.contains(p)) {
+      htmlRenderer.clickAt(p);
+      return true;
+    }
+    return false;
+  }
+
   // //
   // Mouse
   @Override
   public void mousePressed(MouseEvent e) {
     super.mousePressed(e);
+
+    if (handledByHover(e.getPoint())) return;
 
     mouseButtonDown = true;
 
@@ -1309,6 +1321,11 @@ public class PointerTool extends DefaultTool {
             }
           }
         });
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   /**
@@ -1494,6 +1511,38 @@ public class PointerTool extends DefaultTool {
         }
       }
       isSpaceDown = false;
+    }
+  }
+
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      }
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      List<Token> selectedTokensList = renderer.getSelectedTokensList();
+      for (Token token : selectedTokensList) {
+        if (token == null) {
+          continue;
+        }
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      }
+      MapTool.getFrame().refresh();
     }
   }
 
@@ -1909,6 +1958,8 @@ public class PointerTool extends DefaultTool {
 
       // Content
       htmlRenderer.render(g, location.x, location.y);
+      // Bounds (for handling clicks)
+      htmlRenderer.setBounds(location.x, location.y, size.width, size.height);
 
       // Border
       AppStyle.miniMapBorder.paintAround(g, location.x, location.y, size.width, size.height);

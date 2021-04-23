@@ -124,10 +124,42 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setToolTip(toolTip);
   }
 
+  // exact copy constructor (including UUID!)
+  public MacroButtonProperties(MacroButtonProperties other) {
+    macroUUID = other.macroUUID; // IMPORTANT
+    setCommonMacro(other.commonMacro);
+    setIndex(other.index);
+    setColorKey(other.colorKey);
+    setHotKey(other.hotKey);
+    setCommand(other.command);
+    setLabel(other.label);
+    setGroup(other.group);
+    setSortby(other.sortby);
+    setAutoExecute(other.autoExecute);
+    setIncludeLabel(other.includeLabel);
+    setApplyToTokens(other.applyToTokens);
+    setFontColorKey(other.fontColorKey);
+    setFontSize(other.fontSize);
+    setMinWidth(other.minWidth);
+    setMaxWidth(other.maxWidth);
+    setButton(other.button);
+    setTokenId(other.tokenId);
+    setSaveLocation(other.saveLocation);
+    setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(other.displayHotKey);
+    setCompareGroup(other.compareGroup);
+    setCompareSortPrefix(other.compareSortPrefix);
+    setCompareCommand(other.compareCommand);
+    setCompareIncludeLabel(other.compareIncludeLabel);
+    setCompareAutoExecute(other.compareAutoExecute);
+    setCompareApplyToSelectedTokens(other.compareApplyToSelectedTokens);
+    setToolTip(other.toolTip);
+  }
+
   // constructor that creates a new instance, doesn't auto save
   public MacroButtonProperties(int index) {
     setIndex(index);
-    setColorKey("");
+    setColorKey("default");
     setHotKey(MacroButtonHotKeyManager.HOTKEYS[0]);
     setCommand("");
     setLabel("(new)");
@@ -449,10 +481,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String oldText = commandArea.getText();
 
       if (getIncludeLabel()) {
-        String commandToExecute = getLabel();
-        commandArea.setText(impersonatePrefix + commandToExecute);
-
-        MapTool.getFrame().getCommandPanel().commitCommand();
+        MapTool.getFrame().getCommandPanel().commitCommand(impersonatePrefix + getLabel());
       }
 
       String commandsToExecute[] = parseMultiLineCommand(getCommand());
@@ -463,7 +492,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String loc;
       for (String command : commandsToExecute) {
         // If we aren't auto execute, then append the text instead of replace it
-        commandArea.setText(impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command);
+        command = impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command;
         if (getAutoExecute()) {
           boolean trusted = false;
           if (allowPlayerEdits == null) {
@@ -494,7 +523,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             loc = MapToolLineParser.CHAT_INPUT;
           }
           MapToolMacroContext newMacroContext = new MapToolMacroContext(label, loc, trusted, index);
-          MapTool.getFrame().getCommandPanel().commitCommand(newMacroContext);
+          MapTool.getFrame().getCommandPanel().commitCommand(command, newMacroContext);
+        } else {
+          commandArea.setText(command);
         }
       }
       commandArea.requestFocusInWindow();

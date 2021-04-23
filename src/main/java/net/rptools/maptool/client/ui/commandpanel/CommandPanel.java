@@ -673,17 +673,6 @@ public class CommandPanel extends JPanel
     }
   }
 
-  /*
-   * FIXME: this is insufficient for stopping faked rolls; the user can still do something like &{"laquo;"}.
-   */
-  public static final Pattern CHEATER_PATTERN =
-      Pattern.compile("\u00AB|\u00BB|&#171;?|&#187;?|&laquo;?|&raquo;?|&#xAB;?|&#xBB;?|\036|\037");
-
-  /** Execute the command in the command field. */
-  public void commitCommand() {
-    commitCommand(null);
-  }
-
   /**
    * Disables the chat notification toggle if the GM enforces notification
    *
@@ -698,55 +687,77 @@ public class CommandPanel extends JPanel
     }
   }
 
-  /**
-   * Execute the command in the command field.
-   *
-   * @param macroContext The context we are calling the macro in.
+  /*
+   * FIXME: this is insufficient for stopping faked rolls; the user can still do something like &{"laquo;"}.
    */
-  public void commitCommand(MapToolMacroContext macroContext) {
-    String text = commandTextArea.getText().trim();
-    if (text.length() == 0) {
-      return;
-    }
+  public static final Pattern CHEATER_PATTERN =
+      Pattern.compile("\u00AB|\u00BB|&#171;?|&#187;?|&laquo;?|&raquo;?|&#xAB;?|&#xBB;?|\036|\037");
+
+  /** Execute the command in the command field. */
+  public void commitCommand() {
+    String command = commandTextArea.getText().trim();
     // Command history
     // Don't store up a bunch of repeats
-    if (commandHistory.size() == 0 || !text.equals(commandHistory.get(commandHistory.size() - 1))) {
-      commandHistory.add(text);
+    if (commandHistory.size() == 0
+        || !command.equals(commandHistory.get(commandHistory.size() - 1))) {
+      commandHistory.add(command);
       typedCommandBuffer = null;
     }
     commandHistoryIndex = commandHistory.size();
 
+    commitCommand(command, null);
+    commandTextArea.setText("");
+    MapTool.serverCommand().setLiveTypingLabel(MapTool.getPlayer().getName(), false);
+  }
+
+  /**
+   * Execute the given command
+   *
+   * @param command The command to execute
+   */
+  public void commitCommand(String command) {
+    commitCommand(command, null);
+  }
+
+  /**
+   * Execute the given command
+   *
+   * @param command The command to execute
+   * @param macroContext The context we are calling the macro in.
+   */
+  public void commitCommand(String command, MapToolMacroContext macroContext) {
+    command = command.trim();
+    if (command.length() == 0) {
+      return;
+    }
+
     // Detect whether the person is attempting to fake rolls.
-    if (CHEATER_PATTERN.matcher(text).find()) {
+    if (CHEATER_PATTERN.matcher(command).find()) {
       MapTool.addServerMessage(TextMessage.me(null, "Cheater. You have been reported."));
       MapTool.serverCommand()
           .message(
               TextMessage.gm(
-                  null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + text));
-      commandTextArea.setText("");
+                  null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + command));
       return;
     }
     // Make sure they aren't trying to break out of the div
     // FIXME: as above, </{"div"}> can be used to get around this
-    int divCount = StringUtil.countOccurances(text, "<div");
-    int closeDivCount = StringUtil.countOccurances(text, "</div>");
+    int divCount = StringUtil.countOccurances(command, "<div");
+    int closeDivCount = StringUtil.countOccurances(command, "</div>");
     while (closeDivCount < divCount) {
-      text += "</div>";
+      command += "</div>";
       closeDivCount++;
     }
     if (closeDivCount > divCount) {
       MapTool.addServerMessage(
           TextMessage.me(null, "Unexpected &lt;/div&gt; tag without matching &lt;div&gt;."));
-      commandTextArea.setText("");
       return;
     }
-    if (text.charAt(0) != '/') {
+    if (command.charAt(0) != '/') {
       // Assume a "SAY"
-      text = "/s " + text;
+      command = "/s " + command;
     }
-    MacroManager.executeMacro(text, macroContext);
-    commandTextArea.setText("");
-    MapTool.serverCommand().setLiveTypingLabel(MapTool.getPlayer().getName(), false);
+    MacroManager.executeMacro(command, macroContext);
   }
 
   public void clearMessagePanel() {
@@ -901,9 +912,7 @@ public class CommandPanel extends JPanel
             @Override
             public void mouseClicked(MouseEvent e) {
               if (cancelBounds != null && cancelBounds.contains(e.getPoint())) {
-                JTextPane commandArea = getCommandTextArea();
-                commandArea.setText("/im");
-                MapTool.getFrame().getCommandPanel().commitCommand();
+                MapTool.getFrame().getCommandPanel().commitCommand("/im");
               }
             }
           });
@@ -981,25 +990,6 @@ public class CommandPanel extends JPanel
                 requestFocusInWindow();
               }
             });
-  }
-
-  /**
-   * Convenience method to run a command with ability to preserve the text in the commandTextArea.
-   *
-   * @param command Command string
-   * @param preserveOldText true for preserving, false to remove the old text
-   */
-  public void quickCommit(String command, boolean preserveOldText) {
-    String oldText = commandTextArea.getText();
-    commandTextArea.setText(command);
-    commitCommand();
-    if (preserveOldText) {
-      commandTextArea.setText(oldText);
-    }
-  }
-
-  public void quickCommit(String command) {
-    quickCommit(command, true);
   }
 
   /*
