@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '14' ]
+        java: [ '16' ]
       fail-fast: false
     steps:
       #       ____          _  __     __   ___        ____                __
@@ -27,8 +27,9 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@v2
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
+        distribution: 'adopt'
         java-version: ${{ matrix.java }}
     - name: Cache Gradle
       uses: actions/cache@v1
@@ -44,6 +45,7 @@ jobs:
     - name: Copy the RPM to the location required to build the ArchLinux package
       if: matrix.os == 'ubuntu-latest'
       run: cp releases/maptool-*.rpm package/archlinux/maptool/maptool.rpm
+      continue-on-error: true
     - name: Build ArchLinux package
       uses: 2m/arch-pkgbuild-builder@v1.16
       # This only even makes sense on Ubuntu.
@@ -70,6 +72,7 @@ jobs:
       run: |
         cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
         cp releases/MapTool*.msi releases/MapTool-${{ github.event.release.tag_name }}.msi
+      continue-on-error: true
     - name: Upload Windows EXE Release Asset
       id: upload-release-asset-exe
       uses: actions/upload-release-asset@v1
@@ -115,6 +118,7 @@ jobs:
         cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
         cp releases/maptool*_amd64.deb releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
         cp package/archlinux/maptool/maptool-*-x86_64.pkg.tar.zst releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+      continue-on-error: true
     - name: Upload Linux RPM Release Asset
       id: upload-release-asset-rpm
       uses: actions/upload-release-asset@v1
@@ -159,6 +163,7 @@ jobs:
       run: |
         cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
         cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
+      continue-on-error: true
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1

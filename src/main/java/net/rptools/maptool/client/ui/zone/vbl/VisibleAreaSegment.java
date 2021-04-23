@@ -126,17 +126,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   ////
   // COMPARABLE
   public int compareTo(@NotNull VisibleAreaSegment o) {
-    if (o != this) {
-      // Jamz: We're getting the following exception from this compare:
-      // java.lang.IllegalArgumentException: Comparison method violates its general contract!
-      // So we changed getDistanceFromOrigin() to return a long after multiplying by 1000 for
-      // precision
-      long odist = o.getDistanceSqFromOrigin();
-      long val = getDistanceSqFromOrigin() - odist; // separate variable for debugging
-      return (int) val;
-      // return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
-      // return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
-    }
-    return 0;
+    return Long.compare(getDistanceSqFromOrigin(), o.getDistanceSqFromOrigin());
   }
 }

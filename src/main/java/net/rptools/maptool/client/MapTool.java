@@ -87,6 +87,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
@@ -676,7 +677,7 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new LocalPlayer("", Player.Role.GM, "");
+    player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -766,7 +767,7 @@ public class MapTool {
       if (!player.equals(MapTool.getPlayer())) {
         String msg =
             MessageFormat.format(I18N.getText("msg.info.playerConnected"), player.getName());
-        addLocalMessage("<span style='color:#0000ff'><i>" + msg + "</i></span>");
+        addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
       }
     }
   }
@@ -789,7 +790,7 @@ public class MapTool {
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
           MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
-      addLocalMessage("<span style='color:#0000ff'><i>" + msg + "</i></span>");
+      addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
     }
   }
 
@@ -1044,8 +1045,10 @@ public class MapTool {
     // Registered ?
     if (config.isServerRegistered() && !config.isPersonalServer()) {
       try {
-        int result = MapToolRegistry.registerInstance(config.getServerName(), config.getPort());
-        if (result == 3) {
+        MapToolRegistry.RegisterResponse result =
+            MapToolRegistry.getInstance()
+                .registerInstance(config.getServerName(), config.getPort());
+        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         }
         // TODO: I don't like this
@@ -1159,7 +1162,9 @@ public class MapTool {
 
     // Connect to server
     MapTool.createConnection(
-        "localhost", config.getPort(), new LocalPlayer(username, Player.Role.GM, null));
+        "localhost",
+        config.getPort(),
+        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
@@ -1225,7 +1230,7 @@ public class MapTool {
     // Unregister ourselves
     if (server != null && server.getConfig().isServerRegistered() && !isPersonalServer) {
       try {
-        MapToolRegistry.unregisterInstance(server.getConfig().getPort());
+        MapToolRegistry.getInstance().unregisterInstance();
       } catch (Throwable t) {
         MapTool.showError("While unregistering server instance", t);
       }
@@ -1244,8 +1249,7 @@ public class MapTool {
         .setStatus(ConnectionStatusPanel.Status.disconnected);
 
     if (!isPersonalServer) {
-      addLocalMessage(
-          "<span style='color:blue'><i>" + I18N.getText("msg.info.disconnected") + "</i></span>");
+      addLocalMessage(MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.disconnected")));
     }
   }
 
@@ -1333,13 +1337,6 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
-
-    // Check to see status of start up configuration
-    if (AppSetup.didStartupPreferencesGetCopied()) {
-      MapTool.showInformation("startup.config.checkConfigMessage");
-    } else if (AppSetup.didCopyPreviousStartupPreferences()) {
-      MapTool.showInformation("startup.config.copiedPrevious");
-    }
   }
 
   /**
@@ -1782,13 +1779,20 @@ public class MapTool {
     // File f = AppUtil.getAppHome("config");
     // if (f.exists()) {
     // File f2 = new File(f, "Default.theme");
-    if (f2.exists() && Theme.loadTheme(f2)) {
+    if (f2 != null && f2.exists() && Theme.loadTheme(f2)) {
       // re-install the Tiny Look and Feel
       UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
       // Update the ComponentUIs for all Components. This
       // needs to be invoked for all windows.
       // SwingUtilities.updateComponentTreeUI(rootWindow);
+    } else {
+      showMessage(
+          "msg.error.cantLoadTheme",
+          "msg.error.cantLoadThemeTitle",
+          JOptionPane.WARNING_MESSAGE,
+          AppUtil.getThemeName());
+      AppUtil.setThemeName(AppConstants.DEFAULT_THEME_NAME);
     }
     // }
   }

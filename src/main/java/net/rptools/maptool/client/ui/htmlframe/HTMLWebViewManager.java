@@ -171,7 +171,7 @@ public class HTMLWebViewManager {
           + " https://ajax.googleapis.com " // Google CDN
           + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
           + " 'unsafe-inline' 'unsafe-eval' ; "
-          + " img-src *; "
+          + " img-src * asset: ; "
           + " font-src https://fonts.gstatic.com 'self'"
           + "\">\n";
 
