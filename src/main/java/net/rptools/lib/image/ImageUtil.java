@@ -448,4 +448,22 @@ public class ImageUtil {
 
     return new ImageIcon(icon.getImage().getScaledInstance(nw, nh, Image.SCALE_DEFAULT));
   }
+
+  /**
+   * Scales a BufferedImage to a desired width and height and returns the result.
+   *
+   * @param image The BufferedImage to be scaled
+   * @param width Desired width in px
+   * @param height Desired height in px
+   * @return The scaled BufferedImage
+   */
+  public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
+    BufferedImage scaled = new BufferedImage(width, height, image.getType());
+    Graphics2D g = scaled.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    g.drawImage(image, 0, 0, width, height, null);
+    g.dispose();
+
+    return scaled;
+  }
 }
