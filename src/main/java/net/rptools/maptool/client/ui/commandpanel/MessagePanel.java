@@ -223,7 +223,8 @@ public class MessagePanel extends JPanel {
           // output = output.replaceAll("(^|\\s|>|\002)(https?://[\\w.%-/~?&+#=]+)", "$1<a
           // href='$2'>$2</a>");
           output =
-              output.replaceAll("(^|\\s|>|\002)(https?://[^<>\002\003]+)", "$1<a href='$2'>$2</a>");
+              output.replaceAll(
+                  "(^|\\s|>|\002)(https?://[^<>\002\003\\s]+)", "$1<a href='$2'>$2</a>");
 
           if (!message.getSource().equals(MapTool.getPlayer().getName())) {
             // TODO change this so 'macro' is case-insensitive

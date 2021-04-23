@@ -62,7 +62,7 @@ public class StateImageFunction extends AbstractFunction {
     if (over instanceof ImageTokenOverlay) {
       StringBuilder assetId = new StringBuilder("asset://");
       assetId.append(((ImageTokenOverlay) over).getAssetId().toString());
-      if (size != null) {
+      if (size != null && size.intValue() != 0) {
         assetId.append("-");
         // Constrain it slightly, so its between 1 and 500 :)
         int i = Math.max(Math.min(size.intValue(), 500), 1);
