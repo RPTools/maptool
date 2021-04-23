@@ -86,7 +86,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     } else add(new GroupDrawingsAction());
     add(new MergeDrawingsAction());
     addGMItem(new JSeparator());
-    add(new DeleteDrawingAction());
+    add(new DeleteDrawingAction(selectedDrawSet));
     // add(new JSeparator());
     add(new GetPropertiesAction());
     add(new SetPropertiesAction());
@@ -138,19 +138,37 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
   }
 
-  private class DeleteDrawingAction extends AbstractAction {
+  public static class DeleteDrawingAction extends AbstractAction {
+
     public DeleteDrawingAction() {
       super("Delete");
     }
 
+    public DeleteDrawingAction(Set<GUID> selectedDrawings) {
+      super("Delete");
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    private Set<GUID> selectedDrawings;
+
+    public void setSelectedDrawings(Set<GUID> selectedDrawings) {
+      this.selectedDrawings = selectedDrawings;
+    }
+
     public void actionPerformed(ActionEvent e) {
+      var frame = MapTool.getFrame();
+      var renderer = frame.getCurrentZoneRenderer();
+
+      if (selectedDrawings.isEmpty()) return;
+
       // check to see if this is the required action
       if (!MapTool.confirmDrawDelete()) {
         return;
       }
-      for (GUID id : selectedDrawSet) {
+      for (GUID id : selectedDrawings) {
         MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
       }
+      selectedDrawings.clear();
       renderer.repaint();
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();
