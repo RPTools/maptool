@@ -14,20 +14,14 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,41 +52,11 @@ public class ImageLoaderCache {
         try {
           image = ImageUtil.getImage(path);
         } catch (IOException ioe) {
-          log.error("ImageLoaderCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
+          log.debug("ImageLoaderCache.get(" + url.toString() + "), using BROKEN_IMAGE", ioe);
           return ImageManager.BROKEN_IMAGE;
         }
       } else if ("asset".equals(protocol)) {
-        // Look for size request
-        int index = path.indexOf('-');
-        int size = -1;
-        if (index >= 0) {
-          String szStr = path.substring(index + 1);
-          path = path.substring(0, index);
-          size = Integer.parseInt(szStr);
-        }
-        image = ImageManager.getImage(new MD5Key(path), observers);
-        boolean imageLoaded = image != ImageManager.TRANSFERING_IMAGE;
-        if (!imageLoaded) {
-          size = 38;
-        }
-        if (size > 0) {
-          Dimension sz = new Dimension(image.getWidth(null), image.getHeight(null));
-          SwingUtil.constrainTo(sz, size);
-
-          BufferedImage img =
-              new BufferedImage(sz.width, sz.height, ImageUtil.pickBestTransparency(image));
-          Graphics2D g = img.createGraphics();
-          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-          g.drawImage(image, 0, 0, sz.width, sz.height, null);
-          g.dispose();
-
-          image = img;
-        }
-        if (imageLoaded) {
-          // Don't have to load it again
-          imageMap.put(url.toString(), image);
-        }
-        return image;
+        image = ImageManager.getImageFromUrl(url);
       } else {
         try {
           image = ImageIO.read(url);

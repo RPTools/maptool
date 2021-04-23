@@ -93,7 +93,7 @@ public class StrPropFunctions extends AbstractFunction {
     // Changed to allow spaces within keys, although spaces on either end of keys or
     // values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
     // Added "." to allowed key names since variable names can contain dots.
-    final String entryPatt = "\\s*([\\w .]+\\s*=.*?)" + delimPatt + "|([\\w.]+\\s*=.*)";
+    final String entryPatt = "\\s*([\\w .]+\\s*=.*?)" + delimPatt + "|([\\w .]+\\s*=.*)";
     final Pattern entryParser = Pattern.compile(entryPatt);
 
     // Extract the keys and values already in the props string.
