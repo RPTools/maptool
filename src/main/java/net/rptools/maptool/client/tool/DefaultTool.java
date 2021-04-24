@@ -110,6 +110,12 @@ public abstract class DefaultTool extends Tool
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK),
         new ViewMovementKey(this, 0, -1));
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   ////
@@ -374,5 +380,39 @@ public abstract class DefaultTool extends Tool
    */
   public boolean isMiddleMouseButton(MouseEvent event) {
     return SwingUtilities.isMiddleMouseButton(event);
+  }
+
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
   }
 }
