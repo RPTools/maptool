@@ -110,7 +110,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
    * @param token Token being decorated.
    * @return The bounds w/in the token where the image is painted.
    */
-  protected Rectangle getImageBounds(Rectangle bounds, Token token) {
+  public Rectangle getImageBounds(Rectangle bounds, Token token) {
     return bounds;
   }
 }

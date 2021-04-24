@@ -65,7 +65,7 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
    *     Token)
    */
   @Override
-  protected Rectangle getImageBounds(Rectangle bounds, Token token) {
+  public Rectangle getImageBounds(Rectangle bounds, Token token) {
     return getFlow().getStateBounds(bounds, token, getName());
   }
 

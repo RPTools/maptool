@@ -1770,28 +1770,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         float fy = y + (float) origBounds.getHeight() / zoom / 2;
 
 
-                        //drawer.setDefaultLineWidth()
-
                         tmpMatrix.idt();
                         tmpMatrix.translate(fx, -fy, 0);
                         batch.setTransformMatrix(tmpMatrix);
                         drawer.update();
 
 
-                        if (token.getFacing() < 0) {
-                            //    shape.setColor(Color.YELLOW);
-                        } else {
-                            //     shape.setColor(1, 1, 0, 0.5f);
+                        if (token.getFacing() < 0)
+                            drawer.setColor(Color.YELLOW);
+                        else
+                            drawer.setColor(1, 1, 0, 0.5f);
 
-                        }
-                        //shape.set(ShapeRenderer.ShapeType.Filled);
                         var arrowArea = new Area(arrow);
                         fill(arrowArea);
-                        //shape.setColor(Color.DARK_GRAY);
 
                         drawer.setColor(Color.DARK_GRAY);
-
-                        //shape.set(ShapeRenderer.ShapeType.Line);
                         draw(arrowArea);
 
 
@@ -1810,9 +1803,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         float cx = x + (float) origBounds.getWidth() / 2;
                         float cy = y + (float) origBounds.getHeight() / 2;
 
-                        //shape.translate(cx, -cy, 0);
-                        //shape.setColor(Color.YELLOW);
-                        //shape.set(ShapeRenderer.ShapeType.Filled);
                         tmpMatrix.idt();
                         tmpMatrix.translate(cx, -cy, 0);
                         batch.setTransformMatrix(tmpMatrix);
@@ -1822,10 +1812,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         fill(arrowArea);
                         drawer.setColor(Color.DARK_GRAY);
                         drawer.setDefaultLineWidth(1);
-                        //shape.setColor(Color.DARK_GRAY);
-                        //shape.set(ShapeRenderer.ShapeType.Line);
+
                         draw(arrowArea);
-                        //shape.translate(-cx, cy, 0);
                         tmpMatrix.idt();
                         batch.setTransformMatrix(tmpMatrix);
                         drawer.update();
@@ -1837,20 +1825,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             cy = y + (float) origBounds.getHeight() / 2;
                         } else {
                             int facing = token.getFacing();
-                            while (facing < 0) {
-                                facing += 360;
-                            }
-                            // TODO: this should really be done in Token.setFacing() but I didn't want to take
-                            // the chance
-                            // of breaking something, so change this when it's safe to break stuff
-                            facing %= 360;
                             arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
                             cx = x + (float) origBounds.getWidth() / 2;
                             cy = y + (float) origBounds.getHeight() / 2;
 
                             // Find the edge of the image
-                            // TODO: Man, this is horrible, there's gotta be a better way to do this
                             double xp = origBounds.getWidth() / 2;
                             double yp = origBounds.getHeight() / 2;
                             if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
@@ -1976,7 +1956,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 } else {
                     renderImageBorderAround(selectedBorder, gdxTokenRectangle);
                 }
-                // Remove labels from the cache if the corresponding tokens are deselected
             }
 
             // Token names and labels
@@ -2131,12 +2110,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (!FunctionUtil.getBooleanValue(value))
             return;
 
-        if (overlay instanceof FlowImageTokenOverlay)
+  /*      if (overlay instanceof FlowImageTokenOverlay)
             renderTokenOverlay((FlowImageTokenOverlay) overlay, token, bounds);
         else if (overlay instanceof CornerImageTokenOverlay)
             renderTokenOverlay((CornerImageTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof ImageTokenOverlay)
-            renderTokenOverlay((ImageTokenOverlay) overlay, token, bounds);
+        else*/ if (overlay instanceof ImageTokenOverlay)
+            renderTokenOverlay((ImageTokenOverlay) overlay, token);
         else if (overlay instanceof FlowColorDotTokenOverlay)
             renderTokenOverlay((FlowColorDotTokenOverlay) overlay, token);
         else if (overlay instanceof YieldTokenOverlay)
@@ -2187,21 +2166,49 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         //TODO: Implement
     }
 
-    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
-
     private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
         //TODO: Implement
     }
 
+    private void renderTokenOverlay(ImageTokenOverlay overlay, Token token) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y;
+
+        // Get the image
+        java.awt.Rectangle iBounds = overlay.getImageBounds(bounds, token);
+        Dimension d = iBounds.getSize();
+
+        var image = getSprite(overlay.getAssetId());
+
+        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        SwingUtil.constrainTo(size, d.width, d.height);
+
+        // Paint it at the right location
+        int width = size.width;
+        int height = size.height;
+
+        if(overlay instanceof CornerImageTokenOverlay) {
+            x += iBounds.x + (d.width - width) / 2;
+            y -= iBounds.y + (d.height - height) / 2 + iBounds.height;
+        } else {
+            x = iBounds.x + (d.width - width) / 2;
+            y = -(iBounds.y + (d.height - height) / 2) - iBounds.height;
+        }
+
+        image.setAlpha(overlay.getOpacity()/100f);
+        image.setPosition(x, y);
+        image.setSize(size.width, size.height);
+        image.draw(batch);
+    }
+/*
     private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
     }
 
     private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
         //TODO: Implement
-    }
+    }*/
 
     private void renderTokenOverlay(XTokenOverlay overlay, Token token) {
         var bounds = token.getBounds(zone);
@@ -2930,6 +2937,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             updateVisibleArea();
             return;
         }
+        return;
         /*
         if (evt == Zone.Event.TOKEN_CHANGED
                 || evt == Zone.Event.TOKEN_REMOVED
@@ -2944,13 +2952,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 zoneRenderer.flush((Token) event.getArg());
             }
         }*/
-
+/*
         var currentZone = zone;
 
         // for now quick and dirty
         disposeZoneResources();
         initializeZoneResources(currentZone);
-    }
+  */  }
 
     public void setScale(Scale scale) {
         offsetX = scale.getOffsetX() * -1;
@@ -2967,7 +2975,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void assetAvailable(MD5Key key) {
         try {
-            var img = ImageManager.getImageAndWait(key);
+            var asset = AssetManager.getAsset(key);
+            var img = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage(), asset.getName()), null);
+            //var img = ImageManager.getImage(key);
             var bytes = ImageUtil.imageToBytes(img, "png");
             // without imageutil there seem to be some issues with tranparency  for some images.
             // (black background instead of tranparent)
