@@ -139,8 +139,7 @@ public class UPnPUtil {
       findIGDs();
     }
     if (igds == null || igds.isEmpty()) {
-      MapTool.showError(
-          "UPnP Error - No Internet Gateway Devices found.<br><br>UPnP port mapping will not be available.");
+      MapTool.showError("msg.error.server.upnp.noigd");
       return false;
     }
     for (var entry : igds.entrySet()) {
