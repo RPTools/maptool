@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
@@ -48,6 +49,7 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -72,20 +74,23 @@ import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
  */
 
 
-public class GdxRenderer extends ApplicationAdapter implements AppEventListener, ModelChangeListener {
+public class GdxRenderer extends ApplicationAdapter implements AppEventListener, ModelChangeListener, AssetAvailableListener {
 
     private static final Logger log = LogManager.getLogger(GdxRenderer.class);
 
     private static GdxRenderer _instance;
-    private final Map<MD5Key, Sprite> sprites = new HashMap<>();
+    //private final Map<MD5Key, Sprite> sprites = new HashMap<>();
+    private final Map<String, Sprite> fetchedSprites = new HashMap<>();
     private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
     private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
+    private final Map<MD5Key, Sprite> bigSprites = new HashMap<>();
 
     //renderFog
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
     private final String FONT_NORMAL = "normalFont.ttf";
     private final String FONT_DISTANCE = "distanceFont.ttf";
-
+    PixmapPacker packer = createPacker();
+    TextureAtlas tokenAtlas = new TextureAtlas();
     private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
@@ -97,7 +102,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private ZoneRenderer zoneRenderer;
     private Sprite background;
     private Sprite fog;
-    private MD5Key mapAssetId;
+    //private MD5Key mapAssetId;
     private int offsetX = 0;
     private int offsetY = 0;
     private float zoom = 1.0f;
@@ -113,10 +118,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private BitmapFont normalFont;
     private BitmapFont distanceFont;
     private float distanceFontScale = 0;
-
+    ;
     private GlyphLayout glyphLayout = new GlyphLayout();
     private CodeTimer timer = new CodeTimer("GdxRenderer.renderZone");
-    ;
     private VfxManager vfxManager;
     private ChainVfxEffect vfxEffect;
     private VfxFrameBuffer backBuffer;
@@ -207,6 +211,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxEffect.dispose();
         disposeZoneResources();
         onePixel.dispose();
+        packer.updateTextureAtlas(atlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
+        packer.dispose();
+        tokenAtlas.dispose();
     }
 
     @Override
@@ -239,6 +246,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     @Override
     public void render() {
         manager.finishLoading();
+        packer.updateTextureAtlas(tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
+
         if (atlas == null)
             atlas = manager.get(ATLAS, TextureAtlas.class);
 
@@ -263,6 +272,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         vfxManager.applyEffects();
         vfxManager.renderToScreen();
         copyFramebufferToJfx();
+    }
+
+    @NotNull
+    private PixmapPacker createPacker() {
+        return new PixmapPacker(2048, 2048, Pixmap.Format.RGBA8888, 2, false);
     }
 
     private void ensureCorrectDistanceFont() {
@@ -918,7 +932,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
                 // get token image, using image table if present
-                Sprite image = sprites.get(token.getImageAssetId());
+                Sprite image = getSprite(token.getImageAssetId());
                 if (image == null)
                     continue;
 
@@ -1463,18 +1477,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         fillViewportWith(background);
 
-        if (mapAssetId != null) {
-            var map = sprites.get(mapAssetId);
-            if (map != null) {
-                map.setPosition(zone.getBoardX(), zone.getBoardY() - map.getHeight());
-                map.draw(batch);
-            }
+        var map = getSprite(zone.getMapAssetId());
+        if (map != null) {
+            map.setPosition(zone.getBoardX(), zone.getBoardY() - map.getHeight());
+            map.draw(batch);
         }
     }
 
     private void fillViewportWith(Sprite fill) {
-
-
         var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
         startX = (int) (startX / fill.getWidth()) * fill.getWidth() - fill.getWidth();
         var endX = cam.position.x + cam.viewportWidth / 2 * zoom;
@@ -1530,11 +1540,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             // get token image sprite, using image table if present
             var imageKey = token.getTokenImageAssetId();
-            Sprite image = sprites.get(imageKey);
-            if (image == null)
-                continue;
+            Sprite image = getSprite(imageKey);
 
-            image.setSize(image.getTexture().getWidth(), image.getTexture().getHeight());
             image.setRotation(0);
 
 
@@ -2009,16 +2016,52 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.stop("tokenlist-13");
     }
 
+    private Sprite getSprite(MD5Key key) {
+        if (key == null)
+            return null;
+
+        var sprite = bigSprites.get(key);
+        if (sprite != null)
+            return sprite;
+
+        return getSprite(key.toString());
+    }
+
+
+    private Sprite getSprite(String name) {
+        var sprite = fetchedSprites.get(name);
+        if (sprite != null)
+            return sprite;
+
+        var region = fetch(name);
+
+        if (name != "unknown" && region == null) {
+            AssetManager.getAssetAsynchronously(new MD5Key(name), this);
+            return getSprite("unknown");
+        }
+
+
+        sprite = new Sprite(region);
+        sprite.setSize(region.getRegionWidth(), region.getRegionHeight());
+
+        fetchedSprites.put(name, sprite);
+        return sprite;
+    }
+
+
     private TextureRegion fetch(String regionName) {
         var region = fetchedRegions.get(regionName);
         if (region != null)
             return region;
 
-        region = atlas.findRegion(regionName);
-        fetchedRegions.put(regionName, region);
+        region = tokenAtlas.findRegion(regionName);
+        if (region == null)
+            region = atlas.findRegion(regionName);
 
+        fetchedRegions.put(regionName, region);
         return region;
     }
+
 
     private void renderImageBorderAround(ImageBorder border, Rectangle bounds) {
         var imagePath = border.getImagePath();
@@ -2174,8 +2217,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var stroke = overlay.getStroke();
 
         drawer.setColor(tmpColor);
-        drawer.line(x, y, x+w, y+h, stroke.getLineWidth());
-        drawer.line(x, y+h, x+w, y, stroke.getLineWidth());
+        drawer.line(x, y, x + w, y + h, stroke.getLineWidth());
+        drawer.line(x, y + h, x + w, y, stroke.getLineWidth());
         drawer.setColor(Color.WHITE);
     }
 
@@ -2210,7 +2253,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var hc = w / 2f;
         var vc = h * (1 - 0.134f);
 
-        var floats = new float[] {
+        var floats = new float[]{
                 x, y + vc,
                 x + w, y + vc,
                 x + hc, y,
@@ -2235,13 +2278,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var stroke = overlay.getStroke();
         var lineWidth = stroke.getLineWidth();
 
-        var centerX = x + w/2f;
-        var centerY = y + h/2f;
-        var radiusX = w/2f - lineWidth/2f;
-        var radiusY = h/2f - lineWidth/2f;
+        var centerX = x + w / 2f;
+        var centerY = y + h / 2f;
+        var radiusX = w / 2f - lineWidth / 2f;
+        var radiusY = h / 2f - lineWidth / 2f;
 
         drawer.setColor(tmpColor);
-        drawer.ellipse(centerX, centerY, radiusX,radiusY, 0, lineWidth );
+        drawer.ellipse(centerX, centerY, radiusX, radiusY, 0, lineWidth);
         drawer.setColor(Color.WHITE);
     }
 
@@ -2296,7 +2339,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var hc = w / 2f;
         var vc = h / 2f;
 
-        var floats = new float[] {
+        var floats = new float[]{
                 x, y + vc,
                 x + hc, y,
                 x + w, y + vc,
@@ -2323,10 +2366,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var hc = w / 2f;
         var vc = h * (1 - 0.866f);
 
-        var floats = new float[] {
-           x, y + vc,
-           x + w, y + vc,
-           x + hc, y + h,
+        var floats = new float[]{
+                x, y + vc,
+                x + w, y + vc,
+                x + hc, y + h,
         };
 
         drawer.setColor(tmpColor);
@@ -2703,6 +2746,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         offsetY = 0;
         fogX = null;
         fogY = null;
+        fetchedRegions.clear();
+        fetchedSprites.clear();
+        var oldPacker = packer;
+        packer = createPacker();
+        oldPacker.dispose();
 
         Gdx.app.postRunnable(() -> {
             updateCam();
@@ -2718,15 +2766,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 fog.getTexture().dispose();
             }
 
-            for (var sprite : sprites.values()) {
-                sprite.getTexture().dispose();
-            }
-            sprites.clear();
-
             for (var sprite : isoSprites.values()) {
                 sprite.getTexture().dispose();
             }
-            sprites.clear();
+            isoSprites.clear();
+
+            for (var sprite : bigSprites.values()) {
+                sprite.getTexture().dispose();
+            }
+            bigSprites.clear();
         });
     }
 
@@ -2736,32 +2784,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
         updateVisibleArea();
-        mapAssetId = newZone.getMapAssetId();
 
-        // FIXME: zonechanges during wait for resources
-        new Thread(() -> {
-            try {
-                while (zoneRenderer.isLoading()) {
-                    Thread.sleep(100);
-                }
-
-                // create sprites for all assets
-                //TODO: create textureAtlas ?
-                Gdx.app.postRunnable(() -> {
-                    for (var assetId : newZone.getAllAssetIds()) {
-                        var bytes = AssetManager.getAsset(assetId).getImage();
-
-                        var pix = new Pixmap(bytes, 0, bytes.length);
-                        var sprite = new Sprite(new Texture(pix));
-                        sprite.setSize(pix.getWidth(), pix.getHeight());
-                        sprites.put(assetId, sprite);
-                        pix.dispose();
-                    }
-                });
-            } catch (InterruptedException e) {
-            }
-        }).start();
-
+        for (var assetId : newZone.getAllAssetIds()) {
+            AssetManager.getAssetAsynchronously(assetId, this);
+        }
         zone = newZone;
     }
 
@@ -2936,6 +2962,38 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void flushFog() {
         flushFog = true;
         updateVisibleArea();
+    }
+
+    @Override
+    public void assetAvailable(MD5Key key) {
+        try {
+            var img = ImageManager.getImageAndWait(key);
+            var bytes = ImageUtil.imageToBytes(img, "png");
+            // without imageutil there seem to be some issues with tranparency  for some images.
+            // (black background instead of tranparent)
+            //var bytes = AssetManager.getAsset(key).getImage();
+            var pix = new Pixmap(bytes, 0, bytes.length);
+
+            try {
+                var name = key.toString();
+                synchronized (packer) {
+                    if (packer.getRect(name) == null)
+                        packer.pack(name, pix);
+
+                    pix.dispose();
+                }
+            } catch (GdxRuntimeException x) {
+                // this means that the pixmap is to big for the atlas.
+                Gdx.app.postRunnable(() -> {
+                    synchronized (bigSprites) {
+                        if (!bigSprites.containsKey(key))
+                            bigSprites.put(key, new Sprite(new Texture(pix)));
+                    }
+                    pix.dispose();
+                });
+            }
+        } catch (Exception e) {
+        }
     }
 
     private interface ItemRenderer {

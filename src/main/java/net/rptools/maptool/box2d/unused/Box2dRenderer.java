@@ -302,7 +302,7 @@ public class Box2dRenderer implements Screen {
 	 * For POC only TODO: Check for color vs image and change to a listener vs getting images every frame
 	 */
 	private void drawBackgroundTile() {
-		Zone zone = mapToolFrame.getCurrentZoneRenderer().getZone();
+	/*	Zone zone = mapToolFrame.getCurrentZoneRenderer().getZone();
 		byte[] image = ImageManager.getTexture(zone.getBackgroundAsset(), mapToolFrame.getCurrentZoneRenderer());
 
 		if (image != null && image != backgroundImage) {
@@ -317,7 +317,7 @@ public class Box2dRenderer implements Screen {
 		backgroundTexture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		app.sb.begin();
 		app.sb.draw(backgroundTexture, 0, 0, 0, 0, MapToolGame.SCREEN_WIDTH, MapToolGame.SCREEN_HEIGHT);
-		app.sb.end();
+		app.sb.end();*/
 	}
 
 	/*
