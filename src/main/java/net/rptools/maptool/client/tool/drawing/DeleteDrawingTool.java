@@ -37,6 +37,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.drawing.DrawnElement;
 
 /** Tool for deleting drawings. */
 public class DeleteDrawingTool extends DefaultTool
@@ -127,19 +128,22 @@ public class DeleteDrawingTool extends DefaultTool
       var drawnElement = renderer.getZone().getDrawnElement(id);
       if (drawnElement == null) continue;
 
-      drawBox(g, drawnElement.getDrawable().getBounds());
+      drawBox(g, drawnElement);
     }
   }
 
-  private void drawBox(Graphics2D g, Rectangle box) {
+  private void drawBox(Graphics2D g, DrawnElement element) {
+    var box = element.getDrawable().getBounds();
+    var pen = element.getPen();
+
     var scale = renderer.getScale();
 
     var screenPoint = ScreenPoint.fromZonePoint(renderer, box.x, box.y);
 
-    var x = (int) screenPoint.x;
-    var y = (int) screenPoint.y;
-    var w = (int) (box.width * scale);
-    var h = (int) (box.height * scale);
+    var x = (int) (screenPoint.x - pen.getThickness() * scale /2);
+    var y = (int) (screenPoint.y - pen.getThickness() * scale /2);
+    var w = (int) ((box.width + pen.getThickness()) * scale);
+    var h = (int) ((box.height + pen.getThickness()) * scale);
 
     AppStyle.selectedBorder.paintAround(g, x, y, w, h);
   }
