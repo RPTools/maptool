@@ -140,8 +140,8 @@ public class DeleteDrawingTool extends DefaultTool
 
     var screenPoint = ScreenPoint.fromZonePoint(renderer, box.x, box.y);
 
-    var x = (int) (screenPoint.x - pen.getThickness() * scale /2);
-    var y = (int) (screenPoint.y - pen.getThickness() * scale /2);
+    var x = (int) (screenPoint.x - pen.getThickness() * scale / 2);
+    var y = (int) (screenPoint.y - pen.getThickness() * scale / 2);
     var w = (int) ((box.width + pen.getThickness()) * scale);
     var h = (int) ((box.height + pen.getThickness()) * scale);
 
