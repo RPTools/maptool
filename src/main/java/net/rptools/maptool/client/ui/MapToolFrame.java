@@ -47,14 +47,8 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ServerDisconnectHandler;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -168,6 +162,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
   private ZoomStatusBar zoomStatusBar;
   private JLabel chatActionLabel;
+  private boolean fullScreenToolsShown;
 
   private Color chatTypingLabelColor;
   private ChatTypingNotification chatTypingPanel;
@@ -1670,6 +1665,8 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void showFullScreenTools() {
+    if(!AppState.isFullScreenUIEnabled()) return;
+
     fullScreenToolPanel = new JPanel();
     fullScreenToolPanel.setOpaque(false);
     fullScreenToolPanel.add(toolbarPanel.getPointerGroupButton());
@@ -1734,9 +1731,13 @@ public class MapToolFrame extends DefaultDockableHolder
 
     zoneRendererPanel.revalidate();
     zoneRendererPanel.repaint();
+
+    fullScreenToolsShown = true;
   }
 
   private void hideFullScreenTools() {
+    if(!fullScreenToolsShown) return;
+
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
 
     JToggleButton buttons[] = {
