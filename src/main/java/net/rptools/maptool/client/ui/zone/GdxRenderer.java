@@ -2000,8 +2000,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return null;
 
         var sprite = bigSprites.get(key);
-        if (sprite != null)
+        if (sprite != null) {
+            sprite.setSize(sprite.getTexture().getWidth(), sprite.getTexture().getHeight());
             return sprite;
+        }
 
         return getSprite(key.toString());
     }
@@ -2009,8 +2011,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private Sprite getSprite(String name) {
         var sprite = fetchedSprites.get(name);
-        if (sprite != null)
+        if (sprite != null) {
+            var region = fetchedRegions.get(name);
+            sprite.setSize(region.getRegionWidth(), region.getRegionHeight());
             return sprite;
+        }
 
         var region = fetch(name);
 
@@ -2092,29 +2097,234 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
-        if (overlay instanceof MultipleImageBarTokenOverlay)
-            renderTokenOverlay((MultipleImageBarTokenOverlay) overlay, token, bounds, value);
-        else if (overlay instanceof SingleImageBarTokenOverlay)
-            renderTokenOverlay((SingleImageBarTokenOverlay) overlay, token, bounds, value);
-        else if (overlay instanceof TwoToneBarTokenOverlay)
-            renderTokenOverlay((TwoToneBarTokenOverlay) overlay, token, bounds, value);
-        else if (overlay instanceof DrawnBarTokenOverlay)
-            renderTokenOverlay((DrawnBarTokenOverlay) overlay, token, bounds, value);
-        else if (overlay instanceof TwoImageBarTokenOverlay)
-            renderTokenOverlay((TwoImageBarTokenOverlay) overlay, token, bounds, value);
+        if(overlay instanceof BarTokenOverlay)
+            renderTokenOverlay((BarTokenOverlay) overlay, token, bounds, value);
         else if (overlay instanceof BooleanTokenOverlay)
-            renderTokenOverlay((BooleanTokenOverlay) overlay, token, bounds, value);
+            renderTokenOverlay((BooleanTokenOverlay) overlay, token, value);
     }
 
-    private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
+    private void renderTokenOverlay(BarTokenOverlay overlay, Token token, Rectangle2D bounds, Object value)
+    {
+        if (value == null) return;
+        double val = 0;
+        if (value instanceof Number) {
+            val = ((Number) value).doubleValue();
+        } else {
+            try {
+                val = Double.parseDouble(value.toString());
+            } catch (NumberFormatException e) {
+                return; // Bad value so don't paint.
+            } // endtry
+        } // endif
+        if (val < 0) val = 0;
+        if (val > 1) val = 1;
+
+        if (overlay instanceof MultipleImageBarTokenOverlay)
+            renderTokenOverlay((MultipleImageBarTokenOverlay) overlay, token, val);
+        else if (overlay instanceof SingleImageBarTokenOverlay)
+            renderTokenOverlay((SingleImageBarTokenOverlay) overlay, token, val);
+        else if (overlay instanceof TwoToneBarTokenOverlay)
+            renderTokenOverlay((TwoToneBarTokenOverlay) overlay, token, val);
+        else if (overlay instanceof DrawnBarTokenOverlay)
+            renderTokenOverlay((DrawnBarTokenOverlay) overlay, token, val);
+        else if (overlay instanceof TwoImageBarTokenOverlay)
+            renderTokenOverlay((TwoImageBarTokenOverlay) overlay, token, val);
+    }
+
+    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, double barValue) {
+        int incr = overlay.findIncrement(barValue);
+
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+
+        // Get the images
+        var image = getSprite(overlay.getAssetIds()[incr]);
+
+        Dimension d = bounds.getSize();
+        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        SwingUtil.constrainTo(size, d.width, d.height);
+
+        // Find the position of the image according to the size and side where they are placed
+        switch (overlay.getSide()) {
+            case LEFT:
+                y += d.height - size.height;
+                break;
+            case RIGHT:
+                x += d.width - size.width;
+                y += d.height - size.height;
+                break;
+            case TOP:
+                y += d.height - size.height;
+                break;
+        }
+
+        image.setPosition(x, y);
+        image.setSize(size.width, size.height);
+        image.draw(batch, overlay.getOpacity()/100f);
+    }
+
+    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, double barValue) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+
+        // Get the images
+        var image = getSprite(overlay.getAssetId());
+
+        Dimension d = bounds.getSize();
+        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        SwingUtil.constrainTo(size, d.width, d.height);
+
+        var side = overlay.getSide();
+        // Find the position of the images according to the size and side where they are placed
+        switch (side) {
+            case LEFT:
+                y += d.height - size.height;
+                break;
+            case RIGHT:
+                x += d.width - size.width;
+                y += d.height - size.height;
+                break;
+            case TOP:
+                y += d.height - size.height;
+                break;
+        }
+
+        int width =
+                (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
+                        ? overlay.calcBarSize((int)image.getWidth(), barValue)
+                        : (int)image.getWidth();
+        int height =
+                (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
+                        ? overlay.calcBarSize((int)image.getHeight(), barValue)
+                        : (int)image.getHeight();
+
+        int screenWidth =
+                (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
+                        ? overlay.calcBarSize(size.width, barValue)
+                        : size.width;
+        int screenHeight =
+                (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
+                        ? overlay.calcBarSize(size.height, barValue)
+                        : size.height;
+
+        image.setPosition(x + size.width - screenWidth, y + size.height - screenHeight);
+        image.setSize(screenWidth, screenHeight);
+
+        var u = image.getU();
+        var v = image.getV();
+        var u2 = image.getU2();
+        var v2 = image.getV2();
+
+        var wfactor = screenWidth * 1.0f/size.width;
+        var uDiff = (u2 - u) * wfactor;
+        image.setU(u2 - uDiff);
+
+        var vfactor = screenHeight * 1.0f/size.height;
+        var vDiff = (v2 - v) * vfactor;
+        image.setV(v2 - vDiff);
+
+        image.draw(batch, overlay.getOpacity()/100f);
+
+        image.setU(u);
+        image.setV(v);
+    }
+
+    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, double barValue) {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, double barValue) {
+        //TODO: Implement
+    }
+
+    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, double barValue) {
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+
+        // Get the images
+        var topImage = getSprite(overlay.getTopAssetId());
+        var bottomImage = getSprite(overlay.getBottomAssetId());
+
+
+        Dimension d = bounds.getSize();
+        Dimension size = new Dimension((int)topImage.getWidth(), (int)topImage.getHeight());
+        SwingUtil.constrainTo(size, d.width, d.height);
+
+        var side = overlay.getSide();
+        // Find the position of the images according to the size and side where they are placed
+        switch (side) {
+            case LEFT:
+                y += d.height - size.height;
+                break;
+            case RIGHT:
+                x += d.width - size.width;
+                y += d.height - size.height;
+                break;
+            case TOP:
+                y += d.height - size.height;
+                break;
+        }
+
+        var width =
+                (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
+                        ? overlay.calcBarSize((int)topImage.getWidth(), barValue)
+                        : topImage.getWidth();
+        var height =
+                (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
+                        ? overlay.calcBarSize((int)topImage.getHeight(), barValue)
+                        : topImage.getHeight();
+
+        var screenWidth =
+                (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
+                        ? overlay.calcBarSize(size.width, barValue)
+                        : size.width;
+        var screenHeight =
+                (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
+                        ? overlay.calcBarSize(size.height, barValue)
+                        : size.height;
+
+        bottomImage.setPosition(x, y);
+        bottomImage.setSize(size.width, size.height);
+        bottomImage.draw(batch, overlay.getOpacity()/100f);
+
+        var u = topImage.getU();
+        var v = topImage.getV();
+        var u2 = topImage.getU2();
+        var v2 = topImage.getV2();
+
+        var wFactor = screenWidth * 1.0f/size.width;
+        var uDiff = (u2 - u) * wFactor;
+
+        var vFactor = screenHeight * 1.0f/size.height;
+        var vDiff = (v2 - v) * vFactor;
+
+        topImage.setPosition(x, y);
+        topImage.setSize(screenWidth, screenHeight);
+
+        if (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT) {
+            topImage.setU(u2 - uDiff);
+            topImage.setV(v2 - vDiff);
+        } else {
+
+            topImage.setU2(u + uDiff);
+            topImage.setV2(v + vDiff);
+        }
+        topImage.draw(batch, overlay.getOpacity()/100f);
+
+        topImage.setU(u);
+        topImage.setV(v);
+        topImage.setU2(u2);
+        topImage.setV2(v2);
+    }
+
+    private void renderTokenOverlay(BooleanTokenOverlay overlay, Token token, Object value) {
         if (!FunctionUtil.getBooleanValue(value))
             return;
 
-  /*      if (overlay instanceof FlowImageTokenOverlay)
-            renderTokenOverlay((FlowImageTokenOverlay) overlay, token, bounds);
-        else if (overlay instanceof CornerImageTokenOverlay)
-            renderTokenOverlay((CornerImageTokenOverlay) overlay, token, bounds);
-        else*/ if (overlay instanceof ImageTokenOverlay)
+        if (overlay instanceof ImageTokenOverlay)
             renderTokenOverlay((ImageTokenOverlay) overlay, token);
         else if (overlay instanceof FlowColorDotTokenOverlay)
             renderTokenOverlay((FlowColorDotTokenOverlay) overlay, token);
@@ -2150,26 +2360,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         drawer.setColor(Color.WHITE);
     }
 
-    private void renderTokenOverlay(MultipleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, Rectangle2D bounds, Object barValue) {
-        //TODO: Implement
-    }
-
     private void renderTokenOverlay(ImageTokenOverlay overlay, Token token) {
         var bounds = token.getBounds(zone);
         var x = bounds.x;
@@ -2196,19 +2386,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             y = -(iBounds.y + (d.height - height) / 2) - iBounds.height;
         }
 
-        image.setAlpha(overlay.getOpacity()/100f);
         image.setPosition(x, y);
         image.setSize(size.width, size.height);
-        image.draw(batch);
+        image.draw(batch, overlay.getOpacity()/100f);
     }
-/*
-    private void renderTokenOverlay(FlowImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }
-
-    private void renderTokenOverlay(CornerImageTokenOverlay overlay, Token token, Rectangle2D bounds) {
-        //TODO: Implement
-    }*/
 
     private void renderTokenOverlay(XTokenOverlay overlay, Token token) {
         var bounds = token.getBounds(zone);
