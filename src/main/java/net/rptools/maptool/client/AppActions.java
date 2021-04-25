@@ -1366,24 +1366,24 @@ public class AppActions {
         }
       };
 
-    public static final Action TOGGLE_FULLSCREEN_UI =
-            new AdminClientAction() {
-                {
-                    init("action.enableFullScreenUI");
-                }
+  public static final Action TOGGLE_FULLSCREEN_UI =
+      new AdminClientAction() {
+        {
+          init("action.enableFullScreenUI");
+        }
 
-                @Override
-                public boolean isSelected() {
-                    return AppState.isFullScreenUIEnabled();
-                }
+        @Override
+        public boolean isSelected() {
+          return AppState.isFullScreenUIEnabled();
+        }
 
-                @Override
-                protected void executeAction() {
+        @Override
+        protected void executeAction() {
 
-                    AppState.setFullScreenUIEnabled(!AppState.isFullScreenUIEnabled());
-                    MapTool.getFrame().refresh();
-                }
-            };
+          AppState.setFullScreenUIEnabled(!AppState.isFullScreenUIEnabled());
+          MapTool.getFrame().refresh();
+        }
+      };
 
   public static final Action TOGGLE_COLLECT_PROFILING_DATA =
       new DefaultClientAction() {

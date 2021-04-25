@@ -217,7 +217,11 @@ public class AppState {
     enforceNotification = enforce;
   }
 
-  public static boolean isFullScreenUIEnabled() { return enableFullScreenUI; }
+  public static boolean isFullScreenUIEnabled() {
+    return enableFullScreenUI;
+  }
 
-  public static void setFullScreenUIEnabled(boolean value) { enableFullScreenUI = value; }
+  public static void setFullScreenUIEnabled(boolean value) {
+    enableFullScreenUI = value;
+  }
 }

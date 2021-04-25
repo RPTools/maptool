@@ -1665,7 +1665,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void showFullScreenTools() {
-    if(!AppState.isFullScreenUIEnabled()) return;
+    if (!AppState.isFullScreenUIEnabled()) return;
 
     fullScreenToolPanel = new JPanel();
     fullScreenToolPanel.setOpaque(false);
@@ -1736,7 +1736,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   private void hideFullScreenTools() {
-    if(!fullScreenToolsShown) return;
+    if (!fullScreenToolsShown) return;
 
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
 
