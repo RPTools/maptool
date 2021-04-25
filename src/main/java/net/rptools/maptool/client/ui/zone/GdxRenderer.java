@@ -150,7 +150,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Area tmpArea = new Area();
     private TiledDrawable tmpTile = new TiledDrawable();
     private float pointsPerBezier = 10f;
-    private boolean showAstarDebugging;
+    private boolean showAstarDebugging = false;
 
 
     public GdxRenderer() {
@@ -972,117 +972,38 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         for (Point2D point : validMoves) {
                             ZonePoint zp = acp.offsetZonePoint(zoneRenderer.getZone().getGrid(), point.getX(), point.getY());
                             double r = (zp.x - 1) * 45;
-                            showBlockedMoves(zp, r, AppStyle.blockMoveImage, 1.0f);
+                            showBlockedMoves(zp, r, getSprite("block_move"), 1.0f);
                         }
                     }
                 }
-/*                // handle flipping
-                BufferedImage workImage = image;
-                if (token.isFlippedX() || token.isFlippedY()) {
-                    workImage =
-                            new BufferedImage(image.getWidth(), image.getHeight(), image.getTransparency());
 
-                    int workW = image.getWidth() * (token.isFlippedX() ? -1 : 1);
-                    int workH = image.getHeight() * (token.isFlippedY() ? -1 : 1);
-                    int workX = token.isFlippedX() ? image.getWidth() : 0;
-                    int workY = token.isFlippedY() ? image.getHeight() : 0;
+                footprintBounds.x += set.getOffsetX();
+                footprintBounds.y += set.getOffsetY();
 
-                    Graphics2D wig = workImage.createGraphics();
-                    wig.drawImage(image, workX, workY, workW, workH, null);
-                    wig.dispose();
-                }
-                // on the iso plane
-                if (token.isFlippedIso()) {
-                    if (flipIsoImageMap.get(token) == null) {
-                        workImage = IsometricGrid.isoImage(workImage);
-                    } else {
-                        workImage = flipIsoImageMap.get(token);
-                    }
-                    token.setHeight(workImage.getHeight());
-                    token.setWidth(workImage.getWidth());
-                    footprintBounds = token.getBounds(zone);
-                }
-                // Draw token
-                double iso_ho = 0;
-                Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
-                if (token.getShape() == Token.TokenShape.FIGURE) {
-                    double th = token.getHeight() * (double) footprintBounds.width / token.getWidth();
-                    iso_ho = footprintBounds.height - th;
-                    footprintBounds =
-                            new java.awt.Rectangle(
-                                    footprintBounds.x,
-                                    footprintBounds.y - (int) iso_ho,
-                                    footprintBounds.width,
-                                    (int) th);
-                    iso_ho = iso_ho * getScale();
-                }
-                SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+                prepareTokenSprite(image, token, footprintBounds);
+                image.draw(batch);
 
-                int offsetx = 0;
-                int offsety = 0;
-                if (token.isSnapToScale()) {
-                    offsetx =
-                            (int)
-                                    (imgSize.width < footprintBounds.width
-                                            ? (footprintBounds.width - imgSize.width) / 2 * getScale()
-                                            : 0);
-                    offsety =
-                            (int)
-                                    (imgSize.height < footprintBounds.height
-                                            ? (footprintBounds.height - imgSize.height) / 2 * getScale()
-                                            : 0);
-                }
-                int tx = x + offsetx;
-                int ty = y + offsety + (int) iso_ho;
-
-                AffineTransform at = new AffineTransform();
-                at.translate(tx, ty);
-
-                if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                    at.rotate(
-                            Math.toRadians(-token.getFacing() - 90),
-                            scaledWidth / 2 - token.getAnchor().x * scale - offsetx,
-                            scaledHeight / 2
-                                    - token.getAnchor().y * scale
-                                    - offsety); // facing defaults to down, or -90 degrees
-                }
-                if (token.isSnapToScale()) {
-                    at.scale(
-                            (double) imgSize.width / workImage.getWidth(),
-                            (double) imgSize.height / workImage.getHeight());
-                    at.scale(getScale(), getScale());
-                } else {
-                    if (token.getShape() == Token.TokenShape.FIGURE) {
-                        at.scale(
-                                (double) scaledWidth / workImage.getWidth(),
-                                (double) scaledWidth / workImage.getWidth());
-                    } else {
-                        at.scale(
-                                (double) scaledWidth / workImage.getWidth(),
-                                (double) scaledHeight / workImage.getHeight());
-                    }
-                }
-
-                g.drawImage(workImage, at, this);
 
                 // Other details
                 if (token == keyToken) {
-                    java.awt.Rectangle bounds = new java.awt.Rectangle(tx, ty, imgSize.width, imgSize.height);
-                    bounds.width *= getScale();
-                    bounds.height *= getScale();
+                    var x = footprintBounds.x;
+                    var y = footprintBounds.y;
+                    var w = footprintBounds.width;
+                    var h = footprintBounds.height;
+
 
                     Grid grid = zone.getGrid();
                     boolean checkForFog =
-                            MapTool.getServerPolicy().isUseIndividualFOW() && zoneView.isUsingVision();
+                            MapTool.getServerPolicy().isUseIndividualFOW() && zoneRenderer.getZoneView().isUsingVision();
                     boolean showLabels = isOwner;
                     if (checkForFog) {
                         Path<? extends AbstractPoint> path =
-                                set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
+                                set.getWalker() != null ? set.getWalker().getPath() : set.getGridlessPath();
                         List<? extends AbstractPoint> thePoints = path.getCellPath();
 
-                       // now that we have the last point, we can check to see if it's gridless or not. If not
-                       // gridless, get the last point the token was at and see if the token's footprint is inside
-                       // the visible area to show the label.
+                        // now that we have the last point, we can check to see if it's gridless or not. If not
+                        // gridless, get the last point the token was at and see if the token's footprint is inside
+                        // the visible area to show the label.
 
                         if (thePoints.isEmpty()) {
                             showLabels = false;
@@ -1101,11 +1022,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                                         (int) tokBounds.getWidth(),
                                         (int) tokBounds.getHeight());
                             }
-                            showLabels = showLabels || zoneView.getVisibleArea(view).intersects(tokenRectangle);
+                            showLabels = showLabels || zoneRenderer.getZoneView().getVisibleArea(view).intersects(tokenRectangle);
                         }
                     } else {
                         boolean hasFog = zone.hasFog();
-                        boolean fogIntersects = exposedFogArea.intersects(bounds);
+                        boolean fogIntersects = exposedFogArea.intersects(footprintBounds);
                         showLabels = showLabels || (visibleScreenArea == null && !hasFog); // no vision - fog
                         showLabels =
                                 showLabels
@@ -1113,57 +1034,64 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         showLabels =
                                 showLabels
                                         || (visibleScreenArea != null
-                                        && visibleScreenArea.intersects(bounds)
+                                        && visibleScreenArea.intersects(footprintBounds)
                                         && fogIntersects); // vision
                     }
                     if (showLabels) {
-                        // if the token is visible on the screen it will be in the location cache
-                        if (tokenLocationCache.containsKey(token)) {
-                            y += 10 + scaledHeight;
-                            x += scaledWidth / 2;
 
-                            if (!token.isStamp() && AppState.getShowMovementMeasurements()) {
-                                String distance = "";
-                                if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
-                                    // grid.isPathingSupported()
-                                    double distanceTraveled = walker.getDistance();
-                                    if (distanceTraveled >= 0) {
-                                        distance = NumberFormat.getInstance().format(distanceTraveled);
-                                    }
-                                } else {
-                                    double c = 0;
-                                    ZonePoint lastPoint = null;
-                                    for (ZonePoint zp : set.gridlessPath.getCellPath()) {
-                                        if (lastPoint == null) {
-                                            lastPoint = zp;
-                                            continue;
-                                        }
-                                        int a = lastPoint.x - zp.x;
-                                        int b = lastPoint.y - zp.y;
-                                        c += Math.hypot(a, b);
+                        y += 10 + h;
+                        x += w / 2;
+
+                        if (!token.isStamp() && AppState.getShowMovementMeasurements()) {
+                            String distance = "";
+                            if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
+                                // grid.isPathingSupported()
+                                double distanceTraveled = walker.getDistance();
+                                if (distanceTraveled >= 0) {
+                                    distance = NumberFormat.getInstance().format(distanceTraveled);
+                                }
+                            } else {
+                                double c = 0;
+                                ZonePoint lastPoint = null;
+                                for (ZonePoint zp : set.getGridlessPath().getCellPath()) {
+                                    if (lastPoint == null) {
                                         lastPoint = zp;
+                                        continue;
                                     }
-                                    c /= zone.getGrid().getSize(); // Number of "cells"
-                                    c *= zone.getUnitsPerCell(); // "actual" distance traveled
-                                    distance = NumberFormat.getInstance().format(c);
+                                    int a = lastPoint.x - zp.x;
+                                    int b = lastPoint.y - zp.y;
+                                    c += Math.hypot(a, b);
+                                    lastPoint = zp;
                                 }
-                                if (!distance.isEmpty()) {
-                                    delayRendering(new ZoneRenderer.LabelRenderer(distance, x, y));
-                                    y += 20;
-                                }
+                                c /= zone.getGrid().getSize(); // Number of "cells"
+                                c *= zone.getUnitsPerCell(); // "actual" distance traveled
+                                distance = NumberFormat.getInstance().format(c);
                             }
-                            if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
-                                delayRendering(new ZoneRenderer.LabelRenderer(set.getPlayerId(), x, y));
+                            if (!distance.isEmpty()) {
+                                itemRenderList.add(new LabelRenderer(distance, x, -y));
+                                y += 20;
                             }
-                        } // !token.isStamp()
+                        }
+                        if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
+                            itemRenderList.add(new LabelRenderer(set.getPlayerId(), x, -y));
+                        }
                     } // showLabels
-                } // token == keyToken*/
+                } // token == keyToken
             }
         }
     }
 
-    private void showBlockedMoves(ZonePoint zp, double r, BufferedImage blockMoveImage, float v) {
-        //TODO: implement
+    private void showBlockedMoves(ZonePoint zp, double angle, Sprite image, float size) {
+        // Resize image to size of 1/4 size of grid
+        var resizeWidth = (float)zone.getGrid().getCellWidth() / image.getWidth() * .25f;
+        var resizeHeight = (float)zone.getGrid().getCellHeight() / image.getHeight() * .25f;
+
+        var w = image.getWidth() * resizeWidth * size;
+        var h = image.getHeight() * resizeHeight * size;
+
+        image.setSize(w, h);
+        image.setPosition(zp.x - w / 2f, -(zp.y - h / 2f));
+        image.draw(batch);
     }
 
     private void renderAuras(PlayerView view) {
@@ -1510,8 +1438,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (visibleScreenArea == null)
             return;
 
-        Set<GUID> tempVisTokens = new HashSet<GUID>();
-
         for (Token token : tokenList) {
             if (token.getShape() != Token.TokenShape.FIGURE && figuresOnly && !token.isAlwaysVisible()) {
                 continue;
@@ -1536,42 +1462,21 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 timer.stop("tokenlist-1");
             }
 
-            timer.start("tokenlist-1b");
-
-            // get token image sprite, using image table if present
-            var imageKey = token.getTokenImageAssetId();
-            Sprite image = getSprite(imageKey);
-
-            image.setRotation(0);
-
-
-            timer.stop("tokenlist-1b");
-
-            timer.start("tokenlist-1a");
             java.awt.Rectangle footprintBounds = token.getBounds(zone);
+            java.awt.Rectangle origBounds = (java.awt.Rectangle) footprintBounds.clone();
+            Area tokenBounds = new Area(footprintBounds);
 
-            timer.stop("tokenlist-1a");
             timer.start("tokenlist-1d");
-            // Tokens are centered on the image center point
-            float x = footprintBounds.x;
-            float y = footprintBounds.y;
-
-            Rectangle2D origBounds = new Rectangle2D.Double(x, y, footprintBounds.width, footprintBounds.height);
-            Area tokenBounds = new Area(origBounds);
             if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                double sx = footprintBounds.width / 2 + x - (token.getAnchor().x);
-                double sy = footprintBounds.height / 2 + y - (token.getAnchor().y);
+                double sx = footprintBounds.width / 2 + footprintBounds.x - (token.getAnchor().x);
+                double sy = footprintBounds.height / 2 + footprintBounds.y - (token.getAnchor().y);
                 tokenBounds.transform(
                         AffineTransform.getRotateInstance(
                                 Math.toRadians(-token.getFacing() - 90), sx, sy)); // facing
-                // defaults
-                // to
-                // down,
-                // or
-                // -90
-                // degrees
+                // defaults to down, or -90 degrees
             }
             timer.stop("tokenlist-1d");
+
             timer.start("tokenlist-1e");
             try {
 
@@ -1586,9 +1491,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 timer.stop("tokenlist-1e");
             }
 
-            // Add the token to our visible set.
-            tempVisTokens.add(token.getId());
-
             // Previous path
             timer.start("renderTokens:ShowPath");
             if (zoneRenderer.getShowPathList().contains(token) && token.getLastPath() != null) {
@@ -1596,103 +1498,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
             timer.stop("renderTokens:ShowPath");
 
-            timer.start("tokenlist-5");
+            // get token image sprite, using image table if present
+            var imageKey = token.getTokenImageAssetId();
+            Sprite image = getSprite(imageKey);
 
-            // handle flipping
-            image.setFlip(token.isFlippedX(), token.isFlippedY());
-            timer.stop("tokenlist-5");
-
-            image.setOriginCenter();
-
-            timer.start("tokenlist-5a");
-            if (token.isFlippedIso()) {
-                var assetId = token.getImageAssetId();
-                if (!isoSprites.containsKey(assetId)) {
-                    var workImage = IsometricGrid.isoImage(ImageManager.getImage(assetId));
-                    try {
-                        var bytes = ImageUtil.imageToBytes(workImage, "png");
-                        var pix = new Pixmap(bytes, 0, bytes.length);
-                        image = new Sprite(new Texture(pix));
-                        pix.dispose();
-                    } catch (Exception e) {
-                    }
-                    isoSprites.put(assetId, image);
-                } else {
-                    image = isoSprites.get(assetId);
-                }
-                token.setHeight((int) image.getHeight());
-                token.setWidth((int) image.getWidth());
-                footprintBounds = token.getBounds(zone);
-            }
-            timer.stop("tokenlist-5a");
-
-            timer.start("tokenlist-6");
-            // Position
-            // For Isometric Grid we alter the height offset
-            float iso_ho = 0;
-            java.awt.Dimension imgSize = new java.awt.Dimension((int) image.getWidth(), (int) image.getHeight());
-            if (token.getShape() == Token.TokenShape.FIGURE) {
-                float th = token.getHeight() * (float) footprintBounds.width / token.getWidth();
-                iso_ho = footprintBounds.height - th;
-                footprintBounds =
-                        new java.awt.Rectangle(
-                                footprintBounds.x,
-                                footprintBounds.y - (int) iso_ho,
-                                footprintBounds.width,
-                                (int) th);
-            }
-            SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-
-            int offsetx = 0;
-            int offsety = 0;
-            if (token.isSnapToScale()) {
-                offsetx =
-                        (int)
-                                (imgSize.width < footprintBounds.width
-                                        ? (footprintBounds.width - imgSize.width) / 2
-                                        : 0);
-                offsety =
-                        (int)
-                                (imgSize.height < footprintBounds.height
-                                        ? (footprintBounds.height - imgSize.height) / 2
-                                        : 0);
-
-
-            }
-            float tx = x + offsetx;
-            float ty = y + offsety + iso_ho;
-
-            // Snap
-            var scaleX = 1f;
-            var scaleY = 1f;
-            if (token.isSnapToScale()) {
-                scaleX = imgSize.width / image.getWidth();
-                scaleY = imgSize.height / image.getHeight();
-            } else {
-                if (token.getShape() == Token.TokenShape.FIGURE) {
-                    scaleX = footprintBounds.width / image.getHeight();
-                    scaleY = footprintBounds.width / image.getWidth();
-                } else {
-                    scaleX = footprintBounds.width / image.getWidth();
-                    scaleY = footprintBounds.height / image.getHeight();
-                }
-            }
-            image.setSize(scaleX * image.getWidth(), scaleY * image.getHeight());
-
-            image.setPosition(tx, -image.getHeight() - ty);
-
-            image.setOriginCenter();
-
-            // Rotated
-            if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                var originX = image.getWidth() / 2 - token.getAnchorX();
-                var originY = image.getHeight() / 2 + token.getAnchorY();
-                image.setOrigin(originX, originY);
-                image.setRotation(token.getFacing() + 90);
-            }
-
-            timer.stop("tokenlist-6");
-
+            prepareTokenSprite(image, token, footprintBounds);
 
             // Render Halo
             if (token.hasHalo()) {
@@ -1766,8 +1576,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
                         }
 
-                        float fx = x + (float) origBounds.getWidth() / zoom / 2;
-                        float fy = y + (float) origBounds.getHeight() / zoom / 2;
+                        float fx = origBounds.x + origBounds.width / zoom / 2f;
+                        float fy = origBounds.y + origBounds.height / zoom / 2f;
 
 
                         tmpMatrix.idt();
@@ -1800,8 +1610,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         }
                         arrowArea = new Area(arrow);
 
-                        float cx = x + (float) origBounds.getWidth() / 2;
-                        float cy = y + (float) origBounds.getHeight() / 2;
+                        float cx = origBounds.x + origBounds.width / 2f;
+                        float cy = origBounds.y + origBounds.height / 2f;
 
                         tmpMatrix.idt();
                         tmpMatrix.translate(cx, -cy, 0);
@@ -1821,14 +1631,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     case SQUARE:
                         if (zone.getGrid().isIsometric()) {
                             arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
-                            cx = x + (float) origBounds.getWidth() / 2;
-                            cy = y + (float) origBounds.getHeight() / 2;
+                            cx = origBounds.x + origBounds.width / 2f;
+                            cy = origBounds.y + origBounds.height / 2f;
                         } else {
                             int facing = token.getFacing();
                             arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
-                            cx = x + (float) origBounds.getWidth() / 2;
-                            cy = y + (float) origBounds.getHeight() / 2;
+                            cx = origBounds.x + origBounds.width / 2f;
+                            cy = origBounds.y + origBounds.height / 2f;
 
                             // Find the edge of the image
                             double xp = origBounds.getWidth() / 2;
@@ -1882,7 +1692,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-                renderTokenOverlay(overlay, token, origBounds, stateValue);
+                renderTokenOverlay(overlay, token, stateValue);
             }
             timer.stop("tokenlist-9");
 
@@ -1896,7 +1706,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         || !overlay.showPlayer(token, MapTool.getPlayer())) {
                     continue;
                 }
-                renderTokenOverlay(overlay, token, origBounds, barValue);
+                renderTokenOverlay(overlay, token, barValue);
             } // endfor
             timer.stop("tokenlist-10");
 
@@ -1969,7 +1779,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 showCurrentTokenLabel = false;
             }
             if (showCurrentTokenLabel) {
-                itemRenderList.add(new LabelRenderer(token, isGMView));
+                itemRenderList.add(new TokenLabelRenderer(token, isGMView));
             }
             timer.stop("tokenlist-12");
         }
@@ -1993,6 +1803,111 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
         }
         timer.stop("tokenlist-13");
+    }
+
+    private void prepareTokenSprite(Sprite image, Token token, java.awt.Rectangle footprintBounds) {
+        image.setRotation(0);
+
+        // Tokens are centered on the image center point
+        float x = footprintBounds.x;
+        float y = footprintBounds.y;
+
+        timer.start("tokenlist-5");
+
+        // handle flipping
+        image.setFlip(token.isFlippedX(), token.isFlippedY());
+        timer.stop("tokenlist-5");
+
+        image.setOriginCenter();
+
+        timer.start("tokenlist-5a");
+        if (token.isFlippedIso()) {
+            var assetId = token.getImageAssetId();
+            if (!isoSprites.containsKey(assetId)) {
+                var workImage = IsometricGrid.isoImage(ImageManager.getImage(assetId));
+                try {
+                    var bytes = ImageUtil.imageToBytes(workImage, "png");
+                    var pix = new Pixmap(bytes, 0, bytes.length);
+                    image = new Sprite(new Texture(pix));
+                    pix.dispose();
+                } catch (Exception e) {
+                }
+                isoSprites.put(assetId, image);
+            } else {
+                image = isoSprites.get(assetId);
+            }
+            token.setHeight((int) image.getHeight());
+            token.setWidth((int) image.getWidth());
+            footprintBounds = token.getBounds(zone);
+        }
+        timer.stop("tokenlist-5a");
+
+        timer.start("tokenlist-6");
+        // Position
+        // For Isometric Grid we alter the height offset
+        float iso_ho = 0;
+        java.awt.Dimension imgSize = new java.awt.Dimension((int) image.getWidth(), (int) image.getHeight());
+        if (token.getShape() == Token.TokenShape.FIGURE) {
+            float th = token.getHeight() * (float) footprintBounds.width / token.getWidth();
+            iso_ho = footprintBounds.height - th;
+            footprintBounds =
+                    new java.awt.Rectangle(
+                            footprintBounds.x,
+                            footprintBounds.y - (int) iso_ho,
+                            footprintBounds.width,
+                            (int) th);
+        }
+        SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+
+        int offsetx = 0;
+        int offsety = 0;
+        if (token.isSnapToScale()) {
+            offsetx =
+                    (int)
+                            (imgSize.width < footprintBounds.width
+                                    ? (footprintBounds.width - imgSize.width) / 2
+                                    : 0);
+            offsety =
+                    (int)
+                            (imgSize.height < footprintBounds.height
+                                    ? (footprintBounds.height - imgSize.height) / 2
+                                    : 0);
+
+
+        }
+        float tx = x + offsetx;
+        float ty = y + offsety + iso_ho;
+
+        // Snap
+        var scaleX = 1f;
+        var scaleY = 1f;
+        if (token.isSnapToScale()) {
+            scaleX = imgSize.width / image.getWidth();
+            scaleY = imgSize.height / image.getHeight();
+        } else {
+            if (token.getShape() == Token.TokenShape.FIGURE) {
+                scaleX = footprintBounds.width / image.getHeight();
+                scaleY = footprintBounds.width / image.getWidth();
+            } else {
+                scaleX = footprintBounds.width / image.getWidth();
+                scaleY = footprintBounds.height / image.getHeight();
+            }
+        }
+        image.setSize(scaleX * image.getWidth(), scaleY * image.getHeight());
+
+        image.setPosition(tx, -image.getHeight() - ty);
+
+        image.setOriginCenter();
+
+        // Rotated
+        if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
+            var originX = image.getWidth() / 2 - token.getAnchorX();
+            var originY = image.getHeight() / 2 + token.getAnchorY();
+            image.setOrigin(originX, originY);
+            image.setRotation(token.getFacing() + 90);
+        }
+
+        timer.stop("tokenlist-6");
     }
 
     private Sprite getSprite(MD5Key key) {
@@ -2096,15 +2011,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpTile.draw(batch, x + width - rightMargin, y + topMargin, right.getRegionWidth(), height - topMargin - bottomMargin);
     }
 
-    private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Rectangle2D bounds, Object value) {
-        if(overlay instanceof BarTokenOverlay)
-            renderTokenOverlay((BarTokenOverlay) overlay, token, bounds, value);
+    private void renderTokenOverlay(AbstractTokenOverlay overlay, Token token, Object value) {
+        if (overlay instanceof BarTokenOverlay)
+            renderTokenOverlay((BarTokenOverlay) overlay, token, value);
         else if (overlay instanceof BooleanTokenOverlay)
             renderTokenOverlay((BooleanTokenOverlay) overlay, token, value);
     }
 
-    private void renderTokenOverlay(BarTokenOverlay overlay, Token token, Rectangle2D bounds, Object value)
-    {
+    private void renderTokenOverlay(BarTokenOverlay overlay, Token token, Object value) {
         if (value == null) return;
         double val = 0;
         if (value instanceof Number) {
@@ -2142,7 +2056,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var image = getSprite(overlay.getAssetIds()[incr]);
 
         Dimension d = bounds.getSize();
-        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
         SwingUtil.constrainTo(size, d.width, d.height);
 
         // Find the position of the image according to the size and side where they are placed
@@ -2161,7 +2075,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         image.setPosition(x, y);
         image.setSize(size.width, size.height);
-        image.draw(batch, overlay.getOpacity()/100f);
+        image.draw(batch, overlay.getOpacity() / 100f);
     }
 
     private void renderTokenOverlay(SingleImageBarTokenOverlay overlay, Token token, double barValue) {
@@ -2173,7 +2087,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var image = getSprite(overlay.getAssetId());
 
         Dimension d = bounds.getSize();
-        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
         SwingUtil.constrainTo(size, d.width, d.height);
 
         var side = overlay.getSide();
@@ -2193,12 +2107,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         int width =
                 (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
-                        ? overlay.calcBarSize((int)image.getWidth(), barValue)
-                        : (int)image.getWidth();
+                        ? overlay.calcBarSize((int) image.getWidth(), barValue)
+                        : (int) image.getWidth();
         int height =
                 (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
-                        ? overlay.calcBarSize((int)image.getHeight(), barValue)
-                        : (int)image.getHeight();
+                        ? overlay.calcBarSize((int) image.getHeight(), barValue)
+                        : (int) image.getHeight();
 
         int screenWidth =
                 (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
@@ -2217,15 +2131,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var u2 = image.getU2();
         var v2 = image.getV2();
 
-        var wfactor = screenWidth * 1.0f/size.width;
+        var wfactor = screenWidth * 1.0f / size.width;
         var uDiff = (u2 - u) * wfactor;
         image.setU(u2 - uDiff);
 
-        var vfactor = screenHeight * 1.0f/size.height;
+        var vfactor = screenHeight * 1.0f / size.height;
         var vDiff = (v2 - v) * vfactor;
         image.setV(v2 - vDiff);
 
-        image.draw(batch, overlay.getOpacity()/100f);
+        image.draw(batch, overlay.getOpacity() / 100f);
 
         image.setU(u);
         image.setV(v);
@@ -2265,7 +2179,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         var barColor = overlay.getBarColor();
-        tmpColor.set(barColor.getRed()/255f, barColor.getGreen()/255f, barColor.getBlue()/255f, barColor.getAlpha()/255f);
+        tmpColor.set(barColor.getRed() / 255f, barColor.getGreen() / 255f, barColor.getBlue() / 255f, barColor.getAlpha() / 255f);
         drawer.filledRectangle(x, y, width, height, tmpColor);
     }
 
@@ -2296,7 +2210,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         var color = overlay.getBgColor();
-        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, color.getAlpha()/255f);
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         drawer.filledRectangle(x, y, width, height, tmpColor);
 
         // Draw the bar
@@ -2312,7 +2226,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         color = overlay.getBarColor();
-        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, color.getAlpha()/255f);
+        tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
         drawer.filledRectangle(x, y, width, height, tmpColor);
     }
 
@@ -2327,7 +2241,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
         Dimension d = bounds.getSize();
-        Dimension size = new Dimension((int)topImage.getWidth(), (int)topImage.getHeight());
+        Dimension size = new Dimension((int) topImage.getWidth(), (int) topImage.getHeight());
         SwingUtil.constrainTo(size, d.width, d.height);
 
         var side = overlay.getSide();
@@ -2347,11 +2261,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var width =
                 (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM)
-                        ? overlay.calcBarSize((int)topImage.getWidth(), barValue)
+                        ? overlay.calcBarSize((int) topImage.getWidth(), barValue)
                         : topImage.getWidth();
         var height =
                 (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT)
-                        ? overlay.calcBarSize((int)topImage.getHeight(), barValue)
+                        ? overlay.calcBarSize((int) topImage.getHeight(), barValue)
                         : topImage.getHeight();
 
         var screenWidth =
@@ -2365,17 +2279,17 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         bottomImage.setPosition(x, y);
         bottomImage.setSize(size.width, size.height);
-        bottomImage.draw(batch, overlay.getOpacity()/100f);
+        bottomImage.draw(batch, overlay.getOpacity() / 100f);
 
         var u = topImage.getU();
         var v = topImage.getV();
         var u2 = topImage.getU2();
         var v2 = topImage.getV2();
 
-        var wFactor = screenWidth * 1.0f/size.width;
+        var wFactor = screenWidth * 1.0f / size.width;
         var uDiff = (u2 - u) * wFactor;
 
-        var vFactor = screenHeight * 1.0f/size.height;
+        var vFactor = screenHeight * 1.0f / size.height;
         var vDiff = (v2 - v) * vFactor;
 
         topImage.setPosition(x, y);
@@ -2389,7 +2303,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             topImage.setU2(u + uDiff);
             topImage.setV2(v + vDiff);
         }
-        topImage.draw(batch, overlay.getOpacity()/100f);
+        topImage.draw(batch, overlay.getOpacity() / 100f);
 
         topImage.setU(u);
         topImage.setV(v);
@@ -2448,14 +2362,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var image = getSprite(overlay.getAssetId());
 
-        Dimension size = new Dimension((int)image.getWidth(), (int)image.getHeight());
+        Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
         SwingUtil.constrainTo(size, d.width, d.height);
 
         // Paint it at the right location
         int width = size.width;
         int height = size.height;
 
-        if(overlay instanceof CornerImageTokenOverlay) {
+        if (overlay instanceof CornerImageTokenOverlay) {
             x += iBounds.x + (d.width - width) / 2;
             y -= iBounds.y + (d.height - height) / 2 + iBounds.height;
         } else {
@@ -2465,7 +2379,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         image.setPosition(x, y);
         image.setSize(size.width, size.height);
-        image.draw(batch, overlay.getOpacity()/100f);
+        image.draw(batch, overlay.getOpacity() / 100f);
     }
 
     private void renderTokenOverlay(XTokenOverlay overlay, Token token) {
@@ -3216,7 +3130,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         // for now quick and dirty
         disposeZoneResources();
         initializeZoneResources(currentZone);
-  */  }
+  */
+    }
 
     public void setScale(Scale scale) {
         offsetX = scale.getOffsetX() * -1;
@@ -3269,10 +3184,38 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private class LabelRenderer implements ItemRenderer {
+        private float x;
+        private float y;
+        private String text;
+
+        public LabelRenderer(String text, float x, float y) {
+            this.x = x;
+            this.y = y;
+            this.text = text;
+        }
+
+        @Override
+        public void render() {
+            tmpWorldCoord.x = x;
+            tmpWorldCoord.y = y;
+            tmpWorldCoord.z = 0;
+            tmpScreenCoord = cam.project(tmpWorldCoord);
+
+            drawBoxedString(
+                    text,
+                    tmpScreenCoord.x,
+                    tmpScreenCoord.y,
+                    SwingUtilities.CENTER,
+                    grayLabel,
+                    Color.BLACK);
+        }
+    }
+
+    private class TokenLabelRenderer implements ItemRenderer {
         private final boolean isGMView;
         private Token token;
 
-        public LabelRenderer(Token token, boolean isGMView) {
+        public TokenLabelRenderer(Token token, boolean isGMView) {
             this.token = token;
             this.isGMView = isGMView;
         }
