@@ -132,12 +132,6 @@ public class DeleteDrawingTool extends DefaultTool
   }
 
   private void drawBox(Graphics2D g, Rectangle box) {
-    Composite composite = g.getComposite();
-    Stroke stroke = g.getStroke();
-    g.setStroke(new BasicStroke(2));
-
-    var offX = renderer.getViewOffsetX();
-    var offY = renderer.getViewOffsetY();
     var scale = renderer.getScale();
 
     var screenPoint = ScreenPoint.fromZonePoint(renderer, box.x, box.y);
@@ -147,16 +141,7 @@ public class DeleteDrawingTool extends DefaultTool
     var w = (int) (box.width * scale);
     var h = (int) (box.height * scale);
 
-    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
-    g.setPaint(AppStyle.selectionBoxFill);
-    g.fillRoundRect(x, y, w, h, 10, 10);
-    g.setComposite(composite);
-
-    g.setColor(AppStyle.selectionBoxOutline);
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g.drawRoundRect(x, y, w, h, 10, 10);
-
-    g.setStroke(stroke);
+    AppStyle.selectedBorder.paintAround(g, x, y, w, h);
   }
 
   @Override
