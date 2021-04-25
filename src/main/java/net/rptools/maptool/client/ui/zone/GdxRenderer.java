@@ -2232,11 +2232,88 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderTokenOverlay(DrawnBarTokenOverlay overlay, Token token, double barValue) {
-        //TODO: Implement
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var side = overlay.getSide();
+        var thickness = overlay.getThickness();
+
+        int width = (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM) ? w : thickness;
+        int height = (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT) ? h : thickness;
+
+        switch (side) {
+            case LEFT:
+                y += h - height;
+                break;
+            case RIGHT:
+                x += w - width;
+                y += h - height;
+                break;
+            case TOP:
+                y += h - height;
+                break;
+        }
+
+        if (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM) {
+            width = overlay.calcBarSize(width, barValue);
+        } else {
+            height = overlay.calcBarSize(height, barValue);
+            y += bounds.height - height;
+        }
+
+        var barColor = overlay.getBarColor();
+        tmpColor.set(barColor.getRed()/255f, barColor.getGreen()/255f, barColor.getBlue()/255f, barColor.getAlpha()/255f);
+        drawer.filledRectangle(x, y, width, height, tmpColor);
     }
 
     private void renderTokenOverlay(TwoToneBarTokenOverlay overlay, Token token, double barValue) {
-        //TODO: Implement
+        var bounds = token.getBounds(zone);
+        var x = bounds.x;
+        var y = -bounds.y - bounds.height;
+        var w = bounds.width;
+        var h = bounds.height;
+
+        var side = overlay.getSide();
+        var thickness = overlay.getThickness();
+
+        int width = (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM) ? w : thickness;
+        int height = (side == BarTokenOverlay.Side.LEFT || side == BarTokenOverlay.Side.RIGHT) ? h : thickness;
+
+        switch (side) {
+            case LEFT:
+                y += h - height;
+                break;
+            case RIGHT:
+                x += w - width;
+                y += h - height;
+                break;
+            case TOP:
+                y += h - height;
+                break;
+        }
+
+        var color = overlay.getBgColor();
+        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, color.getAlpha()/255f);
+        drawer.filledRectangle(x, y, width, height, tmpColor);
+
+        // Draw the bar
+        int borderSize = thickness > 5 ? 2 : 1;
+        x += borderSize;
+        y += borderSize;
+        width -= borderSize * 2;
+        height -= borderSize * 2;
+        if (side == BarTokenOverlay.Side.TOP || side == BarTokenOverlay.Side.BOTTOM) {
+            width = overlay.calcBarSize(width, barValue);
+        } else {
+            height = overlay.calcBarSize(height, barValue);
+        }
+
+        color = overlay.getBarColor();
+        tmpColor.set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f, color.getAlpha()/255f);
+        drawer.filledRectangle(x, y, width, height, tmpColor);
     }
 
     private void renderTokenOverlay(TwoImageBarTokenOverlay overlay, Token token, double barValue) {
