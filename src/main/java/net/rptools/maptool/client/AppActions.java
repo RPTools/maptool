@@ -647,36 +647,6 @@ public class AppActions {
           }
         }
       };
-  public static final ClientAction REDO_PER_MAP =
-      new ZoneClientAction() {
-        {
-          init("action.redoDrawing");
-          isAvailable(); // XXX Is this even necessary?
-        }
-
-        @Override
-        protected void executeAction() {
-          Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-          z.redoDrawable();
-          isAvailable();
-          UNDO_PER_MAP.isAvailable();
-        }
-
-        @Override
-        public boolean isAvailable() {
-          boolean result = false;
-          MapToolFrame mtf = MapTool.getFrame();
-          if (mtf != null) {
-            ZoneRenderer zr = mtf.getCurrentZoneRenderer();
-            if (zr != null) {
-              Zone z = zr.getZone();
-              result = z.canRedo();
-            }
-          }
-          setEnabled(result);
-          return isEnabled();
-        }
-      };
   public static final ClientAction UNDO_PER_MAP =
       new ZoneClientAction() {
         {
@@ -703,6 +673,36 @@ public class AppActions {
             if (zr != null) {
               Zone z = zr.getZone();
               result = z.canUndo();
+            }
+          }
+          setEnabled(result);
+          return isEnabled();
+        }
+      };
+  public static final ClientAction REDO_PER_MAP =
+      new ZoneClientAction() {
+        {
+          init("action.redoDrawing");
+          isAvailable(); // XXX Is this even necessary?
+        }
+
+        @Override
+        protected void executeAction() {
+          Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+          z.redoDrawable();
+          isAvailable();
+          UNDO_PER_MAP.isAvailable();
+        }
+
+        @Override
+        public boolean isAvailable() {
+          boolean result = false;
+          MapToolFrame mtf = MapTool.getFrame();
+          if (mtf != null) {
+            ZoneRenderer zr = mtf.getCurrentZoneRenderer();
+            if (zr != null) {
+              Zone z = zr.getZone();
+              result = z.canRedo();
             }
           }
           setEnabled(result);
