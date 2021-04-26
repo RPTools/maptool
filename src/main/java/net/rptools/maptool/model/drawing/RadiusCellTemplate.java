@@ -225,8 +225,13 @@ public class RadiusCellTemplate extends AbstractTemplate {
     int gridSize = zone.getGrid().getSize();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
     ZonePoint vertex = getVertex();
-    return new Rectangle(
-        vertex.x - quadrantSize, vertex.y - quadrantSize, quadrantSize * 2, quadrantSize * 2);
+
+    var x = vertex.x - quadrantSize + gridSize;
+    var y = vertex.y - quadrantSize + gridSize;
+    var w = quadrantSize * 2 - gridSize;
+    var h = quadrantSize * 2 - gridSize;
+
+    return new Rectangle(x, y, w, h);
   }
 
   /**
