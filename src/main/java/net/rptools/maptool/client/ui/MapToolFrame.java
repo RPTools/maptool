@@ -1735,7 +1735,7 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolsShown = true;
   }
 
-  private void hideFullScreenTools() {
+  public void hideFullScreenTools() {
     if (!fullScreenToolsShown) return;
 
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
@@ -1756,10 +1756,16 @@ public class MapToolFrame extends DefaultDockableHolder
     var initiativeFrame = frameMap.get(MTFrame.INITIATIVE);
     initiativePanel.setVisible(true);
     initiativeFrame.add(initiativePanel);
+
+    fullScreenToolsShown = false;
   }
 
   public boolean isFullScreen() {
     return fullScreenFrame != null;
+  }
+
+  public boolean areFullScreenToolsShown() {
+    return fullScreenToolsShown;
   }
 
   public void showWindowed() {
