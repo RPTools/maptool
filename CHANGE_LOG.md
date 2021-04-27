@@ -5,6 +5,7 @@ Moved to Java 16.
 - [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
 - [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.
+- [#2494][i2494] Support added for WebP, SVG, ICO, TGA images.
 - [#2466][i2466] Drawings can not be selected with the mouse and deleted via delete key.
 - [#2366][i2366] Improved tooltips and error messages from Start Server dialog. 
 - [#2360][i2360] Map view can now be panned with Ctrl + arrow keys.
@@ -24,6 +25,7 @@ Moved to Java 16.
 - [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
 - [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
 - [#2288][i2288] Non-alphanumeric chars in the key of a String Property could break `getStrProp()`. Fixed.
+- [#2249][i2249] Javascript in Overlays would keep running after overlay closed. Fixed.
 - [#2214][i2214] Moving to Java 16 fixed startup issues with Japanese locale.
 - [#706][i706] A State & Bar with the same name can activate/deactivate together. Duplicate names no longer allowed.
 - [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
@@ -36,30 +38,32 @@ Moved to Java 16.
 - [#][i] 
 - [#][i] 
 
-[i2560]: https://github.com/RPTools/maptool/pull/2560
-[i2555]: https://github.com/RPTools/maptool/pull/2555
-[i2551]: https://github.com/RPTools/maptool/pull/2551
-[i2550]: https://github.com/RPTools/maptool/pull/2550
-[i2538]: https://github.com/RPTools/maptool/pull/2538
-[i2524]: https://github.com/RPTools/maptool/pull/2524
-[i2519]: https://github.com/RPTools/maptool/pull/2519
-[i2493]: https://github.com/RPTools/maptool/pull/2493
-[i2466]: https://github.com/RPTools/maptool/pull/2466
-[i2366]: https://github.com/RPTools/maptool/pull/2366
-[i2360]: https://github.com/RPTools/maptool/pull/2360
-[i2349]: https://github.com/RPTools/maptool/pull/2349
-[i2334]: https://github.com/RPTools/maptool/pull/2334
-[i2288]: https://github.com/RPTools/maptool/pull/2288
-[i2234]: https://github.com/RPTools/maptool/pull/2234
-[i2214]: https://github.com/RPTools/maptool/pull/2214
-[i1496]: https://github.com/RPTools/maptool/pull/1496
-[i1420]: https://github.com/RPTools/maptool/pull/1420
-[i1234]: https://github.com/RPTools/maptool/pull/1234
-[i706]: https://github.com/RPTools/maptool/pull/706
-[i685]: https://github.com/RPTools/maptool/pull/685
-[i369]: https://github.com/RPTools/maptool/pull/369
-[i]: https://github.com/RPTools/maptool/pull/
-[i]: https://github.com/RPTools/maptool/pull/
+[i2560]: https://github.com/RPTools/maptool/issues/2560
+[i2555]: https://github.com/RPTools/maptool/issues/2555
+[i2551]: https://github.com/RPTools/maptool/issues/2551
+[i2550]: https://github.com/RPTools/maptool/issues/2550
+[i2538]: https://github.com/RPTools/maptool/issues/2538
+[i2524]: https://github.com/RPTools/maptool/issues/2524
+[i2519]: https://github.com/RPTools/maptool/issues/2519
+[i2494]: https://github.com/RPTools/maptool/issues/2494
+[i2493]: https://github.com/RPTools/maptool/issues/2493
+[i2466]: https://github.com/RPTools/maptool/issues/2466
+[i2366]: https://github.com/RPTools/maptool/issues/2366
+[i2360]: https://github.com/RPTools/maptool/issues/2360
+[i2349]: https://github.com/RPTools/maptool/issues/2349
+[i2334]: https://github.com/RPTools/maptool/issues/2334
+[i2288]: https://github.com/RPTools/maptool/issues/2288
+[i2249]: https://github.com/RPTools/maptool/issues/2249
+[i2234]: https://github.com/RPTools/maptool/issues/2234
+[i2214]: https://github.com/RPTools/maptool/issues/2214
+[i1496]: https://github.com/RPTools/maptool/issues/1496
+[i1420]: https://github.com/RPTools/maptool/issues/1420
+[i1234]: https://github.com/RPTools/maptool/issues/1234
+[i706]: https://github.com/RPTools/maptool/issues/706
+[i685]: https://github.com/RPTools/maptool/issues/685
+[i369]: https://github.com/RPTools/maptool/issues/369
+[i]: https://github.com/RPTools/maptool/issues/
+[i]: https://github.com/RPTools/maptool/issues/
 
 # MapTool 1.8.5
 Focus on bug fixes related to previous 1.8 releases plus an improvement to the macro editor.
