@@ -15,26 +15,37 @@
 package net.rptools.maptool.server;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.rptools.clientserver.hessian.server.ServerConnection;
+
+import net.rptools.clientserver.ActivityListener;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.hessian.server.IMethodServerConnection;
+import net.rptools.clientserver.hessian.server.MethodServerConnection;
+import net.rptools.clientserver.simple.AbstractConnection;
+import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.client.IClientConnection;
+import net.rptools.clientserver.simple.server.IHandshake;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool.transfer.AssetChunk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
-public class MapToolServerConnection extends ServerConnection implements ServerObserver {
+public class MapToolServerConnection implements ServerObserver, IHandshake {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
   private final MapToolServer server;
+  private final IMethodServerConnection connection;
 
-  public MapToolServerConnection(MapToolServer server, int port) throws IOException {
-    super(port);
+  public MapToolServerConnection(MapToolServer server) throws IOException {
+    this.connection = ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     addObserver(this);
   }
@@ -44,13 +55,12 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  @Override
-  public boolean handleConnectionHandshake(String id, Socket socket) {
+  public boolean handleConnectionHandshake(IClientConnection conn) {
     try {
-      Player player = Handshake.receiveHandshake(server, socket);
+      Player player = Handshake.receiveHandshake(server, conn);
 
       if (player != null) {
-        playerMap.put(id.toUpperCase(), player);
+        playerMap.put(conn.getId().toUpperCase(), player);
         return true;
       }
     } catch (IOException ioe) {
@@ -83,7 +93,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   // SERVER OBSERVER
 
   /** Handle late connections */
-  public void connectionAdded(net.rptools.clientserver.simple.client.ClientConnection conn) {
+  public void connectionAdded(IClientConnection conn) {
     server.configureClientConnection(conn);
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
@@ -103,7 +113,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     // }
   }
 
-  public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {
+  public void connectionRemoved(IClientConnection conn) {
     server.releaseClientConnection(conn.getId());
     server
         .getConnection()
@@ -112,5 +122,38 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
             ClientCommand.COMMAND.playerDisconnected.name(),
             playerMap.get(conn.getId().toUpperCase()));
     playerMap.remove(conn.getId().toUpperCase());
+  }
+
+  public void addMessageHandler(ServerMethodHandler handler) {
+    connection.addMessageHandler(handler);
+  }
+
+  public void broadcastCallMethod(String method, Object... parameters) {
+    connection.broadcastCallMethod(method, parameters);
+  }
+
+  public void broadcastCallMethod(String[] exclude, String method, Object... parameters) {
+    connection.broadcastCallMethod(exclude, method, parameters);
+  }
+
+  public void callMethod(String id, String method, Object... parameters) {
+    connection.callMethod(id, method, parameters);
+  }
+
+  public void callMethod(String id, Object channel, String method, Object... parameters) {
+    connection.callMethod(id, channel, method, parameters);
+  }
+
+
+  public void close() throws IOException {
+    connection.close();
+  }
+
+  public void addObserver(ServerObserver observer) {
+    connection.addObserver(observer);
+  }
+
+  public void removeObserver(ServerObserver observer) {
+    connection.removeObserver(observer);
   }
 }

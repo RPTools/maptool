@@ -14,12 +14,8 @@
  */
 package net.rptools.clientserver.simple.client;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.io.*;
+
 import net.rptools.clientserver.simple.AbstractConnection;
 
 /**
@@ -27,35 +23,20 @@ import net.rptools.clientserver.simple.AbstractConnection;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public class ClientConnection extends AbstractConnection {
-  private final Socket socket;
+public abstract class AbstractClientConnection extends AbstractConnection implements IClientConnection {
   private SendThread send;
   private ReceiveThread receive;
   private final String id;
 
-  public ClientConnection(String host, int port, String id)
-      throws UnknownHostException, IOException {
-    this(new Socket(host, port), id);
-  }
-
-  public ClientConnection(Socket socket, String id) {
-    this.socket = socket;
+  public AbstractClientConnection(String id) {
     this.id = id;
   }
 
   public void start() throws IOException {
-    if (sendHandshake(socket)) {
-      this.send = new SendThread(this, socket.getOutputStream());
-      this.send.start();
-      this.receive = new ReceiveThread(this, socket.getInputStream());
-      this.receive.start();
-    } else {
-      socket.close();
-    }
-  }
-
-  public boolean sendHandshake(Socket s) throws IOException {
-    return true;
+    this.send = new SendThread(this, getOutputSream());
+    this.send.start();
+    this.receive = new ReceiveThread(this, getInputStream());
+    this.receive.start();
   }
 
   public String getId() {
@@ -73,35 +54,28 @@ public class ClientConnection extends AbstractConnection {
     }
   }
 
-  public boolean isAlive() {
-    return !socket.isClosed();
+  protected boolean isStopRequested() {
+    return send.stopRequested;
   }
+
 
   public synchronized void close() throws IOException {
     if (send.stopRequested) {
       return;
     }
-    socket.close();
     send.requestStop();
     receive.requestStop();
-
-    //        try {
-    //            send.join();
-    //            // receive.join(); <-- This causes a freaky error.  whatever.
-    //        } catch (InterruptedException e) {
-    //            e.printStackTrace();
-    //        }
   }
 
   // /////////////////////////////////////////////////////////////////////////
   // send thread
   // /////////////////////////////////////////////////////////////////////////
   private class SendThread extends Thread {
-    private final ClientConnection conn;
+    private final AbstractClientConnection conn;
     private final OutputStream out;
     private boolean stopRequested = false;
 
-    public SendThread(ClientConnection conn, OutputStream out) {
+    public SendThread(AbstractClientConnection conn, OutputStream out) {
       this.conn = conn;
       this.out = new BufferedOutputStream(out, 1024);
     }
@@ -148,11 +122,11 @@ public class ClientConnection extends AbstractConnection {
   // receive thread
   // /////////////////////////////////////////////////////////////////////////
   private class ReceiveThread extends Thread {
-    private final ClientConnection conn;
+    private final AbstractClientConnection conn;
     private final InputStream in;
     private boolean stopRequested = false;
 
-    public ReceiveThread(ClientConnection conn, InputStream in) {
+    public ReceiveThread(AbstractClientConnection conn, InputStream in) {
       this.conn = conn;
       this.in = in;
     }

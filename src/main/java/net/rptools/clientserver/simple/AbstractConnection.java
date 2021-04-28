@@ -33,7 +33,7 @@ import net.rptools.clientserver.ActivityListener.State;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public abstract class AbstractConnection {
+public abstract class AbstractConnection implements IConnection {
   // We don't need to make each list synchronized since the class is synchronized
 
   protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();

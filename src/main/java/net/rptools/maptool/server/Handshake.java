@@ -17,7 +17,6 @@ package net.rptools.maptool.server;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import java.io.*;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -25,7 +24,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+
 import net.rptools.clientserver.hessian.HessianUtils;
+import net.rptools.clientserver.simple.client.IClientConnection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
@@ -54,16 +55,16 @@ public class Handshake {
    * Server side of the handshake
    *
    * @param server the MapTool server instance
-   * @param s the server socket
    * @throws IOException if an I/O error occurs when creating the input stream, the socket is
    *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return A player structure for the connected player or null on issues
    * @throws IOException if there is a problem reading from the socket.
    */
-  public static Player receiveHandshake(MapToolServer server, Socket s)
+  public static Player receiveHandshake(MapToolServer server, IClientConnection conn)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
-    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+    var dos = conn.getOutputSream();
+    var dis = conn.getInputStream();
 
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
@@ -73,7 +74,7 @@ public class Handshake {
     Response response = new Response();
     Request request =
         decodeRequest(
-            s,
+            dis,
             server.getConfig().getPlayerPassword(),
             server.getConfig().getGmPassword(),
             initialMacSalt);
@@ -122,7 +123,6 @@ public class Handshake {
       dos.flush();
 
       // Now read the response
-      DataInputStream dis = new DataInputStream(s.getInputStream());
       int saltLen = dis.readInt();
       byte[] responseSalt = dis.readNBytes(saltLen);
       if (responseSalt.length != saltLen) {
@@ -152,7 +152,7 @@ public class Handshake {
         player = null;
       }
 
-      HessianOutput output = new HessianOutput(s.getOutputStream());
+      HessianOutput output = new HessianOutput(dos);
       output.getSerializerFactory().setAllowNonSerializable(true);
       output.writeObject(response);
     } else {
@@ -211,17 +211,14 @@ public class Handshake {
   /**
    * Decrypts the handshake / login request.
    *
-   * @param socket The network socket for the connection.
    * @param playerPassword
    * @param gmPassword
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt)
+      DataInputStream inputStream, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
-    socket.getInetAddress().getAddress();
-    InputStream inputStream = socket.getInputStream();
     DataInputStream dis = new DataInputStream(inputStream);
 
     byte[] decrypted = null;
@@ -267,7 +264,7 @@ public class Handshake {
       Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
       decrypted = playerCipher.doFinal(message);
     } catch (Exception ex) {
-      log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
+      log.warn(I18N.getText("Handshake.msg.failedLogin", ""));
       log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
       return null;
     }
@@ -281,16 +278,17 @@ public class Handshake {
    * Client side of the handshake
    *
    * @param request the handshake request
-   * @param s the socket to send the request on
    * @throws IOException if an I/O error occurs when creating the input stream, the socket is
    *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return the response from the srever
    */
-  public static Response sendHandshake(Request request, Socket s)
+  public static Response sendHandshake(Request request, IClientConnection conn)
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
-          NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
+      NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
-    DataInputStream dis = new DataInputStream(s.getInputStream());
+    var dis = conn.getInputStream();
+    var dos = conn.getOutputSream();
+
     // Read the salt we are expected to use for initial messages MAC
     int macSaltLen = dis.readInt();
     byte[] macSalt = dis.readNBytes(macSaltLen);
@@ -303,7 +301,6 @@ public class Handshake {
     }
 
     byte[] reqBytes = buildRequest(request, macSalt);
-    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.write(reqBytes);
     dos.flush();
 
@@ -359,7 +356,7 @@ public class Handshake {
     }
 
     // If we are here the handshake succeeded so wait for the server policy
-    HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
+    HessianInput input = HessianUtils.createSafeHessianInput(dis);
     Response response = (Response) input.readObject();
     MapTool.getPlayer().setRole(response.role);
     return response;
@@ -367,7 +364,7 @@ public class Handshake {
 
   private static byte[] buildRequest(Request request, byte[] macSalt)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
+      BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(USERNAME_FIELD);
     sb.append(request.name);

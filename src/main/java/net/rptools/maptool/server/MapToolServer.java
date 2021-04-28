@@ -21,7 +21,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.simple.client.ClientConnection;
+
+import net.rptools.clientserver.simple.client.IClientConnection;
+import net.rptools.clientserver.simple.client.SocketClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.client.MapTool;
@@ -48,8 +50,8 @@ public class MapToolServer {
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
-  private final Map<String, ClientConnection> connectionMap =
-      Collections.synchronizedMap(new HashMap<String, ClientConnection>());
+  private final Map<String, IClientConnection> connectionMap =
+      Collections.synchronizedMap(new HashMap<String, IClientConnection>());
   private final AssetProducerThread assetProducerThread;
 
   private Campaign campaign;
@@ -57,8 +59,10 @@ public class MapToolServer {
   private HeartbeatThread heartbeatThread;
 
   public MapToolServer(ServerConfig config, ServerPolicy policy) throws IOException {
+    this.config = config;
+    this.policy = policy;
     handler = new ServerMethodHandler(this);
-    conn = new MapToolServerConnection(this, config.getPort());
+    conn = new MapToolServerConnection(this);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
@@ -66,8 +70,7 @@ public class MapToolServer {
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
 
-    this.config = config;
-    this.policy = policy;
+
 
     // Start a heartbeat if requested
     if (config.isServerRegistered()) {
@@ -76,13 +79,13 @@ public class MapToolServer {
     }
   }
 
-  public void configureClientConnection(ClientConnection connection) {
+  public void configureClientConnection(IClientConnection connection) {
     String id = connection.getId();
     assetManagerMap.put(id, new AssetTransferManager());
     connectionMap.put(id, connection);
   }
 
-  public ClientConnection getClientConnection(String id) {
+  public IClientConnection getClientConnection(String id) {
     return connectionMap.get(id);
   }
 
@@ -96,7 +99,7 @@ public class MapToolServer {
    * @param id the connection ID
    */
   public void releaseClientConnection(String id) {
-    ClientConnection connection = getClientConnection(id);
+    IClientConnection connection = getClientConnection(id);
     if (connection != null) {
       try {
         connection.close();

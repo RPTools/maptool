@@ -47,6 +47,7 @@ public class ServerConfig {
   private String playerPassword;
   private boolean personalServer;
   private String serverName;
+  private String hostName;
 
   public static String getPersonalServerGMPassword() {
     return personalServerGMPassword;
@@ -62,12 +63,13 @@ public class ServerConfig {
   }
 
   public ServerConfig(
-      String hostPlayerId, String gmPassword, String playerPassword, int port, String serverName) {
+      String hostPlayerId, String gmPassword, String playerPassword, int port, String serverName, String hostName) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
+    this.hostName = hostName;
   }
 
   public String getHostPlayerId() {
@@ -100,6 +102,7 @@ public class ServerConfig {
 
   public static ServerConfig createPersonalServerConfig() {
     ServerConfig config = new ServerConfig();
+    config.hostName = "localhost";
     config.personalServer = true;
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
     return config;
@@ -112,6 +115,8 @@ public class ServerConfig {
   public String getPlayerPassword() {
     return playerPassword;
   }
+
+  public String getHostName() { return hostName; }
 
   private static Random r = new Random();
 

@@ -2166,7 +2166,9 @@ public class AppActions {
                         serverProps.getGMPassword(),
                         serverProps.getPlayerPassword(),
                         serverProps.getPort(),
-                        serverProps.getRPToolsName());
+                        serverProps.getRPToolsName(),
+                        "localhost"
+                    );
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2203,16 +2205,14 @@ public class AppActions {
                   String playerType = dialog.getRoleCombo().getSelectedItem().toString();
                   if (playerType.equals("GM")) {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             serverProps.getRole(),
                             serverProps.getGMPassword()));
                   } else {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             serverProps.getRole(),
@@ -2289,9 +2289,17 @@ public class AppActions {
                 boolean failed = false;
                 try {
                   ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
+                  ServerConfig config =
+                      new ServerConfig(
+                          prefs.getUsername(),
+                          "",
+                          "",
+                          dialog.getPort(),
+                          prefs.getServerName(),
+                          dialog.getServer()
+                      );
                   MapTool.createConnection(
-                      dialog.getServer(),
-                      dialog.getPort(),
+                      config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
 
                   MapTool.getFrame().hideGlassPane();

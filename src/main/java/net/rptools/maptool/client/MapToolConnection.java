@@ -14,29 +14,34 @@
  */
 package net.rptools.maptool.client;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import net.rptools.clientserver.hessian.client.ClientConnection;
+
+import net.rptools.clientserver.ActivityListener;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.hessian.client.IMethodClientConnection;
+import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.client.AbstractClientConnection;
+import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.server.Handshake;
+import net.rptools.maptool.server.ServerConfig;
 
 /** @author trevor */
-public class MapToolConnection extends ClientConnection {
+public class MapToolConnection {
   private final Player player;
+  private IMethodClientConnection connection;
 
-  public MapToolConnection(String host, int port, Player player) throws IOException {
-    super(host, port, null);
-    this.player = player;
-  }
-
-  public MapToolConnection(Socket socket, Player player) throws IOException {
-    super(socket, null);
+  public MapToolConnection(ServerConfig config, Player player) throws IOException {
+    this.connection = ConnectionFactory.getInstance().createClientConnection(null, config);
     this.player = player;
   }
 
@@ -45,15 +50,11 @@ public class MapToolConnection extends ClientConnection {
    *
    * @see net.rptools.clientserver.simple.client.ClientConnection#sendHandshake( java.net.Socket)
    */
-  @Override
-  public boolean sendHandshake(Socket s) throws IOException {
+  public boolean sendHandshake() throws IOException {
     Handshake.Response response = null;
     try {
-      response =
-          Handshake.sendHandshake(
-              new Handshake.Request(
-                  player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()),
-              s);
+      var request = new Handshake.Request(player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion());
+      response = Handshake.sendHandshake(request,connection);
     } catch (IllegalBlockSizeException
         | InvalidKeyException
         | BadPaddingException
@@ -73,5 +74,37 @@ public class MapToolConnection extends ClientConnection {
       MapTool.setServerPolicy(response.policy);
     }
     return result;
+  }
+
+  public void start() throws IOException {
+    if (sendHandshake()) {
+      connection.start();
+    } else {
+      connection.close();
+    }
+  }
+
+  public void addMessageHandler(ClientMethodHandler handler) {
+    connection.addMessageHandler(handler);
+  }
+
+  public void addActivityListener(ActivityMonitorPanel activityMonitor) {
+    connection.addActivityListener(activityMonitor);
+  }
+
+  public void addDisconnectHandler(ServerDisconnectHandler serverDisconnectHandler) {
+    connection.addDisconnectHandler(serverDisconnectHandler);
+  }
+
+  public boolean isAlive() {
+    return connection.isAlive();
+  }
+
+  public void close() throws IOException {
+    connection.close();
+  }
+
+  public void callMethod(String name, Object[] params) {
+    connection.callMethod(name, params);
   }
 }
