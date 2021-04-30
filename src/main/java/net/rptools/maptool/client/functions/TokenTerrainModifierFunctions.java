@@ -123,8 +123,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
     }
 
     jsonObject.addProperty("terrainModifier", token.getTerrainModifier());
-    jsonObject.addProperty(
-        "terrainModifierOperation", token.getTerrainModifierOperation().name());
+    jsonObject.addProperty("terrainModifierOperation", token.getTerrainModifierOperation().name());
     jsonObject.add("terrainModifiersIgnored", jsonArray);
 
     return jsonObject;
