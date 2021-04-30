@@ -430,10 +430,7 @@ public class Topology_Functions extends AbstractFunction {
     final int level = getJSONint(jsonParms, "level", 2, 0, 100, "setTokenVBL[Auto]");
     final String method =
         getJSONasString(
-            jsonParms,
-            "method",
-            JTS_SimplifyMethodType.getDefault().getLabel(),
-            "setTokenVBL[Auto]");
+            jsonParms, "method", JTS_SimplifyMethodType.getDefault().name(), "setTokenVBL[Auto]");
 
     Color color = new Color(r, g, b, a);
     final boolean inverseVbl = inverse == 1;
