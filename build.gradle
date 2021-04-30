@@ -381,6 +381,7 @@ task configSentryRelease(type: Copy) {
 
 task uberJar(type: Jar) {
     group = 'distribution'
+    zip64 = true
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion
