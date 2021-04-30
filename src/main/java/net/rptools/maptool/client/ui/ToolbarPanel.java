@@ -14,22 +14,11 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.CardLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JSlider;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
@@ -60,6 +49,12 @@ public class ToolbarPanel extends JToolBar {
 
   private final ButtonGroup buttonGroup = new ButtonGroup();
   private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
+  private final JToggleButton pointerGroupButton;
+  private final JToggleButton drawButton;
+  private final JToggleButton templateButton;
+  private final JToggleButton fogButton;
+  private final JToggleButton topologyButton;
+  private final Component horizontalSpacer;
   private final JPanel optionPanel;
   private final Toolbox toolbox;
 
@@ -69,62 +64,52 @@ public class ToolbarPanel extends JToolBar {
     toolbox = tbox;
     optionPanel = new JPanel(new CardLayout());
 
-    final OptionPanel pointerGroupOptionPanel = createPointerPanel();
-    final JToggleButton pointerGroupButton =
-        createButton(
-            "net/rptools/maptool/client/image/tool/pointer-blue.png",
-            "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
-            pointerGroupOptionPanel,
-            I18N.getText("tools.interaction.tooltip"));
-
-    final SidePanel aiPanel = new SidePanel();
-    aiPanel.add(AI_Tool.class);
-    aiPanel.add(AI_UseVblTool.class);
-
-    pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
-    pointerGroupOptionPanel.add(aiPanel);
-
-    pointerGroupButton.setSelected(true);
-    pointerGroupOptionPanel.activate();
-
     final JSeparator vertSplit = new JSeparator(JSeparator.VERTICAL);
     final Component vertSpacer = Box.createHorizontalStrut(10);
 
     final JSeparator horizontalSplit = new JSeparator(JSeparator.HORIZONTAL);
     horizontalSplit.setVisible(false);
-    final Component horizontalSpacer = Box.createVerticalStrut(10);
+    horizontalSpacer = Box.createVerticalStrut(10);
     horizontalSpacer.setVisible(false);
 
+    pointerGroupButton = createPointerGroupButton();
     add(pointerGroupButton);
-    add(
+    drawButton =
         createButton(
             "net/rptools/maptool/client/image/tool/draw-blue.png",
             "net/rptools/maptool/client/image/tool/draw-blue-off.png",
             createDrawPanel(),
-            I18N.getText("tools.drawing.tooltip")));
-    add(
+            I18N.getText("tools.drawing.tooltip"));
+    add(drawButton);
+    templateButton =
         createButton(
             "net/rptools/maptool/client/image/tool/temp-blue.png",
             "net/rptools/maptool/client/image/tool/temp-blue-off.png",
             createTemplatePanel(),
-            I18N.getText("tools.template.tooltip")));
-    add(
+            I18N.getText("tools.template.tooltip"));
+    add(templateButton);
+    fogButton =
         createButton(
             "net/rptools/maptool/client/image/tool/fog-blue.png",
             "net/rptools/maptool/client/image/tool/fog-blue-off.png",
             createFogPanel(),
-            I18N.getText("tools.fog.tooltip")));
-    add(
+            I18N.getText("tools.fog.tooltip"));
+    add(fogButton);
+    topologyButton =
         createButton(
             "net/rptools/maptool/client/image/tool/eye-blue.png",
             "net/rptools/maptool/client/image/tool/eye-blue-off.png",
             createTopologyPanel(),
-            I18N.getText("tools.topo.tooltip")));
+            I18N.getText("tools.topo.tooltip"));
+    add(topologyButton);
+
     add(vertSplit);
     add(horizontalSplit);
     add(vertSpacer);
     add(horizontalSpacer);
+
     add(optionPanel);
+
     add(Box.createGlue());
 
     // the Volume icon
@@ -214,8 +199,58 @@ public class ToolbarPanel extends JToolBar {
         });
   }
 
-  private JButton createZoneSelectionButton() {
-    final String title = I18N.getText("tools.zoneselector.tooltip");
+  public JPanel getOptionPanel() {
+    return optionPanel;
+  }
+
+  public JToggleButton getPointerGroupButton() {
+    return pointerGroupButton;
+  }
+
+  public JToggleButton getDrawButton() {
+    return drawButton;
+  }
+
+  public JToggleButton getTemplateButton() {
+    return templateButton;
+  }
+
+  public JToggleButton getFogButton() {
+    return fogButton;
+  }
+
+  public JToggleButton getTopologyButton() {
+    return topologyButton;
+  }
+
+  public int getOptionsPanelIndex() {
+    return getComponentIndex(horizontalSpacer) + 1;
+  }
+
+  private JToggleButton createPointerGroupButton() {
+    final OptionPanel pointerGroupOptionPanel = createPointerPanel();
+    final JToggleButton pointerGroupButton =
+        createButton(
+            "net/rptools/maptool/client/image/tool/pointer-blue.png",
+            "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
+            pointerGroupOptionPanel,
+            I18N.getText("tools.interaction.tooltip"));
+
+    final SidePanel aiPanel = new SidePanel();
+    aiPanel.add(AI_Tool.class);
+    aiPanel.add(AI_UseVblTool.class);
+
+    pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
+    pointerGroupOptionPanel.add(aiPanel);
+    pointerGroupButton.setSelected(true);
+    pointerGroupOptionPanel.activate();
+
+    return pointerGroupButton;
+  }
+
+  public JButton createZoneSelectionButton() {
+    String title = I18N.getText("tools.zoneselector.tooltip");
+
     final JButton button =
         new JButton(
             title,
@@ -224,6 +259,7 @@ public class ToolbarPanel extends JToolBar {
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/tool/btn-world.png")));
     button.setToolTipText(title);
+
     SwingUtil.makePopupMenuButton(button, ZoneSelectionPopup::new, true);
     return button;
   }
@@ -314,11 +350,14 @@ public class ToolbarPanel extends JToolBar {
       final String icon, final String offIcon, final OptionPanel panel, String tooltip) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
+
     button.addActionListener(
         e -> {
           if (button.isSelected()) {
             panel.activate();
             ((CardLayout) optionPanel.getLayout()).show(optionPanel, icon);
+            // This is has only an effect when the panel is used in fullscreen mode.
+            optionPanel.setSize(panel.getPreferredSize());
           }
         });
     try {
@@ -329,6 +368,7 @@ public class ToolbarPanel extends JToolBar {
     }
     optionPanel.add(panel, icon);
     buttonGroup.add(button);
+
     return button;
   }
 
