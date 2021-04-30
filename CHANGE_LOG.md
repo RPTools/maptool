@@ -16,7 +16,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
 - [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.
 - [#2494][i2494] Support added for WebP, SVG, ICO, TGA images.
-- [#2466][i2466] Drawings can not be selected with the mouse and deleted via delete key.
+- [#2466][i2466] Drawings can now be selected with the mouse and deleted via delete key.
 - [#2452][i2452] Additional UI elements added to fullscreen view
 - [#2366][i2366] Improved tooltips and error messages from Start Server dialog. 
 - [#2360][i2360] Map view can now be panned with Ctrl + arrow keys.
