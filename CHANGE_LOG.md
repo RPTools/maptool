@@ -28,6 +28,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
 
 ##Bug Fixes
+- [#2601][i2601] Replaced Java native filetype detection with Apache Tika for better coverage of asset types.
 - [#2596][i2596] Assert output a stack trace when called from a macro executed by a macro link. Fixed.
 - [#2560][i2560] Layer names lacked i18n support. Fixed.
 - [#2558][i2558] Exception thrown with keyboard input on undocked frames. Fixed.
@@ -44,9 +45,11 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
 
 ##Other
+- [#2601][i2601] Added Apache Tika for filetype recognition. 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2601]: https://github.com/RPTools/maptool/issues/2601
 [i2596]: https://github.com/RPTools/maptool/issues/2596
 [i2560]: https://github.com/RPTools/maptool/issues/2560
 [i2558]: https://github.com/RPTools/maptool/issues/2558
