@@ -141,17 +141,29 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[sS][rR]5[gG](\\d+)\\b", "sr5($1, $2)"},
         new String[] {"\\b(\\d+)[sS][rR]5\\b", "sr5($1)"},
 
-        // Subtract X with minimum of Y
-        new String[] {
-          "\\b(\\d+)[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower($1, $2, $3, $4)"
-        },
-        new String[] {"\\b[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower(1, $1, $2, $3)"},
-
-        // Add X with maximum of Y
+        // Add X, apply a maximum of Y
         new String[] {
           "\\b(\\d+)[dD](\\d+)[aA](\\d+)[uU](\\d+)\\b", "rollAddWithUpper($1, $2, $3, $4)"
         },
         new String[] {"\\b[dD](\\d+)[aA](\\d+)[uU](\\d+)\\b", "rollAddWithUpper(1, $1, $2, $3)"},
+
+        // Add X, apply a minimum of Y
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[aA](\\d+)[lL](\\d+)\\b", "rollAddWithLower($1, $2, $3, $4)"
+        },
+        new String[] {"\\b[dD](\\d+)[aA](\\d+)[lL](\\d+)\\b", "rollAddWithLower(1, $1, $2, $3)"},
+
+        // Subtract X, apply a maximum of Y
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[sS](\\d+)[uU](\\d+)\\b", "rollSubWithUpper($1, $2, $3, $4)"
+        },
+        new String[] {"\\b[dD](\\d+)[sS](\\d+)[uU](\\d+)\\b", "rollSubWithUpper(1, $1, $2, $3)"},
+
+        // Subtract X, apply a minimum of Y
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower($1, $2, $3, $4)"
+        },
+        new String[] {"\\b[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower(1, $1, $2, $3)"},
 
         // Roll with a minimum value per roll (e.g. treat 1s as 2s)
         new String[] {"\\b(\\d+)[dD](\\d+)[lL](\\d+)\\b", "rollWithLower($1, $2, $3)"},
