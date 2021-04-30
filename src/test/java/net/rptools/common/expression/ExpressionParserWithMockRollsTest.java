@@ -226,6 +226,48 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(BigDecimal.ZERO, result.getValue());
   }
 
+  public void testEvaluate_RollWithUpperWithMockRunData() throws ParserException {
+    int[] rolls = {6, 16, 18, 15, 14}; // 16, 18 bounded to 15
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20u15");
+    assertEquals(new BigDecimal(65), result.getValue());
+  }
+
+  public void testEvaluate_RollWithLowerWithMockRunData() throws ParserException {
+    int[] rolls = {13, 7, 6, 8, 2}; // 6, 2 bounded to 7
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20l7");
+    assertEquals(new BigDecimal(42), result.getValue());
+  }
+
+  public void testEvaluate_RollAddWithUpperWithMockRunData() throws ParserException {
+    int[] rolls = {17, 4, 20, 15, 16}; // adds to 22, 9, 25, 20, 21. Then 22, 25 bounded to 21.
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20a5u21");
+    assertEquals(new BigDecimal(92), result.getValue());
+  }
+
+  public void testEvaluate_RollAddWithLowerWithMockRunData() throws ParserException {
+    int[] rolls = {13, 6, 7, 4, 8}; // adds to 16, 9, 10, 7, 11. Then 9, 7 bounded to 10.
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20a3l10");
+    assertEquals(new BigDecimal(57), result.getValue());
+  }
+
+  public void testEvaluate_RollSubWithUpperWithMockRunData() throws ParserException {
+    int[] rolls = {16, 7, 19, 15, 17}; // subs to 12, 3, 15, 11, 13. Then 15, 13 bounded to 12.
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20s4u12");
+    assertEquals(new BigDecimal(50), result.getValue());
+  }
+
+  public void testEvaluate_RollSubWithLowerWithMockRunData() throws ParserException {
+    int[] rolls = {13, 12, 18, 5, 11}; // subs to 6, 5, 11, -2, 4. Then -2, 4 bounded to 5.
+    setUpMockRunData(rolls);
+    Result result = new ExpressionParser().evaluate("5d20s7l5");
+    assertEquals(new BigDecimal(32), result.getValue());
+  }
+
   public void testEvaluate_arsMagicaStress() throws ParserException {
     int[] rolls = {3, 7, 5, 2, 3, 2, 8, 9, 4, 7};
     setUpMockRunData(rolls);
