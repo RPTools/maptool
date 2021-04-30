@@ -89,15 +89,15 @@ public class Token extends BaseModel implements Cloneable {
       new Gson().getAdapter(JsonObject.class);
 
   public enum TokenShape {
-    TOP_DOWN("Top down"),
-    CIRCLE("Circle"),
-    SQUARE("Square"),
-    FIGURE("Figure");
+    TOP_DOWN(),
+    CIRCLE(),
+    SQUARE(),
+    FIGURE();
 
-    private String displayName;
+    private final String displayName;
 
-    TokenShape(String displayName) {
-      this.displayName = displayName;
+    TokenShape() {
+      displayName = I18N.getString("Token.TokenShape." + name());
     }
 
     @Override
