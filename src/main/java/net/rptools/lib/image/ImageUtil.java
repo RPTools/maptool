@@ -257,7 +257,14 @@ public class ImageUtil {
    * @throws IOException if the image cannot be written to the output stream.
    */
   public static byte[] imageToBytes(BufferedImage image) throws IOException {
-    return imageToBytes(image, "jpg");
+
+    // First try jpg, if it cant be converted to jpg try png
+    byte[] imageBytes = imageToBytes(image, "jpg");
+    if (imageBytes.length > 0) {
+      return imageBytes;
+    }
+
+    return imageToBytes(image, "png");
   }
 
   /**
