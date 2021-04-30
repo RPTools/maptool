@@ -33,6 +33,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2558][i2558] Exception thrown with keyboard input on undocked frames. Fixed.
 - [#2555][i2555] Names for Dockable frames didn't use localized names. Fixed.
 - [#2551][i2551] Various UI and macro actions could clear in progress text in the Chat panel. Fixed.
+- [#2548][i2548] Light icons broken on imported Dungeondraft UVTT maps. Fixed.
 - [#2527][i2527] Unsupported assets types are now filtered in drag-and-drop to map.
 - [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
 - [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
@@ -52,6 +53,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2555]: https://github.com/RPTools/maptool/issues/2555
 [i2551]: https://github.com/RPTools/maptool/issues/2551
 [i2550]: https://github.com/RPTools/maptool/issues/2550
+[i2548]: https://github.com/RPTools/maptool/issues/2548
 [i2538]: https://github.com/RPTools/maptool/issues/2538
 [i2527]: https://github.com/RPTools/maptool/issues/2527
 [i2524]: https://github.com/RPTools/maptool/issues/2524
