@@ -28,11 +28,12 @@ public class RollWithBounds extends AbstractNumberFunction {
         3,
         4,
         false,
-        "rollSubWithLower",
+        "rollWithUpper",
         "rollWithLower",
         "rollAddWithUpper",
-        "rollWithUpper",
-        "rollAddWithLower");
+        "rollAddWithLower",
+        "rollSubWithUpper",
+        "rollSubWithLower");
   }
 
   @Override
