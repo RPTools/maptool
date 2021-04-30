@@ -26,6 +26,14 @@ import net.rptools.parser.function.EvaluationException;
 
 public class ExpressionParserTest extends TestCase {
 
+  /**
+   * Make sure these tests aren't using mock RunData instances that might still be Current.
+   * Safeguard against possible problematic interleaving if tests get run in parallel.
+   */
+  public void setUp() {
+    RunData.setCurrent(null);
+  }
+
   public void testEvaluate() throws ParserException {
     Result result = new ExpressionParser().evaluate("100+4d1*10");
 
@@ -136,7 +144,7 @@ public class ExpressionParserTest extends TestCase {
     Result result = new ExpressionParser().evaluate("5sr4g2");
     assertEquals("5sr4g2", result.getExpression());
     assertEquals("sr4(5, 2)", result.getDetailExpression());
-    assertEquals("Hits: 1 Ones: 1 *Glitch*  Results: 3 1 4 6 3 ", result.getValue());
+    assertEquals("Hits: 1 Ones: 1 *Gremlin Glitch*  Results: 3 1 4 6 3 ", result.getValue());
   }
 
   public void testEvaluate_SR4ExplodingSuccess() throws ParserException {
@@ -152,7 +160,39 @@ public class ExpressionParserTest extends TestCase {
     Result result = new ExpressionParser().evaluate("5sr4eg2");
     assertEquals("5sr4eg2", result.getExpression());
     assertEquals("sr4e(5, 2)", result.getDetailExpression());
-    assertEquals("Hits: 1 Ones: 2 *Glitch*  Results: 3 1 4 6 3 1 ", result.getValue());
+    assertEquals("Hits: 1 Ones: 2 *Gremlin Glitch*  Results: 3 1 4 6 3 1 ", result.getValue());
+  }
+
+  public void testEvaluate_SR5Success() throws ParserException {
+    RunData.setSeed(10523L);
+    Result result = new ExpressionParser().evaluate("5sr5");
+    assertEquals("5sr5", result.getExpression());
+    assertEquals("sr5(5)", result.getDetailExpression());
+    assertEquals("Hits: 1 Ones: 1  Results: 3 1 4 6 3 ", result.getValue());
+  }
+
+  public void testEvaluate_SR5GremlinSuccess() throws ParserException {
+    RunData.setSeed(10523L);
+    Result result = new ExpressionParser().evaluate("5sr5g2");
+    assertEquals("5sr5g2", result.getExpression());
+    assertEquals("sr5(5, 2)", result.getDetailExpression());
+    assertEquals("Hits: 1 Ones: 1 *Gremlin Glitch*  Results: 3 1 4 6 3 ", result.getValue());
+  }
+
+  public void testEvaluate_SR5ExplodingSuccess() throws ParserException {
+    RunData.setSeed(10523L);
+    Result result = new ExpressionParser().evaluate("5sr5e");
+    assertEquals("5sr5e", result.getExpression());
+    assertEquals("sr5e(5)", result.getDetailExpression());
+    assertEquals("Hits: 1 Ones: 2  Results: 3 1 4 6 3 1 ", result.getValue());
+  }
+
+  public void testEvaluate_SR5ExplodingGremlinSuccess() throws ParserException {
+    RunData.setSeed(10523L);
+    Result result = new ExpressionParser().evaluate("5sr5eg2");
+    assertEquals("5sr5eg2", result.getExpression());
+    assertEquals("sr5e(5, 2)", result.getDetailExpression());
+    assertEquals("Hits: 1 Ones: 2 *Gremlin Glitch*  Results: 3 1 4 6 3 1 ", result.getValue());
   }
 
   public void testEvaluate_HeroRoll() throws ParserException {

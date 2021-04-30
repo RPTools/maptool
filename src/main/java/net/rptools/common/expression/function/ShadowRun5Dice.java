@@ -21,10 +21,10 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 import net.rptools.parser.function.EvaluationException;
 
-public class ShadowRun4ExplodeDice extends AbstractNumberFunction {
+public class ShadowRun5Dice extends AbstractNumberFunction {
 
-  public ShadowRun4ExplodeDice() {
-    super(1, 2, true, "sr4e");
+  public ShadowRun5Dice() {
+    super(1, 2, true, "sr5");
   }
 
   @Override
@@ -37,6 +37,6 @@ public class ShadowRun4ExplodeDice extends AbstractNumberFunction {
     int times = ((BigDecimal) parameters.get(n++)).intValue();
     if (parameters.size() == 2) gremlins = ((BigDecimal) parameters.get(n++)).intValue();
 
-    return DiceHelper.countShadowRun(times, gremlins, true, DiceHelper.ShadowrunEdition.EDITION_4);
+    return DiceHelper.countShadowRun(times, gremlins, false, DiceHelper.ShadowrunEdition.EDITION_5);
   }
 }
