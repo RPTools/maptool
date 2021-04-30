@@ -46,11 +46,10 @@ public class RollWithBounds extends AbstractNumberFunction {
     int upper = Integer.MAX_VALUE;
 
     switch (functionName) {
-      case "rollSubWithLower":
+      case "rollWithUpper":
         times = ((BigDecimal) parameters.get(0)).intValue();
         sides = ((BigDecimal) parameters.get(1)).intValue();
-        mod = -((BigDecimal) parameters.get(2)).intValue();
-        lower = ((BigDecimal) parameters.get(3)).intValue();
+        upper = ((BigDecimal) parameters.get(2)).intValue();
         break;
       case "rollWithLower":
         times = ((BigDecimal) parameters.get(0)).intValue();
@@ -60,18 +59,25 @@ public class RollWithBounds extends AbstractNumberFunction {
       case "rollAddWithUpper":
         times = ((BigDecimal) parameters.get(0)).intValue();
         sides = ((BigDecimal) parameters.get(1)).intValue();
-        mod = ((BigDecimal) parameters.get(2)).intValue();
+        mod   = ((BigDecimal) parameters.get(2)).intValue();
         upper = ((BigDecimal) parameters.get(3)).intValue();
-        break;
-      case "rollWithUpper":
-        times = ((BigDecimal) parameters.get(0)).intValue();
-        sides = ((BigDecimal) parameters.get(1)).intValue();
-        upper = ((BigDecimal) parameters.get(2)).intValue();
         break;
       case "rollAddWithLower":
         times = ((BigDecimal) parameters.get(0)).intValue();
         sides = ((BigDecimal) parameters.get(1)).intValue();
-        mod = ((BigDecimal) parameters.get(2)).intValue();
+        mod   = ((BigDecimal) parameters.get(2)).intValue();
+        lower = ((BigDecimal) parameters.get(3)).intValue();
+        break;
+      case "rollSubWithUpper":
+        times = ((BigDecimal) parameters.get(0)).intValue();
+        sides = ((BigDecimal) parameters.get(1)).intValue();
+        mod  = -((BigDecimal) parameters.get(2)).intValue();
+        upper = ((BigDecimal) parameters.get(3)).intValue();
+        break;
+      case "rollSubWithLower":
+        times = ((BigDecimal) parameters.get(0)).intValue();
+        sides = ((BigDecimal) parameters.get(1)).intValue();
+        mod  = -((BigDecimal) parameters.get(2)).intValue();
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
       default:
