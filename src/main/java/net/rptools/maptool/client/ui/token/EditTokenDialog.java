@@ -526,7 +526,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     JComboBox size = getSizeCombo();
     Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
     DefaultComboBoxModel model = new DefaultComboBoxModel(grid.getFootprints().toArray());
-    model.insertElementAt(token.getLayer() == Layer.TOKEN ? "Native Size" : "Free Size", 0);
+    model.insertElementAt(
+        token.getLayer() == Layer.TOKEN
+            ? I18N.getString("token.popup.menu.size.native")
+            : I18N.getString("token.popup.menu.size.free"),
+        0);
     size.setModel(model);
     if (token.isSnapToScale()) {
       size.setSelectedItem(token.getFootprint(grid));
