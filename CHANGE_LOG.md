@@ -1,5 +1,5 @@
-#MapTool 1.9.0 Beta 1
-##Highlights
+# MapTool 1.9.0 Beta 1
+## Highlights
 The MapTool community continues to push MapTool forward with code patches, localization and providing support to each other on the various social media platforms.  A huge thanks goes out to everyone who takes part in making MapTool better.
 
 MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
@@ -11,7 +11,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - More bug fixes.
 - More localization for the UI.
 
-##Enhancements
+## Enhancements
 - [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
 - [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.
@@ -27,7 +27,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#1234][i1234] New macro function for retrieving Bar & State images: `getBarImage()` and `getStateImage()`
 - [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
 
-##Bug Fixes
+## Bug Fixes
 - [#2601][i2601] Replaced Java native filetype detection with Apache Tika for better coverage of asset types.
 - [#2596][i2596] Assert output a stack trace when called from a macro executed by a macro link. Fixed.
 - [#2560][i2560] Layer names lacked i18n support. Fixed.
@@ -44,7 +44,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#706][i706] A State & Bar with the same name can activate/deactivate together. Duplicate names no longer allowed.
 - [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
 
-##Other
+## Other
 - [#2601][i2601] Added Apache Tika for filetype recognition. 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
