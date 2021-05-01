@@ -896,6 +896,9 @@ public class ZoneRenderer extends JComponent
 
     renderZone(g2d, pl);
     int noteVPos = 20;
+    if(MapTool.getFrame().areFullScreenToolsShown())
+      noteVPos += 40;
+
     if (!zone.isVisible() && pl.isGMView()) {
       GraphicsUtil.drawBoxedString(
           g2d, "Map not visible to players", getSize().width / 2, noteVPos);
