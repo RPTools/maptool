@@ -18,5 +18,4 @@ public interface IConnection {
   void addDisconnectHandler(DisconnectHandler handler);
   void removeDisconnectHandler(DisconnectHandler handler);
   void close() throws IOException;
-  boolean isAlive();
 }

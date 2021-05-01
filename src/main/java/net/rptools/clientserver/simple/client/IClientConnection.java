@@ -12,5 +12,6 @@ public interface IClientConnection extends IConnection {
   void sendMessage(byte[] message);
   void sendMessage(Object channel, byte[] message);
   void start() throws IOException;
+  boolean isAlive();
   String getId();
 }

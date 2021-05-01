@@ -109,11 +109,6 @@ public class MethodServerConnection implements IMethodServerConnection {
   }
 
   @Override
-  public boolean isAlive() {
-    return connection.isAlive();
-  }
-
-  @Override
   public void handleDisconnect(AbstractConnection conn) {
     connection.handleDisconnect(conn);
   }

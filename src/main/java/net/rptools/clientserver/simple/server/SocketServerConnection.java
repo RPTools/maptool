@@ -31,19 +31,13 @@ public class SocketServerConnection extends AbstractServerConnection {
   private static final Logger log = Logger.getLogger(SocketServerConnection.class);
   private final ServerSocket socket;
   private final ListeningThread listeningThread;
-  private final DispatchThread dispatchThread;
 
 
   public SocketServerConnection(int port, IHandshake handshake) throws IOException {
     super(handshake);
     socket = new ServerSocket(port);
-    dispatchThread = new DispatchThread(this);
-    dispatchThread.start();
     listeningThread = new ListeningThread(this, socket);
     listeningThread.start();
-    //        reaperThread = new ReaperThread();
-    //        reaperThread.start();  // There's a deadlock in there, no time to find it now though,
-    // so revert to the old way
   }
 
   @Override
@@ -61,11 +55,6 @@ public class SocketServerConnection extends AbstractServerConnection {
     } catch (InterruptedException e) {
       log.error(e.getMessage(), e);
     }
-  }
-
-  @Override
-  public boolean isAlive() {
-    return !socket.isClosed();
   }
 
   ////
@@ -112,94 +101,6 @@ public class SocketServerConnection extends AbstractServerConnection {
           }
         }
       }
-    }
-  }
-
-  private class ReaperThread extends Thread {
-    private boolean stopRequested = false;
-    private final SocketServerConnection server;
-
-    public ReaperThread(SocketServerConnection server) {
-      this.server = server;
-    }
-
-    public void requestStop() {
-      stopRequested = true;
-    }
-
-    @Override
-    public void run() {
-      while (!stopRequested) {
-        try {
-          server.reapClients();
-        } catch (Throwable t) {
-          log.error(t.getMessage(), t);
-        }
-        synchronized (this) {
-          try {
-            Thread.sleep(4000);
-          } catch (InterruptedException e) {
-            // Whatever.
-          }
-        }
-      }
-    }
-  }
-
-  private static class DispatchThread extends Thread implements MessageHandler {
-    private final SocketServerConnection server;
-    private final List<Message> queue = Collections.synchronizedList(new ArrayList<Message>());
-
-    private boolean stopRequested = false;
-
-    public DispatchThread(SocketServerConnection server) {
-      this.server = server;
-    }
-
-    public void requestStop() {
-      stopRequested = true;
-    }
-
-    public void handleMessage(String id, byte[] message) {
-      queue.add(new Message(id, message));
-      synchronized (this) {
-        this.notify();
-      }
-    }
-
-    @Override
-    public void run() {
-      while (!stopRequested) {
-        while (queue.size() > 0) {
-          Message msg = queue.remove(0);
-          try {
-            if (log.isDebugEnabled()) {
-              log.debug("Server handling: " + msg.id);
-            }
-            server.handleMessage(msg.id, msg.message);
-          } catch (Throwable t) {
-            // Don't let anything kill this thread
-            log.error(t.getMessage(), t);
-          }
-        }
-        synchronized (this) {
-          try {
-            this.wait();
-          } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
-          }
-        }
-      }
-    }
-  }
-
-  private static class Message {
-    final String id;
-    final byte[] message;
-
-    public Message(String id, byte[] message) {
-      this.id = id;
-      this.message = message;
     }
   }
 }
