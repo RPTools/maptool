@@ -41,7 +41,7 @@ public class MapToolConnection {
   private IMethodClientConnection connection;
 
   public MapToolConnection(ServerConfig config, Player player) throws IOException {
-    this.connection = ConnectionFactory.getInstance().createClientConnection(null, config);
+    this.connection = ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
   }
 
