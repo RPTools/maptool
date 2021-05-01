@@ -1668,13 +1668,17 @@ public class MapToolFrame extends DefaultDockableHolder
     if (!AppState.isFullScreenUIEnabled()) return;
 
     fullScreenToolPanel = new JPanel();
+    fullScreenToolPanel.setLayout(new BoxLayout(fullScreenToolPanel, BoxLayout.LINE_AXIS));
     fullScreenToolPanel.setOpaque(false);
     fullScreenToolPanel.add(toolbarPanel.getPointerGroupButton());
     fullScreenToolPanel.add(toolbarPanel.getDrawButton());
     fullScreenToolPanel.add(toolbarPanel.getTemplateButton());
     fullScreenToolPanel.add(toolbarPanel.getFogButton());
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
-    fullScreenToolPanel.add(toolbarPanel.createZoneSelectionButton());
+
+    var zoneButton = toolbarPanel.createZoneSelectionButton();
+    zoneButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+    fullScreenToolPanel.add(zoneButton);
 
     var initiativeButton =
         new JButton(
@@ -1688,6 +1692,8 @@ public class MapToolFrame extends DefaultDockableHolder
           if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
           else initiativePanel.setVisible(true);
         });
+    initiativeButton.setOpaque(false);
+    initiativeButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size
