@@ -351,13 +351,12 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private void setBorderSizes(JPanel container, JToggleButton source) {
-    for(var component: container.getComponents()) {
-      if(component instanceof JPanel)
-        setBorderSizes((JPanel)component, source);
-      if(component instanceof JToggleButton) {
+    for (var component : container.getComponents()) {
+      if (component instanceof JPanel) setBorderSizes((JPanel) component, source);
+      if (component instanceof JToggleButton) {
         ((JToggleButton) component).setBorder(source.getBorder());
       }
-      if(component instanceof AbstractButton) {
+      if (component instanceof AbstractButton) {
         component.setSize(source.getSize());
       }
     }
@@ -490,12 +489,9 @@ public class ToolbarPanel extends JToolBar {
           "orientation", evt -> setLayout((Integer) evt.getNewValue()));
     }
 
-    private void setLayout(int orientation)
-    {
-      if(orientation == JToolBar.HORIZONTAL)
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-      else
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+    private void setLayout(int orientation) {
+      if (orientation == JToolBar.HORIZONTAL) setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+      else setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     }
 
     public void add(Class<? extends Tool> toolClass) {
@@ -538,14 +534,10 @@ public class ToolbarPanel extends JToolBar {
           "orientation", evt -> setLayout((Integer) evt.getNewValue()));
     }
 
-    private void setLayout(int orientation)
-    {
-      if(orientation == JToolBar.HORIZONTAL)
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-      else
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+    private void setLayout(int orientation) {
+      if (orientation == JToolBar.HORIZONTAL) setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+      else setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     }
-
 
     public void add(Class<? extends Tool> toolClass) {
       final Tool tool = toolbox.createTool(toolClass);

@@ -896,8 +896,7 @@ public class ZoneRenderer extends JComponent
 
     renderZone(g2d, pl);
     int noteVPos = 20;
-    if(MapTool.getFrame().areFullScreenToolsShown())
-      noteVPos += 40;
+    if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
 
     if (!zone.isVisible() && pl.isGMView()) {
       GraphicsUtil.drawBoxedString(
@@ -905,7 +904,8 @@ public class ZoneRenderer extends JComponent
       noteVPos += 20;
     }
     if (AppState.isShowAsPlayer()) {
-      GraphicsUtil.drawBoxedString(g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
+      GraphicsUtil.drawBoxedString(
+          g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
     }
     if (timer.isEnabled()) {
       String results = timer.toString();
