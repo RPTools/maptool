@@ -349,7 +349,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   //datachannel
   @Override
   public void onMessage(RTCDataChannelBuffer buffer) {
-    log.info(prefix() + "localDataChannel onMessage");
+    log.info(prefix() + "localDataChannel onMessage: got " + buffer.data.capacity() + " bytes" );
     try {
       int len = buffer.data.capacity();
       byte[] byteArray = new byte[len];
@@ -383,6 +383,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
               var buffer = ByteBuffer.wrap(bytes);
 
               localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
+              log.info("sent " + bytes.length + " bytes" );
             }
           } catch (Exception e) {
             System.out.println(e.toString());
