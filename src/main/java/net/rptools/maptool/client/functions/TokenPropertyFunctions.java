@@ -985,7 +985,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     } else {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer);
     }
-    return layerName;
+    return layer.name();
   }
 
   /**
