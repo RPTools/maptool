@@ -3111,6 +3111,23 @@ public class AppActions {
         }
       };
 
+  public static final Action TOGGLE_WEBRTC =
+      new AdminClientAction() {
+        {
+          init("action.toggleUseWebRTC");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.useWebRTC();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setUseWebRTC(!AppState.useWebRTC());
+        }
+      };
+
   /** Toggle drawing straight lines at double width on the line tool. */
   public static final Action TOGGLE_DOUBLE_WIDE =
       new DefaultClientAction() {

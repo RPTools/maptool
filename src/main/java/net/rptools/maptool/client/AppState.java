@@ -43,6 +43,7 @@ public class AppState {
   private static boolean collectProfilingData = false;
   private static boolean isLoggingToConsole = false;
   private static boolean isLockedForBackgroundTask = false;
+  private static boolean useWebRTC = false;
 
   private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
 
@@ -214,5 +215,13 @@ public class AppState {
 
   public static void setNotificationEnforced(boolean enforce) {
     enforceNotification = enforce;
+  }
+
+  public static boolean useWebRTC() {
+    return useWebRTC;
+  }
+
+  public static void setUseWebRTC(boolean use) {
+    useWebRTC = use;
   }
 }

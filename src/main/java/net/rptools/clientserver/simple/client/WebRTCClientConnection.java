@@ -355,7 +355,6 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
       byte[] byteArray = new byte[len];
       buffer.data.get(byteArray);
       received.write(byteArray);
-      //received.notify();
 
     } catch (IOException e) {
       e.printStackTrace();
