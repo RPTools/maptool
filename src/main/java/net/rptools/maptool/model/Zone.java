@@ -55,9 +55,20 @@ public class Zone extends BaseModel {
 
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
-    OFF,
-    DAY,
-    NIGHT
+    OFF(),
+    DAY(),
+    NIGHT();
+
+    private final String displayName;
+
+    VisionType() {
+      displayName = I18N.getString("visionType." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /** Event types for the listeners. */
