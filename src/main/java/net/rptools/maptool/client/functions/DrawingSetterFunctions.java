@@ -57,7 +57,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
     GUID guid = getGUID(functionName, id);
     if ("setDrawingLayer".equalsIgnoreCase(functionName)) {
       Layer layer = getLayer(parameters.get(2).toString());
-      return changeLayer(map, layer, guid);
+      return changeLayer(map, layer, guid).name();
     } else if ("setDrawingOpacity".equalsIgnoreCase(functionName)) {
       String opacity = parameters.get(2).toString();
       float op = getFloatPercent(functionName, opacity);
