@@ -21,6 +21,7 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 import com.jeta.forms.gui.form.FormComponent;
 import com.jeta.forms.gui.form.GridView;
+import com.jeta.forms.store.properties.ListItemProperty;
 import java.awt.*;
 import java.util.Iterator;
 import javax.swing.*;
@@ -72,6 +73,10 @@ public class FormPanelI18N extends FormPanel {
       String tooltip = jComboBox.getToolTipText();
       if (tooltip != null) {
         jComboBox.setToolTipText(I18N.getText(tooltip));
+      }
+      for (int i = 0; i < jComboBox.getItemCount(); ++i) {
+        ListItemProperty item = (ListItemProperty) jComboBox.getItemAt(i);
+        item.setLabel(I18N.getText(item.getLabel()));
       }
     } else if (comp instanceof JTextField) {
       JTextField jTextField = (JTextField) comp;
