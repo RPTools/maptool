@@ -125,18 +125,7 @@ public class getInfoFunction extends AbstractFunction {
       minfo.addProperty("largest Z order", zone.getLargestZOrder());
     }
 
-    String visionType = "off";
-    switch (zone.getVisionType()) {
-      case DAY:
-        visionType = "day";
-        break;
-      case NIGHT:
-        visionType = "night";
-        break;
-      case OFF:
-        visionType = "off";
-        break;
-    }
+    String visionType = zone.getVisionType().name();
     minfo.addProperty("vision type", visionType);
 
     JsonObject ginfo = new JsonObject();

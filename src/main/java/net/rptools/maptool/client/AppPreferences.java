@@ -688,13 +688,13 @@ public class AppPreferences {
   }
 
   public static void setDefaultVisionType(Zone.VisionType visionType) {
-    prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.toString());
+    prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.name());
   }
 
   public static Zone.VisionType getDefaultVisionType() {
     try {
       return Zone.VisionType.valueOf(
-          prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.toString()));
+          prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.name()));
     } catch (Exception e) {
       return DEFAULT_VISION_TYPE;
     }
