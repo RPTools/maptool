@@ -39,10 +39,7 @@ import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.DrawablePaint;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -56,7 +53,6 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
@@ -1335,7 +1331,98 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
-        // TODO: implement
+        for(var drawable: drawables)
+            renderDrawable(drawable);
+    }
+
+    private void renderDrawable(DrawnElement element) {
+        var pen = element.getPen();
+        var drawable = element.getDrawable();
+
+        if(drawable instanceof ShapeDrawable)
+            render((ShapeDrawable)drawable, pen);
+        else if(drawable instanceof  LineSegment)
+            render((LineSegment)drawable, pen);
+        else if(drawable instanceof  DrawablesGroup)
+            render((DrawablesGroup)drawable, pen);
+        else if(drawable instanceof  Cross)
+            render((Cross)drawable, pen);
+        else if(drawable instanceof Oval)
+            render((Oval)drawable, pen);
+        else if(drawable instanceof net.rptools.maptool.model.drawing.Rectangle)
+            render((net.rptools.maptool.model.drawing.Rectangle)drawable, pen);
+        else if(drawable instanceof  RadiusCellTemplate)
+            render((RadiusCellTemplate)drawable, pen);
+        else if(drawable instanceof  LineCellTemplate)
+            render((LineCellTemplate)drawable, pen);
+        else if(drawable instanceof  BlastTemplate)
+            render((BlastTemplate)drawable, pen);
+        else if(drawable instanceof ConeTemplate)
+            render((ConeTemplate)drawable, pen);
+        else if(drawable instanceof BurstTemplate)
+            render((BurstTemplate)drawable, pen);
+        else if(drawable instanceof  RadiusTemplate)
+            render((RadiusTemplate)drawable, pen);
+        else if(drawable instanceof  WallTemplate)
+            render((WallTemplate)drawable, pen);
+        else if(drawable instanceof  LineTemplate)
+            render((LineTemplate)drawable, pen);
+    }
+
+    private void render(ShapeDrawable drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(LineSegment drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(DrawablesGroup drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(Cross drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(Oval drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(net.rptools.maptool.model.drawing.Rectangle drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(LineCellTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(RadiusCellTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(BlastTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(ConeTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(BurstTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(RadiusTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(WallTemplate drawable, Pen pen) {
+        //TODO: implement
+    }
+
+    private void render(LineTemplate drawable, Pen pen) {
+        //TODO: implement
     }
 
     public void drawString(String text, float centerX, float centerY, Color foreground) {
