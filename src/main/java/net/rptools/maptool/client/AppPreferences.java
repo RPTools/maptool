@@ -879,7 +879,7 @@ public class AppPreferences {
   }
 
   public static void setMovementMetric(WalkerMetric metric) {
-    prefs.put(KEY_MOVEMENT_METRIC, metric.toString());
+    prefs.put(KEY_MOVEMENT_METRIC, metric.name());
   }
 
   public static void setFrameRateCap(int cap) {
@@ -933,8 +933,7 @@ public class AppPreferences {
   public static WalkerMetric getMovementMetric() {
     WalkerMetric metric;
     try {
-      metric =
-          WalkerMetric.valueOf(prefs.get(KEY_MOVEMENT_METRIC, DEFAULT_MOVEMENT_METRIC.toString()));
+      metric = WalkerMetric.valueOf(prefs.get(KEY_MOVEMENT_METRIC, DEFAULT_MOVEMENT_METRIC.name()));
     } catch (Exception exc) {
       metric = DEFAULT_MOVEMENT_METRIC;
     }
