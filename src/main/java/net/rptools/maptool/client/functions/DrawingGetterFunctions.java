@@ -64,7 +64,7 @@ public class DrawingGetterFunctions extends DrawingFunctions {
     Zone map = getNamedMap(functionName, mapName).getZone();
     GUID guid = getGUID(functionName, id);
     if ("getDrawingLayer".equalsIgnoreCase(functionName)) {
-      return getDrawable(functionName, map, guid).getLayer();
+      return getDrawable(functionName, map, guid).getLayer().name();
     } else if ("getDrawingOpacity".equalsIgnoreCase(functionName)) {
       return getPen(functionName, map, guid).getOpacity();
     } else if ("getDrawingProperties".equalsIgnoreCase(functionName)) {

@@ -2377,94 +2377,15 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="selectedItem">
-                               <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                <at name="name">listitem</at>
-                                <at name="label">Douglas Peucker</at>
-                                <at name="icon">
-                                 <object classname="com.jeta.forms.store.properties.IconProperty">
-                                  <at name="embedded">false</at>
-                                  <at name="width">0</at>
-                                  <at name="height">0</at>
-                                 </object>
-                                </at>
-                               </object>
-                              </at>
                               <at name="name">jtsMethodComboBox</at>
                               <at name="width">112</at>
                               <at name="items">
                                <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                 <at name="name">items</at>
-                                <at name="items">
-                                 <object classname="java.util.LinkedList">
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Douglas Peucker</at>
-                                     <at name="icon">
-                                      <object classname="com.jeta.forms.store.properties.IconProperty">
-                                       <at name="embedded">false</at>
-                                       <at name="width">0</at>
-                                       <at name="height">0</at>
-                                      </object>
-                                     </at>
-                                    </object>
-                                   </at>
-                                  </item>
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Topology Preserving</at>
-                                     <at name="icon">
-                                      <object classname="com.jeta.forms.store.properties.IconProperty">
-                                       <at name="embedded">false</at>
-                                       <at name="width">0</at>
-                                       <at name="height">0</at>
-                                      </object>
-                                     </at>
-                                    </object>
-                                   </at>
-                                  </item>
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">VW Simplifier</at>
-                                     <at name="icon">
-                                      <object classname="com.jeta.forms.store.properties.IconProperty">
-                                       <at name="embedded">false</at>
-                                       <at name="width">0</at>
-                                       <at name="height">0</at>
-                                      </object>
-                                     </at>
-                                    </object>
-                                   </at>
-                                  </item>
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">No Optimization</at>
-                                     <at name="icon">
-                                      <object classname="com.jeta.forms.store.properties.IconProperty">
-                                       <at name="embedded">false</at>
-                                       <at name="width">0</at>
-                                       <at name="height">0</at>
-                                      </object>
-                                     </at>
-                                    </object>
-                                   </at>
-                                  </item>
-                                 </object>
-                                </at>
                                </object>
                               </at>
                               <at name="toolTipText">EditTokenDialog.drop.vbl.optimize.tooltip</at>
                               <at name="height">18</at>
-                              <at name="itemCount">4</at>
-                              <at name="maximumRowCount">4</at>
                              </object>
                             </at>
                            </object>

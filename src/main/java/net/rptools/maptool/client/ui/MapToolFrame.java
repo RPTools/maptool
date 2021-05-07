@@ -17,13 +17,7 @@ package net.rptools.maptool.client.ui;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -53,14 +47,8 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ServerDisconnectHandler;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -159,6 +147,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
+  private JPanel fullScreenToolPanel;
   private final JPanel rendererBorderPanel;
   private final List<ZoneRenderer> zoneRendererList;
   private final JMenuBar menuBar;
@@ -173,6 +162,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
   private ZoomStatusBar zoomStatusBar;
   private JLabel chatActionLabel;
+  private boolean fullScreenToolsShown;
 
   private Color chatTypingLabelColor;
   private ChatTypingNotification chatTypingPanel;
@@ -876,6 +866,7 @@ public class MapToolFrame extends DefaultDockableHolder
       layoutPanel.add(panel, gbc);
       i++;
     }
+
     layoutPanel.setSize(layoutPanel.getPreferredSize());
     zoneRendererPanel.add(layoutPanel, PositionalLayout.Position.NE);
     zoneRendererPanel.setComponentZOrder(layoutPanel, 0);
@@ -1669,17 +1660,126 @@ public class MapToolFrame extends DefaultDockableHolder
     if (!AppUtil.MAC_OS_X) menuBar.setVisible(false);
 
     fullScreenFrame.setVisible(true);
+    showFullScreenTools();
     this.setVisible(false);
+  }
+
+  public void showFullScreenTools() {
+    if (!AppState.isFullScreenUIEnabled()) return;
+
+    fullScreenToolPanel = new JPanel();
+    fullScreenToolPanel.setLayout(new BoxLayout(fullScreenToolPanel, BoxLayout.LINE_AXIS));
+    fullScreenToolPanel.setOpaque(false);
+    fullScreenToolPanel.add(toolbarPanel.getPointerGroupButton());
+    fullScreenToolPanel.add(toolbarPanel.getDrawButton());
+    fullScreenToolPanel.add(toolbarPanel.getTemplateButton());
+    fullScreenToolPanel.add(toolbarPanel.getFogButton());
+    fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
+
+    var zoneButton = toolbarPanel.createZoneSelectionButton();
+    zoneButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+    fullScreenToolPanel.add(zoneButton);
+
+    var initiativeButton =
+        new JButton(
+            new ImageIcon(
+                getClass()
+                    .getClassLoader()
+                    .getResource("net/rptools/maptool/client/image/arrow_menu.png")));
+
+    initiativeButton.addActionListener(
+        (e) -> {
+          if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
+          else initiativePanel.setVisible(true);
+        });
+    initiativeButton.setOpaque(false);
+    initiativeButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+    fullScreenToolPanel.add(initiativeButton);
+
+    // set buttons to uniform size
+    boolean first = true;
+    Dimension size = null;
+    for (var component : fullScreenToolPanel.getComponents()) {
+      if (!(component instanceof AbstractButton)) continue;
+
+      var btn = (AbstractButton) component;
+      if (first) {
+        first = false;
+        size = btn.getSize();
+      } else btn.setPreferredSize(size);
+
+      btn.setText(null);
+    }
+    fullScreenToolPanel.setSize(fullScreenToolPanel.getPreferredSize());
+    zoneRendererPanel.add(fullScreenToolPanel, PositionalLayout.Position.NW);
+    zoneRendererPanel.setComponentZOrder(fullScreenToolPanel, 0);
+
+    var optionPanel = toolbarPanel.getOptionPanel();
+    // set size of optionpanel to only necessary size
+    for (Component comp : optionPanel.getComponents()) {
+      if (comp.isVisible()) {
+        optionPanel.setSize(comp.getPreferredSize());
+      }
+    }
+
+    zoneRendererPanel.add(optionPanel, PositionalLayout.Position.N);
+    zoneRendererPanel.setComponentZOrder(optionPanel, 0);
+
+    size = initiativePanel.getPreferredSize();
+    size.height = zoneRendererPanel.getHeight() / 2;
+
+    initiativePanel.setSize(size);
+
+    initiativePanel.setVisible(false);
+
+    zoneRendererPanel.add(initiativePanel, PositionalLayout.Position.SE);
+    zoneRendererPanel.setComponentZOrder(initiativePanel, 0);
+
+    zoneRendererPanel.revalidate();
+    zoneRendererPanel.repaint();
+
+    fullScreenToolsShown = true;
+  }
+
+  public void hideFullScreenTools() {
+    if (!fullScreenToolsShown) return;
+
+    toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
+
+    JToggleButton buttons[] = {
+      toolbarPanel.getTopologyButton(), toolbarPanel.getFogButton(),
+      toolbarPanel.getTemplateButton(), toolbarPanel.getDrawButton(),
+      toolbarPanel.getPointerGroupButton()
+    };
+
+    for (var button : buttons) {
+      button.setPreferredSize(null);
+      toolbarPanel.add(button, 0);
+    }
+
+    zoneRendererPanel.remove(fullScreenToolPanel);
+    fullScreenToolPanel = null;
+    var initiativeFrame = frameMap.get(MTFrame.INITIATIVE);
+    initiativePanel.setVisible(true);
+    initiativeFrame.add(initiativePanel);
+
+    fullScreenToolsShown = false;
   }
 
   public boolean isFullScreen() {
     return fullScreenFrame != null;
   }
 
+  public boolean areFullScreenToolsShown() {
+    return fullScreenToolsShown;
+  }
+
   public void showWindowed() {
     if (fullScreenFrame == null) {
       return;
     }
+    hideFullScreenTools();
+
     rendererBorderPanel.add(zoneRendererPanel);
     setJMenuBar(menuBar);
     menuBar.setVisible(true);

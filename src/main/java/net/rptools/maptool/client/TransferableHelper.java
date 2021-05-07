@@ -18,12 +18,10 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,6 +48,11 @@ import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 
 /**
  * A helper class for converting Transferable objects into their respective data types. This class
@@ -424,31 +427,34 @@ public class TransferableHelper extends TransferHandler {
   }
 
   private static boolean checkValidType(URL url) throws IOException {
-    String ftype = Files.probeContentType(new File(url.getPath()).toPath());
-    if (ftype == null) {
-      return false;
+    Metadata metadata = new Metadata();
+    metadata.set(Metadata.RESOURCE_NAME_KEY, url.getPath());
+
+
+    TikaConfig tika;
+    try {
+      tika = new TikaConfig();
+    } catch (TikaException e) {
+      throw new IOException(e);
     }
 
-    if (ftype.startsWith("audio/")) {
-      return true;
-    }
+    MediaType mediaType = tika.getDetector().detect(TikaInputStream.get(url), metadata);
+    String contentType = mediaType.getType();
 
-    if (ftype.startsWith("image/")) {
-      return true;
-    }
+    String subType = mediaType.getSubtype();
+    return switch(contentType) {
+      case "audio", "image" -> true;
+      case "text" -> switch(subType) {
+        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
+        default -> false;
+      };
+      case "application" -> switch(subType) {
+        case "pdf", "json", "javascript", "xml" -> true;
+        default -> false;
+      };
+      default -> false;
+    };
 
-    switch (ftype) {
-      case "text/html":
-      case "text/markdown":
-      case "text/plain":
-      case "application/pdf":
-      case "text/javascript":
-      case "text/css":
-      case "application/json":
-        return true;
-    }
-
-    return false;
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)
