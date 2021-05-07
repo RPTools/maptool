@@ -272,12 +272,12 @@ public class DiceHelper {
     return result;
   }
 
-  public static int rollModWithBounds(int times, int sides, int sub, int lower, int upper) {
+  public static int rollModWithBounds(int times, int sides, int mod, int lower, int upper) {
     int result = 0;
 
     for (int i = 0; i < times; i++) {
       int roll = rollDice(1, sides);
-      int val = Math.min(Math.max(roll + sub, lower), upper);
+      int val = Math.min(Math.max(roll + mod, lower), upper);
       result += val;
     }
 

@@ -28,11 +28,12 @@ public class RollWithBounds extends AbstractNumberFunction {
         3,
         4,
         false,
-        "rollSubWithLower",
+        "rollWithUpper",
         "rollWithLower",
         "rollAddWithUpper",
-        "rollWithUpper",
-        "rollAddWithLower");
+        "rollAddWithLower",
+        "rollSubWithUpper",
+        "rollSubWithLower");
   }
 
   @Override
@@ -46,11 +47,10 @@ public class RollWithBounds extends AbstractNumberFunction {
     int upper = Integer.MAX_VALUE;
 
     switch (functionName) {
-      case "rollSubWithLower":
+      case "rollWithUpper":
         times = ((BigDecimal) parameters.get(0)).intValue();
         sides = ((BigDecimal) parameters.get(1)).intValue();
-        mod = -((BigDecimal) parameters.get(2)).intValue();
-        lower = ((BigDecimal) parameters.get(3)).intValue();
+        upper = ((BigDecimal) parameters.get(2)).intValue();
         break;
       case "rollWithLower":
         times = ((BigDecimal) parameters.get(0)).intValue();
@@ -63,20 +63,27 @@ public class RollWithBounds extends AbstractNumberFunction {
         mod = ((BigDecimal) parameters.get(2)).intValue();
         upper = ((BigDecimal) parameters.get(3)).intValue();
         break;
-      case "rollWithUpper":
-        times = ((BigDecimal) parameters.get(0)).intValue();
-        sides = ((BigDecimal) parameters.get(1)).intValue();
-        upper = ((BigDecimal) parameters.get(2)).intValue();
-        break;
       case "rollAddWithLower":
         times = ((BigDecimal) parameters.get(0)).intValue();
         sides = ((BigDecimal) parameters.get(1)).intValue();
         mod = ((BigDecimal) parameters.get(2)).intValue();
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
+      case "rollSubWithUpper":
+        times = ((BigDecimal) parameters.get(0)).intValue();
+        sides = ((BigDecimal) parameters.get(1)).intValue();
+        mod = -((BigDecimal) parameters.get(2)).intValue();
+        upper = ((BigDecimal) parameters.get(3)).intValue();
+        break;
+      case "rollSubWithLower":
+        times = ((BigDecimal) parameters.get(0)).intValue();
+        sides = ((BigDecimal) parameters.get(1)).intValue();
+        mod = -((BigDecimal) parameters.get(2)).intValue();
+        lower = ((BigDecimal) parameters.get(3)).intValue();
+        break;
       default:
         throw new ParserException("Unknown function name: " + functionName);
     }
-    return DiceHelper.rollModWithBounds(times, sides, mod, lower, upper);
+    return new BigDecimal(DiceHelper.rollModWithBounds(times, sides, mod, lower, upper));
   }
 }
