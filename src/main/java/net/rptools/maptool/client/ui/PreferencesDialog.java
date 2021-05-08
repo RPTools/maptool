@@ -149,7 +149,8 @@ public class PreferencesDialog extends JDialog {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
     new LocalizedComboItem(GridFactory.HEX_VERT, "Preferences.combo.maps.grid.hexVert"),
-    new LocalizedComboItem(GridFactory.ISOMETRIC, "Preferences.combo.maps.grid.isometric")
+    new LocalizedComboItem(GridFactory.ISOMETRIC, "Preferences.combo.maps.grid.isometric"),
+    new LocalizedComboItem(GridFactory.NONE, "MapPropertiesDialog.image.nogrid")
   };
   private static final LocalizedComboItem[] duplicateTokenComboItems = {
     new LocalizedComboItem(Token.NUM_INCREMENT, "Preferences.combo.tokens.duplicate.increment"),
