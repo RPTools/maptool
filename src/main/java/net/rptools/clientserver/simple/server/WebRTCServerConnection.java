@@ -33,6 +33,8 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private final Gson gson = new Gson();
   private RTCConfiguration rtcConfig;
 
+  public static String WebSocketUrl = "ws://172.20.74.230:9090";
+
   public WebRTCServerConnection(ServerConfig config, IHandshake handshake) {
     super(handshake);
     this.config = config;
@@ -45,7 +47,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     rtcConfig.iceServers.add(iceServer);
 
     try {
-      uri = new URI("ws://172.24.181.158:9090");
+      uri = new URI(WebSocketUrl);
     } catch (Exception e) {}
 
     signalingCLient = new WebSocketClient(uri) {

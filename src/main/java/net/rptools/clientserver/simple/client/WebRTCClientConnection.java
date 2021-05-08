@@ -54,7 +54,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   private void startSignaling() {
     URI uri = null;
     try {
-      uri = new URI("ws://172.24.181.158:9090");
+      uri = new URI(WebRTCServerConnection.WebSocketUrl);
     } catch (Exception e) {}
 
     signalingCLient = new WebSocketClient(uri) {
@@ -99,6 +99,11 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
     os = new PipedOutputStream();
     dos = new DataOutputStream(os);
     toSend = new PipedInputStream(os);
+
+    if(sendThread.getContextClassLoader() == null) {
+      ClassLoader cl = ClassLoader.getSystemClassLoader();
+      sendThread.setContextClassLoader(cl);
+    }
     sendThread.start();
   }
 
@@ -257,27 +262,15 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
     log.info(prefix() + "PeerConnection.onDataChannel");
     this.localDataChannel = newDataChannel;
     localDataChannel.registerObserver(this);
-   /*
-    remoteDataChannel.registerObserver(new RTCDataChannelObserver() {
-      @Override
-      public void onBufferedAmountChange(long previousAmount) {
-        log.info(prefix() + "remoteDataChannel onBufferedAmountChange");
-      }
 
-      @Override
-      public void onStateChange() {
-        log.info(prefix() + "remoteDataChannel onStateChange " + localDataChannel.getState());
-      }
-
-      @Override
-      public void onMessage(RTCDataChannelBuffer buffer) {
-        log.info(prefix() + "remoteDataChannel onMessage");
-      }
-    });*/
     if(serverConnection != null) {
       handleConnnect = new Thread(() -> {
         serverConnection.onDataChannelOpened(this);
       });
+      if(handleConnnect.getContextClassLoader() == null) {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        handleConnnect.setContextClassLoader(cl);
+      }
       handleConnnect.start();
     }
   }
@@ -349,7 +342,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   //datachannel
   @Override
   public void onMessage(RTCDataChannelBuffer buffer) {
-    log.info(prefix() + "localDataChannel onMessage: got " + buffer.data.capacity() + " bytes" );
+    //log.info(prefix() + "localDataChannel onMessage: got " + buffer.data.capacity() + " bytes" );
     try {
       int len = buffer.data.capacity();
       byte[] byteArray = new byte[len];
@@ -375,8 +368,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
     public void run() {
         while (!stopRequested) {
           try {
-            if(localDataChannel == null || localDataChannel.getState() != RTCDataChannelState.OPEN
-                || /*remoteDataChannel.getState() != RTCDataChannelState.OPEN ||*/ toSend.available() == 0)
+            if(localDataChannel == null || localDataChannel.getState() != RTCDataChannelState.OPEN)
               Thread.sleep(100);
             else {
               var bytes = toSend.readNBytes(toSend.available());
