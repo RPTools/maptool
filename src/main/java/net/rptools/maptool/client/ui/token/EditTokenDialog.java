@@ -331,6 +331,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();
+    String heroLabTitle = I18N.getString("EditTokenDialog.tab.hero");
 
     if (heroLabData != null) {
       boolean isDirty = heroLabData.isDirty() && heroLabData.getPortfolioFile().exists();
@@ -339,14 +340,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       if (isDirty && refreshDataButton.getIcon() != REFRESH_ICON_ON) {
         refreshDataButton.setIcon(REFRESH_ICON_ON);
         refreshDataButton.setToolTipText(
-            "<html>Refresh data from Hero Lab<br/><b><i>Changes detected!</i></b></html>");
+            I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.on"));
       } else if (!isDirty && refreshDataButton.getIcon() != REFRESH_ICON_OFF) {
         refreshDataButton.setIcon(REFRESH_ICON_OFF);
         refreshDataButton.setToolTipText(
-            "<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+            I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.off"));
       }
 
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), true);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), true);
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
@@ -375,8 +376,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       // loadHeroLabImageList();
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab")) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(heroLabTitle)) {
         tabbedPane.setSelectedIndex(6);
       }
     }
@@ -849,7 +850,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             new JLabel(bar.getName() + ":"),
             new CellConstraints(1, 1, CellConstraints.RIGHT, CellConstraints.TOP));
         JSlider slider = new JSlider(0, 100);
-        JCheckBox hide = new JCheckBox("Hide");
+        JCheckBox hide = new JCheckBox(I18N.getString("EditTokenDialog.checkbox.state.hide"));
         hide.putClientProperty("JSlider", slider);
         hide.addChangeListener(
             e -> {
@@ -1365,7 +1366,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             if (heroLabData != null) {
               refreshDataButton.setIcon(REFRESH_ICON_OFF);
               refreshDataButton.setToolTipText(
-                  "<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+                  I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.off"));
 
               ((JLabel) getComponent("portfolioLocation"))
                   .setToolTipText(heroLabData.getPortfolioPath());
@@ -1820,7 +1821,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     public void mouseClicked(MouseEvent e) {
       if (SwingUtilities.isRightMouseButton(e)) {
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem sendToChatItem = new JMenuItem("Send to Chat");
+        JMenuItem sendToChatItem =
+            new JMenuItem(I18N.getString("EditTokenDialog.menu.notes.sendChat"));
         sendToChatItem.addActionListener(
             e12 -> {
               String selectedText = source.getSelectedText();
@@ -1836,7 +1838,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             });
         menu.add(sendToChatItem);
 
-        JMenuItem sendAsEmoteItem = new JMenuItem("Send as Emit");
+        JMenuItem sendAsEmoteItem =
+            new JMenuItem(I18N.getString("EditTokenDialog.menu.notes.sendEmit"));
         sendAsEmoteItem.addActionListener(
             e1 -> {
               String selectedText = source.getSelectedText();
