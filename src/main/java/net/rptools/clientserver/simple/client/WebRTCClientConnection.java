@@ -3,6 +3,7 @@ package net.rptools.clientserver.simple.client;
 import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
+import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
@@ -15,18 +16,17 @@ import java.io.*;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
-public class WebRTCClientConnection extends AbstractClientConnection implements PeerConnectionObserver,
+public class WebRTCClientConnection extends AbstractConnection implements IClientConnection, PeerConnectionObserver,
     SetSessionDescriptionObserver, CreateSessionDescriptionObserver, RTCDataChannelObserver {
   private static final Logger log = Logger.getLogger(WebRTCClientConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
-  private WebSocketClient signalingCLient;
   private final ServerConfig config;
-
+  private final String id;
+  private final Gson gson = new Gson();
+  private WebSocketClient signalingCLient;
   //only set on server side
   private WebRTCServerConnection serverConnection;
-  
-  private final Gson gson = new Gson();
   private RTCConfiguration rtcConfig;
   private RTCPeerConnection peerConnection;
   private RTCDataChannel localDataChannel;
@@ -40,22 +40,40 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   private PipedOutputStream os;
   private DataOutputStream dos;
 
-  private SendThread sendThread = new SendThread();
+  private boolean started = false;
+  private StreamSendThread sendThread;
+  private Thread handleConnnect;
 
   // used from client side
   public WebRTCClientConnection(String id, ServerConfig config) throws IOException {
-    super(id);
+    this.id = id;
     this.config = config;
     init();
 
     startSignaling();
   }
 
+  // this is used from the server side
+  public WebRTCClientConnection(OfferMessage message, WebRTCServerConnection webRTCServerConnection) throws IOException {
+    this.id = message.source;
+    this.serverConnection = webRTCServerConnection;
+    this.config = serverConnection.getConfig();
+    this.signalingCLient = serverConnection.getSignalingCLient();
+    init();
+
+    peerConnection = factory.createPeerConnection(rtcConfig, this);
+    peerConnection.setRemoteDescription(message.offer, this);
+
+    var answerOptions = new RTCAnswerOptions();
+    peerConnection.createAnswer(answerOptions, this);
+  }
+
   private void startSignaling() {
     URI uri = null;
     try {
       uri = new URI(WebRTCServerConnection.WebSocketUrl);
-    } catch (Exception e) {}
+    } catch (Exception e) {
+    }
 
     signalingCLient = new WebSocketClient(uri) {
       @Override
@@ -98,33 +116,10 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
 
     os = new PipedOutputStream();
     dos = new DataOutputStream(os);
+
     toSend = new PipedInputStream(os);
-
-    if(sendThread.getContextClassLoader() == null) {
-      ClassLoader cl = ClassLoader.getSystemClassLoader();
-      sendThread.setContextClassLoader(cl);
-    }
+    sendThread = new StreamSendThread(this);
     sendThread.start();
-  }
-
-  // this is used from the server side
-  public WebRTCClientConnection(OfferMessage message,  WebRTCServerConnection webRTCServerConnection) throws IOException {
-    super(message.source);
-    this.serverConnection = webRTCServerConnection;
-    this.config = serverConnection.getConfig();
-    this.signalingCLient = serverConnection.getSignalingCLient();
-    init();
-
-    peerConnection = factory.createPeerConnection(rtcConfig, this);
- //   var initDict = new RTCDataChannelInit();
- //   initDict.ordered = true;
- //   localDataChannel = peerConnection.createDataChannel("myDataChannel", initDict);
- //   localDataChannel.registerObserver(this);
-
-    peerConnection.setRemoteDescription(message.offer, this);
-
-    var answerOptions = new RTCAnswerOptions();
-    peerConnection.createAnswer(answerOptions, this);
   }
 
   @Override
@@ -138,8 +133,31 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   }
 
   @Override
+  public void sendMessage(byte[] message) {
+    sendMessage(null, message);
+  }
+
+  @Override
+  public void sendMessage(Object channel, byte[] message) {
+    addMessage(channel, message);
+    synchronized (sendThread) {
+      sendThread.notify();
+    }
+  }
+
+  @Override
+  public void start() throws IOException {
+      started = true;
+  }
+
+  @Override
   public boolean isAlive() {
     return true;
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
   private void handleSignalingMessage(String message) {
@@ -150,9 +168,9 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
         onLogin(loginMsg);
         break;
       }
- //     case "offer": // client side should not get offers
-        //  onOffer(data.getString("offer"), data.getString("name"));
-  //      break;
+      //     case "offer": // client side should not get offers
+      //  onOffer(data.getString("offer"), data.getString("name"));
+      //      break;
       case "answer": {
         var answerMessage = gson.fromJson(message, AnswerMessage.class);
         onAnswer(answerMessage);
@@ -173,7 +191,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   }
 
   private void onLogin(LoginMessage message) {
-    if(!message.success) {
+    if (!message.success) {
       MapTool.showError("Player already taken!");
       return;
     }
@@ -188,8 +206,9 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
     peerConnection.createOffer(offerOptions, this);
   }
 
-  private String prefix() { return serverConnection == null ? "C " : "S "; }
-
+  private String prefix() {
+    return serverConnection == null ? "C " : "S ";
+  }
 
   @Override
   public void onSignalingChange(RTCSignalingState state) {
@@ -225,7 +244,7 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
   public void onIceCandidate(RTCIceCandidate candidate) {
     var msg = new CandidateMessage();
 
-    if(serverConnection == null) {
+    if (serverConnection == null) {
       msg.destination = config.getServerName();
       msg.source = getId();
     } else {
@@ -256,18 +275,17 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
     log.info(prefix() + "PeerConnection.onRemoveStream");
   }
 
-  private Thread handleConnnect;
   @Override
   public void onDataChannel(RTCDataChannel newDataChannel) {
     log.info(prefix() + "PeerConnection.onDataChannel");
     this.localDataChannel = newDataChannel;
     localDataChannel.registerObserver(this);
 
-    if(serverConnection != null) {
+    if (serverConnection != null) {
       handleConnnect = new Thread(() -> {
         serverConnection.onDataChannelOpened(this);
-      });
-      if(handleConnnect.getContextClassLoader() == null) {
+      }, "handeConnect_" + id);
+      if (handleConnnect.getContextClassLoader() == null) {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
         handleConnnect.setContextClassLoader(cl);
       }
@@ -297,13 +315,14 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
 
   //setSession
   @Override
-  public void onSuccess() {}
+  public void onSuccess() {
+  }
 
   @Override
   public void onSuccess(RTCSessionDescription description) {
     peerConnection.setLocalDescription(description, this);
 
-    if(serverConnection != null) {
+    if (serverConnection != null) {
       var msg = new AnswerMessage();
       msg.source = serverConnection.getConfig().getServerName();
       msg.destination = getId();
@@ -341,21 +360,70 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
 
   //datachannel
   @Override
-  public void onMessage(RTCDataChannelBuffer buffer) {
+  public void onMessage(RTCDataChannelBuffer channelBuffer) {
     //log.info(prefix() + "localDataChannel onMessage: got " + buffer.data.capacity() + " bytes" );
-    try {
-      int len = buffer.data.capacity();
-      byte[] byteArray = new byte[len];
-      buffer.data.get(byteArray);
-      received.write(byteArray);
+    var buffer = channelBuffer.data;
 
+    if (Thread.currentThread().getContextClassLoader() == null) {
+      ClassLoader cl = ClassLoader.getSystemClassLoader();
+      Thread.currentThread().setContextClassLoader(cl);
+    }
+
+    int len = buffer.capacity();
+
+    var byteArray = new byte[len];
+    buffer.get(byteArray);
+    synchronized (this) {
+      if (!started) {
+        try {
+          received.write(byteArray);
+          return;
+        } catch (Exception e) {
+          log.error(e.toString());
+        }
+      }
+    }
+
+    int b32 = byteArray[0] & 0xff;
+    int b24 = byteArray[1] & 0xff;
+    int b16 = byteArray[2] & 0xff;
+    int b8 = byteArray[3]  & 0xff;
+
+    int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
+
+    if(length != len - 4) {
+      log.info("size differs");
+    }
+
+    InputStream byteStream = new ByteArrayInputStream(byteArray);
+    try {
+      while(byteStream.available() > 0) {
+        var message = readMessage(byteStream);
+        dispatchMessage(id, message);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private class SendThread extends Thread {
+  @Override
+  public void close() throws IOException {
+    if (sendThread.stopRequested) {
+      return;
+    }
+    sendThread.requestStop();
+    peerConnection.close();
+  }
+
+  private class StreamSendThread extends Thread {
     private boolean stopRequested = false;
+    private IClientConnection connection;
+
+    public StreamSendThread(IClientConnection connection) {
+      super("StreamSendThread_" + connection.getId());
+      this.connection = connection;
+
+    }
 
     public void requestStop() {
       this.stopRequested = true;
@@ -366,23 +434,62 @@ public class WebRTCClientConnection extends AbstractClientConnection implements 
 
     @Override
     public void run() {
-        while (!stopRequested) {
-          try {
-            if(localDataChannel == null || localDataChannel.getState() != RTCDataChannelState.OPEN)
-              Thread.sleep(100);
-            else {
-              var bytes = toSend.readNBytes(toSend.available());
-              var buffer = ByteBuffer.wrap(bytes);
+      while (!stopRequested) {
+        try {
+          if (localDataChannel == null || localDataChannel.getState() != RTCDataChannelState.OPEN
+              || (toSend.available() == 0 && !started))
+            Thread.sleep(100);
+          else if (!started || toSend.available() > 0) {
 
-              localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
-              log.info("sent " + bytes.length + " bytes" );
+            var bytes = toSend.readNBytes(toSend.available());
+            var buffer = ByteBuffer.wrap(bytes);
+
+            localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
+            log.info("sent " + bytes.length + " bytes");
+          } else {
+            try {
+              while (!stopRequested && connection.isAlive()) {
+                try {
+                  while (connection.hasMoreMessages()) {
+                    try {
+                      byte[] message = connection.nextMessage();
+                      if (message == null) {
+                        continue;
+                      }
+
+                      var length = message.length;
+                      var buffer = ByteBuffer.allocate(length + 4);
+
+                      buffer.put((byte) (length >> 24));
+                      buffer.put((byte) (length >> 16));
+                      buffer.put((byte) (length >> 8));
+                      buffer.put((byte) (length));
+                      buffer.put(message);
+
+                      localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
+                    } catch (IndexOutOfBoundsException e) {
+                      // just ignore and wait
+                    }
+                  }
+                  synchronized (this) {
+                    if (!stopRequested) {
+                      this.wait();
+                    }
+                  }
+                } catch (InterruptedException e) {
+                  // do nothing
+                }
+              }
+            } catch (IOException e) {
+              fireDisconnect();
             }
-          } catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-            log.error(e.toString());
           }
+        } catch (Exception e) {
+          System.out.println(e.toString());
+          e.printStackTrace();
+          log.error(e.toString());
         }
+      }
     }
   }
 }

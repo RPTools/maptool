@@ -51,7 +51,7 @@ public abstract class AbstractConnection implements IConnection {
     messageHandlers.remove(handler);
   }
 
-  protected final void dispatchMessage(String id, byte[] message) {
+  public final void dispatchMessage(String id, byte[] message) {
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
     }
@@ -152,7 +152,7 @@ public abstract class AbstractConnection implements IConnection {
     notifyListeners(Direction.Outbound, State.Complete, length, length);
   }
 
-  protected final byte[] readMessage(InputStream in) throws IOException {
+  public final byte[] readMessage(InputStream in) throws IOException {
     int b32 = in.read();
     int b24 = in.read();
     int b16 = in.read();
