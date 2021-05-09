@@ -89,15 +89,15 @@ public class Token extends BaseModel implements Cloneable {
       new Gson().getAdapter(JsonObject.class);
 
   public enum TokenShape {
-    TOP_DOWN("Top down"),
-    CIRCLE("Circle"),
-    SQUARE("Square"),
-    FIGURE("Figure");
+    TOP_DOWN(),
+    CIRCLE(),
+    SQUARE(),
+    FIGURE();
 
-    private String displayName;
+    private final String displayName;
 
-    TokenShape(String displayName) {
-      this.displayName = displayName;
+    TokenShape() {
+      displayName = I18N.getString("Token.TokenShape." + name());
     }
 
     @Override
@@ -244,11 +244,22 @@ public class Token extends BaseModel implements Cloneable {
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
-    NONE, // Default, no terrain modifications to pathfinding cost
-    MULTIPLY, // All tokens with this type are added together and multiplied against the Cell cost
-    ADD, // All tokens with this type are added together and added to the cell cost
-    BLOCK, // Movement through tokens with this type are blocked just as if they had VBL
-    FREE // Any cell with a token of this type in it has ALL movement costs removed
+    NONE(), // Default, no terrain modifications to pathfinding cost
+    MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
+    ADD(), // All tokens with this type are added together and added to the cell cost
+    BLOCK(), // Movement through tokens with this type are blocked just as if they had VBL
+    FREE(); // Any cell with a token of this type in it has ALL movement costs removed
+
+    private final String displayName;
+
+    TerrainModifierOperation() {
+      displayName = I18N.getString("Token.TerrainModifierOperation." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   // Jamz: modifies A* cost of other tokens

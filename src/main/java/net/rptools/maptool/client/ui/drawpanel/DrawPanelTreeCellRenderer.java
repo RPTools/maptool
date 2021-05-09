@@ -57,7 +57,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       DrawnElement de = (DrawnElement) value;
       text = de.getDrawable().toString();
       if (de.getDrawable() instanceof DrawablesGroup) {
-        text = "Group";
+        text = I18N.getString("drawing.type.group");
       } else if (de.getDrawable() instanceof ShapeDrawable) {
         ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
         key =
@@ -97,10 +97,10 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   private String addText(Pen pen, String text, Drawable drawing) {
     if (pen == null) return text;
     String result = text;
-    if (pen.isEraser()) result = "CUT: " + result;
+    if (pen.isEraser()) result = I18N.getText("panel.DrawExplorer.eraser", result);
     if (pen.getOpacity() < 1) {
       int perc = (int) (pen.getOpacity() * 100);
-      result = result + String.format(" opacity %s%%", perc);
+      result += " " + I18N.getText("panel.DrawExplorer.opacity", perc);
     }
     if (drawing instanceof AbstractDrawing) {
       String dName = ((AbstractDrawing) drawing).getName();
