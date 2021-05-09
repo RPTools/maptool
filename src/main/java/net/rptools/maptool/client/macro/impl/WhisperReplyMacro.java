@@ -32,7 +32,8 @@ public class WhisperReplyMacro extends AbstractMacro {
     if (playerName == null) {
       MapTool.addMessage(
           TextMessage.me(
-              context.getTransformationHistory(), "<b>You have no one to which to reply.</b>"));
+              context.getTransformationHistory(), I18N.getString("whisperreply.noTarget")));
+      return;
     }
     // Validate
     if (!MapTool.isPlayerConnected(playerName)) {

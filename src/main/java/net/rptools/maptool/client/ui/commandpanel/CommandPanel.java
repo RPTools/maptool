@@ -733,11 +733,14 @@ public class CommandPanel extends JPanel
 
     // Detect whether the person is attempting to fake rolls.
     if (CHEATER_PATTERN.matcher(command).find()) {
-      MapTool.addServerMessage(TextMessage.me(null, "Cheater. You have been reported."));
+      MapTool.addServerMessage(
+          TextMessage.me(null, I18N.getString("msg.commandPanel.cheater.self")));
       MapTool.serverCommand()
           .message(
               TextMessage.gm(
-                  null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + command));
+                  null,
+                  I18N.getText(
+                      "msg.commandPanel.cheater.gm", MapTool.getPlayer().getName(), command)));
       return;
     }
     // Make sure they aren't trying to break out of the div
@@ -749,8 +752,7 @@ public class CommandPanel extends JPanel
       closeDivCount++;
     }
     if (closeDivCount > divCount) {
-      MapTool.addServerMessage(
-          TextMessage.me(null, "Unexpected &lt;/div&gt; tag without matching &lt;div&gt;."));
+      MapTool.addServerMessage(TextMessage.me(null, I18N.getString("msg.commandPanel.div")));
       return;
     }
     if (command.charAt(0) != '/') {
@@ -870,7 +872,9 @@ public class CommandPanel extends JPanel
           new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-              Color newColor = JColorChooser.showDialog(TextColorWell.this, "Text Color", color);
+              Color newColor =
+                  JColorChooser.showDialog(
+                      TextColorWell.this, I18N.getString("dialog.colorChooser.title"), color);
               if (newColor != null) {
                 setColor(newColor);
               }

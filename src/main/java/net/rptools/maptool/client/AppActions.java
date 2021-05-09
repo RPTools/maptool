@@ -1482,7 +1482,9 @@ public class AppActions {
           // XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared? An
           // imported map would ask...
           String zoneName =
-              JOptionPane.showInputDialog("New map name:", "Copy of " + zone.getName());
+              JOptionPane.showInputDialog(
+                  I18N.getText("dialog.copyZone.msg"),
+                  I18N.getText("dialog.copyZone.initial", zone.getName()));
           if (zoneName != null) {
             Zone zoneCopy = new Zone(zone);
             zoneCopy.setName(zoneName);
