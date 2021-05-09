@@ -204,7 +204,7 @@ public class PaintChooser extends JPanel {
   }
 
   public Paint choosePaint(Frame owner, Paint paint) {
-    return choosePaint(owner, paint, "Choose Paint");
+    return choosePaint(owner, paint, I18N.getString("dialog.colorChooser.title"));
   }
 
   public Paint choosePaint(Frame owner, Paint paint, String title) {

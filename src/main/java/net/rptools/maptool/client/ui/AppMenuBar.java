@@ -282,6 +282,10 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_FULLSCREEN));
 
+    item = new RPCheckBoxMenuItem(AppActions.TOGGLE_FULLSCREEN_TOOLS, menu);
+    item.setSelected(AppState.isFullScreenUIEnabled());
+    menu.add(item);
+
     return menu;
   }
 

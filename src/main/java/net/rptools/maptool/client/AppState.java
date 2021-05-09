@@ -44,6 +44,7 @@ public class AppState {
   private static boolean isLoggingToConsole = false;
   private static boolean isLockedForBackgroundTask = false;
   private static boolean useWebRTC = false;
+  private static boolean enableFullScreenUI = true;
 
   private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
 
@@ -223,5 +224,13 @@ public class AppState {
 
   public static void setUseWebRTC(boolean use) {
     useWebRTC = use;
+  }
+
+  public static boolean isFullScreenUIEnabled() {
+    return enableFullScreenUI;
+  }
+
+  public static void setFullScreenUIEnabled(boolean value) {
+    enableFullScreenUI = value;
   }
 }
