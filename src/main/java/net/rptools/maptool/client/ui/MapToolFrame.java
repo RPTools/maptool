@@ -1680,9 +1680,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
     var zoneButton = toolbarPanel.createZoneSelectionButton();
     zoneButton.setBorder(btn.getBorder());
-    zoneButton.setBackground(btn.getBackground());
-    zoneButton.setForeground(btn.getForeground());
-    zoneButton.setSize(btn.getSize());
     fullScreenToolPanel.add(zoneButton);
 
     var initiativeButton =
