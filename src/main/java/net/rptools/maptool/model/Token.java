@@ -108,8 +108,19 @@ public class Token extends BaseModel implements Cloneable {
 
   /** Type of character: PC or NPC. */
   public enum Type {
-    PC,
-    NPC
+    PC(),
+    NPC();
+
+    private final String displayName;
+
+    Type() {
+      displayName = I18N.getString("Token.Type." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /** Type of update for the token. */
