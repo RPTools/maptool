@@ -12,12 +12,14 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - More localization for the UI.
 
 ## Enhancements
+- [#2608][i2608] Updated to DiceLib 1.8.0.  New macro function `rollSubWithUpper()` and two new dice expressions `XdYaZlW` & `XdYsZuW`.
+- [#2583][i2583] Large number of additional UI strings have been localized.
 - [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
 - [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.
 - [#2494][i2494] Support added for WebP, SVG, ICO, TGA images.
 - [#2466][i2466] Drawings can now be selected with the mouse and deleted via delete key.
-- [#2452][i2452] Additional UI elements added to fullscreen view
+- [#2452][i2452] Additional UI elements added to fullscreen view with new View menu toggle.
 - [#2366][i2366] Improved tooltips and error messages from Start Server dialog. 
 - [#2360][i2360] Map view can now be panned with Ctrl + arrow keys.
 - [#2349][i2349] Shortcut keys added to flip token images. F for horizontal and Shift-F for vertical.
@@ -28,6 +30,8 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
 
 ## Bug Fixes
+- [#2637][i2637] Tree view in Draw Explorer was showing single drawings as groups and groups as single drawings. Fixed. 
+- [#2630][i2630] Map grid type `None` was missing from `New Map Grid Type` in Preferences. Fixed. 
 - [#2601][i2601] Replaced Java native filetype detection with Apache Tika for better coverage of asset types.
 - [#2596][i2596] Assert output a stack trace when called from a macro executed by a macro link. Fixed.
 - [#2560][i2560] Layer names lacked i18n support. Fixed.
@@ -37,7 +41,9 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2548][i2548] Light icons broken on imported Dungeondraft UVTT maps. Fixed.
 - [#2527][i2527] Unsupported assets types are now filtered in drag-and-drop to map.
 - [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
+- [#2482][i2482] `playStream()` failing on MacOS and Linux. Fixed with update to Java 16.
 - [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
+- [#2325][i2325] Error message returned when `/reply` is used without a prior `/whisper` has been localized.
 - [#2288][i2288] Non-alphanumeric chars in the key of a String Property could break `getStrProp()`. Fixed.
 - [#2249][i2249] Javascript in Overlays would keep running after overlay closed. Fixed.
 - [#2214][i2214] Moving to Java 16 fixed startup issues with Japanese locale.
@@ -49,8 +55,12 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2637]: https://github.com/RPTools/maptool/issues/2637
+[i2630]: https://github.com/RPTools/maptool/issues/2630
+[i2608]: https://github.com/RPTools/maptool/issues/2608
 [i2601]: https://github.com/RPTools/maptool/issues/2601
 [i2596]: https://github.com/RPTools/maptool/issues/2596
+[i2583]: https://github.com/RPTools/maptool/issues/2583
 [i2560]: https://github.com/RPTools/maptool/issues/2560
 [i2558]: https://github.com/RPTools/maptool/issues/2558
 [i2555]: https://github.com/RPTools/maptool/issues/2555
@@ -63,12 +73,14 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2519]: https://github.com/RPTools/maptool/issues/2519
 [i2494]: https://github.com/RPTools/maptool/issues/2494
 [i2493]: https://github.com/RPTools/maptool/issues/2493
+[i2482]: https://github.com/RPTools/maptool/issues/2482
 [i2466]: https://github.com/RPTools/maptool/issues/2466
 [i2452]: https://github.com/RPTools/maptool/issues/2452
 [i2366]: https://github.com/RPTools/maptool/issues/2366
 [i2360]: https://github.com/RPTools/maptool/issues/2360
 [i2349]: https://github.com/RPTools/maptool/issues/2349
 [i2334]: https://github.com/RPTools/maptool/issues/2334
+[i2325]: https://github.com/RPTools/maptool/issues/2325
 [i2288]: https://github.com/RPTools/maptool/issues/2288
 [i2249]: https://github.com/RPTools/maptool/issues/2249
 [i2234]: https://github.com/RPTools/maptool/issues/2234
