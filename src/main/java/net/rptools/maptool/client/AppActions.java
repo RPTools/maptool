@@ -2229,14 +2229,14 @@ public class AppActions {
                       dialog.getUsernameTextField().getText(), config, policy, campaign, true);
 
                   // Connect to server
-                  String playerType = dialog.getRoleCombo().getSelectedItem().toString();
-                  if (playerType.equals("GM")) {
+                  Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
                         "localhost",
                         serverProps.getPort(),
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
-                            serverProps.getRole(),
+                            playerType,
                             serverProps.getGMPassword()));
                   } else {
                     MapTool.createConnection(
@@ -2244,7 +2244,7 @@ public class AppActions {
                         serverProps.getPort(),
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
-                            serverProps.getRole(),
+                            playerType,
                             serverProps.getPlayerPassword()));
                   }
 
