@@ -8651,7 +8651,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="name">@type</at>
+                 <at name="name">type</at>
                  <at name="width">25</at>
                  <at name="items">
                   <object classname="com.jeta.forms.store.properties.ItemsProperty">
