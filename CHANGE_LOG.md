@@ -13,6 +13,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 
 ## Enhancements
 - [#2608][i2608] Updated to DiceLib 1.8.0.  New macro function `rollSubWithUpper()` and two new dice expressions `XdYaZlW` & `XdYsZuW`.
+- [#2595][i2595] To facilitate localization and consistency, several macro commands changed to accept/return enum values instead of the English display names. Functions affected: `setTokenVBL()`, `getTokenShape()`, `setTokenShape()` and `getInfo("map")`.
 - [#2583][i2583] Large number of additional UI strings have been localized.
 - [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
@@ -60,6 +61,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2608]: https://github.com/RPTools/maptool/issues/2608
 [i2601]: https://github.com/RPTools/maptool/issues/2601
 [i2596]: https://github.com/RPTools/maptool/issues/2596
+[i2595]: https://github.com/RPTools/maptool/issues/2595
 [i2583]: https://github.com/RPTools/maptool/issues/2583
 [i2560]: https://github.com/RPTools/maptool/issues/2560
 [i2558]: https://github.com/RPTools/maptool/issues/2558
