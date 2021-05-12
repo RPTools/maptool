@@ -3246,8 +3246,7 @@
                                    <at name="actionCommand">Use tooltips for inline rolls</at>
                                    <at name="name">toolTipInlineRolls</at>
                                    <at name="width">42</at>
-                                   <at name="toolTipText">&lt;html&gt;Enabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[t: ]&lt;/b&gt;&amp;nbsp;&lt;br&gt;
-Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</at>
+                                   <at name="toolTipText">Preferences.checkbox.chat.rolls.tooltip</at>
                                    <at name="height">17</at>
                                   </object>
                                  </at>
@@ -3858,8 +3857,7 @@ Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</a
                                    <at name="actionCommand">Use tooltips for inline rolls</at>
                                    <at name="name">suppressToolTipsMacroLinks</at>
                                    <at name="width">42</at>
-                                   <at name="toolTipText">&lt;html&gt;Enabled: do not show tooltips for macroLinks&lt;br&gt;
-Disabled (default): show tooltips for macroLinks</at>
+                                   <at name="toolTipText">Preference.checkbox.chat.macrolinks.tooltip</at>
                                    <at name="height">17</at>
                                   </object>
                                  </at>
