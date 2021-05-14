@@ -437,7 +437,8 @@ public class AppPreferences {
   private static final boolean DEFAULT_FIT_GM_VIEW = true;
 
   private static final String KEY_DEFAULT_USERNAME = "defaultUsername";
-  private static final String DEFAULT_USERNAME = I18N.getString("Preferences.client.default.username.value");
+  private static final String DEFAULT_USERNAME =
+      I18N.getString("Preferences.client.default.username.value");
 
   private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
   private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
