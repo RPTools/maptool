@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -436,7 +437,7 @@ public class AppPreferences {
   private static final boolean DEFAULT_FIT_GM_VIEW = true;
 
   private static final String KEY_DEFAULT_USERNAME = "defaultUsername";
-  private static final String DEFAULT_USERNAME = "Anonymous User";
+  private static final String DEFAULT_USERNAME = I18N.getString("Preferences.client.default.username.value");
 
   private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
   private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
