@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.StringUtil;
 
 /**
@@ -34,7 +35,7 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
 
   public ZoomStatusBar() {
     super("", RIGHT);
-    setToolTipText("Zoom Level");
+    setToolTipText(I18N.getString("ZoomStatusBar.tooltip"));
     addActionListener(this);
   }
 

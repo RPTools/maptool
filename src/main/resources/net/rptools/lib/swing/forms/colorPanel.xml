@@ -904,7 +904,7 @@
                  </at>
                  <at name="name">toggleSnapToGrid</at>
                  <at name="width">21</at>
-                 <at name="toolTipText">Snap to grid</at>
+                 <at name="toolTipText">ColorPicker.tooltip.gridSnap</at>
                  <at name="height">24</at>
                 </object>
                </at>
@@ -966,9 +966,9 @@
                    <at name="height">16</at>
                   </object>
                  </at>
-                 <at name="name">toggelSquareCap</at>
+                 <at name="name">toggleSquareCap</at>
                  <at name="width">21</at>
-                 <at name="toolTipText">Line Type</at>
+                 <at name="toolTipText">ColorPicker.tooltip.lineType</at>
                  <at name="height">24</at>
                 </object>
                </at>
@@ -1032,7 +1032,7 @@
                  </at>
                  <at name="name">toggleErase</at>
                  <at name="width">21</at>
-                 <at name="toolTipText">Eraser</at>
+                 <at name="toolTipText">ColorPicker.tooltip.eraser</at>
                  <at name="height">24</at>
                 </object>
                </at>
@@ -1273,7 +1273,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">Pen Width</at>
+                 <at name="toolTipText">ColorPicker.tooltip.penWidth</at>
                  <at name="height">16</at>
                 </object>
                </at>
@@ -1342,7 +1342,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">Opacity</at>
+                 <at name="toolTipText">ColorPicker.tooltip.opacity</at>
                  <at name="height">16</at>
                 </object>
                </at>

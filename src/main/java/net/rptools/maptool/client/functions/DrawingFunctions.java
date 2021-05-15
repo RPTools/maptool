@@ -286,7 +286,7 @@ public class DrawingFunctions extends AbstractFunction {
     JsonObject dinfo = new JsonObject();
     dinfo.addProperty("id", el.getDrawable().getId().toString());
     dinfo.addProperty("name", d.getName());
-    dinfo.addProperty("layer", el.getDrawable().getLayer().toString());
+    dinfo.addProperty("layer", el.getDrawable().getLayer().name());
     dinfo.addProperty("type", getDrawbleType(d));
     dinfo.add("bounds", boundsToJSON(d));
     dinfo.addProperty("penColor", paintToString(el.getPen().getPaint()));

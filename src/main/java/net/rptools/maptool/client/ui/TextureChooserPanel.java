@@ -22,6 +22,7 @@ import net.rptools.lib.swing.ImagePanel;
 import net.rptools.lib.swing.PaintChooser;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 
 public class TextureChooserPanel extends AbstractPaintChooserPanel {
@@ -66,6 +67,6 @@ public class TextureChooserPanel extends AbstractPaintChooserPanel {
 
   @Override
   public String getDisplayName() {
-    return "Texture";
+    return I18N.getString("TextureChooserPanel.title");
   }
 }

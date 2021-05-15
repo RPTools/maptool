@@ -1432,8 +1432,8 @@
                               </at>
                               <at name="selectedItem">
                                <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                <at name="name">listitem</at>
-                                <at name="label">Image</at>
+                                <at name="name">Image</at>
+                                <at name="label">CampaignPropertiesDialog.combo.states.type.image</at>
                                 <at name="icon">
                                  <object classname="com.jeta.forms.store.properties.IconProperty">
                                   <at name="embedded">false</at>
@@ -1453,8 +1453,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Image</at>
+                                     <at name="name">Image</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.image</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1468,8 +1468,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Corner Image</at>
+                                     <at name="name">Corner Image</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.cornerImage</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1483,8 +1483,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Image</at>
+                                     <at name="name">Grid Image</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridImage</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1498,8 +1498,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Dot</at>
+                                     <at name="name">Dot</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.dot</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1513,8 +1513,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Dot</at>
+                                     <at name="name">Grid Dot</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridDot</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1528,8 +1528,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Circle</at>
+                                     <at name="name">Circle</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.circle</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1543,8 +1543,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Shaded</at>
+                                     <at name="name">Shaded</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.shaded</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1558,8 +1558,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">X</at>
+                                     <at name="name">X</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.x</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1573,8 +1573,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Cross</at>
+                                     <at name="name">Cross</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.cross</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1588,8 +1588,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Diamond</at>
+                                     <at name="name">Diamond</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.diamond</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1603,8 +1603,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Diamond</at>
+                                     <at name="name">Grid Diamond</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridDiamond</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1618,8 +1618,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Yield</at>
+                                     <at name="name">Yield</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.yield</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1633,8 +1633,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Yield</at>
+                                     <at name="name">Grid Yield</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridYield</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1648,8 +1648,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Triangle</at>
+                                     <at name="name">Triangle</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.triangle</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1663,8 +1663,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Triangle</at>
+                                     <at name="name">Grid Triangle</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridTriangle</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -1678,8 +1678,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">Grid Square</at>
+                                     <at name="name">Grid Square</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.type.gridSquare</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -2201,8 +2201,8 @@
                               </at>
                               <at name="selectedItem">
                                <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                <at name="name">listitem</at>
-                                <at name="label">North East</at>
+                                <at name="name">NORTH_EAST</at>
+                                <at name="label">CampaignPropertiesDialog.combo.states.corner.topRight</at>
                                 <at name="icon">
                                  <object classname="com.jeta.forms.store.properties.IconProperty">
                                   <at name="embedded">false</at>
@@ -2222,8 +2222,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">North East</at>
+                                     <at name="name">NORTH_EAST</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.corner.topRight</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -2237,8 +2237,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">North West</at>
+                                     <at name="name">NORTH_WEST</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.corner.topLeft</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -2252,8 +2252,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">South East</at>
+                                     <at name="name">SOUTH_EAST</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.corner.bottomRight</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -2267,8 +2267,8 @@
                                   <item >
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
-                                     <at name="label">South West</at>
+                                     <at name="name">SOUTH_WEST</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.states.corner.bottomLeft</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -4159,7 +4159,7 @@
                                    <at name="selectedItem">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                      <at name="name">listitem</at>
-                                     <at name="label">Two Image</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.bars.type.twoImages</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -4180,7 +4180,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Two Image</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.twoImages</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4195,7 +4195,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Single Image</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.singleImage</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4210,7 +4210,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Multiple Images</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.multipleImages</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4225,7 +4225,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Solid</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.solid</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4240,7 +4240,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Two Tone</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.twoTone</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4561,7 +4561,7 @@
                                    <at name="selectedItem">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                      <at name="name">listitem</at>
-                                     <at name="label">Top</at>
+                                     <at name="label">CampaignPropertiesDialog.combo.bars.side.top</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -4582,7 +4582,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Top</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.side.top</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4597,7 +4597,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Bottom</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.bottom</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4612,7 +4612,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Left</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.left</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -4627,7 +4627,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">Right</at>
+                                          <at name="label">CampaignPropertiesDialog.combo.bars.type.right</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>

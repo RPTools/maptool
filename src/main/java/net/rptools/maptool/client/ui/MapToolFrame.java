@@ -1668,13 +1668,19 @@ public class MapToolFrame extends DefaultDockableHolder
     if (!AppState.isFullScreenUIEnabled()) return;
 
     fullScreenToolPanel = new JPanel();
+    fullScreenToolPanel.setLayout(new BoxLayout(fullScreenToolPanel, BoxLayout.LINE_AXIS));
     fullScreenToolPanel.setOpaque(false);
     fullScreenToolPanel.add(toolbarPanel.getPointerGroupButton());
     fullScreenToolPanel.add(toolbarPanel.getDrawButton());
     fullScreenToolPanel.add(toolbarPanel.getTemplateButton());
     fullScreenToolPanel.add(toolbarPanel.getFogButton());
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
-    fullScreenToolPanel.add(toolbarPanel.createZoneSelectionButton());
+
+    var btn = toolbarPanel.getPointerGroupButton();
+
+    var zoneButton = toolbarPanel.createZoneSelectionButton();
+    zoneButton.setBorder(btn.getBorder());
+    fullScreenToolPanel.add(zoneButton);
 
     var initiativeButton =
         new JButton(
@@ -1688,6 +1694,8 @@ public class MapToolFrame extends DefaultDockableHolder
           if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
           else initiativePanel.setVisible(true);
         });
+
+    initiativeButton.setBorder(btn.getBorder());
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size
@@ -1696,13 +1704,13 @@ public class MapToolFrame extends DefaultDockableHolder
     for (var component : fullScreenToolPanel.getComponents()) {
       if (!(component instanceof AbstractButton)) continue;
 
-      var btn = (AbstractButton) component;
+      var abstractButton = (AbstractButton) component;
       if (first) {
         first = false;
-        size = btn.getSize();
-      } else btn.setPreferredSize(size);
+        size = abstractButton.getSize();
+      } else abstractButton.setPreferredSize(size);
 
-      btn.setText(null);
+      abstractButton.setText(null);
     }
     fullScreenToolPanel.setSize(fullScreenToolPanel.getPreferredSize());
     zoneRendererPanel.add(fullScreenToolPanel, PositionalLayout.Position.NW);

@@ -6,7 +6,7 @@
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.1.0"
-    id "com.diffplug.spotless" version "5.0.0"
+    id "com.diffplug.spotless" version "5.2.0"
     id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'org.beryx.runtime' version '1.12.4'
 }
@@ -78,6 +78,7 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
+            exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -260,7 +261,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
-    implementation 'com.github.RPTools:dicelib:1.7.1'
+    implementation 'net.rptools.dicelib:dicelib:1.8.3'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -355,6 +356,10 @@ dependencies {
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
 
+
+    // Apache Tika Parsers for determining file type
+    implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
+
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
@@ -376,6 +381,7 @@ task configSentryRelease(type: Copy) {
 
 task uberJar(type: Jar) {
     group = 'distribution'
+    zip64 = true
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion
