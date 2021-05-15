@@ -16,6 +16,8 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
+
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -72,14 +74,14 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       if (parameters.size() > 0) {
         String mapName = parameters.get(0).toString();
-        return getNamedMap(functionName, mapName).getZone().isVisible() ? "1" : "0";
+        return getNamedMap(functionName, mapName).getZone().isVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
       } else {
         // Return the visibility of the current map/zone
         ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
         if (currentZR == null) {
           throw new ParserException(I18N.getText("macro.function.map.none", functionName));
         } else {
-          return currentZR.getZone().isVisible() ? "1" : "0";
+          return currentZR.getZone().isVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
         }
       }
     } else if ("setMapVisible".equalsIgnoreCase(functionName)) {
@@ -103,7 +105,7 @@ public class MapFunctions extends AbstractFunction {
       MapTool.serverCommand().setZoneVisibility(zone.getId(), zone.isVisible());
       MapTool.getFrame().getZoneMiniMapPanel().flush();
       MapTool.getFrame().repaint();
-      return zone.isVisible() ? "1" : "0";
+      return zone.isVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if ("setMapName".equalsIgnoreCase(functionName)) {
       checkTrusted(functionName);
