@@ -16,7 +16,6 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
-
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +73,9 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       if (parameters.size() > 0) {
         String mapName = parameters.get(0).toString();
-        return getNamedMap(functionName, mapName).getZone().isVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
+        return getNamedMap(functionName, mapName).getZone().isVisible()
+            ? BigDecimal.ONE
+            : BigDecimal.ZERO;
       } else {
         // Return the visibility of the current map/zone
         ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
