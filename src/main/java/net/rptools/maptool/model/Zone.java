@@ -227,6 +227,7 @@ public class Zone extends BaseModel {
   private transient boolean exposeFogAtWaypoints = false;
 
   private String name;
+  private String playerAlias;
   private boolean isVisible;
 
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
@@ -313,8 +314,16 @@ public class Zone extends BaseModel {
     return name;
   }
 
+  public String getPlayerAlias() {
+    return playerAlias;
+  }
+
   public void setName(String name) {
     this.name = name;
+  }
+
+  public void setPlayerAlias(String playerAlias) {
+    this.playerAlias = playerAlias;
   }
 
   public MD5Key getMapAssetId() {
