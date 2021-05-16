@@ -52,10 +52,11 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Polygon;
 import java.awt.geom.*;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
@@ -114,7 +115,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private BitmapFont normalFont;
     private BitmapFont distanceFont;
     private float distanceFontScale = 0;
-    ;
     private GlyphLayout glyphLayout = new GlyphLayout();
     private CodeTimer timer = new CodeTimer("GdxRenderer.renderZone");
     private VfxManager vfxManager;
@@ -129,6 +129,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private NinePatch darkGrayLabel;
     private Texture onePixel;
     private ShapeDrawer drawer;
+    private final LineTemplateDrawer lineTemplateDrawer = new LineTemplateDrawer();
+    private final LineCellTemplateDrawer lineCellTemplateDrawer = new LineCellTemplateDrawer();
+    private final RadiusTemplateDrawer radiusTemplateDrawer = new RadiusTemplateDrawer();
+    private final BurstTemplateDrawer burstTemplateDrawer = new BurstTemplateDrawer();
+    private final ConeTemplateDrawer coneTemplateDrawer = new ConeTemplateDrawer();
+    private final BlastTemplateDrawer blastTemplateDrawer = new BlastTemplateDrawer();
+    private final RadiusCellTemplateDrawer radiusCellTemplateDrawer = new RadiusCellTemplateDrawer();
+    private final ShapeDrawableDrawer shapeDrawableDrawer = new ShapeDrawableDrawer();
 
     //temorary objects. Stored here to avoid garbage collection;
     private Vector3 tmpWorldCoord = new Vector3();
@@ -136,6 +144,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Color tmpColor = new Color();
     private float[] floatsFromArea = new float[6];
     private FloatArray tmpFloat = new FloatArray();
+    private FloatArray tmpFloat1 = new FloatArray();
     private Vector2 tmpVector = new Vector2();
     private Vector2 tmpVectorOut = new Vector2();
     private Vector2 tmpVector0 = new Vector2();
@@ -337,13 +346,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         setProjectionMatrix(hudCam.combined);
 
         if (zoneRenderer.isLoading())
-            drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2, height / 2);
+            drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2f, height / 2f);
         else if (MapTool.getCampaign().isBeingSerialized())
-            drawBoxedString("    Please Wait    ", width / 2, height / 2);
+            drawBoxedString("    Please Wait    ", width / 2f, height / 2f);
 
         int noteVPos = 20;
         if (!zone.isVisible() && playerView.isGMView()) {
-            drawBoxedString("Map not visible to players", width / 2, height - noteVPos);
+            drawBoxedString("Map not visible to players", width / 2f, height - noteVPos);
             noteVPos += 20;
         }
         if (AppState.isShowAsPlayer()) {
@@ -656,7 +665,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
          */
         if (showVisionAndHalo) {
             drawer.setColor(Color.WHITE);
-            draw(combined);
+            drawArea(combined);
             renderHaloArea(combined);
         }
     }
@@ -674,7 +683,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             drawer.setColor(visionColor.getRed() / 255f, visionColor.getGreen() / 255f,
                     visionColor.getBlue() / 255f, AppPreferences.getHaloOverlayOpacity() / 255f);
-            fill(visible);
+            fillArea(visible);
         }
     }
 
@@ -754,7 +763,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tempArea.add(new Area(exposedArea));
                 }
                 if (combinedView) {
-                    fill(combined);
+                    fillArea(combined);
                     renderFogArea(combined, visibleArea);
                     renderFogOutline();
                 } else {
@@ -762,7 +771,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     // use 'combined' instead in this block of code?
                     tempArea.add(combined);
 
-                    fill(tempArea);
+                    fillArea(tempArea);
                     renderFogArea(tempArea, visibleArea);
                     renderFogOutline();
                 }
@@ -773,7 +782,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (combined.isEmpty()) {
                         combined = zone.getExposedArea();
                     }
-                    fill(combined);
+                    fillArea(combined);
                     renderFogArea(combined, visibleArea);
                     renderFogOutline();
                 } else {
@@ -789,7 +798,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         exposedArea = meta.getExposedAreaHistory();
                         myCombined.add(new Area(exposedArea));
                     }
-                    fill(myCombined);
+                    fillArea(myCombined);
                     renderFogArea(myCombined, visibleArea);
                     renderFogOutline();
                 }
@@ -823,19 +832,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 drawer.setColor(0, 0, 0, AppPreferences.getFogOverlayOpacity() / 255.0f);
 
                 // Fill in the exposed area
-                fill(softFog);
+                fillArea(softFog);
 
                 //batch.setColor(Color.CLEAR);
                 drawer.setColor(Color.CLEAR);
 
-                fill(visibleArea);
+                fillArea(visibleArea);
             } else {
                 drawer.setColor(0, 0, 0, 80 / 255.0f);
-                fill(softFog);
+                fillArea(softFog);
                 drawer.setColor(Color.WHITE);
             }
         } else {
-            fill(softFog);
+            fillArea(softFog);
         }
     }
 
@@ -844,7 +853,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return;
 
         drawer.setColor(Color.BLACK);
-        draw(visibleScreenArea);
+        drawArea(visibleScreenArea);
     }
 
     private void renderLabels(PlayerView view) {
@@ -1105,7 +1114,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 tmpColor.set(1, 1, 1, 0.59f);
             }
             drawer.setColor(tmpColor);
-            fill(light.getArea());
+            fillArea(light.getArea());
         }
 
         timer.stop("auras-4");
@@ -1146,7 +1155,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
             tmpColor.a = alpha;
             drawer.setColor(tmpColor);
-            fill(light.getArea());
+            fillArea(light.getArea());
         }
         timer.stop("lights-3");
 
@@ -1154,7 +1163,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.start("lights-4");
         for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
             drawer.setColor(Color.CLEAR);
-            fill(brightArea);
+            fillArea(brightArea);
         }
         timer.stop("lights-4");
         //createScreenShot("light");
@@ -1331,8 +1340,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void renderDrawableOverlay(PlayerView view, List<DrawnElement> drawables) {
-        for(var drawable: drawables)
-            renderDrawable(drawable);
+        for(var drawable: drawables.toArray())
+            renderDrawable((DrawnElement)drawable);
     }
 
     private void renderDrawable(DrawnElement element) {
@@ -1340,89 +1349,24 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var drawable = element.getDrawable();
 
         if(drawable instanceof ShapeDrawable)
-            render((ShapeDrawable)drawable, pen);
-        else if(drawable instanceof  LineSegment)
-            render((LineSegment)drawable, pen);
-        else if(drawable instanceof  DrawablesGroup)
-            render((DrawablesGroup)drawable, pen);
-        else if(drawable instanceof  Cross)
-            render((Cross)drawable, pen);
-        else if(drawable instanceof Oval)
-            render((Oval)drawable, pen);
-        else if(drawable instanceof net.rptools.maptool.model.drawing.Rectangle)
-            render((net.rptools.maptool.model.drawing.Rectangle)drawable, pen);
-        else if(drawable instanceof  RadiusCellTemplate)
-            render((RadiusCellTemplate)drawable, pen);
-        else if(drawable instanceof  LineCellTemplate)
-            render((LineCellTemplate)drawable, pen);
-        else if(drawable instanceof  BlastTemplate)
-            render((BlastTemplate)drawable, pen);
+            shapeDrawableDrawer.draw(drawable, pen);
+        else if(drawable instanceof DrawablesGroup)
+            for(var groupElement: ((DrawablesGroup)drawable).getDrawableList())
+                renderDrawable(groupElement);
+        else if(drawable instanceof RadiusCellTemplate)
+            radiusCellTemplateDrawer.draw(drawable, pen);
+        else if(drawable instanceof LineCellTemplate)
+            lineCellTemplateDrawer.draw(drawable, pen);
+        else if(drawable instanceof BlastTemplate)
+            blastTemplateDrawer.draw(drawable, pen);
         else if(drawable instanceof ConeTemplate)
-            render((ConeTemplate)drawable, pen);
+            coneTemplateDrawer.draw(drawable, pen);
         else if(drawable instanceof BurstTemplate)
-            render((BurstTemplate)drawable, pen);
-        else if(drawable instanceof  RadiusTemplate)
-            render((RadiusTemplate)drawable, pen);
-        else if(drawable instanceof  WallTemplate)
-            render((WallTemplate)drawable, pen);
-        else if(drawable instanceof  LineTemplate)
-            render((LineTemplate)drawable, pen);
-    }
-
-    private void render(ShapeDrawable drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(LineSegment drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(DrawablesGroup drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(Cross drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(Oval drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(net.rptools.maptool.model.drawing.Rectangle drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(LineCellTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(RadiusCellTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(BlastTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(ConeTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(BurstTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(RadiusTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(WallTemplate drawable, Pen pen) {
-        //TODO: implement
-    }
-
-    private void render(LineTemplate drawable, Pen pen) {
-        //TODO: implement
+            burstTemplateDrawer.draw(drawable, pen);
+        else if(drawable instanceof RadiusTemplate)
+            radiusTemplateDrawer.draw(drawable, pen);
+        else if(drawable instanceof LineTemplate)
+            lineTemplateDrawer.draw(drawable, pen);
     }
 
     public void drawString(String text, float centerX, float centerY, Color foreground) {
@@ -1555,8 +1499,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             timer.start("tokenlist-1d");
             if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-                double sx = footprintBounds.width / 2 + footprintBounds.x - (token.getAnchor().x);
-                double sy = footprintBounds.height / 2 + footprintBounds.y - (token.getAnchor().y);
+                double sx = footprintBounds.width / 2f + footprintBounds.x - (token.getAnchor().x);
+                double sy = footprintBounds.height / 2f + footprintBounds.y - (token.getAnchor().y);
                 tokenBounds.transform(
                         AffineTransform.getRotateInstance(
                                 Math.toRadians(-token.getFacing() - 90), sx, sy)); // facing
@@ -1596,7 +1540,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 drawer.setDefaultLineWidth(AppPreferences.getHaloLineWidth());
                 Color.argb8888ToColor(tmpColor, token.getHaloColor().getRGB());
                 drawer.setColor(tmpColor);
-                draw(zone.getGrid().getTokenCellArea(tokenBounds));
+                drawArea(zone.getGrid().getTokenCellArea(tokenBounds));
             }
 
             // Calculate alpha Transparency from token and use opacity for indicating that token is moving
@@ -1679,10 +1623,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                             drawer.setColor(1, 1, 0, 0.5f);
 
                         var arrowArea = new Area(arrow);
-                        fill(arrowArea);
+                        fillArea(arrowArea);
 
                         drawer.setColor(Color.DARK_GRAY);
-                        draw(arrowArea);
+                        drawArea(arrowArea);
 
 
                         break;
@@ -1706,11 +1650,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         drawer.update();
                         drawer.setColor(Color.YELLOW);
 
-                        fill(arrowArea);
+                        fillArea(arrowArea);
                         drawer.setColor(Color.DARK_GRAY);
                         drawer.setDefaultLineWidth(1);
 
-                        draw(arrowArea);
+                        drawArea(arrowArea);
                         tmpMatrix.idt();
                         batch.setTransformMatrix(tmpMatrix);
                         drawer.update();
@@ -1754,9 +1698,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         drawer.update();
                         drawer.setColor(Color.YELLOW);
 
-                        fill(arrowArea);
+                        fillArea(arrowArea);
                         drawer.setColor(Color.DARK_GRAY);
-                        draw(arrowArea);
+                        drawArea(arrowArea);
                         batch.setTransformMatrix(tmpMatrix.idt());
                         drawer.update();
                         break;
@@ -2500,7 +2444,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpColor.set(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, overlay.getOpacity() / 100);
         drawer.setColor(tmpColor);
         Shape s = overlay.getShape(bounds, token);
-        fill(new Area(s));
+        fillArea(new Area(s));
         drawer.setColor(Color.WHITE);
     }
 
@@ -2720,7 +2664,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         tmpArea.reset();
         tmpArea.add(bounds);
         tmpArea.subtract(clip);
-        fill(tmpArea);
+        fillArea(tmpArea);
 
         backBuffer.end();
 
@@ -3057,6 +3001,31 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         zone = newZone;
     }
 
+    private Texture paintToTexture(DrawablePaint paint) {
+        if (paint instanceof DrawableTexturePaint) {
+            var texturePaint = (DrawableTexturePaint) paint;
+            var image = texturePaint.getAsset().getImage();
+            var pix = new Pixmap(image, 0, image.length);
+            var texture = new Texture(pix);
+            pix.dispose();
+            return texture;
+        }
+        if (paint instanceof DrawableColorPaint) {
+            var colorPaint = (DrawableColorPaint) paint;
+            var colorValue = colorPaint.getColor();
+            var color = new Color();
+            Color.argb8888ToColor(color, colorValue);
+            var pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+
+            pix.setColor(color);
+            pix.fill();
+            var texture = new Texture(pix);
+            pix.dispose();
+            return texture;
+        }
+        return null;
+    }
+
     private Sprite paintToSprite(DrawablePaint paint) {
         if (paint instanceof DrawableTexturePaint) {
             var texturePaint = (DrawableTexturePaint) paint;
@@ -3086,21 +3055,46 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         return null;
     }
 
-    private void fill(Area area) {
+    private void fillArea(Area area) {
+        if (area == null || area.isEmpty())
+            return;
+
         paintArea(area, true);
     }
 
-    private void draw(Area area) {
+    private void drawArea(Area area) {
+        if (area == null || area.isEmpty())
+            return;
+
         paintArea(area, false);
     }
 
     private void paintArea(Area area, boolean fill) {
-        if (area == null || area.isEmpty())
-            return;
+        pathToFloatArray(area.getPathIterator(null));
 
+        if (fill) {
+            var lastX = tmpFloat.get(tmpFloat.size-2);
+            var lastY = tmpFloat.get(tmpFloat.size-1);
+            if(lastX != tmpFloat.get(0) && lastY !=  tmpFloat.get(1))
+                tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
+
+            drawer.filledPolygon(tmpFloat.toArray());
+        } else {
+            if(tmpFloat.get(0) == tmpFloat.get(tmpFloat.size - 2)
+                && tmpFloat.get(1) == tmpFloat.get(tmpFloat.size - 1)) {
+                tmpFloat.pop();
+                tmpFloat.pop();
+            }
+
+            drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, false);
+        }
+    }
+
+
+    private void pathToFloatArray(PathIterator it) {
         tmpFloat.clear();
 
-        for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
+        for (; !it.isDone(); it.next()) {
             int type = it.currentSegment(floatsFromArea);
 
             switch (type) {
@@ -3111,14 +3105,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     break;
                 case PathIterator.SEG_CLOSE:
                     //                   System.out.println("Close");
-                    tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
-                    if (fill) {
-                        drawer.filledPolygon(tmpFloat.toArray());
-                    } else {
-                        drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, true);
-                    }
-                    tmpFloat.clear();
-                    break;
+
+                    return;
                 case PathIterator.SEG_LINETO:
                     //                  System.out.println("Line to: ( " + floatsFromArea[0] + ", " + floatsFromArea[1] + ")");
                     tmpFloat.add(floatsFromArea[0], -floatsFromArea[1]);
@@ -3361,6 +3349,602 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         SwingUtilities.CENTER,
                         background,
                         foreground);
+            }
+        }
+    }
+    
+    private abstract class AbstractDrawingDrawer {
+        public void draw(Drawable element, Pen pen) {
+            if(pen.getBackgroundPaint() instanceof DrawableColorPaint) {
+                var colorPaint = (DrawableColorPaint)pen.getBackgroundPaint();
+                Color.argb8888ToColor(tmpColor, colorPaint.getColor());
+                drawer.setColor(tmpColor);
+            }
+            drawBackground(element, pen);
+
+            if(pen.getPaint() instanceof DrawableColorPaint) {
+                var colorPaint = (DrawableColorPaint)pen.getPaint();
+                Color.argb8888ToColor(tmpColor, colorPaint.getColor());
+                drawer.setColor(tmpColor);
+            }
+            var lineWidth = drawer.getDefaultLineWidth();
+            drawer.setDefaultLineWidth(pen.getThickness());
+            drawBorder(element, pen);
+            drawer.setDefaultLineWidth(lineWidth);
+        }
+        
+        protected abstract void drawBackground(Drawable element, Pen pen);
+        protected abstract void drawBorder(Drawable element, Pen pen);
+    }
+    
+    private abstract  class AbstractTemplateDrawer extends AbstractDrawingDrawer {
+        @Override
+        protected void drawBackground(Drawable element, Pen pen) {
+            tmpColor.set(tmpColor.r, tmpColor.g, tmpColor.b, AbstractTemplate.DEFAULT_BG_ALPHA);
+            drawer.setColor(tmpColor);
+            paint((AbstractTemplate)element, false, true);
+        }
+        
+        @Override
+        protected void drawBorder(Drawable element, Pen pen) {
+            paint((AbstractTemplate)element, true, false);
+        }
+
+        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+            var radius = template.getRadius();
+            
+            if (radius == 0) return;
+            Zone zone = MapTool.getCampaign().getZone(template.getZoneId());
+            if (zone == null) return;
+
+            // Find the proper distance
+            int gridSize = zone.getGrid().getSize();
+            for (int y = 0; y < radius; y++) {
+                for (int x = 0; x < radius; x++) {
+
+                    // Get the offset to the corner of the square
+                    int xOff = x * gridSize;
+                    int yOff = y * gridSize;
+
+                    // Template specific painting
+                    if (border) paintBorder(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                    if (area) paintArea(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                } // endfor
+            } // endfor
+        }
+
+        protected void paintArea(AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            var vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
+            int y = vertex.y + getYMult(q) * yOff + ((getYMult(q) - 1) / 2) * gridSize;
+            drawer.filledRectangle(x, -y - gridSize, gridSize, gridSize);
+        }
+
+        protected int getXMult(AbstractTemplate.Quadrant q) {
+            return ((q == AbstractTemplate.Quadrant.NORTH_WEST || q == AbstractTemplate.Quadrant.SOUTH_WEST) ? -1 : +1);
+        }
+
+        protected int getYMult(AbstractTemplate.Quadrant q) {
+            return ((q == AbstractTemplate.Quadrant.NORTH_WEST || q == AbstractTemplate.Quadrant.NORTH_EAST) ? -1 : +1);
+        }
+
+        protected void paintCloseVerticalBorder(
+            AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            var vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff;
+            int y = vertex.y + getYMult(q) * yOff;
+            drawer.line(x, -y, x, -(y + getYMult(q) * gridSize));
+        }
+
+        protected void paintFarHorizontalBorder(
+            AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            var vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff;
+            int y = vertex.y + getYMult(q) * yOff + getYMult(q) * gridSize;
+            drawer.line(x, -y, x + getXMult(q) * gridSize, -y);
+        }
+
+        protected void paintFarVerticalBorder(
+            AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            var vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff + getXMult(q) * gridSize;
+            int y = vertex.y + getYMult(q) * yOff;
+            drawer.line(x, -y, x, -(y + getYMult(q) * gridSize));
+        }
+
+        protected void paintCloseHorizontalBorder(
+            AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            var vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff;
+            int y = vertex.y + getYMult(q) * yOff;
+            drawer.line(x, -y, x + getXMult(q) * gridSize, -y);
+        }
+
+        protected abstract void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance);
+
+        protected abstract void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance);
+    }
+
+    private class LineTemplateDrawer extends AbstractTemplateDrawer {
+        @Override
+        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+            if (MapTool.getCampaign().getZone(template.getZoneId()) == null) {
+                return;
+            }
+            var lineTemplate = (LineTemplate)template;
+
+            // Need to paint? We need a line and to translate the painting
+            if (lineTemplate.getPathVertex() == null) return;
+            if (template.getRadius() == 0) return;
+            if (lineTemplate.getPath() == null && lineTemplate.calcPath() == null) return;
+
+            // Paint each element in the path
+            int gridSize = MapTool.getCampaign().getZone(template.getZoneId()).getGrid().getSize();
+            ListIterator<CellPoint> i = lineTemplate.getPath().listIterator();
+            while (i.hasNext()) {
+                CellPoint p = i.next();
+                int xOff = p.x * gridSize;
+                int yOff = p.y * gridSize;
+                int distance = template.getDistance(p.x, p.y);
+
+                // Paint what is needed.
+                if (area) {
+                    paintArea(template, p.x, p.y, xOff, yOff, gridSize, distance);
+                } // endif
+                if (border) {
+                    paintBorder(template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
+                } // endif
+            } // endfor
+        }
+        @Override
+        protected void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var lineTemplate = (LineTemplate)template;
+            paintArea(template, xOff, yOff, gridSize, lineTemplate.getQuadrant());
+        }
+
+        @Override
+        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
+            var lineTemplate = (LineTemplate)template;
+
+            // Have to scan 3 points behind and ahead, since that is the maximum number of points
+            // that can be added to the path from any single intersection.
+            boolean[] noPaint = new boolean[4];
+            var path = lineTemplate.getPath();
+            for (int i = pElement - 3; i < pElement + 3; i++) {
+                if (i < 0 || i >= path.size() || i == pElement) continue;
+                CellPoint p = path.get(i);
+
+                // Ignore diagonal cells and cells that are not adjacent
+                int dx = p.x - x;
+                int dy = p.y - y;
+                if (Math.abs(dx) == Math.abs(dy) || Math.abs(dx) > 1 || Math.abs(dy) > 1) continue;
+
+                // Remove the border between the 2 points
+                noPaint[dx != 0 ? (dx < 0 ? 0 : 2) : (dy < 0 ? 3 : 1)] = true;
+            } // endif
+
+            var quadrant = lineTemplate.getQuadrant();
+            // Paint the borders as needed
+            if (!noPaint[0]) paintCloseVerticalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[1]) paintFarHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[2]) paintFarVerticalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[3]) paintCloseHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+        }
+    }
+
+    private class LineCellTemplateDrawer extends AbstractTemplateDrawer {
+
+        @Override
+        protected void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var lineCellTemplate = (LineCellTemplate)template;
+            paintArea(template, xOff, yOff, gridSize, lineCellTemplate.getQuadrant());
+        }
+
+        @Override
+        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
+            var lineCellTemplate = (LineCellTemplate)template;
+            // Have to scan 3 points behind and ahead, since that is the maximum number of points
+            // that can be added to the path from any single intersection.
+            boolean[] noPaint = new boolean[4];
+            var path = lineCellTemplate.getPath();
+            for (int i = pElement - 3; i < pElement + 3; i++) {
+                if (i < 0 || i >= path.size() || i == pElement) continue;
+                CellPoint p = path.get(i);
+
+                // Ignore diagonal cells and cells that are not adjacent
+                int dx = p.x - x;
+                int dy = p.y - y;
+                if (Math.abs(dx) == Math.abs(dy) || Math.abs(dx) > 1 || Math.abs(dy) > 1) continue;
+
+                // Remove the border between the 2 points
+                noPaint[dx != 0 ? (dx < 0 ? 0 : 2) : (dy < 0 ? 3 : 1)] = true;
+            } // endif
+
+            var quadrant = lineCellTemplate.getQuadrant();
+            // Paint the borders as needed
+            if (!noPaint[0]) paintCloseVerticalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[1]) paintFarHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[2]) paintFarVerticalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[3]) paintCloseHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+        }
+
+        @Override
+        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+            if (MapTool.getCampaign().getZone(template.getZoneId()) == null) {
+                return;
+            }
+            var lineCellTemplate = (LineCellTemplate)template;
+            var path = lineCellTemplate.getPath();
+            // Need to paint? We need a line and to translate the painting
+            if (lineCellTemplate.getPathVertex() == null) return;
+            if (lineCellTemplate.getRadius() == 0) return;
+            if (path == null && lineCellTemplate.calcPath() == null) return;
+
+            var quadrant = lineCellTemplate.getQuadrant();
+
+            // Paint each element in the path
+            int gridSize = MapTool.getCampaign().getZone(lineCellTemplate.getZoneId()).getGrid().getSize();
+            ListIterator<CellPoint> i = path.listIterator();
+            while (i.hasNext()) {
+                CellPoint p = i.next();
+                int xOff = p.x * gridSize;
+                int yOff = p.y * gridSize;
+                int distance = template.getDistance(p.x, p.y);
+
+                if (quadrant.equals(AbstractTemplate.Quadrant.NORTH_EAST.name())) {
+                    yOff = yOff - gridSize;
+                } else if (quadrant.equals(AbstractTemplate.Quadrant.SOUTH_WEST.name())) {
+                    xOff = xOff - gridSize;
+                } else if (quadrant.equals(AbstractTemplate.Quadrant.NORTH_WEST.name())) {
+                    xOff = xOff - gridSize;
+                    yOff = yOff - gridSize;
+                }
+
+                // Paint what is needed.
+                if (area) {
+                    paintArea(template, p.x, p.y, xOff, yOff, gridSize, distance);
+                } // endif
+                if (border) {
+                    paintBorder(template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
+                } // endif
+            } // endfor
+        }
+    }
+
+    private class RadiusTemplateDrawer extends AbstractTemplateDrawer {
+        @Override
+        protected void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var radiusTemplate = (RadiusTemplate)template;
+            // Only squares w/in the radius
+            if (distance <= radiusTemplate.getRadius()) {
+                // Paint the squares
+                for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
+                    paintArea(template, xOff, yOff, gridSize, q);
+                }
+            }
+        }
+
+        @Override
+        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var radiusTemplate = (RadiusTemplate)template;
+            paintBorderAtRadius(template, x, y, xOff, yOff, gridSize, distance, radiusTemplate.getRadius());
+        }
+
+        private void paintBorderAtRadius(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
+            // At the border?
+            if (distance == radius) {
+                // Paint lines between vertical boundaries if needed
+                if (template.getDistance(x + 1, y) > radius) {
+                    for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
+                        paintFarVerticalBorder(template, xOff, yOff, gridSize, q);
+                    }
+                }
+
+                // Paint lines between horizontal boundaries if needed
+                if (template.getDistance(x, y + 1) > radius) {
+                    for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
+                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, q);
+                    }
+                }
+            }
+        }
+    }
+
+    private class BurstTemplateDrawer extends AbstractDrawingDrawer {
+
+        @Override
+        protected void drawBackground(Drawable element, Pen pen) {
+            var template = (BurstTemplate)element;
+            tmpColor.set(tmpColor.r, tmpColor.g, tmpColor.b, AbstractTemplate.DEFAULT_BG_ALPHA);
+            drawer.setColor(tmpColor);
+            fillArea(template.getArea());
+        }
+
+        @Override
+        protected void drawBorder(Drawable element, Pen pen) {
+            var template = (BurstTemplate)element;
+            drawArea(template.getArea());
+            drawArea(template.getVertexRenderer().getArea());
+        }
+    }
+
+    private class ConeTemplateDrawer extends RadiusTemplateDrawer {
+        @Override
+        protected void paintArea(
+            AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var coneTemplate = (ConeTemplate)template;
+
+            var direction = coneTemplate.getDirection();
+
+            // Drawing along the spines only?
+            if ((direction == AbstractTemplate.Direction.EAST || direction == AbstractTemplate.Direction.WEST) && y > x) return;
+            if ((direction == AbstractTemplate.Direction.NORTH || direction == AbstractTemplate.Direction.SOUTH) && x > y) return;
+
+            // Only squares w/in the radius
+            if (distance > coneTemplate.getRadius()) {
+                return;
+            }
+            for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
+                if (coneTemplate.withinQuadrant(q)) {
+                    paintArea(template, xOff, yOff, gridSize, q);
+                }
+            }
+        }
+
+        @Override
+        protected void paintBorder(
+            AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            var coneTemplate = (ConeTemplate)template;
+            paintBorderAtRadius(coneTemplate, x, y, xOff, yOff, gridSize, distance, coneTemplate.getRadius());
+            paintEdges(coneTemplate, x, y, xOff, yOff, gridSize, distance);
+        }
+
+        protected void paintEdges(
+            ConeTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+
+            // Handle the edges
+            int radius = template.getRadius();
+            var direction = template.getDirection();
+            if (direction.ordinal() % 2 == 0) {
+                if (x == 0) {
+                    if (direction == AbstractTemplate.Direction.SOUTH_EAST || direction == AbstractTemplate.Direction.SOUTH_WEST)
+                        paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    if (direction == AbstractTemplate.Direction.NORTH_EAST || direction == AbstractTemplate.Direction.NORTH_WEST)
+                        paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                } // endif
+                if (y == 0) {
+                    if (direction == AbstractTemplate.Direction.SOUTH_EAST || direction == AbstractTemplate.Direction.NORTH_EAST)
+                        paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    if (direction == AbstractTemplate.Direction.SOUTH_WEST || direction == AbstractTemplate.Direction.NORTH_WEST)
+                        paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                } // endif
+            } else if (direction.ordinal() % 2 == 1 && x == y && distance <= radius) {
+                if (direction == AbstractTemplate.Direction.SOUTH) {
+                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                } // endif
+                if (direction == AbstractTemplate.Direction.NORTH) {
+                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                } // endif
+                if (direction == AbstractTemplate.Direction.EAST) {
+                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                } // endif
+                if (direction == AbstractTemplate.Direction.WEST) {
+                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                } // endif
+            } // endif
+        }
+
+        protected void paintBorderAtRadius(
+            ConeTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
+            // At the border?
+            if (distance == radius) {
+                var direction = template.getDirection();
+                // Paint lines between vertical boundaries if needed
+                if (template.getDistance(x + 1, y) > radius) {
+                    if (direction == AbstractTemplate.Direction.SOUTH_EAST
+                        || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.EAST && x >= y))
+                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    if (direction == AbstractTemplate.Direction.NORTH_EAST
+                        || (direction == AbstractTemplate.Direction.NORTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.EAST && x >= y))
+                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    if (direction == AbstractTemplate.Direction.SOUTH_WEST
+                        || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.WEST && x >= y))
+                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    if (direction == AbstractTemplate.Direction.NORTH_WEST
+                        || (direction == AbstractTemplate.Direction.NORTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.WEST && x >= y))
+                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                } // endif
+
+                // Paint lines between horizontal boundaries if needed
+                if (template.getDistance(x, y + 1) > radius) {
+                    if (direction == AbstractTemplate.Direction.SOUTH_EAST
+                        || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.EAST && x >= y))
+                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    if (direction == AbstractTemplate.Direction.SOUTH_WEST
+                        || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.WEST && x >= y))
+                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    if (direction == AbstractTemplate.Direction.NORTH_EAST
+                        || (direction == AbstractTemplate.Direction.NORTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.EAST && x >= y))
+                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    if (direction == AbstractTemplate.Direction.NORTH_WEST
+                        || (direction == AbstractTemplate.Direction.NORTH && y >= x)
+                        || (direction == AbstractTemplate.Direction.WEST && x >= y))
+                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                } // endif
+            } // endif
+        }
+    }
+
+    private class BlastTemplateDrawer extends  AbstractDrawingDrawer {
+
+        @Override
+        protected void drawBackground(Drawable element, Pen pen) {
+            var template = (BlastTemplate)element;
+            tmpColor.set(tmpColor.r, tmpColor.g, tmpColor.b, AbstractTemplate.DEFAULT_BG_ALPHA);
+            drawer.setColor(tmpColor);
+            fillArea(template.getArea());
+        }
+
+        @Override
+        protected void drawBorder(Drawable element, Pen pen) {
+            var template = (BlastTemplate)element;
+            drawArea(template.getArea());
+        }
+    }
+
+    private class RadiusCellTemplateDrawer extends  AbstractTemplateDrawer {
+
+        @Override
+        protected void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            // Only squares w/in the radius
+            int radius = template.getRadius();
+            if (distance <= radius) {
+                paintArea(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+            }
+
+            if (template.getDistance(x, y + 1) <= radius) {
+                paintArea(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+            }
+
+            if (template.getDistance(x + 1, y) <= radius) {
+                paintArea(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+            }
+
+            if (template.getDistance(x + 1, y + 1) <= radius) {
+                paintArea(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+            }
+        }
+
+        @Override
+        protected void paintArea(AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
+            ZonePoint vertex = template.getVertex();
+            int x = vertex.x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
+            int y = vertex.y + getYMult(q) * yOff + ((getYMult(q) - 1) / 2) * gridSize;
+            drawer.filledRectangle(x, -y - gridSize, gridSize, gridSize);
+        }
+
+        @Override
+        protected int getXMult(AbstractTemplate.Quadrant q) {
+            return ((q == AbstractTemplate.Quadrant.NORTH_WEST || q == AbstractTemplate.Quadrant.SOUTH_WEST) ? -1 : +1);
+        }
+
+        @Override
+        protected int getYMult(AbstractTemplate.Quadrant q) {
+            return ((q == AbstractTemplate.Quadrant.NORTH_WEST || q == AbstractTemplate.Quadrant.NORTH_EAST) ? -1 : +1);
+        }
+
+        @Override
+        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            paintBorderAtRadius(template, x, y, xOff, yOff, gridSize, distance, template.getRadius());
+        }
+
+        protected void paintBorderAtRadius(
+            AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
+            // At the border?
+            // Paint lines between vertical boundaries if needed
+
+            if (template.getDistance(x, y + 1) == radius && template.getDistance(x + 1, y + 1) > radius) {
+                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+            }
+            if (distance == radius && template.getDistance(x + 1, y) > radius) {
+                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+            }
+            if (template.getDistance(x + 1, y + 1) == radius && template.getDistance(x + 2, y + 1) > radius) {
+                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+            }
+            if (template.getDistance(x + 1, y) == radius && template.getDistance(x + 2, y) > radius) {
+                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+            } // endif
+            if (x == 0 && y + 1 == radius) {
+                paintFarVerticalBorder(template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+            }
+            if (x == 0 && y + 2 == radius) {
+                paintFarVerticalBorder(template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+            }
+
+            // Paint lines between horizontal boundaries if needed
+            if (template.getDistance(x, y + 1) == radius && template.getDistance(x, y + 2) > radius) {
+                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+            }
+            if (template.getDistance(x, y) == radius && template.getDistance(x, y + 1) > radius) {
+                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+            }
+            if (y == 0 && x + 1 == radius) {
+                paintFarHorizontalBorder(template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+            }
+            if (y == 0 && x + 2 == radius) {
+                paintFarHorizontalBorder(template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+            }
+            if (template.getDistance(x + 1, y + 1) == radius && template.getDistance(x + 1, y + 2) > radius) {
+                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+            }
+            if (template.getDistance(x + 1, y) == radius && template.getDistance(x + 1, y + 1) > radius) {
+                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+            } // endif
+        }
+
+        @Override
+        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+            int radius = template.getRadius();
+            GUID zoneId = template.getZoneId();
+
+            if (radius == 0) return;
+            Zone zone = MapTool.getCampaign().getZone(zoneId);
+            if (zone == null) return;
+
+            // Find the proper distance
+            int gridSize = zone.getGrid().getSize();
+            for (int y = 0; y < radius; y++) {
+                for (int x = 0; x < radius; x++) {
+
+                    // Get the offset to the corner of the square
+                    int xOff = x * gridSize;
+                    int yOff = y * gridSize;
+
+                    // Template specific painting
+                    if (border) paintBorder(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                    if (area) paintArea(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                } // endfor
+            } // endfor
+        }
+    }
+
+    private class ShapeDrawableDrawer extends  AbstractDrawingDrawer {
+
+        @Override
+        protected void drawBackground(Drawable element, Pen pen) {
+            var shape = (ShapeDrawable)element;
+            fillArea(shape.getArea());
+        }
+
+        @Override
+        protected void drawBorder(Drawable element, Pen pen) {
+            var shape = (ShapeDrawable)element;
+            var area = shape.getArea();
+            if(area.isEmpty()) {
+                pathToFloatArray(shape.getShape().getPathIterator(null));
+                drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, false);
+            } else {
+                drawArea(area);
             }
         }
     }

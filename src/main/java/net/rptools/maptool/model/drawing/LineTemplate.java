@@ -120,7 +120,7 @@ public class LineTemplate extends AbstractTemplate {
     // Need to paint? We need a line and to translate the painting
     if (pathVertex == null) return;
     if (getRadius() == 0) return;
-    if (calcPath() == null) return;
+    if (path == null && calcPath() == null) return;
 
     // Paint each element in the path
     int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
@@ -165,7 +165,7 @@ public class LineTemplate extends AbstractTemplate {
    *
    * @return The new path or <code>null</code> if there is no path.
    */
-  protected List<CellPoint> calcPath() {
+  public List<CellPoint> calcPath() {
     if (getRadius() == 0) return null;
     if (pathVertex == null) return null;
     int radius = getRadius();

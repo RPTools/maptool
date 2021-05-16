@@ -22,6 +22,7 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
+import org.locationtech.jts.awt.ShapeReader;
 
 /**
  * Create and paint a donut burst
@@ -124,4 +125,6 @@ public class BurstTemplate extends RadiusTemplate {
   public Area getArea() {
     return renderer.getArea();
   }
+
+  public ShapeDrawable getVertexRenderer() { return vertexRenderer; }
 }

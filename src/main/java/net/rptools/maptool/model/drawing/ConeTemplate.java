@@ -225,7 +225,7 @@ public class ConeTemplate extends RadiusTemplate {
     }
   }
 
-  private boolean withinQuadrant(Quadrant q) {
+  public boolean withinQuadrant(Quadrant q) {
     Direction dir = getDirection();
     switch (q) {
       case SOUTH_EAST:
