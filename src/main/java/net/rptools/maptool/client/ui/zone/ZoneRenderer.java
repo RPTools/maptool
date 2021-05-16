@@ -218,6 +218,8 @@ public class ZoneRenderer extends JComponent
 
   private ZonePoint previousZonePoint;
 
+  private boolean skipDrawing;
+
   public enum TokenMoveCompletion {
     TRUE,
     FALSE,
@@ -912,24 +914,20 @@ public class ZoneRenderer extends JComponent
     PlayerView pl = getPlayerView();
     timer.stop("paintComponent:createView");
 
-    if(MapTool.getFrame().getJfxPanel().isVisible()) {
-      // zoneoverlays and gridcoordinates are still drawn with Graphics2D
-      renderOverlays(g2d, pl);
-      return;
-    } else {
-      renderZone(g2d, pl);
-      int noteVPos = 20;
-      if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
+    skipDrawing = MapTool.getFrame().getJfxPanel().isVisible();
 
-      if (!zone.isVisible() && pl.isGMView()) {
-        GraphicsUtil.drawBoxedString(
-            g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
-        noteVPos += 20;
-      }
-      if (AppState.isShowAsPlayer()) {
-        GraphicsUtil.drawBoxedString(
-            g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
-      }
+    renderZone(g2d, pl);
+    int noteVPos = 20;
+    if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
+
+    if (!zone.isVisible() && pl.isGMView()) {
+      GraphicsUtil.drawBoxedString(
+          g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
+      noteVPos += 20;
+    }
+    if (AppState.isShowAsPlayer()) {
+      GraphicsUtil.drawBoxedString(
+          g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
     }
 
     if (timer.isEnabled()) {
@@ -1169,16 +1167,20 @@ public class ZoneRenderer extends JComponent
     }
     // Are we still waiting to show the zone ?
     if (isLoading()) {
-      g2d.setColor(Color.black);
-      g2d.fillRect(0, 0, viewRect.width, viewRect.height);
-      GraphicsUtil.drawBoxedString(g2d, loadingProgress, viewRect.width / 2, viewRect.height / 2);
+      if(!skipDrawing) {
+        g2d.setColor(Color.black);
+        g2d.fillRect(0, 0, viewRect.width, viewRect.height);
+        GraphicsUtil.drawBoxedString(g2d, loadingProgress, viewRect.width / 2, viewRect.height / 2);
+      }
       return;
     }
     if (MapTool.getCampaign().isBeingSerialized()) {
-      g2d.setColor(Color.black);
-      g2d.fillRect(0, 0, viewRect.width, viewRect.height);
-      GraphicsUtil.drawBoxedString(
-          g2d, "    Please Wait    ", viewRect.width / 2, viewRect.height / 2);
+      if(!skipDrawing) {
+        g2d.setColor(Color.black);
+        g2d.fillRect(0, 0, viewRect.width, viewRect.height);
+        GraphicsUtil.drawBoxedString(
+            g2d, "    Please Wait    ", viewRect.width / 2, viewRect.height / 2);
+      }
       return;
     }
     if (zone == null) {
@@ -1254,7 +1256,7 @@ public class ZoneRenderer extends JComponent
     timer.stop("calcs-2");
 
     // Rendering pipeline
-    if (zone.drawBoard()) {
+    if (zone.drawBoard() && !skipDrawing) {
       Rectangle fill = new Rectangle(getWidth(), getHeight());
       timer.start("board");
       renderBoard(g2d, view);
@@ -1264,7 +1266,8 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableBackground");
-      renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+      if(!skipDrawing)
+        renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
       timer.stop("drawableBackground");
       // }
       List<Token> background = zone.getBackgroundStamps(false);
@@ -1279,12 +1282,13 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getObjectDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableObjects");
-      renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+      if(!skipDrawing)
+        renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
       timer.stop("drawableObjects");
       // }
     }
     timer.start("grid");
-    renderGrid(g2d, view);
+    if(!skipDrawing) renderGrid(g2d, view);
     timer.stop("grid");
 
     if (Zone.Layer.OBJECT.isEnabled()) {
@@ -1298,11 +1302,13 @@ public class ZoneRenderer extends JComponent
     }
     if (Zone.Layer.TOKEN.isEnabled()) {
       timer.start("lights");
-      renderLights(g2d, view);
+      if(!skipDrawing)
+        renderLights(g2d, view);
       timer.stop("lights");
 
       timer.start("auras");
-      renderAuras(g2d, view);
+      if(!skipDrawing)
+        renderAuras(g2d, view);
       timer.stop("auras");
     }
 
@@ -1331,7 +1337,8 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableTokens");
-      renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+      if(!skipDrawing)
+        renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
       timer.stop("drawableTokens");
       // }
 
@@ -1339,7 +1346,8 @@ public class ZoneRenderer extends JComponent
         drawables = zone.getGMDrawnElements();
         // if (!drawables.isEmpty()) {
         timer.start("drawableGM");
-        renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        if(!skipDrawing)
+          renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
         timer.stop("drawableGM");
         // }
         List<Token> stamps = zone.getGMStamps(false);
@@ -1356,7 +1364,8 @@ public class ZoneRenderer extends JComponent
         timer.stop("tokens");
       }
       timer.start("unowned movement");
-      showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
+      if(!skipDrawing)
+        showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
       timer.stop("unowned movement");
 
       // Moved below, after the renderFog() call...
@@ -1384,12 +1393,12 @@ public class ZoneRenderer extends JComponent
     // Perhaps we should draw the fog first and use hard fog to determine whether labels need to be
     // drawn?
     // (This method has it's own 'timer' calls)
-    if (AppState.getShowTextLabels()) {
+    if (AppState.getShowTextLabels() && !skipDrawing) {
       renderLabels(g2d, view);
     }
 
     // (This method has it's own 'timer' calls)
-    if (zone.hasFog()) {
+    if (zone.hasFog() && !skipDrawing) {
       renderFog(g2d, view);
     }
 
@@ -1416,7 +1425,8 @@ public class ZoneRenderer extends JComponent
       }
 
       timer.start("owned movement");
-      showBlockedMoves(g2d, view, getOwnedMovementSet(view));
+      if(!skipDrawing)
+        showBlockedMoves(g2d, view, getOwnedMovementSet(view));
       timer.stop("owned movement");
 
       // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
@@ -1426,18 +1436,21 @@ public class ZoneRenderer extends JComponent
       // will be
       // visible.
       timer.start("token name/labels");
-      renderRenderables(g2d);
+      if(!skipDrawing)
+        renderRenderables(g2d);
       timer.stop("token name/labels");
     }
 
     // if (zone.visionType ...)
     if (view.isGMView()) {
       timer.start("visionOverlayGM");
-      renderGMVisionOverlay(g2d, view);
+      if(!skipDrawing)
+        renderGMVisionOverlay(g2d, view);
       timer.stop("visionOverlayGM");
     } else {
       timer.start("visionOverlayPlayer");
-      renderPlayerVisionOverlay(g2d, view);
+      if(!skipDrawing)
+        renderPlayerVisionOverlay(g2d, view);
       timer.stop("visionOverlayPlayer");
     }
 
@@ -3218,6 +3231,9 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("renderTokens:OnscreenCheck");
 
+      if(skipDrawing)
+        continue;
+
       // create a per token Graphics object - normally clipped, unless always visible
       Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);
 
@@ -3756,7 +3772,7 @@ public class ZoneRenderer extends JComponent
     // Stacks
     if (!tokenList.isEmpty()
         && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
-      if (tokenStackMap != null) { // FIXME Needed to prevent NPE but how can it be null?
+      if (tokenStackMap != null && !skipDrawing) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
           Area bounds = getTokenBounds(token);
           if (bounds == null) {

@@ -494,13 +494,14 @@ public class MapToolFrame extends DefaultDockableHolder
 */
 
 
-      javafx.scene.control.Label label = new Label("This is JavaFX");
+      javafx.scene.control.Label label = new Label(" ");
       label.setMouseTransparent(true);
-      label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
+      //label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
 
       var canvas = new NativeRenderingCanvas(gdxCanvas);
 
       var root = new StackPane();
+      //FIXME: find out why gdx doen't render without this label
       root.getChildren().addAll(/*swingNode, */canvas.getRoot(),label);
 
       Scene scene = new Scene(root);
