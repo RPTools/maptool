@@ -270,12 +270,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         ensureCorrectDistanceFont();
 
-        vfxManager.cleanUpBuffers();
-        vfxManager.beginInputCapture();
+     //   vfxManager.cleanUpBuffers();
+     //   vfxManager.beginInputCapture();
         doRendering();
-        vfxManager.endInputCapture();
-        vfxManager.applyEffects();
-        vfxManager.renderToScreen();
+     //   vfxManager.endInputCapture();
+     //   vfxManager.applyEffects();
+     //   vfxManager.renderToScreen();
         copyFramebufferToJfx();
     }
 
@@ -3372,6 +3372,22 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             drawBorder(element, pen);
             drawer.setDefaultLineWidth(lineWidth);
         }
+
+        protected void line(Pen pen, float x1, float y1, float x2, float y2) {
+            var halfLineWidth = pen.getThickness()/2f;
+            if(!pen.getSquareCap())
+            {
+                drawer.filledCircle(x1, -y1, halfLineWidth);
+                drawer.filledCircle(x2, -y2, halfLineWidth);
+                drawer.line(x1, -y1, x2, -y2);
+            } else {
+                tmpVector.set(x1-x2, y1-y2).nor();
+                var tx = tmpVector.x * halfLineWidth;
+                var ty = tmpVector.y * halfLineWidth;
+                drawer.line(x1 + tx, y1 + ty, x2 - tx, y2 - ty);
+            }
+        }
+
         
         protected abstract void drawBackground(Drawable element, Pen pen);
         protected abstract void drawBorder(Drawable element, Pen pen);
@@ -3382,15 +3398,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         protected void drawBackground(Drawable element, Pen pen) {
             tmpColor.set(tmpColor.r, tmpColor.g, tmpColor.b, AbstractTemplate.DEFAULT_BG_ALPHA);
             drawer.setColor(tmpColor);
-            paint((AbstractTemplate)element, false, true);
+            paint(pen, (AbstractTemplate)element, false, true);
         }
         
         @Override
         protected void drawBorder(Drawable element, Pen pen) {
-            paint((AbstractTemplate)element, true, false);
+            paint(pen, (AbstractTemplate)element, true, false);
         }
 
-        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+        protected void paint(Pen pen, AbstractTemplate template, boolean border, boolean area) {
             var radius = template.getRadius();
             
             if (radius == 0) return;
@@ -3407,7 +3423,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     int yOff = y * gridSize;
 
                     // Template specific painting
-                    if (border) paintBorder(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                    if (border) paintBorder(pen, template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
                     if (area) paintArea(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
                 } // endfor
             } // endfor
@@ -3428,46 +3444,46 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return ((q == AbstractTemplate.Quadrant.NORTH_WEST || q == AbstractTemplate.Quadrant.NORTH_EAST) ? -1 : +1);
         }
 
-        protected void paintCloseVerticalBorder(
+        protected void paintCloseVerticalBorder(Pen pen,
             AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
             var vertex = template.getVertex();
             int x = vertex.x + getXMult(q) * xOff;
             int y = vertex.y + getYMult(q) * yOff;
-            drawer.line(x, -y, x, -(y + getYMult(q) * gridSize));
+            line(pen, x, y, x, y + getYMult(q) * gridSize);
         }
 
-        protected void paintFarHorizontalBorder(
+        protected void paintFarHorizontalBorder(Pen pen,
             AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
             var vertex = template.getVertex();
             int x = vertex.x + getXMult(q) * xOff;
             int y = vertex.y + getYMult(q) * yOff + getYMult(q) * gridSize;
-            drawer.line(x, -y, x + getXMult(q) * gridSize, -y);
+            line(pen, x, y, x + getXMult(q) * gridSize, y);
         }
 
-        protected void paintFarVerticalBorder(
+        protected void paintFarVerticalBorder(Pen pen,
             AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
             var vertex = template.getVertex();
             int x = vertex.x + getXMult(q) * xOff + getXMult(q) * gridSize;
             int y = vertex.y + getYMult(q) * yOff;
-            drawer.line(x, -y, x, -(y + getYMult(q) * gridSize));
+            line(pen, x, y, x, y + getYMult(q) * gridSize);
         }
 
-        protected void paintCloseHorizontalBorder(
+        protected void paintCloseHorizontalBorder(Pen pen,
             AbstractTemplate template, int xOff, int yOff, int gridSize, AbstractTemplate.Quadrant q) {
             var vertex = template.getVertex();
             int x = vertex.x + getXMult(q) * xOff;
             int y = vertex.y + getYMult(q) * yOff;
-            drawer.line(x, -y, x + getXMult(q) * gridSize, -y);
+            line(pen, x, y, x + getXMult(q) * gridSize, y);
         }
 
         protected abstract void paintArea(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance);
 
-        protected abstract void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance);
+        protected abstract void paintBorder(Pen pen, AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance);
     }
 
     private class LineTemplateDrawer extends AbstractTemplateDrawer {
         @Override
-        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+        protected void paint(Pen pen, AbstractTemplate template, boolean border, boolean area) {
             if (MapTool.getCampaign().getZone(template.getZoneId()) == null) {
                 return;
             }
@@ -3492,7 +3508,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     paintArea(template, p.x, p.y, xOff, yOff, gridSize, distance);
                 } // endif
                 if (border) {
-                    paintBorder(template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
+                    paintBorder(pen, template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
                 } // endif
             } // endfor
         }
@@ -3503,7 +3519,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         @Override
-        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
+        protected void paintBorder(Pen pen ,AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
             var lineTemplate = (LineTemplate)template;
 
             // Have to scan 3 points behind and ahead, since that is the maximum number of points
@@ -3525,10 +3541,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             var quadrant = lineTemplate.getQuadrant();
             // Paint the borders as needed
-            if (!noPaint[0]) paintCloseVerticalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[1]) paintFarHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[2]) paintFarVerticalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[3]) paintCloseHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[0]) paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[1]) paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[2]) paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[3]) paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, quadrant);
         }
     }
 
@@ -3541,7 +3557,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         @Override
-        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
+        protected void paintBorder(Pen pen, AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
             var lineCellTemplate = (LineCellTemplate)template;
             // Have to scan 3 points behind and ahead, since that is the maximum number of points
             // that can be added to the path from any single intersection.
@@ -3562,14 +3578,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
             var quadrant = lineCellTemplate.getQuadrant();
             // Paint the borders as needed
-            if (!noPaint[0]) paintCloseVerticalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[1]) paintFarHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[2]) paintFarVerticalBorder(template, xOff, yOff, gridSize, quadrant);
-            if (!noPaint[3]) paintCloseHorizontalBorder(template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[0]) paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[1]) paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[2]) paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, quadrant);
+            if (!noPaint[3]) paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, quadrant);
         }
 
         @Override
-        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+        protected void paint(Pen pen, AbstractTemplate template, boolean border, boolean area) {
             if (MapTool.getCampaign().getZone(template.getZoneId()) == null) {
                 return;
             }
@@ -3605,7 +3621,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     paintArea(template, p.x, p.y, xOff, yOff, gridSize, distance);
                 } // endif
                 if (border) {
-                    paintBorder(template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
+                    paintBorder(pen, template, p.x, p.y, xOff, yOff, gridSize, i.previousIndex());
                 } // endif
             } // endfor
         }
@@ -3625,25 +3641,25 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         @Override
-        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+        protected void paintBorder(Pen pen, AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
             var radiusTemplate = (RadiusTemplate)template;
-            paintBorderAtRadius(template, x, y, xOff, yOff, gridSize, distance, radiusTemplate.getRadius());
+            paintBorderAtRadius(pen, template, x, y, xOff, yOff, gridSize, distance, radiusTemplate.getRadius());
         }
 
-        private void paintBorderAtRadius(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
+        private void paintBorderAtRadius(Pen pen, AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
             // At the border?
             if (distance == radius) {
                 // Paint lines between vertical boundaries if needed
                 if (template.getDistance(x + 1, y) > radius) {
                     for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
-                        paintFarVerticalBorder(template, xOff, yOff, gridSize, q);
+                        paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, q);
                     }
                 }
 
                 // Paint lines between horizontal boundaries if needed
                 if (template.getDistance(x, y + 1) > radius) {
                     for (AbstractTemplate.Quadrant q : AbstractTemplate.Quadrant.values()) {
-                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, q);
+                        paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, q);
                     }
                 }
             }
@@ -3692,14 +3708,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         @Override
-        protected void paintBorder(
+        protected void paintBorder(Pen pen,
             AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
             var coneTemplate = (ConeTemplate)template;
-            paintBorderAtRadius(coneTemplate, x, y, xOff, yOff, gridSize, distance, coneTemplate.getRadius());
-            paintEdges(coneTemplate, x, y, xOff, yOff, gridSize, distance);
+            paintBorderAtRadius(pen, coneTemplate, x, y, xOff, yOff, gridSize, distance, coneTemplate.getRadius());
+            paintEdges(pen, coneTemplate, x, y, xOff, yOff, gridSize, distance);
         }
 
-        protected void paintEdges(
+        protected void paintEdges(Pen pen,
             ConeTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
 
             // Handle the edges
@@ -3708,45 +3724,45 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             if (direction.ordinal() % 2 == 0) {
                 if (x == 0) {
                     if (direction == AbstractTemplate.Direction.SOUTH_EAST || direction == AbstractTemplate.Direction.SOUTH_WEST)
-                        paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                        paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
                     if (direction == AbstractTemplate.Direction.NORTH_EAST || direction == AbstractTemplate.Direction.NORTH_WEST)
-                        paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                        paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
                 } // endif
                 if (y == 0) {
                     if (direction == AbstractTemplate.Direction.SOUTH_EAST || direction == AbstractTemplate.Direction.NORTH_EAST)
-                        paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                        paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
                     if (direction == AbstractTemplate.Direction.SOUTH_WEST || direction == AbstractTemplate.Direction.NORTH_WEST)
-                        paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                        paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
                 } // endif
             } else if (direction.ordinal() % 2 == 1 && x == y && distance <= radius) {
                 if (direction == AbstractTemplate.Direction.SOUTH) {
-                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
-                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
-                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
-                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
                 } // endif
                 if (direction == AbstractTemplate.Direction.NORTH) {
-                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
-                    paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
-                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
-                    paintCloseHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintCloseHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
                 } // endif
                 if (direction == AbstractTemplate.Direction.EAST) {
-                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
-                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
-                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
-                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                    paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                    paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
                 } // endif
                 if (direction == AbstractTemplate.Direction.WEST) {
-                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
-                    paintCloseVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
-                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
-                    paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintCloseVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                    paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                    paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
                 } // endif
             } // endif
         }
 
-        protected void paintBorderAtRadius(
+        protected void paintBorderAtRadius(Pen pen,
             ConeTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
             // At the border?
             if (distance == radius) {
@@ -3756,19 +3772,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (direction == AbstractTemplate.Direction.SOUTH_EAST
                         || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
                         || (direction == AbstractTemplate.Direction.EAST && x >= y))
-                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                        paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
                     if (direction == AbstractTemplate.Direction.NORTH_EAST
                         || (direction == AbstractTemplate.Direction.NORTH && y >= x)
                         || (direction == AbstractTemplate.Direction.EAST && x >= y))
-                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                        paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
                     if (direction == AbstractTemplate.Direction.SOUTH_WEST
                         || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
                         || (direction == AbstractTemplate.Direction.WEST && x >= y))
-                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                        paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
                     if (direction == AbstractTemplate.Direction.NORTH_WEST
                         || (direction == AbstractTemplate.Direction.NORTH && y >= x)
                         || (direction == AbstractTemplate.Direction.WEST && x >= y))
-                        paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                        paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
                 } // endif
 
                 // Paint lines between horizontal boundaries if needed
@@ -3776,19 +3792,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     if (direction == AbstractTemplate.Direction.SOUTH_EAST
                         || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
                         || (direction == AbstractTemplate.Direction.EAST && x >= y))
-                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                        paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
                     if (direction == AbstractTemplate.Direction.SOUTH_WEST
                         || (direction == AbstractTemplate.Direction.SOUTH && y >= x)
                         || (direction == AbstractTemplate.Direction.WEST && x >= y))
-                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                        paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
                     if (direction == AbstractTemplate.Direction.NORTH_EAST
                         || (direction == AbstractTemplate.Direction.NORTH && y >= x)
                         || (direction == AbstractTemplate.Direction.EAST && x >= y))
-                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                        paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
                     if (direction == AbstractTemplate.Direction.NORTH_WEST
                         || (direction == AbstractTemplate.Direction.NORTH && y >= x)
                         || (direction == AbstractTemplate.Direction.WEST && x >= y))
-                        paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                        paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
                 } // endif
             } // endif
         }
@@ -3853,57 +3869,57 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
 
         @Override
-        protected void paintBorder(AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
-            paintBorderAtRadius(template, x, y, xOff, yOff, gridSize, distance, template.getRadius());
+        protected void paintBorder(Pen pen, AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance) {
+            paintBorderAtRadius(pen, template, x, y, xOff, yOff, gridSize, distance, template.getRadius());
         }
 
-        protected void paintBorderAtRadius(
+        protected void paintBorderAtRadius(Pen pen,
             AbstractTemplate template, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
             // At the border?
             // Paint lines between vertical boundaries if needed
 
             if (template.getDistance(x, y + 1) == radius && template.getDistance(x + 1, y + 1) > radius) {
-                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
             }
             if (distance == radius && template.getDistance(x + 1, y) > radius) {
-                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
             }
             if (template.getDistance(x + 1, y + 1) == radius && template.getDistance(x + 2, y + 1) > radius) {
-                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
             }
             if (template.getDistance(x + 1, y) == radius && template.getDistance(x + 2, y) > radius) {
-                paintFarVerticalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                paintFarVerticalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
             } // endif
             if (x == 0 && y + 1 == radius) {
-                paintFarVerticalBorder(template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                paintFarVerticalBorder(pen, template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
             }
             if (x == 0 && y + 2 == radius) {
-                paintFarVerticalBorder(template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                paintFarVerticalBorder(pen, template, xOff - gridSize, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
             }
 
             // Paint lines between horizontal boundaries if needed
             if (template.getDistance(x, y + 1) == radius && template.getDistance(x, y + 2) > radius) {
-                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_EAST);
             }
             if (template.getDistance(x, y) == radius && template.getDistance(x, y + 1) > radius) {
-                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
             }
             if (y == 0 && x + 1 == radius) {
-                paintFarHorizontalBorder(template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.SOUTH_EAST);
             }
             if (y == 0 && x + 2 == radius) {
-                paintFarHorizontalBorder(template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff - gridSize, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
             }
             if (template.getDistance(x + 1, y + 1) == radius && template.getDistance(x + 1, y + 2) > radius) {
-                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.NORTH_WEST);
             }
             if (template.getDistance(x + 1, y) == radius && template.getDistance(x + 1, y + 1) > radius) {
-                paintFarHorizontalBorder(template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
+                paintFarHorizontalBorder(pen, template, xOff, yOff, gridSize, AbstractTemplate.Quadrant.SOUTH_WEST);
             } // endif
         }
 
         @Override
-        protected void paint(AbstractTemplate template, boolean border, boolean area) {
+        protected void paint(Pen pen, AbstractTemplate template, boolean border, boolean area) {
             int radius = template.getRadius();
             GUID zoneId = template.getZoneId();
 
@@ -3921,7 +3937,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     int yOff = y * gridSize;
 
                     // Template specific painting
-                    if (border) paintBorder(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
+                    if (border) paintBorder(pen, template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
                     if (area) paintArea(template, x, y, xOff, yOff, gridSize, template.getDistance(x, y));
                 } // endfor
             } // endfor
@@ -3939,12 +3955,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         @Override
         protected void drawBorder(Drawable element, Pen pen) {
             var shape = (ShapeDrawable)element;
-            var area = shape.getArea();
-            if(area.isEmpty()) {
-                pathToFloatArray(shape.getShape().getPathIterator(null));
-                drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.SMOOTH, false);
-            } else {
-                drawArea(area);
+            pathToFloatArray(shape.getShape().getPathIterator(null));
+            if(tmpFloat.get(0) == tmpFloat.get(tmpFloat.size - 2)
+                && tmpFloat.get(1) == tmpFloat.get(tmpFloat.size - 1)) {
+                tmpFloat.pop();
+                tmpFloat.pop();
+            }
+            if(pen.getSquareCap())
+                drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.POINTY, false);
+            else
+            {
+                drawer.path(tmpFloat.toArray(), drawer.getDefaultLineWidth(), JoinType.NONE, false);
+                for(int i=0; i + 1 < tmpFloat.size; i+=2)
+                    drawer.filledCircle(tmpFloat.get(i), tmpFloat.get(i+1), pen.getThickness()/2f);
             }
         }
     }

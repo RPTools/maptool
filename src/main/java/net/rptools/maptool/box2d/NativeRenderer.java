@@ -53,7 +53,7 @@ public class NativeRenderer implements InputProcessor {
 
         var config = new LwjglApplicationConfiguration();
         config.allowSoftwareMode = true;
-        //config.samples = 8;
+        config.samples = 8;
         config.forceExit = false;
         LwjglApplicationConfiguration.disableAudio = true;
 
