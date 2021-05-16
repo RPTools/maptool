@@ -315,7 +315,7 @@ public class Zone extends BaseModel {
   }
 
   public String getPlayerAlias() {
-    return playerAlias;
+    return playerAlias == null? name : playerAlias;
   }
 
   public void setName(String name) {
@@ -382,6 +382,7 @@ public class Zone extends BaseModel {
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
     imageScaleY = zone.imageScaleY;
+    playerAlias = zone.playerAlias;
 
     // In the following blocks we allocate a new linked list then fill it with null values
     // because the Collections.copy() method requires the destination list to already be
