@@ -80,7 +80,9 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
       this.renderer = renderer;
       String name =
           MapTool.getPlayer().isGM()
-              ? renderer.getZone().getName()
+              ? renderer.getZone().getName().equals(renderer.getZone().getPlayerAlias())
+                  ? renderer.getZone().getName()
+                  : renderer.getZone().getPlayerAlias() + " (" + renderer.getZone().getName() + ")"
               : renderer.getZone().getPlayerAlias();
       if ("".equals(name)) {
         name = I18N.getText("Button.map");
