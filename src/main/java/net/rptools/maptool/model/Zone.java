@@ -315,7 +315,7 @@ public class Zone extends BaseModel {
   }
 
   public String getPlayerAlias() {
-    return playerAlias == null? name : playerAlias;
+    return playerAlias == null ? name : playerAlias;
   }
 
   public void setName(String name) {

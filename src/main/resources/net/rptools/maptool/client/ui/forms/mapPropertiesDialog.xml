@@ -48,7 +48,6 @@
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
         <at name="id">embedded.1353365589</at>
-        <!--following line determines how many rows are in dialog for actual content-->
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:NONE,LEFT:MIN(100DLU;PREF):NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:GROW(1.0)</at>
         <at name="components">
@@ -350,7 +349,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">1</at>
-                <at name="row">7</at><!--5-->
+                <at name="row">7</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -410,7 +409,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">7</at><!--5-->
+                <at name="row">7</at>
                 <at name="colspan">4</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -465,7 +464,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">1</at>
-                <at name="row">15</at><!--13-->
+                <at name="row">15</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -526,7 +525,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">15</at><!--13-->
+                <at name="row">15</at>
                 <at name="colspan">4</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -585,7 +584,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">5</at><!--3-->
+                <at name="row">5</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -813,7 +812,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">5</at>
-                <at name="row">5</at><!--3-->
+                <at name="row">5</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1041,7 +1040,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">7</at>
-                <at name="row">5</at><!--3-->
+                <at name="row">5</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1269,7 +1268,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">11</at>
-                <at name="row">5</at><!--3-->
+                <at name="row">5</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1498,7 +1497,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">9</at>
-                <at name="row">5</at><!--3-->
+                <at name="row">5</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1726,7 +1725,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">1</at>
-                <at name="row">9</at><!--7-->
+                <at name="row">9</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1786,7 +1785,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">9</at><!--7-->
+                <at name="row">9</at>
                 <at name="colspan">4</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1841,7 +1840,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">1</at>
-                <at name="row">11</at><!--9-->
+                <at name="row">11</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1901,7 +1900,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">11</at><!--9-->
+                <at name="row">11</at>
                 <at name="colspan">4</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -1956,7 +1955,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">1</at>
-                <at name="row">13</at><!--11-->
+                <at name="row">13</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
@@ -2017,7 +2016,7 @@
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                 <at name="column">3</at>
-                <at name="row">13</at><!--11-->
+                <at name="row">13</at>
                 <at name="colspan">4</at>
                 <at name="rowspan">1</at>
                 <at name="halign">default</at>
