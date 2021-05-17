@@ -47,7 +47,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1908786824</at>
+        <at name="id">embedded.1030185697</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:NONE,LEFT:MIN(100DLU;PREF):NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:GROW(1.0)</at>
         <at name="components">
@@ -96,15 +96,15 @@
                    </at>
                   </object>
                  </at>
+                 <at name="name"></at>
                  <at name="width">207</at>
-                 <at name="name"/>
-                 <at name="text">MapPropertiesDialog.label.playerMapAlias</at>
+                 <at name="text">Label.gmname</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">MapPropertiesDialog.label.playerMapAlias.tooltip</at>
+                 <at name="toolTipText">MapPropertiesDialog.label.GMName.tooltip</at>
                  <at name="height">14</at>
                 </object>
                </at>
@@ -158,8 +158,8 @@
                   </object>
                  </at>
                  <at name="columns">30</at>
-                 <at name="name">playerMapAlias</at>
-                 <at name="width">1752</at>
+                 <at name="name">name</at>
+                 <at name="width">1332</at>
                  <at name="height">20</at>
                 </object>
                </at>
@@ -212,15 +212,15 @@
                    </at>
                   </object>
                  </at>
+                 <at name="name"></at>
                  <at name="width">207</at>
-                 <at name="name"/>
-                 <at name="text">Label.gmname</at>
+                 <at name="text">MapPropertiesDialog.label.playerMapAlias</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="toolTipText">MapPropertiesDialog.label.GMName.tooltip</at>
+                 <at name="toolTipText">MapPropertiesDialog.label.playerMapAlias.tooltip</at>
                  <at name="height">14</at>
                 </object>
                </at>
@@ -274,8 +274,8 @@
                   </object>
                  </at>
                  <at name="columns">30</at>
-                 <at name="name">name</at>
-                 <at name="width">1752</at>
+                 <at name="name">playerMapAlias</at>
+                 <at name="width">1332</at>
                  <at name="height">20</at>
                 </object>
                </at>
@@ -596,7 +596,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.655620813</at>
+             <at name="id">embedded.1467883135</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -824,7 +824,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.261177288</at>
+             <at name="id">embedded.1187475688</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1052,7 +1052,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.1492419513</at>
+             <at name="id">embedded.955461089</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1280,7 +1280,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.632720052</at>
+             <at name="id">embedded.960277452</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1509,7 +1509,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.309650335</at>
+             <at name="id">embedded.1546001274</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -2211,7 +2211,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.526514375</at>
+        <at name="id">embedded.906307103</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
@@ -2427,7 +2427,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1276266553</at>
+        <at name="id">embedded.592756009</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0)</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">

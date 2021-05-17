@@ -323,7 +323,7 @@ public class Zone extends BaseModel {
   }
 
   public void setPlayerAlias(String playerAlias) {
-    this.playerAlias = playerAlias;
+    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
   }
 
   public MD5Key getMapAssetId() {

@@ -77,6 +77,7 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<LocalizedComboItem> showNumberingCombo;
   private final JComboBox<WalkerMetric> movementMetricCombo;
   private final JComboBox<Zone.VisionType> visionTypeCombo;
+  private final JComboBox<AppPreferences.MapSortType> mapSortType;
   private final JCheckBox showStatSheetCheckBox;
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
@@ -265,6 +266,7 @@ public class PreferencesDialog extends JDialog {
     showAvatarInChat = panel.getCheckBox("showChatAvatar");
     showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
     visionTypeCombo = panel.getComboBox("defaultVisionType");
+    mapSortType = panel.getComboBox("mapSortType");
     movementMetricCombo = panel.getComboBox("movementMetric");
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
@@ -829,6 +831,13 @@ public class PreferencesDialog extends JDialog {
         e ->
             AppPreferences.setDefaultVisionType(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
+
+    mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
+    mapSortType.setSelectedItem(AppPreferences.getMapSortType());
+    mapSortType.addItemListener(
+        e ->
+            AppPreferences.setMapSortType(
+                (AppPreferences.MapSortType) mapSortType.getSelectedItem()));
 
     macroEditorThemeCombo.setModel(new DefaultComboBoxModel<>());
     try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {

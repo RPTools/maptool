@@ -540,6 +540,14 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
+  public void changeZoneDispName(GUID zoneGUID, String name) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    if (zone != null) {
+      zone.setPlayerAlias(name);
+      forwardToAllClients();
+    }
+  }
+
   public void message(TextMessage message) {
     forwardToClients();
   }
