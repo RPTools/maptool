@@ -1186,6 +1186,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             return;
         }
 
+        setProjectionMatrix(hudCam.combined);
+
         if (grid instanceof GridlessGrid) {
             // do nothing
         } else if (grid instanceof HexGrid) {
@@ -1195,6 +1197,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         } else if (grid instanceof IsometricGrid) {
             renderGrid((IsometricGrid) grid);
         }
+        setProjectionMatrix(cam.combined);
     }
 
     private void renderGrid(HexGrid grid) {
@@ -1203,13 +1206,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         drawer.setColor(tmpColor);
         var path = grid.createShape(zoneRenderer.getScale());
-        var vertices = pathToVertices(path);
+        pathToFloatArray(path.getPathIterator(null));
 
         int offU = grid.getOffU(zoneRenderer);
         int offV = grid.getOffV(zoneRenderer);
+
         int count = 0;
 
-        Gdx.gl.glLineWidth(AppState.getGridSize());
+        var lineWidth = AppState.getGridSize();
 
         for (double v = offV % (grid.getScaledMinorRadius() * 2) - (grid.getScaledMinorRadius() * 2);
              v < grid.getRendererSizeV(zoneRenderer);
@@ -1230,13 +1234,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     transY = height - (float) v;
                 } else {
                     transX = (float) v;
-                    transY = height - (float) (u + offsetU);
+                    transY = (float) (-u - offsetU) + height;
                 }
 
                 tmpMatrix.translate(transX, transY, 0);
                 batch.setTransformMatrix(tmpMatrix);
                 drawer.update();
-                drawer.path(vertices.toArray(), 1, JoinType.SMOOTH, true);
+
+                drawer.path(tmpFloat.toArray(), lineWidth, JoinType.SMOOTH, true);
                 tmpMatrix.idt();
                 batch.setTransformMatrix(tmpMatrix);
                 drawer.update();
@@ -1296,7 +1301,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void renderGrid(SquareGrid grid) {
         var scale = (float) zoneRenderer.getScale();
         int gridSize = (int) (grid.getSize() * scale);
-
 
         Color.argb8888ToColor(tmpColor, zone.getGridColor());
 
