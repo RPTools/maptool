@@ -66,7 +66,6 @@ import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
  * coordinate system. So if you would draw a token t awt at (x,y) you have to draw it at (x, -y - t.width)
  * <p>
  * Bugs:
- * - y offset of VerticalHexgrid is wrong
  * - Imageborders are not rotated
  */
 
@@ -97,8 +96,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     // zone specific resources
     private Zone zone;
     private ZoneRenderer zoneRenderer;
-    private Sprite background;
-    private Sprite fog;
     //private MD5Key mapAssetId;
     private int offsetX = 0;
     private int offsetY = 0;
@@ -128,6 +125,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private NinePatch blueLabel;
     private NinePatch darkGrayLabel;
     private Texture onePixel;
+    private Texture fog;
+    private Texture background;
     private ShapeDrawer drawer;
     private final LineTemplateDrawer lineTemplateDrawer = new LineTemplateDrawer();
     private final LineCellTemplateDrawer lineCellTemplateDrawer = new LineCellTemplateDrawer();
@@ -722,13 +721,25 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
 
             // Fill
-            if (fog == null)
-                fog = paintToSprite(zone.getFogPaint());
-
             batch.setColor(Color.WHITE);
-            var color = fog.getColor();
-            fog.setColor(color.r, color.g, color.b, view.isGMView() ? .6f : 1f);
-            fillViewportWith(fog);
+            var paint = zone.getFogPaint();
+            if(paint instanceof DrawableColorPaint) {
+                Color.argb8888ToColor(tmpColor, ((DrawableColorPaint)paint).getColor());
+                tmpColor.set(tmpColor.r, tmpColor.g, tmpColor.b, view.isGMView() ? .6f : 1f);
+                drawer.setColor(tmpColor);
+                drawer.filledRectangle(cam.position.x - width * zoom / 2f, cam.position.y - height * zoom / 2f,
+                    width * zoom, height * zoom);
+            } else {
+                if(fog == null) {
+                    var texturePaint = (DrawableTexturePaint)paint;
+                    var image = texturePaint.getAsset().getImage();
+                    var pix = new Pixmap(image, 0, image.length);
+                    fog = new Texture(pix);
+                    fog.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+                    pix.dispose();
+                }
+                fillViewportWith(fog);
+            }
 
             timer.start("renderFog-visibleArea");
             Area visibleArea = zoneRenderer.getZoneView().getVisibleArea(view);
@@ -1435,10 +1446,23 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (!zone.drawBoard())
             return;
 
-        if (background == null)
-            background = paintToSprite(zone.getBackgroundPaint());
-
-        fillViewportWith(background);
+        var paint = zone.getBackgroundPaint();
+        if(paint instanceof DrawableColorPaint) {
+            Color.argb8888ToColor(tmpColor, ((DrawableColorPaint)paint).getColor());
+            drawer.setColor(tmpColor);
+            drawer.filledRectangle(cam.position.x - width * zoom / 2f, cam.position.y - height * zoom / 2f,
+                width * zoom, height * zoom);
+        } else {
+            if(background == null) {
+                var texturePaint = (DrawableTexturePaint)paint;
+                var image = texturePaint.getAsset().getImage();
+                var pix = new Pixmap(image, 0, image.length);
+                background = new Texture(pix);
+                background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+                pix.dispose();
+            }
+            fillViewportWith(background);
+        }
 
         var map = getSprite(zone.getMapAssetId());
         if (map != null) {
@@ -1447,24 +1471,18 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         }
     }
 
-    private void fillViewportWith(Sprite fill) {
-        var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
-        startX = (int) (startX / fill.getWidth()) * fill.getWidth() - fill.getWidth();
-        var endX = cam.position.x + cam.viewportWidth / 2 * zoom;
-        var startY = (cam.position.y - cam.viewportHeight * zoom / 2);
-        startY = (int) (startY / fill.getHeight()) * fill.getHeight() - fill.getHeight();
-        var endY = (cam.position.y + cam.viewportHeight / 2 * zoom);
+    private void fillViewportWith(Texture texture) {
+        var w = ((int)(cam.viewportWidth * zoom / texture.getWidth()) + 4) * texture.getWidth();
+        var h = ((int)(cam.viewportHeight * zoom / texture.getHeight()) + 4 ) * texture.getHeight();
 
-        batch.setColor(fill.getColor());
-        tmpTile.setRegion(new TextureRegion(fill.getTexture()));
-        tmpTile.draw(batch, startX, startY, endX - startX, endY - startY);
-        batch.setColor(Color.WHITE);
- /*
-        for (var i = startX; i < endX; i += fill.getWidth())
-            for (var j = startY; j < endY; j += fill.getHeight()) {
-                fill.setPosition(i, j);
-                fill.draw(batch);
-            } */
+        var startX = (cam.position.x - cam.viewportWidth * zoom / 2);
+        startX = (((int)startX) / texture.getWidth()) * texture.getWidth() - texture.getWidth();
+
+        var startY = (cam.position.y - cam.viewportHeight * zoom / 2);
+        startY = (((int)startY) / texture.getHeight()) * texture.getHeight() - texture.getHeight();
+
+        batch.draw(texture, startX, startY, 0, 0, w, h);
+        //batch.draw(texture, startX, startY, 0, 0, (int)w, (int)h);
     }
 
     private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
@@ -2971,13 +2989,13 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             var background = this.background;
             this.background = null;
             if (background != null) {
-                background.getTexture().dispose();
+                background.dispose();
             }
 
             var fog = this.fog;
             this.fog = null;
             if (fog != null) {
-                fog.getTexture().dispose();
+                fog.dispose();
             }
 
             for (var sprite : isoSprites.values()) {
