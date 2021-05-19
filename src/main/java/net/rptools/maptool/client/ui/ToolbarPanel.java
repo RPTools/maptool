@@ -63,7 +63,6 @@ public class ToolbarPanel extends JToolBar {
 
     toolbox = tbox;
     optionPanel = new JPanel(new CardLayout());
-    optionPanel.setOpaque(false);
 
     final JSeparator vertSplit = new JSeparator(JSeparator.VERTICAL);
     final Component vertSpacer = Box.createHorizontalStrut(10);
@@ -204,8 +203,6 @@ public class ToolbarPanel extends JToolBar {
           vertSplit.setVisible(orientation == JToolBar.HORIZONTAL);
           vertSpacer.setVisible(orientation == JToolBar.HORIZONTAL);
         });
-
-    setBorderSizes(optionPanel, pointerGroupButton);
   }
 
   public JPanel getOptionPanel() {
@@ -268,7 +265,6 @@ public class ToolbarPanel extends JToolBar {
                     .getClassLoader()
                     .getResource("net/rptools/maptool/client/image/tool/btn-world.png")));
     button.setToolTipText(title);
-    button.setContentAreaFilled(false);
 
     SwingUtil.makePopupMenuButton(button, ZoneSelectionPopup::new, true);
     return button;
@@ -356,23 +352,10 @@ public class ToolbarPanel extends JToolBar {
     return panel;
   }
 
-  private void setBorderSizes(JPanel container, JToggleButton source) {
-    for (var component : container.getComponents()) {
-      if (component instanceof JPanel) setBorderSizes((JPanel) component, source);
-      if (component instanceof JToggleButton) {
-        ((JToggleButton) component).setBorder(source.getBorder());
-      }
-      if (component instanceof AbstractButton) {
-        component.setSize(source.getSize());
-      }
-    }
-  }
-
   private JToggleButton createButton(
       final String icon, final String offIcon, final OptionPanel panel, String tooltip) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
-    button.setContentAreaFilled(false);
 
     button.addActionListener(
         e -> {
@@ -497,7 +480,7 @@ public class ToolbarPanel extends JToolBar {
     }
   }
 
-  private class OptionPanel extends JPanel {
+  private class OptionPanel extends JToolBar {
 
     private Class<? extends Tool> firstTool;
     private Class<? extends Tool> currentTool;
@@ -507,16 +490,9 @@ public class ToolbarPanel extends JToolBar {
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-      setOpaque(false);
-      setLayout(ToolbarPanel.this.getOrientation());
 
       ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setLayout((Integer) evt.getNewValue()));
-    }
-
-    private void setLayout(int orientation) {
-      if (orientation == JToolBar.HORIZONTAL) setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-      else setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public void add(Class<? extends Tool> toolClass) {
@@ -530,7 +506,6 @@ public class ToolbarPanel extends JToolBar {
               currentTool = tool.getClass();
             }
           });
-      tool.setOpaque(false);
       add(tool);
     }
 
@@ -545,28 +520,20 @@ public class ToolbarPanel extends JToolBar {
   /*
    * Stand-alone toolbar with meant to not interact with standard toolbar
    */
-  private class SidePanel extends JPanel {
+  private class SidePanel extends JToolBar {
 
     public SidePanel() {
       setFloatable(false);
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-      setOpaque(false);
-      setLayout(ToolbarPanel.this.getOrientation());
 
       ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setLayout((Integer) evt.getNewValue()));
-    }
-
-    private void setLayout(int orientation) {
-      if (orientation == JToolBar.HORIZONTAL) setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-      else setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public void add(Class<? extends Tool> toolClass) {
       final Tool tool = toolbox.createTool(toolClass);
-      tool.setOpaque(false);
       add(tool);
     }
   }
