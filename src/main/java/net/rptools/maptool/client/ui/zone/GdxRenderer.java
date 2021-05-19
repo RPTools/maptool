@@ -1482,7 +1482,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         startY = (((int)startY) / texture.getHeight()) * texture.getHeight() - texture.getHeight();
 
         batch.draw(texture, startX, startY, 0, 0, w, h);
-        //batch.draw(texture, startX, startY, 0, 0, (int)w, (int)h);
     }
 
     private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
@@ -1783,7 +1782,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     tokenRectangle.height);
             boolean isSelected = zoneRenderer.getSelectedTokenSet().contains(token.getId());
             if (isSelected) {
-
                 ImageBorder selectedBorder =
                         token.isStamp() ? AppStyle.selectedStampBorder : AppStyle.selectedBorder;
                 if (zoneRenderer.getHighlightCommonMacros().contains(token)) {
@@ -1803,22 +1801,34 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                         selectedBorder = AppConstants.FOW_TOOLS_BORDER;
                     }
                 }
+
+                setProjectionMatrix(hudCam.combined);
+                tmpWorldCoord.set(gdxTokenRectangle.x, gdxTokenRectangle.y, 0);
+                cam.project(tmpWorldCoord);
+                gdxTokenRectangle.set(tmpWorldCoord.x, tmpWorldCoord.y, gdxTokenRectangle.width/zoom, gdxTokenRectangle.height/zoom);
+
                 if (token.hasFacing()
                         && (token.getShape() == Token.TokenShape.TOP_DOWN || token.isStamp())) {
 
-             /*     TODO: figure out how to rotate the selected border
-                    tmpMatrix.idt();
+                    var transX = gdxTokenRectangle.width/2f - token.getAnchor().x/zoom;
+                    var transY = gdxTokenRectangle.height/2f + token.getAnchor().y/zoom;
 
-                    tmpMatrix.rotate(image.getX() + image.getOriginX(),
-                            image.getY() + image.getOriginY(), 0, token.getFacing() + 90);
-                    batch.setTransformMatrix(tmpMatrix);*/
+                    tmpMatrix.idt();
+                    tmpMatrix.translate(tmpWorldCoord.x + transX, tmpWorldCoord.y + transY, 0);
+                    tmpMatrix.rotate(0, 0,1, token.getFacing() + 90);
+                    tmpMatrix.translate(-transX, -transY, 0);
+                    gdxTokenRectangle.x = 0;
+                    gdxTokenRectangle.y = 0;
+                    batch.setTransformMatrix(tmpMatrix);
                     renderImageBorderAround(selectedBorder, gdxTokenRectangle);
-                    //      tmpMatrix.idt();
-                    //      batch.setTransformMatrix(tmpMatrix);
+                    tmpMatrix.idt();
+                    batch.setTransformMatrix(tmpMatrix);
 
                 } else {
                     renderImageBorderAround(selectedBorder, gdxTokenRectangle);
                 }
+
+                setProjectionMatrix(cam.combined);
             }
 
             // Token names and labels
@@ -2020,7 +2030,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var index = imagePath.indexOf("border/");
         var bordername = imagePath.substring(index);
 
-
         var topRight = fetch(bordername + "/tr");
         var top = fetch(bordername + "/top");
         var topLeft = fetch(bordername + "/tl");
@@ -2030,7 +2039,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var bottomRight = fetch(bordername + "/br");
         var right = fetch(bordername + "/right");
 
-
         //x,y is bottom left of the rectangle
         var leftMargin = border.getLeftMargin();
         var rightMargin = border.getRightMargin();
@@ -2039,12 +2047,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         var x = bounds.x - leftMargin;
         var y = bounds.y - bottomMargin;
+
         var width = bounds.width + leftMargin + rightMargin;
         var height = bounds.height + topMargin + bottomMargin;
 
-
         // Draw Corners
-
 
         batch.draw(bottomLeft, x + leftMargin - bottomLeft.getRegionWidth(), y + topMargin - bottomLeft.getRegionHeight());
         batch.draw(bottomRight, x + width - rightMargin, y + topMargin - bottomRight.getRegionHeight());
