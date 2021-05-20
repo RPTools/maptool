@@ -235,6 +235,8 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
           break;
+        case changeZoneDispName:
+          changeZoneDispName(context.getGUID(0), context.getString(1));
         case heartbeat:
           heartbeat(context.getString(0));
           break;
