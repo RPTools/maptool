@@ -59,6 +59,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
     int psize = parameters.size();
+    CellPoint cellPoint = null;
 
     if (functionName.equals(COPY_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
@@ -66,8 +67,29 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
       int nCopies = psize > 1 ? FunctionUtil.paramAsInteger(functionName, parameters, 1, false) : 1;
       JsonObject newVals;
-      if (psize > 3) newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
-      else newVals = new JsonObject();
+      if (psize > 3) {
+        newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
+        // This token is used for when delta is 2, indicating that delta measurements should be
+        // based on a selected token
+        Token delt2token;
+        try {
+          delt2token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, -1, -1);
+        } catch (ParserException e) {
+          delt2token = null;
+        }
+        if (delt2token == null
+            && MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() == 1)
+          delt2token = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().get(0);
+        if (delt2token != null) {
+          // cellPoint = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().convert(new
+          // ZonePoint(delt2token.getX(), delt2token.getY()));
+          newVals.addProperty("impersonateX", delt2token.getX());
+          newVals.addProperty("impersonateY", delt2token.getY());
+        } else {
+          newVals.addProperty("impersonateX", 0);
+          newVals.addProperty("impersonateY", 0);
+        }
+      } else newVals = new JsonObject();
 
       return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
@@ -198,8 +220,20 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       }
     }
 
+    int impX = 0; // impersonate x
+    int impY = 0;
+
     int x = token.getX();
     int y = token.getY();
+
+    boolean delta = false;
+    boolean relativeDelta = false;
+    if (newVals.has("delta")) {
+      delta = newVals.get("delta").getAsInt() == 1;
+      relativeDelta = newVals.get("delta").getAsInt() == 2;
+      impX = newVals.get("impersonateX").getAsInt();
+      impY = newVals.get("impersonateY").getAsInt();
+    }
 
     // Location...
     boolean useDistance = false; // FALSE means to multiple x,y values by grid size
@@ -212,25 +246,24 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       CellPoint cp = grid.convert(new ZonePoint(x, y));
       x = cp.x;
       y = cp.y;
+      cp = grid.convert(new ZonePoint(impX, impY));
+      impX = cp.x;
+      impY = cp.y;
     }
 
     boolean tokenMoved = false;
-    boolean delta = false;
-    if (newVals.has("delta")) {
-      delta = newVals.get("delta").getAsInt() != 0;
-    }
 
     // X
     if (newVals.has("x")) {
       int tmpX = newVals.get("x").getAsInt();
-      x = tmpX + (delta ? x : 0);
+      x = tmpX + (delta ? x : 0) + (relativeDelta ? impX : 0);
       tokenMoved = true;
     }
 
     // Y
     if (newVals.has("y")) {
       int tmpY = newVals.get("y").getAsInt();
-      y = tmpY + (delta ? y : 0);
+      y = tmpY + (delta ? y : 0) + (relativeDelta ? impY : 0);
       tokenMoved = true;
     }
 
