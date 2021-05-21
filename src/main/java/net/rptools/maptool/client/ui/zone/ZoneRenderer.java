@@ -4865,6 +4865,23 @@ public class ZoneRenderer extends JComponent
       if (evt == Zone.Event.FOG_CHANGED) {
         flushFog = true;
       }
+      if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
+        DrawnElement de = (DrawnElement) event.getArg();
+        switch (de.getDrawable().getLayer()) {
+          case TOKEN:
+            tokenDrawableRenderer.setDirty();
+            break;
+          case GM:
+            gmDrawableRenderer.setDirty();
+            break;
+          case OBJECT:
+            objectDrawableRenderer.setDirty();
+            break;
+          case BACKGROUND:
+            backgroundDrawableRenderer.setDirty();
+            break;
+        }
+      }
       MapTool.getFrame().updateTokenTree(); // for any event
       repaintDebouncer.dispatch();
     }
