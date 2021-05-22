@@ -170,6 +170,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
   private final ChatTyperObserver chatTyperObserver;
+  private GUID PreRemoveRenderGUID = null;
 
   private final GlassPane glassPane;
   /** Model for the token tree panel of the map explorer. */
@@ -1446,6 +1447,16 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
+    if (renderer.getZone().getId().equals(this.PreRemoveRenderGUID)) {
+      if (MapTool.getPlayer().isGM() || renderer.getZone().isVisible()) {
+        this.PreRemoveRenderGUID = null;
+        setCurrentZoneRenderer(renderer);
+      } else {
+        this.PreRemoveRenderGUID = null;
+      }
+    } else {
+      this.PreRemoveRenderGUID = null;
+    }
   }
 
   /**
@@ -1456,6 +1467,7 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public void removeZoneRenderer(ZoneRenderer renderer) {
     boolean isCurrent = renderer == getCurrentZoneRenderer();
+    this.PreRemoveRenderGUID = getCurrentZoneRenderer().getZone().getId();
     zoneRendererList.remove(renderer);
     if (isCurrent) {
       boolean rendererSet = false;
