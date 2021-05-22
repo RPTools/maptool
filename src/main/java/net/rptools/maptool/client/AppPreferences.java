@@ -343,7 +343,7 @@ public class AppPreferences {
   private static final boolean DEFAULT_FACE_EDGE = true;
 
   private static final String KEY_DEFAULT_GRID_SIZE = "defaultGridSize";
-  private static final int DEFAULT_DEFAULT_GRID_SIZE = 50;
+  private static final int DEFAULT_DEFAULT_GRID_SIZE = 100;
 
   private static final String KEY_DEFAULT_GRID_COLOR = "defaultGridColor";
   private static final int DEFAULT_DEFAULT_GRID_COLOR = Color.black.getRGB();
