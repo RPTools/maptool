@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -435,6 +436,10 @@ public class AppPreferences {
   private static final String KEY_FIT_GM_VIEW = "fitGMView";
   private static final boolean DEFAULT_FIT_GM_VIEW = true;
 
+  private static final String KEY_DEFAULT_USERNAME = "defaultUsername";
+  private static final String DEFAULT_USERNAME =
+      I18N.getString("Preferences.client.default.username.value");
+
   private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
   private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
 
@@ -688,13 +693,13 @@ public class AppPreferences {
   }
 
   public static void setDefaultVisionType(Zone.VisionType visionType) {
-    prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.toString());
+    prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.name());
   }
 
   public static Zone.VisionType getDefaultVisionType() {
     try {
       return Zone.VisionType.valueOf(
-          prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.toString()));
+          prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.name()));
     } catch (Exception e) {
       return DEFAULT_VISION_TYPE;
     }
@@ -878,8 +883,16 @@ public class AppPreferences {
     prefs.putBoolean(KEY_FIT_GM_VIEW, fit);
   }
 
+  public static String getDefaultUserName() {
+    return prefs.get(KEY_DEFAULT_USERNAME, DEFAULT_USERNAME);
+  }
+
+  public static void setDefaultUserName(String uname) {
+    prefs.put(KEY_DEFAULT_USERNAME, uname);
+  }
+
   public static void setMovementMetric(WalkerMetric metric) {
-    prefs.put(KEY_MOVEMENT_METRIC, metric.toString());
+    prefs.put(KEY_MOVEMENT_METRIC, metric.name());
   }
 
   public static void setFrameRateCap(int cap) {
@@ -933,8 +946,7 @@ public class AppPreferences {
   public static WalkerMetric getMovementMetric() {
     WalkerMetric metric;
     try {
-      metric =
-          WalkerMetric.valueOf(prefs.get(KEY_MOVEMENT_METRIC, DEFAULT_MOVEMENT_METRIC.toString()));
+      metric = WalkerMetric.valueOf(prefs.get(KEY_MOVEMENT_METRIC, DEFAULT_MOVEMENT_METRIC.name()));
     } catch (Exception exc) {
       metric = DEFAULT_MOVEMENT_METRIC;
     }

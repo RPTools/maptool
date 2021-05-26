@@ -55,9 +55,20 @@ public class Zone extends BaseModel {
 
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
-    OFF,
-    DAY,
-    NIGHT
+    OFF(),
+    DAY(),
+    NIGHT();
+
+    private final String displayName;
+
+    VisionType() {
+      displayName = I18N.getString("visionType." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /** Event types for the listeners. */
@@ -121,9 +132,20 @@ public class Zone extends BaseModel {
 
   /** Control how A* Pathfinding distances is rounded off due to terrain costs */
   public enum AStarRoundingOptions {
-    NONE,
-    CELL_UNIT,
-    INTEGER
+    NONE(),
+    CELL_UNIT(),
+    INTEGER();
+
+    private final String displayName;
+
+    AStarRoundingOptions() {
+      displayName = I18N.getString("Zone.AStarRoundingOptions." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   // Control what topology layer(s) to add/get drawing to/from

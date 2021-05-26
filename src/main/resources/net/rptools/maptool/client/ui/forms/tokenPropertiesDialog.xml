@@ -1276,7 +1276,7 @@
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">VBL Preview</at>
+                                      <at name="title">EditTokenDialog.border.title.vbl.preview</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -5475,7 +5475,7 @@
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Handout</at>
+                                           <at name="title">EditTokenDialog.border.title.handout</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -5660,7 +5660,7 @@
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Layout</at>
+                                           <at name="title">EditTokenDialog.border.title.layout</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -5845,7 +5845,7 @@
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Portrait</at>
+                                           <at name="title">EditTokenDialog.border.title.portrait</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -6107,7 +6107,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Hero Lab</at>
+                   <at name="title">EditTokenDialog.tab.hero</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -8651,7 +8651,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="name">@type</at>
+                 <at name="name">type</at>
                  <at name="width">25</at>
                  <at name="items">
                   <object classname="com.jeta.forms.store.properties.ItemsProperty">

@@ -170,6 +170,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
   private final ChatTyperObserver chatTyperObserver;
+  private GUID PreRemoveRenderGUID = null;
 
   private final GlassPane glassPane;
   /** Model for the token tree panel of the map explorer. */
@@ -1446,6 +1447,16 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
+    if (renderer.getZone().getId().equals(this.PreRemoveRenderGUID)) {
+      if (MapTool.getPlayer().isGM() || renderer.getZone().isVisible()) {
+        this.PreRemoveRenderGUID = null;
+        setCurrentZoneRenderer(renderer);
+      } else {
+        this.PreRemoveRenderGUID = null;
+      }
+    } else {
+      this.PreRemoveRenderGUID = null;
+    }
   }
 
   /**
@@ -1456,6 +1467,7 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public void removeZoneRenderer(ZoneRenderer renderer) {
     boolean isCurrent = renderer == getCurrentZoneRenderer();
+    this.PreRemoveRenderGUID = getCurrentZoneRenderer().getZone().getId();
     zoneRendererList.remove(renderer);
     if (isCurrent) {
       boolean rendererSet = false;
@@ -1676,8 +1688,10 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolPanel.add(toolbarPanel.getFogButton());
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
 
+    var btn = toolbarPanel.getPointerGroupButton();
+
     var zoneButton = toolbarPanel.createZoneSelectionButton();
-    zoneButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+    zoneButton.setBorder(btn.getBorder());
     fullScreenToolPanel.add(zoneButton);
 
     var initiativeButton =
@@ -1692,8 +1706,8 @@ public class MapToolFrame extends DefaultDockableHolder
           if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
           else initiativePanel.setVisible(true);
         });
-    initiativeButton.setOpaque(false);
-    initiativeButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+
+    initiativeButton.setBorder(btn.getBorder());
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size
@@ -1702,13 +1716,13 @@ public class MapToolFrame extends DefaultDockableHolder
     for (var component : fullScreenToolPanel.getComponents()) {
       if (!(component instanceof AbstractButton)) continue;
 
-      var btn = (AbstractButton) component;
+      var abstractButton = (AbstractButton) component;
       if (first) {
         first = false;
-        size = btn.getSize();
-      } else btn.setPreferredSize(size);
+        size = abstractButton.getSize();
+      } else abstractButton.setPreferredSize(size);
 
-      btn.setText(null);
+      abstractButton.setText(null);
     }
     fullScreenToolPanel.setSize(fullScreenToolPanel.getPreferredSize());
     zoneRendererPanel.add(fullScreenToolPanel, PositionalLayout.Position.NW);

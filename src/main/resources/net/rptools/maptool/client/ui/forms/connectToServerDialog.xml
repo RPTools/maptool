@@ -693,7 +693,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">LAN</at>
+                   <at name="title">ConnectToServerDialog.tab.lan</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -1026,7 +1026,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Direct</at>
+                   <at name="title">ConnectToServerDialog.tab.direct</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
