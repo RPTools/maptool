@@ -1158,8 +1158,7 @@ public class MapTool {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
-    String username = System.getProperty("user.name", "Player");
-
+    String username = AppPreferences.getDefaultUserName();
     // Connect to server
     MapTool.createConnection(
         "localhost",
