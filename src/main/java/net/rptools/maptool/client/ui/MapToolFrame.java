@@ -22,16 +22,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
@@ -565,6 +565,31 @@ public class MapToolFrame extends DefaultDockableHolder
       getDockingManager().addFrame(frame);
     }
 
+    /* Issue #2485
+     * Layout data is only retained for frames that already exist, so to work around this
+     * create some placeholder frames using the names saved to frames.dat before loading
+     * the layout
+     */
+    String[] frameNames = null;
+    try {
+      Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
+      String data = Files.readString(path, StandardCharsets.UTF_8);
+
+      if (!data.isEmpty()) {
+        frameNames = data.split("\0");
+
+        for (String name : frameNames) {
+          if (name.isBlank()) continue;
+          getDockingManager().addFrame(new DockableFrame(name));
+        }
+      }
+    } catch (NoSuchFileException nsfe) {
+      // Do nothing
+    } catch (IOException ioe) {
+      log.error("Unable to load frames.dat", ioe);
+    }
+    /* /Issue #2485 */
+
     try {
       getDockingManager()
           .loadInitialLayout(
@@ -587,6 +612,15 @@ public class MapToolFrame extends DefaultDockableHolder
     for (MTFrame mtFrame : frameMap.keySet()) {
       setFrameTitle(mtFrame, I18N.getText(mtFrame.getPropertyName()));
     }
+
+    /* Issue #2485 */
+    if (frameNames != null) {
+      for (String name : frameNames) {
+        if (name.isBlank()) continue;
+        getDockingManager().hideFrame(name);
+      }
+    }
+    /* /Issue #2485 */
   }
 
   public DockableFrame getFrame(MTFrame frame) {
@@ -1889,6 +1923,22 @@ public class MapToolFrame extends DefaultDockableHolder
 
     getDockingManager()
         .saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+
+    /* Issue #2485
+     * Write the name of macro created frames to frames.dat so they can be used to create
+     * placeholders the next time Maptool is launched
+     */
+    try {
+      List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+      Collection<String> namesToSave = getDockingManager().getAllFrames();
+      namesToSave.removeAll(mtFrameNames);
+
+      Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
+      Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);
+    } catch (IOException ioe) {
+      log.error("Unable to write to frames.dat", ioe);
+    }
+    /* /Issue #2485 */
 
     // If closing cleanly, remove the autosave file
     MapTool.getAutoSaveManager().purge();
