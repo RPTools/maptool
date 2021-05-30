@@ -19,6 +19,8 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -59,7 +61,6 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
     int psize = parameters.size();
-    CellPoint cellPoint = null;
 
     if (functionName.equals(COPY_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
@@ -67,29 +68,8 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
       int nCopies = psize > 1 ? FunctionUtil.paramAsInteger(functionName, parameters, 1, false) : 1;
       JsonObject newVals;
-      if (psize > 3) {
-        newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
-        // This token is used for when delta is 2, indicating that delta measurements should be
-        // based on a selected token
-        Token delt2token;
-        try {
-          delt2token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, -1, -1);
-        } catch (ParserException e) {
-          delt2token = null;
-        }
-        if (delt2token == null
-            && MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().size() == 1)
-          delt2token = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList().get(0);
-        if (delt2token != null) {
-          // cellPoint = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid().convert(new
-          // ZonePoint(delt2token.getX(), delt2token.getY()));
-          newVals.addProperty("impersonateX", delt2token.getX());
-          newVals.addProperty("impersonateY", delt2token.getY());
-        } else {
-          newVals.addProperty("impersonateX", 0);
-          newVals.addProperty("impersonateY", 0);
-        }
-      } else newVals = new JsonObject();
+      if (psize > 3) newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
+      else newVals = new JsonObject();
 
       return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
@@ -220,19 +200,46 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       }
     }
 
-    int impX = 0; // impersonate x
-    int impY = 0;
-
     int x = token.getX();
     int y = token.getY();
 
+    int deltX = 0; // in context x
+    int deltY = 0;
+
+
     boolean delta = false;
-    boolean relativeDelta = false;
-    if (newVals.has("delta")) {
-      delta = newVals.get("delta").getAsInt() == 1;
-      relativeDelta = newVals.get("delta").getAsInt() == 2;
-      impX = newVals.get("impersonateX").getAsInt();
-      impY = newVals.get("impersonateY").getAsInt();
+    boolean original = false; //handles any weird spaces with 1's for compatibility
+    if (newVals.has("delta"))
+    {
+      try {
+        delta = Integer.parseInt(newVals.get("delta").getAsString().trim()) != 0;
+        original = Integer.parseInt(newVals.get("delta").getAsString().trim()) == 1;
+      }
+      catch(NumberFormatException e)
+      {
+        delta = true;
+      }
+    }
+    if (delta)
+    {
+      if(newVals.get("delta").getAsString().trim().toLowerCase(Locale.ROOT).equals("incontext"))
+      {
+        try
+        {
+          deltX = res.getTokenInContext().getX();
+          deltY = res.getTokenInContext().getY();
+        }
+        catch(NullPointerException e) {
+          throw new ParserException(
+                  I18N.getText("THIS SHOULD BE IN i18n Error ejecutando \"copyToken\": el nombre de ficha no puede estar vacío.", COPY_FUNC));
+                  //TODO: send this error to i18n
+        }
+      }
+      else if(original || newVals.get("delta").getAsString().trim().toLowerCase(Locale.ROOT).equals("original"))
+      {
+        deltX = token.getX();
+        deltY = token.getY();
+      }
     }
 
     // Location...
@@ -243,12 +250,9 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     Grid grid =
         zone.getGrid(); // These won't change for a given execution; this could be more efficient
     if (!useDistance) {
-      CellPoint cp = grid.convert(new ZonePoint(x, y));
-      x = cp.x;
-      y = cp.y;
-      cp = grid.convert(new ZonePoint(impX, impY));
-      impX = cp.x;
-      impY = cp.y;
+      CellPoint cp = grid.convert(new ZonePoint(deltX, deltY));
+      deltX = cp.x;
+      deltY = cp.y;
     }
 
     boolean tokenMoved = false;
@@ -256,14 +260,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // X
     if (newVals.has("x")) {
       int tmpX = newVals.get("x").getAsInt();
-      x = tmpX + (delta ? x : 0) + (relativeDelta ? impX : 0);
+      x = tmpX + (delta ? deltX : 0);
       tokenMoved = true;
     }
 
     // Y
     if (newVals.has("y")) {
       int tmpY = newVals.get("y").getAsInt();
-      y = tmpY + (delta ? y : 0) + (relativeDelta ? impY : 0);
+      y = tmpY + (delta ? deltY : 0);
       tokenMoved = true;
     }
 
