@@ -28,6 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.rptools.maptool.server.MapToolServer;
 import okhttp3.Call;
@@ -222,10 +227,26 @@ public class MapToolRegistry {
             });
   }
 
+  /**
+   * Get the external IP address of this MapTool instance.
+   *
+   * @return The external IP, or the empty string if none could be determined.
+   */
   public String getAddress() {
-    String address = "";
-    List<String> ipCheckURLs;
+    try {
+      return this.getAddressAsync().get(30, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      return "";
+    }
+  }
 
+  /**
+   * Asynchronously get the external IP address of this MapTool instance.
+   *
+   * @return A future that resolves to the external IP address.
+   */
+  public Future<String> getAddressAsync() {
+    List<String> ipCheckURLs;
     try (InputStream ipCheckList =
         getClass().getResourceAsStream("/net/rptools/maptool/client/network/ip-check.txt")) {
       ipCheckURLs =
@@ -238,19 +259,29 @@ public class MapToolRegistry {
       throw new AssertionError("Unable to read ip-check list.", e); // Shouldn't happen
     }
 
+    final CompletableFuture<String> externalIpFuture = new CompletableFuture<>();
+    final ExecutorService executor = Executors.newCachedThreadPool();
     for (String urlString : ipCheckURLs) {
-      try {
-        URL url = new URL(urlString);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
-          String ip = reader.readLine();
-          if (ip != null && !ip.isEmpty()) {
-            address = ip;
-          }
-        }
-      } catch (Exception e) {
-        // ignore error and continue checking.
-      }
+      executor.execute(
+          () -> {
+            try {
+              URL url = new URL(urlString);
+
+              try (BufferedReader reader =
+                  new BufferedReader(new InputStreamReader(url.openStream()))) {
+                String ip = reader.readLine();
+                if (ip != null && !ip.isEmpty()) {
+                  externalIpFuture.complete(ip);
+                  // A result has been found. No need to continue running tasks.
+                  executor.shutdownNow();
+                }
+              }
+            } catch (Exception t) {
+              // Ignore. Hopefully another request succeeds.
+            }
+          });
     }
-    return address;
+
+    return externalIpFuture;
   }
 }
