@@ -126,6 +126,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
+  private final JTextField defaultUsername;
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -225,6 +226,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
     frameRateCapTextField = panel.getTextField("frameRateCapTextField");
+    defaultUsername = panel.getTextField("defaultUsername");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
@@ -462,11 +464,17 @@ public class PreferencesDialog extends JDialog {
                 return StringUtil.parseInteger(value);
               }
             });
-    // initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
-    // public void actionPerformed(ActionEvent e) {
-    // AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
-    // }
-    // });
+
+    defaultUsername.addFocusListener(
+        new FocusAdapter() {
+          @Override
+          public void focusLost(FocusEvent e) {
+            if (!e.isTemporary()) {
+              StringBuilder userName = new StringBuilder(defaultUsername.getText());
+              AppPreferences.setDefaultUserName(userName.toString());
+            }
+          }
+        });
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -893,6 +901,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
     fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
+    defaultUsername.setText(AppPreferences.getDefaultUserName());
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
