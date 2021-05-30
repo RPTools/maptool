@@ -113,6 +113,7 @@ public class getInfoFunction extends AbstractFunction {
     }
 
     minfo.addProperty("name", zone.getName());
+    minfo.addProperty("display name", zone.getPlayerAlias());
     minfo.addProperty("image x scale", zone.getImageScaleX());
     minfo.addProperty("image y scale", zone.getImageScaleY());
     minfo.addProperty("player visible", zone.isVisible() ? 1 : 0);
