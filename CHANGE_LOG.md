@@ -1,13 +1,14 @@
 # MapTool 1.9.0 Beta 3
-## Highlights
 The MapTool community continues to push MapTool forward with code patches, localization and providing support to each other on the various social media platforms.  A huge thanks goes out to everyone who takes part in making MapTool better.
 
 MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
-  
+
+## Highlights 
 - Development moved to AdoptOpen Java 16.
 - Moved from Nashorn to GraalVM JavaScript engine.
 - More image types supported along with beginnings of support for non-image assets.
 - Quality of Life improvements: pan map with arrow keys, select drawings on map for deletion, hotkeys for image flip.
+- Additional UI elements available in full-screen mode. 
 - More bug fixes.
 - More localization for the UI.
 
@@ -33,11 +34,12 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
 
 ## Bug Fixes
-- [#2675][i2675] Message returned if a macro-generated frame used a reserved name wasn't helpful. Fixed.
+- [#2684][i2684] Retrieving external IP address could cause MT to seemingly hang up. Fixed.
+- [#2675][i2675] Message returned when a macro-generated frame used a reserved name wasn't helpful. Fixed.
 - [#2661][i2661] Changes made to drawings via Draw Explorer were not immediately reflected on map. Fixed.
 - [#2656][i2656] Clients forced off map if GM changed map properties. Fixed.
 - [#2652][i2652] `getMapVisible()` returned strings instead of numbers. Fixed.
-Tree view in Draw Explorer was showing single drawings as groups and groups as single drawings. Fixed. 
+- [#2637][i2637] Tree view in Draw Explorer was showing single drawings as groups and groups as single drawings. Fixed. 
 - [#2630][i2630] Map grid type `None` was missing from `New Map Grid Type` in Preferences. Fixed. 
 - [#2601][i2601] Replaced Java native filetype detection with Apache Tika for better coverage of asset types.
 - [#2596][i2596] Assert output a stack trace when called from a macro executed by a macro link. Fixed.
