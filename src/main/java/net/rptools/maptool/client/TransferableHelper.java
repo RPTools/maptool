@@ -451,7 +451,6 @@ public class TransferableHelper extends TransferHandler {
         mediaType = new MediaType("text","javascript");
     }
 
-
     return mediaType;
   }
 
