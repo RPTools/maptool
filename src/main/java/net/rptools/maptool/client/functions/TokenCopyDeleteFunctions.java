@@ -39,6 +39,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.bouncycastle.pqc.asn1.ParSet;
 
 public class TokenCopyDeleteFunctions extends AbstractFunction {
 
@@ -208,21 +209,32 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
 
     boolean delta = false;
-    boolean original = false; //handles any weird spaces with 1's for compatibility
+    boolean relativeto = false;
+    if (newVals.has("delta") && newVals.has("relativeto"))
+    {
+      throw new ParserException(
+              I18N.getText("macro.function.tokenCopy.oxymoronicParameters", COPY_FUNC));
+    }
     if (newVals.has("delta"))
     {
       try {
         delta = Integer.parseInt(newVals.get("delta").getAsString().trim()) != 0;
-        original = Integer.parseInt(newVals.get("delta").getAsString().trim()) == 1;
       }
       catch(NumberFormatException e)
       {
         delta = true;
       }
+      if(delta)
+      {
+        relativeto = true;
+        deltX = token.getX();
+        deltY = token.getY();
+      }
     }
-    if (delta)
+    if (newVals.has("relativeto") && !delta)
     {
-      if(newVals.get("delta").getAsString().trim().toLowerCase(Locale.ROOT).equals("incontext"))
+      relativeto = true;
+      if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("current"))
       {
         try
         {
@@ -231,14 +243,23 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
         }
         catch(NullPointerException e) {
           throw new ParserException(
-                  I18N.getText("THIS SHOULD BE IN i18n Error ejecutando \"copyToken\": el nombre de ficha no puede estar vacío.", COPY_FUNC));
-                  //TODO: send this error to i18n
+                  I18N.getText("macro.function.tokenCopy.noCurrentToken", COPY_FUNC));
         }
       }
-      else if(original || newVals.get("delta").getAsString().trim().toLowerCase(Locale.ROOT).equals("original"))
+      else if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("source"))
       {
         deltX = token.getX();
         deltY = token.getY();
+      }
+      else if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("map"))
+      {
+        deltX = 0;
+        deltY = 0;
+      }
+      else
+      {
+        throw new ParserException(
+                I18N.getText("macro.function.tokenCopy.unrecognizedRelativeValue", COPY_FUNC));
       }
     }
 
@@ -260,14 +281,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // X
     if (newVals.has("x")) {
       int tmpX = newVals.get("x").getAsInt();
-      x = tmpX + (delta ? deltX : 0);
+      x = tmpX + (relativeto ? deltX : 0);
       tokenMoved = true;
     }
 
     // Y
     if (newVals.has("y")) {
       int tmpY = newVals.get("y").getAsInt();
-      y = tmpY + (delta ? deltY : 0);
+      y = tmpY + (relativeto ? deltY : 0);
       tokenMoved = true;
     }
 
