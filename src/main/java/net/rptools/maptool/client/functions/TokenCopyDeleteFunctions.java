@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -39,7 +38,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import org.bouncycastle.pqc.asn1.ParSet;
 
 public class TokenCopyDeleteFunctions extends AbstractFunction {
 
@@ -207,59 +205,58 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     int deltX = 0; // in context x
     int deltY = 0;
 
-
     boolean delta = false;
     boolean relativeto = false;
-    if (newVals.has("delta") && newVals.has("relativeto"))
-    {
+    if (newVals.has("delta") && newVals.has("relativeto")) {
       throw new ParserException(
-              I18N.getText("macro.function.tokenCopy.oxymoronicParameters", COPY_FUNC));
+          I18N.getText("macro.function.tokenCopy.oxymoronicParameters", COPY_FUNC));
     }
-    if (newVals.has("delta"))
-    {
+    if (newVals.has("delta")) {
       try {
         delta = Integer.parseInt(newVals.get("delta").getAsString().trim()) != 0;
-      }
-      catch(NumberFormatException e)
-      {
+      } catch (NumberFormatException e) {
         delta = true;
       }
-      if(delta)
-      {
+      if (delta) {
         relativeto = true;
         deltX = token.getX();
         deltY = token.getY();
       }
     }
-    if (newVals.has("relativeto") && !delta)
-    {
+    if (newVals.has("relativeto") && !delta) {
       relativeto = true;
-      if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("current"))
-      {
-        try
-        {
+      if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("current")) {
+        try {
           deltX = res.getTokenInContext().getX();
           deltY = res.getTokenInContext().getY();
-        }
-        catch(NullPointerException e) {
+        } catch (NullPointerException e) {
           throw new ParserException(
-                  I18N.getText("macro.function.tokenCopy.noCurrentToken", COPY_FUNC));
+              I18N.getText("macro.function.tokenCopy.noCurrentToken", COPY_FUNC));
         }
-      }
-      else if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("source"))
-      {
+      } else if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("source")) {
         deltX = token.getX();
         deltY = token.getY();
-      }
-      else if(newVals.get("relativeto").getAsString().trim().toLowerCase(Locale.ROOT).equals("map"))
-      {
+      } else if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("map")) {
         deltX = 0;
         deltY = 0;
-      }
-      else
-      {
+      } else {
         throw new ParserException(
-                I18N.getText("macro.function.tokenCopy.unrecognizedRelativeValue", COPY_FUNC));
+            I18N.getText("macro.function.tokenCopy.unrecognizedRelativeValue", COPY_FUNC));
       }
     }
 
