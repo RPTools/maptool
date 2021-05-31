@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -343,7 +344,7 @@ public class AppPreferences {
   private static final boolean DEFAULT_FACE_EDGE = true;
 
   private static final String KEY_DEFAULT_GRID_SIZE = "defaultGridSize";
-  private static final int DEFAULT_DEFAULT_GRID_SIZE = 50;
+  private static final int DEFAULT_DEFAULT_GRID_SIZE = 100;
 
   private static final String KEY_DEFAULT_GRID_COLOR = "defaultGridColor";
   private static final int DEFAULT_DEFAULT_GRID_COLOR = Color.black.getRGB();
@@ -434,6 +435,10 @@ public class AppPreferences {
 
   private static final String KEY_FIT_GM_VIEW = "fitGMView";
   private static final boolean DEFAULT_FIT_GM_VIEW = true;
+
+  private static final String KEY_DEFAULT_USERNAME = "defaultUsername";
+  private static final String DEFAULT_USERNAME =
+      I18N.getString("Preferences.client.default.username.value");
 
   private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
   private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
@@ -876,6 +881,14 @@ public class AppPreferences {
 
   public static void setFitGMView(boolean fit) {
     prefs.putBoolean(KEY_FIT_GM_VIEW, fit);
+  }
+
+  public static String getDefaultUserName() {
+    return prefs.get(KEY_DEFAULT_USERNAME, DEFAULT_USERNAME);
+  }
+
+  public static void setDefaultUserName(String uname) {
+    prefs.put(KEY_DEFAULT_USERNAME, uname);
   }
 
   public static void setMovementMetric(WalkerMetric metric) {

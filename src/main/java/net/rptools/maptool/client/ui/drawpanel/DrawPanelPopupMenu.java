@@ -337,19 +337,13 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent e) {
-      String drawType;
-      if (elementUnderMouse.getDrawable() instanceof DrawablesGroup) {
-        drawType = I18N.getString("drawing.type.group");
-      } else {
-        drawType = I18N.getString("drawing.type.drawing");
-      }
       AbstractDrawing group = (AbstractDrawing) elementUnderMouse.getDrawable();
       String groupName =
           (String)
               JOptionPane.showInputDialog(
                   MapTool.getFrame(),
-                  I18N.getText("DrawPanelPopupMenu.dialog.name.msg", drawType),
-                  I18N.getText("DrawPanelPopupMenu.dialog.name.title", drawType),
+                  I18N.getString("DrawPanelPopupMenu.dialog.name.msg"),
+                  I18N.getString("DrawPanelPopupMenu.dialog.name.title"),
                   JOptionPane.QUESTION_MESSAGE,
                   null,
                   null,
