@@ -162,8 +162,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       try {
         vblGeometry =
             shapeReader
-                .read(vbl.getPathIterator(null))
+                .read(new ReverseShapePathIterator(vbl.getPathIterator(null)))
                 .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
+
         // polygons
         if (!vblGeometry.isValid()) {
           log.info(
