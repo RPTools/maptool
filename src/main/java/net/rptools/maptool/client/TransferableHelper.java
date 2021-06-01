@@ -417,6 +417,7 @@ public class TransferableHelper extends TransferHandler {
 
           if (!checkValidType(mediaType)) {
             MapTool.showError("dragdrop.unsupportedType");
+            log.info("Unsupported file type: " + mediaType.toString() + " (" + url + ")");
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
           } else {
             Asset temp = AssetManager.createAsset(url);
