@@ -13,6 +13,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - More localization for the UI.
 
 ## Enhancements
+- [#2657][i2657] New `relativeto` updates option for `copyToken()` accepts `map`, `current` token, &amp; `source` token.
 - [#2651][i2651] Default grid size increased to 100.
 - [#2608][i2608] Updated to DiceLib 1.8.0.  New macro function `rollSubWithUpper()` and two new dice expressions `XdYaZlW` & `XdYsZuW`.
 - [#2595][i2595] To facilitate localization and consistency, several macro commands changed to accept/return enum values instead of the English display names. Functions affected: `setTokenVBL()`, `getTokenShape()`, `setTokenShape()` and `getInfo("map")`.
@@ -52,6 +53,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
 - [#2485][i2485] Macro-generated frames were not restored to previous positions. Fixed.
 - [#2482][i2482] `playStream()` failing on MacOS and Linux. Fixed with update to Java 16.
+- [#2379][i2379] Pathfinding could fail with certain configurations of VBL/MBL structures. Fixed.
 - [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
 - [#2325][i2325] Error message returned when `/reply` is used without a prior `/whisper` has been localized.
 - [#2288][i2288] Non-alphanumeric chars in the key of a String Property could break `getStrProp()`. Fixed.
@@ -97,6 +99,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2482]: https://github.com/RPTools/maptool/issues/2482
 [i2466]: https://github.com/RPTools/maptool/issues/2466
 [i2452]: https://github.com/RPTools/maptool/issues/2452
+[i2379]: https://github.com/RPTools/maptool/issues/2379
 [i2366]: https://github.com/RPTools/maptool/issues/2366
 [i2360]: https://github.com/RPTools/maptool/issues/2360
 [i2349]: https://github.com/RPTools/maptool/issues/2349
