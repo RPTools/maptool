@@ -63,6 +63,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
 
 ## Other
+- [#2654][i2654] Abeille form designer added to [How to Setup UI Tools page](https://github.com/RPTools/maptool/blob/develop/doc/How_To_Setup_UI_Tools.md)
 - [#2601][i2601] Added Apache Tika for filetype recognition. 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
