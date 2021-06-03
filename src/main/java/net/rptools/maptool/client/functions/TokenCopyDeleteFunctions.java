@@ -268,7 +268,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     Grid grid =
         zone.getGrid(); // These won't change for a given execution; this could be more efficient
     if (!useDistance) {
-      CellPoint cp = grid.convert(new ZonePoint(deltX, deltY));
+      CellPoint cp =
+          grid.convert(
+              new ZonePoint(
+                  x, y)); // Accidentally removed these 3 lines earlier, it serves a very important
+      // purpose for when the tokens don't move in a certain direction.
+      x = cp.x;
+      y = cp.y;
+      cp = grid.convert(new ZonePoint(deltX, deltY));
       deltX = cp.x;
       deltY = cp.y;
     }
