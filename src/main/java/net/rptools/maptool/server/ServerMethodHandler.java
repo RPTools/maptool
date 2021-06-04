@@ -237,6 +237,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case changeZoneDispName:
           changeZoneDispName(context.getGUID(0), context.getString(1));
+          break;
         case heartbeat:
           heartbeat(context.getString(0));
           break;
