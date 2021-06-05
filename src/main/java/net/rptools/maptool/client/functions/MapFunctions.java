@@ -68,36 +68,31 @@ public class MapFunctions extends AbstractFunction {
       }
     } else if (functionName.equals("getMapDisplayName")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
-      if(parameters.size() == 0) {
+      if (parameters.size() == 0) {
         ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
         if (currentZR == null) {
           throw new ParserException(I18N.getText("macro.function.map.none", functionName));
         } else {
           return currentZR.getZone().getPlayerAlias();
         }
-      }
-      else {
+      } else {
         List<ZoneRenderer> rendererList =
-                new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers()); //copied from ZoneSelectionPopup
+            new LinkedList<ZoneRenderer>(
+                MapTool.getFrame().getZoneRenderers()); // copied from ZoneSelectionPopup
         if (!MapTool.getPlayer().isGM()) {
           rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
         }
         String searchMap = parameters.get(0).toString();
         String foundMap = null;
-        for(int i = 0;i < rendererList.size();i++)
-        {
-          if(rendererList.get(i).getZone().getName().equals(searchMap))
-          {
+        for (int i = 0; i < rendererList.size(); i++) {
+          if (rendererList.get(i).getZone().getName().equals(searchMap)) {
             foundMap = rendererList.get(i).getZone().getPlayerAlias();
             break;
           }
         }
-        if(foundMap == null)
-        {
+        if (foundMap == null) {
           throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
-        }
-        else
-        {
+        } else {
           return foundMap;
         }
       }
