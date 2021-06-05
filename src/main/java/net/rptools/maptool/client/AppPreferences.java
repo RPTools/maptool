@@ -358,6 +358,9 @@ public class AppPreferences {
   private static final String KEY_DEFAULT_VISION_TYPE = "defaultVisionType";
   private static final Zone.VisionType DEFAULT_VISION_TYPE = Zone.VisionType.OFF;
 
+  private static final String KEY_MAP_SORT_TYPE = "sortByGMName";
+  private static final MapSortType DEFAULT_MAP_SORT_TYPE = MapSortType.GMNAME;
+
   private static final String KEY_FONT_SIZE = "fontSize";
   private static final int DEFAULT_FONT_SIZE = 12;
 
@@ -696,12 +699,24 @@ public class AppPreferences {
     prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.name());
   }
 
+  public static void setMapSortType(MapSortType mapSortType) {
+    prefs.put(KEY_MAP_SORT_TYPE, mapSortType.name());
+  }
+
   public static Zone.VisionType getDefaultVisionType() {
     try {
       return Zone.VisionType.valueOf(
           prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.name()));
     } catch (Exception e) {
       return DEFAULT_VISION_TYPE;
+    }
+  }
+
+  public static MapSortType getMapSortType() {
+    try {
+      return MapSortType.valueOf(prefs.get(KEY_MAP_SORT_TYPE, DEFAULT_MAP_SORT_TYPE.name()));
+    } catch (Exception e) {
+      return DEFAULT_MAP_SORT_TYPE;
     }
   }
 
@@ -1230,6 +1245,24 @@ public class AppPreferences {
   public static TopologyMode getTopologyDrawingMode() {
     return TopologyMode.valueOf(
         prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
+  }
+
+  // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if
+  // preferred.
+  public enum MapSortType {
+    DISPLAYNAME(),
+    GMNAME();
+
+    private final String displayName;
+
+    MapSortType() {
+      displayName = I18N.getString("mapSortType." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /**

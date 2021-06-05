@@ -1604,7 +1604,18 @@ public class MapToolFrame extends DefaultDockableHolder
             + " - "
             + MapTool.getPlayer()
             + campaignName
-            + (renderer != null ? " - " + renderer.getZone().getName() : ""));
+            + (renderer != null
+                ? " - "
+                    + (((renderer.getZone().getPlayerAlias() != null)
+                            && !MapTool.getPlayer().isGM())
+                        ? renderer.getZone().getPlayerAlias()
+                        : (renderer.getZone().getPlayerAlias().equals(renderer.getZone().getName())
+                            ? renderer.getZone().getName()
+                            : renderer.getZone().getPlayerAlias()
+                                + " ("
+                                + renderer.getZone().getName()
+                                + ")"))
+                : ""));
   }
 
   /**
