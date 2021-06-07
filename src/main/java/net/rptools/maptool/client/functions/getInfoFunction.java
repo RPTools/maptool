@@ -17,6 +17,7 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +30,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
+import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -113,6 +115,7 @@ public class getInfoFunction extends AbstractFunction {
     }
 
     minfo.addProperty("name", zone.getName());
+    minfo.addProperty("display name", zone.getPlayerAlias());
     minfo.addProperty("image x scale", zone.getImageScaleX());
     minfo.addProperty("image y scale", zone.getImageScaleY());
     minfo.addProperty("player visible", zone.isVisible() ? 1 : 0);
@@ -328,9 +331,9 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.add("light sources", llinfo);
 
     JsonObject sinfo = new JsonObject();
-    for (BooleanTokenOverlay states : c.getTokenStatesMap().values()) {
-      String group = states.getGroup();
-      if (group == null) {
+    for (BooleanTokenOverlay bto : c.getTokenStatesMap().values()) {
+      String group = bto.getGroup();
+      if (group == null || group.isEmpty()) {
         group = "no group";
       }
       JsonArray sgroup;
@@ -339,7 +342,19 @@ public class getInfoFunction extends AbstractFunction {
       } else {
         sgroup = new JsonArray();
       }
-      sgroup.add(states.getName());
+      JsonObject state = new JsonObject();
+      state.addProperty("name", bto.getName());
+      state.addProperty("type", bto.getClass().getSimpleName());
+      state.addProperty("isShowGM", bto.isShowGM() ? BigDecimal.ONE : BigDecimal.ZERO);
+      state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
+      state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
+      state.addProperty(
+          "isImageOverlay", (bto instanceof ImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
+      state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
+      state.addProperty("opacity", bto.getOpacity());
+      state.addProperty("order", bto.getOrder());
+
+      sgroup.add(state);
       sinfo.add(group, sgroup);
     }
     cinfo.add("states", sinfo);
@@ -376,9 +391,16 @@ public class getInfoFunction extends AbstractFunction {
       }
       JsonObject bar = new JsonObject();
       bar.addProperty("name", tbo.getName());
+      bar.addProperty("type", tbo.getClass().getSimpleName());
       bar.addProperty("side", tbo.getSide().toString());
       bar.addProperty("increment", tbo.getIncrements());
+      bar.addProperty("mouseOver", tbo.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
+      bar.addProperty("isShowGM", tbo.isShowGM() ? BigDecimal.ONE : BigDecimal.ZERO);
+      bar.addProperty("isShowOwner", tbo.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
+      bar.addProperty("isShowOthers", tbo.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
+
       bgroup.add(bar);
+      barinfo.add(group, bgroup);
     }
     cinfo.add("bars", barinfo);
 

@@ -227,6 +227,7 @@ public class Zone extends BaseModel {
   private transient boolean exposeFogAtWaypoints = false;
 
   private String name;
+  private String playerAlias;
   private boolean isVisible;
 
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
@@ -313,8 +314,16 @@ public class Zone extends BaseModel {
     return name;
   }
 
+  public String getPlayerAlias() {
+    return playerAlias == null ? name : playerAlias;
+  }
+
   public void setName(String name) {
     this.name = name;
+  }
+
+  public void setPlayerAlias(String playerAlias) {
+    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
   }
 
   public MD5Key getMapAssetId() {
@@ -373,6 +382,7 @@ public class Zone extends BaseModel {
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
     imageScaleY = zone.imageScaleY;
+    playerAlias = zone.playerAlias;
 
     // In the following blocks we allocate a new linked list then fill it with null values
     // because the Collections.copy() method requires the destination list to already be

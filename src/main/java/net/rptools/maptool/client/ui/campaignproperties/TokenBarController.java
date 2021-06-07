@@ -730,7 +730,7 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals("Two Image")) {
+      if (overlay.equals("Two Images")) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
       } else if (overlay.equals("Single Image")) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);

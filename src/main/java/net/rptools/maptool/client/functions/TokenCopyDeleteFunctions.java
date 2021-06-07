@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -201,6 +202,64 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     int x = token.getX();
     int y = token.getY();
 
+    int deltX = 0; // in context x
+    int deltY = 0;
+
+    boolean delta = false;
+    boolean relativeto = false;
+    if (newVals.has("delta") && newVals.has("relativeto")) {
+      throw new ParserException(
+          I18N.getText("macro.function.tokenCopy.oxymoronicParameters", COPY_FUNC));
+    }
+    if (newVals.has("delta")) {
+      try {
+        delta = Integer.parseInt(newVals.get("delta").getAsString().trim()) != 0;
+      } catch (NumberFormatException e) {
+        delta = true;
+      }
+      if (delta) {
+        relativeto = true;
+        deltX = token.getX();
+        deltY = token.getY();
+      }
+    }
+    if (newVals.has("relativeto") && !delta) {
+      relativeto = true;
+      if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("current")) {
+        try {
+          deltX = res.getTokenInContext().getX();
+          deltY = res.getTokenInContext().getY();
+        } catch (NullPointerException e) {
+          throw new ParserException(
+              I18N.getText("macro.function.tokenCopy.noCurrentToken", COPY_FUNC));
+        }
+      } else if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("source")) {
+        deltX = token.getX();
+        deltY = token.getY();
+      } else if (newVals
+          .get("relativeto")
+          .getAsString()
+          .trim()
+          .toLowerCase(Locale.ROOT)
+          .equals("map")) {
+        deltX = 0;
+        deltY = 0;
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenCopy.unrecognizedRelativeValue", COPY_FUNC));
+      }
+    }
+
     // Location...
     boolean useDistance = false; // FALSE means to multiple x,y values by grid size
     if (newVals.has("useDistance")) {
@@ -209,28 +268,31 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     Grid grid =
         zone.getGrid(); // These won't change for a given execution; this could be more efficient
     if (!useDistance) {
-      CellPoint cp = grid.convert(new ZonePoint(x, y));
+      CellPoint cp =
+          grid.convert(
+              new ZonePoint(
+                  x, y)); // Accidentally removed these 3 lines earlier, it serves a very important
+      // purpose for when the tokens don't move in a certain direction.
       x = cp.x;
       y = cp.y;
+      cp = grid.convert(new ZonePoint(deltX, deltY));
+      deltX = cp.x;
+      deltY = cp.y;
     }
 
     boolean tokenMoved = false;
-    boolean delta = false;
-    if (newVals.has("delta")) {
-      delta = newVals.get("delta").getAsInt() != 0;
-    }
 
     // X
     if (newVals.has("x")) {
       int tmpX = newVals.get("x").getAsInt();
-      x = tmpX + (delta ? x : 0);
+      x = tmpX + (relativeto ? deltX : 0);
       tokenMoved = true;
     }
 
     // Y
     if (newVals.has("y")) {
       int tmpY = newVals.get("y").getAsInt();
-      y = tmpY + (delta ? y : 0);
+      y = tmpY + (relativeto ? deltY : 0);
       tokenMoved = true;
     }
 
