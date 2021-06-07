@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.walker.astar;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.text.DecimalFormat;
@@ -178,11 +179,14 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     }
 
     // Erase previous debug labels, this actually erases ALL labels! Use only when debugging!
-    if (!zone.getLabels().isEmpty() && debugCosts) {
-      for (Label label : zone.getLabels()) {
-        zone.removeLabel(label.getId());
-      }
-    }
+    EventQueue.invokeLater(
+        () -> {
+          if (!zone.getLabels().isEmpty() && debugCosts) {
+            for (Label label : zone.getLabels()) {
+              zone.removeLabel(label.getId());
+            }
+          }
+        });
 
     // Timeout quicker for GM cause reasons
     if (MapTool.getPlayer().isGM()) {
@@ -486,6 +490,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Label gScore = new Label();
     Label hScore = new Label();
     Label fScore = new Label();
+    Label parent = new Label();
 
     gScore.setLabel(f.format(node.gCost()));
     gScore.setX(cellBounds.x + 10);
@@ -500,9 +505,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     fScore.setY(cellBounds.y + 25);
     fScore.setForegroundColor(Color.RED);
 
-    zone.putLabel(gScore);
-    zone.putLabel(hScore);
-    zone.putLabel(fScore);
+    parent.setLabel(String.format("(%d, %d)", node.parent.x, node.parent.y));
+    parent.setX(cellBounds.x + 25);
+    parent.setY(cellBounds.y + 35);
+    parent.setForegroundColor(Color.BLUE);
+
+    EventQueue.invokeLater(
+        () -> {
+          zone.putLabel(gScore);
+          zone.putLabel(hScore);
+          zone.putLabel(fScore);
+          zone.putLabel(parent);
+        });
 
     // Track labels to delete later
     // debugLabels.add(gScore.getId());
