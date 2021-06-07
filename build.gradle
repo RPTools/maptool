@@ -32,25 +32,35 @@ def winUpgradeUUID = UUID.randomUUID().toString();
 
 // Custom properties
 ext {
-    // Get tag and commit info from Git to use for version numbering
-    def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-    def head = grgit.head()
-    def tags = grgit.tag.list().find {
-        it.commit == head
-    }
+    // Allow packagers to build from the source code tarball, which doesn't
+    // have '.git'
+    revisionFull = project.findProperty('gitCommit')
+    revision = revisionFull ? revisionFull.substring(0, 10) : ''
+    tagVersion = project.findProperty('gitTag')
+    environment = 'Production'
+    sentryDSN = sentry_production_dsn
 
-    revision = head.abbreviatedId
-    revisionFull = head.id
+    if (!project.hasProperty('noGit')) {
+        // Get tag and commit info from Git to use for version numbering
+        def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+        def head = grgit.head()
+        def tags = grgit.tag.list().find {
+            it.commit == head
+        }
 
-    if (tags) {
-        tagVersion = tags.getName()
-        enviroment = "Production"
-        sentryDSN = sentry_production_dsn
-    } else {
-        tagVersion = 'SNAPSHOT-' + revision
-        project.description = "SNAPSHOT-" + revision
-        enviroment = "Development"
-        sentryDSN = sentry_development_dsn
+        revision = head.abbreviatedId
+        revisionFull = head.id
+
+        if (tags) {
+            tagVersion = tags.getName()
+            environment = "Production"
+            sentryDSN = sentry_production_dsn
+        } else {
+            tagVersion = 'SNAPSHOT-' + revision
+            project.description = "SNAPSHOT-" + revision
+            environment = "Development"
+            sentryDSN = sentry_development_dsn
+        }
     }
 
     // This will strip anything other than core semver from the tag
@@ -372,7 +382,7 @@ task configSentryRelease(type: Copy) {
     rename("sentry.properties.template", "sentry.properties")
     def tokens = [
             AppVersion : "${tagVersion}",
-            Environment: "${enviroment}",
+            Environment: "${environment}",
             SentryDSN  : "${sentryDSN}"
     ]
     expand(tokens)
