@@ -80,8 +80,8 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
   }
 
   private double metricDistance(AStarCellPoint current, CellPoint goal) {
-    int xDist = current.x - goal.x;
-    int yDist = current.y - goal.y;
+    int xDist = current.position.x - goal.x;
+    int yDist = current.position.y - goal.y;
 
     double distance;
     int crossProductTieBreaker;
@@ -94,8 +94,8 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
       default:
       case ONE_ONE_ONE:
       case ONE_TWO_ONE:
-        xDist = Math.abs(current.x - goal.x);
-        yDist = Math.abs(current.y - goal.y);
+        xDist = Math.abs(current.position.x - goal.x);
+        yDist = Math.abs(current.position.y - goal.y);
 
         final int remainingDiagonals = Math.min(xDist, yDist);
         final int remainingStraights = Math.abs(xDist - yDist);
@@ -113,7 +113,8 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
 
     // break ties to prefer better looking paths that are along the straight line from the
     // starting point to the goal
-    if ((goal.x > current.x && goal.y > current.y) || (goal.x < current.x && goal.y < current.y)) {
+    if ((goal.x > current.position.x && goal.y > current.position.y)
+        || (goal.x < current.position.x && goal.y < current.position.y)) {
       crossProductTieBreaker = Math.abs(xDist * crossY - crossX * yDist);
     } else {
       crossProductTieBreaker = Math.abs(xDist * crossY + crossX * yDist);

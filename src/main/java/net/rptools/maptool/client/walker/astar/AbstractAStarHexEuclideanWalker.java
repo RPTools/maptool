@@ -31,7 +31,7 @@ public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalke
 
   @Override
   protected double hScore(AStarCellPoint p1, CellPoint p2) {
-    return euclideanDistance(p1, p2);
+    return euclideanDistance(p1.position, p2);
   }
 
   // Adjusted math per: https://www.redblobgames.com/grids/hexagons/#distances
