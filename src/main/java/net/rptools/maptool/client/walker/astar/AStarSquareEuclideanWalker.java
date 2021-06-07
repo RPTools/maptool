@@ -79,7 +79,7 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
     else return 1;
   }
 
-  private double metricDistance(CellPoint current, CellPoint goal) {
+  private double metricDistance(AStarCellPoint current, CellPoint goal) {
     int xDist = current.x - goal.x;
     int yDist = current.y - goal.y;
 
@@ -96,11 +96,18 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
       case ONE_TWO_ONE:
         xDist = Math.abs(current.x - goal.x);
         yDist = Math.abs(current.y - goal.y);
-        if (xDist > yDist) {
-          distance = Math.floor(diagonalMultiplier * yDist) + (xDist - yDist);
-        } else {
-          distance = Math.floor(diagonalMultiplier * xDist) + (yDist - xDist);
-        }
+
+        final int remainingDiagonals = Math.min(xDist, yDist);
+        final int remainingStraights = Math.abs(xDist - yDist);
+        // The floor operation does 1-2-1 for the remaining path; we need to adjust that according
+        // to the prior path.
+        final int evenOddDiagonalAdjustment =
+            (current.isOddStepOfOneTwoOneMovement() && remainingDiagonals % 2 != 0 ? 1 : 0);
+        distance =
+            evenOddDiagonalAdjustment
+                + Math.floor(diagonalMultiplier * remainingDiagonals)
+                + remainingStraights;
+
         break;
     }
 
@@ -111,8 +118,9 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
     } else {
       crossProductTieBreaker = Math.abs(xDist * crossY + crossX * yDist);
     }
-
-    distance += crossProductTieBreaker * 0.001;
+    // Important: this reduction is >0 and <<1, meaning it can only distinguish between otherwise
+    // equally scored cells.
+    distance -= 0.1 / (1.0 + crossProductTieBreaker);
 
     return distance;
   }
@@ -123,7 +131,7 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
   }
 
   @Override
-  protected double hScore(CellPoint p1, CellPoint p2) {
+  protected double hScore(AStarCellPoint p1, CellPoint p2) {
     return metricDistance(p1, p2);
   }
 }

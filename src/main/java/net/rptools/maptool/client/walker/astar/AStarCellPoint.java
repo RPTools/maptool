@@ -56,18 +56,56 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
     isAStarCanceled = aStarCanceled;
   }
 
+  /**
+   * Create an A* node from a position.
+   *
+   * <p>The node will have no scores or data carried over from a cell point.
+   *
+   * @param x The x cell position of the node.
+   * @param y The y cell position of the node.
+   */
   public AStarCellPoint(int x, int y) {
     super(x, y);
   }
 
+  /**
+   * Create an A* node from a cell point.
+   *
+   * <p>The distance travelled is copied from the cell point, making this useful for creating nodes
+   * that need to carry over data, such as after a waypoint.
+   *
+   * @param p The cell point to associate with the A* node.
+   */
   public AStarCellPoint(CellPoint p) {
     super(p.x, p.y, p.distanceTraveled, p.distanceTraveledWithoutTerrain);
   }
 
+  /**
+   * Create a node with terrain modifiers.
+   *
+   * <p>This is only used to associate terrain modifiers with a position. It is not queued to be
+   * used as part of A* itself.
+   *
+   * @param p The cell at which the node should exist.
+   * @param mod The amount of the terrain modifier.
+   * @param operation Which operation is used to calculate the terrain's effect.
+   */
   public AStarCellPoint(CellPoint p, double mod, TerrainModifierOperation operation) {
     super(p.x, p.y);
     terrainModifier = mod;
     terrainModifierOperation = operation;
+  }
+
+  /**
+   * Check if the path taken to this node has an odd number of diagonal steps.
+   *
+   * <p>The cost of the nth diagonal step under 1-2-1 movement depends on whether n is odd or even.
+   * This method allows that to be easily decided for a given node.
+   *
+   * @return `true` if the path to this number has an odd number of diagonal steps.
+   */
+  public boolean isOddStepOfOneTwoOneMovement() {
+    return (int) this.distanceTraveledWithoutTerrain != this.distanceTraveledWithoutTerrain;
   }
 
   public double fCost() {

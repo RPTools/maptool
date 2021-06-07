@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.walker.astar;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.text.DecimalFormat;
@@ -25,8 +26,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.maptool.client.MapTool;
@@ -96,7 +97,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
    */
   protected abstract int[][] getNeighborMap(int x, int y);
 
-  protected abstract double hScore(CellPoint p1, CellPoint p2);
+  protected abstract double hScore(AStarCellPoint p1, CellPoint p2);
 
   protected abstract double getDiagonalMultiplier(int[] neighborArray);
 
@@ -122,7 +123,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     crossX = start.x - goal.x;
     crossY = start.y - goal.y;
 
-    List<AStarCellPoint> openList = new ArrayList<>();
+    PriorityQueue<AStarCellPoint> openList = new PriorityQueue<>();
     Map<AStarCellPoint, AStarCellPoint> openSet = new HashMap<>(); // For faster lookups
     Set<AStarCellPoint> closedSet = new HashSet<>();
 
@@ -134,8 +135,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // if (start.equals(end))
     // log.info("NO WORK!");
 
-    openList.add(new AStarCellPoint(start));
-    openSet.put(openList.get(0), openList.get(0));
+    var startNode = new AStarCellPoint(start);
+    openList.add(startNode);
+    openSet.put(startNode, startNode);
 
     AStarCellPoint currentNode = null;
 
@@ -178,11 +180,14 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     }
 
     // Erase previous debug labels, this actually erases ALL labels! Use only when debugging!
-    if (!zone.getLabels().isEmpty() && debugCosts) {
-      for (Label label : zone.getLabels()) {
-        zone.removeLabel(label.getId());
-      }
-    }
+    EventQueue.invokeLater(
+        () -> {
+          if (!zone.getLabels().isEmpty() && debugCosts) {
+            for (Label label : zone.getLabels()) {
+              zone.removeLabel(label.getId());
+            }
+          }
+        });
 
     // Timeout quicker for GM cause reasons
     if (MapTool.getPlayer().isGM()) {
@@ -197,7 +202,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         break;
       }
 
-      currentNode = openList.remove(0);
+      currentNode = openList.remove();
       openSet.remove(currentNode);
       if (currentNode.equals(goal)) {
         break;
@@ -211,14 +216,19 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           // check if it is cheaper to get here the way that we just came, versus the previous path
           AStarCellPoint oldNode = openSet.get(currentNeighbor);
           if (currentNeighbor.gCost() < oldNode.gCost()) {
+            // We're about to modify the node cost, so we have to reinsert the node.
+            openList.remove(oldNode);
+
             oldNode.replaceG(currentNeighbor);
             currentNeighbor = oldNode;
             currentNeighbor.parent = currentNode;
+
+            openList.add(oldNode);
           }
           continue;
         }
 
-        pushNode(openList, currentNeighbor);
+        openList.add(currentNeighbor);
         openSet.put(currentNeighbor, currentNeighbor);
       }
 
@@ -271,29 +281,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     return returnedCellPointList;
   }
 
-  void pushNode(List<AStarCellPoint> list, AStarCellPoint node) {
-    if (list.isEmpty()) {
-      list.add(node);
-      return;
-    }
-    if (node.fCost() < list.get(0).fCost()) {
-      list.add(0, node);
-      return;
-    }
-    if (node.fCost() > list.get(list.size() - 1).fCost()) {
-      list.add(node);
-      return;
-    }
-    for (ListIterator<AStarCellPoint> iter = list.listIterator(); iter.hasNext(); ) {
-      AStarCellPoint listNode = iter.next();
-      if (listNode.fCost() >= node.fCost()) {
-        iter.previous();
-        iter.add(node);
-        return;
-      }
-    }
-  }
-
   protected List<AStarCellPoint> getNeighbors(AStarCellPoint node, Set<AStarCellPoint> closedSet) {
     List<AStarCellPoint> neighbors = new ArrayList<>();
     int[][] neighborMap = getNeighborMap(node.x, node.y);
@@ -304,6 +291,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       double terrainAdder = 0;
       boolean terrainIsFree = false;
       boolean blockNode = false;
+
+      // Get diagonal cost multiplier, if any...
+      double diagonalMultiplier = getDiagonalMultiplier(neighborArray);
 
       AStarCellPoint neighbor =
           new AStarCellPoint(node.x + neighborArray[0], node.y + neighborArray[1]);
@@ -371,9 +361,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
       terrainMultiplier = Math.abs(terrainMultiplier); // net negative multipliers screw with the AI
 
-      // Get diagonal cost multiplier, if any...
-      double diagonalMultiplier = getDiagonalMultiplier(neighborArray);
-
       if (terrainIsFree) {
         neighbor.g = node.g;
         neighbor.distanceTraveled = node.distanceTraveled;
@@ -381,15 +368,12 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         neighbor.distanceTraveledWithoutTerrain =
             node.distanceTraveledWithoutTerrain + diagonalMultiplier;
 
-        // basic check to see if we are on the odd or even step of 1-2-1 movement
-        if ((int) neighbor.distanceTraveledWithoutTerrain
-            != neighbor.distanceTraveledWithoutTerrain) {
-
+        if (neighbor.isOddStepOfOneTwoOneMovement()) {
           neighbor.g = node.g + terrainAdder + terrainMultiplier;
 
           neighbor.distanceTraveled = node.distanceTraveled + terrainAdder + terrainMultiplier;
         } else {
-          neighbor.g = node.g + terrainAdder + terrainMultiplier * diagonalMultiplier;
+          neighbor.g = node.g + terrainAdder + terrainMultiplier * Math.ceil(diagonalMultiplier);
 
           neighbor.distanceTraveled =
               node.distanceTraveled
@@ -486,6 +470,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Label gScore = new Label();
     Label hScore = new Label();
     Label fScore = new Label();
+    Label parent = new Label();
 
     gScore.setLabel(f.format(node.gCost()));
     gScore.setX(cellBounds.x + 10);
@@ -500,9 +485,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     fScore.setY(cellBounds.y + 25);
     fScore.setForegroundColor(Color.RED);
 
-    zone.putLabel(gScore);
-    zone.putLabel(hScore);
-    zone.putLabel(fScore);
+    parent.setLabel(String.format("(%d, %d)", node.parent.x, node.parent.y));
+    parent.setX(cellBounds.x + 25);
+    parent.setY(cellBounds.y + 35);
+    parent.setForegroundColor(Color.BLUE);
+
+    EventQueue.invokeLater(
+        () -> {
+          zone.putLabel(gScore);
+          zone.putLabel(hScore);
+          zone.putLabel(fScore);
+          zone.putLabel(parent);
+        });
 
     // Track labels to delete later
     // debugLabels.add(gScore.getId());
