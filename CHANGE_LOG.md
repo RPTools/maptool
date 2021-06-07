@@ -4,6 +4,7 @@ The MapTool community continues to push MapTool forward with code patches, local
 MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
 
 ## Highlights 
+- Maps now have a Display Name (Players) and a True Name (GM).
 - Development moved to AdoptOpen Java 16.
 - Moved from Nashorn to GraalVM JavaScript engine.
 - More image types supported along with beginnings of support for non-image assets.
@@ -15,6 +16,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 ## Enhancements
 - [#2657][i2657] New `relativeto` updates option for `copyToken()` accepts `map`, `current` token, &amp; `source` token.
 - [#2651][i2651] Default grid size increased to 100.
+- [#2647][i2647] Maps now have both a Display Name (Players) and a True Name (GM).
 - [#2608][i2608] Updated to DiceLib 1.8.0.  New macro function `rollSubWithUpper()` and two new dice expressions `XdYaZlW` & `XdYsZuW`.
 - [#2595][i2595] To facilitate localization and consistency, several macro commands changed to accept/return enum values instead of the English display names. Functions affected: `setTokenVBL()`, `getTokenShape()`, `setTokenShape()` and `getInfo("map")`.
 - [#2583][i2583] Large number of additional UI strings have been localized.
@@ -35,6 +37,8 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
 
 ## Bug Fixes
+- [#2709][i2709] Two-Image bars couldn't be added. Fixed.
+- [#2706][i2706] Issues with getInfo("campaign"): bars not listed, ungrouped states in two arrays, both missing important information. Fixed.
 - [#2684][i2684] Retrieving external IP address could cause MT to seemingly hang up. Fixed.
 - [#2675][i2675] Message returned when a macro-generated frame used a reserved name wasn't helpful. Fixed.
 - [#2661][i2661] Changes made to drawings via Draw Explorer were not immediately reflected on map. Fixed.
@@ -63,16 +67,21 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
 
 ## Other
+- [#2708][i2708] Build.gradle updated so MT can be built without a .git directory.
 - [#2654][i2654] Abeille form designer added to [How to Setup UI Tools page](https://github.com/RPTools/maptool/blob/develop/doc/How_To_Setup_UI_Tools.md)
 - [#2601][i2601] Added Apache Tika for filetype recognition. 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2709]: https://github.com/RPTools/maptool/issues/2709
+[i2708]: https://github.com/RPTools/maptool/issues/2708
+[i2706]: https://github.com/RPTools/maptool/issues/2706
 [i2684]: https://github.com/RPTools/maptool/issues/2684
 [i2675]: https://github.com/RPTools/maptool/issues/2675
 [i2661]: https://github.com/RPTools/maptool/issues/2661
 [i2657]: https://github.com/RPTools/maptool/issues/2657
 [i2656]: https://github.com/RPTools/maptool/issues/2656
+[i2654]: https://github.com/RPTools/maptool/issues/2654
 [i2652]: https://github.com/RPTools/maptool/issues/2652
 [i2651]: https://github.com/RPTools/maptool/issues/2651
 [i2647]: https://github.com/RPTools/maptool/issues/2647
