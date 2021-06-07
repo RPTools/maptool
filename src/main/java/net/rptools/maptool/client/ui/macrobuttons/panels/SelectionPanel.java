@@ -90,9 +90,7 @@ public class SelectionPanel extends AbstractMacroPanel {
       // draw common group only when there is more than one token selected
       if (selectedTokenList.size() > 1) {
         populateCommonButtons(selectedTokenList);
-        if (!commonMacros.isEmpty()) {
-          addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
-        }
+        addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
         // add(new ButtonGroup(selectedTokenList, commonMacros, this));
       }
       for (Token token : selectedTokenList) {

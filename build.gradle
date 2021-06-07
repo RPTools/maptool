@@ -5,10 +5,10 @@
 // Access Git info from build script
 plugins {
     id "application"
-    id "org.ajoberstar.grgit" version "4.0.1"
-    id "com.diffplug.gradle.spotless" version "3.28.0"
-    id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.11.4'
+    id "org.ajoberstar.grgit" version "4.1.0"
+    id "com.diffplug.spotless" version "5.2.0"
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.beryx.runtime' version '1.12.4'
 }
 
 // Apply the java plugin to add support for Java
@@ -16,13 +16,12 @@ apply plugin: 'base'
 apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'com.diffplug.gradle.spotless'
-apply plugin: 'jacoco'
+apply plugin: 'com.diffplug.spotless'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = 16
+targetCompatibility = 16
 
 
 // Used by gradle assemble & run tasks
@@ -89,6 +88,7 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
+            exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -107,21 +107,17 @@ spotless {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.5"
-    reportsDir = file("$buildDir/reports/jacoco")
-}
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '14'
+    version = '16'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -152,7 +148,6 @@ runtime {
                'jdk.dynalink',
                'jdk.jfr',
                'jdk.jsobject',
-               'jdk.scripting.nashorn',
                'jdk.unsupported',
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
@@ -164,7 +159,7 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -173,7 +168,7 @@ runtime {
                 //'--temp', 'releases/temp-files',
                 '--verbose',
                 '--description', project.description,
-                '--copyright', 'Copyright 2000-2020 RPTools.net',
+                '--copyright', 'Copyright 2000-2021 RPTools.net',
                 '--license-file', 'package/license/COPYING.AFFERO',
                 '--app-version', appSemVer,
                 '--vendor', vendor,
@@ -193,7 +188,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_windows_hotspot_14.0.2_12.zip');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_windows_hotspot_16_36.zip');
             }
         }
 
@@ -204,14 +199,14 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_mac_hotspot_14.0.2_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
             }
         }
 
         if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
             resourceDir = file('package/linux')
-            imageOptions += ['--icon', project.name + developerRelease + '.png']
+            imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
                     '--linux-menu-group', 'Game',
                     '--linux-shortcut'
@@ -229,7 +224,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.2%2B12/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_linux_hotspot_16_36.tar.gz');
             }
         }
     }
@@ -241,7 +236,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
 }
@@ -276,7 +271,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
-    implementation 'com.github.RPTools:dicelib:1.7.1'
+    implementation 'net.rptools.dicelib:dicelib:1.8.3'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -289,13 +284,13 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.31.v20200723'
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.40.v20210413'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.40.v20210413'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.40.v20210413'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
@@ -311,9 +306,11 @@ dependencies {
     implementation 'com.withay:withay-util:1.0'
     implementation 'xmlpull:xmlpull:1.1.3.1'
     implementation 'xpp3:xpp3_min:1.1.4c'
-    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.16'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+    implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
+    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
@@ -325,21 +322,25 @@ dependencies {
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
     // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 
     implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
+
+    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.1.1'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.2'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
@@ -360,10 +361,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
+
+
+    // Apache Tika Parsers for determining file type
+    implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
 
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
@@ -386,10 +391,12 @@ task configSentryRelease(type: Copy) {
 
 task uberJar(type: Jar) {
     group = 'distribution'
+    zip64 = true
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
     manifest {
         attributes 'Implementation-Title': project.name + developerRelease,
@@ -443,6 +450,7 @@ task copyPackageExtras(type: Copy) {
     from('package/license/')
     into('build/libs/')
     include('*')
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 javadoc {

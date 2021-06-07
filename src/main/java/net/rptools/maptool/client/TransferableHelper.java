@@ -46,8 +46,14 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 
 /**
  * A helper class for converting Transferable objects into their respective data types. This class
@@ -285,8 +291,14 @@ public class TransferableHelper extends TransferHandler {
     for (Object working : assets) {
       if (working instanceof Asset) {
         Asset asset = (Asset) working;
-        if (!AssetManager.hasAsset(asset)) AssetManager.putAsset(asset);
-        if (!MapTool.getCampaign().containsAsset(asset)) MapTool.serverCommand().putAsset(asset);
+        if (!asset.getId().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
+          if (!AssetManager.hasAsset(asset)) {
+            AssetManager.putAsset(asset);
+          }
+          if (!MapTool.getCampaign().containsAsset(asset)) {
+            MapTool.serverCommand().putAsset(asset);
+          }
+        }
       }
     }
     return assets;
@@ -400,14 +412,66 @@ public class TransferableHelper extends TransferHandler {
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
         } else {
-          Asset temp = AssetManager.createAsset(url);
-          if (temp != null) // `null' means no image available
-          assets.add(temp);
-          else if (log.isInfoEnabled()) log.info("No image available for " + url);
+          // Get the MediaType so we can use it when creating the Asset later
+          MediaType mediaType = getFileMediaType(url);
+
+          if (!checkValidType(mediaType)) {
+            MapTool.showError("dragdrop.unsupportedType");
+            log.info("Unsupported file type: " + mediaType.toString() + " (" + url + ")");
+            assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
+          } else {
+            Asset temp = AssetManager.createAsset(url);
+            if (temp != null) // `null' means no image available
+              assets.add(temp);
+            else if (log.isInfoEnabled())
+              log.info("No image available for " + url);
+          }
         }
       }
     }
     return assets;
+  }
+
+  private static MediaType getFileMediaType(URL url) throws IOException {
+    Metadata metadata = new Metadata();
+    metadata.set(Metadata.RESOURCE_NAME_KEY, url.getFile());
+
+    TikaConfig tika;
+    try {
+      tika = new TikaConfig();
+    } catch (TikaException e) {
+      throw new IOException(e);
+    }
+
+    MediaType mediaType = tika.getDetector().detect(TikaInputStream.get(url), metadata);
+
+    /* Workaround for Tika seeing Javascript files as Matlab scripts */
+    if ("text/x-matlab".equals(mediaType.toString())) {
+      String ext = FilenameUtils.getExtension(url.getPath());
+      if("js".equals(ext) || "javascript".equals(ext))
+        mediaType = new MediaType("text","javascript");
+    }
+
+    return mediaType;
+  }
+
+  private static boolean checkValidType(MediaType mediaType) {
+    String contentType = mediaType.getType();
+
+    String subType = mediaType.getSubtype();
+    return switch(contentType) {
+      case "audio", "image" -> true;
+      case "text" -> switch(subType) {
+        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
+        default -> false;
+      };
+      case "application" -> switch(subType) {
+        case "pdf", "json", "javascript", "xml" -> true;
+        default -> false;
+      };
+      default -> false;
+    };
+
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)

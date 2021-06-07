@@ -26,6 +26,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Player;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
@@ -68,6 +69,9 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     generatePlayerPassword = (JButton) getComponent("@generatePlayerPassword");
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
+
+    getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
+    getRoleCombo().setSelectedItem(prefs.getRole());
 
     useIndividualFOW.setEnabled(prefs.getUseIndividualViews());
     useIndividualViews.addItemListener(
@@ -146,7 +150,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   }
 
   public JComboBox getRoleCombo() {
-    return (JComboBox) getComponent("@role");
+    return (JComboBox) getComponent("role");
   }
 
   public JButton getNetworkingHelpButton() {
@@ -197,6 +201,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 return;
               }
               if (commit()) {
+                prefs.setRole((Player.Role) getRoleCombo().getSelectedItem());
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
                 accepted = true;

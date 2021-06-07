@@ -791,6 +791,18 @@ public class ZoneRenderer extends JComponent
     setViewOffset(getViewOffsetX() + dx, getViewOffsetY() + dy);
   }
 
+  public void moveViewByCells(int dx, int dy) {
+    int gridSize = (int) (zone.getGrid().getSize() * getScale());
+
+    int rawXOffset = getViewOffsetX() + dx * gridSize;
+    int rawYOffset = getViewOffsetY() + dy * gridSize;
+
+    int snappedXOffset = rawXOffset - rawXOffset % gridSize;
+    int snappedYOffset = rawYOffset - rawYOffset % gridSize;
+
+    setViewOffset(snappedXOffset, snappedYOffset);
+  }
+
   public void zoomReset(int x, int y) {
     zoneScale.zoomReset(x, y);
     MapTool.getFrame().getZoomStatusBar().update();
@@ -884,13 +896,16 @@ public class ZoneRenderer extends JComponent
 
     renderZone(g2d, pl);
     int noteVPos = 20;
+    if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
+
     if (!zone.isVisible() && pl.isGMView()) {
       GraphicsUtil.drawBoxedString(
-          g2d, "Map not visible to players", getSize().width / 2, noteVPos);
+          g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
       noteVPos += 20;
     }
     if (AppState.isShowAsPlayer()) {
-      GraphicsUtil.drawBoxedString(g2d, "Player View", getSize().width / 2, noteVPos);
+      GraphicsUtil.drawBoxedString(
+          g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
     }
     if (timer.isEnabled()) {
       String results = timer.toString();
@@ -4849,6 +4864,23 @@ public class ZoneRenderer extends JComponent
       }
       if (evt == Zone.Event.FOG_CHANGED) {
         flushFog = true;
+      }
+      if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
+        DrawnElement de = (DrawnElement) event.getArg();
+        switch (de.getDrawable().getLayer()) {
+          case TOKEN:
+            tokenDrawableRenderer.setDirty();
+            break;
+          case GM:
+            gmDrawableRenderer.setDirty();
+            break;
+          case OBJECT:
+            objectDrawableRenderer.setDirty();
+            break;
+          case BACKGROUND:
+            backgroundDrawableRenderer.setDirty();
+            break;
+        }
       }
       MapTool.getFrame().updateTokenTree(); // for any event
       repaintDebouncer.dispatch();

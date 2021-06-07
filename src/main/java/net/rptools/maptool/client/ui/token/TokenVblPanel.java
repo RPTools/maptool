@@ -152,11 +152,7 @@ public class TokenVblPanel extends JPanel {
           public void mouseEntered(MouseEvent e) {
             old = MapTool.getFrame().getStatusMessage();
             MapTool.getFrame()
-                .setStatusMessage("Mouse Wheel to zoom; double-LClick to reset  position and zoom");
-
-            //            log.info("Curor is: {}", getCursor().getName());
-            //            log.info("Has focus?: {}", hasFocus());
-            //            log.info("Has editTokenDialog focus?: {}", editTokenDialog.hasFocus());
+                .setStatusMessage(I18N.getString("EditTokenDialog.status.vbl.instructions"));
           }
 
           @Override
@@ -552,7 +548,7 @@ public class TokenVblPanel extends JPanel {
     return jtsMethod;
   }
 
-  public void setJtsMethod(String method) {
-    jtsMethod = JTS_SimplifyMethodType.fromString(method);
+  public void setJtsMethod(JTS_SimplifyMethodType method) {
+    jtsMethod = method;
   }
 }

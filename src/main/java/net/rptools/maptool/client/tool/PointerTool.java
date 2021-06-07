@@ -432,11 +432,23 @@ public class PointerTool extends DefaultTool {
     }
   }
 
+  private boolean handledByHover(Point p) {
+    if (!isShowingHover) return false;
+
+    if (htmlRenderer.contains(p)) {
+      htmlRenderer.clickAt(p);
+      return true;
+    }
+    return false;
+  }
+
   // //
   // Mouse
   @Override
   public void mousePressed(MouseEvent e) {
     super.mousePressed(e);
+
+    if (handledByHover(e.getPoint())) return;
 
     mouseButtonDown = true;
 
@@ -1909,6 +1921,8 @@ public class PointerTool extends DefaultTool {
 
       // Content
       htmlRenderer.render(g, location.x, location.y);
+      // Bounds (for handling clicks)
+      htmlRenderer.setBounds(location.x, location.y, size.width, size.height);
 
       // Border
       AppStyle.miniMapBorder.paintAround(g, location.x, location.y, size.width, size.height);

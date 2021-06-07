@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
+import net.rptools.maptool.language.I18N;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -30,6 +31,7 @@ public class TokenFootprint {
   private GUID id;
   private boolean isDefault;
   private double scale = 1;
+  private boolean localizeName = false;
 
   private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
@@ -47,7 +49,7 @@ public class TokenFootprint {
 
   @Override
   public String toString() {
-    return name;
+    return getLocalizedName();
   }
 
   public void addOffsetTranslator(OffsetTranslator translator) {
@@ -87,7 +89,16 @@ public class TokenFootprint {
     return id;
   }
 
+  /** Returns the English name of the footprint */
   public String getName() {
+    return name;
+  }
+
+  /** Returns the localized name of the footprint */
+  public String getLocalizedName() {
+    if (localizeName) {
+      return I18N.getString("TokenFootprint.name." + name.toLowerCase());
+    }
     return name;
   }
 
