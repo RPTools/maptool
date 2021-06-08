@@ -41,9 +41,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
@@ -57,7 +58,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
   private ShapeReader shapeReader = new ShapeReader(geometryFactory);
-  private Geometry vblGeometry = null;
+  private PreparedGeometry vblGeometry = null;
   // private long avgRetrieveTime;
   // private long avgTestTime;
   // private long retrievalCount;
@@ -162,7 +163,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     if (!vbl.isEmpty()) {
       try {
-        vblGeometry =
+        var vblGeometry =
             shapeReader
                 .read(new ReverseShapePathIterator(vbl.getPathIterator(null)))
                 .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
@@ -172,6 +173,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           log.info(
               "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
         }
+
+        this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
       } catch (Exception e) {
         log.info("vblGeometry oh oh: ", e);
       }
