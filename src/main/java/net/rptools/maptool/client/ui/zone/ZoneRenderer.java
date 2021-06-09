@@ -83,7 +83,6 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.Asset;
@@ -2262,13 +2261,14 @@ public class ZoneRenderer extends JComponent
 
         // Show current Blocked Movement directions for A*
         if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
-          Collection<AStarCellPoint> checkPoints = walker.getCheckedPoints();
+          Map<CellPoint, Set<CellPoint>> blockedMovesByTarget = walker.getBlockedMoves();
           // Color currentColor = g.getColor();
-          for (AStarCellPoint acp : checkPoints) {
-            Set<Point2D> validMoves = acp.getValidMoves();
+          for (var entry : blockedMovesByTarget.entrySet()) {
+            var position = entry.getKey();
+            var blockedMoves = entry.getValue();
 
-            for (Point2D point : validMoves) {
-              ZonePoint zp = acp.offsetZonePoint(getZone().getGrid(), point.getX(), point.getY());
+            for (CellPoint point : blockedMoves) {
+              ZonePoint zp = point.midZonePoint(getZone().getGrid(), position);
               double r = (zp.x - 1) * 45;
               showBlockedMoves(g, zp, r, AppStyle.blockMoveImage, 1.0f);
             }
