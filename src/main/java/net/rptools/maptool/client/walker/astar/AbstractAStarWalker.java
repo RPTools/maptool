@@ -330,8 +330,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         for (CellPoint cellPoint : occupiedCells) {
           // VBL Check
           if (vblBlocksMovement(cellPoint, neighbor.position)) {
-            closedSet.add(new AStarCellPoint(cellPoint, false));
-            closedSet.add(new AStarCellPoint(cellPoint, true));
             blockNode = true;
             break;
           }
