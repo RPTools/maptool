@@ -49,8 +49,7 @@ import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
-  private record TerrainModifier(Token.TerrainModifierOperation operation, double value) {
-  }
+  private record TerrainModifier(Token.TerrainModifierOperation operation, double value) {}
 
   private static boolean isInteger(double d) {
     return (int) d == d;
@@ -83,8 +82,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       // log.info("Token: " + token.getName() + ", " + token.getTerrainModifier());
       Set<CellPoint> cells = token.getOccupiedCells(zone.getGrid());
       for (CellPoint cell : cells) {
-        terrainCells.computeIfAbsent(cell, ignored -> new ArrayList<>())
-                    .add(new TerrainModifier(token.getTerrainModifierOperation(), token.getTerrainModifier()));
+        terrainCells
+            .computeIfAbsent(cell, ignored -> new ArrayList<>())
+            .add(
+                new TerrainModifier(
+                    token.getTerrainModifierOperation(), token.getTerrainModifier()));
       }
     }
   }
@@ -340,7 +342,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
 
         // Check for terrain modifiers
-        for (TerrainModifier terrainModifier : terrainCells.getOrDefault(neighbor.position, Collections.emptyList())) {
+        for (TerrainModifier terrainModifier :
+            terrainCells.getOrDefault(neighbor.position, Collections.emptyList())) {
           if (!terrainModifiersIgnored.contains(terrainModifier.operation)) {
             switch (terrainModifier.operation) {
               case MULTIPLY:
@@ -388,11 +391,15 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if (neighbor.isOddStepOfOneTwoOneMovement()) {
           neighbor.g = node.g + terrainAdder + terrainMultiplier;
 
-          neighbor.position.distanceTraveled = node.position.distanceTraveled + terrainAdder + terrainMultiplier;
+          neighbor.position.distanceTraveled =
+              node.position.distanceTraveled + terrainAdder + terrainMultiplier;
         } else {
           neighbor.g = node.g + terrainAdder + terrainMultiplier * Math.ceil(diagonalMultiplier);
 
-          neighbor.position.distanceTraveled = node.position.distanceTraveled + terrainAdder + terrainMultiplier * Math.ceil(diagonalMultiplier);
+          neighbor.position.distanceTraveled =
+              node.position.distanceTraveled
+                  + terrainAdder
+                  + terrainMultiplier * Math.ceil(diagonalMultiplier);
         }
       }
 
