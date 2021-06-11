@@ -15,6 +15,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - More localization for the UI.
 
 ## Enhancements
+- [#2731][i2731] Support for Universal VTT format updated to version 0.3.
 - [#2657][i2657] New `relativeto` updates option for `copyToken()` accepts `map`, `current` token, &amp; `source` token.
 - [#2651][i2651] Default grid size increased to 100.
 - [#2647][i2647] Maps now have both a Display Name (Players) and a True Name (GM).
@@ -78,6 +79,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2731]: https://github.com/RPTools/maptool/issues/2731
 [i2716]: https://github.com/RPTools/maptool/issues/2716
 [i2709]: https://github.com/RPTools/maptool/issues/2709
 [i2708]: https://github.com/RPTools/maptool/issues/2708
