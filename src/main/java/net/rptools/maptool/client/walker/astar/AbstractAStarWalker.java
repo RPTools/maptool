@@ -41,8 +41,10 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.algorithm.ConvexHull;
 import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
@@ -329,9 +331,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
       // Don't count VBL or Terrain Modifiers
       if (restrictMovement) {
+        if (tokenFootprintIntersectsVBL(neighbor.position)) {
+          // The token would overlap VBL if moved to this position, so it is not a valid position.
+          closedSet.add(neighbor);
+          blockNode = true;
+          continue;
+        }
+
         for (CellPoint cellPoint : occupiedCells) {
-          // VBL Check
-          if (vblBlocksMovement(cellPoint, neighbor.position)) {
+          // Check whether moving the occupied cell to its new location would be prohibited by VBL.
+          var cellNeighbor =
+              new CellPoint(cellPoint.x + neighborArray[0], cellPoint.y + neighborArray[1]);
+          if (vblBlocksMovement(cellPoint, cellNeighbor)) {
             blockNode = true;
             break;
           }
@@ -407,6 +418,24 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     }
 
     return neighbors;
+  }
+
+  private boolean tokenFootprintIntersectsVBL(CellPoint position) {
+    if (vblGeometry == null) {
+      return false;
+    }
+
+    var points =
+        footprint.getOccupiedCells(position).stream()
+            .map(
+                cellPoint -> {
+                  var bounds = zone.getGrid().getBounds(cellPoint);
+                  return new Coordinate(bounds.getCenterX(), bounds.getCenterY());
+                })
+            .toArray(Coordinate[]::new);
+    Geometry footprintGeometry = new ConvexHull(points, geometryFactory).getConvexHull();
+
+    return vblGeometry.intersects(footprintGeometry);
   }
 
   private boolean vblBlocksMovement(CellPoint start, CellPoint goal) {
