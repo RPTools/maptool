@@ -5,11 +5,12 @@ MapTool currently has support for 13 languages in various stages of completion: 
 
 ## Highlights 
 - Maps now have a Display Name (Players) and a True Name (GM).
-- Development moved to AdoptOpen Java 16.
-- Moved from Nashorn to GraalVM JavaScript engine.
 - More image types supported along with beginnings of support for non-image assets.
 - Quality of Life improvements: pan map with arrow keys, select drawings on map for deletion, hotkeys for image flip.
+- Improved performance and consistency for paths from AI pathfinding including improvements for paths for large tokens.
 - Additional UI elements available in full-screen mode. 
+- Development moved to AdoptOpen Java 16.
+- Moved from Nashorn to GraalVM JavaScript engine.
 - More bug fixes.
 - More localization for the UI.
 
@@ -22,8 +23,9 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2583][i2583] Large number of additional UI strings have been localized.
 - [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
 - [#2546][i2546] MapTool no longer uses OS User Name by default in title bar. New preference setting added for Default Username which defaults to Anonymous User.
+- [#2526][i2526] Icons for non-image assets added to build. Code to use those coming later.
 - [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
-- [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.
+- [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.  `json.eval()` disabled until other issues resolved. 
 - [#2494][i2494] Support added for WebP, SVG, ICO, TGA images.
 - [#2466][i2466] Drawings can now be selected with the mouse and deleted via delete key.
 - [#2452][i2452] Additional UI elements added to fullscreen view with new View menu toggle.
@@ -38,7 +40,9 @@ MapTool currently has support for 13 languages in various stages of completion: 
 
 ## Bug Fixes
 - [#2709][i2709] Two-Image bars couldn't be added. Fixed.
+- [#2716][i2716] Pathfinding performance significatnly degrades with Complex MBL. Improved.
 - [#2706][i2706] Issues with getInfo("campaign"): bars not listed, ungrouped states in two arrays, both missing important information. Fixed.
+- [#2696][i2696] Suboptimal/inconsistent pathfinding with 1-2-1 movement. Improved. 
 - [#2684][i2684] Retrieving external IP address could cause MT to seemingly hang up. Fixed.
 - [#2675][i2675] Message returned when a macro-generated frame used a reserved name wasn't helpful. Fixed.
 - [#2661][i2661] Changes made to drawings via Draw Explorer were not immediately reflected on map. Fixed.
@@ -57,6 +61,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
 - [#2485][i2485] Macro-generated frames were not restored to previous positions. Fixed.
 - [#2482][i2482] `playStream()` failing on MacOS and Linux. Fixed with update to Java 16.
+- [#2409][i2409] Pathfinding returning inconsistent/bad paths for large tokens. Fixed.
 - [#2379][i2379] Pathfinding could fail with certain configurations of VBL/MBL structures. Fixed.
 - [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
 - [#2325][i2325] Error message returned when `/reply` is used without a prior `/whisper` has been localized.
@@ -73,9 +78,11 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2716]: https://github.com/RPTools/maptool/issues/2716
 [i2709]: https://github.com/RPTools/maptool/issues/2709
 [i2708]: https://github.com/RPTools/maptool/issues/2708
 [i2706]: https://github.com/RPTools/maptool/issues/2706
+[i2696]: https://github.com/RPTools/maptool/issues/2696
 [i2684]: https://github.com/RPTools/maptool/issues/2684
 [i2675]: https://github.com/RPTools/maptool/issues/2675
 [i2661]: https://github.com/RPTools/maptool/issues/2661
@@ -101,6 +108,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2546]: https://github.com/RPTools/maptool/issues/2546
 [i2538]: https://github.com/RPTools/maptool/issues/2538
 [i2527]: https://github.com/RPTools/maptool/issues/2527
+[i2526]: https://github.com/RPTools/maptool/issues/2526
 [i2524]: https://github.com/RPTools/maptool/issues/2524
 [i2519]: https://github.com/RPTools/maptool/issues/2519
 [i2494]: https://github.com/RPTools/maptool/issues/2494
@@ -109,6 +117,7 @@ MapTool currently has support for 13 languages in various stages of completion: 
 [i2482]: https://github.com/RPTools/maptool/issues/2482
 [i2466]: https://github.com/RPTools/maptool/issues/2466
 [i2452]: https://github.com/RPTools/maptool/issues/2452
+[i2409]: https://github.com/RPTools/maptool/issues/2409
 [i2379]: https://github.com/RPTools/maptool/issues/2379
 [i2366]: https://github.com/RPTools/maptool/issues/2366
 [i2360]: https://github.com/RPTools/maptool/issues/2360
