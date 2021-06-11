@@ -167,37 +167,48 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Using JTS because AWT Area can only intersect with Area and we want to use simple lines here.
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
+    Area newVbl = new Area();
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
       if (MapTool.getServerPolicy().getVblBlocksMove()) {
-        vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+        newVbl =
+            MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
 
         if (tokenVBL != null) {
-          vbl.subtract(tokenVBL);
+          newVbl.subtract(tokenVBL);
         }
 
         // Finally, add the Move Blocking Layer!
-        vbl.add(zone.getTopologyTerrain());
+        newVbl.add(zone.getTopologyTerrain());
       } else {
-        vbl = zone.getTopologyTerrain();
+        newVbl = zone.getTopologyTerrain();
       }
     }
 
-    if (!vbl.isEmpty()) {
-      try {
-        var vblGeometry =
-            shapeReader
-                .read(new ReverseShapePathIterator(vbl.getPathIterator(null)))
-                .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
+    if (!newVbl.equals(vbl)) {
+      vbl = newVbl;
 
-        // polygons
-        if (!vblGeometry.isValid()) {
-          log.info(
-              "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+      // The move cache may no longer accurately reflect the VBL limitations.
+      this.blockedMovesByGoal.clear();
+      // VBL has changed. Let's update the JTS geometry to match.
+      if (vbl.isEmpty()) {
+        this.vblGeometry = null;
+      } else {
+        try {
+          var vblGeometry =
+              shapeReader
+                  .read(new ReverseShapePathIterator(vbl.getPathIterator(null)))
+                  .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
+
+          // polygons
+          if (!vblGeometry.isValid()) {
+            log.info(
+                "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+          }
+
+          this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
+        } catch (Exception e) {
+          log.info("vblGeometry oh oh: ", e);
         }
-
-        this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
-      } catch (Exception e) {
-        log.info("vblGeometry oh oh: ", e);
       }
 
       // log.info("vblGeometry bounds: " + vblGeometry.toString());
@@ -320,8 +331,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               node.position.x + neighborArray[0],
               node.position.y + neighborArray[1],
               node.isOddStepOfOneTwoOneMovement ^ invertEvenOddDiagonals);
-      Set<CellPoint> occupiedCells = footprint.getOccupiedCells(node.position);
-
       if (closedSet.contains(neighbor)) {
         continue;
       }
@@ -338,6 +347,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           continue;
         }
 
+        Set<CellPoint> occupiedCells = footprint.getOccupiedCells(node.position);
         for (CellPoint cellPoint : occupiedCells) {
           // Check whether moving the occupied cell to its new location would be prohibited by VBL.
           var cellNeighbor =
@@ -460,11 +470,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Rectangle goalBounds = zone.getGrid().getBounds(goal);
 
     if (goalBounds.isEmpty() || startBounds.isEmpty()) {
-      return false;
-    }
-
-    // If there is no vbl within the footprints, we're good!
-    if (!vbl.intersects(startBounds) && !vbl.intersects(goalBounds)) {
       return false;
     }
 
