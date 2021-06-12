@@ -15,10 +15,9 @@
 package net.rptools.maptool.client.walker;
 
 import java.awt.geom.Area;
-import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -68,7 +67,7 @@ public interface ZoneWalker {
 
   public void setFootprint(TokenFootprint footprint);
 
-  public default Collection<AStarCellPoint> getCheckedPoints() {
+  public default Map<CellPoint, Set<CellPoint>> getBlockedMoves() {
     return null;
   }
 }

@@ -79,9 +79,9 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
     else return 1;
   }
 
-  private double metricDistance(CellPoint current, CellPoint goal) {
-    int xDist = current.x - goal.x;
-    int yDist = current.y - goal.y;
+  private double metricDistance(AStarCellPoint current, CellPoint goal) {
+    int xDist = current.position.x - goal.x;
+    int yDist = current.position.y - goal.y;
 
     double distance;
     int crossProductTieBreaker;
@@ -94,25 +94,34 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
       default:
       case ONE_ONE_ONE:
       case ONE_TWO_ONE:
-        xDist = Math.abs(current.x - goal.x);
-        yDist = Math.abs(current.y - goal.y);
-        if (xDist > yDist) {
-          distance = Math.floor(diagonalMultiplier * yDist) + (xDist - yDist);
-        } else {
-          distance = Math.floor(diagonalMultiplier * xDist) + (yDist - xDist);
-        }
+        xDist = Math.abs(current.position.x - goal.x);
+        yDist = Math.abs(current.position.y - goal.y);
+
+        final int remainingDiagonals = Math.min(xDist, yDist);
+        final int remainingStraights = Math.abs(xDist - yDist);
+        // The floor operation does 1-2-1 for the remaining path; we need to adjust that according
+        // to the prior path.
+        final int evenOddDiagonalAdjustment =
+            (current.isOddStepOfOneTwoOneMovement() && remainingDiagonals % 2 != 0 ? 1 : 0);
+        distance =
+            evenOddDiagonalAdjustment
+                + Math.floor(diagonalMultiplier * remainingDiagonals)
+                + remainingStraights;
+
         break;
     }
 
     // break ties to prefer better looking paths that are along the straight line from the
     // starting point to the goal
-    if ((goal.x > current.x && goal.y > current.y) || (goal.x < current.x && goal.y < current.y)) {
+    if ((goal.x > current.position.x && goal.y > current.position.y)
+        || (goal.x < current.position.x && goal.y < current.position.y)) {
       crossProductTieBreaker = Math.abs(xDist * crossY - crossX * yDist);
     } else {
       crossProductTieBreaker = Math.abs(xDist * crossY + crossX * yDist);
     }
-
-    distance += crossProductTieBreaker * 0.001;
+    // Important: this reduction is >0 and <<1, meaning it can only distinguish between otherwise
+    // equally scored cells.
+    distance -= 0.1 / (1.0 + crossProductTieBreaker);
 
     return distance;
   }
@@ -123,7 +132,7 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
   }
 
   @Override
-  protected double hScore(CellPoint p1, CellPoint p2) {
+  protected double hScore(AStarCellPoint p1, CellPoint p2) {
     return metricDistance(p1, p2);
   }
 }
