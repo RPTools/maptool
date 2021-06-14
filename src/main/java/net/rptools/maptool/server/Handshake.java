@@ -250,8 +250,6 @@ public class Handshake {
     DataInputStream dis = new DataInputStream(inputStream);
 
     byte[] decrypted = null;
-    Exception playerEx = null;
-    Exception gmEx = null;
 
     // First retrieve the salt for the message
     int saltLen = dis.readInt();
@@ -277,8 +275,7 @@ public class Handshake {
     Role playerRole = null;
     // TODO: CDW need a new way to determine if player or GM
     if (CipherUtil.getInstance().validateMac(mac, username)) {
-      cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
-      playerRole = Role.GM;
+      cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
     } else if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
       playerRole = Role.PLAYER;
@@ -291,13 +288,35 @@ public class Handshake {
       return null;
     }
 
+    Exception decryptionException = null;
     Request request = null;
+    // If playerRole is null (we dont know if player or GM yet) then password would have been
+    // set to player password ans we try that first, if it fails then try GM. If the rols is
+    // already known dont attempt the other password.
     try {
       Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
       decrypted = playerCipher.doFinal(message);
+      if (playerRole == null) {
+        playerRole = Role.PLAYER;
+      }
     } catch (Exception ex) {
+      if (playerRole == null) {
+        cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
+        try {
+          Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
+          decrypted = playerCipher.doFinal(message);
+          playerRole = Role.GM;
+        } catch (Exception ex2) {
+          decryptionException = ex;
+        }
+      } else {
+        decryptionException = ex;
+      }
+    }
+
+    if (decryptionException != null) {
       log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
-      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
+      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), decryptionException);
       return null;
     }
 
@@ -378,7 +397,7 @@ public class Handshake {
       }
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
-      if (!CipherUtil.getInstance().validateMac(mac, request.name)) {
+      if (!CipherUtil.getInstance().validateMac(mac,  request.name)) {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = I18N.getString("Handshake.msg.wrongPassword");
