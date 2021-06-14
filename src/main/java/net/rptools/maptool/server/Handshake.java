@@ -97,6 +97,7 @@ public class Handshake {
             s,
             server.getConfig().getPlayerPassword(),
             server.getConfig().getGmPassword(),
+            username,
             initialMacSalt,
             passwordSalt);
     if (request == null) {
@@ -140,7 +141,7 @@ public class Handshake {
       dos.write(salt);
       dos.writeInt(challenge.length);
       dos.write(challenge);
-      dos.write(CipherUtil.getInstance().generateMacAndSalt(passwordToUse));
+      dos.write(CipherUtil.getInstance().generateMacAndSalt(player.getName()));
       dos.flush();
 
       // Now read the response
@@ -157,7 +158,7 @@ public class Handshake {
       }
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
-      if (!CipherUtil.getInstance().validateMac(mac, passwordToUse)) {
+      if (!CipherUtil.getInstance().validateMac(mac, player.getName())) {
         return null;
       }
       passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, responseSalt);
@@ -238,7 +239,8 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt,
+      Socket socket, String playerPassword, String gmPassword, String username,
+      byte[] expectedInitialMacSalt,
       byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
@@ -273,7 +275,11 @@ public class Handshake {
 
     SecretKeySpec cipherKey = null;
     Role playerRole = null;
-    if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
+    // TODO: CDW need a new way to determine if player or GM
+    if (CipherUtil.getInstance().validateMac(mac, username)) {
+      cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
+      playerRole = Role.GM;
+    } else if (CipherUtil.getInstance().validateMac(mac, playerPassword)) {
       cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
       playerRole = Role.PLAYER;
     } else if (CipherUtil.getInstance().validateMac(mac, gmPassword)) {
@@ -372,7 +378,7 @@ public class Handshake {
       }
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
-      if (!CipherUtil.getInstance().validateMac(mac, request.password)) {
+      if (!CipherUtil.getInstance().validateMac(mac, request.name)) {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -390,7 +396,7 @@ public class Handshake {
       dos.write(responseSalt);
       dos.writeInt(response.length);
       dos.write(response);
-      dos.write(CipherUtil.getInstance().generateMacAndSalt(request.password));
+      dos.write(CipherUtil.getInstance().generateMacAndSalt(request.name));
     } else {
       Response response = new Response();
       response.code = code;
@@ -422,7 +428,7 @@ public class Handshake {
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-    byte[] mac = CipherUtil.getInstance().generateMacWithSalt(request.password, macSalt);
+    byte[] mac = CipherUtil.getInstance().generateMacWithSalt(request.name, macSalt);
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
