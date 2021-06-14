@@ -44,8 +44,8 @@ public class Handshake {
     int ERROR = 2;
   }
 
-  private static String USERNAME_FIELD = "username:";
-  private static String VERSION_FIELD = "version:";
+  private static final String USERNAME_FIELD = "username:";
+  private static final String VERSION_FIELD = "version:";
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
@@ -65,10 +65,31 @@ public class Handshake {
 
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
+    // TODO: CDW get the username to look up salt + send salt
+    DataInputStream dis = new DataInputStream(s.getInputStream());
+    int nameLen = dis.readInt();
+    byte[] nameBytes = dis.readNBytes(nameLen);
+
+    if (nameLen != nameBytes.length) {
+      throw new IOException("Unable to read username");
+    }
+
+    String username = new String(nameBytes);
+
+    // TODO: CDW Remove debug
+    System.out.println("DEBUG: username = " + username);
+
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
     dos.writeInt(initialMacSalt.length);
     dos.write(initialMacSalt);
+
+    // TODO: CDW send password salt for player
+    byte[] passwordSalt = CipherUtil.getInstance().createSalt();
+    dos.writeInt(passwordSalt.length);
+    dos.write(passwordSalt);
+
+
 
     Response response = new Response();
     Request request =
@@ -76,7 +97,8 @@ public class Handshake {
             s,
             server.getConfig().getPlayerPassword(),
             server.getConfig().getGmPassword(),
-            initialMacSalt);
+            initialMacSalt,
+            passwordSalt);
     if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -122,7 +144,6 @@ public class Handshake {
       dos.flush();
 
       // Now read the response
-      DataInputStream dis = new DataInputStream(s.getInputStream());
       int saltLen = dis.readInt();
       byte[] responseSalt = dis.readNBytes(saltLen);
       if (responseSalt.length != saltLen) {
@@ -217,9 +238,11 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt)
+      Socket socket, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt,
+      byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
+    // TODO: CDW Change to pass in already encrypted password.
     socket.getInetAddress().getAddress();
     InputStream inputStream = socket.getInputStream();
     DataInputStream dis = new DataInputStream(inputStream);
@@ -290,10 +313,18 @@ public class Handshake {
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
           NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
+    // First sent the username
+    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+    dos.writeInt(request.name.length());
+    dos.write(request.name.getBytes(StandardCharsets.UTF_8));
+
+    // TODO CDW: client hand shake code here
+
     DataInputStream dis = new DataInputStream(s.getInputStream());
     // Read the salt we are expected to use for initial messages MAC
     int macSaltLen = dis.readInt();
     byte[] macSalt = dis.readNBytes(macSaltLen);
+
 
     if (macSaltLen != macSalt.length) {
       Response response = new Response();
@@ -302,8 +333,19 @@ public class Handshake {
       return response;
     }
 
-    byte[] reqBytes = buildRequest(request, macSalt);
-    DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+    // Read the salt we are expected to user for player password
+    int passwordSaltLen = dis.readInt();
+    byte[] passwordSalt = dis.readNBytes(passwordSaltLen);
+
+    if (passwordSaltLen != passwordSalt.length) {
+      Response response = new Response();
+      response.code = Code.ERROR;
+      response.message = I18N.getString("Handshake.msg.wrongPassword");
+      return response;
+    }
+
+
+    byte[] reqBytes = buildRequest(request, macSalt, passwordSalt);
     dos.write(reqBytes);
     dos.flush();
 
@@ -343,7 +385,7 @@ public class Handshake {
       byte[] responseSalt = CipherUtil.getInstance().createSalt();
       SecretKeySpec responseKey =
           CipherUtil.getInstance().createSecretKeySpec(request.password, responseSalt);
-      byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(), responseKey);
+      byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8), responseKey);
       dos.writeInt(responseSalt.length);
       dos.write(responseSalt);
       dos.writeInt(response.length);
@@ -365,7 +407,7 @@ public class Handshake {
     return response;
   }
 
-  private static byte[] buildRequest(Request request, byte[] macSalt)
+  private static byte[] buildRequest(Request request, byte[] macSalt, byte[] passwordSalt)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
           BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
@@ -376,8 +418,7 @@ public class Handshake {
     sb.append(request.version);
     sb.append("\n");
 
-    byte[] salt = CipherUtil.getInstance().createSalt();
-    Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, salt);
+    Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, passwordSalt);
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
@@ -386,8 +427,8 @@ public class Handshake {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-    dataOutputStream.writeInt(salt.length);
-    dataOutputStream.write(salt);
+    dataOutputStream.writeInt(passwordSalt.length);
+    dataOutputStream.write(passwordSalt);
     dataOutputStream.writeInt(cipherBytes.length);
     dataOutputStream.write(cipherBytes);
     dataOutputStream.write(mac);
