@@ -16,7 +16,11 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
+import javax.crypto.spec.SecretKeySpec;
+import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 
 public class ServerConfig {
@@ -43,8 +47,8 @@ public class ServerConfig {
 
   private int port;
   private String hostPlayerId;
-  private String gmPassword;
-  private String playerPassword;
+  private final String gmPassword;
+  private final String playerPassword;
   private boolean personalServer;
   private String serverName;
 
@@ -105,12 +109,14 @@ public class ServerConfig {
     return config;
   }
 
-  public String getGmPassword() {
-    return gmPassword;
+  public SecretKeySpec getGmPassword(byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    return CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
   }
 
-  public String getPlayerPassword() {
-    return playerPassword;
+  public SecretKeySpec getPlayerPassword(byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    return CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
   }
 
   private static Random r = new Random();

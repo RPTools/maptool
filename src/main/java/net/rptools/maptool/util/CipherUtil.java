@@ -19,8 +19,10 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -77,46 +79,6 @@ public class CipherUtil {
       log.error(e);
       throw new IllegalStateException(e);
     }
-  }
-
-  /**
-   * Returns a {@link SecretKeySpec} from the supplied {@link String} key.
-   *
-   * @param key the key used to encrypt/decrypt
-   * @return the {@link SecretKeySpec}.
-   */
-  public synchronized SecretKeySpec createSecretKeySpec(String key) {
-    messageDigest.reset();
-    byte[] digest = messageDigest.digest(key.getBytes());
-    return new SecretKeySpec(digest, CIPHER_ALGORITHM);
-  }
-
-  /**
-   * Returns a {@link Cipher} that can be used to decipher encoded values.
-   *
-   * @param key the key used for deciphering.
-   * @return a {@link Cipher} that can be used for deciphering encoded values.
-   * @throws NoSuchPaddingException if the requested padding algorithm is not available.
-   * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
-   * @throws InvalidKeyException if there are problems with the supplied key.
-   */
-  public Cipher createDecryptor(String key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    return createCipher(Cipher.DECRYPT_MODE, createSecretKeySpec(key));
-  }
-
-  /**
-   * Returns a {@link Cipher} that can be used to encipher encoded values.
-   *
-   * @param key the key used for encipher.
-   * @return a {@link Cipher} that can be used for deciphering encoded values.
-   * @throws NoSuchPaddingException if the requested padding algorithm is not available.
-   * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
-   * @throws InvalidKeyException if there are problems with the supplied key.
-   */
-  public Cipher createEncrypter(String key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    return createCipher(Cipher.ENCRYPT_MODE, createSecretKeySpec(key));
   }
 
   /**
@@ -290,5 +252,9 @@ public class CipherUtil {
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  public String encodeBase64(SecretKey key) {
+    return Base64.getEncoder().withoutPadding().encodeToString(key.getEncoded());
   }
 }

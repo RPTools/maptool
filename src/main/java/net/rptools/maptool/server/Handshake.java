@@ -96,8 +96,8 @@ public class Handshake {
     Request request =
         decodeRequest(
             s,
-            server.getConfig().getPlayerPassword(),
-            server.getConfig().getGmPassword(),
+            server.getConfig().getPlayerPassword(passwordSalt),
+            server.getConfig().getGmPassword(passwordSalt),
             username,
             initialMacSalt,
             passwordSalt);
@@ -127,23 +127,22 @@ public class Handshake {
     if (response.code == Code.OK) {
       player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-      String passwordToUse =
+      SecretKeySpec passwordToUse =
           player.isGM()
-              ? MapTool.getServer().getConfig().getGmPassword()
-              : MapTool.getServer().getConfig().getPlayerPassword();
+              ? MapTool.getServer().getConfig().getGmPassword(passwordSalt)
+              : MapTool.getServer().getConfig().getPlayerPassword(passwordSalt);
 
       byte[] salt = CipherUtil.getInstance().createSalt();
-      SecretKeySpec passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, salt);
 
       byte[] challenge =
-          encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
+          encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordToUse);
 
       dos.writeInt(salt.length);
       dos.write(salt);
       dos.writeInt(challenge.length);
       dos.write(challenge);
       dos.write(CipherUtil.getInstance().generateMacAndSalt(
-          Base64.getEncoder().encodeToString(passwordToUse.getBytes(StandardCharsets.UTF_8))
+          CipherUtil.getInstance().encodeBase64(passwordToUse)
       ));
       dos.flush();
 
@@ -162,11 +161,11 @@ public class Handshake {
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
       if (!CipherUtil.getInstance().validateMac(mac,
-          Base64.getEncoder().encodeToString(passwordToUse.getBytes(StandardCharsets.UTF_8)))) {
+          CipherUtil.getInstance().encodeBase64(passwordToUse))) {
         return null;
       }
-      passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, responseSalt);
-      byte[] responseBytes = decode(bytes, passwordKey);
+
+      byte[] responseBytes = decode(bytes, passwordToUse);
       String challengeResponse = new String(responseBytes);
 
       if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
@@ -243,7 +242,7 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, String playerPassword, String gmPassword, String username,
+      Socket socket, SecretKeySpec playerPassword, SecretKeySpec gmPassword, String username,
       byte[] expectedInitialMacSalt,
       byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
@@ -282,12 +281,12 @@ public class Handshake {
       //cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
     //} else
     if (CipherUtil.getInstance().validateMac(mac,
-        Base64.getEncoder().encodeToString(playerPassword.getBytes(StandardCharsets.UTF_8)))) {
-      cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
+        CipherUtil.getInstance().encodeBase64(playerPassword))) {
+      cipherKey = playerPassword;
       playerRole = Role.PLAYER;
     } else if (CipherUtil.getInstance().validateMac(mac,
-        Base64.getEncoder().encodeToString(gmPassword.getBytes(StandardCharsets.UTF_8)))) {
-      cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
+        CipherUtil.getInstance().encodeBase64(gmPassword))) {
+      cipherKey = gmPassword;
       playerRole = Role.GM;
     } else {
       // If neither MAC checks out then return null Request which will be logged as invalid
@@ -295,41 +294,19 @@ public class Handshake {
       return null;
     }
 
-    Exception decryptionException = null;
-    Request request = null;
     // If playerRole is null (we dont know if player or GM yet) then password would have been
     // set to player password ans we try that first, if it fails then try GM. If the rols is
     // already known dont attempt the other password.
     try {
       Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
       decrypted = playerCipher.doFinal(message);
-      if (playerRole == null) {
-        playerRole = Role.PLAYER;
-      }
     } catch (Exception ex) {
-      if (playerRole == null) {
-        cipherKey = CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
-        try {
-          Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
-          decrypted = playerCipher.doFinal(message);
-          playerRole = Role.GM;
-        } catch (Exception ex2) {
-          decryptionException = ex;
-        }
-      } else {
-        decryptionException = ex;
-      }
-    }
-
-    if (decryptionException != null) {
       log.warn(I18N.getText("Handshake.msg.failedLogin", socket.getInetAddress()));
-      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), decryptionException);
+      log.warn(I18N.getText("Handshake.msg.failedLoginDecode"), ex);
       return null;
     }
 
-    request = extractRequestDetails(decrypted, playerRole);
-
-    return request;
+    return extractRequestDetails(decrypted, playerRole);
   }
 
   /**
