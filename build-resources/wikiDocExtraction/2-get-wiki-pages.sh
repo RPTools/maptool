@@ -11,7 +11,7 @@
 
 # Whatever the function name is, it gets tacked onto this URL.
 # Note that the MediaWiki Craig is using has case-sensitive URLs.
-BASE="http://lmwcs.com/rptools/wiki/"
+BASE="http://wiki.rptools.info/index.php/"
 
 function my_wget {
     wget --input-file=- \

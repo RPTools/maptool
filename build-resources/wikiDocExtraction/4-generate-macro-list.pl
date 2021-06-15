@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 # Some of the characters we're going to read are apparently multibyte
-# (i.e., wide) characters.  And when our `print` statements tries to
+# (i.e., wide) characters.  And when our `print` statements try to
 # concatenate two strings together we'll get a warning that wide
 # characters are being used in conjunction with non-wide characters.
 # By opening all files using the `locale` module, files will be
@@ -15,6 +15,7 @@ use HTML::TreeBuilder 5 -weak;
 
 # Reads all of the HTML files under 'processed/' and makes a list that
 # contains the filename (without directory prefix) and the description.
+# # This is just for quick eyeballing to ensure reasonable text was extracted.
 
 chdir "processed"
     or die "Can't change directory to 'processed'?!\n$!";
@@ -45,15 +46,16 @@ sub processFile {
         ('class', 'template_description')
     );
     if (not($e)) {
-        # If we don't find a description, use the old technique.
-        # /template_version/ { getline; print FILENAME "\t" $0 }' *
+        # If we don't find a description, use the old awk technique:
+        # /template_version/ { getline; print FILENAME "\t" $0 }'
         $e = $tree->look_down(
             ('_tag', 'div'),
             ('class', 'template_version')
         );
+	# Now grab the following element (the one to the "right").
         $e = $e->right();
     }
-    # Could look for the first <h2> and take the following <p>...
+    # Could also look for the first <h2> and take the following <p>...?
     die "Can't find either description or version?!" unless $e;
 
     my @t = ();
