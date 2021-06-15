@@ -111,7 +111,7 @@ public class ServerConfig {
 
   public SecretKeySpec getGmPassword(byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    return CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
+    return CipherUtil.getInstance().createSecretKeySpec(gmPassword, salt);
   }
 
   public SecretKeySpec getPlayerPassword(byte[] salt)
