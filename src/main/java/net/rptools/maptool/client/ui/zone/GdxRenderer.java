@@ -25,6 +25,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.box2d.GifDecoder;
 import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
@@ -54,6 +55,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.Polygon;
 import java.awt.geom.*;
+import java.io.ByteArrayInputStream;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -80,6 +82,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private final Map<MD5Key, Sprite> isoSprites = new HashMap<>();
     private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
     private final Map<MD5Key, Sprite> bigSprites = new HashMap<>();
+    private final Map<MD5Key, Animation<TextureRegion>> animationMap = new HashMap<>();
 
     //renderFog
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
@@ -100,6 +103,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private int offsetX = 0;
     private int offsetY = 0;
     private float zoom = 1.0f;
+    private float stateTime = 0f;
     private boolean renderZone = false;
     // general resources
     private OrthographicCamera cam;
@@ -249,6 +253,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void render() {
+        stateTime += Gdx.graphics.getDeltaTime();
         manager.finishLoading();
         packer.updateTextureAtlas(tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
 
@@ -1311,8 +1316,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     private void renderGrid(SquareGrid grid) {
         var scale = (float) zoneRenderer.getScale();
-        int gridSize = (int) (grid.getSize() * scale);
-
+        float gridSize = (grid.getSize() * scale);
         Color.argb8888ToColor(tmpColor, zone.getGridColor());
 
         drawer.setColor(tmpColor);
@@ -1322,8 +1326,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var w = hudCam.viewportWidth;
         var h = hudCam.viewportHeight;
 
-        var offX = (int) (zoneRenderer.getViewOffsetX() % gridSize + grid.getOffsetX() * scale) + 1;
-        var offY = (int) (zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale) + 1;
+        var offX = Math.round(zoneRenderer.getViewOffsetX() % gridSize + grid.getOffsetX() * scale);
+        var offY = Math.round(zoneRenderer.getViewOffsetY() % gridSize + grid.getOffsetY() * scale);
 
         var startCol = ((int) (x / gridSize) * gridSize);
         var startRow = ((int) (y / gridSize) * gridSize);
@@ -1331,10 +1335,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         var lineWidth = AppState.getGridSize();
 
         for (float row = startRow; row < y + h + gridSize; row += gridSize)
-            drawer.line(x, (int) (h - (row + offY)), x + w, (int) (h - (row + offY)), lineWidth);
+            drawer.line(x, Math.round(h - (row + offY)), x + w, Math.round(h - (row + offY)), lineWidth);
 
         for (float col = startCol; col < x + w + gridSize; col += gridSize)
-            drawer.line((int) (col + offX), y, (int) (col + offX), y + h, lineWidth);
+            drawer.line(Math.round(col + offX), y, Math.round(col + offX), y + h, lineWidth);
     }
 
     private FloatArray pathToVertices(GeneralPath path) {
@@ -1977,11 +1981,20 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (key == null)
             return null;
 
+        var animation = animationMap.get(key);
+        if(animation != null) {
+            var currentFrame = animation.getKeyFrame(stateTime, true);
+            var sprite = new Sprite(currentFrame);
+            sprite.setSize(currentFrame.getRegionWidth(), currentFrame.getRegionHeight());
+            return sprite;
+        }
+
         var sprite = bigSprites.get(key);
         if (sprite != null) {
             sprite.setSize(sprite.getTexture().getWidth(), sprite.getTexture().getHeight());
             return sprite;
         }
+
 
         return getSprite(key.toString());
     }
@@ -3014,6 +3027,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 sprite.getTexture().dispose();
             }
             bigSprites.clear();
+            animationMap.clear();
         });
     }
 
@@ -3253,6 +3267,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void assetAvailable(MD5Key key) {
         try {
             var asset = AssetManager.getAsset(key);
+            if(asset.getImageExtension() == "gif") {
+
+                Gdx.app.postRunnable(() -> {
+                    var ass = AssetManager.getAsset(key);
+                    var is = new ByteArrayInputStream(asset.getImage());
+                    var animation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, is);
+                    animationMap.put(key, animation);
+                });
+                return;
+            }
             var img = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage(), asset.getName()), null);
             //var img = ImageManager.getImage(key);
             var bytes = ImageUtil.imageToBytes(img, "png");
