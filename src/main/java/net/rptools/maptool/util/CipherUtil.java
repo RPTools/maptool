@@ -58,6 +58,9 @@ public class CipherUtil {
   /** Key generation algorithm. */
   private static final String KEY_GENERATION_ALGORITHM = "PBKDF2WithHmacSHA1";
 
+
+  public static record Key(SecretKeySpec secretKeySpec, byte[] salt) {};
+
   /**
    * Returns the singleton instance of {@code CipherUtil}.
    *
@@ -90,11 +93,11 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createDecryptor(SecretKeySpec key)
+  public Cipher createDecryptor(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    if (!key.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+    if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
       throw new AssertionError(
-          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.getAlgorithm());
+          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
     }
     return createCipher(Cipher.DECRYPT_MODE, key);
   }
@@ -108,11 +111,11 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createEncrypter(SecretKeySpec key)
+  public Cipher createEncrypter(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    if (!key.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+    if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
       throw new AssertionError(
-          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.getAlgorithm());
+          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
     }
     return createCipher(Cipher.ENCRYPT_MODE, key);
   }
@@ -127,10 +130,10 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  private Cipher createCipher(int encryptMode, SecretKeySpec key)
+  private Cipher createCipher(int encryptMode, Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-    cipher.init(encryptMode, key);
+    cipher.init(encryptMode, key.secretKeySpec);
     return cipher;
   }
 
@@ -150,7 +153,7 @@ public class CipherUtil {
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
           InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-    cipher.init(Cipher.ENCRYPT_MODE, createSecretKeySpec(key, salt));
+    cipher.init(Cipher.ENCRYPT_MODE, createKey(key, salt).secretKeySpec);
 
     return cipher;
   }
@@ -159,17 +162,17 @@ public class CipherUtil {
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
           InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-    cipher.init(Cipher.DECRYPT_MODE, createSecretKeySpec(key, salt));
+    cipher.init(Cipher.DECRYPT_MODE, createKey(key, salt).secretKeySpec);
 
     return cipher;
   }
 
-  public SecretKeySpec createSecretKeySpec(String key, byte[] salt)
+  public Key createKey(String key, byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
 
-    return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM);
+    return new Key(new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM), salt);
   }
 
   public byte[] generateMacAndSalt(String password) throws IOException {
@@ -181,17 +184,17 @@ public class CipherUtil {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
 
-    SecretKeySpec key;
+    Key key;
     try {
-      key = createSecretKeySpec(password, salt);
+      key = createKey(password, salt);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new IOException(e);
     }
 
-    byte[] mac = key.getEncoded();
+    byte[] mac = key.secretKeySpec.getEncoded();
 
-    dataOutputStream.writeInt(salt.length);
-    dataOutputStream.write(salt);
+    dataOutputStream.writeInt(key.salt.length);
+    dataOutputStream.write(key.salt);
     dataOutputStream.writeInt(mac.length);
     dataOutputStream.write(mac);
     dataOutputStream.flush();
@@ -252,6 +255,10 @@ public class CipherUtil {
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  public String encodeBase64(Key key) {
+    return encodeBase64(key.secretKeySpec); // TODO: CDW should I be encodding salt too?
   }
 
   public String encodeBase64(SecretKey key) {

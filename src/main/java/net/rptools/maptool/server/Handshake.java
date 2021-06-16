@@ -25,7 +25,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -127,7 +126,7 @@ public class Handshake {
     if (response.code == Code.OK) {
       player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-      SecretKeySpec passwordToUse =
+      CipherUtil.Key passwordToUse =
           player.isGM()
               ? MapTool.getServer().getConfig().getGmPassword(passwordSalt)
               : MapTool.getServer().getConfig().getPlayerPassword(passwordSalt);
@@ -137,8 +136,8 @@ public class Handshake {
       byte[] challenge =
           encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordToUse);
 
-      dos.writeInt(salt.length);
-      dos.write(salt);
+      dos.writeInt(passwordToUse.salt().length);
+      dos.write(passwordToUse.salt());
       dos.writeInt(challenge.length);
       dos.write(challenge);
       dos.write(CipherUtil.getInstance().generateMacAndSalt(
@@ -165,7 +164,9 @@ public class Handshake {
         return null;
       }
 
-      byte[] responseBytes = decode(bytes, passwordToUse);
+      byte[] responseBytes = decode(bytes, player.isGM()
+          ? MapTool.getServer().getConfig().getGmPassword(responseSalt)
+          : MapTool.getServer().getConfig().getPlayerPassword(responseSalt));
       String challengeResponse = new String(responseBytes);
 
       if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
@@ -187,7 +188,7 @@ public class Handshake {
     return player;
   }
 
-  private static byte[] decode(byte[] bytes, SecretKeySpec passwordKey) {
+  private static byte[] decode(byte[] bytes, CipherUtil.Key passwordKey) {
     try {
       Cipher cipher = CipherUtil.getInstance().createDecryptor(passwordKey);
       return cipher.doFinal(bytes);
@@ -200,7 +201,7 @@ public class Handshake {
     }
   }
 
-  private static byte[] encode(byte[] bytes, SecretKeySpec passwordKey) {
+  private static byte[] encode(byte[] bytes, CipherUtil.Key passwordKey) {
     try {
       Cipher cipher = CipherUtil.getInstance().createEncrypter(passwordKey);
       return cipher.doFinal(bytes);
@@ -242,7 +243,7 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, SecretKeySpec playerPassword, SecretKeySpec gmPassword, String username,
+      Socket socket, CipherUtil.Key playerPassword, CipherUtil.Key gmPassword, String username,
       byte[] expectedInitialMacSalt,
       byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
@@ -274,7 +275,7 @@ public class Handshake {
       return null; // handshake is invalid
     }
 
-    SecretKeySpec cipherKey = null;
+    CipherUtil.Key cipherKey = null;
     Role playerRole = null;
     // TODO: CDW need a new way to determine if player or GM
     //if (CipherUtil.getInstance().validateMac(mac, username)) {
@@ -381,28 +382,32 @@ public class Handshake {
       }
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
+
+      // TODO: CDW Seems a waste to do this is buildRequest and here.
+      CipherUtil.Key passwordKey = CipherUtil.getInstance().createKey(request.password, passwordSalt);
+
+
       if (!CipherUtil.getInstance().validateMac(mac,
-          Base64.getEncoder().encodeToString(request.password.getBytes(StandardCharsets.UTF_8)))) {
+          CipherUtil.getInstance().encodeBase64(passwordKey))) {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = I18N.getString("Handshake.msg.wrongPassword");
         return response;
       }
 
-      SecretKeySpec key = CipherUtil.getInstance().createSecretKeySpec(request.password, salt);
+      //TODO: CDW fix!!
+      CipherUtil.Key key = CipherUtil.getInstance().createKey(request.password, salt);
       byte[] resp = decode(bytes, key);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
       byte[] responseSalt = CipherUtil.getInstance().createSalt();
-      SecretKeySpec responseKey =
-          CipherUtil.getInstance().createSecretKeySpec(request.password, responseSalt);
+      CipherUtil.Key responseKey =
+          CipherUtil.getInstance().createKey(request.password, responseSalt);
       byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8), responseKey);
       dos.writeInt(responseSalt.length);
       dos.write(responseSalt);
       dos.writeInt(response.length);
       dos.write(response);
-      dos.write(CipherUtil.getInstance().generateMacAndSalt(
-          Base64.getEncoder().encodeToString(request.password.getBytes(StandardCharsets.UTF_8)))
-      );
+      dos.write(CipherUtil.getInstance().generateMacAndSalt(CipherUtil.getInstance().encodeBase64(passwordKey)));
     } else {
       Response response = new Response();
       response.code = code;
@@ -430,12 +435,15 @@ public class Handshake {
     sb.append(request.version);
     sb.append("\n");
 
+    CipherUtil.Key passwordKey = CipherUtil.getInstance().createKey(request.password, passwordSalt);
+
+    // TODO: CDW we already have the secret key spec above so why not create with that
     Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, passwordSalt);
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
     byte[] mac = CipherUtil.getInstance().generateMacWithSalt(
-        Base64.getEncoder().encodeToString(request.password.getBytes(StandardCharsets.UTF_8)),
+        CipherUtil.getInstance().encodeBase64(passwordKey),
         macSalt
     );
 

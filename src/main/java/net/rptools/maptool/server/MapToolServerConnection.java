@@ -56,7 +56,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     } catch (IOException ioe) {
       log.error("Handshake failure: " + ioe, ioe);
     } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-      e.printStackTrace();
+      e.printStackTrace(); // TODO: CDW need to fix this
     }
     return false;
   }
