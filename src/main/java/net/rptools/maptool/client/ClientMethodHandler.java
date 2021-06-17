@@ -42,7 +42,7 @@ import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;

@@ -77,7 +77,7 @@ import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;

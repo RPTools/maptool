@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.model.player.Player;
 
 /** Represents the local player. Its methods can depend on AppState and other local properties. */
 public class LocalPlayer extends Player {

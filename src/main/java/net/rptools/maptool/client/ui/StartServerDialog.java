@@ -26,7 +26,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;

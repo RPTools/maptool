@@ -23,7 +23,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.client.ClientConnection;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Handshake;
 
 /** @author trevor */

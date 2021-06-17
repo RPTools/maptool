@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

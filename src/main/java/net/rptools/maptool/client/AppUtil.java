@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.apache.commons.io.FileUtils;

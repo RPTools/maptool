@@ -12,9 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.player;
 
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.CipherUtil;
 
 /** @author trevor */
 public class Player {
@@ -41,15 +42,15 @@ public class Player {
 
   private String name; // Primary Key
   private String role;
-  private String password;
 
+  private transient CipherUtil.Key password;
   private transient Role actualRole;
 
   public Player() {
     // For serialization
   }
 
-  public Player(String name, Role role, String password) {
+  public Player(String name, Role role, CipherUtil.Key password) {
     this.name = name;
     this.role = role.name();
     this.password = password;
@@ -88,11 +89,7 @@ public class Player {
     this.name = name;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getPassword() {
+  public CipherUtil.Key getPassword() {
     return password;
   }
 
