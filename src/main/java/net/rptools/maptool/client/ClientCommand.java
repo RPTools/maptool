@@ -62,6 +62,7 @@ public class ClientCommand {
     addTopology,
     removeTopology,
     renameZone,
+    changeZoneDispName,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,

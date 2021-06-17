@@ -14,12 +14,29 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.language.I18N;
+
 /** @author trevor */
 public class Player {
 
   public enum Role {
-    PLAYER,
-    GM
+    PLAYER(),
+    GM();
+
+    private final String displayName;
+
+    Role() {
+      if (name().equals("GM")) {
+        displayName = I18N.getString("userTerm.GM");
+      } else {
+        displayName = I18N.getString("userTerm.Player");
+      }
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   private String name; // Primary Key
@@ -89,6 +106,6 @@ public class Player {
 
   @Override
   public String toString() {
-    return name + " " + (getRole() == Role.PLAYER ? "(Player)" : "(GM)");
+    return String.format("%s (%s)", name, getRole().toString());
   }
 }

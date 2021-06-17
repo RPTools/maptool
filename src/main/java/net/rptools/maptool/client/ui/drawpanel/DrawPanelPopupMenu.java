@@ -38,6 +38,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
@@ -86,7 +87,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     } else add(new GroupDrawingsAction());
     add(new MergeDrawingsAction());
     addGMItem(new JSeparator());
-    add(new DeleteDrawingAction());
+    add(new DeleteDrawingAction(selectedDrawSet));
     // add(new JSeparator());
     add(new GetPropertiesAction());
     add(new SetPropertiesAction());
@@ -138,19 +139,37 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     }
   }
 
-  private class DeleteDrawingAction extends AbstractAction {
+  public static class DeleteDrawingAction extends AbstractAction {
+
     public DeleteDrawingAction() {
-      super("Delete");
+      super(I18N.getString("token.popup.menu.delete"));
+    }
+
+    public DeleteDrawingAction(Set<GUID> selectedDrawings) {
+      super(I18N.getString("token.popup.menu.delete"));
+      this.selectedDrawings = selectedDrawings;
+    }
+
+    private Set<GUID> selectedDrawings;
+
+    public void setSelectedDrawings(Set<GUID> selectedDrawings) {
+      this.selectedDrawings = selectedDrawings;
     }
 
     public void actionPerformed(ActionEvent e) {
+      var frame = MapTool.getFrame();
+      var renderer = frame.getCurrentZoneRenderer();
+
+      if (selectedDrawings.isEmpty()) return;
+
       // check to see if this is the required action
       if (!MapTool.confirmDrawDelete()) {
         return;
       }
-      for (GUID id : selectedDrawSet) {
+      for (GUID id : selectedDrawings) {
         MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
       }
+      selectedDrawings.clear();
       renderer.repaint();
       MapTool.getFrame().updateDrawTree();
       MapTool.getFrame().refresh();
@@ -159,7 +178,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class GetDrawingId extends AbstractAction {
     public GetDrawingId() {
-      super("Get Drawing Id");
+      super(I18N.getString("DrawPanelPopupMenu.menu.getId"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -171,7 +190,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class GetPropertiesAction extends AbstractAction {
     public GetPropertiesAction() {
-      super("Get Properties");
+      super(I18N.getString("DrawPanelPopupMenu.menu.getProperties"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -193,7 +212,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class GroupDrawingsAction extends AbstractAction {
     public GroupDrawingsAction() {
-      super("Group Drawings");
+      super(I18N.getString("DrawPanelPopupMenu.menu.group"));
       enabled = selectedDrawSet.size() > 1;
       if (enabled) {
         List<DrawnElement> zoneList =
@@ -242,7 +261,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class MergeDrawingsAction extends AbstractAction {
     public MergeDrawingsAction() {
-      super("Merge Drawings");
+      super(I18N.getString("DrawPanelPopupMenu.menu.merge"));
       enabled = selectedDrawSet.size() > 1;
       if (enabled) {
         List<DrawnElement> zoneList =
@@ -314,31 +333,32 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class SetDrawingName extends AbstractAction {
     public SetDrawingName() {
-      super("Set Name");
+      super(I18N.getString("DrawPanelPopupMenu.menu.setName"));
     }
 
     public void actionPerformed(ActionEvent e) {
-      String drawType = "Drawing";
-      if (elementUnderMouse.getDrawable() instanceof DrawnElement) drawType = "Group";
       AbstractDrawing group = (AbstractDrawing) elementUnderMouse.getDrawable();
       String groupName =
           (String)
               JOptionPane.showInputDialog(
                   MapTool.getFrame(),
-                  "Enter a name for the " + drawType,
-                  drawType + " Name",
+                  I18N.getString("DrawPanelPopupMenu.dialog.name.msg"),
+                  I18N.getString("DrawPanelPopupMenu.dialog.name.title"),
                   JOptionPane.QUESTION_MESSAGE,
                   null,
                   null,
                   group.getName());
-      group.setName(groupName.isEmpty() ? null : groupName);
+      if (groupName == null) {
+        return;
+      }
+      group.setName(groupName.isBlank() ? null : groupName.trim());
       MapTool.getFrame().updateDrawTree();
     }
   }
 
   private class SetPropertiesAction extends AbstractAction {
     public SetPropertiesAction() {
-      super("Set Properties");
+      super(I18N.getString("DrawPanelPopupMenu.menu.setProperties"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -370,7 +390,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private class UngroupDrawingsAction extends AbstractAction {
     public UngroupDrawingsAction() {
-      super("Ungroup");
+      super(I18N.getString("DrawPanelPopupMenu.menu.ungroup"));
       enabled = selectedDrawSet.size() == 1 && isDrawnElementGroup(elementUnderMouse);
     }
 
@@ -393,7 +413,10 @@ public class DrawPanelPopupMenu extends JPopupMenu {
      * @param isEraser - boolean, erase VBL if true.
      */
     public VblAction(boolean pathOnly, boolean isEraser) {
-      super((isEraser ? "Remove from " : "Add to ") + "VBL");
+      super(
+          isEraser
+              ? I18N.getString("DrawPanelPopupMenu.menu.vbl.remove")
+              : I18N.getString("DrawPanelPopupMenu.menu.vbl.add"));
       enabled = hasPath(elementUnderMouse);
       this.isEraser = isEraser;
       this.pathOnly = pathOnly;
@@ -442,12 +465,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private JMenu createArrangeMenu() {
-    JMenu arrangeMenu = new JMenu("Arrange");
+    JMenu arrangeMenu = new JMenu(I18N.getString("token.popup.menu.arrange"));
     arrangeMenu.setEnabled(topLevelOnly);
-    JMenuItem bringToFrontMenuItem = new JMenuItem("Bring to Front");
+    JMenuItem bringToFrontMenuItem = new JMenuItem(I18N.getString("token.popup.menu.zorder.front"));
     bringToFrontMenuItem.addActionListener(new BringToFrontAction());
 
-    JMenuItem sendToBackMenuItem = new JMenuItem("Send to Back");
+    JMenuItem sendToBackMenuItem = new JMenuItem(I18N.getString("token.popup.menu.zorder.back"));
     sendToBackMenuItem.addActionListener(new SendToBackAction());
 
     arrangeMenu.add(bringToFrontMenuItem);
@@ -457,7 +480,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private JMenu createChangeToMenu(Zone.Layer... types) {
-    JMenu changeTypeMenu = new JMenu("Change to");
+    JMenu changeTypeMenu = new JMenu(I18N.getString("token.popup.menu.change"));
     changeTypeMenu.setEnabled(topLevelOnly);
     for (Zone.Layer layer : types) {
       changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
@@ -466,7 +489,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private JMenu createPathVblMenu() {
-    JMenu pathVblMenu = new JMenu("Path to VBL");
+    JMenu pathVblMenu = new JMenu(I18N.getString("DrawPanelPopupMenu.menu.pathVbl"));
     pathVblMenu.setEnabled(hasPath(selectedDrawSet));
     pathVblMenu.add(new JMenuItem(new VblAction(true, false)));
     pathVblMenu.add(new JMenuItem(new VblAction(true, true)));
@@ -474,7 +497,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   }
 
   private JMenu createShapeVblMenu() {
-    JMenu shapeVblMenu = new JMenu("Shape to VBL");
+    JMenu shapeVblMenu = new JMenu(I18N.getString("DrawPanelPopupMenu.menu.shapeVbl"));
     shapeVblMenu.setEnabled(hasPath(selectedDrawSet));
     shapeVblMenu.add(new JMenuItem(new VblAction(false, false)));
     shapeVblMenu.add(new JMenuItem(new VblAction(false, true)));
