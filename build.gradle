@@ -323,14 +323,16 @@ dependencies {
 
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.7.0'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.7.0'
 
-    implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
+    implementation 'org.apache.xmlgraphics:batik-transcoder:1.14' // For Twelvemonkey SVG
+    implementation 'org.apache.xmlgraphics:batik-awt-util:1.14' // For Twelvemonkey SVG
+    implementation 'org.apache.xmlgraphics:batik-bridge:1.14' // For Twelvemonkey SVG
 
     implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
 
