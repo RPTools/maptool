@@ -231,6 +231,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     // log.info("A* Path timeout estimate: " + estimatedTimeoutNeeded);
 
+    Rectangle pathfindingBounds = this.getPathfindingBounds(start, goal);
+
     while (!openList.isEmpty()) {
       if (System.currentTimeMillis() > timeOut + estimatedTimeoutNeeded) {
         log.info("Timing out after " + estimatedTimeoutNeeded);
@@ -243,7 +245,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         break;
       }
 
-      for (AStarCellPoint currentNeighbor : getNeighbors(currentNode, closedSet)) {
+      for (AStarCellPoint currentNeighbor :
+          getNeighbors(currentNode, closedSet, pathfindingBounds)) {
         currentNeighbor.h = hScore(currentNeighbor, goal);
         showDebugInfo(currentNeighbor);
 
@@ -311,7 +314,44 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     return returnedCellPointList;
   }
 
-  protected List<AStarCellPoint> getNeighbors(AStarCellPoint node, Set<AStarCellPoint> closedSet) {
+  /**
+   * Find a suitable bounding box in which A* can look for paths.
+   *
+   * <p>The bounding box will surround all of the following:
+   *
+   * <ul>
+   *   <li>All MBL/VBL
+   *   <li>All terrain modifiers
+   *   <li>The start and goal cells
+   * </ul>
+   *
+   * Additionally, some padding is provided around all this so that a token can navigate around the
+   * outside if necessary.
+   *
+   * @param start
+   * @param goal
+   * @return A bounding box suitable for constraining the A* search space.
+   */
+  protected Rectangle getPathfindingBounds(CellPoint start, CellPoint goal) {
+    // Bounding box must contain all VBL/MBL ...
+    Rectangle pathfindingBounds = vbl.getBounds();
+    // ... and the footprints of all terrain tokens ...
+    for (var cellPoint : terrainCells.keySet()) {
+      pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(cellPoint));
+    }
+    // ... and the original token position ...
+    pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(start));
+    // ... and the target token position ...
+    pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(goal));
+    // ... and have ample room for the token to go anywhere around the outside if necessary.
+    var tokenBounds = footprint.getBounds(zone.getGrid());
+    pathfindingBounds.grow(2 * tokenBounds.width, 2 * tokenBounds.height);
+
+    return pathfindingBounds;
+  }
+
+  protected List<AStarCellPoint> getNeighbors(
+      AStarCellPoint node, Set<AStarCellPoint> closedSet, Rectangle pathfindingBounds) {
     List<AStarCellPoint> neighbors = new ArrayList<>();
     int[][] neighborMap = getNeighborMap(node.position.x, node.position.y);
 
@@ -332,6 +372,12 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               node.position.y + neighborArray[1],
               node.isOddStepOfOneTwoOneMovement ^ invertEvenOddDiagonals);
       if (closedSet.contains(neighbor)) {
+        continue;
+      }
+
+      if (!zone.getGrid().getBounds(node.position).intersects(pathfindingBounds)) {
+        // This position is too far out to possibly be part of the optimal path.
+        closedSet.add(neighbor);
         continue;
       }
 
