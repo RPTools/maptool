@@ -1,4 +1,4 @@
-# MapTool 1.9.0 Beta 3
+# MapTool 1.9.0
 The MapTool community continues to push MapTool forward with code patches, localization and providing support to each other on the various social media platforms.  A huge thanks goes out to everyone who takes part in making MapTool better.
 
 MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
