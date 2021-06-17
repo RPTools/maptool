@@ -23,7 +23,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.Base64;
 import javax.crypto.*;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.maptool.client.MapTool;
@@ -130,8 +129,6 @@ public class Handshake {
           player.isGM()
               ? MapTool.getServer().getConfig().getGmPassword(passwordSalt)
               : MapTool.getServer().getConfig().getPlayerPassword(passwordSalt);
-
-      byte[] salt = CipherUtil.getInstance().createSalt();
 
       byte[] challenge =
           encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordToUse);
@@ -277,10 +274,6 @@ public class Handshake {
 
     CipherUtil.Key cipherKey = null;
     Role playerRole = null;
-    // TODO: CDW need a new way to determine if player or GM
-    //if (CipherUtil.getInstance().validateMac(mac, username)) {
-      //cipherKey = CipherUtil.getInstance().createSecretKeySpec(playerPassword, salt);
-    //} else
     if (CipherUtil.getInstance().validateMac(mac,
         CipherUtil.getInstance().encodeBase64(playerPassword))) {
       cipherKey = playerPassword;
@@ -295,9 +288,6 @@ public class Handshake {
       return null;
     }
 
-    // If playerRole is null (we dont know if player or GM yet) then password would have been
-    // set to player password ans we try that first, if it fails then try GM. If the rols is
-    // already known dont attempt the other password.
     try {
       Cipher playerCipher = CipherUtil.getInstance().createDecryptor(cipherKey);
       decrypted = playerCipher.doFinal(message);
