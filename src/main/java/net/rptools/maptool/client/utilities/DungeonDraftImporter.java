@@ -61,6 +61,8 @@ public class DungeonDraftImporter {
   private static final int WALL_VBL_WIDTH = 3;
   /** The width to used for VBL for doors. */
   private static final int DOOR_VBL_WIDTH = 1;
+  /** The width to used for VBL for objects. */
+  private static final int OBJECT_VBL_WIDTH = 1;
 
   /** Stroke to use t create VBL path for walls. */
   private static final BasicStroke WALL_VBL_STROKE =
@@ -69,6 +71,10 @@ public class DungeonDraftImporter {
   /** Stroke to use t create VBL path for doors. */
   private static final BasicStroke DOOR_VBL_STROKE =
       new BasicStroke(DOOR_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+  /** Stroke to use t create VBL path for doors. */
+  private static final BasicStroke OBJECT_VBL_STROKE =
+      new BasicStroke(OBJECT_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
   /** Width of the Light source icon. */
   private static final int LIGHT_WIDTH = 20;
@@ -98,6 +104,8 @@ public class DungeonDraftImporter {
    */
   public void importVTT() throws IOException {
     JsonObject ddvtt;
+    double dd2vtt_format;
+
     try (InputStreamReader reader = new InputStreamReader(new FileInputStream(dungeonDraftFile))) {
       ddvtt = JsonParser.parseReader(reader).getAsJsonObject();
     }
@@ -105,7 +113,8 @@ public class DungeonDraftImporter {
     Zone zone = ZoneFactory.createZone();
 
     // Make sure this is a file format we understand
-    if (ddvtt.get(VTT_FIELD_FORMAT).getAsDouble() != 0.2) {
+    dd2vtt_format = ddvtt.get(VTT_FIELD_FORMAT).getAsDouble();
+    if (dd2vtt_format != 0.2 && dd2vtt_format != 0.3) {
       MapTool.showError("dungeondraft.import.unknownVersion");
       return;
     }
@@ -150,6 +159,20 @@ public class DungeonDraftImporter {
             Area vblArea =
                 new Area(
                     WALL_VBL_STROKE.createStrokedShape(
+                        getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
+            zone.addTopology(vblArea, TopologyMode.VBL);
+            zone.addTopology(vblArea, TopologyMode.MBL);
+          });
+    }
+
+    // Handle Objects - added with Dungeondraft 1.0.2.1
+    vbl = ddvtt.getAsJsonArray("objects_line_of_sight");
+    if (vbl != null) {
+      vbl.forEach(
+          v -> {
+            Area vblArea =
+                new Area(
+                    OBJECT_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
             zone.addTopology(vblArea, TopologyMode.VBL);
             zone.addTopology(vblArea, TopologyMode.MBL);

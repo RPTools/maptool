@@ -686,18 +686,18 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String newShape = getTokenShape(String tokenId: currentToken(), string mapName: current map)
      *
-     * See Token.TokenShape for return values. Currently "Top down", "Circle", and "Square".
+     * See Token.TokenShape for return values. Currently "TOP_DOWN", "CIRCLE", "SQUARE", and "FIGURE".
      */
     if (functionName.equals("getTokenShape")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      return token.getShape().toString();
+      return token.getShape().name();
     }
 
     /*
      * String newShape = setTokenShape(String shape, String tokenId: currentToken(), string mapName: current map)
      *
-     * See Token.TokenShape for shape values. Currently "Top down", "Top_down", "Circle", and "Square".
+     * See Token.TokenShape for shape values. Currently "top down", "top_down", "circle", "square", and "figure".
      */
     if (functionName.equals("setTokenShape")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
@@ -707,7 +707,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
           Token.TokenShape.valueOf(
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape);
-      return token.getShape().toString();
+      return token.getShape().name();
     }
 
     /*
@@ -918,14 +918,14 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   public static Zone.Layer getLayer(String layerName) throws ParserException {
     Zone.Layer layer;
-    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.toString())) {
+    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.name())) {
       layer = Zone.Layer.TOKEN;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.name())) {
       layer = Zone.Layer.BACKGROUND;
-    } else if (layerName.equalsIgnoreCase("gm")
-        || layerName.equalsIgnoreCase(Zone.Layer.GM.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.GM.name())
+        || layerName.equalsIgnoreCase("hidden")) {
       layer = Zone.Layer.GM;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.toString())) {
+    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.name())) {
       layer = Zone.Layer.OBJECT;
     } else {
       throw new ParserException(
@@ -985,7 +985,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     } else {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer);
     }
-    return layerName;
+    return layer.name();
   }
 
   /**

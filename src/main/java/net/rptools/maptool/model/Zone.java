@@ -55,9 +55,20 @@ public class Zone extends BaseModel {
 
   /** The vision type (OFF, DAY, NIGHT). */
   public enum VisionType {
-    OFF,
-    DAY,
-    NIGHT
+    OFF(),
+    DAY(),
+    NIGHT();
+
+    private final String displayName;
+
+    VisionType() {
+      displayName = I18N.getString("visionType." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /** Event types for the listeners. */
@@ -82,15 +93,15 @@ public class Zone extends BaseModel {
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
-    TOKEN("Token"),
-    GM("Hidden"),
-    OBJECT("Object"),
-    BACKGROUND("Background");
+    TOKEN(),
+    GM(),
+    OBJECT(),
+    BACKGROUND();
 
     private String displayName;
 
-    Layer(String displayName) {
-      this.displayName = displayName;
+    Layer() {
+      displayName = I18N.getString("layer." + name().toLowerCase());
     }
 
     @Override
@@ -121,9 +132,20 @@ public class Zone extends BaseModel {
 
   /** Control how A* Pathfinding distances is rounded off due to terrain costs */
   public enum AStarRoundingOptions {
-    NONE,
-    CELL_UNIT,
-    INTEGER
+    NONE(),
+    CELL_UNIT(),
+    INTEGER();
+
+    private final String displayName;
+
+    AStarRoundingOptions() {
+      displayName = I18N.getString("Zone.AStarRoundingOptions." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   // Control what topology layer(s) to add/get drawing to/from
@@ -205,6 +227,7 @@ public class Zone extends BaseModel {
   private transient boolean exposeFogAtWaypoints = false;
 
   private String name;
+  private String playerAlias;
   private boolean isVisible;
 
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
@@ -291,8 +314,16 @@ public class Zone extends BaseModel {
     return name;
   }
 
+  public String getPlayerAlias() {
+    return playerAlias == null ? name : playerAlias;
+  }
+
   public void setName(String name) {
     this.name = name;
+  }
+
+  public void setPlayerAlias(String playerAlias) {
+    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
   }
 
   public MD5Key getMapAssetId() {
@@ -351,6 +382,7 @@ public class Zone extends BaseModel {
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
     imageScaleY = zone.imageScaleY;
+    playerAlias = zone.playerAlias;
 
     // In the following blocks we allocate a new linked list then fill it with null values
     // because the Collections.copy() method requires the destination list to already be

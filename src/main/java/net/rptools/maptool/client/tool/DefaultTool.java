@@ -17,6 +17,7 @@ package net.rptools.maptool.client.tool;
 import java.awt.dnd.DragSource;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
@@ -29,6 +30,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.ViewMovementKey;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.TokenUtil;
 
@@ -77,6 +79,43 @@ public abstract class DefaultTool extends Tool
 
   protected Zone getZone() {
     return renderer.getZone();
+  }
+
+  @Override
+  protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
+    super.installKeystrokes(actionMap);
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, -1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, 1));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, -1));
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, -1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, 1));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, -1));
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
   }
 
   ////
@@ -195,6 +234,10 @@ public abstract class DefaultTool extends Tool
         lastMoveRedraw = now;
       }
     }
+  }
+
+  public void moveViewByCells(int dx, int dy) {
+    renderer.moveViewByCells(dx, dy);
   }
 
   ////
@@ -337,5 +380,39 @@ public abstract class DefaultTool extends Tool
    */
   public boolean isMiddleMouseButton(MouseEvent event) {
     return SwingUtilities.isMiddleMouseButton(event);
+  }
+
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
   }
 }

@@ -390,16 +390,12 @@ public class LineCellTemplate extends AbstractTemplate {
     // The path is only calculated for the south-east quadrant, so
     // appropriately reflect the bounding box around the starting vertex.
     if (getXMult(getQuadrant()) < 0) {
-      int tmp;
-      tmp = vertex.x - (maxp.x - vertex.x);
-      maxp.x = vertex.x - (minp.x - vertex.x);
-      minp.x = tmp;
+      minp.x -= gridSize;
+      maxp.x -= gridSize;
     }
     if (getYMult(getQuadrant()) < 0) {
-      int tmp;
-      tmp = vertex.y - (maxp.y - vertex.y);
-      maxp.y = vertex.y - (minp.y - vertex.y);
-      minp.y = tmp;
+      minp.y -= gridSize;
+      maxp.y -= gridSize;
     }
     int width = (maxp.x - minp.x);
     int height = (maxp.y - minp.y);

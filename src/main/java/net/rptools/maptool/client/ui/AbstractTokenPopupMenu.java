@@ -43,7 +43,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -193,8 +192,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              token.setFlippedX(!token.isFlippedX());
-              MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+              MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
             }
             MapTool.getFrame().refresh();
           }
@@ -211,8 +209,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              token.setFlippedY(!token.isFlippedY());
-              MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+              MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
             }
             MapTool.getFrame().refresh();
           }
@@ -863,7 +860,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     private final TokenFootprint footprint;
 
     public ChangeSizeAction(TokenFootprint footprint) {
-      super(footprint.getName());
+      super(footprint.getLocalizedName());
       this.footprint = footprint;
     }
 
@@ -927,14 +924,11 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent e) {
-      JTextComponent commandArea = MapTool.getFrame().getCommandPanel().getCommandTextArea();
-
       if (!AppUtil.playerOwns(tokenUnderMouse)) {
         return;
       }
-      commandArea.setText("/im " + tokenUnderMouse.getId());
-      MapTool.getFrame().getCommandPanel().commitCommand();
-      commandArea.requestFocusInWindow();
+      MapTool.getFrame().getCommandPanel().commitCommand("/im " + tokenUnderMouse.getId());
+      MapTool.getFrame().getCommandPanel().getCommandTextArea().requestFocusInWindow();
     }
   }
 

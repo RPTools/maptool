@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '14' ]
+        java: [ '16' ]
       fail-fast: false
     steps:
       #       ____          _  __     __   ___        ____                __
@@ -27,8 +27,9 @@ jobs:
     - name: Git checkout
       uses: actions/checkout@v2
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
+        distribution: 'adopt'
         java-version: ${{ matrix.java }}
     - name: Cache Gradle
       uses: actions/cache@v1

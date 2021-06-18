@@ -186,7 +186,7 @@ public class StartServerDialogPreferences {
   }
 
   public void setMovementMetric(WalkerMetric metric) {
-    prefs.put(KEY_WALKER_METRIC, metric.toString());
+    prefs.put(KEY_WALKER_METRIC, metric.name());
   }
 
   public boolean getUseIndividualFOW() {

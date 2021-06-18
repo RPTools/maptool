@@ -1342,7 +1342,7 @@
                             <at name="classname">javax.swing.JRadioButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Image Writer</at>
+                              <at name="text">ExportScreenshot.method.iw</at>
                               <at name="height">17</at>
                               <at name="buttonGroup">
                                <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -1353,7 +1353,7 @@
                               <at name="width">83</at>
                               <at name="name">METHOD_IMAGE_WRITER</at>
                               <at name="actionCommand">Image Writer</at>
-                              <at name="toolTipText">Renders the image incrementally as it is needed by the file output formatting code. Uses less memory. Extremely large files can take a long time. The UI will not update during the file output, so the program may be unresponsive for several minutes while the file is saved.</at>
+                              <at name="toolTipText">ExportScreenshot.method.iw.tooltip</at>
                               <at name="border">
                                <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                                 <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -1405,7 +1405,7 @@
                             <at name="classname">javax.swing.JRadioButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Background Thread</at>
+                              <at name="text">ExportScreenshot.method.bg</at>
                               <at name="height">17</at>
                               <at name="buttonGroup">
                                <object classname="com.jeta.forms.store.properties.ButtonGroupProperty">
@@ -1416,7 +1416,7 @@
                               <at name="width">113</at>
                               <at name="name">METHOD_BACKGROUND</at>
                               <at name="actionCommand">Background Thread</at>
-                              <at name="toolTipText">NOT IMPLEMENTED! Uses a the Image Writer technique in a background thread so that the UI can be updated with the progress.</at>
+                              <at name="toolTipText">ExportScreenshot.method.bg.tooltip</at>
                               <at name="border">
                                <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                                 <super classname="com.jeta.forms.store.properties.BorderProperty">
@@ -1468,7 +1468,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Rendering Method:</at>
+                              <at name="text">ExportScreenshot.method.label</at>
                               <at name="height">14</at>
                               <at name="width">92</at>
                               <at name="name">METHOD_LABEL</at>
@@ -1528,7 +1528,7 @@
                             <at name="classname">javax.swing.JRadioButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Buffered Image</at>
+                              <at name="text">ExportScreenshot.method.buffered</at>
                               <at name="selected">true</at>
                               <at name="height">17</at>
                               <at name="buttonGroup">
@@ -1540,7 +1540,7 @@
                               <at name="width">95</at>
                               <at name="name">METHOD_BUFFERED_IMAGE</at>
                               <at name="actionCommand">Buffered Image</at>
-                              <at name="toolTipText">Renders the image into a single bitmap then saves that to the chosen location. Can use a lot of memory, and may fail if the image is too large.</at>
+                              <at name="toolTipText">ExportScreenshot.method.buffered.tooltip</at>
                               <at name="border">
                                <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
                                 <super classname="com.jeta.forms.store.properties.BorderProperty">
