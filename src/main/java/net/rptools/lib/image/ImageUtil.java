@@ -257,7 +257,14 @@ public class ImageUtil {
    * @throws IOException if the image cannot be written to the output stream.
    */
   public static byte[] imageToBytes(BufferedImage image) throws IOException {
-    return imageToBytes(image, "jpg");
+
+    // First try jpg, if it cant be converted to jpg try png
+    byte[] imageBytes = imageToBytes(image, "jpg");
+    if (imageBytes.length > 0) {
+      return imageBytes;
+    }
+
+    return imageToBytes(image, "png");
   }
 
   /**
@@ -447,5 +454,23 @@ public class ImageUtil {
     }
 
     return new ImageIcon(icon.getImage().getScaledInstance(nw, nh, Image.SCALE_DEFAULT));
+  }
+
+  /**
+   * Scales a BufferedImage to a desired width and height and returns the result.
+   *
+   * @param image The BufferedImage to be scaled
+   * @param width Desired width in px
+   * @param height Desired height in px
+   * @return The scaled BufferedImage
+   */
+  public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
+    BufferedImage scaled = new BufferedImage(width, height, image.getType());
+    Graphics2D g = scaled.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    g.drawImage(image, 0, 0, width, height, null);
+    g.dispose();
+
+    return scaled;
   }
 }

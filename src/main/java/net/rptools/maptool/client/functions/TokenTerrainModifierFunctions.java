@@ -119,12 +119,11 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
     JsonArray jsonArray = new JsonArray();
 
     for (TerrainModifierOperation terrainModifiersIgnored : token.getTerrainModifiersIgnored()) {
-      jsonArray.add(terrainModifiersIgnored.toString());
+      jsonArray.add(terrainModifiersIgnored.name());
     }
 
     jsonObject.addProperty("terrainModifier", token.getTerrainModifier());
-    jsonObject.addProperty(
-        "terrainModifierOperation", token.getTerrainModifierOperation().toString());
+    jsonObject.addProperty("terrainModifierOperation", token.getTerrainModifierOperation().name());
     jsonObject.add("terrainModifiersIgnored", jsonArray);
 
     return jsonObject;
@@ -179,7 +178,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
                 "setTerrainModifier",
                 terrainModifierOperationPrimitive.getAsString(),
                 Arrays.stream(TerrainModifierOperation.values())
-                    .map(Enum::toString)
+                    .map(Enum::name)
                     .collect(Collectors.joining(", "))));
       }
 

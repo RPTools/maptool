@@ -14,9 +14,22 @@
  */
 package net.rptools.maptool.client.walker;
 
+import net.rptools.maptool.language.I18N;
+
 public enum WalkerMetric {
-  NO_DIAGONALS,
-  MANHATTAN,
-  ONE_TWO_ONE,
-  ONE_ONE_ONE;
+  NO_DIAGONALS(),
+  MANHATTAN(),
+  ONE_TWO_ONE(),
+  ONE_ONE_ONE();
+
+  private final String displayName;
+
+  WalkerMetric() {
+    displayName = I18N.getString("WalkerMetric." + name());
+  }
+
+  @Override
+  public String toString() {
+    return displayName;
+  }
 }

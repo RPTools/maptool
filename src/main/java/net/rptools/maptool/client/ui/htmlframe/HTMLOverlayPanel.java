@@ -192,6 +192,7 @@ public class HTMLOverlayPanel extends JFXPanel {
       root.getChildren().remove(overlay.getWebView());
       overlays.remove(overlay);
       AppMenuBar.removeFromOverlayMenu(overlay.getName());
+      overlay.flush();
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -207,6 +208,7 @@ public class HTMLOverlayPanel extends JFXPanel {
           for (HTMLOverlayManager overlay : overlays) {
             listChildren.remove(overlay.getWebView());
             AppMenuBar.removeFromOverlayMenu(overlay.getName());
+            overlay.flush();
           }
           overlays.clear();
           setVisible(false);

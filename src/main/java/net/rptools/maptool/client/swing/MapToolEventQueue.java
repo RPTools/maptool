@@ -145,7 +145,7 @@ public class MapToolEventQueue extends EventQueue {
     // Set the user in the current context.
     Sentry.getContext().setUser(user.build());
 
-    Sentry.getContext().addTag("role", player != null ? player.getRole().toString() : null);
+    Sentry.getContext().addTag("role", player != null ? player.getRole().name() : null);
     boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
