@@ -122,7 +122,7 @@ run {
     // Add  -Djavax.net.debug=all to debug networking issues
 
     if (osdetector.os.is('osx')) {
-        applicationDefaultJvmArgs += [ "-Xdock:name=MapTool" ]
+        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
     }
 
     if (System.getProperty("exec.args") != null) {
@@ -204,7 +204,7 @@ runtime {
             ]
             targetPlatform('mac') {
                 jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
-                jvmArgs += [ "-Xdock:name=MapTool" ]
+                jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
 
