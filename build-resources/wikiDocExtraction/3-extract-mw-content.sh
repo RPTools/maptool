@@ -9,7 +9,7 @@
 XSL=extract-mw-content.xsl
 
 mkdir -p processed
-find wiki.rptools.info/index.php/ -type f |
+find wiki.rptools.info/index.php -type f |
     sort |
     while read fname
     do

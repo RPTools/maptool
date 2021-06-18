@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Create the i18n.properties file by read the files under 'processed/'
+# Create the i18n.properties file by reading the files under 'processed/'
 
 #abort.description = Conditionally abort the execution of a macro
 #abort.summary     = <h2><span>abort() Function</span></h2>\

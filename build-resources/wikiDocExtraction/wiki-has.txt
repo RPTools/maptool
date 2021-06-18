@@ -1,3 +1,60 @@
+https://wiki.rptools.info/index.php/macro.args missing template
+https://wiki.rptools.info/index.php/macro.return missing template
+https://wiki.rptools.info/index.php/Glossary missing template
+https://wiki.rptools.info/index.php/token.name missing template
+https://wiki.rptools.info/index.php/token.halo missing template
+https://wiki.rptools.info/index.php/token.label missing template
+https://wiki.rptools.info/index.php/roll.count missing template
+https://wiki.rptools.info/index.php/token.visible missing template
+https://wiki.rptools.info/index.php/roll.result missing template
+https://wiki.rptools.info/index.php/bar.name missing template
+https://wiki.rptools.info/index.php/String missing template
+https://wiki.rptools.info/index.php/token.init missing template
+https://wiki.rptools.info/index.php/token.initHold missing template
+https://wiki.rptools.info/index.php/state.name missing template
+https://wiki.rptools.info/index.php/Token missing template
+https://wiki.rptools.info/index.php/h redirect out of scope
+https://wiki.rptools.info/index.php/hide redirect out of scope
+https://wiki.rptools.info/index.php/hidden redirect out of scope
+https://wiki.rptools.info/index.php/token redirect out of scope
+https://wiki.rptools.info/index.php/Notepad++ missing template
+https://wiki.rptools.info/index.php/onCampaignLoad missing template
+https://wiki.rptools.info/index.php/!!unknown-macro!! missing template
+https://wiki.rptools.info/index.php/MTBasics redirect out of scope
+https://wiki.rptools.info/index.php/Number missing template
+https://wiki.rptools.info/index.php/Editor missing template
+https://wiki.rptools.info/index.php/Preferences redirect out of scope
+https://wiki.rptools.info/index.php/dialog redirect out of scope
+https://wiki.rptools.info/index.php/Wiki redirect out of scope
+https://wiki.rptools.info/index.php/Uninstalling missing template
+https://wiki.rptools.info/index.php/State redirect out of scope
+https://wiki.rptools.info/index.php/Aura missing template
+https://wiki.rptools.info/index.php/Frameworks missing template
+https://wiki.rptools.info/index.php/Size missing template
+https://wiki.rptools.info/index.php/tokens.denyMove missing template
+https://wiki.rptools.info/index.php/tokens.moveCount missing template
+https://wiki.rptools.info/index.php/onTokenMove missing template
+https://wiki.rptools.info/index.php/onMultipleTokensMove missing template
+https://wiki.rptools.info/index.php/onChangeSelection missing template
+https://wiki.rptools.info/index.php/onMouseOverEvent missing template
+https://wiki.rptools.info/index.php/Phergus missing template
+https://wiki.rptools.info/index.php/TokenTool missing template
+https://wiki.rptools.info/index.php/exposeAllOwnedAreas missing template
+https://wiki.rptools.info/index.php/macro.catchAbort missing template
+https://wiki.rptools.info/index.php/macro.catchAssert missing template
+https://wiki.rptools.info/index.php/init.current missing template
+https://wiki.rptools.info/index.php/init.round missing template
+https://wiki.rptools.info/index.php/AI redirect out of scope
+https://wiki.rptools.info/index.php/Bars redirect out of scope
+https://wiki.rptools.info/index.php/Tables redirect out of scope
+https://wiki.rptools.info/index.php/frame5 redirect out of scope
+https://wiki.rptools.info/index.php/MBL redirect out of scope
+https://wiki.rptools.info/index.php/MapTool missing template
+https://wiki.rptools.info/index.php/overlay redirect out of scope
+https://wiki.rptools.info/index.php/dialog5 redirect out of scope
+https://wiki.rptools.info/index.php/init.denyChange missing template
+https://wiki.rptools.info/index.php/onInitiativeChange redirect out of scope
+https://wiki.rptools.info/index.php/onInitiativeChangeRequest redirect out of scope
 REST.delete
 REST.get
 REST.patch
@@ -50,6 +107,7 @@ countsuccess
 createMacro
 createTable
 currentToken
+d
 decode
 defineAudioSource
 defineFunction
@@ -57,8 +115,6 @@ deleteStrProp
 deleteTable
 deleteTableEntry
 deselectTokens
-dialog
-dialog5
 dice
 divide
 drawMBL
@@ -87,11 +143,11 @@ exposeFOW
 exposeFogAtWaypoints
 exposePCAreaOnly
 exposePCOnlyArea
+f
 findDrawings
 findToken
 floor
 formatStrProp
-frame5
 fudge
 ge
 getAllMapDisplayNames
@@ -260,8 +316,6 @@ herolab.isMinion
 herolab.refresh
 herostun
 hex
-hidden
-hide
 hideTextLabels
 hypot
 hypotenuse
@@ -378,7 +432,6 @@ max
 mean
 median
 min
-mod
 moveToken
 moveTokenFrom
 moveTokenFromMap
@@ -392,12 +445,8 @@ nextInitiative
 not
 number
 oldFunction
-onInitiativeChange
-onInitiativeChangeRequest
-onMouseOver
 openTest
 or
-overlay
 playClip
 playStream
 pow
@@ -511,7 +560,6 @@ square
 squareroot
 sr4
 sr4e
-stamp
 startsWith
 stopSound
 stopStream
@@ -531,9 +579,9 @@ tableImage
 tbl
 tblImage
 toggleFoW
-token
 transferVBL
 trim
+u
 ubiquity
 upper
 varsFromStrProp

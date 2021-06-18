@@ -1,0 +1,33 @@
+= Wiki Pages That Need Updates
+
+Most of these are simple formatting updates (using the `{{code|...}}` template, for example).
+
+== Phrasing
+
+The first sentence of each function page should be an overview of that function, and it should read as though two words were implied at the beginning, "This function ..."
+
+For example, the `abort()` function has a single sentence that says, "Is used to conditionally abort the execution of a macro."
+That's properly constructed.
+
+But the `and()` function says, "This function performs a logical *AND* comparison between all of the passed numeric values."
+The First two words are redundant (additionally, and "of" should be removed from "all of the", but that's a separate issue).
+
+I'm also thinking that the phrase "is used to" should be removed as well and active verbs used instead.  That changes `abort()` to, "Conditionally aborts the execution of a macro."  The `arg()` description would change from, "Is used to extract arguments that are passed to a macro when called as a user defined function." to "Extracts arguments that are passed to a macro when called as a user defined function."
+
+It would be best to look at all such _phrasing_ issues before implementing any of them, or there could be a lot of redo involved!
+
+== Fonts
+
+I noticed that many pages are not consistent about how they format content.
+For example, the `bitwiseand` page puts single quotes around `and` to denote that it's the boolean operation (and mistakenly says it's the logical operation!).
+Instead of single quotes, I think a template should be defined for anything meant to be literal text, such as `{{lit|...}}`, and all literal text changed to use it.
+Using a template allows the actual visual display to be changed at any time for all pages.
+
+The same should be done for user input, variable names, code snippets, function parameters, and so forth.
+A full list of all semantic types of string could be quite long.
+This could be a huge benefit for accessibility since people with visual handicaps need consistency from their screen reader.
+
+This is going to be a huge effort to revamp all existing pages. 🙁
+
+A good approach may be to gather a group of volunteers and give each one a portion of the wiki to clean up, starting with just the function pages.
+For such volunteers to be helpful, that list of semantic types need to be prepared in advance.
