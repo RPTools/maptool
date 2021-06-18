@@ -117,9 +117,13 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Xdock:name=MapTool", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
+
+    if (osdetector.os.is('osx')) {
+        applicationDefaultJvmArgs += [ "-Xdock:name=MapTool" ]
+    }
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -200,6 +204,7 @@ runtime {
             ]
             targetPlatform('mac') {
                 jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
+                jvmArgs += [ "-Xdock:name=MapTool" ]
             }
         }
 
