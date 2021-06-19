@@ -14,13 +14,14 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
-import java.util.Collections;
-import java.util.List;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.ModelChangeEvent;
+import net.rptools.maptool.model.ModelChangeListener;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Event;
 import net.rptools.parser.ParserException;
 
@@ -199,15 +200,7 @@ public class HTMLFrameFactory {
 
     public void modelChanged(ModelChangeEvent event) {
       if (event.eventType == Event.TOKEN_CHANGED) {
-        List<Token> tokens; // could be receiving a list from putTokens()
-
-        if (event.getArg() instanceof Token) {
-          tokens = Collections.singletonList((Token) event.getArg());
-        } else {
-          tokens = (List<Token>) event.getArg();
-        }
-
-        for (Token token : tokens) {
+        for (Token token : event.getTokensAsList()) {
           tokenChanged(token);
         }
       }
