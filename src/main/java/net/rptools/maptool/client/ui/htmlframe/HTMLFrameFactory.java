@@ -14,8 +14,10 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
@@ -184,11 +186,14 @@ public class HTMLFrameFactory {
    * One of the tokens has changed.
    *
    * @param token the token that have changed
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    */
-  public static void tokenChanged(Token token) {
-    HTMLFrame.doTokenChanged(token);
-    HTMLDialog.doTokenChanged(token);
-    MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
+  public static void tokenChanged(Token token, Token.Update update, String[] parameters) {
+    HTMLFrame.doTokenChanged(token, update, parameters);
+    HTMLDialog.doTokenChanged(token, update, parameters);
+    MapTool.getFrame().getOverlayPanel().doTokenChanged(token, update, parameters);
   }
 
   public static class Listener implements ModelChangeListener, AppEventListener {
@@ -197,18 +202,29 @@ public class HTMLFrameFactory {
       MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(this);
     }
 
+    @SuppressWarnings("unchecked")
     public void modelChanged(ModelChangeEvent event) {
       if (event.eventType == Event.TOKEN_CHANGED) {
         List<Token> tokens; // could be receiving a list from putTokens()
+        Token.Update update = null;
+        String[] parameters = null;
 
         if (event.getArg() instanceof Token) {
           tokens = Collections.singletonList((Token) event.getArg());
-        } else {
+        } else if (event.getArg() instanceof List<?>) {
           tokens = (List<Token>) event.getArg();
+        } else {
+          Object[] argArray = (Object[]) event.getArg();
+          tokens = Collections.singletonList((Token) argArray[0]);
+          update = (Token.Update) argArray[1];
+          parameters =
+              Stream.of(Arrays.copyOfRange(argArray, 2, argArray.length))
+                  .map(String.class::cast)
+                  .toArray(String[]::new);
         }
 
         for (Token token : tokens) {
-          tokenChanged(token);
+          tokenChanged(token, update, parameters);
         }
       }
     }

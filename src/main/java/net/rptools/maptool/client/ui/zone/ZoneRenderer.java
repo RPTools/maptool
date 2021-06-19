@@ -4858,8 +4858,11 @@ public class ZoneRenderer extends JComponent
           for (Token token : list) {
             flush(token);
           }
-        } else {
+        } else if (event.getArg() instanceof Token) {
           flush((Token) event.getArg());
+        } else {
+          Object[] argArray = (Object[]) event.getArg();
+          flush((Token) argArray[0]);
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {

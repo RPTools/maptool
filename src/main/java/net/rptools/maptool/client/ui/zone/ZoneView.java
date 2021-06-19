@@ -19,17 +19,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
@@ -801,8 +792,13 @@ public class ZoneView implements ModelChangeListener {
             if (token.hasVBL()) tokenChangedVBL = true;
             flush(token);
           }
-        } else {
+        } else if (event.getArg() instanceof Token) {
           final Token token = (Token) event.getArg();
+          if (token.hasVBL()) tokenChangedVBL = true;
+          flush(token);
+        } else {
+          Object[] argArray = (Object[]) event.getArg();
+          final Token token = (Token) argArray[0];
           if (token.hasVBL()) tokenChangedVBL = true;
           flush(token);
         }
@@ -815,10 +811,12 @@ public class ZoneView implements ModelChangeListener {
         Object o = event.getArg();
         List<Token> tokens = null;
         if (o instanceof Token) {
-          tokens = new ArrayList<Token>(1);
-          tokens.add((Token) o);
-        } else {
+          tokens = Collections.singletonList((Token) o);
+        } else if (o instanceof List<?>) {
           tokens = (List<Token>) o;
+        } else {
+          Object[] argArray = (Object[]) o;
+          tokens = Collections.singletonList((Token) argArray[0]);
         }
 
         tokenChangedVBL = processTokenAddChangeEvent(tokens);

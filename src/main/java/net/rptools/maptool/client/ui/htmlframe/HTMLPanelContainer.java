@@ -14,11 +14,14 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.functions.StringFunctions;
 import net.rptools.maptool.model.Token;
 
 /** Interface for the container of an HTML panel. */
@@ -112,14 +115,47 @@ public interface HTMLPanelContainer extends ActionListener {
    * Run the callback macro for "onChangeToken".
    *
    * @param token the token that changed.
+   * @param update the update source
+   * @param parameters any additional update parameters that can be passed off to the onChangeToken
+   *     event, these are string representations designed to be inspected by macro code
    * @param macroCallbacks the call back macros.
    */
-  static void tokenChanged(final Token token, Map<String, String> macroCallbacks) {
+  static void tokenChanged(
+      final Token token,
+      Token.Update update,
+      String[] parameters,
+      Map<String, String> macroCallbacks) {
+    // basic onChangeToken, that only accepts the token id
     if (macroCallbacks.get("onChangeToken") != null) {
       EventQueue.invokeLater(
           () ->
               MacroLinkFunction.runMacroLink(
                   macroCallbacks.get("onChangeToken") + token.getId().toString()));
+    }
+
+    // onChangeToken version 2 which accepts token id, update source, and contextual parameters
+    if (macroCallbacks.get("onChangeToken_2") != null) {
+      StringBuilder strBuilder = new StringBuilder();
+      // macro link
+      strBuilder.append(macroCallbacks.get("onChangeToken_2"));
+
+      JsonObject additionalInfo = new JsonObject();
+      additionalInfo.addProperty("tokenId", token.getId().toString());
+      if (update != null) {
+        additionalInfo.addProperty("update", update.name());
+      }
+      if (parameters != null) {
+        JsonArray paramArray = new JsonArray();
+        for (String parameter : parameters) {
+          paramArray.add(StringFunctions.urlEncodeString(parameter));
+        }
+        additionalInfo.add("parameters", paramArray);
+      }
+
+      strBuilder.append(additionalInfo.toString());
+      strBuilder.append(';');
+
+      EventQueue.invokeLater(() -> MacroLinkFunction.runMacroLink(strBuilder.toString()));
     }
   }
 }
