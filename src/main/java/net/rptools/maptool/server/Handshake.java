@@ -123,12 +123,14 @@ public class Handshake {
     Player player = null;
     dos.writeInt(response.code);
     if (response.code == Code.OK) {
-      player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
-      HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-      CipherUtil.Key passwordToUse =
-          player.isGM()
+
+      Player.Role role = Player.Role.valueOf(request.role);
+      CipherUtil.Key passwordToUse = role == Player.Role.GM
               ? MapTool.getServer().getConfig().getGmPassword(passwordSalt)
               : MapTool.getServer().getConfig().getPlayerPassword(passwordSalt);
+
+      player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
+      HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
 
       byte[] challenge =
           encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordToUse);
@@ -161,9 +163,7 @@ public class Handshake {
         return null;
       }
 
-      byte[] responseBytes = decode(bytes, player.isGM()
-          ? MapTool.getServer().getConfig().getGmPassword(responseSalt)
-          : MapTool.getServer().getConfig().getPlayerPassword(responseSalt));
+      byte[] responseBytes = decode(bytes, passwordToUse);
       String challengeResponse = new String(responseBytes);
 
       if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
@@ -391,7 +391,7 @@ public class Handshake {
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
       byte[] responseSalt = CipherUtil.getInstance().createSalt();
       CipherUtil.Key responseKey =
-          CipherUtil.getInstance().createKey(request.password, responseSalt);
+          CipherUtil.getInstance().createKey(request.password, passwordSalt);
       byte[] response = encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8), responseKey);
       dos.writeInt(responseSalt.length);
       dos.write(responseSalt);

@@ -23,19 +23,19 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.client.ClientConnection;
-import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.Handshake;
 
 /** @author trevor */
 public class MapToolConnection extends ClientConnection {
-  private final Player player;
+  private final LocalPlayer player;
 
-  public MapToolConnection(String host, int port, Player player) throws IOException {
+  public MapToolConnection(String host, int port, LocalPlayer player) throws IOException {
     super(host, port, null);
     this.player = player;
   }
 
-  public MapToolConnection(Socket socket, Player player) throws IOException {
+  public MapToolConnection(Socket socket, LocalPlayer player) throws IOException {
     super(socket, null);
     this.player = player;
   }
@@ -49,10 +49,12 @@ public class MapToolConnection extends ClientConnection {
   public boolean sendHandshake(Socket s) throws IOException {
     Handshake.Response response = null;
     try {
+      // TODO CDW: would this be better to set salt and use password
       response =
           Handshake.sendHandshake(
               new Handshake.Request(
-                  player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()),
+                  player.getName(), player.getPlainTextPassword(), player.getRole(),
+                  MapTool.getVersion()),
               s);
     } catch (IllegalBlockSizeException
         | InvalidKeyException

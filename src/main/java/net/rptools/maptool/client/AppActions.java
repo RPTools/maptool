@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -101,8 +103,8 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.LookupTable;
+import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
@@ -2260,13 +2262,16 @@ public class AppActions {
                 } catch (IOException ioe) {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                  MapTool.showError("msg.error.initializeCrypto", e);
+                  failed = true;
                 }
 
                 if (failed) {
                   try {
                     MapTool.startPersonalServer(campaign);
-                  } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+                  } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
               });
@@ -2333,13 +2338,16 @@ public class AppActions {
                 } catch (IOException e1) {
                   MapTool.showError("msg.error.failedLoadCampaign", e1);
                   failed = true;
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
+                  MapTool.showError("msg.error.initializeCrypto", e1);
+                  failed = true;
                 }
                 if (failed || MapTool.getConnection() == null) {
                   MapTool.getFrame().hideGlassPane();
                   try {
                     MapTool.startPersonalServer(oldCampaign);
-                  } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+                  } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
               });
@@ -2374,8 +2382,8 @@ public class AppActions {
     MapTool.disconnect();
     try {
       MapTool.startPersonalServer(campaign);
-    } catch (IOException ioe) {
-      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+      MapTool.showError("msg.error.failedStartPersonalServer", e);
     }
   }
 

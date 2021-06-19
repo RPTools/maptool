@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -75,8 +77,8 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
@@ -677,9 +679,9 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
 
     try {
+      player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // This was previously being done in the server thread and didn't always get done
       // before the campaign was accessed by the postInitialize() method below.
@@ -1154,7 +1156,8 @@ public class MapTool {
     return player;
   }
 
-  public static void startPersonalServer(Campaign campaign) throws IOException {
+  public static void startPersonalServer(Campaign campaign)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
