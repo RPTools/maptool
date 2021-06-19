@@ -155,6 +155,11 @@ public class InitiativePanel extends JPanel
     toolBar.add(round);
     toolBar.add(Box.createHorizontalStrut(8));
 
+    // ensure that the preferred width is enough to show the round counter in fullscreen
+    round.setText(I18N.getText("initPanel.round") + " 99");
+    round.setPreferredSize(round.getMinimumSize());
+    round.setText("");
+
     ownerPermissions = MapTool.getCampaign().isInitiativeOwnerPermissions();
     movementLock = MapTool.getCampaign().isInitiativeMovementLock();
     initUseReverseSort = MapTool.getCampaign().isInitiativeUseReverseSort();

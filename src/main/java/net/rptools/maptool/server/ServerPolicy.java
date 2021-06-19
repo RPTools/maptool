@@ -241,7 +241,7 @@ public class ServerPolicy {
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
-    sinfo.addProperty("movement metric", metric.toString());
+    sinfo.addProperty("movement metric", metric.name());
 
     sinfo.addProperty("using ai", isUsingAstarPathfinding() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty("vbl blocks movement", getVblBlocksMove() ? BigDecimal.ONE : BigDecimal.ZERO);

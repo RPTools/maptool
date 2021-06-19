@@ -428,7 +428,7 @@ public class TokenStatesController
   public void changedUpdate(DocumentEvent e) {
     String text = formPanel.getText(IMAGE);
     boolean hasImage =
-        !((ListItemProperty) formPanel.getSelectedItem(TYPE)).getLabel().contains("Image")
+        !((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName().contains("Image")
             || text != null && (text = text.trim()).length() != 0;
     text = formPanel.getText(NAME);
     boolean hasName = text != null && (text = text.trim()).length() != 0;
@@ -665,7 +665,7 @@ public class TokenStatesController
     String name = formPanel.getText(NAME);
     String group = formPanel.getText(GROUP);
     boolean mouseover = formPanel.isSelected(MOUSEOVER);
-    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getLabel();
+    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName();
     int opacity = getSpinner(OPACITY, "opacity", formPanel);
     int index = getSpinner(INDEX, "index", formPanel);
     boolean showGM = formPanel.isSelected(SHOW_GM);
@@ -675,8 +675,7 @@ public class TokenStatesController
     // Check for overlays that don't use width
     BooleanTokenOverlay to = null;
     if (overlay.equals("Dot")) {
-      String cornerName =
-          formPanel.getSelectedItem(CORNER).toString().toUpperCase().replace(' ', '_');
+      String cornerName = ((ListItemProperty) formPanel.getSelectedItem(CORNER)).getName();
       to = new ColorDotTokenOverlay(name, color, Quadrant.valueOf(cornerName));
     } else if (overlay.equals("Shaded")) {
       to = new ShadedTokenOverlay(name, color);
@@ -739,8 +738,7 @@ public class TokenStatesController
         if (overlay.equals("Image")) {
           to = new ImageTokenOverlay(name, assetId);
         } else if (overlay.equals("Corner Image")) {
-          String cornerName =
-              formPanel.getSelectedItem(CORNER).toString().toUpperCase().replace(' ', '_');
+          String cornerName = ((ListItemProperty) formPanel.getSelectedItem(CORNER)).getName();
           to = new CornerImageTokenOverlay(name, assetId, Quadrant.valueOf(cornerName));
         } else if (overlay.equals("Grid Image")) {
           to = new FlowImageTokenOverlay(name, assetId, grid);

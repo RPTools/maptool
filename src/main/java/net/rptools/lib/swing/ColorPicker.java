@@ -33,6 +33,7 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.BevelBorder;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 
 public class ColorPicker extends JPanel {
   private final JFrame owner;
@@ -90,7 +91,7 @@ public class ColorPicker extends JPanel {
     paintChooser = new PaintChooser();
     paintChooser.setPreferredSize(new Dimension(450, 400));
 
-    FormPanel panel = new FormPanel("net/rptools/lib/swing/forms/colorPanel.xml");
+    FormPanel panel = new FormPanelI18N("net/rptools/lib/swing/forms/colorPanel.xml");
 
     ColorWellListener listener = new ColorWellListener(1);
 
@@ -130,7 +131,7 @@ public class ColorPicker extends JPanel {
     snapToggle.setIcon(freeDrawIcon);
     snapToggle.setSelectedIcon(snapToIcon);
 
-    squareCapToggle = (JToggleButton) panel.getButton("toggelSquareCap");
+    squareCapToggle = (JToggleButton) panel.getButton("toggleSquareCap");
     squareCapToggle.setIcon(roundCapIcon);
     squareCapToggle.setSelectedIcon(squareCapIcon);
 

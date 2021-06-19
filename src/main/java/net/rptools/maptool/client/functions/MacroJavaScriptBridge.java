@@ -16,10 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.*;
-import javax.script.ScriptException;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
@@ -47,6 +44,11 @@ public class MacroJavaScriptBridge extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
+    throw new ParserException(
+        I18N.getText("macro.function.general.temporarilyUnavailable", functionName));
+
+    /* Temporarily commented out to avoid "unreachable statements" errors while a fix is being developed
+    see https://github.com/RPTools/maptool/issues/2519 for more details.
     variableResolver = (MapToolVariableResolver) resolver;
     if ("js.eval".equals(functionName)) {
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -72,6 +74,7 @@ public class MacroJavaScriptBridge extends AbstractFunction {
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+    */
   }
 
   public Object JavaScriptToMTScriptType(Object val) {

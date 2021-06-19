@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.utilities.RandomSuffixFactory;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
@@ -137,7 +138,7 @@ public class MapToolUtil {
     Integer newNum = null;
 
     if (isToken && AppPreferences.getNewTokenNaming().equals(Token.NAME_USE_CREATURE)) {
-      newName = "Creature";
+      newName = I18N.getString("Token.name.creature");
     } else if (!force) {
       return baseName;
     } else if (baseName == null) {
