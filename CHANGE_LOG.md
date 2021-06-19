@@ -1,8 +1,14 @@
+# MapTool 1.9.2
+Bug fix release.  Missed one.
+
+## Bug Fixes
+- [#2749][i2749] Macro editor help missing entries for many functions.  Most documented functions now have help.
+
+
 # MapTool 1.9.1
 Bug fix release.
 
 ## Bug Fixes
-- [#2749][i2749] Macro editor help missing entries for many functions.  Most documented functions now have help.
 - [#2745][i2745] SVG files not being rendered. Fixed.
 - [#2742][i2742] Attempting to add local folder to Resource Library was throwing exception. Fixed.
 
