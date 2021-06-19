@@ -57,14 +57,8 @@ public class WebTokenInfo {
               } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
                 tokenAdded((Token) event.getArg());
               } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
-                if (event.getArg() instanceof List<?>) {
-                  @SuppressWarnings("unchecked")
-                  List<Token> list = (List<Token>) (event.getArg());
-                  for (Token token : list) {
-                    tokenRemoved(token);
-                  }
-                } else {
-                  tokenRemoved((Token) event.getArg());
+                for (Token token : event.getTokensAsList()) {
+                  tokenRemoved(token);
                 }
               }
             });
