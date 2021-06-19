@@ -1,5 +1,8 @@
 package net.rptools.maptool.model.player;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
 
 import java.util.HashMap;
@@ -12,10 +15,14 @@ import java.util.Optional;
  */
 public class DefaultPlayerDatabase implements PlayerDatabase {
 
-  private final Map<Player.Role, CipherUtil.Key> rolePasswordMap = new HashMap<>();
+  private final CipherUtil.Key playerPassword;
+  private final CipherUtil.Key gmPassword;
 
-  DefaultPlayerDatabase() {
-
+  public DefaultPlayerDatabase(String playerPassword, String gmPassword)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    byte[] salt = CipherUtil.getInstance().createSalt();
+    this.playerPassword = CipherUtil.getInstance().createKey(playerPassword, salt);
+    this.gmPassword = CipherUtil.getInstance().createKey(gmPassword, salt);
   }
 
   @Override
@@ -26,7 +33,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public Player getPlayer(String playerName) {
     // If role is not specified always return player!
-    return new Player(playerName, Player.Role.PLAYER, rolePasswordMap.get(Player.Role.PLAYER));
+    return new Player(playerName, Player.Role.PLAYER, playerPassword);
   }
 
   @Override
@@ -35,12 +42,24 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public byte[] getPlayerPasswordSalt(String playerName) {
+    return playerPassword.salt(); // Player and GM password salt are the same
+  }
+
+  @Override
   public Player getPlayerWithRole(String playerName, Player.Role role) {
-    return new Player(playerName, role, rolePasswordMap.get(role));
+    return new Player(playerName, role, getRolePassword(role).get());
   }
 
   @Override
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
-    return Optional.of(rolePasswordMap.get(role));
+    switch (role) {
+      case PLAYER:
+        return Optional.of(playerPassword);
+      case GM:
+        return Optional.of(gmPassword);
+      default:
+        return Optional.empty();
+    }
   }
 }

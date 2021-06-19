@@ -1,5 +1,7 @@
 package net.rptools.maptool.model.player;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import net.rptools.maptool.util.CipherUtil;
 
 import java.util.Optional;
@@ -24,7 +26,7 @@ public interface PlayerDatabase {
    * @param playerName the name of the player to retrieve.
    * @return the player information.
    */
-  Player getPlayer(String playerName);
+  Player getPlayer(String playerName) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
   /**
    * Returns the {@link CipherUtil.Key} for the player. If the database only supports role based passwords
@@ -37,13 +39,23 @@ public interface PlayerDatabase {
 
 
   /**
+   * Returns the salt used for the player's password.
+   *
+   * @param playerName the name of the player to get the password salt for.
+   * @return the salt used for the password.
+   */
+  byte[] getPlayerPasswordSalt(String playerName);
+
+
+  /**
    * Returns the player overriding the role in the database with the specified role.
    *
    * @param playerName The name of the player to retrieve.
    * @param role The role for the player.
    * @return The player.
    */
-  Player getPlayerWithRole(String playerName, Player.Role role);
+  Player getPlayerWithRole(String playerName, Player.Role role)
+      throws NoSuchAlgorithmException, InvalidKeySpecException;
 
   /**
    * Returns the password required for the role. If role authentication is not supported this will

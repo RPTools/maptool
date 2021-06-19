@@ -29,6 +29,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +50,15 @@ public class Handshake {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
 
+
+  private final PlayerDatabase playerDatabase;
+
+
+  public Handshake(PlayerDatabase database) {
+    playerDatabase = database;
+  }
+
+
   /**
    * Server side of the handshake
    *
@@ -59,7 +69,7 @@ public class Handshake {
    * @return A player structure for the connected player or null on issues
    * @throws IOException if there is a problem reading from the socket.
    */
-  public static Player receiveHandshake(MapToolServer server, Socket s)
+  public Player receiveHandshake(MapToolServer server, Socket s)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
@@ -84,18 +94,26 @@ public class Handshake {
     dos.write(initialMacSalt);
 
     // TODO: CDW send password salt for player
-    byte[] passwordSalt = CipherUtil.getInstance().createSalt();
+    if (!playerDatabase.playerExists(username)) {
+      return null;
+      // TODO: CDW log this error
+    }
+
+    // TODO: CDW: refactor needed when users have password
+    byte[] passwordSalt = playerDatabase.getPlayerPasswordSalt(username);
+    CipherUtil.Key playerPassword = playerDatabase.getRolePassword(Role.PLAYER).get();
+    CipherUtil.Key gmPassword = playerDatabase.getRolePassword(Role.GM).get();
+
     dos.writeInt(passwordSalt.length);
     dos.write(passwordSalt);
 
-
-
+    // TODO: CDW: refactor needed when users have password
     Response response = new Response();
     Request request =
         decodeRequest(
             s,
-            server.getConfig().getPlayerPassword(passwordSalt),
-            server.getConfig().getGmPassword(passwordSalt),
+            playerPassword,
+            gmPassword,
             username,
             initialMacSalt,
             passwordSalt);
@@ -125,9 +143,7 @@ public class Handshake {
     if (response.code == Code.OK) {
 
       Player.Role role = Player.Role.valueOf(request.role);
-      CipherUtil.Key passwordToUse = role == Player.Role.GM
-              ? MapTool.getServer().getConfig().getGmPassword(passwordSalt)
-              : MapTool.getServer().getConfig().getPlayerPassword(passwordSalt);
+      CipherUtil.Key passwordToUse = role == Player.Role.GM ? gmPassword : playerPassword;
 
       player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
@@ -309,11 +325,11 @@ public class Handshake {
    *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return the response from the srever
    */
-  public static Response sendHandshake(Request request, Socket s)
+  public Response sendHandshake(Request request, Socket s)
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
           NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
-    // First sent the username
+    // First send the username
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
     dos.writeInt(request.name.length());
     dos.write(request.name.getBytes(StandardCharsets.UTF_8));
@@ -321,6 +337,7 @@ public class Handshake {
     // TODO CDW: client hand shake code here
 
     DataInputStream dis = new DataInputStream(s.getInputStream());
+
     // Read the salt we are expected to use for initial messages MAC
     int macSaltLen = dis.readInt();
     byte[] macSalt = dis.readNBytes(macSaltLen);

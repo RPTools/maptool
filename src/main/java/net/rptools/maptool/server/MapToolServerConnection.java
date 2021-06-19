@@ -23,7 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.model.player.DefaultPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,7 +49,13 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   @Override
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
-      Player player = Handshake.receiveHandshake(server, socket);
+      // TODO: CDW grab correct database
+      PlayerDatabase playerDatabase = new DefaultPlayerDatabase(
+                server.getConfig().getPlayerPassword(),
+                server.getConfig().getGmPassword()
+      );
+      Handshake handshake = new Handshake(playerDatabase);
+      Player player = handshake.receiveHandshake(server, socket);
 
       if (player != null) {
         playerMap.put(id.toUpperCase(), player);

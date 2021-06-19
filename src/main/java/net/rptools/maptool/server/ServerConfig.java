@@ -109,14 +109,12 @@ public class ServerConfig {
     return config;
   }
 
-  public CipherUtil.Key getGmPassword(byte[] salt)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    return CipherUtil.getInstance().createKey(gmPassword, salt);
+  public String getGmPassword() {
+    return gmPassword;
   }
 
-  public CipherUtil.Key getPlayerPassword(byte[] salt)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    return CipherUtil.getInstance().createKey(playerPassword, salt);
+  public String getPlayerPassword() {
+    return playerPassword;
   }
 
   private static Random r = new Random();
