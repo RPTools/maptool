@@ -6,8 +6,8 @@
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.1.0"
-    id "com.diffplug.spotless" version "5.0.0"
-    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id "com.diffplug.spotless" version "5.2.0"
+    id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.beryx.runtime' version '1.12.4'
 }
 
@@ -32,25 +32,35 @@ def winUpgradeUUID = UUID.randomUUID().toString();
 
 // Custom properties
 ext {
-    // Get tag and commit info from Git to use for version numbering
-    def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-    def head = grgit.head()
-    def tags = grgit.tag.list().find {
-        it.commit == head
-    }
+    // Allow packagers to build from the source code tarball, which doesn't
+    // have '.git'
+    revisionFull = project.findProperty('gitCommit')
+    revision = revisionFull ? revisionFull.substring(0, 10) : ''
+    tagVersion = project.findProperty('gitTag')
+    environment = 'Production'
+    sentryDSN = sentry_production_dsn
 
-    revision = head.abbreviatedId
-    revisionFull = head.id
+    if (!project.hasProperty('noGit')) {
+        // Get tag and commit info from Git to use for version numbering
+        def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+        def head = grgit.head()
+        def tags = grgit.tag.list().find {
+            it.commit == head
+        }
 
-    if (tags) {
-        tagVersion = tags.getName()
-        enviroment = "Production"
-        sentryDSN = sentry_production_dsn
-    } else {
-        tagVersion = 'SNAPSHOT-' + revision
-        project.description = "SNAPSHOT-" + revision
-        enviroment = "Development"
-        sentryDSN = sentry_development_dsn
+        revision = head.abbreviatedId
+        revisionFull = head.id
+
+        if (tags) {
+            tagVersion = tags.getName()
+            environment = "Production"
+            sentryDSN = sentry_production_dsn
+        } else {
+            tagVersion = 'SNAPSHOT-' + revision
+            project.description = "SNAPSHOT-" + revision
+            environment = "Development"
+            sentryDSN = sentry_development_dsn
+        }
     }
 
     // This will strip anything other than core semver from the tag
@@ -78,6 +88,7 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
+            exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -106,9 +117,18 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
+
+    if (osdetector.os.is('osx')) {
+        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+    }
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -148,7 +168,12 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED"]
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+                   "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+                   "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+                   "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -189,6 +214,7 @@ runtime {
             ]
             targetPlatform('mac') {
                 jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
+                jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
 
@@ -224,7 +250,6 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     mavenLocal()
     mavenCentral()
-    jcenter()
     maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
@@ -241,6 +266,19 @@ dependencies {
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
+
+
+    // Image processing lib
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.7.0'
+
+    implementation 'org.apache.xmlgraphics:batik-all:1.14' // For Twelvemonkey SVG
+
 
     // For Sentry bug reporting
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
@@ -260,7 +298,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
-    implementation 'com.github.RPTools:dicelib:1.7.1'
+    implementation 'net.rptools.dicelib:dicelib:1.8.3'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -283,14 +321,18 @@ dependencies {
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
-    implementation 'net.java.abeille:abeille-formsrt:2.0'
+
+    // This is just the standard abeille-formsrt but need to rename it so jpackage puts it at the
+    // end of the classpath list becuase it contains an old version of batik which is causing
+    // SVG rendering to fail.
+    implementation 'net.java.abeille:zz-abeille-formsrt:2.0'
+
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho:hessian:4.0.63'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
-    implementation 'org.swinglabs:swing-worker:1.2'
     implementation 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
     implementation 'com.withay:withay-util:1.0'
     implementation 'xmlpull:xmlpull:1.1.3.1'
@@ -299,7 +341,7 @@ dependencies {
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
     implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
-    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.0.0.2'
+    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
@@ -310,23 +352,14 @@ dependencies {
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
-    // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 
-    implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
 
     implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.1.1'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
     implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.2'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
@@ -350,10 +383,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
+
+
+    // Apache Tika Parsers for determining file type
+    implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
 
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
@@ -367,7 +404,7 @@ task configSentryRelease(type: Copy) {
     rename("sentry.properties.template", "sentry.properties")
     def tokens = [
             AppVersion : "${tagVersion}",
-            Environment: "${enviroment}",
+            Environment: "${environment}",
             SentryDSN  : "${sentryDSN}"
     ]
     expand(tokens)
@@ -376,6 +413,7 @@ task configSentryRelease(type: Copy) {
 
 task uberJar(type: Jar) {
     group = 'distribution'
+    zip64 = true
     description = 'Create uber jar for native installers'
 
     baseName project.name + '-' + tagVersion

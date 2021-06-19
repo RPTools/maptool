@@ -53,6 +53,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
@@ -123,7 +124,6 @@ import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -629,6 +629,33 @@ public class AppActions {
           } else {
             MapTool.getFrame().showFullScreen();
           }
+        }
+      };
+
+  public static final Action TOGGLE_FULLSCREEN_TOOLS =
+      new AdminClientAction() {
+        {
+          init("action.toggleFullScreenTools");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isFullScreenUIEnabled();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setFullScreenUIEnabled(!AppState.isFullScreenUIEnabled());
+
+          var frame = MapTool.getFrame();
+          if (AppState.isFullScreenUIEnabled()
+              && !frame.areFullScreenToolsShown()
+              && frame.isFullScreen()) {
+            frame.showFullScreenTools();
+          } else if (!AppState.isFullScreenUIEnabled() && frame.areFullScreenToolsShown()) {
+            frame.hideFullScreenTools();
+          }
+          frame.refresh();
         }
       };
 
@@ -1455,7 +1482,9 @@ public class AppActions {
           // XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared? An
           // imported map would ask...
           String zoneName =
-              JOptionPane.showInputDialog("New map name:", "Copy of " + zone.getName());
+              JOptionPane.showInputDialog(
+                  I18N.getText("dialog.copyZone.msg"),
+                  I18N.getText("dialog.copyZone.initial", zone.getName()));
           if (zoneName != null) {
             Zone zoneCopy = new Zone(zone);
             zoneCopy.setName(zoneName);
@@ -2200,14 +2229,14 @@ public class AppActions {
                       dialog.getUsernameTextField().getText(), config, policy, campaign, true);
 
                   // Connect to server
-                  String playerType = dialog.getRoleCombo().getSelectedItem().toString();
-                  if (playerType.equals("GM")) {
+                  Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
                         "localhost",
                         serverProps.getPort(),
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
-                            serverProps.getRole(),
+                            playerType,
                             serverProps.getGMPassword()));
                   } else {
                     MapTool.createConnection(
@@ -2215,7 +2244,7 @@ public class AppActions {
                         serverProps.getPort(),
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
-                            serverProps.getRole(),
+                            playerType,
                             serverProps.getPlayerPassword()));
                   }
 

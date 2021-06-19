@@ -94,6 +94,7 @@ import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
+import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -169,6 +170,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     EnumSet.allOf(TerrainModifierOperation.class).forEach(operationModel::addElement);
   }
 
+  public void initJtsMethodComboBox() {
+    getJtsMethodComboBox().setModel(new DefaultComboBoxModel<>(JTS_SimplifyMethodType.values()));
+  }
+
   public void showDialog(Token token) {
     dialog =
         new GenericDialog(I18N.getString("EditTokenDialog.msg.title"), MapTool.getFrame(), this) {
@@ -203,6 +208,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   public void bind(final Token token) {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
+
+    // TYPE
+    getTypeCombo().setSelectedItem(token.getType());
 
     // SIGHT
     updateSightTypeCombo();
@@ -326,6 +334,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();
+    String heroLabTitle = I18N.getString("EditTokenDialog.tab.hero");
 
     if (heroLabData != null) {
       boolean isDirty = heroLabData.isDirty() && heroLabData.getPortfolioFile().exists();
@@ -334,14 +343,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       if (isDirty && refreshDataButton.getIcon() != REFRESH_ICON_ON) {
         refreshDataButton.setIcon(REFRESH_ICON_ON);
         refreshDataButton.setToolTipText(
-            "<html>Refresh data from Hero Lab<br/><b><i>Changes detected!</i></b></html>");
+            I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.on"));
       } else if (!isDirty && refreshDataButton.getIcon() != REFRESH_ICON_OFF) {
         refreshDataButton.setIcon(REFRESH_ICON_OFF);
         refreshDataButton.setToolTipText(
-            "<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+            I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.off"));
       }
 
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), true);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), true);
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
@@ -370,8 +379,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       // loadHeroLabImageList();
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab")) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(heroLabTitle)) {
         tabbedPane.setSelectedIndex(6);
       }
     }
@@ -432,14 +441,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   // }
 
   public void initTypeCombo() {
-    DefaultComboBoxModel model = new DefaultComboBoxModel();
-    model.addElement(Token.Type.NPC);
-    model.addElement(Token.Type.PC);
-    // getTypeCombo().setModel(model);
+    getTypeCombo().setModel(new DefaultComboBoxModel<>(Token.Type.values()));
   }
 
   public JComboBox getTypeCombo() {
-    return (JComboBox) getComponent("@type");
+    return (JComboBox) getComponent("type");
   }
 
   public void initTokenIconPanel() {
@@ -521,7 +527,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     JComboBox size = getSizeCombo();
     Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
     DefaultComboBoxModel model = new DefaultComboBoxModel(grid.getFootprints().toArray());
-    model.insertElementAt(token.getLayer() == Layer.TOKEN ? "Native Size" : "Free Size", 0);
+    model.insertElementAt(
+        token.getLayer() == Layer.TOKEN
+            ? I18N.getString("token.popup.menu.size.native")
+            : I18N.getString("token.popup.menu.size.free"),
+        0);
     size.setModel(model);
     if (token.isSnapToScale()) {
       size.setSelectedItem(token.getFootprint(grid));
@@ -596,6 +606,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (!super.commit() || MapTool.getFrame().getCurrentZoneRenderer() == null) {
       return false;
     }
+    // TYPE
+    token.setType((Token.Type) getTypeCombo().getSelectedItem());
+
     // SIZE
     token.setSnapToScale(getSizeCombo().getSelectedIndex() != 0);
     if (getSizeCombo().getSelectedIndex() > 0) {
@@ -840,7 +853,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             new JLabel(bar.getName() + ":"),
             new CellConstraints(1, 1, CellConstraints.RIGHT, CellConstraints.TOP));
         JSlider slider = new JSlider(0, 100);
-        JCheckBox hide = new JCheckBox("Hide");
+        JCheckBox hide = new JCheckBox(I18N.getString("EditTokenDialog.checkbox.state.hide"));
         hide.putClientProperty("JSlider", slider);
         hide.addChangeListener(
             e -> {
@@ -1213,7 +1226,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getJtsMethodComboBox()
         .addActionListener(
             e -> {
-              getTokenVblPanel().setJtsMethod(getJtsMethodComboBox().getSelectedItem().toString());
+              getTokenVblPanel()
+                  .setJtsMethod((JTS_SimplifyMethodType) getJtsMethodComboBox().getSelectedItem());
               updateAutoGeneratedVBL(false);
             });
 
@@ -1355,7 +1369,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             if (heroLabData != null) {
               refreshDataButton.setIcon(REFRESH_ICON_OFF);
               refreshDataButton.setToolTipText(
-                  "<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+                  I18N.getString("EditTokenDialog.button.hero.refresh.tooltip.off"));
 
               ((JLabel) getComponent("portfolioLocation"))
                   .setToolTipText(heroLabData.getPortfolioPath());
@@ -1810,7 +1824,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     public void mouseClicked(MouseEvent e) {
       if (SwingUtilities.isRightMouseButton(e)) {
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem sendToChatItem = new JMenuItem("Send to Chat");
+        JMenuItem sendToChatItem =
+            new JMenuItem(I18N.getString("EditTokenDialog.menu.notes.sendChat"));
         sendToChatItem.addActionListener(
             e12 -> {
               String selectedText = source.getSelectedText();
@@ -1826,7 +1841,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             });
         menu.add(sendToChatItem);
 
-        JMenuItem sendAsEmoteItem = new JMenuItem("Send as Emit");
+        JMenuItem sendAsEmoteItem =
+            new JMenuItem(I18N.getString("EditTokenDialog.menu.notes.sendEmit"));
         sendAsEmoteItem.addActionListener(
             e1 -> {
               String selectedText = source.getSelectedText();

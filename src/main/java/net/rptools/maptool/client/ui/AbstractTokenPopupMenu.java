@@ -860,7 +860,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     private final TokenFootprint footprint;
 
     public ChangeSizeAction(TokenFootprint footprint) {
-      super(footprint.getName());
+      super(footprint.getLocalizedName());
       this.footprint = footprint;
     }
 

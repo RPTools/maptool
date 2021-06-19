@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
@@ -486,19 +487,20 @@ public class TokenVBL {
   }
 
   public enum JTS_SimplifyMethodType {
-    DOUGLAS_PEUCKER_SIMPLIFIER("Douglas Peucker"),
-    TOPOLOGY_PRESERVING_SIMPLIFIER("Topology Preserving"),
-    VW_SIMPLIFIER("VW Simplifier"),
-    NONE("No Optimization");
+    DOUGLAS_PEUCKER_SIMPLIFIER(),
+    TOPOLOGY_PRESERVING_SIMPLIFIER(),
+    VW_SIMPLIFIER(),
+    NONE();
 
-    private final String label;
+    private final String displayName;
 
-    public String getLabel() {
-      return label;
+    JTS_SimplifyMethodType() {
+      displayName = I18N.getString("TokenVBL.JTS_SimplifyMethodType." + name());
     }
 
-    JTS_SimplifyMethodType(String label) {
-      this.label = label;
+    @Override
+    public String toString() {
+      return displayName;
     }
 
     public static JTS_SimplifyMethodType getDefault() {
@@ -508,9 +510,9 @@ public class TokenVBL {
     public static JTS_SimplifyMethodType fromString(String label) {
       final JTS_SimplifyMethodType jts_simplifyMethod =
           Stream.of(JTS_SimplifyMethodType.values())
-              .filter(e -> e.label.equalsIgnoreCase(label))
+              .filter(e -> e.name().equalsIgnoreCase(label))
               .findAny()
-              .orElse(DOUGLAS_PEUCKER_SIMPLIFIER);
+              .orElse(getDefault());
 
       return jts_simplifyMethod;
     }

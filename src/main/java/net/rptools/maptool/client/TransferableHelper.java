@@ -18,12 +18,10 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,8 +46,14 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 
 /**
  * A helper class for converting Transferable objects into their respective data types. This class
@@ -408,14 +412,19 @@ public class TransferableHelper extends TransferHandler {
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
         } else {
-          if (!checkValidType(url)) {
+          // Get the MediaType so we can use it when creating the Asset later
+          MediaType mediaType = getFileMediaType(url);
+
+          if (!checkValidType(mediaType)) {
             MapTool.showError("dragdrop.unsupportedType");
+            log.info("Unsupported file type: " + mediaType.toString() + " (" + url + ")");
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
           } else {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) // `null' means no image available
-            assets.add(temp);
-            else if (log.isInfoEnabled()) log.info("No image available for " + url);
+              assets.add(temp);
+            else if (log.isInfoEnabled())
+              log.info("No image available for " + url);
           }
         }
       }
@@ -423,32 +432,46 @@ public class TransferableHelper extends TransferHandler {
     return assets;
   }
 
-  private static boolean checkValidType(URL url) throws IOException {
-    String ftype = Files.probeContentType(new File(url.getPath()).toPath());
-    if (ftype == null) {
-      return false;
+  private static MediaType getFileMediaType(URL url) throws IOException {
+    Metadata metadata = new Metadata();
+    metadata.set(Metadata.RESOURCE_NAME_KEY, url.getFile());
+
+    TikaConfig tika;
+    try {
+      tika = new TikaConfig();
+    } catch (TikaException e) {
+      throw new IOException(e);
     }
 
-    if (ftype.startsWith("audio/")) {
-      return true;
+    MediaType mediaType = tika.getDetector().detect(TikaInputStream.get(url), metadata);
+
+    /* Workaround for Tika seeing Javascript files as Matlab scripts */
+    if ("text/x-matlab".equals(mediaType.toString())) {
+      String ext = FilenameUtils.getExtension(url.getPath());
+      if("js".equals(ext) || "javascript".equals(ext))
+        mediaType = new MediaType("text","javascript");
     }
 
-    if (ftype.startsWith("image/")) {
-      return true;
-    }
+    return mediaType;
+  }
 
-    switch (ftype) {
-      case "text/html":
-      case "text/markdown":
-      case "text/plain":
-      case "application/pdf":
-      case "text/javascript":
-      case "text/css":
-      case "application/json":
-        return true;
-    }
+  private static boolean checkValidType(MediaType mediaType) {
+    String contentType = mediaType.getType();
 
-    return false;
+    String subType = mediaType.getSubtype();
+    return switch(contentType) {
+      case "audio", "image" -> true;
+      case "text" -> switch(subType) {
+        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
+        default -> false;
+      };
+      case "application" -> switch(subType) {
+        case "pdf", "json", "javascript", "xml" -> true;
+        default -> false;
+      };
+      default -> false;
+    };
+
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)

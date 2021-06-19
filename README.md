@@ -25,7 +25,7 @@ There are several tutorials on the [MapTool wiki](https://wiki.rptools.info/inde
 Requirements
 ------------
 
-- MapTool from version 1.8+ requires [Java 14](https://github.com/AdoptOpenJDK) and the RPTools builds use AdoptOpenJDK. Installers for MapTool include an embedded JRE that will install along with MapTool
+- MapTool from version 1.9+ requires [Java 16](https://github.com/AdoptOpenJDK) and the RPTools builds use AdoptOpenJDK. Installers for MapTool include an embedded JRE that will install along with MapTool
 - Building MapTool requires the corresponding Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
 
 Version Numbers
@@ -42,7 +42,7 @@ Resources
  - **Forums:**  http://forums.rptools.net 
  - **Wiki:**    https://wiki.rptools.info/index.php/Main_Page
  - **Discord:** https://discord.gg/gevEtpC
- 
+ - **Reddit:**  https://www.reddit.com/r/MapTool/
 
 Configuration Steps Prior to Building MapTool
 ---------------------------------------------

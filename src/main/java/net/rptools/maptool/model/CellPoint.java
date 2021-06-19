@@ -28,10 +28,10 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  */
 public class CellPoint extends AbstractPoint {
 
-  public double g; // Only populated by AStarWalker classes to be used upstream
   public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
   public double
       distanceTraveledWithoutTerrain; // Only populated by AStarWalker classes to be used upstream
+  private boolean isAStarCanceled = false;
 
   public CellPoint(int x, int y) {
     super(x, y);
@@ -46,6 +46,14 @@ public class CellPoint extends AbstractPoint {
   @Override
   public String toString() {
     return "CellPoint" + super.toString();
+  }
+
+  public boolean isAStarCanceled() {
+    return isAStarCanceled;
+  }
+
+  public void setAStarCanceled(boolean aStarCanceled) {
+    this.isAStarCanceled = aStarCanceled;
   }
 
   /**
@@ -85,6 +93,10 @@ public class CellPoint extends AbstractPoint {
     return zp;
   }
 
+  public ZonePoint midZonePoint(Grid grid, CellPoint other) {
+    return this.offsetZonePoint(grid, other.x - this.x, other.y - this.y);
+  }
+
   /**
    * Return distance in grid units for current map.
    *
@@ -114,15 +126,5 @@ public class CellPoint extends AbstractPoint {
       double result = Math.floor((num + unitsPerCell / 2) / unitsPerCell) * unitsPerCell;
       return Math.max(result, unitsPerCell);
     }
-  }
-
-  public double gCost() {
-    return g;
-  }
-
-  public void replaceG(CellPoint previousCell) {
-    g = previousCell.g;
-    distanceTraveled = previousCell.distanceTraveled;
-    distanceTraveledWithoutTerrain = previousCell.distanceTraveledWithoutTerrain;
   }
 }
