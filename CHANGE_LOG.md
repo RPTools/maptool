@@ -1,4 +1,18 @@
-# MapTool 1.9.0 Beta 3
+# MapTool 1.9.2
+Bug fix release.  Missed one.
+
+## Bug Fixes
+- [#2749][i2749] Macro editor help missing entries for many functions.  Most documented functions now have help.
+
+
+# MapTool 1.9.1
+Bug fix release.
+
+## Bug Fixes
+- [#2745][i2745] SVG files not being rendered. Fixed.
+- [#2742][i2742] Attempting to add local folder to Resource Library was throwing exception. Fixed.
+
+# MapTool 1.9.0
 The MapTool community continues to push MapTool forward with code patches, localization and providing support to each other on the various social media platforms.  A huge thanks goes out to everyone who takes part in making MapTool better.
 
 MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
@@ -79,6 +93,9 @@ MapTool currently has support for 13 languages in various stages of completion: 
 - [#2538][i2538] Builds moved to AdoptOpen Java 16. 
 - [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
 
+[i2749]: https://github.com/RPTools/maptool/issues/2749
+[i2745]: https://github.com/RPTools/maptool/issues/2745
+[i2742]: https://github.com/RPTools/maptool/issues/2742
 [i2731]: https://github.com/RPTools/maptool/issues/2731
 [i2716]: https://github.com/RPTools/maptool/issues/2716
 [i2709]: https://github.com/RPTools/maptool/issues/2709
