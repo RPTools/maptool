@@ -19,6 +19,7 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -58,6 +59,7 @@ public class MapToolEventQueue extends EventQueue {
       JTextArea jta = new JTextArea(I18N.getString("MapToolEventQueue.stackOverflow"));
       jta.setLineWrap(true);
       jta.setWrapStyleWord(true);
+      jta.setMargin(new Insets(5, 10, 10, 10));
       optionPane.setDetails(jta);
       // optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
