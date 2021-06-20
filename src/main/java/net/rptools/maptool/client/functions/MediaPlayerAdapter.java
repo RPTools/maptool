@@ -82,7 +82,9 @@ public class MediaPlayerAdapter {
           int cycCount = player.getCycleCount();
           if (cycCount != MediaPlayer.INDEFINITE && curCount >= cycCount) {
             player.stop(); // otherwise, status stuck on "PLAYING" at end
-            player.seek(Duration.millis(start)); // fixes the problem with getStreamProperties()/currentTime #2658
+            player.seek(
+                Duration.millis(
+                    start)); // fixes the problem with getStreamProperties()/currentTime #2658
           }
         });
   }
