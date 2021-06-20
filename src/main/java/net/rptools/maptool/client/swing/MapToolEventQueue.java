@@ -23,8 +23,7 @@ import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -56,7 +55,11 @@ public class MapToolEventQueue extends EventQueue {
       log.error(soe, soe);
       JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
-      optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
+      JTextArea jta = new JTextArea(I18N.getString("MapToolEventQueue.stackOverflow"));
+      jta.setLineWrap(true);
+      jta.setWrapStyleWord(true);
+      optionPane.setDetails(jta);
+      // optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
