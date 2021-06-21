@@ -89,9 +89,8 @@ public class HTMLOverlayPanel extends JFXPanel {
           }
         });
 
-
-    //In JavaFX mousewheel events are not included in MouseEvent.ANY but in ScrollEvent.ANY, add a
-    //separate event filter for those to make sure these events reach the Webview
+    // In JavaFX mousewheel events are not included in MouseEvent.ANY but in ScrollEvent.ANY, add a
+    // separate event filter for those to make sure these events reach the Webview
     front.addEventFilter(
         ScrollEvent.ANY,
         event -> {
