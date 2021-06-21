@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.1.0"
     id "com.diffplug.spotless" version "5.2.0"
     id 'org.openjfx.javafxplugin' version '0.0.10'
-    id 'org.beryx.runtime' version '1.12.4'
+    id 'org.beryx.runtime' version '1.12.5'
 }
 
 // Apply the java plugin to add support for Java
