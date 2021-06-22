@@ -175,6 +175,10 @@ public class CipherUtil {
     return new Key(new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM), salt);
   }
 
+  public Key createKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    return createKey(key, createSalt());
+  }
+
   public byte[] generateMacAndSalt(String password) throws IOException {
     byte[] salt = createSalt();
     return generateMacWithSalt(password, salt);
@@ -263,5 +267,9 @@ public class CipherUtil {
 
   public String encodeBase64(SecretKey key) {
     return Base64.getEncoder().withoutPadding().encodeToString(key.getEncoded());
+  }
+
+  public SecretKeySpec decodeBase64(String encoded) {
+    return new SecretKeySpec(Base64.getDecoder().decode(encoded), CIPHER_ALGORITHM);
   }
 }
