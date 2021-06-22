@@ -25,6 +25,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -79,6 +80,19 @@ public class HTMLOverlayPanel extends JFXPanel {
     front.setPickOnBounds(true); // catches the clicks
     front.addEventFilter(
         javafx.scene.input.MouseEvent.ANY,
+        event -> {
+          // Passes the mouse event to all overlays
+          for (HTMLOverlayManager overlay : overlays) {
+            if (overlay.isVisible()) {
+              overlay.getWebView().fireEvent(event);
+            }
+          }
+        });
+
+    // In JavaFX mousewheel events are not included in MouseEvent.ANY but in ScrollEvent.ANY, add a
+    // separate event filter for those to make sure these events reach the Webview
+    front.addEventFilter(
+        ScrollEvent.ANY,
         event -> {
           // Passes the mouse event to all overlays
           for (HTMLOverlayManager overlay : overlays) {
