@@ -49,6 +49,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.operation.valid.IsValidOp;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private record TerrainModifier(Token.TerrainModifierOperation operation, double value) {}
@@ -195,16 +196,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       } else {
         try {
           var vblGeometry =
-              shapeReader
-                  .read(new ReverseShapePathIterator(vbl.getPathIterator(null)))
-                  .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
+              shapeReader.read(new ReverseShapePathIterator(vbl.getPathIterator(null)));
 
           // polygons
           if (!vblGeometry.isValid()) {
             log.info(
                 "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+            log.debug("Invalid vblGeometry: " + new IsValidOp(vblGeometry).getValidationError());
           }
 
+          vblGeometry = vblGeometry.buffer(1); // .buffer always creates valid geometry.
           this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
         } catch (Exception e) {
           log.info("vblGeometry oh oh: ", e);
