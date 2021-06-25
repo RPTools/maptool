@@ -2719,6 +2719,11 @@ public class AppActions {
               // Jamz: Bug fix, would not add extension if map name had a . in it...
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+              if (mapFile.exists()) {
+                if (!MapTool.confirm("msg.confirm.fileExists")) {
+                  return;
+                }
+              }
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
               AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
