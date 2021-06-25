@@ -131,7 +131,8 @@ public class ButtonGroup extends AbstractButtonGroup {
       if (!MapTool.getPlayer().isGM()
           && (panelClass.equals("CampaignPanel")
               || panelClass.equals("GmPanel")
-              || data.panelClass.equals("CampaignPanel")
+              || (data.panelClass.equals("CampaignPanel")
+                  && !MapTool.getServerPolicy().playersReceiveCampaignMacros())
               || data.panelClass.equals("GmPanel"))) {
         MapTool.showError(
             I18N.getText(
@@ -306,9 +307,13 @@ public class ButtonGroup extends AbstractButtonGroup {
     if (data.panelClass.equals("GlobalPanel")) {
       MacroButtonPrefs.delete(properties);
     } else if (data.panelClass.equals("CampaignPanel")) {
-      MapTool.getCampaign().deleteMacroButton(properties);
+      if (MapTool.getPlayer().isGM()) {
+        MapTool.getCampaign().deleteMacroButton(properties);
+      }
     } else if (data.panelClass.equals("GmPanel")) {
-      MapTool.getCampaign().deleteGmMacroButton(properties);
+      if (MapTool.getPlayer().isGM()) {
+        MapTool.getCampaign().deleteGmMacroButton(properties);
+      }
     } else if ((data.panelClass.equals("SelectionPanel")
             || data.panelClass.equals("ImpersonatePanel"))
         && (data.tokenID != null)) {
