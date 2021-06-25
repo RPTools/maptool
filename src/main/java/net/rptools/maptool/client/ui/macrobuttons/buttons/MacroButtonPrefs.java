@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -43,6 +44,7 @@ public class MacroButtonPrefs {
   private static final String PREF_FONT_SIZE = "fontSize";
   private static final String PREF_MIN_WIDTH = "minWidth";
   private static final String PREF_MAX_WIDTH = "maxWidth";
+  private static final String PREF_ALLOW_PLAYER_EDITS = "allowPlayerEdits";
   private static final String PREF_TOOLTIP = "toolTip";
   private static final String PREF_DISPLAY_HOT_KEY = "displayHotKey";
 
@@ -124,6 +126,7 @@ public class MacroButtonPrefs {
       prefs.put(PREF_FONT_SIZE, properties.getFontSize());
       prefs.put(PREF_MIN_WIDTH, properties.getMinWidth());
       prefs.put(PREF_MAX_WIDTH, properties.getMaxWidth());
+      prefs.putBoolean(PREF_ALLOW_PLAYER_EDITS, properties.getAllowPlayerEdits());
       prefs.put(PREF_TOOLTIP, properties.getToolTip());
       prefs.flush();
       if (resetFrame) {
@@ -181,6 +184,8 @@ public class MacroButtonPrefs {
               newPrefs.put(PREF_FONT_SIZE, buttonPref.get(PREF_FONT_SIZE, ""));
               newPrefs.put(PREF_MIN_WIDTH, buttonPref.get(PREF_MIN_WIDTH, ""));
               newPrefs.put(PREF_MAX_WIDTH, buttonPref.get(PREF_MAX_WIDTH, ""));
+              newPrefs.putBoolean(
+                  PREF_ALLOW_PLAYER_EDITS, buttonPref.getBoolean(PREF_ALLOW_PLAYER_EDITS, true));
 
               String colorKey = buttonPref.get(PREF_COLOR_KEY, "");
               String label = buttonPref.get(PREF_LABEL_KEY, Integer.toString(index));
@@ -195,6 +200,9 @@ public class MacroButtonPrefs {
               String fontSize = buttonPref.get(PREF_FONT_SIZE, "");
               String minWidth = buttonPref.get(PREF_MIN_WIDTH, "");
               String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
+              boolean allowPlayerEdits =
+                  buttonPref.getBoolean(
+                      PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
               String toolTip = buttonPref.get(PREF_TOOLTIP, "");
               boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
 
@@ -214,6 +222,7 @@ public class MacroButtonPrefs {
                       fontSize,
                       minWidth,
                       maxWidth,
+                      allowPlayerEdits,
                       toolTip,
                       displayHotKey));
             }
@@ -234,6 +243,9 @@ public class MacroButtonPrefs {
         String fontSize = buttonPref.get(PREF_FONT_SIZE, "");
         String minWidth = buttonPref.get(PREF_MIN_WIDTH, "");
         String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
+        boolean allowPlayerEdits =
+            buttonPref.getBoolean(
+                PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
         String hotKey = buttonPref.get(PREF_HOTKEY_KEY, MacroButtonHotKeyManager.HOTKEYS[0]);
         String toolTip = buttonPref.get(PREF_TOOLTIP, "");
         boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
@@ -254,6 +266,7 @@ public class MacroButtonPrefs {
                 fontSize,
                 minWidth,
                 maxWidth,
+                allowPlayerEdits,
                 toolTip,
                 displayHotKey));
       }
