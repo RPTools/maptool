@@ -127,17 +127,12 @@ public class ButtonGroup extends AbstractButtonGroup {
       // if a reference is needed when moving instead of copying
       MacroButtonProperties oldMacroProps = new MacroButtonProperties(tempProperties);
 
-      if (!MapTool.getPlayer().isGM()
-          && (
-          // stops players from moving non-player-editable macros into another panel
-          (!tempProperties.getAllowPlayerEdits()
-                  && data.panelHashcode != System.identityHashCode(getPanel()))
-              ||
-              // or into/from the Campaign/GM panels
-              (panelClass.equals("CampaignPanel")
-                  || panelClass.equals("GmPanel")
-                  || data.panelClass.equals("CampaignPanel")
-                  || data.panelClass.equals("GmPanel")))) {
+      // stops players from moving macros into/from the Campaign/GM panels
+      if (!MapTool.getPlayer().isGM() &&
+          (panelClass.equals("CampaignPanel")
+              || panelClass.equals("GmPanel")
+              || data.panelClass.equals("CampaignPanel")
+              || data.panelClass.equals("GmPanel"))) {
         MapTool.showError(
             I18N.getText(
                 "macro.function.MacroFunctions.noPermMove",
