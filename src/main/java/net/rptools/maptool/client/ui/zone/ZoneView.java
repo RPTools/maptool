@@ -14,43 +14,20 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import javax.swing.SwingWorker;
+import java.util.concurrent.*;
+import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
-import net.rptools.maptool.model.AttachedLightSource;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.Direction;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Light;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.SightType;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -794,15 +771,7 @@ public class ZoneView implements ModelChangeListener {
       boolean tokenChangedVBL = false;
 
       if (evt == Zone.Event.TOKEN_CHANGED || evt == Zone.Event.TOKEN_REMOVED) {
-        if (event.getArg() instanceof List<?>) {
-          @SuppressWarnings("unchecked")
-          List<Token> list = (List<Token>) (event.getArg());
-          for (Token token : list) {
-            if (token.hasVBL()) tokenChangedVBL = true;
-            flush(token);
-          }
-        } else {
-          final Token token = (Token) event.getArg();
+        for (Token token : event.getTokensAsList()) {
           if (token.hasVBL()) tokenChangedVBL = true;
           flush(token);
         }
@@ -812,29 +781,11 @@ public class ZoneView implements ModelChangeListener {
       }
 
       if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
-        Object o = event.getArg();
-        List<Token> tokens = null;
-        if (o instanceof Token) {
-          tokens = new ArrayList<Token>(1);
-          tokens.add((Token) o);
-        } else {
-          tokens = (List<Token>) o;
-        }
-
-        tokenChangedVBL = processTokenAddChangeEvent(tokens);
+        tokenChangedVBL = processTokenAddChangeEvent(event.getTokensAsList());
       }
 
       if (evt == Zone.Event.TOKEN_REMOVED) {
-        Object o = event.getArg();
-        List<Token> tokens;
-        if (o instanceof Token) {
-          tokens = new ArrayList<>(1);
-          tokens.add((Token) o);
-        } else {
-          tokens = (List<Token>) o;
-        }
-
-        for (Token token : tokens) {
+        for (Token token : event.getTokensAsList()) {
           if (token.hasVBL()) tokenChangedVBL = true;
           for (AttachedLightSource als : token.getLightSources()) {
             LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());

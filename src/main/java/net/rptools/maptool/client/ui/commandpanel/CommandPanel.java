@@ -14,73 +14,28 @@
  */
 package net.rptools.maptool.client.ui.commandpanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Stack;
 import java.util.regex.Pattern;
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -295,13 +250,8 @@ public class CommandPanel extends JPanel
       GUID tokenId = globalIdentity.getIdentityGUID();
       if (tokenId != null) {
         // If the impersonated token has changed, update the identity
-        Token impersonated;
-        if (event.getArg() instanceof List<?>) {
-          impersonated = getImpersonatedAmongList((List<Token>) event.getArg());
-        } else {
-          Token token = (Token) event.getArg();
-          impersonated = isTokenImpersonated(token) ? token : null;
-        }
+
+        Token impersonated = getImpersonatedAmongList(event.getTokensAsList());
         if (impersonated != null) {
           setGlobalIdentity(new TokenIdentity(impersonated));
         }
@@ -733,11 +683,14 @@ public class CommandPanel extends JPanel
 
     // Detect whether the person is attempting to fake rolls.
     if (CHEATER_PATTERN.matcher(command).find()) {
-      MapTool.addServerMessage(TextMessage.me(null, "Cheater. You have been reported."));
+      MapTool.addServerMessage(
+          TextMessage.me(null, I18N.getString("msg.commandPanel.cheater.self")));
       MapTool.serverCommand()
           .message(
               TextMessage.gm(
-                  null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + command));
+                  null,
+                  I18N.getText(
+                      "msg.commandPanel.cheater.gm", MapTool.getPlayer().getName(), command)));
       return;
     }
     // Make sure they aren't trying to break out of the div
@@ -749,8 +702,7 @@ public class CommandPanel extends JPanel
       closeDivCount++;
     }
     if (closeDivCount > divCount) {
-      MapTool.addServerMessage(
-          TextMessage.me(null, "Unexpected &lt;/div&gt; tag without matching &lt;div&gt;."));
+      MapTool.addServerMessage(TextMessage.me(null, I18N.getString("msg.commandPanel.div")));
       return;
     }
     if (command.charAt(0) != '/') {
@@ -870,7 +822,9 @@ public class CommandPanel extends JPanel
           new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-              Color newColor = JColorChooser.showDialog(TextColorWell.this, "Text Color", color);
+              Color newColor =
+                  JColorChooser.showDialog(
+                      TextColorWell.this, I18N.getString("dialog.colorChooser.title"), color);
               if (newColor != null) {
                 setColor(newColor);
               }

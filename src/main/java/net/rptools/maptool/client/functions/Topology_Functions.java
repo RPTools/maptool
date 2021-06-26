@@ -142,16 +142,16 @@ public class Topology_Functions extends AbstractFunction {
             Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
         switch (topologyShape) {
           case RECTANGLE:
-            drawRectangleTopology(renderer, topologyObject, erase, mode);
+            drawRectangleTopology(renderer, topologyObject, erase, mode, functionName);
             break;
           case POLYGON:
-            drawPolygonTopology(renderer, topologyObject, erase, mode);
+            drawPolygonTopology(renderer, topologyObject, erase, mode, functionName);
             break;
           case CROSS:
-            drawCrossTopology(renderer, topologyObject, erase, mode);
+            drawCrossTopology(renderer, topologyObject, erase, mode, functionName);
             break;
           case CIRCLE:
-            drawCircleTopology(renderer, topologyObject, erase, mode);
+            drawCircleTopology(renderer, topologyObject, erase, mode, functionName);
             break;
           case NONE:
             break;
@@ -203,10 +203,11 @@ public class Topology_Functions extends AbstractFunction {
       Area topologyArea = null;
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
+        Area tempTopologyArea = getTopology(renderer, topologyObject, mode, functionName);
         if (topologyArea == null) {
-          topologyArea = getTopology(renderer, topologyObject, mode);
+          topologyArea = tempTopologyArea;
         } else {
-          topologyArea.add(getTopology(renderer, topologyObject, mode));
+          topologyArea.add(tempTopologyArea);
         }
       }
       return getAreaPoints(topologyArea, simpleJSON);
@@ -294,16 +295,20 @@ public class Topology_Functions extends AbstractFunction {
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
-            tokenVBL.add(drawRectangleTopology(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(
+                drawRectangleTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
             break;
           case POLYGON:
-            tokenVBL.add(drawPolygonTopology(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(
+                drawPolygonTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
             break;
           case CROSS:
-            tokenVBL.add(drawCrossTopology(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(
+                drawCrossTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
             break;
           case CIRCLE:
-            tokenVBL.add(drawCircleTopology(null, vblObject, false, Zone.TopologyMode.VBL));
+            tokenVBL.add(
+                drawCircleTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
             break;
           case AUTO:
             tokenVBL = autoGenerateVBL(token, vblObject);
@@ -430,10 +435,7 @@ public class Topology_Functions extends AbstractFunction {
     final int level = getJSONint(jsonParms, "level", 2, 0, 100, "setTokenVBL[Auto]");
     final String method =
         getJSONasString(
-            jsonParms,
-            "method",
-            JTS_SimplifyMethodType.getDefault().getLabel(),
-            "setTokenVBL[Auto]");
+            jsonParms, "method", JTS_SimplifyMethodType.getDefault().name(), "setTokenVBL[Auto]");
 
     Color color = new Color(r, g, b, a);
     final boolean inverseVbl = inverse == 1;
@@ -453,9 +455,13 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area drawRectangleTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      boolean erase,
+      Zone.TopologyMode mode,
+      String funcname)
       throws ParserException {
-    String funcname = "drawTopology[Rectangle]";
+    funcname += "[Rectangle]";
     // Required Parameters
     String[] requiredParms = {"x", "y", "w", "h"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
@@ -583,13 +589,17 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area drawPolygonTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      boolean erase,
+      Zone.TopologyMode mode,
+      String funcname)
       throws ParserException {
-    String funcname = "drawTopology[Polygon]";
+    funcname += "[Polygon]";
     String requiredParms[] = {"points"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeA", "points", funcname));
+          I18N.getText("macro.function.general.argumentKeyTypeA", funcname, "points"));
     }
 
     // Get all the x,y coords for the Polygon, must have at least 2
@@ -624,7 +634,7 @@ public class Topology_Functions extends AbstractFunction {
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
+              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
         }
 
         double x = getJSONdouble(point, "x", funcname);
@@ -652,7 +662,7 @@ public class Topology_Functions extends AbstractFunction {
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y}", funcname));
+              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
         }
 
         int x = getJSONint(point, "x", funcname);
@@ -713,14 +723,18 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area drawCrossTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      boolean erase,
+      Zone.TopologyMode mode,
+      String funcname)
       throws ParserException {
-    String funcname = "drawTopology[Cross]";
+    funcname += "[Cross]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,w,h}", funcname));
+          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
     }
 
     int x = getJSONint(topologyObject, "x", funcname);
@@ -802,14 +816,18 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area drawCircleTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, boolean erase, Zone.TopologyMode mode)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      boolean erase,
+      Zone.TopologyMode mode,
+      String funcname)
       throws ParserException {
-    String funcname = "drawTopology[Circle]";
+    funcname += "[Circle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "radius", "sides"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeI", "{x,y,radius,sides}", funcname));
+          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,radius,sides}"));
     }
 
     int x = getJSONint(topologyObject, "x", funcname);
@@ -903,9 +921,9 @@ public class Topology_Functions extends AbstractFunction {
    * @return the topology area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getTopology(ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode)
+  private Area getTopology(
+      ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode, String funcname)
       throws ParserException {
-    String funcname = "getTopology[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {

@@ -15,12 +15,8 @@
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
 import com.jidesoft.docking.DockableFrame;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.ImageIcon;
+import java.util.*;
+import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
@@ -125,18 +121,11 @@ public class SelectionPanel extends AbstractMacroPanel {
       // Only resets if one of the selected tokens is among those changed/deleted.
       ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
       if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
-        if (event.getArg() instanceof List<?>) {
-          List<Token> tokenList = (List<Token>) event.getArg();
-          for (Token token : tokenList) {
-            if (zr.getSelectedTokenSet().contains(token.getId())) {
-              reset();
-              break;
-            }
-          }
-        } else {
-          Token token = (Token) event.getArg();
+        List<Token> tokenList = event.getTokensAsList();
+        for (Token token : tokenList) {
           if (zr.getSelectedTokenSet().contains(token.getId())) {
             reset();
+            break;
           }
         }
       }

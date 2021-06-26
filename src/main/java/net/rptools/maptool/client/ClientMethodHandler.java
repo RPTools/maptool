@@ -522,6 +522,22 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               if (zone != null) {
                 zone.setName(name);
               }
+              MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+              return;
+
+            case changeZoneDispName:
+              zoneGUID = (GUID) parameters[0];
+              String dispName = (String) parameters[1];
+
+              zone = MapTool.getCampaign().getZone(zoneGUID);
+              if (zone != null) {
+                zone.setPlayerAlias(dispName);
+              }
+              MapTool.getFrame()
+                  .setTitleViaRenderer(
+                      MapTool.getFrame()
+                          .getCurrentZoneRenderer()); // fixes a bug where the display name at the
+              // program title was not updating
               return;
 
             case updateCampaign:

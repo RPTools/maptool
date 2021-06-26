@@ -479,7 +479,7 @@
               </at>
              </object>
             </at>
-            <at name="name">@role</at>
+            <at name="name">role</at>
             <at name="width">214</at>
             <at name="items">
              <object classname="com.jeta.forms.store.properties.ItemsProperty">

@@ -32,6 +32,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone;
@@ -95,7 +96,7 @@ public class TokenLayoutPanel extends JPanel {
           public void mouseEntered(MouseEvent e) {
             old = MapTool.getFrame().getStatusMessage();
             MapTool.getFrame()
-                .setStatusMessage("Mouse Wheel to zoom; double-LClick to reset position and zoom");
+                .setStatusMessage(I18N.getString("EditTokenDialog.status.layout.instructions"));
           }
 
           @Override

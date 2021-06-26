@@ -72,11 +72,12 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox stampsStartFreeSizeCheckBox;
   private final JCheckBox backgroundsStartSnapToGridCheckBox;
   private final JCheckBox backgroundsStartFreeSizeCheckBox;
-  private final JComboBox duplicateTokenCombo;
-  private final JComboBox tokenNamingCombo;
-  private final JComboBox showNumberingCombo;
-  private final JComboBox movementMetricCombo;
+  private final JComboBox<LocalizedComboItem> duplicateTokenCombo;
+  private final JComboBox<LocalizedComboItem> tokenNamingCombo;
+  private final JComboBox<LocalizedComboItem> showNumberingCombo;
+  private final JComboBox<WalkerMetric> movementMetricCombo;
   private final JComboBox<Zone.VisionType> visionTypeCombo;
+  private final JComboBox<AppPreferences.MapSortType> mapSortType;
   private final JCheckBox showStatSheetCheckBox;
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
@@ -104,12 +105,12 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner chatAutosaveTime;
   private final JTextField chatFilenameFormat;
   private final JSpinner typingNotificationDuration;
-  private final JComboBox macroEditorThemeCombo;
+  private final JComboBox<String> macroEditorThemeCombo;
   // Chat Notification
   private final JETAColorWell chatNotificationColor;
   private final JCheckBox chatNotificationShowBackground;
   // Defaults
-  private final JComboBox defaultGridTypeCombo;
+  private final JComboBox<LocalizedComboItem> defaultGridTypeCombo;
   private final JTextField defaultGridSizeTextField;
   private final JTextField defaultUnitsPerCellTextField;
   private final JTextField defaultVisionDistanceTextField;
@@ -125,6 +126,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
+  private final JTextField defaultUsername;
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -145,6 +147,35 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<String> jamLanguageOverrideComboBox;
   private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
+  private static final LocalizedComboItem[] defaultGridTypeComboItems = {
+    new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
+    new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
+    new LocalizedComboItem(GridFactory.HEX_VERT, "Preferences.combo.maps.grid.hexVert"),
+    new LocalizedComboItem(GridFactory.ISOMETRIC, "Preferences.combo.maps.grid.isometric"),
+    new LocalizedComboItem(GridFactory.NONE, "MapPropertiesDialog.image.nogrid")
+  };
+  private static final LocalizedComboItem[] duplicateTokenComboItems = {
+    new LocalizedComboItem(Token.NUM_INCREMENT, "Preferences.combo.tokens.duplicate.increment"),
+    new LocalizedComboItem(Token.NUM_RANDOM, "Preferences.combo.tokens.duplicate.random"),
+  };
+  private static final LocalizedComboItem[] showNumberingComboItems = {
+    new LocalizedComboItem(Token.NUM_ON_NAME, "Preferences.combo.tokens.numbering.name"),
+    new LocalizedComboItem(Token.NUM_ON_GM, "Preferences.combo.tokens.numbering.gm"),
+    new LocalizedComboItem(Token.NUM_ON_BOTH, "Preferences.combo.tokens.numbering.both")
+  };
+  private static final LocalizedComboItem[] tokenNamingComboItems = {
+    new LocalizedComboItem(Token.NAME_USE_FILENAME, "Preferences.combo.tokens.naming.filename"),
+    new LocalizedComboItem(
+        Token.NAME_USE_CREATURE,
+        "Preferences.combo.tokens.naming.creature",
+        I18N.getString("Token.name.creature"))
+  };
+  private static final WalkerMetric[] movementMetricComboItems = {
+    WalkerMetric.ONE_TWO_ONE,
+    WalkerMetric.ONE_ONE_ONE,
+    WalkerMetric.MANHATTAN,
+    WalkerMetric.NO_DIAGONALS
+  };
 
   public PreferencesDialog() {
     super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
@@ -195,6 +226,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
     frameRateCapTextField = panel.getTextField("frameRateCapTextField");
+    defaultUsername = panel.getTextField("defaultUsername");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
@@ -236,6 +268,7 @@ public class PreferencesDialog extends JDialog {
     showAvatarInChat = panel.getCheckBox("showChatAvatar");
     showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
     visionTypeCombo = panel.getComboBox("defaultVisionType");
+    mapSortType = panel.getComboBox("mapSortType");
     movementMetricCombo = panel.getComboBox("movementMetric");
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
@@ -431,11 +464,17 @@ public class PreferencesDialog extends JDialog {
                 return StringUtil.parseInteger(value);
               }
             });
-    // initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
-    // public void actionPerformed(ActionEvent e) {
-    // AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
-    // }
-    // });
+
+    defaultUsername.addFocusListener(
+        new FocusAdapter() {
+          @Override
+          public void focusLost(FocusEvent e) {
+            if (!e.isTemporary()) {
+              StringBuilder userName = new StringBuilder(defaultUsername.getText());
+              AppPreferences.setDefaultUserName(userName.toString());
+            }
+          }
+        });
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -760,89 +799,72 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setChatNotificationShowBackground(
                 chatNotificationShowBackground.isSelected()));
 
-    DefaultComboBoxModel gridTypeModel = new DefaultComboBoxModel();
-    gridTypeModel.addElement(GridFactory.SQUARE);
-    gridTypeModel.addElement(GridFactory.HEX_HORI);
-    gridTypeModel.addElement(GridFactory.HEX_VERT);
-    gridTypeModel.addElement(GridFactory.ISOMETRIC);
-    gridTypeModel.setSelectedItem(AppPreferences.getDefaultGridType());
-    defaultGridTypeCombo.setModel(gridTypeModel);
+    defaultGridTypeCombo.setModel(
+        getLocalizedModel(defaultGridTypeComboItems, AppPreferences.getDefaultGridType()));
     defaultGridTypeCombo.addItemListener(
-        e -> AppPreferences.setDefaultGridType((String) defaultGridTypeCombo.getSelectedItem()));
+        e ->
+            AppPreferences.setDefaultGridType(
+                ((LocalizedComboItem) (defaultGridTypeCombo.getSelectedItem())).getValue()));
 
-    DefaultComboBoxModel tokenNumModel = new DefaultComboBoxModel();
-    tokenNumModel.addElement(Token.NUM_INCREMENT);
-    tokenNumModel.addElement(Token.NUM_RANDOM);
-    tokenNumModel.setSelectedItem(AppPreferences.getDuplicateTokenNumber());
-    duplicateTokenCombo.setModel(tokenNumModel);
+    duplicateTokenCombo.setModel(
+        getLocalizedModel(duplicateTokenComboItems, AppPreferences.getDuplicateTokenNumber()));
     duplicateTokenCombo.addItemListener(
         e ->
-            AppPreferences.setDuplicateTokenNumber((String) duplicateTokenCombo.getSelectedItem()));
+            AppPreferences.setDuplicateTokenNumber(
+                ((LocalizedComboItem) (duplicateTokenCombo.getSelectedItem())).getValue()));
 
-    DefaultComboBoxModel tokenNameModel = new DefaultComboBoxModel();
-    tokenNameModel.addElement(Token.NAME_USE_FILENAME);
-    tokenNameModel.addElement(Token.NAME_USE_CREATURE);
-    tokenNameModel.setSelectedItem(AppPreferences.getNewTokenNaming());
-    tokenNamingCombo.setModel(tokenNameModel);
-    tokenNamingCombo.addItemListener(
-        e -> AppPreferences.setNewTokenNaming((String) tokenNamingCombo.getSelectedItem()));
-
-    DefaultComboBoxModel showNumModel = new DefaultComboBoxModel();
-    showNumModel.addElement(Token.NUM_ON_NAME);
-    showNumModel.addElement(Token.NUM_ON_GM);
-    showNumModel.addElement(Token.NUM_ON_BOTH);
-    showNumModel.setSelectedItem(AppPreferences.getTokenNumberDisplay());
-    showNumberingCombo.setModel(showNumModel);
+    showNumberingCombo.setModel(
+        getLocalizedModel(showNumberingComboItems, AppPreferences.getTokenNumberDisplay()));
     showNumberingCombo.addItemListener(
-        e -> AppPreferences.setTokenNumberDisplay((String) showNumberingCombo.getSelectedItem()));
+        e ->
+            AppPreferences.setTokenNumberDisplay(
+                ((LocalizedComboItem) showNumberingCombo.getSelectedItem()).getValue()));
 
-    DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
-    movementMetricModel.addElement(WalkerMetric.ONE_TWO_ONE);
-    movementMetricModel.addElement(WalkerMetric.ONE_ONE_ONE);
-    movementMetricModel.addElement(WalkerMetric.MANHATTAN);
-    movementMetricModel.addElement(WalkerMetric.NO_DIAGONALS);
-    movementMetricModel.setSelectedItem(AppPreferences.getMovementMetric());
+    tokenNamingCombo.setModel(
+        getLocalizedModel(tokenNamingComboItems, AppPreferences.getNewTokenNaming()));
+    tokenNamingCombo.addItemListener(
+        e ->
+            AppPreferences.setNewTokenNaming(
+                ((LocalizedComboItem) (tokenNamingCombo.getSelectedItem())).getValue()));
 
-    movementMetricCombo.setModel(movementMetricModel);
+    movementMetricCombo.setModel(new DefaultComboBoxModel<>(movementMetricComboItems));
+    movementMetricCombo.setSelectedItem(AppPreferences.getMovementMetric());
     movementMetricCombo.addItemListener(
         e ->
             AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem()));
 
-    DefaultComboBoxModel<Zone.VisionType> visionTypeModel = new DefaultComboBoxModel<>();
-    for (Zone.VisionType vt : Zone.VisionType.values()) {
-      visionTypeModel.addElement(vt);
-    }
-    visionTypeModel.setSelectedItem(AppPreferences.getDefaultVisionType());
-
-    visionTypeCombo.setModel(visionTypeModel);
+    visionTypeCombo.setModel(new DefaultComboBoxModel<>(Zone.VisionType.values()));
+    visionTypeCombo.setSelectedItem(AppPreferences.getDefaultVisionType());
     visionTypeCombo.addItemListener(
         e ->
             AppPreferences.setDefaultVisionType(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
 
-    DefaultComboBoxModel macroEditorThemeModel = new DefaultComboBoxModel();
+    mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
+    mapSortType.setSelectedItem(AppPreferences.getMapSortType());
+    mapSortType.addItemListener(
+        e ->
+            AppPreferences.setMapSortType(
+                (AppPreferences.MapSortType) mapSortType.getSelectedItem()));
 
+    macroEditorThemeCombo.setModel(new DefaultComboBoxModel<>());
     try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {
       paths
           .filter(Files::isRegularFile)
           .filter(p -> p.toString().toLowerCase().endsWith(".xml"))
           .forEach(
               p ->
-                  macroEditorThemeModel.addElement(
+                  macroEditorThemeCombo.addItem(
                       FilenameUtils.removeExtension(p.getFileName().toString())));
-
-      macroEditorThemeModel.setSelectedItem(AppPreferences.getDefaultMacroEditorTheme());
+      macroEditorThemeCombo.setSelectedItem(AppPreferences.getDefaultMacroEditorTheme());
     } catch (IOException ioe) {
       log.warn("Unable to list macro editor themes.", ioe);
-      macroEditorThemeModel.addElement("default");
+      macroEditorThemeCombo.addItem("Default");
     }
-
-    macroEditorThemeCombo.setModel(macroEditorThemeModel);
-
     macroEditorThemeCombo.addItemListener(
         e ->
             AppPreferences.setDefaultMacroEditorTheme(
-                (String) macroEditorThemeModel.getSelectedItem()));
+                (String) macroEditorThemeCombo.getSelectedItem()));
 
     add(panel);
     pack();
@@ -879,6 +901,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
     fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
+    defaultUsername.setText(AppPreferences.getDefaultUserName());
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
@@ -998,6 +1021,15 @@ public class PreferencesDialog extends JDialog {
     chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
   }
 
+  /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */
+  private ComboBoxModel<LocalizedComboItem> getLocalizedModel(
+      LocalizedComboItem[] items, String currPref) {
+    DefaultComboBoxModel<LocalizedComboItem> model = new DefaultComboBoxModel<>(items);
+    model.setSelectedItem(
+        Stream.of(items).filter(i -> i.getValue().equals(currPref)).findFirst().orElse(items[0]));
+    return model;
+  }
+
   /** @author frank */
   private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
@@ -1046,5 +1078,32 @@ public class PreferencesDialog extends JDialog {
     }
 
     protected abstract void storeSpinnerValue(int value);
+  }
+
+  /**
+   * Stores the localized display name and preference value String for menu items that don't have a
+   * corresponding enum.
+   */
+  private static class LocalizedComboItem {
+    private final String displayName;
+    private final String prefValue;
+
+    LocalizedComboItem(String prefValue, String i18nKey) {
+      this.prefValue = prefValue;
+      displayName = I18N.getText(i18nKey);
+    }
+
+    LocalizedComboItem(String prefValue, String i18nKey, Object... args) {
+      this.prefValue = prefValue;
+      displayName = I18N.getText(i18nKey, args);
+    }
+
+    public String getValue() {
+      return prefValue;
+    }
+
+    public String toString() {
+      return displayName;
+    }
   }
 }

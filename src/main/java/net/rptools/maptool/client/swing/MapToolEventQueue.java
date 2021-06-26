@@ -19,12 +19,12 @@ import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+import java.awt.Insets;
 import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -56,7 +56,12 @@ public class MapToolEventQueue extends EventQueue {
       log.error(soe, soe);
       JideOptionPane optionPane = getOptionPane();
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
-      optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
+      JTextArea jta = new JTextArea(I18N.getString("MapToolEventQueue.stackOverflow"));
+      jta.setLineWrap(true);
+      jta.setWrapStyleWord(true);
+      jta.setMargin(new Insets(5, 10, 10, 10));
+      optionPane.setDetails(jta);
+      // optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
@@ -145,7 +150,7 @@ public class MapToolEventQueue extends EventQueue {
     // Set the user in the current context.
     Sentry.getContext().setUser(user.build());
 
-    Sentry.getContext().addTag("role", player != null ? player.getRole().toString() : null);
+    Sentry.getContext().addTag("role", player != null ? player.getRole().name() : null);
     boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
