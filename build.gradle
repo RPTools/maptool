@@ -393,7 +393,7 @@ dependencies {
     implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
 
     // Noise Generator
-    implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
+    implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
 }
 
