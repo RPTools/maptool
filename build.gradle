@@ -282,7 +282,7 @@ dependencies {
 
     // For Sentry bug reporting
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
-    implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
+    implementation group: 'io.sentry', name: 'sentry-log4j2', version: '5.0.1'
 
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
