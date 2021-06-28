@@ -51,12 +51,7 @@ public class AppUtil {
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
 
-  static {
-    // Don't move this. This MUST be set before the logger is initialized
-    System.setProperty(LOGDIR_PROPERTY_NAME, getAppHome("logs").getAbsolutePath());
-  }
-
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
+  private static Logger log;
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
@@ -82,6 +77,15 @@ public class AppUtil {
       getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
           ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
           : null;
+
+  /** Sets the MAPTOOL_LOGDIR system property and initializes the first logger. */
+  public static void initLogging() {
+    if (log == null) {
+      // Note: This property MUST be set before the logger is initialized
+      System.setProperty(LOGDIR_PROPERTY_NAME, getAppHome("logs").getAbsolutePath());
+      log = LogManager.getLogger(AppUtil.class);
+    }
+  }
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -122,7 +126,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log.isInfoEnabled()) {
+        if (log != null && log.isInfoEnabled()) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;
