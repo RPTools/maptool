@@ -44,13 +44,19 @@ import org.apache.logging.log4j.Logger;
 
 /** This class provides utility functions for maptool client. */
 public class AppUtil {
-
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
+  public static final String LOGDIR_PROPERTY_NAME = "MAPTOOL_LOGDIR";
   private static final String CLIENT_ID_FILE = "client-id";
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
+
+  static {
+    // Don't move this. This MUST be set before the logger is initialized
+    System.setProperty(LOGDIR_PROPERTY_NAME, getAppHome("logs").getAbsolutePath());
+  }
+
+  private static final Logger log = LogManager.getLogger(AppUtil.class);
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
@@ -72,15 +78,10 @@ public class AppUtil {
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   private static File dataDirPath;
-  private static String packagerCfgFileName;
-
-  static {
-    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
-    packagerCfgFileName =
-        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
-            ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
-            : null;
-  }
+  private static String packagerCfgFileName =
+      getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
+          ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
+          : null;
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
