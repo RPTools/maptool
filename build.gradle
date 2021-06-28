@@ -281,7 +281,7 @@ dependencies {
 
 
     // For Sentry bug reporting
-    implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
+    implementation group: 'io.sentry', name: 'sentry', version: '5.0.1'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
@@ -346,7 +346,7 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.20'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.24'
     implementation 'org.apache.pdfbox:pdfbox-tools:2.0.24'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.69'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
@@ -354,7 +354,7 @@ dependencies {
 
 
 
-    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
+    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
