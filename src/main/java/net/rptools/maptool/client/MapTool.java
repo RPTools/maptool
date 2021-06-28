@@ -1529,7 +1529,6 @@ public class MapTool {
     log.info("**                              MapTool Started!                              **");
     log.info("**                                                                            **");
     log.info("********************************************************************************");
-    log.info("AppHome System Property: " + System.getProperty("appHome"));
     log.info("Logging to: " + getLoggerFileName());
 
     String versionImplementation = version;
