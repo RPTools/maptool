@@ -47,7 +47,8 @@ public class MapFunctions extends AbstractFunction {
         "setMapVisible",
         "setMapName",
         "setMapDisplayName",
-        "copyMap");
+        "copyMap",
+        "getMapByDisplay");
   }
 
   public static MapFunctions getInstance() {
@@ -202,24 +203,47 @@ public class MapFunctions extends AbstractFunction {
 
     } else if ("getVisibleMapDisplayNames".equalsIgnoreCase(functionName)
         || "getAllMapDisplayNames".equalsIgnoreCase(functionName)) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
-      boolean allMaps = functionName.equalsIgnoreCase("getAllMapDisplayNames");
+        FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+        boolean allMaps = functionName.equalsIgnoreCase("getAllMapDisplayNames");
 
-      if (allMaps) checkTrusted(functionName);
+        if (allMaps) checkTrusted(functionName);
 
-      List<String> mapNames = new LinkedList<String>();
-      for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-        if (allMaps || zr.getZone().isVisible()) {
-          mapNames.add(zr.getZone().getPlayerAlias());
+        List<String> mapNames = new LinkedList<String>();
+        for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+          if (allMaps || zr.getZone().isVisible()) {
+            mapNames.add(zr.getZone().getPlayerAlias());
+          }
+        }
+        String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
+        if ("json".equals(delim)) {
+          JsonArray jarr = new JsonArray();
+          mapNames.forEach(m -> jarr.add(new JsonPrimitive(m)));
+          return jarr;
+        } else {
+          return StringFunctions.getInstance().join(mapNames, delim);
         }
       }
-      String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
+    else if ("getMapByDisplay".equalsIgnoreCase(functionName) || "getMapByDisp".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String dispName = parameters.get(0).toString();
+      checkTrusted(functionName);
+
+      List<String> mapWithDisp = new LinkedList<String>();
+      for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+        if (zr.getZone().getPlayerAlias().equals(dispName)) {
+          mapWithDisp.add(zr.getZone().getName());
+        }
+      }
+      if (mapWithDisp.size() == 0) {
+        throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
+      }
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();
-        mapNames.forEach(m -> jarr.add(new JsonPrimitive(m)));
+        mapWithDisp.forEach(m -> jarr.add(new JsonPrimitive(m)));
         return jarr;
       } else {
-        return StringFunctions.getInstance().join(mapNames, delim);
+        return StringFunctions.getInstance().join(mapWithDisp, delim);
       }
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
