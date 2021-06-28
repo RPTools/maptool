@@ -354,7 +354,7 @@ dependencies {
 
 
 
-    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
+    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
