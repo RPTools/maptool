@@ -386,7 +386,7 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
 
     // flexmark markdown parsing / conversion
-    implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
 
 
     // Apache Tika Parsers for determining file type
