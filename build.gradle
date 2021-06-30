@@ -329,7 +329,7 @@ dependencies {
 
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
-    implementation 'com.caucho:hessian:4.0.63'
+    implementation 'com.caucho:hessian:4.0.65'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
