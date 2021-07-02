@@ -310,14 +310,14 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
-    implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.31.v20200723'
-    implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.40.v20210413'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.40.v20210413'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.40.v20210413'
+    implementation 'org.eclipse.jetty:jetty-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
@@ -343,7 +343,7 @@ dependencies {
     implementation group: 'org.graalvm.js', name: 'js', version: '21.1.0'
     implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
-    implementation 'com.jayway.jsonpath:json-path:2.4.0'
+    implementation 'com.jayway.jsonpath:json-path:2.6.0'
 
     // For PDF image extraction
     implementation 'org.apache.pdfbox:pdfbox:2.0.24'
@@ -383,7 +383,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.11.2'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
