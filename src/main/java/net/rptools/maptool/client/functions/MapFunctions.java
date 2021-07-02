@@ -48,7 +48,7 @@ public class MapFunctions extends AbstractFunction {
         "setMapName",
         "setMapDisplayName",
         "copyMap",
-        "getMapByDisplay");
+        "getMapNames");
   }
 
   public static MapFunctions getInstance() {
@@ -203,27 +203,26 @@ public class MapFunctions extends AbstractFunction {
 
     } else if ("getVisibleMapDisplayNames".equalsIgnoreCase(functionName)
         || "getAllMapDisplayNames".equalsIgnoreCase(functionName)) {
-        FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
-        boolean allMaps = functionName.equalsIgnoreCase("getAllMapDisplayNames");
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      boolean allMaps = functionName.equalsIgnoreCase("getAllMapDisplayNames");
 
-        if (allMaps) checkTrusted(functionName);
+      if (allMaps) checkTrusted(functionName);
 
-        List<String> mapNames = new LinkedList<String>();
-        for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-          if (allMaps || zr.getZone().isVisible()) {
-            mapNames.add(zr.getZone().getPlayerAlias());
-          }
-        }
-        String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
-        if ("json".equals(delim)) {
-          JsonArray jarr = new JsonArray();
-          mapNames.forEach(m -> jarr.add(new JsonPrimitive(m)));
-          return jarr;
-        } else {
-          return StringFunctions.getInstance().join(mapNames, delim);
+      List<String> mapNames = new LinkedList<String>();
+      for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+        if (allMaps || zr.getZone().isVisible()) {
+          mapNames.add(zr.getZone().getPlayerAlias());
         }
       }
-    else if ("getMapByDisplay".equalsIgnoreCase(functionName) || "getMapByDisp".equalsIgnoreCase(functionName)) {
+      String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
+      if ("json".equals(delim)) {
+        JsonArray jarr = new JsonArray();
+        mapNames.forEach(m -> jarr.add(new JsonPrimitive(m)));
+        return jarr;
+      } else {
+        return StringFunctions.getInstance().join(mapNames, delim);
+      }
+    } else if ("getMapNames".equalsIgnoreCase(functionName)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String dispName = parameters.get(0).toString();
       checkTrusted(functionName);
