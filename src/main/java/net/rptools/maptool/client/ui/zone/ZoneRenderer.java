@@ -442,7 +442,13 @@ public class ZoneRenderer extends JComponent
     }
 
     // Lee: check only matters for snap-to-grid
-    if (stg) {
+    // Phill: and limit players to only complete found paths
+    boolean isValidPath =
+        stg
+            && (MapTool.getPlayer().isGM()
+                || set.getWalker() == null
+                || set.getWalker().getDistance() != 0);
+    if (isValidPath) {
       CodeTimer moveTimer = new CodeTimer("ZoneRenderer.commitMoveSelectionSet");
       moveTimer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
       moveTimer.setThreshold(1);
@@ -579,10 +585,6 @@ public class ZoneRenderer extends JComponent
           log.debug(results);
         }
         moveTimer.clear();
-      }
-    } else {
-      for (GUID tokenGUID : selectionSet) {
-        denyMovement(zone.getToken(tokenGUID));
       }
     }
 
