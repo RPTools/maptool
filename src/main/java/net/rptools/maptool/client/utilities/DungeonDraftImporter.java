@@ -40,6 +40,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.ZoneFactory;
+import org.apache.commons.io.FilenameUtils;
 
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
@@ -140,7 +141,9 @@ public class DungeonDraftImporter {
     String imageString = ddvtt.get(VTT_FIELD_IMAGE).getAsString();
 
     byte[] imageBytes = Base64.decode(imageString);
-    Asset asset = new Asset(dungeonDraftFile.getName(), imageBytes);
+    String mapName = FilenameUtils.removeExtension(dungeonDraftFile.getName());
+    Asset asset = new Asset(mapName, imageBytes);
+    zone.setPlayerAlias(mapName);
     AssetManager.putAsset(asset);
     MapPropertiesDialog dialog =
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
