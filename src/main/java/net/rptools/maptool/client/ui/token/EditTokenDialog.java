@@ -608,7 +608,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     // TYPE
     // Only update this if it actually changed
-    if(getTypeCombo().getSelectedItem() != token.getType()) {
+    if (getTypeCombo().getSelectedItem() != token.getType()) {
       token.setType((Token.Type) getTypeCombo().getSelectedItem());
     }
 
