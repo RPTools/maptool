@@ -537,9 +537,11 @@ public class AssetManager {
           () -> {
             assetFile.getParentFile().mkdirs();
 
-            try (var operation = new AssetWriteRenameOperation(assetFile);
-                var temporaryFileStream = new FileOutputStream(operation.temporaryFile)) {
-              temporaryFileStream.write(asset.getImage());
+            try (var operation = new AssetWriteRenameOperation(assetFile)) {
+              try (var temporaryFileStream = new FileOutputStream(operation.temporaryFile)) {
+                temporaryFileStream.write(asset.getImage());
+              }
+
               // Now that the data is in a file, we move it to its final resting place.
               operation.commit();
             } catch (IOException ioe) {
