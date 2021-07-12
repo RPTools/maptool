@@ -28,7 +28,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
@@ -239,10 +238,17 @@ public class DungeonDraftImporter {
         lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
 
         JsonObject lightValues = new JsonObject();
-        lightValues.addProperty("range", ele.getAsJsonObject().getAsJsonPrimitive("range").getAsBigDecimal());
-        lightValues.addProperty("intensity", ele.getAsJsonObject().getAsJsonPrimitive("intensity").getAsBigDecimal());
-        lightValues.addProperty("color", ele.getAsJsonObject().getAsJsonPrimitive("color").getAsString());
-        lightValues.addProperty("shadows", ele.getAsJsonObject().getAsJsonPrimitive("shadows").getAsBoolean()? BigDecimal.ONE : BigDecimal.ZERO);
+        lightValues.addProperty(
+            "range", ele.getAsJsonObject().getAsJsonPrimitive("range").getAsBigDecimal());
+        lightValues.addProperty(
+            "intensity", ele.getAsJsonObject().getAsJsonPrimitive("intensity").getAsBigDecimal());
+        lightValues.addProperty(
+            "color", ele.getAsJsonObject().getAsJsonPrimitive("color").getAsString());
+        lightValues.addProperty(
+            "shadows",
+            ele.getAsJsonObject().getAsJsonPrimitive("shadows").getAsBoolean()
+                ? BigDecimal.ONE
+                : BigDecimal.ZERO);
         lightToken.setGMNotes(lightValues.toString());
 
         zone.putToken(lightToken);
