@@ -785,6 +785,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /**
+   * Sets the token's type. Sets hasSight to true if the new type is PC.
+   *
+   * @param type The new type
+   */
   public void setType(Type type) {
     tokenType = type.name();
     if (type == Type.PC) {
