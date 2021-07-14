@@ -48,7 +48,7 @@ public class MapFunctions extends AbstractFunction {
         "setMapName",
         "setMapDisplayName",
         "copyMap",
-        "getMapNames");
+        "getMapName");
   }
 
   public static MapFunctions getInstance() {
@@ -222,28 +222,17 @@ public class MapFunctions extends AbstractFunction {
       } else {
         return StringFunctions.getInstance().join(mapNames, delim);
       }
-    } else if ("getMapNames".equalsIgnoreCase(functionName)) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+    } else if ("getMapName".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       String dispName = parameters.get(0).toString();
       checkTrusted(functionName);
 
-      List<String> mapWithDisp = new LinkedList<String>();
       for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
         if (zr.getZone().getPlayerAlias().equals(dispName)) {
-          mapWithDisp.add(zr.getZone().getName());
+          return zr.getZone().getName();
         }
       }
-      if (mapWithDisp.size() == 0) {
-        throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
-      }
-      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      if ("json".equals(delim)) {
-        JsonArray jarr = new JsonArray();
-        mapWithDisp.forEach(m -> jarr.add(new JsonPrimitive(m)));
-        return jarr;
-      } else {
-        return StringFunctions.getInstance().join(mapWithDisp, delim);
-      }
+      throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
