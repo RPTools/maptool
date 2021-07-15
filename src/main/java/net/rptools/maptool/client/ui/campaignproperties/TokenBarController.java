@@ -714,7 +714,8 @@ public class TokenBarController
     boolean showOthers = formPanel.isSelected(SHOW_OTHERS);
     int thickness = TokenStatesController.getSpinner(THICKNESS, "thickness", formPanel);
     int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
-    Side side = Side.valueOf(formPanel.getSelectedItem(SIDE).toString().toUpperCase());
+    Side side =
+        Side.valueOf(((ListItemProperty) formPanel.getSelectedItem(SIDE)).getName().toUpperCase());
 
     BarTokenOverlay to = null;
     if (overlay.equals("Solid")) {
