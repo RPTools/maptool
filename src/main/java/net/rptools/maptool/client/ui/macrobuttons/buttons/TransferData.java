@@ -30,6 +30,7 @@ public class TransferData implements Serializable {
   public boolean autoExecute = true;
   public boolean includeLabel = false;
   public boolean applyToTokens = true;
+  public boolean allowPlayerEdits = false;
   public String fontColorKey = "";
   public String fontSize = "";
   public String minWidth = "";
@@ -53,6 +54,7 @@ public class TransferData implements Serializable {
     this.autoExecute = prop.getAutoExecute();
     this.includeLabel = prop.getIncludeLabel();
     this.applyToTokens = prop.getApplyToTokens();
+    this.allowPlayerEdits = prop.getAllowPlayerEdits();
     this.panelClass = button.getPanelClass();
     this.fontColorKey = prop.getFontColorKey();
     this.fontSize = prop.getFontSize();

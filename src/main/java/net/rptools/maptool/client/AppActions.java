@@ -55,6 +55,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
@@ -128,7 +129,6 @@ import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -2735,6 +2735,11 @@ public class AppActions {
               // Jamz: Bug fix, would not add extension if map name had a . in it...
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+              if (mapFile.exists()) {
+                if (!MapTool.confirm("msg.confirm.fileExists")) {
+                  return;
+                }
+              }
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
               AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");

@@ -1539,7 +1539,6 @@ public class MapTool {
     log.info("**                              MapTool Started!                              **");
     log.info("**                                                                            **");
     log.info("********************************************************************************");
-    log.info("AppHome System Property: " + System.getProperty("appHome"));
     log.info("Logging to: " + getLoggerFileName());
 
     String versionImplementation = version;
@@ -1661,13 +1660,6 @@ public class MapTool {
       System.setProperty("apple.laf.useScreenMenuBar", "true");
       System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
       System.setProperty("apple.awt.brushMetalLook", "true");
-    }
-    // Before anything else, create a place to store all the data
-    try {
-      AppUtil.getAppHome();
-    } catch (Throwable t) {
-      MapTool.showError("Error creating data directory", t);
-      System.exit(1);
     }
 
     // System properties

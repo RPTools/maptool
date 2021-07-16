@@ -8,7 +8,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.1.0"
     id "com.diffplug.spotless" version "5.2.0"
     id 'org.openjfx.javafxplugin' version '0.0.10'
-    id 'org.beryx.runtime' version '1.12.4'
+    id 'org.beryx.runtime' version '1.12.5'
 }
 
 // Apply the java plugin to add support for Java
@@ -117,7 +117,12 @@ javafx {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -163,7 +168,12 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages", "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED", "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=java.desktop/javax.swing=ALL-UNNAMED"]
+        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+                   "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+                   "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+                   "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -240,7 +250,6 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     mavenLocal()
     mavenCentral()
-    jcenter()
     maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
@@ -255,8 +264,21 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.13.0'	// Bridges v1 to v2 for other code in other libs
 
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.31'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
+
+
+    // Image processing lib
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.7.0'
+
+    implementation 'org.apache.xmlgraphics:batik-all:1.14' // For Twelvemonkey SVG
+
 
     // For Sentry bug reporting
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
@@ -266,10 +288,10 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
 
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.10.0'
     implementation 'commons-jxpath:commons-jxpath:1.3'
     implementation 'commons-lang:commons-lang:2.6'
-    implementation 'commons-net:commons-net:3.6'
+    implementation 'commons-net:commons-net:3.8.0'
     implementation 'commons-cli:commons-cli:1.4'
 
     // RPTool Libs
@@ -288,61 +310,56 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
-    implementation 'org.eclipse.jetty:jetty-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.31.v20200723'
-    implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.40.v20210413'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.40.v20210413'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.40.v20210413'
+    implementation 'org.eclipse.jetty:jetty-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
-    implementation 'net.java.abeille:abeille-formsrt:2.0'
+
+    // This is just the standard abeille-formsrt but need to rename it so jpackage puts it at the
+    // end of the classpath list becuase it contains an old version of batik which is causing
+    // SVG rendering to fail.
+    implementation 'net.java.abeille:zz-abeille-formsrt:2.0'
+
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho:hessian:4.0.63'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
-    implementation 'org.swinglabs:swing-worker:1.2'
     implementation 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
     implementation 'com.withay:withay-util:1.0'
     implementation 'xmlpull:xmlpull:1.1.3.1'
     implementation 'xpp3:xpp3_min:1.1.4c'
-    implementation 'com.thoughtworks.xstream:xstream:1.4.16'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.17'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-    implementation group: 'org.graalvm.js', name: 'js', version: '21.0.0.2'
+    implementation group: 'org.graalvm.js', name: 'js', version: '21.1.0'
     implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
-    implementation 'com.jayway.jsonpath:json-path:2.4.0'
+    implementation 'com.jayway.jsonpath:json-path:2.6.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.20'
-    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.20'
-    implementation 'org.bouncycastle:bcmail-jdk15on:1.64'								// To decrypt passworded/secured pdf's
+    implementation 'org.apache.pdfbox:pdfbox:2.0.24'
+    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.24'
+    implementation 'org.bouncycastle:bcmail-jdk15on:1.69'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
-    implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
+    implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
-    // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.6.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.6.4'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 
-    implementation 'org.apache.xmlgraphics:batik-transcoder:1.13' // For Twelvemonkey SVG
 
-    implementation 'com.github.gotson:webp-imageio:0.2.0' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.0/jar
+    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
 
     // For syntax highlighting in macro editor
-    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-    implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.1.1'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.1.3'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+    implementation group: 'com.fifesoft', name: 'rstaui', version: '3.1.2'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.1.2'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
     implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.2'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
@@ -352,31 +369,31 @@ dependencies {
     implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
 
     // For RESTful functions
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.3.0'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.1'
 
     // Better JSON functions...
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.7'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.11.2'
 
     // flexmark markdown parsing / conversion
-    implementation 'com.vladsch.flexmark:flexmark-all:0.61.12'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
 
 
     // Apache Tika Parsers for determining file type
     implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
 
     // Noise Generator
-    implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
+    implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
 }
 

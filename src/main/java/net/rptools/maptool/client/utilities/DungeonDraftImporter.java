@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
@@ -38,6 +39,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.ZoneFactory;
+import org.apache.commons.io.FilenameUtils;
 
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
@@ -138,7 +140,9 @@ public class DungeonDraftImporter {
     String imageString = ddvtt.get(VTT_FIELD_IMAGE).getAsString();
 
     byte[] imageBytes = Base64.decode(imageString);
-    Asset asset = new Asset(dungeonDraftFile.getName(), imageBytes);
+    String mapName = FilenameUtils.removeExtension(dungeonDraftFile.getName());
+    Asset asset = new Asset(mapName, imageBytes);
+    zone.setPlayerAlias(mapName);
     AssetManager.putAsset(asset);
     MapPropertiesDialog dialog =
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
@@ -232,6 +236,21 @@ public class DungeonDraftImporter {
 
         lightToken.setX((int) (position.get("x").getAsDouble() * pixelsPerCell) - LIGHT_WIDTH / 2);
         lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
+
+        JsonObject lightValues = new JsonObject();
+        lightValues.addProperty(
+            "range", ele.getAsJsonObject().getAsJsonPrimitive("range").getAsBigDecimal());
+        lightValues.addProperty(
+            "intensity", ele.getAsJsonObject().getAsJsonPrimitive("intensity").getAsBigDecimal());
+        lightValues.addProperty(
+            "color", ele.getAsJsonObject().getAsJsonPrimitive("color").getAsString());
+        lightValues.addProperty(
+            "shadows",
+            ele.getAsJsonObject().getAsJsonPrimitive("shadows").getAsBoolean()
+                ? BigDecimal.ONE
+                : BigDecimal.ZERO);
+        lightToken.setGMNotes(lightValues.toString());
+
         zone.putToken(lightToken);
         lightNo++;
       } else {
