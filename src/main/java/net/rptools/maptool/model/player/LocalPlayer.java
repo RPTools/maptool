@@ -28,8 +28,9 @@ public class LocalPlayer extends Player {
 
   public LocalPlayer(String name, Role role, String plainTextPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    super(name, role, null); // Subclass takes care of plainTextPassword info
+    super(name, role, null); // Superclass takes care of plainTextPassword info
     this.plainTextPassword = plainTextPassword;
+    setPasswordSalt(CipherUtil.getInstance().createSalt());
   }
 
   /** @return the effective role of the local player, taking into account Show As Player. */
@@ -48,7 +49,7 @@ public class LocalPlayer extends Player {
 
   public void setPasswordSalt(byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    if (password != null  && Arrays.compare(password.salt(), salt) != 0) {
+    if (password == null  || Arrays.compare(password.salt(), salt) != 0) {
       password = CipherUtil.getInstance().createKey(plainTextPassword, salt);
     }
   }

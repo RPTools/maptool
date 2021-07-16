@@ -1,0 +1,161 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Launch LargeImage",
+            "request": "launch",
+            "mainClass": "net.rptools.lib.image.LargeImage",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch PositionalLayout",
+            "request": "launch",
+            "mainClass": "net.rptools.lib.swing.PositionalLayout",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch TaskPanelGroup",
+            "request": "launch",
+            "mainClass": "net.rptools.lib.swing.TaskPanelGroup",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch DropTargetInfo",
+            "request": "launch",
+            "mainClass": "net.rptools.lib.tool.DropTargetInfo",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch LaunchInstructions",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.LaunchInstructions",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch MapTool",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.MapTool",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch RemoteFileDownloader",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.RemoteFileDownloader",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch WebDownloader",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.WebDownloader",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch CampaignPropertiesDialog",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch FTPClient",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.io.FTPClient",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch AreaFace",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.zone.AreaFace",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch FogUtil",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.zone.FogUtil",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch AreaFace(1)",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.zone.vbl.AreaFace",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch AreaTreeInspector",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.client.ui.zone.vbl.AreaTreeInspector",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch GUID",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.model.GUID",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch MapToolServer",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.server.MapToolServer",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch LightSourceCreator",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.tool.LightSourceCreator",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch TokenFootprintCreator",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.tool.TokenFootprintCreator",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch CreateGridFile",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.util.CreateGridFile",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch CreateVersionedInstallSplash",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.util.CreateVersionedInstallSplash",
+            "projectName": "MapTool"
+        },
+        {
+            "type": "java",
+            "name": "Launch GraphicsUtil",
+            "request": "launch",
+            "mainClass": "net.rptools.maptool.util.GraphicsUtil",
+            "projectName": "MapTool"
+        }
+    ]
+}

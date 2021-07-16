@@ -79,10 +79,13 @@ import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -1162,11 +1165,11 @@ public class MapTool {
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
     String username = AppPreferences.getDefaultUserName();
+    LocalPlayer localPlayer =
+        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
+    ((LocalPlayerDatabase)PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER)).setLocalPlayer(localPlayer);
     // Connect to server
-    MapTool.createConnection(
-        "localhost",
-        config.getPort(),
-        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
+    MapTool.createConnection( "localhost", config.getPort(), localPlayer);
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);

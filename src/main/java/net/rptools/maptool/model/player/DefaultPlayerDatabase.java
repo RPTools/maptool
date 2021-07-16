@@ -2,6 +2,8 @@ package net.rptools.maptool.model.player;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Collection;
+import java.util.Set;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
 
@@ -18,7 +20,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   private final CipherUtil.Key playerPassword;
   private final CipherUtil.Key gmPassword;
 
-  public DefaultPlayerDatabase(String playerPassword, String gmPassword)
+  DefaultPlayerDatabase(String playerPassword, String gmPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     byte[] salt = CipherUtil.getInstance().createSalt();
     this.playerPassword = CipherUtil.getInstance().createKey(playerPassword, salt);
@@ -61,5 +63,40 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
       default:
         return Optional.empty();
     }
+  }
+
+  @Override
+  public boolean supportsDisabling() {
+    return false;
+  }
+
+  @Override
+  public boolean supportsPlayTimes() {
+    return false;
+  }
+
+  @Override
+  public void disablePlayer(Player player, String reason) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isDisabled(Player player) {
+    return false;
+  }
+
+  @Override
+  public String getDisabledReason(Player player) {
+    return "";
+  }
+
+  @Override
+  public Set<PlayTime> getPlayTimes(Player player) {
+    return ANY_TIME;
+  }
+
+  @Override
+  public void setPlayTimes(Player player, Collection<PlayTime> times) {
+    throw new UnsupportedOperationException();
   }
 }

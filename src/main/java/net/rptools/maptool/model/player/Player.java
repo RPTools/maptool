@@ -54,7 +54,6 @@ public class Player {
     this.name = name;
     this.role = role.name();
     this.password = password;
-    actualRole = role;
   }
 
   protected void setRole(Role role) {

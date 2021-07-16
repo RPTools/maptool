@@ -16,6 +16,7 @@ package net.rptools.maptool.server;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import com.rometools.rome.io.impl.Base64;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -25,11 +26,17 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import javax.crypto.*;
 import net.rptools.clientserver.hessian.HessianUtils;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppSetup;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
@@ -87,6 +94,7 @@ public class Handshake {
 
     // TODO: CDW Remove debug
     System.out.println("DEBUG: username = " + username);
+    System.out.println("DEBUG: receiveHandshake PlayerDatabase = " + playerDatabase);
 
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
@@ -98,14 +106,25 @@ public class Handshake {
       return null;
       // TODO: CDW log this error
     }
+    System.err.println(playerDatabase);
 
     // TODO: CDW: refactor needed when users have password
+    // TODO: CDW: Also remove ** hack
     byte[] passwordSalt = playerDatabase.getPlayerPasswordSalt(username);
-    CipherUtil.Key playerPassword = playerDatabase.getRolePassword(Role.PLAYER).get();
-    CipherUtil.Key gmPassword = playerDatabase.getRolePassword(Role.GM).get();
+    CipherUtil.Key playerPassword =
+        playerDatabase.getRolePassword(Role.PLAYER).orElse(CipherUtil.getInstance().createKey(
+            "**"));
+    CipherUtil.Key gmPassword =
+        playerDatabase.getRolePassword(Role.GM).orElse(CipherUtil.getInstance().createKey("**"));
 
     dos.writeInt(passwordSalt.length);
     dos.write(passwordSalt);
+
+    System.out.println("DEBUG: PS Player Password = " + ServerConfig.getPersonalServerPlayerPassword());
+    System.out.println("DEBUG: PS GM Password = " + ServerConfig.getPersonalServerGMPassword());
+    System.out.println("DEBUG: receiveHS PW Salt = " + new String(Base64.encode(passwordSalt)));
+    System.out.println("DEBUG: receiveHS PW Player Salt = " + new String(Base64.encode(playerPassword.salt())));
+    System.out.println("DEBUG: receiveHS PW GM Salt = " + new String(Base64.encode(gmPassword.salt())));
 
     // TODO: CDW: refactor needed when users have password
     Response response = new Response();
@@ -290,6 +309,8 @@ public class Handshake {
 
     CipherUtil.Key cipherKey = null;
     Role playerRole = null;
+    System.out.println("DEBUG: player = "  + CipherUtil.getInstance().encodeBase64(playerPassword));
+    System.out.println("DEBUG: gm = "  + CipherUtil.getInstance().encodeBase64(gmPassword));
     if (CipherUtil.getInstance().validateMac(mac,
         CipherUtil.getInstance().encodeBase64(playerPassword))) {
       cipherKey = playerPassword;
@@ -334,7 +355,10 @@ public class Handshake {
     dos.writeInt(request.name.length());
     dos.write(request.name.getBytes(StandardCharsets.UTF_8));
 
+    System.out.println("DEBUG: sendHandshake request.password = " + request.password);
     // TODO CDW: client hand shake code here
+
+    System.out.println("DEBUG: sendHandshake PlayerDatabase = " + playerDatabase);
 
     DataInputStream dis = new DataInputStream(s.getInputStream());
 
@@ -353,6 +377,8 @@ public class Handshake {
     // Read the salt we are expected to user for player password
     int passwordSaltLen = dis.readInt();
     byte[] passwordSalt = dis.readNBytes(passwordSaltLen);
+
+    System.out.println("DEBUG: sendHS PW Salt = " + new String(Base64.encode(passwordSalt)));
 
     if (passwordSaltLen != passwordSalt.length) {
       Response response = new Response();
@@ -449,6 +475,7 @@ public class Handshake {
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
 
+    System.out.println("DEBUG: Send = " + CipherUtil.getInstance().encodeBase64(passwordKey));
     byte[] mac = CipherUtil.getInstance().generateMacWithSalt(
         CipherUtil.getInstance().encodeBase64(passwordKey),
         macSalt

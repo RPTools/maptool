@@ -1,7 +1,12 @@
 package net.rptools.maptool.model.player;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.Set;
 import net.rptools.maptool.util.CipherUtil;
 
 import java.util.Optional;
@@ -11,6 +16,16 @@ import java.util.Optional;
  */
 public interface PlayerDatabase {
 
+
+  Set<PlayTime> ANY_TIME = Set.of(
+      new PlayTime(DayOfWeek.MONDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.TUESDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.WEDNESDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.THURSDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.FRIDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.SATURDAY, LocalTime.MIN, LocalTime.MAX),
+      new PlayTime(DayOfWeek.SUNDAY, LocalTime.MIN, LocalTime.MAX)
+  );
   /**
    * Returns {@code true} if a player with the given name is known.
    *
@@ -65,4 +80,57 @@ public interface PlayerDatabase {
    * @return The password for the role.
    */
   Optional<CipherUtil.Key> getRolePassword(Player.Role role);
+
+
+  /**
+   * Returns if this player database supports disabling players.
+   * @return {@code true} if this player database supports disabling players.
+   */
+  boolean supportsDisabling();
+
+  /**
+   * Returns if this player database supports valid play times.
+   * @return {@code true} if this player database supports valid play times.
+   */
+  boolean supportsPlayTimes();
+
+  /**
+   * Disables the specified player. This will not boot the player from the server.
+   * @param player The player to disable.
+   * @param reason The reason that the player is disabled, this can be a key in i18n properties.
+   */
+  void disablePlayer(Player player, String reason) throws IOException;
+
+  /**
+   * Returns if the player has been disabled.
+   * @param player {@code true} the player to check if they have been disabled.
+   * @return {@code true} if the player has been disabled.
+   */
+  boolean isDisabled(Player player);
+
+  /**
+   * Returns the reason tha the player has been disabled, if the player has not been disabled
+   * then an empty string is returned.
+   *
+   * @param player the player to get the disabled reason for.
+   * @return the reason that the player has been disabled, or empty string if they have not.
+   */
+  String getDisabledReason(Player player);
+
+  /**
+   * Returns the play times that the player is allowed on during.
+   * @note Times are in the time zone of the server.
+   *
+   * @param player The player to get the play times from.
+   * @return the times that player is allowed on.
+   */
+  Set<PlayTime> getPlayTimes(Player player);
+
+  /**
+   * Sets the play times that the player is allowed on during.
+   * This will not boot a player if the current time is outside of the allowed times.
+   * @param player The player to set the play times for
+   * @param times the times that the player was allowed on during.
+   */
+  void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException;
 }

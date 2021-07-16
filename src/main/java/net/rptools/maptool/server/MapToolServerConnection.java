@@ -23,9 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.model.player.DefaultPlayerDatabase;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,10 +53,13 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
       // TODO: CDW grab correct database
-      PlayerDatabase playerDatabase = new DefaultPlayerDatabase(
-                server.getConfig().getPlayerPassword(),
-                server.getConfig().getGmPassword()
-      );
+      PlayerDatabase playerDatabase;
+      //if ( MapTool.isPersonalServer()) {
+        //playerDatabase = PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
+        //((LocalPlayerDatabase)playerDatabase).setLocalPlayer(MapTool.getPlayer());
+      //} else {
+        playerDatabase = PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.DEFAULT);
+      //}
       Handshake handshake = new Handshake(playerDatabase);
       Player player = handshake.receiveHandshake(server, socket);
 

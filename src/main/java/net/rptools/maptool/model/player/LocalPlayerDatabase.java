@@ -1,9 +1,13 @@
 package net.rptools.maptool.model.player;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.util.CipherUtil.Key;
 
 /**
@@ -12,48 +16,109 @@ import net.rptools.maptool.util.CipherUtil.Key;
 public class LocalPlayerDatabase implements PlayerDatabase {
 
 
-  private final LocalPlayer localPlayer;
+  private LocalPlayer localPlayer;
 
+  LocalPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    localPlayer = new LocalPlayer("None", Role.GM, ServerConfig.getPersonalServerGMPassword());
+  }
 
-  public LocalPlayerDatabase(LocalPlayer player) {
+  public synchronized void setLocalPlayer(LocalPlayer player) {
     localPlayer = player;
   }
 
+  private synchronized LocalPlayer getLocalPlayer() {
+    return localPlayer;
+  }
+
+
   @Override
   public boolean playerExists(String playerName) {
-    return localPlayer.getName().equals(playerName);
+    return getLocalPlayer().getName().equals(playerName);
   }
 
   @Override
   public Player getPlayer(String playerName) {
-    if (playerExists(playerName)) {
+    LocalPlayer player = getLocalPlayer();
+    if (player != null && player.getName().equals(playerName)) {
       return localPlayer;
+    } else {
+      return null;
     }
-    return null;
   }
 
   @Override
   public Optional<Key> getPlayerPassword(String playerName) {
-    return Optional.of(localPlayer.getPassword());
+    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
+    if (player != null && player.getName().equals(playerName)) {
+      return Optional.of(player.getPassword());
+    }
+    return Optional.empty();
   }
 
   @Override
   public byte[] getPlayerPasswordSalt(String playerName) {
-    return localPlayer.getPassword().salt();
+    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
+    if (player != null && player.getName().equals(playerName)) {
+      return player.getPassword().salt();
+    }
+    return new byte[0];
   }
 
   @Override
   public Player getPlayerWithRole(String playerName, Role role)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    if (playerExists(playerName)) {
-      localPlayer.setRole(role);
-      return localPlayer;
+    LocalPlayer player = (LocalPlayer) getPlayer(playerName);
+    if (player != null && player.getName().equals(playerName)) {
+      player.setRole(role);
+    } else {
+      player = new LocalPlayer(
+          playerName,
+          role,
+          role == Role.GM ? ServerConfig.getPersonalServerGMPassword() :
+              ServerConfig.getPersonalServerPlayerPassword()
+      );
     }
-    return null;
+    setLocalPlayer(player);
+    return player;
   }
 
   @Override
   public Optional<Key> getRolePassword(Role role) {
     return Optional.empty();
+  }
+
+  @Override
+  public boolean supportsDisabling() {
+    return false;
+  }
+
+  @Override
+  public boolean supportsPlayTimes() {
+    return false;
+  }
+
+  @Override
+  public void disablePlayer(Player player, String reason) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isDisabled(Player player) {
+    return false;
+  }
+
+  @Override
+  public String getDisabledReason(Player player) {
+    return "";
+  }
+
+  @Override
+  public Set<PlayTime> getPlayTimes(Player player) {
+    return ANY_TIME;
+  }
+
+  @Override
+  public void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException {
+    throw new UnsupportedOperationException();
   }
 }
