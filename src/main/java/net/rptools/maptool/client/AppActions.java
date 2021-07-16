@@ -114,6 +114,9 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.ImageManager;
@@ -2217,6 +2220,10 @@ public class AppActions {
                   // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
                   campaign.setHasUsedFogToolbar(useIF);
 
+                  // TODO: CDW select correct database
+                  PlayerDatabaseFactory.setServerConfig(config);
+                  PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
+                  PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
                   // Make a copy of the campaign since we don't coordinate local changes well ...
                   // yet
 
@@ -2228,7 +2235,8 @@ public class AppActions {
                    * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
                    */
                   MapTool.startServer(
-                      dialog.getUsernameTextField().getText(), config, policy, campaign, true);
+                      dialog.getUsernameTextField().getText(), config, policy, campaign,
+                      playerDatabase, true);
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();

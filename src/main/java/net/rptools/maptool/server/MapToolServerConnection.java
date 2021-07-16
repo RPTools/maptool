@@ -37,10 +37,12 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
   private final MapToolServer server;
+  private final PlayerDatabase playerDatabase;
 
-  public MapToolServerConnection(MapToolServer server, int port) throws IOException {
+  public MapToolServerConnection(MapToolServer server, int port, PlayerDatabase playerDatabase) throws IOException {
     super(port);
     this.server = server;
+    this.playerDatabase = playerDatabase;
     addObserver(this);
   }
 
@@ -53,12 +55,6 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
       // TODO: CDW grab correct database
-      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      //if ( MapTool.isPersonalServer()) {
-        //playerDatabase = PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
-        //((LocalPlayerDatabase)playerDatabase).setLocalPlayer(MapTool.getPlayer());
-      //} else {
-      //}
       Handshake handshake = new Handshake(playerDatabase);
       Player player = handshake.receiveHandshake(server, socket);
 
