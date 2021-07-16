@@ -25,6 +25,7 @@ import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.Handshake;
@@ -53,10 +54,7 @@ public class MapToolConnection extends ClientConnection {
     Handshake.Response response = null;
     try {
       // TODO CDW: would this be better to set salt and use password
-      LocalPlayerDatabase playerDatabase =
-          (LocalPlayerDatabase) PlayerDatabaseFactory.getPlayerDatabase(
-          PlayerDatabaseType.LOCAL_PLAYER);
-      playerDatabase.setLocalPlayer(player);
+      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
       Handshake handshake = new Handshake(playerDatabase);
       response =
           handshake.sendHandshake(

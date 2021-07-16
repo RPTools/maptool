@@ -13,10 +13,14 @@ import net.rptools.maptool.server.ServerConfig;
 public class PlayerDatabaseFactory {
 
   public enum PlayerDatabaseType {
+    PERSONAL_SERVER,
     LOCAL_PLAYER,
     DEFAULT,
     PASSWORD_FILE
   }
+
+
+  private static PlayerDatabase currentPlayerDatabase;
 
 
   private static final Map<PlayerDatabaseType, PlayerDatabase> playerDatabaseMap =
@@ -36,6 +40,24 @@ public class PlayerDatabaseFactory {
     try {
       lock.lock();
       serverConfig = config;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  public static PlayerDatabase getCurrentPlayerDatabase() {
+    try {
+      lock.lock();
+      return currentPlayerDatabase;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  public static void setCurrentPlayerDatabase(PlayerDatabaseType playerDatabaseType) {
+    try {
+      lock.lock();
+      currentPlayerDatabase = getPlayerDatabase(playerDatabaseType);
     } finally {
       lock.unlock();
     }
@@ -69,6 +91,8 @@ public class PlayerDatabaseFactory {
           return new LocalPlayerDatabase();
         case PASSWORD_FILE:
           return new PasswordFilePlayerDatabase(PASSWORD_FILE, PASSWORD_ADDITION_FILE);
+        case PERSONAL_SERVER:
+          return new PersonalServerPlayerDatabase();
         default:
           ServerConfig config = getServerConfig();
           return new DefaultPlayerDatabase(

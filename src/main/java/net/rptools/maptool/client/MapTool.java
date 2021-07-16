@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
+
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -1164,11 +1166,10 @@ public class MapTool {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     String username = AppPreferences.getDefaultUserName();
     LocalPlayer localPlayer =
-        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
-    ((LocalPlayerDatabase)PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER)).setLocalPlayer(localPlayer);
-    // Connect to server
+        (LocalPlayer) PlayerDatabaseFactory.getCurrentPlayerDatabase().getPlayer(username);
     MapTool.createConnection( "localhost", config.getPort(), localPlayer);
 
     // connecting

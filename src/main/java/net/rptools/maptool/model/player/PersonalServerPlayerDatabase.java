@@ -57,17 +57,17 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   @Override
   public void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException {
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Set<PlayTime> getPlayTimes(Player player) {
-    return null;
+    return ANY_TIME;
   }
 
   @Override
   public String getDisabledReason(Player player) {
-    return null;
+    return "";
   }
 
   @Override
@@ -77,17 +77,21 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   @Override
   public void disablePlayer(Player player, String reason) throws IOException {
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
-    return Optional.empty();
+    if (role == Role.GM) {
+       return Optional.of(player.getPassword());
+    } else {
+      return Optional.empty();
+    }
   }
 
   @Override
   public Player getPlayerWithRole(String playerName, Player.Role role)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    return null;
+    return player; // There is no non GM personal server player so just return the GM
   }
 }

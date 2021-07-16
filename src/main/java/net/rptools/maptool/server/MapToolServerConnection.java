@@ -53,12 +53,11 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
       // TODO: CDW grab correct database
-      PlayerDatabase playerDatabase;
+      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
       //if ( MapTool.isPersonalServer()) {
         //playerDatabase = PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
         //((LocalPlayerDatabase)playerDatabase).setLocalPlayer(MapTool.getPlayer());
       //} else {
-        playerDatabase = PlayerDatabaseFactory.getPlayerDatabase(PlayerDatabaseType.DEFAULT);
       //}
       Handshake handshake = new Handshake(playerDatabase);
       Player player = handshake.receiveHandshake(server, socket);
