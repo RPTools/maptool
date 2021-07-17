@@ -54,7 +54,6 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   @Override
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
-      // TODO: CDW grab correct database
       Handshake handshake = new Handshake(playerDatabase);
       Player player = handshake.receiveHandshake(server, socket);
 
@@ -62,10 +61,8 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
         playerMap.put(id.toUpperCase(), player);
         return true;
       }
-    } catch (IOException ioe) {
-      log.error("Handshake failure: " + ioe, ioe);
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-      e.printStackTrace(); // TODO: CDW need to fix this
+    } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+      log.error("Handshake failure: " + e, e);
     }
     return false;
   }

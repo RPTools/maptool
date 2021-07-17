@@ -53,7 +53,6 @@ public class MapToolConnection extends ClientConnection {
   public boolean sendHandshake(Socket s) throws IOException {
     Handshake.Response response = null;
     try {
-      // TODO CDW: would this be better to set salt and use password
       PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
       Handshake handshake = new Handshake(playerDatabase);
       response =

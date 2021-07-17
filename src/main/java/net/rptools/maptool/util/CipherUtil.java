@@ -262,7 +262,7 @@ public class CipherUtil {
   }
 
   public String encodeBase64(Key key) {
-    return encodeBase64(key.secretKeySpec); // TODO: CDW should I be encodding salt too?
+    return encodeBase64(key.secretKeySpec);
   }
 
   public String encodeBase64(SecretKey key) {

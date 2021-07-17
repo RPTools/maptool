@@ -2224,7 +2224,6 @@ public class AppActions {
                   // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
                   campaign.setHasUsedFogToolbar(useIF);
 
-                  // TODO: CDW select correct database
                   PlayerDatabaseFactory.setServerConfig(config);
                   if (serverProps.getUsePasswordFile()) {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.PASSWORD_FILE);

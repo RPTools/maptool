@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
@@ -34,10 +36,9 @@ import net.rptools.maptool.util.CipherUtil.Key;
 
 public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
-  // TODO: CDW: should accept an unencrypted file rather than replace in place
-  // TODO: CDW: Needs more robust checking
-
   private final File passwordFile;
+  private final File backupPasswordFile;
+
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
@@ -52,6 +53,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     Objects.requireNonNull(passwordFile);
     this.passwordFile = passwordFile;
+    this.backupPasswordFile = new File(passwordFile + ".backup");
 
     if (this.passwordFile.exists()) {
       playerDetails.putAll(readPasswordFile(this.passwordFile));
@@ -126,6 +128,9 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
   private void writePasswordFile() throws IOException {
 
     if (dirty.compareAndSet(true, false)) {
+
+      Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(),
+          StandardCopyOption.REPLACE_EXISTING);
 
       JsonObject passwordDetails = new JsonObject();
       JsonArray passwords = new JsonArray();

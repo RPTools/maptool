@@ -84,7 +84,6 @@ public class Handshake {
 
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
-    // TODO: CDW get the username to look up salt + send salt
     DataInputStream dis = new DataInputStream(s.getInputStream());
     int nameLen = dis.readInt();
     byte[] nameBytes = dis.readNBytes(nameLen);
@@ -95,24 +94,18 @@ public class Handshake {
 
     String username = new String(nameBytes);
 
-    // TODO: CDW Remove debug
-    System.out.println("DEBUG: username = " + username);
-    System.out.println("DEBUG: receiveHandshake PlayerDatabase = " + playerDatabase);
 
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
     dos.writeInt(initialMacSalt.length);
     dos.write(initialMacSalt);
 
-    // TODO: CDW send password salt for player
     if (!playerDatabase.playerExists(username)) {
+      log.error(username + " does not exist.");
       return null;
-      // TODO: CDW log this error
     }
     System.err.println(playerDatabase);
 
-    // TODO: CDW: refactor needed when users have password
-    // TODO: CDW: Also remove ** hack
     Optional<CipherUtil.Key> key = playerDatabase.getPlayerPassword(username);
     CipherUtil.Key playerPassword;
     CipherUtil.Key gmPassword;
@@ -139,7 +132,6 @@ public class Handshake {
     System.out.println("DEBUG: receiveHS PW GM Salt = " +  (gmPassword == null ? " (null) " :
         new String(Base64.encode(gmPassword.salt()))));
 
-    // TODO: CDW: refactor needed when users have password
     Response response = new Response();
     Request request =
         decodeRequest(
@@ -293,7 +285,6 @@ public class Handshake {
       byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
-    // TODO: CDW Change to pass in already encrypted password.
     socket.getInetAddress().getAddress();
     InputStream inputStream = socket.getInputStream();
     DataInputStream dis = new DataInputStream(inputStream);
@@ -370,11 +361,6 @@ public class Handshake {
     dos.writeInt(request.name.length());
     dos.write(request.name.getBytes(StandardCharsets.UTF_8));
 
-    System.out.println("DEBUG: sendHandshake request.password = " + request.password);
-    // TODO CDW: client hand shake code here
-
-    System.out.println("DEBUG: sendHandshake PlayerDatabase = " + playerDatabase);
-
     DataInputStream dis = new DataInputStream(s.getInputStream());
 
     // Read the salt we are expected to use for initial messages MAC
@@ -431,7 +417,6 @@ public class Handshake {
 
       byte[] mac = CipherUtil.getInstance().readMac(dis);
 
-      // TODO: CDW Seems a waste to do this is buildRequest and here.
       CipherUtil.Key passwordKey = CipherUtil.getInstance().createKey(request.password, passwordSalt);
 
 
@@ -443,7 +428,6 @@ public class Handshake {
         return response;
       }
 
-      //TODO: CDW fix!!
       CipherUtil.Key key = CipherUtil.getInstance().createKey(request.password, salt);
       byte[] resp = decode(bytes, key);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
@@ -485,7 +469,6 @@ public class Handshake {
 
     CipherUtil.Key passwordKey = CipherUtil.getInstance().createKey(request.password, passwordSalt);
 
-    // TODO: CDW we already have the secret key spec above so why not create with that
     Cipher cipher = CipherUtil.getInstance().createEncryptor(request.password, passwordSalt);
 
     byte[] cipherBytes = cipher.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
