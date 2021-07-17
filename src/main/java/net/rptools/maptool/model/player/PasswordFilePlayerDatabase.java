@@ -39,6 +39,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   private final File passwordFile;
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
+  private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
 
 
@@ -149,13 +150,24 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   @Override
   public boolean playerExists(String playerName) {
+    if (transientPlayerDetails.containsKey(playerName)) {
+      return true;
+    }
     return playerDetails.containsKey(playerName);
   }
 
+
+  private PlayerDetails getPlayerDetails(String playerName) {
+    PlayerDetails pd = transientPlayerDetails.get(playerName);
+    if (pd != null) {
+      return pd;
+    }
+    return playerDetails.get(playerName);
+  }
+
   @Override
-  public Player getPlayer(String playerName)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    PlayerDetails pd = playerDetails.get(playerName);
+  public Player getPlayer(String playerName) {
+    PlayerDetails pd = getPlayerDetails(playerName);
     if (pd != null) {
       return new Player(playerName, pd.role(), pd.password());
     } else {
@@ -168,7 +180,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
     if (!playerExists(playerName)) {
       return Optional.empty();
     }
-    return Optional.ofNullable(playerDetails.get(playerName).password());
+    return Optional.ofNullable(getPlayer(playerName).getPassword());
   }
 
   @Override
@@ -176,7 +188,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
     if (!playerExists(playerName)) {
       return new byte[0];
     }
-    return playerDetails.get(playerName).password().salt();
+    return getPlayer(playerName).getPassword().salt();
   }
 
   @Override
@@ -203,7 +215,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   @Override
   public void disablePlayer(Player player, String reason) throws IOException {
-    PlayerDetails details = playerDetails.get(player.getName());
+    PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
     }
@@ -264,6 +276,25 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
     dirty.set(true);
     writePasswordFile();
+  }
+
+
+  public void putPlayer(String name, Role role, String password, Set<PlayTime> playTimes,
+      boolean persisted) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    PlayerDetails newDetails = new PlayerDetails(
+        name,
+        role,
+        CipherUtil.getInstance().createKey(password),
+        "",
+        playTimes
+    );
+    if (persisted) {
+      playerDetails.put(name, newDetails);
+      dirty.set(true);
+      writePasswordFile();
+    } else {
+      transientPlayerDetails.put(name, newDetails);
+    }
   }
 
 

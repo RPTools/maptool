@@ -2222,7 +2222,11 @@ public class AppActions {
 
                   // TODO: CDW select correct database
                   PlayerDatabaseFactory.setServerConfig(config);
-                  PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
+                  if (serverProps.getUsePasswordFile()) {
+                    PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.PASSWORD_FILE);
+                  } else {
+                    PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
+                  }
                   PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
                   // Make a copy of the campaign since we don't coordinate local changes well ...
                   // yet
@@ -2235,8 +2239,12 @@ public class AppActions {
                    * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
                    */
                   MapTool.startServer(
-                      dialog.getUsernameTextField().getText(), config, policy, campaign,
-                      playerDatabase, true);
+                      dialog.getUsernameTextField().getText(),
+                      config,
+                      policy,
+                      campaign,
+                      playerDatabase,
+                      true);
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
