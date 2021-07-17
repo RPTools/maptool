@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.server;
 
+
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.rometools.rome.io.impl.Base64;
@@ -24,6 +25,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.crypto.*;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.maptool.client.AppConstants;
@@ -38,6 +40,7 @@ import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.CipherUtil.Key;
 import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,12 +113,20 @@ public class Handshake {
 
     // TODO: CDW: refactor needed when users have password
     // TODO: CDW: Also remove ** hack
-    byte[] passwordSalt = playerDatabase.getPlayerPasswordSalt(username);
-    CipherUtil.Key playerPassword =
-        playerDatabase.getRolePassword(Role.PLAYER).orElse(CipherUtil.getInstance().createKey(
-            "**"));
-    CipherUtil.Key gmPassword =
-        playerDatabase.getRolePassword(Role.GM).orElse(CipherUtil.getInstance().createKey("**"));
+    Optional<CipherUtil.Key> key = playerDatabase.getPlayerPassword(username);
+    CipherUtil.Key playerPassword;
+    CipherUtil.Key gmPassword;
+    byte[] passwordSalt;
+    if (key.isPresent()) {
+      Role playerRole = playerDatabase.getPlayer(username).getRole();
+      playerPassword = playerRole == Role.PLAYER ? key.get() : null;
+      gmPassword = playerRole == Role.GM ? key.get() : null;
+      passwordSalt = key.get().salt();
+    } else { // Role based authentication
+      playerPassword = playerDatabase.getRolePassword(Role.PLAYER).orElse(null);
+      gmPassword = playerDatabase.getRolePassword(Role.GM).orElse(null);
+      passwordSalt = playerPassword.salt();
+    }
 
     dos.writeInt(passwordSalt.length);
     dos.write(passwordSalt);
@@ -123,8 +134,10 @@ public class Handshake {
     System.out.println("DEBUG: PS Player Password = " + ServerConfig.getPersonalServerPlayerPassword());
     System.out.println("DEBUG: PS GM Password = " + ServerConfig.getPersonalServerGMPassword());
     System.out.println("DEBUG: receiveHS PW Salt = " + new String(Base64.encode(passwordSalt)));
-    System.out.println("DEBUG: receiveHS PW Player Salt = " + new String(Base64.encode(playerPassword.salt())));
-    System.out.println("DEBUG: receiveHS PW GM Salt = " + new String(Base64.encode(gmPassword.salt())));
+    System.out.println("DEBUG: receiveHS PW Player Salt = " +  (playerPassword == null ? " (null) "
+        : new String(Base64.encode(playerPassword.salt()))));
+    System.out.println("DEBUG: receiveHS PW GM Salt = " +  (gmPassword == null ? " (null) " :
+        new String(Base64.encode(gmPassword.salt()))));
 
     // TODO: CDW: refactor needed when users have password
     Response response = new Response();
@@ -309,13 +322,15 @@ public class Handshake {
 
     CipherUtil.Key cipherKey = null;
     Role playerRole = null;
-    System.out.println("DEBUG: player = "  + CipherUtil.getInstance().encodeBase64(playerPassword));
-    System.out.println("DEBUG: gm = "  + CipherUtil.getInstance().encodeBase64(gmPassword));
-    if (CipherUtil.getInstance().validateMac(mac,
+    System.out.println("DEBUG: player = "  + (playerPassword == null ? " (null) " :
+        CipherUtil.getInstance().encodeBase64(playerPassword)));
+    System.out.println("DEBUG: gm = "  + (gmPassword == null ? " (null) " :
+        CipherUtil.getInstance().encodeBase64(gmPassword)));
+    if (playerPassword != null && CipherUtil.getInstance().validateMac(mac,
         CipherUtil.getInstance().encodeBase64(playerPassword))) {
       cipherKey = playerPassword;
       playerRole = Role.PLAYER;
-    } else if (CipherUtil.getInstance().validateMac(mac,
+    } else if (gmPassword != null && CipherUtil.getInstance().validateMac(mac,
         CipherUtil.getInstance().encodeBase64(gmPassword))) {
       cipherKey = gmPassword;
       playerRole = Role.GM;
