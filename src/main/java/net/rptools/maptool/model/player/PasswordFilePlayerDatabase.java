@@ -33,11 +33,16 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.CipherUtil.Key;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class PasswordFilePlayerDatabase implements PlayerDatabase {
+public final class PasswordFilePlayerDatabase implements PlayerDatabase {
+
+  private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
 
   private final File passwordFile;
   private final File backupPasswordFile;
+  private final File additionalUsers;
 
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
@@ -54,7 +59,12 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
     Objects.requireNonNull(passwordFile);
     this.passwordFile = passwordFile;
     this.backupPasswordFile = new File(passwordFile + ".backup");
+    this.additionalUsers = additionalUsers;
+  }
 
+  public void readPasswordFile()
+      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+    playerDetails.clear();
     if (this.passwordFile.exists()) {
       playerDetails.putAll(readPasswordFile(this.passwordFile));
     }
@@ -62,18 +72,33 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
       playerDetails.putAll(readPasswordFile(additionalUsers));
       additionalUsers.delete();
     }
-    writePasswordFile();
+    writePasswordFile(); // Write out the password file if there were any passwords generated
+  }
+
+  public void initialize() throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+    transientPlayerDetails.clear();
+    readPasswordFile();
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
 
     Map<String, PlayerDetails> players = new HashMap<>();
 
     try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file))) {
-      JsonObject passwordsJson = JsonParser.parseReader(reader).getAsJsonObject();
+      JsonObject passwordsJson;
+      try {
+        passwordsJson = JsonParser.parseReader(reader).getAsJsonObject();
+      } catch (Exception e) {
+        String msg = I18N.getText("msg.error.passFile.errorInJson");
+        log.error(msg, e);
+        throw new PasswordDatabaseException(msg, e);
+      }
+
       if (!passwordsJson.has("passwords")) {
-        throw new IOException("Missing passwords field");
+        String msg = I18N.getText("msg.error.passFile.missingPasswordsField");
+        log.error(msg);
+        throw new PasswordDatabaseException(msg);
       }
       JsonArray passwords = passwordsJson.get("passwords").getAsJsonArray();
       for (JsonElement entry : passwords) {
@@ -120,17 +145,24 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
             Collections.unmodifiableSet(playTimes)
         ));
       }
-
       return players;
+    } catch (IOException ioe) {
+      throw new PasswordDatabaseException("msg.err.passFile.errorReadingFile", ioe);
     }
   }
 
-  private void writePasswordFile() throws IOException {
+  private void writePasswordFile() throws PasswordDatabaseException {
 
     if (dirty.compareAndSet(true, false)) {
 
+      try {
       Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(),
           StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException ioe) {
+        String msg = I18N.getText("msg.err.passFile.errorCopyingBackup");
+        log.error(msg, ioe);
+        throw new PasswordDatabaseException(msg, ioe);
+      }
 
       JsonObject passwordDetails = new JsonObject();
       JsonArray passwords = new JsonArray();
@@ -149,6 +181,10 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
       try (FileWriter writer = new FileWriter(passwordFile)) {
         gson.toJson(passwordDetails, writer);
+      } catch (IOException ioe) {
+        String msg = I18N.getText("msg.err.passFile.errorWritingFile");
+        log.error(msg, ioe);
+        throw new PasswordDatabaseException(msg, ioe);
       }
     }
   }
@@ -219,7 +255,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws IOException {
+  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
     PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
@@ -262,7 +298,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException {
+  public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
     PlayerDetails details = playerDetails.get(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
@@ -285,7 +321,7 @@ public class PasswordFilePlayerDatabase implements PlayerDatabase {
 
 
   public void putPlayer(String name, Role role, String password, Set<PlayTime> playTimes,
-      boolean persisted) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+      boolean persisted) throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException {
     PlayerDetails newDetails = new PlayerDetails(
         name,
         role,

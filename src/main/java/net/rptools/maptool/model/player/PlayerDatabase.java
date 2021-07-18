@@ -1,6 +1,5 @@
 package net.rptools.maptool.model.player;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
@@ -98,8 +97,10 @@ public interface PlayerDatabase {
    * Disables the specified player. This will not boot the player from the server.
    * @param player The player to disable.
    * @param reason The reason that the player is disabled, this can be a key in i18n properties.
+   *
+   * @throws PasswordDatabaseException If the password database does not support disabling players.
    */
-  void disablePlayer(Player player, String reason) throws IOException;
+  void disablePlayer(Player player, String reason) throws PasswordDatabaseException;
 
   /**
    * Returns if the player has been disabled.
@@ -131,6 +132,8 @@ public interface PlayerDatabase {
    * This will not boot a player if the current time is outside of the allowed times.
    * @param player The player to set the play times for
    * @param times the times that the player was allowed on during.
+   *
+   * @throws PasswordDatabaseException if the player database does not support setting play times.
    */
-  void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException;
+  void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException;
 }

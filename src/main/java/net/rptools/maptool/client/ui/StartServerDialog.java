@@ -48,6 +48,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JTextField playerPassword;
   private JCheckBox usePasswordFile;
 
+
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
     panelInit();
@@ -96,6 +97,19 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
             autoRevealOnMovement.setEnabled(true);
           }
         });
+
+    boolean usePf = usePasswordFile.isSelected();
+    playerPassword.setEnabled(!usePf);
+    gmPassword.setEnabled(!usePf);
+    usePasswordFile.addItemListener(
+        e -> {
+          boolean passwordFile = usePasswordFile.isSelected();
+          playerPassword.setEnabled(!passwordFile);
+          gmPassword.setEnabled(!passwordFile);
+        }
+    );
+
+
 
     movementMetricCombo = getMovementMetric();
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
@@ -195,23 +209,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                   MapTool.showError("ServerDialog.error.passwordMustDiffer");
                   return;
                 }
-              } else {
-                // If use password file is checked then we only need the password for the
-                // role selected
-                Player.Role role = (Player.Role) getRoleCombo().getSelectedItem();
-                if (role == Player.Role.GM) {
-                  if (gmPassword.getText().length() == 0) {
-                    MapTool.showError("ServerDialog.error.playerPasswordMissing");
-                    return;
-                  }
-                } else if (playerPassword.getText().length() == 0) {
-                  MapTool.showError("ServerDialog.error.gmPasswordMissing");
-                  return;
-                }
               }
               try {
                 Integer.parseInt(getPortTextField().getText());
-              } catch (NumberFormatException nfe) {
+              } catch (NumberFormatException nfe){
                 MapTool.showError("ServerDialog.error.port");
                 return;
               }

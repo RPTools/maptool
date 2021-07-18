@@ -56,8 +56,8 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void setPlayTimes(Player player, Collection<PlayTime> times) throws IOException {
-    throw new UnsupportedOperationException();
+  public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
+    throw new PasswordDatabaseException("msg.err.passFile.cantSetPlayTimes");
   }
 
   @Override
@@ -76,8 +76,8 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws IOException {
-    throw new UnsupportedOperationException();
+  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
+    throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
   }
 
   @Override

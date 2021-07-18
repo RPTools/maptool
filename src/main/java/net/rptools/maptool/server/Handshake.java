@@ -124,14 +124,6 @@ public class Handshake {
     dos.writeInt(passwordSalt.length);
     dos.write(passwordSalt);
 
-    System.out.println("DEBUG: PS Player Password = " + ServerConfig.getPersonalServerPlayerPassword());
-    System.out.println("DEBUG: PS GM Password = " + ServerConfig.getPersonalServerGMPassword());
-    System.out.println("DEBUG: receiveHS PW Salt = " + new String(Base64.encode(passwordSalt)));
-    System.out.println("DEBUG: receiveHS PW Player Salt = " +  (playerPassword == null ? " (null) "
-        : new String(Base64.encode(playerPassword.salt()))));
-    System.out.println("DEBUG: receiveHS PW GM Salt = " +  (gmPassword == null ? " (null) " :
-        new String(Base64.encode(gmPassword.salt()))));
-
     Response response = new Response();
     Request request =
         decodeRequest(
@@ -313,10 +305,6 @@ public class Handshake {
 
     CipherUtil.Key cipherKey = null;
     Role playerRole = null;
-    System.out.println("DEBUG: player = "  + (playerPassword == null ? " (null) " :
-        CipherUtil.getInstance().encodeBase64(playerPassword)));
-    System.out.println("DEBUG: gm = "  + (gmPassword == null ? " (null) " :
-        CipherUtil.getInstance().encodeBase64(gmPassword)));
     if (playerPassword != null && CipherUtil.getInstance().validateMac(mac,
         CipherUtil.getInstance().encodeBase64(playerPassword))) {
       cipherKey = playerPassword;

@@ -108,6 +108,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
@@ -126,6 +127,7 @@ import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.MessageUtil;
+import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
@@ -2198,11 +2200,22 @@ public class AppActions {
                     serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
                 policy.setUseIndividualFOW(useIF);
 
+                String gmPassword;
+                String playerPassword;
+
+                if (!serverProps.getUsePasswordFile()) {
+                  gmPassword = serverProps.getGMPassword();
+                  playerPassword = serverProps.getPlayerPassword();
+                } else {
+                  gmPassword = new PasswordGenerator().getPassword();
+                  playerPassword = new PasswordGenerator().getPassword();
+                }
+
                 ServerConfig config =
                     new ServerConfig(
                         serverProps.getUsername(),
-                        serverProps.getGMPassword(),
-                        serverProps.getPlayerPassword(),
+                        gmPassword,
+                        playerPassword,
                         serverProps.getPort(),
                         serverProps.getRPToolsName());
 
@@ -2229,13 +2242,14 @@ public class AppActions {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.PASSWORD_FILE);
                     PasswordFilePlayerDatabase db =
                         (PasswordFilePlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
+                    db.initialize();
                     if (serverProps.getRole() == Role.GM) {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.GM,
-                          serverProps.getGMPassword(),
+                          gmPassword,
                           ANY_TIME, false);
                     } else {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.PLAYER,
-                          serverProps.getPlayerPassword(),
+                          playerPassword,
                           ANY_TIME, false);
                     }
                   } else {
@@ -2269,7 +2283,7 @@ public class AppActions {
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
-                            serverProps.getGMPassword()));
+                            gmPassword));
                   } else {
                     MapTool.createConnection(
                         "localhost",
@@ -2277,7 +2291,7 @@ public class AppActions {
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
-                            serverProps.getPlayerPassword()));
+                            playerPassword));
                   }
 
                   // connecting
@@ -2294,6 +2308,9 @@ public class AppActions {
                   failed = true;
                 } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
                   MapTool.showError("msg.error.initializeCrypto", e);
+                  failed = true;
+                } catch (PasswordDatabaseException pwde) {
+                  MapTool.showError(pwde.getMessage());
                   failed = true;
                 }
 
