@@ -100,6 +100,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
+import net.rptools.maptool.webendpoint.WebEndPoint;
 import net.rptools.parser.ParserException;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
@@ -1346,6 +1347,14 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+
+    // Initialize the web end point
+    try {
+      WebEndPoint.getWebEndPoint();
+    } catch (Exception e) {
+      log.error(I18N.getText("msg.error.cantStartWebEndPoint"), e);
+      MapTool.showError("msg.error.cantStartWebEndPoint");
+    }
   }
 
   /**

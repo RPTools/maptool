@@ -50,6 +50,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.util.UserJvmOptions.JVM_OPTION;
+import net.rptools.maptool.webendpoint.WebEndPoint;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -127,6 +128,9 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
   private final JTextField defaultUsername;
+  private final JSpinner webEndPointPortSpinner;
+  private int webEndPointPort;
+
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -212,6 +216,7 @@ public class PreferencesDialog extends JDialog {
           if (close) {
             setVisible(false);
             dispose();
+            WebEndPoint.getWebEndPoint().setPort(webEndPointPort);
           }
           MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
         });
@@ -227,6 +232,7 @@ public class PreferencesDialog extends JDialog {
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
     frameRateCapTextField = panel.getTextField("frameRateCapTextField");
     defaultUsername = panel.getTextField("defaultUsername");
+    webEndPointPortSpinner = panel.getSpinner("webEndPointPortSpinner");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
@@ -475,6 +481,16 @@ public class PreferencesDialog extends JDialog {
             }
           }
         });
+
+    webEndPointPortSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            webEndPointPort = value;
+            AppPreferences.setWebEndPointPort(value);
+          }
+        });
+
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -902,6 +918,9 @@ public class PreferencesDialog extends JDialog {
     fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
     defaultUsername.setText(AppPreferences.getDefaultUserName());
+    webEndPointPortSpinner.setEditor(new JSpinner.NumberEditor(webEndPointPortSpinner, "#"));
+    webEndPointPort = AppPreferences.getWebEndPointPort();
+    webEndPointPortSpinner.setValue(webEndPointPort);
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
