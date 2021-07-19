@@ -398,7 +398,7 @@ dependencies {
 
     // Undertow
     implementation 'io.undertow:undertow-core:2.2.8.Final'
-
+    implementation 'io.undertow:undertow-servlet:2.2.8.Final'
 }
 
 

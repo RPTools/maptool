@@ -2,7 +2,6 @@ package net.rptools.maptool.webendpoint;
 
 import io.undertow.Undertow;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 public class WebEndPoint {
 
   private static final Logger log = LogManager.getLogger(WebEndPoint.class);
+
+  private static final String WEB_ENDPOINT_VERSION = "0.0.1";
 
   private final static WebEndPoint webEndPoint = new WebEndPoint();
   private Undertow server;
@@ -20,6 +21,9 @@ public class WebEndPoint {
     server = null;
   }
 
+  public static String getWebEndPointVersion() {
+    return WEB_ENDPOINT_VERSION;
+  }
   public static WebEndPoint getWebEndPoint() {
     synchronized(webEndPoint) {
       if (webEndPoint.server == null) {
