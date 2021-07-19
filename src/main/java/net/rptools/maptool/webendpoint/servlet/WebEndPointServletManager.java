@@ -10,7 +10,7 @@ import net.rptools.maptool.webendpoint.servlet.general.MapToolServlet;
 
 public class WebEndPointServletManager {
 
-  private static final String CONTEXT_PATH = "/";
+  private static final String CONTEXT_PATH = "maptool";
   private static final String DEPLOYMENT_NAME = "maptool";
 
   public static final String PARAM_MAPTOOL_VERSION = "maptoolVersion";

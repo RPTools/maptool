@@ -35,8 +35,14 @@ public class MapToolServlet extends HttpServlet {
     responseObject.addProperty(WebEndPointServletManager.PARAM_WEB_APP_VERSION, webAppVersion);
 
     PrintWriter writer = response.getWriter();
-    writer.write(response.toString());
+    writer.write(responseObject.toString());
     writer.close();
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    doGet(request, response);
   }
 
 }
