@@ -1,5 +1,6 @@
 package net.rptools.maptool.webendpoint.servlet.general;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,6 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.rptools.maptool.api.maptool.MapToolInfo;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.webendpoint.servlet.WebEndPointServletManager;
 
 public class MapToolServlet extends HttpServlet {
@@ -22,20 +25,18 @@ public class MapToolServlet extends HttpServlet {
   @Override
   public void init(final ServletConfig config) throws ServletException {
     super.init(config);
-    maptoolVersion = config.getInitParameter(WebEndPointServletManager.PARAM_MAPTOOL_VERSION);
-    webAppVersion = config.getInitParameter(WebEndPointServletManager.PARAM_WEB_APP_VERSION);
   }
 
   @Override
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
       throws ServletException, IOException {
     response.setContentType("application/json");
-    JsonObject responseObject = new JsonObject();
-    responseObject.addProperty(WebEndPointServletManager.PARAM_MAPTOOL_VERSION, maptoolVersion);
-    responseObject.addProperty(WebEndPointServletManager.PARAM_WEB_APP_VERSION, webAppVersion);
+
+    MapToolInfo maptoolInfo = new MapToolInfo();
 
     PrintWriter writer = response.getWriter();
-    writer.write(responseObject.toString());
+    Gson gson = new Gson();
+    gson.toJson(maptoolInfo, writer);
     writer.close();
   }
 

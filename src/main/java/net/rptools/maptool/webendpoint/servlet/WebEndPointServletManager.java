@@ -10,17 +10,10 @@ import net.rptools.maptool.webendpoint.servlet.general.MapToolServlet;
 
 public class WebEndPointServletManager {
 
-  private static final String CONTEXT_PATH = "maptool";
-  private static final String DEPLOYMENT_NAME = "maptool";
-
-  public static final String PARAM_MAPTOOL_VERSION = "maptoolVersion";
-  public static final String PARAM_WEB_APP_VERSION = "webAppVersion";
 
   private final ServletInfo[] servlets = new ServletInfo[] {
       Servlets.servlet(MapToolServlet.getEndPointServletName(), MapToolServlet.class)
-          .addInitParam(PARAM_MAPTOOL_VERSION, MapTool.getVersion())
-          .addInitParam(PARAM_WEB_APP_VERSION, WebEndPoint.getWebEndPointVersion())
-          .addMapping("/maptool")
+          .addMapping("/info")
   };
 
   public Collection<ServletInfo> getServlets() {

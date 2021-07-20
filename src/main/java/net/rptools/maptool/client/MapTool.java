@@ -750,6 +750,7 @@ public class MapTool {
   public static boolean isDevelopment() {
     return "DEVELOPMENT".equals(version)
         || "@buildNumber@".equals(version)
+        || "0.0.1".equals(version)
         || (version != null && version.startsWith("SNAPSHOT"));
   }
 
