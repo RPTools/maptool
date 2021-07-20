@@ -97,6 +97,11 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsRolePasswords() {
+    return false;
+  }
+
+  @Override
   public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
     throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
   }

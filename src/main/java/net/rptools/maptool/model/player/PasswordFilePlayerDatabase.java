@@ -255,6 +255,11 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsRolePasswords() {
+    return false;
+  }
+
+  @Override
   public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
     PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {

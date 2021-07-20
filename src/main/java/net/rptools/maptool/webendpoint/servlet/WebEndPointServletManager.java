@@ -13,7 +13,7 @@ public class WebEndPointServletManager {
 
   private final ServletInfo[] servlets = new ServletInfo[] {
       Servlets.servlet(MapToolServlet.getEndPointServletName(), MapToolServlet.class)
-          .addMapping("/info")
+          .addMapping("/version")
   };
 
   public Collection<ServletInfo> getServlets() {

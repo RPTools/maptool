@@ -1,33 +1,31 @@
 package net.rptools.maptool.api.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.rptools.maptool.api.ApiData;
 import net.rptools.maptool.api.ApiException;
 
-public class ApiResult<T extends ApiData> {
+public class ApiListResult<T extends ApiData> {
 
-
-  private final T data;
+  private final List<T> data;
   private final ApiResultStatus status;
   private final ApiException exception;
 
+  public static ApiListResult<NoData> INTERNAL_ERROR_RESULT =
+      new ApiListResult<>(List.of(new NoData()));
 
-  public static ApiResult<NoData> INTERNAL_ERROR_RESULT = new ApiResult<>(new NoData());
-
-  public ApiResult(T data) {
-    this.data = data;
+  public ApiListResult(List<T> data) {
+    this.data = List.copyOf(data);
     this.status = ApiResultStatus.OK;
     this.exception = null;
   }
 
-  public ApiResult(ApiException e) {
-    this.data = null;
-    this.status = ApiResultStatus.ERROR;
-    this.exception = e;
-  }
-
-  public T getData() {
+  public List<T> getData() {
     return data;
   }
 
@@ -46,7 +44,9 @@ public class ApiResult<T extends ApiData> {
   public JsonObject asJsonObject() {
     JsonObject json = new JsonObject();
     if (data != null) {
-      json.add("data", data.asJsonObject());
+      JsonArray objList = data.stream().map(ApiData::asJsonObject)
+          .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+      json.add("data", objList);
     }
     json.addProperty("status", status.getTextValue());
     String msg = getStatusMessage();

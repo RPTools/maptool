@@ -15,8 +15,6 @@ import net.rptools.maptool.api.maptool.MapToolApi;
 import net.rptools.maptool.api.util.ApiResult;
 
 public class MapToolServlet extends HttpServlet {
-  private String maptoolVersion;
-  private String webAppVersion;
 
 
   public static String getEndPointServletName() {

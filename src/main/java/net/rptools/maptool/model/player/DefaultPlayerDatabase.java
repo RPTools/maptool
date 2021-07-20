@@ -76,6 +76,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsRolePasswords() {
+    return true;
+  }
+
+  @Override
   public void disablePlayer(Player player, String reason) {
     throw new UnsupportedOperationException();
   }

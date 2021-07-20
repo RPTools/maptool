@@ -28,8 +28,8 @@ public interface PlayerDatabase {
   /**
    * Returns {@code true} if a player with the given name is known.
    *
-   * @param playerName
-   * @return
+   * @param playerName the name of the player to get the information about from the database
+   * @return {@code true} if the player exists.
    * @note if the "database" allows any player name to connect (e.g. default) then this will always
    *       return true.
    */
@@ -93,6 +93,13 @@ public interface PlayerDatabase {
    */
   boolean supportsPlayTimes();
 
+
+  /**
+   * Returns if this player database supports role based passwords.
+   * @return {@code true} if this player database supports role based passwords.
+   */
+  boolean supportsRolePasswords();
+
   /**
    * Disables the specified player. This will not boot the player from the server.
    * @param player The player to disable.
@@ -126,6 +133,17 @@ public interface PlayerDatabase {
    * @return the times that player is allowed on.
    */
   Set<PlayTime> getPlayTimes(Player player);
+
+  /**
+   *  Returns if the player is allowed to log in at any time.
+   * @return {@code true} if the player can log in at any time.
+   * @note The default implementation checks to see if play time is set to {@link #ANY_TIME} and
+   * will not perform an exhaustive check of all valid times.
+   * @param player The player to get the play times from.
+   */
+  default boolean allowedAnyPlayTime(Player player ) {
+    return ANY_TIME.equals(getPlayTimes(player));
+  }
 
   /**
    * Sets the play times that the player is allowed on during.
