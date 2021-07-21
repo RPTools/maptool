@@ -22,7 +22,7 @@ import org.graalvm.polyglot.HostAccess;
 public class JSAPITokens {
 
   @HostAccess.Export
-  public JSList getMapTokens() {
+  public List<Object> getMapTokens() {
     final List<Object> tokens = new ArrayList<>();
 
     MapTool.getFrame()
@@ -30,6 +30,6 @@ public class JSAPITokens {
         .getZone()
         .getTokens()
         .forEach(t -> tokens.add(new JSAPIToken(t)));
-    return new JSList(tokens);
+    return tokens;
   }
 }

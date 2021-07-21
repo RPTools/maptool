@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import java.util.List;
 import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.client.functions.AssertFunction;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
@@ -32,7 +33,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public void setVariable(String name, Object value) throws ParserException {
+  public void setVariable(String name, Value value) throws ParserException {
     MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
   }
 
@@ -71,7 +72,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public JSList getMTScriptCallingArgs() {
-    return new JSList(MacroJavaScriptBridge.getInstance().getCallingArgs());
+  public List<Object> getMTScriptCallingArgs() {
+    return MacroJavaScriptBridge.getInstance().getCallingArgs();
   }
 }

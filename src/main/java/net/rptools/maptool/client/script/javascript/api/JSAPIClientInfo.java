@@ -61,7 +61,7 @@ public class JSAPIClientInfo {
   }
 
   @HostAccess.Export
-  public JSMap libraryTokens() {
+  public Map<String, Object> libraryTokens() {
     Map<String, Object> libInfo = new HashMap<>();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
@@ -75,12 +75,12 @@ public class JSAPIClientInfo {
         }
       }
     }
-    return new JSMap(libInfo);
+    return libInfo;
   }
 
   @HostAccess.Export
-  public JSList userDefinedFunctions() {
-    return JSList.fromArray(UserDefinedMacroFunctions.getInstance().getAliases());
+  public String[] userDefinedFunctions() {
+    return UserDefinedMacroFunctions.getInstance().getAliases();
   }
 
   public String clientId() {
