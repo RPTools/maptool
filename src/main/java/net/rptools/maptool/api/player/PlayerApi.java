@@ -31,8 +31,14 @@ public class PlayerApi {
   }
 
   public CompletableFuture<ApiListResult<PlayerInfo>> getConnectedPlayers() {
-    return null; // TODO: CDW:
-
+    return CompletableFuture.supplyAsync(() -> {
+      try {
+        return new ApiListResult<>(getPlayersInfo().stream().filter(PlayerInfo::connected).toList());
+      } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        return new ApiListResult<>(new ApiException("err.internal", e));
+        // TODO: CDW: log error
+      }
+    });
   }
 
   public CompletableFuture<ApiListResult<PlayerInfo>> getDatabasePlayers() {
@@ -41,6 +47,7 @@ public class PlayerApi {
         return new ApiListResult<>(getPlayersInfo());
       } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
         return new ApiListResult<>(new ApiException("err.internal", e));
+        // TODO: CDW: log error
       }
     });
   }

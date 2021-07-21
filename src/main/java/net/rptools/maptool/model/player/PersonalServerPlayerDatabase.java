@@ -56,6 +56,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsRolePasswords() {
+    return false;
+  }
+
+  @Override
   public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
     throw new PasswordDatabaseException("msg.err.passFile.cantSetPlayTimes");
   }

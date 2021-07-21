@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import net.rptools.maptool.api.maptool.MapToolApi;
 import net.rptools.maptool.api.util.ApiResult;
 
-public class MapToolServlet extends HttpServlet {
+public class MapToolVersionServlet extends HttpServlet {
 
 
   public static String getEndPointServletName() {
-    return "MapToolServlet";
+    return "MapToolVersionServlet";
   }
 
   @Override
