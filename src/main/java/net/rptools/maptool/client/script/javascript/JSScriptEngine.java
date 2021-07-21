@@ -14,40 +14,55 @@
  */
 package net.rptools.maptool.client.script.javascript;
 
-import java.util.Set;
+import com.oracle.truffle.js.scriptengine.*;
+import java.util.*;
 import javax.script.*;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.HostAccess.*;
 import org.reflections.Reflections;
 
 public class JSScriptEngine {
 
-  private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
+  private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
   private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
 
-  private ScriptEngine engine;
-  private ScriptContext anonymousContext;
+  private static Context context;
+  private static Value bindings;
 
-  private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj) {
+  private void registerAPIObject(Value bindings, MapToolJSAPIInterface apiObj) {
     MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
-    Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
-    bindings.put(def.javaScriptVariableName(), apiObj);
+    bindings.putMember(def.javaScriptVariableName(), apiObj);
   }
 
   private JSScriptEngine() {
-    engine = new ScriptEngineManager().getEngineByName("graal.js");
+    HostAccess.Builder habuilder = HostAccess.newBuilder();
+    habuilder.allowAccessAnnotatedBy(HostAccess.Export.class);
+    habuilder.allowArrayAccess(true);
+    habuilder.allowListAccess(true);
+    habuilder.targetTypeMapping(Value.class, Object.class,
+                        (v) -> v.hasArrayElements(),
+                        (v) -> v.as(List.class));
 
-    anonymousContext = new SimpleScriptContext();
-    anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
+    HostAccess access = habuilder.build();
+
+    Context.Builder cbuilder = Context.newBuilder("js");
+    cbuilder.allowHostAccess(access);
+    cbuilder.option("js.ecmascript-version", "2021");
+    
+    context = cbuilder.build();
+    bindings = context.getBindings("js");
+    
     Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
     Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
 
     for (Class<?> apiClass : annotated) {
       try {
         if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
-          registerAPIObject(anonymousContext, (MapToolJSAPIInterface) apiClass.newInstance());
+          registerAPIObject(bindings, (MapToolJSAPIInterface) apiClass.newInstance());
         } else {
           log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
         }
@@ -61,13 +76,13 @@ public class JSScriptEngine {
     return jsScriptEngine;
   }
 
-  public Object evalAnonymous(String script) throws ScriptException {
+  public Value evalAnonymous(String script) throws ScriptException {
 
     StringBuilder wrapped = new StringBuilder();
     wrapped
         .append("(function() { var args = MTScript.getMTScriptCallingArgs(); ")
         .append(script)
         .append("})();");
-    return engine.eval(wrapped.toString(), anonymousContext);
+    return context.eval("js", wrapped.toString());
   }
 }
