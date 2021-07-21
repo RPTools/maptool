@@ -1,9 +1,13 @@
 package net.rptools.maptool.api.player;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.api.ApiException;
 import net.rptools.maptool.api.util.ApiCall;
 import net.rptools.maptool.api.util.ApiListResult;
 import net.rptools.maptool.api.util.ApiResult;
@@ -32,7 +36,13 @@ public class PlayerApi {
   }
 
   public CompletableFuture<ApiListResult<PlayerInfo>> getDatabasePlayers() {
-    return null; // TODO: CDW:
+    return CompletableFuture.supplyAsync(() -> {
+      try {
+        return new ApiListResult<>(getPlayersInfo());
+      } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        return new ApiListResult<>(new ApiException("err.internal", e));
+      }
+    });
   }
 
 
@@ -82,6 +92,17 @@ public class PlayerApi {
         playTimes,
         connected
     );
+  }
+
+  private List<PlayerInfo> getPlayersInfo()
+      throws InterruptedException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException {
+    List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    for (Player p : playerDatabase.getAllPlayers()) {
+      players.add(getPlayerInfo(p.getName()));
+    }
+
+    return players;
   }
 }
 

@@ -1,11 +1,17 @@
 package net.rptools.maptool.model.player;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.CipherUtil;
 
 import java.util.Optional;
@@ -144,6 +150,32 @@ public interface PlayerDatabase {
   default boolean allowedAnyPlayTime(Player player ) {
     return ANY_TIME.equals(getPlayTimes(player));
   }
+
+  /**
+   * Returns the known players. For many player databases this will be the players
+   * that are currently connected.
+   *
+   * @return The players that are known to the database.
+   */
+  default Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+    return getOnlinePlayers();
+  }
+
+  /**
+   * Returns all the players currently connected.
+   *
+   * @return The players that are currently connected.
+   */
+   default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+     Set<Player> players = new HashSet<>();
+     if (SwingUtilities.isEventDispatchThread()) {
+       MapTool.getPlayerList().forEach(players::add);
+     } else {
+       SwingUtilities.invokeAndWait(() -> MapTool.getPlayerList().forEach(players::add));
+     }
+
+     return players;
+   }
 
   /**
    * Sets the play times that the player is allowed on during.

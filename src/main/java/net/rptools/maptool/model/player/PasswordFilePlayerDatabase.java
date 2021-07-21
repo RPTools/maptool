@@ -6,11 +6,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.uwyn.jhighlight.fastutil.Hash;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
@@ -322,6 +325,16 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
     dirty.set(true);
     writePasswordFile();
+  }
+
+  @Override
+  public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+    Set<Player> players = new HashSet<>(getOnlinePlayers());
+
+    players.addAll(playerDetails.keySet().stream().map(this::getPlayer).collect(Collectors.toSet()));
+    players.addAll(transientPlayerDetails.keySet().stream().map(this::getPlayer).collect(Collectors.toSet()));
+
+    return players;
   }
 
 

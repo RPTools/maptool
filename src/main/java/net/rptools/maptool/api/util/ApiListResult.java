@@ -25,7 +25,15 @@ public class ApiListResult<T extends ApiData> {
     this.exception = null;
   }
 
-  public List<T> getData() {
+
+  public ApiListResult(ApiException e) {
+    this.data = null;
+    this.status = ApiResultStatus.ERROR;
+    this.exception = e;
+  }
+
+
+    public List<T> getData() {
     return data;
   }
 
