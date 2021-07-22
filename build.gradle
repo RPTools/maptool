@@ -402,6 +402,7 @@ dependencies {
     implementation 'io.undertow:undertow-servlet:2.2.8.Final'
     implementation 'org.jboss.resteasy:resteasy-undertow:4.7.0.Final'
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+    implementation 'org.jboss.resteasy:resteasy-jackson2-provider:4.7.0.Final'
 }
 
 
