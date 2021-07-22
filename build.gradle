@@ -396,9 +396,12 @@ dependencies {
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
 
-    // Undertow
+
+    // HTTP End Point
     implementation 'io.undertow:undertow-core:2.2.8.Final'
     implementation 'io.undertow:undertow-servlet:2.2.8.Final'
+    implementation 'org.jboss.resteasy:resteasy-undertow:4.7.0.Final'
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 }
 
 
