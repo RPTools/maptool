@@ -2,7 +2,8 @@ package net.rptools.maptool.api.util;
 
 public enum ApiResultStatus {
     OK("ok", ""),
-    ERROR("error", "Internal API Error");
+    ERROR("error", "Internal API Error"),
+    NOT_FOUND("notFound", "Not Found");
 
     private final String textValue;
     private final String defaultMessage;

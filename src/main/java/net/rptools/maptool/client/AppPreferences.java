@@ -189,7 +189,7 @@ public class AppPreferences {
   private static final String DEFAULT_TOPOLOGY_DRAWING_MODE = "VBL";
 
   private static final String KEY_WEB_END_POINT_PORT = "webEndPointPort";
-  private static final int DEFAULT_WEB_END_POINT = 54545;
+  private static final int DEFAULT_WEB_END_POINT = 654555;
 
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);

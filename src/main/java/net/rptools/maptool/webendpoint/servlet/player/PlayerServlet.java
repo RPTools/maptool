@@ -1,52 +1,34 @@
 package net.rptools.maptool.webendpoint.servlet.player;
 
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.concurrent.ExecutionException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.net.HttpURLConnection;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import net.rptools.maptool.api.maptool.MapToolApi;
+import net.rptools.maptool.api.maptool.MapToolInfo;
 import net.rptools.maptool.api.player.PlayerApi;
+import net.rptools.maptool.api.player.PlayerInfo;
 import net.rptools.maptool.api.util.ApiResult;
+import net.rptools.maptool.api.util.ApiResultStatus;
 
-public class PlayerServlet extends HttpServlet {
+@Path("/version")
+public class PlayerServlet {
 
-
-  public static String getEndPointServletName() {
-    return "PlayerServlet";
-  }
-
-  @Override
-  public void init(final ServletConfig config) throws ServletException {
-    super.init(config);
-  }
-
-  @Override
-  protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
-      throws ServletException, IOException {
-    response.setContentType("application/json");
-
-    PrintWriter writer = response.getWriter();
-    Gson gson = new Gson();
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public PlayerInfo get() {
     try {
-      JsonObject version = new PlayerApi().getPlayer().get().asJsonObject();
-      gson.toJson(version, writer);
-    } catch (InterruptedException | ExecutionException e) {
-      gson.toJson(ApiResult.INTERNAL_ERROR_RESULT, writer);
+      ApiResult<PlayerInfo> player = new PlayerApi().getPlayer().get();
+      switch (player.getStatus()) {
+        case ApiResultStatus.OK:
+          return mapToolInfoApiResult.getData();
+        throw new WebApplicationException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+      }
+    } catch (Exception e) {
+      // TODO: CDW: Log this
+      throw new WebApplicationException(HttpURLConnection.HTTP_INTERNAL_ERROR);
     }
-    writer.close();
   }
-
-  @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    doGet(request, response);
-  }
-
 }
