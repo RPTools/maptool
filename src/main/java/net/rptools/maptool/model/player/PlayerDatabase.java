@@ -5,10 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
@@ -37,7 +35,9 @@ public interface PlayerDatabase {
    * @param playerName the name of the player to get the information about from the database
    * @return {@code true} if the player exists.
    * @note if the "database" allows any player name to connect (e.g. default) then this will always
-   *       return true.
+   *       return true. If you want to check if there is actually a player of this name in the
+   *       database then use {@link #isPlayerRegistered(String)}.
+   *
    */
   boolean playerExists(String playerName);
 
@@ -186,4 +186,13 @@ public interface PlayerDatabase {
    * @throws PasswordDatabaseException if the player database does not support setting play times.
    */
   void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException;
+
+
+  /**
+   * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
+   * this will not return {@code true} for every input but only for those that are logged on.
+   * @param name the name of the player to check for.
+   * @return {@code true} if the player is registered, {@code false} otherwise.
+   */
+  boolean isPlayerRegistered(String name) throws InterruptedException, InvocationTargetException;
 }

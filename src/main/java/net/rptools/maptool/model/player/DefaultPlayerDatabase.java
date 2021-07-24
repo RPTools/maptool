@@ -1,9 +1,13 @@
 package net.rptools.maptool.model.player;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
 
@@ -103,5 +107,24 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public void setPlayTimes(Player player, Collection<PlayTime> times) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isPlayerRegistered(String name)
+      throws InterruptedException, InvocationTargetException {
+    Set<String> players = new HashSet<>();
+    if (SwingUtilities.isEventDispatchThread()) {
+      for (Player player : MapTool.getPlayerList()) {
+        players.add(player.getName());
+      }
+    } else {
+      SwingUtilities.invokeAndWait(() -> {
+        for (Player player : MapTool.getPlayerList()) {
+          players.add(player.getName());
+        }}
+      );
+    }
+
+    return players.contains(name);
   }
 }

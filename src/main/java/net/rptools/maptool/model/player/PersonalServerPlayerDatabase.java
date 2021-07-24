@@ -1,6 +1,7 @@
 package net.rptools.maptool.model.player;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
@@ -63,6 +64,12 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   @Override
   public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
     throw new PasswordDatabaseException("msg.err.passFile.cantSetPlayTimes");
+  }
+
+  @Override
+  public boolean isPlayerRegistered(String name)
+      throws InterruptedException, InvocationTargetException {
+    return player != null && player.getName() != null && player.getName().equals(name);
   }
 
   @Override

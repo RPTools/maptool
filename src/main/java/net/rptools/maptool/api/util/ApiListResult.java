@@ -1,12 +1,8 @@
 package net.rptools.maptool.api.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import net.rptools.maptool.api.ApiData;
 import net.rptools.maptool.api.ApiException;
 
@@ -21,8 +17,9 @@ public class ApiListResult<T extends ApiData> {
 
   public ApiListResult(List<T> data) {
     this.data = List.copyOf(data);
-    this.status = ApiResultStatus.OK;
     this.exception = null;
+    this.status = data != null ? ApiResultStatus.OK : ApiResultStatus.NONE;
+
   }
 
 

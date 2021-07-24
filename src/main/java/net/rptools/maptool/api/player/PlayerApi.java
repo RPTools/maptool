@@ -57,8 +57,11 @@ public class PlayerApi {
 
 
   private PlayerInfo getPlayerInfo(String name)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException, InvocationTargetException {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (!playerDatabase.isPlayerRegistered(name)) {
+      return null;
+    }
     Player player = playerDatabase.getPlayer(name);
     Role role = player.getRole();
     boolean individualPassword = playerDatabase.supportsRolePasswords();

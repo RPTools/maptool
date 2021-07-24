@@ -3,7 +3,6 @@ package net.rptools.maptool.api.player;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.rptools.maptool.api.ApiData;
-import net.rptools.maptool.model.player.PlayTime;
 import net.rptools.maptool.model.player.Player.Role;
 
 public record PlayerInfo(
@@ -22,6 +21,7 @@ public record PlayerInfo(
   public JsonObject asJsonObject() {
     JsonObject json = new JsonObject();
     json.addProperty("name", name);
+    json.addProperty("role", role.name());
     json.addProperty("individualPassword", individualPassword);
     json.addProperty("supportsBlocking", supportsBlocking);
     json.addProperty("blocked", blocked);
