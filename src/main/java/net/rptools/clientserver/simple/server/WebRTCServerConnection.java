@@ -33,7 +33,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private final Gson gson = new Gson();
   private RTCConfiguration rtcConfig;
 
-  public static String WebSocketUrl = "ws://172.20.74.230:9090";
+  public static String WebSocketUrl = "ws://20.101.25.63:9090";
 
   public WebRTCServerConnection(ServerConfig config, IHandshake handshake) {
     super(handshake);

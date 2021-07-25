@@ -136,3 +136,4 @@ wss.on('connection', function(connection) {
 function sendTo(connection, message) { 
    connection.send(JSON.stringify(message)); 
 }
+console.log("started");
