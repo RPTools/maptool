@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
-
 import net.rptools.clientserver.simple.client.IClientConnection;
-import net.rptools.clientserver.simple.client.SocketClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.client.MapTool;
@@ -69,8 +67,6 @@ public class MapToolServer {
 
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
-
-
 
     // Start a heartbeat if requested
     if (config.isServerRegistered()) {

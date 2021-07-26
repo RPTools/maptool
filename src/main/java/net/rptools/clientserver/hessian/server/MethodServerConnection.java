@@ -15,21 +15,18 @@
 package net.rptools.clientserver.hessian.server;
 
 import java.io.IOException;
-
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.clientserver.simple.IConnection;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.server.IServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
-import net.rptools.clientserver.simple.server.SocketServerConnection;
-import net.rptools.maptool.server.ServerConfig;
 
 /** @author drice */
 public class MethodServerConnection implements IMethodServerConnection {
   private IServerConnection connection;
+
   public MethodServerConnection(IServerConnection connection) {
     this.connection = connection;
   }

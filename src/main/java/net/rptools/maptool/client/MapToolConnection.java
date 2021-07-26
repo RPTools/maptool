@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -23,13 +21,8 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
-import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.IMethodClientConnection;
-import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.AbstractClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.server.Handshake;
@@ -41,7 +34,8 @@ public class MapToolConnection {
   private IMethodClientConnection connection;
 
   public MapToolConnection(ServerConfig config, Player player) throws IOException {
-    this.connection = ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
+    this.connection =
+        ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
   }
 
@@ -53,8 +47,10 @@ public class MapToolConnection {
   public boolean sendHandshake() throws IOException {
     Handshake.Response response = null;
     try {
-      var request = new Handshake.Request(player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion());
-      response = Handshake.sendHandshake(request,connection);
+      var request =
+          new Handshake.Request(
+              player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion());
+      response = Handshake.sendHandshake(request, connection);
     } catch (IllegalBlockSizeException
         | InvalidKeyException
         | BadPaddingException

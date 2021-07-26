@@ -2196,8 +2196,7 @@ public class AppActions {
                         serverProps.getPlayerPassword(),
                         serverProps.getPort(),
                         serverProps.getRPToolsName(),
-                        "localhost"
-                    );
+                        "localhost");
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2325,8 +2324,7 @@ public class AppActions {
                           "",
                           dialog.getPort(),
                           prefs.getServerName(),
-                          dialog.getServer()
-                      );
+                          dialog.getServer());
                   MapTool.createConnection(
                       config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));

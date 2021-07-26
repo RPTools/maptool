@@ -19,21 +19,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.server.IMethodServerConnection;
-import net.rptools.clientserver.hessian.server.MethodServerConnection;
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.IClientConnection;
 import net.rptools.clientserver.simple.server.IHandshake;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.model.Player;
-import net.rptools.maptool.transfer.AssetChunk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +37,8 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
   private final IMethodServerConnection connection;
 
   public MapToolServerConnection(MapToolServer server) throws IOException {
-    this.connection = ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
+    this.connection =
+        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     addObserver(this);
   }
@@ -143,7 +136,6 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
   public void callMethod(String id, Object channel, String method, Object... parameters) {
     connection.callMethod(id, channel, method, parameters);
   }
-
 
   public void close() throws IOException {
     connection.close();

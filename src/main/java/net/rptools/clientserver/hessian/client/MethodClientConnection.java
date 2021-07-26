@@ -17,16 +17,16 @@ package net.rptools.clientserver.hessian.client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.clientserver.simple.client.IClientConnection;
 import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.client.IClientConnection;
 
 /** @author drice */
 public class MethodClientConnection implements IMethodClientConnection {
   private IClientConnection connection;
+
   public MethodClientConnection(IClientConnection connection) {
     this.connection = connection;
   }

@@ -24,7 +24,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.client.IClientConnection;
 import net.rptools.maptool.client.MapTool;
@@ -216,7 +215,10 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      DataInputStream inputStream, String playerPassword, String gmPassword, byte[] expectedInitialMacSalt)
+      DataInputStream inputStream,
+      String playerPassword,
+      String gmPassword,
+      byte[] expectedInitialMacSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 
     DataInputStream dis = new DataInputStream(inputStream);
@@ -284,7 +286,7 @@ public class Handshake {
    */
   public static Response sendHandshake(Request request, IClientConnection conn)
       throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException,
-      NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
+          NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 
     var dis = conn.getInputStream();
     var dos = conn.getOutputSream();
@@ -364,7 +366,7 @@ public class Handshake {
 
   private static byte[] buildRequest(Request request, byte[] macSalt)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-      BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
+          BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException, IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(USERNAME_FIELD);
     sb.append(request.name);

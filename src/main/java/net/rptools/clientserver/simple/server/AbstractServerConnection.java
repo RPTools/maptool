@@ -1,13 +1,26 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.clientserver.simple.server;
 
+import java.io.IOException;
+import java.util.*;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.IClientConnection;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.*;
 
 public abstract class AbstractServerConnection extends AbstractConnection
     implements MessageHandler, DisconnectHandler, IServerConnection {
@@ -25,7 +38,6 @@ public abstract class AbstractServerConnection extends AbstractConnection
   public AbstractServerConnection(IHandshake handshake) {
     this.handshake = handshake;
   }
-
 
   public void addObserver(ServerObserver observer) {
     observerList.add(observer);
@@ -84,7 +96,7 @@ public abstract class AbstractServerConnection extends AbstractConnection
       log.debug("Reaping clients");
 
       for (Iterator<Map.Entry<String, IClientConnection>> i = clients.entrySet().iterator();
-           i.hasNext(); ) {
+          i.hasNext(); ) {
         Map.Entry<String, IClientConnection> entry = i.next();
         IClientConnection conn = entry.getValue();
         if (!conn.isAlive()) {

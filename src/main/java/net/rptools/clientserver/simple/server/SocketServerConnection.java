@@ -17,11 +17,6 @@ package net.rptools.clientserver.simple.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import org.apache.log4j.Logger;
 
@@ -31,7 +26,6 @@ public class SocketServerConnection extends AbstractServerConnection {
   private static final Logger log = Logger.getLogger(SocketServerConnection.class);
   private final ServerSocket socket;
   private final ListeningThread listeningThread;
-
 
   public SocketServerConnection(int port, IHandshake handshake) throws IOException {
     super(handshake);

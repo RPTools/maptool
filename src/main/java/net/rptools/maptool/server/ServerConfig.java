@@ -63,7 +63,12 @@ public class ServerConfig {
   }
 
   public ServerConfig(
-      String hostPlayerId, String gmPassword, String playerPassword, int port, String serverName, String hostName) {
+      String hostPlayerId,
+      String gmPassword,
+      String playerPassword,
+      int port,
+      String serverName,
+      String hostName) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
@@ -116,7 +121,9 @@ public class ServerConfig {
     return playerPassword;
   }
 
-  public String getHostName() { return hostName; }
+  public String getHostName() {
+    return hostName;
+  }
 
   private static Random r = new Random();
 

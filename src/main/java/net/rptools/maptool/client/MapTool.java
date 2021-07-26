@@ -47,9 +47,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-
-import net.rptools.clientserver.hessian.client.IMethodClientConnection;
-import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
@@ -1164,15 +1161,15 @@ public class MapTool {
     String username = System.getProperty("user.name", "Player");
 
     // Connect to server
-    MapTool.createConnection(config,
+    MapTool.createConnection(
+        config,
         new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(ServerConfig config, LocalPlayer player)
-      throws IOException {
+  public static void createConnection(ServerConfig config, LocalPlayer player) throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 

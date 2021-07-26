@@ -17,8 +17,6 @@ package net.rptools.clientserver.simple.client;
 import java.io.*;
 import java.net.Socket;
 
-import net.rptools.maptool.server.ServerConfig;
-
 /**
  * @author drice
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
@@ -29,13 +27,11 @@ public class SocketClientConnection extends AbstractClientConnection {
   private DataOutputStream dos;
   private DataInputStream dis;
 
-  public SocketClientConnection(String id, String hostName, int port)
-      throws IOException {
+  public SocketClientConnection(String id, String hostName, int port) throws IOException {
     this(id, new Socket(hostName, port));
   }
 
-  public SocketClientConnection(String id, Socket socket)
-      throws IOException {
+  public SocketClientConnection(String id, Socket socket) throws IOException {
     super(id);
     this.socket = socket;
     this.dis = new DataInputStream(socket.getInputStream());

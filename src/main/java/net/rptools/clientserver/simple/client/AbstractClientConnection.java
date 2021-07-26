@@ -15,7 +15,6 @@
 package net.rptools.clientserver.simple.client;
 
 import java.io.*;
-
 import net.rptools.clientserver.simple.AbstractConnection;
 
 /**
@@ -23,7 +22,8 @@ import net.rptools.clientserver.simple.AbstractConnection;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public abstract class AbstractClientConnection extends AbstractConnection implements IClientConnection {
+public abstract class AbstractClientConnection extends AbstractConnection
+    implements IClientConnection {
   private SendThread send;
   private ReceiveThread receive;
   private final String id;
@@ -57,7 +57,6 @@ public abstract class AbstractClientConnection extends AbstractConnection implem
   protected boolean isStopRequested() {
     return send.stopRequested;
   }
-
 
   public synchronized void close() throws IOException {
     if (send.stopRequested) {
