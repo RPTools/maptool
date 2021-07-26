@@ -3,19 +3,7 @@
 
 name: Build Verification
 
-on:
-  push:
-    branches:
-      - main
-      - develop
-      - feature*
-      - release*
-  pull_request:
-    branches:
-      - main
-      - develop
-      - feature*
-      - release*
+on: [push, pull_request]
 jobs:
   formatting:
     runs-on: ubuntu-latest
