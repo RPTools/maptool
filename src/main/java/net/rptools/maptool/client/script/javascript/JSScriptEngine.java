@@ -51,10 +51,10 @@ public class JSScriptEngine {
     Context.Builder cbuilder = Context.newBuilder("js");
     cbuilder.allowHostAccess(access);
     cbuilder.option("js.ecmascript-version", "2021");
-    
+
     context = cbuilder.build();
     bindings = context.getBindings("js");
-    
+
     Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
     Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
 
