@@ -43,9 +43,8 @@ public class JSScriptEngine {
     habuilder.allowAccessAnnotatedBy(HostAccess.Export.class);
     habuilder.allowArrayAccess(true);
     habuilder.allowListAccess(true);
-    habuilder.targetTypeMapping(Value.class, Object.class,
-                        (v) -> v.hasArrayElements(),
-                        (v) -> v.as(List.class));
+    habuilder.targetTypeMapping(
+        Value.class, Object.class, (v) -> v.hasArrayElements(), (v) -> v.as(List.class));
 
     HostAccess access = habuilder.build();
 
