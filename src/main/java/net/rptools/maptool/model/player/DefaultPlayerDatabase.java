@@ -1,9 +1,11 @@
 package net.rptools.maptool.model.player;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.Set;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.CipherUtil;
 
@@ -17,14 +19,14 @@ import java.util.Optional;
  */
 public class DefaultPlayerDatabase implements PlayerDatabase {
 
-  private final CipherUtil.Key playerPassword;
-  private final CipherUtil.Key gmPassword;
+  private final CipherUtil playerPassword;
+  private final CipherUtil gmPassword;
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    byte[] salt = CipherUtil.getInstance().createSalt();
-    this.playerPassword = CipherUtil.getInstance().createKey(playerPassword, salt);
-    this.gmPassword = CipherUtil.getInstance().createKey(gmPassword, salt);
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    byte[] salt = CipherUtil.createSalt();
+    this.playerPassword = CipherUtil.fromSharedKey(playerPassword, salt);
+    this.gmPassword = CipherUtil.fromSharedKey(gmPassword, salt);
   }
 
   @Override
@@ -35,7 +37,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public Player getPlayer(String playerName) {
     // If role is not specified always return player!
-    return new Player(playerName, Player.Role.PLAYER, playerPassword);
+    return new Player(playerName, Player.Role.PLAYER, playerPassword.getKey());
   }
 
   @Override
@@ -45,7 +47,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
 
   @Override
   public byte[] getPlayerPasswordSalt(String playerName) {
-    return playerPassword.salt(); // Player and GM password salt are the same
+    return playerPassword.getKey().salt(); // Player and GM password salt are the same
   }
 
   @Override
@@ -57,9 +59,9 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
     switch (role) {
       case PLAYER:
-        return Optional.of(playerPassword);
+        return Optional.of(playerPassword.getKey());
       case GM:
-        return Optional.of(gmPassword);
+        return Optional.of(gmPassword.getKey());
       default:
         return Optional.empty();
     }
@@ -103,5 +105,10 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public void setPlayTimes(Player player, Collection<PlayTime> times) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public AuthMethod getAuthMethod(Player player) {
+    return AuthMethod.PASSWORD; // Will always be password based
   }
 }

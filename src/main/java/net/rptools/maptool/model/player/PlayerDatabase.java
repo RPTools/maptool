@@ -21,6 +21,11 @@ import java.util.Optional;
  */
 public interface PlayerDatabase {
 
+  public enum AuthMethod {
+    PASSWORD,
+    ASYMETRIC_KEY
+  };
+
 
   Set<PlayTime> ANY_TIME = Set.of(
       new PlayTime(DayOfWeek.MONDAY, LocalTime.MIN, LocalTime.MAX),
@@ -186,4 +191,12 @@ public interface PlayerDatabase {
    * @throws PasswordDatabaseException if the player database does not support setting play times.
    */
   void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException;
+
+
+  /**
+   * Returns the authentication method for the player.
+   * @param player the player to get the authentication method for.
+   * @return the authentication method for the player.
+   */
+  public AuthMethod getAuthMethod(Player player);
 }

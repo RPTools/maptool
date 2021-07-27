@@ -2,11 +2,13 @@ package net.rptools.maptool.model.player;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.server.ServerConfig;
 
@@ -100,7 +102,7 @@ public class PlayerDatabaseFactory {
               config.getGmPassword()
           );
       }
-    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException e) {
       throw new IllegalStateException(e);
     }
   }

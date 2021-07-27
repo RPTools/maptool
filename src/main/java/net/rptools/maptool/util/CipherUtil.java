@@ -15,12 +15,17 @@
 package net.rptools.maptool.util;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -33,9 +38,6 @@ import org.apache.logging.log4j.Logger;
 
 /** Utility class used for creating objects to encipher/decipher text. */
 public class CipherUtil {
-
-  /** The singleton instance of {@code CipherUtil}. */
-  private static final CipherUtil instance = new CipherUtil();
 
   /** The algorithm to use for encoding / decoding. */
   private static final String CIPHER_ALGORITHM = "AES";
@@ -58,31 +60,77 @@ public class CipherUtil {
   /** Key generation algorithm. */
   private static final String KEY_GENERATION_ALGORITHM = "PBKDF2WithHmacSHA1";
 
+  /** Asynchronous Key Algorithm */
+  private static final String ASYNC_KEY_ALGORITHM = "RSA";
 
-  public static record Key(SecretKeySpec secretKeySpec, byte[] salt) {};
 
-  /**
-   * Returns the singleton instance of {@code CipherUtil}.
-   *
-   * @return the singleton instance of {@code CipherUtil}.
-   */
-  public static CipherUtil getInstance() {
-    return instance;
-  }
+  private final Key key;
+  private final Cipher encryptionCipher;
+  private final Cipher decryptionCipher;;
 
   /** {@link MessageDigest} used for generating a 256 bit key from the password. */
   private final MessageDigest messageDigest;
 
-  /** Creates a new {@code CipherUtil} instance. */
-  private CipherUtil() {
-    try {
-      messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
-      Cipher.getInstance("AES");
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-      log.error(e);
-      throw new IllegalStateException(e);
+  public static record Key(
+      SecretKeySpec secretKeySpec,
+      byte[] salt,
+      PublicKey publicKey,
+      PrivateKey privateKey,
+      boolean asymmetric) {
+
+    public Key(SecretKeySpec secretKeySpec, byte[] salt) {
+      this(secretKeySpec, salt, null, null, false);
     }
+
+    public Key(PublicKey publicKey, PrivateKey privateKey) {
+      this(null, null, publicKey, privateKey, true);
+    }
+  };
+
+
+  private CipherUtil(Key keyToUse)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
+    key = keyToUse;
+    decryptionCipher = createDecryptor(key);
+    encryptionCipher = createEncrypter(key);
   }
+
+  public static CipherUtil fromPublicPrivatePair(File publicKeyFile, File privateKeyFile)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    KeyPair keyPair = readKeyPair(publicKeyFile, privateKeyFile);
+    return CipherUtil.fromPublicPrivatePair(keyPair.getPublic(), keyPair.getPrivate());
+  }
+
+  public static CipherUtil fromPublicPrivatePair(PublicKey publicKey, PrivateKey privateKey)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    return new CipherUtil(new Key(publicKey, privateKey));
+  }
+
+  public static CipherUtil fromSharedKey(String pass, byte[] salt)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    Key key = createKey(pass, salt);
+    return new CipherUtil(key);
+  }
+
+  public static CipherUtil fromSharedKeyNewSalt(String pass)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    byte[] salt = createSalt();
+    return fromSharedKey(pass, salt);
+  }
+  
+  public static CipherUtil fromKey(Key key)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    return new CipherUtil(key);
+  }
+
+  public static CipherUtil fromSecretKeySpec(SecretKeySpec keySpec)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    Key keyTo =  new Key(keySpec, createSalt());
+
+    return new CipherUtil(keyTo);
+  }
+
 
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
@@ -130,14 +178,30 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  private Cipher createCipher(int encryptMode, Key key)
+  private static Cipher createCipher(int encryptMode, Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
     cipher.init(encryptMode, key.secretKeySpec);
     return cipher;
   }
 
-  public byte[] createSalt(int size) {
+  private Cipher createPublicKeyCipher(PublicKey key)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
+    cipher.init(Cipher.DECRYPT_MODE, key);
+
+    return cipher;
+  }
+
+  private Cipher createPrivateKeyCipher(PrivateKey key)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
+    cipher.init(Cipher.ENCRYPT_MODE, key);
+
+    return cipher;
+  }
+
+  public static byte[] createSalt(int size) {
     SecureRandom secureRandom = new SecureRandom();
     byte salt[] = new byte[size];
     secureRandom.nextBytes(salt);
@@ -145,7 +209,7 @@ public class CipherUtil {
     return salt;
   }
 
-  public byte[] createSalt() {
+  public static byte[] createSalt() {
     return createSalt(DEFAULT_SALT_SIZE);
   }
 
@@ -167,7 +231,7 @@ public class CipherUtil {
     return cipher;
   }
 
-  public Key createKey(String key, byte[] salt)
+  public static Key createKey(String key, byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
@@ -179,12 +243,12 @@ public class CipherUtil {
     return createKey(key, createSalt());
   }
 
-  public byte[] generateMacAndSalt(String password) throws IOException {
+  public static byte[] generateMacAndSalt(String password) throws IOException {
     byte[] salt = createSalt();
     return generateMacWithSalt(password, salt);
   }
 
-  public byte[] generateMacWithSalt(String password, byte[] salt) throws IOException {
+  public static byte[] generateMacWithSalt(String password, byte[] salt) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
 
@@ -205,7 +269,7 @@ public class CipherUtil {
     return byteArrayOutputStream.toByteArray();
   }
 
-  public byte[] readMac(DataInputStream in) throws IOException {
+  public static byte[] readMac(DataInputStream in) throws IOException {
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -226,7 +290,7 @@ public class CipherUtil {
     return byteArrayOutputStream.toByteArray();
   }
 
-  public boolean validateMac(byte[] macWithSalt, String password) {
+  public static boolean validateMac(byte[] macWithSalt, String password) {
     DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(macWithSalt));
     try {
       int saltLen = dataInputStream.readInt();
@@ -250,7 +314,7 @@ public class CipherUtil {
     }
   }
 
-  public byte[] getMacSalt(byte[] macWithSalt) {
+  public static byte[] getMacSalt(byte[] macWithSalt) {
     DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(macWithSalt));
     try {
       int saltLen = dataInputStream.readInt();
@@ -261,15 +325,66 @@ public class CipherUtil {
     }
   }
 
-  public String encodeBase64(Key key) {
-    return encodeBase64(key.secretKeySpec);
-  }
-
-  public String encodeBase64(SecretKey key) {
+  public static String encodeBase64(SecretKey key) {
     return Base64.getEncoder().withoutPadding().encodeToString(key.getEncoded());
   }
 
-  public SecretKeySpec decodeBase64(String encoded) {
+  public static SecretKeySpec decodeBase64(String encoded) {
     return new SecretKeySpec(Base64.getDecoder().decode(encoded), CIPHER_ALGORITHM);
+  }
+
+  public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+    SecureRandom secureRandom = new SecureRandom();
+
+    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ASYNC_KEY_ALGORITHM);
+    keyPairGenerator.initialize(2048, secureRandom);
+    return keyPairGenerator.generateKeyPair();
+  }
+
+  public static void writeKeyPair(KeyPair keyPair, File publicFile, File privateFile)
+      throws IOException {
+    publicFile.getParentFile().mkdirs();
+    privateFile.getParentFile().mkdirs();
+    try (FileOutputStream fos = new FileOutputStream(publicFile)) {
+      fos.write(keyPair.getPublic().getEncoded());
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(privateFile)) {
+      fos.write(keyPair.getPrivate().getEncoded());
+    }
+  }
+
+  public Key getKey() {
+    return key;
+  }
+
+  private static KeyPair readKeyPair(File publicFile, File privateFile)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    byte[] privateKeyBytes = Files.readAllBytes(privateFile.toPath());
+    PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+
+    byte[] publicKeyBytes = Files.readAllBytes(publicFile.toPath());
+    X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
+
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+    return new KeyPair(
+        keyFactory.generatePublic(publicSpec),
+        keyFactory.generatePrivate(privateSpec)
+    );
+  }
+
+  public PublicKey getPublicKey(byte[] bytes)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    PKCS8EncodedKeySpec publicSpec = new PKCS8EncodedKeySpec(bytes);
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+    return keyFactory.generatePublic(publicSpec);
+  }
+
+  public byte[] encode(byte[] toEncode) throws IllegalBlockSizeException, BadPaddingException {
+    return encryptionCipher.doFinal(toEncode);
+  }
+
+  public byte[] decode(byte[] toDecode) throws IllegalBlockSizeException, BadPaddingException {
+    return decryptionCipher.doFinal(toDecode);
   }
 }

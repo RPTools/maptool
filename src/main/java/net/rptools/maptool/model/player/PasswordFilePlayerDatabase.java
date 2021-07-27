@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.uwyn.jhighlight.fastutil.Hash;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -15,6 +14,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
@@ -66,7 +67,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   public void readPasswordFile()
-      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
     playerDetails.clear();
     if (this.passwordFile.exists()) {
       playerDetails.putAll(readPasswordFile(this.passwordFile));
@@ -78,13 +79,14 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
     writePasswordFile(); // Write out the password file if there were any passwords generated
   }
 
-  public void initialize() throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+  public void initialize()
+      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
     transientPlayerDetails.clear();
     readPasswordFile();
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
-      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+      throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
 
     Map<String, PlayerDetails> players = new HashMap<>();
 
@@ -112,11 +114,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
         CipherUtil.Key passwordKey;
         if (passwordEntry.has("salt")) {
-          SecretKeySpec password = CipherUtil.getInstance().decodeBase64(passwordString);
+          SecretKeySpec password = CipherUtil.decodeBase64(passwordString);
           byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
           passwordKey = new CipherUtil.Key(password, salt);
         } else {
-          passwordKey = CipherUtil.getInstance().createKey(passwordString);
+          CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(passwordString);
+          passwordKey = cipherUtil.getKey();
           dirty.set(true);
         }
 
@@ -174,7 +177,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           (k, v) -> {
             JsonObject pwObject = new JsonObject();
             pwObject.addProperty("username", v.name());
-            pwObject.addProperty("password", CipherUtil.getInstance().encodeBase64(v.password()));
+            pwObject.addProperty("password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
             pwObject.addProperty(
                 "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
             pwObject.addProperty("role", v.role().toString());
@@ -328,6 +331,11 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public AuthMethod getAuthMethod(Player player) {
+    return null;
+  }
+
+  @Override
   public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 
@@ -339,11 +347,13 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
 
   public void putPlayer(String name, Role role, String password, Set<PlayTime> playTimes,
-      boolean persisted) throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException {
+      boolean persisted)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
+    CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(password);
     PlayerDetails newDetails = new PlayerDetails(
         name,
         role,
-        CipherUtil.getInstance().createKey(password),
+        cipherUtil.getKey(),
         "",
         playTimes
     );

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
@@ -48,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -2306,7 +2308,7 @@ public class AppActions {
                 } catch (IOException ioe) {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
-                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException e) {
                   MapTool.showError("msg.error.initializeCrypto", e);
                   failed = true;
                 } catch (PasswordDatabaseException pwde) {

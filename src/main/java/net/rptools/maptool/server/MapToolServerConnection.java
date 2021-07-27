@@ -16,10 +16,14 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
@@ -61,7 +65,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
         playerMap.put(id.toUpperCase(), player);
         return true;
       }
-    } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+    } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
       log.error("Handshake failure: " + e, e);
     }
     return false;

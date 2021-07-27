@@ -125,4 +125,9 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
     throw new PasswordDatabaseException("msg.err.passFile.cantSetPlayTimes");
   }
+
+  @Override
+  public AuthMethod getAuthMethod(Player player) {
+    return AuthMethod.PASSWORD; // This will always be password authentication
+  }
 }

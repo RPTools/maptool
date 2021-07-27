@@ -66,6 +66,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public AuthMethod getAuthMethod(Player player) {
+    return AuthMethod.PASSWORD; // This will always be password authentication
+  }
+
+  @Override
   public Set<PlayTime> getPlayTimes(Player player) {
     return ANY_TIME;
   }
