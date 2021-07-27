@@ -28,18 +28,23 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
   public String serializeToString() {
     return "MapTool.ClientInfo";
   }
+
+  @HostAccess.Export
   public boolean faceEdge() {
     return AppPreferences.getFaceEdge();
   }
 
+  @HostAccess.Export
   public boolean faceVertex() {
     return AppPreferences.getFaceVertex();
   }
 
+  @HostAccess.Export
   public int portraitSize() {
     return AppPreferences.getPortraitSize();
   }
 
+  @HostAccess.Export
   public boolean showStatSheet() {
     return AppPreferences.getShowStatSheet();
   }
