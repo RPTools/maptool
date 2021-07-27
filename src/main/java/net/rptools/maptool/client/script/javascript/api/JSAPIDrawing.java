@@ -21,7 +21,12 @@ import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import org.graalvm.polyglot.*;
 
-public class JSAPIDrawing {
+public class JSAPIDrawing implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return guid.toString();
+  }
+
   @HostAccess.Export public final AbstractDrawing drawing;
 
   @HostAccess.Export public final GUID guid;

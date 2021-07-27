@@ -23,7 +23,11 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIClientInfo {
+public class JSAPIClientInfo implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.ClientInfo";
+  }
   public boolean faceEdge() {
     return AppPreferences.getFaceEdge();
   }

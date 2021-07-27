@@ -19,7 +19,11 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPITokens {
+public class JSAPITokens implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.tokens";
+  }
 
   @HostAccess.Export
   public List<Object> getMapTokens() {

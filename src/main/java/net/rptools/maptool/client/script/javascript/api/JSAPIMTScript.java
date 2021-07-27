@@ -26,6 +26,10 @@ import org.graalvm.polyglot.*;
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
 public class JSAPIMTScript implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MTScript";
+  }
 
   @HostAccess.Export
   public Object getVariable(String name) throws ParserException {
