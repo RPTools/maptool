@@ -35,12 +35,14 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
   private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
   private final MapToolServer server;
   private final IMethodServerConnection connection;
+  private Handshake handshake;
 
   public MapToolServerConnection(MapToolServer server) throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     addObserver(this);
+    handshake = new Handshake();
   }
 
   /*
@@ -50,7 +52,7 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
    */
   public boolean handleConnectionHandshake(IClientConnection conn) {
     try {
-      Player player = Handshake.receiveHandshake(server, conn);
+      Player player = handshake.receiveHandshake(server, conn);
 
       if (player != null) {
         playerMap.put(conn.getId().toUpperCase(), player);

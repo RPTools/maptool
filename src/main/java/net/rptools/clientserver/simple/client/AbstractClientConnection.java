@@ -32,7 +32,7 @@ public abstract class AbstractClientConnection extends AbstractConnection
     this.id = id;
   }
 
-  public void start() throws IOException {
+  public void start() {
     this.send = new SendThread(this, getOutputSream());
     this.send.start();
     this.receive = new ReceiveThread(this, getInputStream());
@@ -58,7 +58,7 @@ public abstract class AbstractClientConnection extends AbstractConnection
     return send.stopRequested;
   }
 
-  public synchronized void close() throws IOException {
+  public synchronized void close() {
     if (send.stopRequested) {
       return;
     }

@@ -14,7 +14,6 @@
  */
 package net.rptools.clientserver.hessian.server;
 
-import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.AbstractConnection;
@@ -101,7 +100,7 @@ public class MethodServerConnection implements IMethodServerConnection {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     connection.close();
   }
 

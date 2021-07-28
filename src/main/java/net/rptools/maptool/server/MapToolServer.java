@@ -97,11 +97,7 @@ public class MapToolServer {
   public void releaseClientConnection(String id) {
     IClientConnection connection = getClientConnection(id);
     if (connection != null) {
-      try {
-        connection.close();
-      } catch (IOException e) {
-        log.error("Could not release connection: " + id, e);
-      }
+      connection.close();
     }
     assetManagerMap.remove(id);
     connectionMap.remove(id);

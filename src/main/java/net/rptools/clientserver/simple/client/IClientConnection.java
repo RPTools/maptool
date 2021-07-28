@@ -16,7 +16,6 @@ package net.rptools.clientserver.simple.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import net.rptools.clientserver.simple.IConnection;
 
 public interface IClientConnection extends IConnection {
@@ -28,7 +27,7 @@ public interface IClientConnection extends IConnection {
 
   void sendMessage(Object channel, byte[] message);
 
-  void start() throws IOException;
+  void start();
 
   boolean isAlive();
 

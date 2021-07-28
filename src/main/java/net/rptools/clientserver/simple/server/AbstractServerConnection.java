@@ -82,7 +82,7 @@ public abstract class AbstractServerConnection extends AbstractConnection
     client.sendMessage(channel, message);
   }
 
-  public void close() throws IOException {
+  public void close() {
     synchronized (clients) {
       for (IClientConnection conn : clients.values()) {
         conn.close();
@@ -101,13 +101,9 @@ public abstract class AbstractServerConnection extends AbstractConnection
         IClientConnection conn = entry.getValue();
         if (!conn.isAlive()) {
           log.debug("\tReaping: " + conn.getId());
-          try {
-            i.remove();
-            fireClientDisconnect(conn);
-            conn.close();
-          } catch (IOException e) {
-            log.error(e.getMessage(), e);
-          }
+          i.remove();
+          fireClientDisconnect(conn);
+          conn.close();
         }
       }
     }

@@ -1179,14 +1179,17 @@ public class MapTool {
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.addDisconnectHandler(new ServerDisconnectHandler());
 
-    clientConn.start();
+    clientConn.setOnCompleted(
+        () -> {
+          // LATER: I really, really, really don't like this startup pattern
+          if (clientConn.isAlive()) {
+            conn = clientConn;
+          }
+          clientFrame.getLookupTablePanel().updateView();
+          clientFrame.getInitiativePanel().updateView();
+        });
 
-    // LATER: I really, really, really don't like this startup pattern
-    if (clientConn.isAlive()) {
-      conn = clientConn;
-    }
-    clientFrame.getLookupTablePanel().updateView();
-    clientFrame.getInitiativePanel().updateView();
+    clientConn.start();
   }
 
   public static void closeConnection() throws IOException {

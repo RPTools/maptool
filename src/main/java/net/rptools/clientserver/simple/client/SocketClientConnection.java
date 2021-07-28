@@ -16,6 +16,8 @@ package net.rptools.clientserver.simple.client;
 
 import java.io.*;
 import java.net.Socket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author drice
@@ -23,6 +25,9 @@ import java.net.Socket;
  *     Java - Code Style - Code Templates
  */
 public class SocketClientConnection extends AbstractClientConnection {
+  /** Instance used for log messages. */
+  private static final Logger log = LogManager.getLogger(SocketClientConnection.class);
+
   private Socket socket;
   private DataOutputStream dos;
   private DataInputStream dis;
@@ -42,11 +47,15 @@ public class SocketClientConnection extends AbstractClientConnection {
     return !socket.isClosed();
   }
 
-  public synchronized void close() throws IOException {
+  public synchronized void close() {
     if (isStopRequested()) {
       return;
     }
-    socket.close();
+    try {
+      socket.close();
+    } catch (IOException e) {
+      log.warn(e.toString());
+    }
     super.close();
   }
 

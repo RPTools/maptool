@@ -165,13 +165,13 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   @Override
-  public void start() throws IOException {
+  public void start() {
     started = true;
   }
 
   @Override
   public boolean isAlive() {
-    return true;
+    return localDataChannel.getState() == RTCDataChannelState.OPEN;
   }
 
   @Override
@@ -431,7 +431,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (sendThread.stopRequested) {
       return;
     }

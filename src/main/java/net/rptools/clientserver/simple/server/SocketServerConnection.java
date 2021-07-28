@@ -35,12 +35,16 @@ public class SocketServerConnection extends AbstractServerConnection {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     super.close();
     listeningThread.suppressErrors();
     log.debug("Server closing down");
 
-    socket.close();
+    try {
+      socket.close();
+    } catch (IOException e) {
+      log.warn(e.toString());
+    }
 
     listeningThread.requestStop();
     log.debug("Server stopping listening thread");

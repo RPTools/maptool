@@ -15,12 +15,6 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.IMethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
@@ -32,52 +26,40 @@ import net.rptools.maptool.server.ServerConfig;
 public class MapToolConnection {
   private final Player player;
   private IMethodClientConnection connection;
+  private Handshake handshake;
+  private Runnable onCompleted;
 
   public MapToolConnection(ServerConfig config, Player player) throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
+    this.handshake = new Handshake();
+    onCompleted = () -> {};
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.clientserver.simple.client.ClientConnection#sendHandshake( java.net.Socket)
-   */
-  public boolean sendHandshake() throws IOException {
-    Handshake.Response response = null;
-    try {
-      var request =
-          new Handshake.Request(
-              player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion());
-      response = Handshake.sendHandshake(request, connection);
-    } catch (IllegalBlockSizeException
-        | InvalidKeyException
-        | BadPaddingException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException
-        | InvalidKeySpecException e) {
-      MapTool.showError("Handshake.msg.encodeInitFail", e);
-      return false;
-    }
-
-    if (response.code != Handshake.Code.OK) {
-      MapTool.showError("ERROR: " + response.message);
-      return false;
-    }
-    boolean result = response.code == Handshake.Code.OK;
-    if (result) {
-      MapTool.setServerPolicy(response.policy);
-    }
-    return result;
+  public void setOnCompleted(Runnable onCompleted) {
+    if (onCompleted == null) this.onCompleted = () -> {};
+    else this.onCompleted = onCompleted;
   }
 
   public void start() throws IOException {
-    if (sendHandshake()) {
-      connection.start();
-    } else {
-      connection.close();
-    }
+    handshake.setOnSuccess(
+        () -> {
+          MapTool.setServerPolicy(handshake.getResponse().policy);
+          connection.start();
+          onCompleted.run();
+        });
+
+    handshake.setOnFailure(
+        () -> {
+          var exception = handshake.getException();
+          if (exception != null) MapTool.showError("Handshake.msg.encodeInitFail", exception);
+          else MapTool.showError("ERROR: " + handshake.getResponse().message);
+          connection.close();
+          onCompleted.run();
+        });
+
+    handshake.sendHandshake(player, connection);
   }
 
   public void addMessageHandler(ClientMethodHandler handler) {
