@@ -19,10 +19,11 @@ import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.IClientConnection;
+import net.rptools.maptool.server.Handshake;
 import org.apache.log4j.Logger;
 
 public abstract class AbstractServerConnection extends AbstractConnection
-    implements MessageHandler, DisconnectHandler, IServerConnection {
+    implements MessageHandler, DisconnectHandler, IServerConnection, Handshake.HandshakeObserver {
 
   private static final Logger log = Logger.getLogger(AbstractServerConnection.class);
   //    private final ReaperThread reaperThread;
@@ -32,10 +33,10 @@ public abstract class AbstractServerConnection extends AbstractConnection
   private final List<ServerObserver> observerList =
       Collections.synchronizedList(new ArrayList<ServerObserver>());
 
-  private final IHandshake handshake;
+  private final HandshakeProvider handshakeProvider;
 
-  public AbstractServerConnection(IHandshake handshake) {
-    this.handshake = handshake;
+  public AbstractServerConnection(HandshakeProvider handshakeProvider) {
+    this.handshakeProvider = handshakeProvider;
   }
 
   public void addObserver(ServerObserver observer) {
@@ -132,31 +133,34 @@ public abstract class AbstractServerConnection extends AbstractConnection
   }
 
   protected void handleConnection(IClientConnection conn) {
-    handshake.setOnFailure(
-        () -> {
-          log.debug("Client closing: bad handshake");
-          close();
-        });
-
-    handshake.setOnSuccess(
-        () -> {
-          conn.addMessageHandler(this);
-          conn.addDisconnectHandler(this);
-          conn.start();
-
-          log.debug("About to add new client");
-          synchronized (clients) {
-            reapClients();
-
-            log.debug("Adding new client");
-            clients.put(conn.getId(), conn);
-            fireClientConnect(conn);
-            // System.out.println("new client " + conn.getId() + " added, " + server.clients.size()
-            // + " total");
-          }
-        });
+    var handshake = handshakeProvider.getConnectionHandshake(conn);
 
     // Make sure the client is allowed
-    handshake.handleConnectionHandshake(conn);
+    handshake.receiveHandshake();
+  }
+
+  @Override
+  public void onCompleted(Handshake handshake) {
+    handshake.removeObserver(this);
+    var conn = handshake.getConnection();
+    if(handshake.isSuccessful()) {
+      conn.addMessageHandler(this);
+      conn.addDisconnectHandler(this);
+      conn.start();
+
+      log.debug("About to add new client");
+      synchronized (clients) {
+        reapClients();
+
+        log.debug("Adding new client");
+        clients.put(conn.getId(), conn);
+        fireClientConnect(conn);
+        // System.out.println("new client " + conn.getId() + " added, " + server.clients.size()
+        // + " total");
+      }
+    } else {
+      log.debug("Client closing: bad handshake");
+      conn.close();
+    }
   }
 }

@@ -21,7 +21,7 @@ import net.rptools.clientserver.hessian.server.IMethodServerConnection;
 import net.rptools.clientserver.hessian.server.MethodServerConnection;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
-import net.rptools.clientserver.simple.server.IHandshake;
+import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.SocketServerConnection;
 import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.maptool.client.AppState;
@@ -43,7 +43,7 @@ public class ConnectionFactory {
     return new MethodClientConnection(new WebRTCClientConnection(id, config));
   }
 
-  public IMethodServerConnection createServerConnection(ServerConfig config, IHandshake handshake)
+  public IMethodServerConnection createServerConnection(ServerConfig config, HandshakeProvider handshake)
       throws IOException {
     if (!AppState.useWebRTC())
       return new MethodServerConnection(new SocketServerConnection(config.getPort(), handshake));

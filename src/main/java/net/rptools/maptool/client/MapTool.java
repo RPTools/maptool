@@ -1175,12 +1175,12 @@ public class MapTool {
 
     MapToolConnection clientConn = new MapToolConnection(config, player);
 
-    clientConn.addMessageHandler(handler);
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.addDisconnectHandler(new ServerDisconnectHandler());
 
     clientConn.setOnCompleted(
         () -> {
+          clientConn.addMessageHandler(handler);
           // LATER: I really, really, really don't like this startup pattern
           if (clientConn.isAlive()) {
             conn = clientConn;

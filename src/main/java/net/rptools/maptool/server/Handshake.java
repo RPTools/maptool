@@ -25,11 +25,15 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+
+import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.client.IClientConnection;
 import net.rptools.maptool.client.MapTool;
@@ -48,41 +52,23 @@ public class Handshake {
 
   private static String USERNAME_FIELD = "username:";
   private static String VERSION_FIELD = "version:";
-  private Runnable onSuccess;
-  private Runnable onFailure;
   private Response response;
   private Exception exception;
   private Thread handshakeThread;
   private Player player;
+  private IClientConnection connection;
+  private List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
 
-  public Handshake() {
-    onFailure =
-        () -> {
-          /* do nothing */
-        };
-
-    onSuccess =
-        () -> {
-          /* do nothing */
-        };
+  public Handshake(IClientConnection connection) {
+    this.connection = connection;
   }
 
-  public void setOnFailure(Runnable onFailure) {
-    if (onFailure == null)
-      this.onFailure =
-          () -> {
-            /* do nothing */
-          };
-    else this.onFailure = onFailure;
+  public boolean isSuccessful() {
+    return response != null && response.code == Code.OK;
   }
 
-  public void setOnSuccess(Runnable onSuccess) {
-    if (onSuccess == null)
-      this.onSuccess =
-          () -> {
-            /* do nothing */
-          };
-    else this.onSuccess = onSuccess;
+  public IClientConnection getConnection() {
+    return connection;
   }
 
   public Response getResponse() {
@@ -97,20 +83,31 @@ public class Handshake {
     return player;
   }
 
+  public void addObserver(HandshakeObserver observer) {
+    observerList.add(observer);
+  }
+
+  public void removeObserver(HandshakeObserver observer) {
+    observerList.remove(observer);
+  }
+
+  private void notifyObservers() {
+    for(var observer: observerList)
+      observer.onCompleted(this);
+  }
+
   /**
    * Server side of the handshake
-   *
-   * @param server the MapTool server instance
-   * @return A player structure for the connected player or null on issues
    */
-  public void receiveHandshake(MapToolServer server, IClientConnection conn) {
+  public void receiveHandshake() {
     handshakeThread =
         new Thread(
             () -> {
               try {
+                var server = MapTool.getServer();
                 exception = null;
-                var dos = conn.getOutputSream();
-                var dis = conn.getInputStream();
+                var dos = connection.getOutputSream();
+                var dis = connection.getInputStream();
 
                 // Send the initial salt we expect the first message to use as the MAC
                 byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
@@ -178,20 +175,23 @@ public class Handshake {
                   int saltLen = dis.readInt();
                   byte[] responseSalt = dis.readNBytes(saltLen);
                   if (responseSalt.length != saltLen) {
-                    onFailure.run();
+                    response.code = Code.ERROR;
+                    notifyObservers();
                     return; // if the salt cant be read then the handshake is invalid
                   }
 
                   int len = dis.readInt();
                   byte[] bytes = dis.readNBytes(len);
                   if (bytes.length != len) {
-                    onFailure.run();
+                    response.code = Code.ERROR;
+                    notifyObservers();
                     return; // If the message bytes can not be read then the handshake is invalid
                   }
 
                   byte[] mac = CipherUtil.getInstance().readMac(dis);
                   if (!CipherUtil.getInstance().validateMac(mac, passwordToUse)) {
-                    onFailure.run();
+                    response.code = Code.ERROR;
+                    notifyObservers();
                     return;
                   }
                   passwordKey =
@@ -216,15 +216,14 @@ public class Handshake {
                   dos.writeInt(response.message.length());
                   dos.writeBytes(response.message);
                 }
-                if (response.code == Code.OK) onSuccess.run();
-                else onFailure.run();
+                notifyObservers();
               } catch (Exception e) {
                 exception = e;
                 log.warn(e.toString());
                 response = new Response();
                 response.code = Code.ERROR;
                 response.message = I18N.getString("Handshake.msg.wrongPassword");
-                onFailure.run();
+                notifyObservers();
               }
             });
     handshakeThread.start();
@@ -349,12 +348,8 @@ public class Handshake {
    * Client side of the handshake
    *
    * @param player the player who wants to handshake
-   * @param conn the connection to use for the handshake
-   * @return the response from the srever
-   * @throws IOException if an I/O error occurs when creating the input stream, the socket is
-   *     closed, the socket is not connected, or the socket input has been shutdown using
    */
-  public void sendHandshake(Player player, IClientConnection conn) {
+  public void sendHandshake(Player player) {
     handshakeThread =
         new Thread(
             () -> {
@@ -367,8 +362,8 @@ public class Handshake {
                         player.getRole(),
                         MapTool.getVersion());
 
-                var dis = conn.getInputStream();
-                var dos = conn.getOutputSream();
+                var dis = connection.getInputStream();
+                var dos = connection.getOutputSream();
 
                 // Read the salt we are expected to use for initial messages MAC
                 int macSaltLen = dis.readInt();
@@ -378,7 +373,7 @@ public class Handshake {
                   response = new Response();
                   response.code = Code.ERROR;
                   response.message = I18N.getString("Handshake.msg.wrongPassword");
-                  onFailure.run();
+                  notifyObservers();
                   return;
                 }
 
@@ -396,7 +391,7 @@ public class Handshake {
                     response = new Response();
                     response.code = Code.ERROR;
                     response.message = I18N.getString("Handshake.msg.wrongPassword");
-                    onFailure.run();
+                    notifyObservers();
                   }
 
                   int len = dis.readInt();
@@ -405,7 +400,7 @@ public class Handshake {
                     response = new Response();
                     response.code = Code.ERROR;
                     response.message = I18N.getString("Handshake.msg.wrongPassword");
-                    onFailure.run();
+                    notifyObservers();
                   }
 
                   byte[] mac = CipherUtil.getInstance().readMac(dis);
@@ -413,7 +408,7 @@ public class Handshake {
                     response = new Response();
                     response.code = Code.ERROR;
                     response.message = I18N.getString("Handshake.msg.wrongPassword");
-                    onFailure.run();
+                    notifyObservers();
                   }
 
                   SecretKeySpec key =
@@ -436,21 +431,21 @@ public class Handshake {
                   int len = dis.readInt();
                   byte[] msg = dis.readNBytes(len);
                   response.message = new String(msg);
-                  onFailure.run();
+                  notifyObservers();
                 }
 
                 // If we are here the handshake succeeded so wait for the server policy
                 HessianInput input = HessianUtils.createSafeHessianInput(dis);
                 response = (Response) input.readObject();
                 MapTool.getPlayer().setRole(response.role);
-                onSuccess.run();
+                notifyObservers();
               } catch (Exception e) {
                 exception = e;
                 log.warn(e.toString());
                 response = new Response();
                 response.code = Code.ERROR;
                 response.message = I18N.getString("Handshake.msg.wrongPassword");
-                onFailure.run();
+                notifyObservers();
               }
             });
     handshakeThread.start();
@@ -557,5 +552,9 @@ public class Handshake {
     public String getExpectedResponse() {
       return expectedResponse;
     }
+  }
+
+  public interface HandshakeObserver {
+    void onCompleted(Handshake handshake);
   }
 }

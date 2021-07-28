@@ -27,7 +27,7 @@ public class SocketServerConnection extends AbstractServerConnection {
   private final ServerSocket socket;
   private final ListeningThread listeningThread;
 
-  public SocketServerConnection(int port, IHandshake handshake) throws IOException {
+  public SocketServerConnection(int port, HandshakeProvider handshake) throws IOException {
     super(handshake);
     socket = new ServerSocket(port);
     listeningThread = new ListeningThread(this, socket);

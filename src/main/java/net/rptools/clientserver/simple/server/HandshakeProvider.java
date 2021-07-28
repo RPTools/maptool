@@ -15,11 +15,9 @@
 package net.rptools.clientserver.simple.server;
 
 import net.rptools.clientserver.simple.client.IClientConnection;
+import net.rptools.maptool.server.Handshake;
 
-public interface IHandshake {
-  void handleConnectionHandshake(IClientConnection conn);
-
-  void setOnSuccess(Runnable onSuccess);
-
-  void setOnFailure(Runnable onFailure);
+public interface HandshakeProvider {
+  Handshake getConnectionHandshake(IClientConnection conn);
+  void releaseHandshake(IClientConnection conn);
 }

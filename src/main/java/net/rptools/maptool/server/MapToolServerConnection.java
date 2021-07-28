@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.server.IMethodServerConnection;
 import net.rptools.clientserver.simple.client.IClientConnection;
-import net.rptools.clientserver.simple.server.IHandshake;
+import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.Player;
@@ -28,33 +28,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
-public class MapToolServerConnection implements ServerObserver, IHandshake {
+public class MapToolServerConnection implements ServerObserver, HandshakeProvider, Handshake.HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
-  private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
+  private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
+  private final Map<IClientConnection, Handshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
   private final IMethodServerConnection connection;
-  private Handshake handshake;
-  private Runnable onSuccess;
-  private Runnable onFailure;
 
   public MapToolServerConnection(MapToolServer server) throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     addObserver(this);
-    handshake = new Handshake();
-    onSuccess = () -> {};
-    onFailure = () -> {};
-  }
-
-  public void setOnSuccess(Runnable onSuccess) {
-    if (onSuccess == null) this.onSuccess = () -> {};
-    else this.onSuccess = onSuccess;
-  }
-
-  public void setOnFailure(Runnable onFailure) {
-    if (onFailure == null) this.onFailure = () -> {};
-    else this.onFailure = onFailure;
   }
 
   /*
@@ -62,25 +47,16 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  public void handleConnectionHandshake(IClientConnection conn) {
-    handshake.setOnSuccess(
-        () -> {
-          Player player = handshake.getPlayer();
+  public Handshake getConnectionHandshake(IClientConnection conn) {
+    var handshake = new Handshake(conn);
+    handshakeMap.put(conn, handshake);
+    handshake.addObserver(this);
+    return handshake;
+  }
 
-          if (player != null) {
-            playerMap.put(conn.getId().toUpperCase(), player);
-            onSuccess.run();
-            return;
-          }
-          onFailure.run();
-        });
-    handshake.setOnFailure(
-        () -> {
-          var exception = handshake.getException();
-          if (exception != null) log.error("Handshake failure: " + exception, exception);
-          onFailure.run();
-        });
-    handshake.receiveHandshake(server, conn);
+  @Override
+  public void releaseHandshake(IClientConnection conn) {
+    handshakeMap.remove(conn);
   }
 
   public Player getPlayer(String id) {
@@ -166,5 +142,20 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
 
   public void removeObserver(ServerObserver observer) {
     connection.removeObserver(observer);
+  }
+
+  @Override
+  public void onCompleted(Handshake handshake) {
+    handshake.removeObserver(this);
+    if(handshake.isSuccessful()) {
+      Player player = handshake.getPlayer();
+
+      if (player != null) {
+        playerMap.put(handshake.getConnection().getId().toUpperCase(), player);
+      }
+    } else {
+      var exception = handshake.getException();
+      if (exception != null) log.error("Handshake failure: " + exception, exception);
+    }
   }
 }

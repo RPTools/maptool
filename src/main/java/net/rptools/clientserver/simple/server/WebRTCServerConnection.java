@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.*;
+
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessage;
 import net.rptools.clientserver.simple.webrtc.LoginMessage;
@@ -43,7 +43,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
   public static String WebSocketUrl = "ws://20.101.25.63:9090";
 
-  public WebRTCServerConnection(ServerConfig config, IHandshake handshake) {
+  public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
     super(handshake);
     this.config = config;
     URI uri = null;
