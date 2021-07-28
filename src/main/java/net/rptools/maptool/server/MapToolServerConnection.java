@@ -15,8 +15,6 @@
 package net.rptools.maptool.server;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
@@ -36,6 +34,8 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
   private final MapToolServer server;
   private final IMethodServerConnection connection;
   private Handshake handshake;
+  private Runnable onSuccess;
+  private Runnable onFailure;
 
   public MapToolServerConnection(MapToolServer server) throws IOException {
     this.connection =
@@ -43,6 +43,18 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
     this.server = server;
     addObserver(this);
     handshake = new Handshake();
+    onSuccess = () -> {};
+    onFailure = () -> {};
+  }
+
+  public void setOnSuccess(Runnable onSuccess) {
+    if (onSuccess == null) this.onSuccess = () -> {};
+    else this.onSuccess = onSuccess;
+  }
+
+  public void setOnFailure(Runnable onFailure) {
+    if (onFailure == null) this.onFailure = () -> {};
+    else this.onFailure = onFailure;
   }
 
   /*
@@ -50,20 +62,25 @@ public class MapToolServerConnection implements ServerObserver, IHandshake {
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  public boolean handleConnectionHandshake(IClientConnection conn) {
-    try {
-      Player player = handshake.receiveHandshake(server, conn);
+  public void handleConnectionHandshake(IClientConnection conn) {
+    handshake.setOnSuccess(
+        () -> {
+          Player player = handshake.getPlayer();
 
-      if (player != null) {
-        playerMap.put(conn.getId().toUpperCase(), player);
-        return true;
-      }
-    } catch (IOException ioe) {
-      log.error("Handshake failure: " + ioe, ioe);
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-      e.printStackTrace();
-    }
-    return false;
+          if (player != null) {
+            playerMap.put(conn.getId().toUpperCase(), player);
+            onSuccess.run();
+            return;
+          }
+          onFailure.run();
+        });
+    handshake.setOnFailure(
+        () -> {
+          var exception = handshake.getException();
+          if (exception != null) log.error("Handshake failure: " + exception, exception);
+          onFailure.run();
+        });
+    handshake.receiveHandshake(server, conn);
   }
 
   public Player getPlayer(String id) {

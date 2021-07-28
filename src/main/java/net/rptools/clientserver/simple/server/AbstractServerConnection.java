@@ -14,7 +14,6 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import java.io.IOException;
 import java.util.*;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
@@ -132,27 +131,32 @@ public abstract class AbstractServerConnection extends AbstractConnection
     }
   }
 
-  protected void handleConnection(IClientConnection conn) throws IOException {
+  protected void handleConnection(IClientConnection conn) {
+    handshake.setOnFailure(
+        () -> {
+          log.debug("Client closing: bad handshake");
+          close();
+        });
+
+    handshake.setOnSuccess(
+        () -> {
+          conn.addMessageHandler(this);
+          conn.addDisconnectHandler(this);
+          conn.start();
+
+          log.debug("About to add new client");
+          synchronized (clients) {
+            reapClients();
+
+            log.debug("Adding new client");
+            clients.put(conn.getId(), conn);
+            fireClientConnect(conn);
+            // System.out.println("new client " + conn.getId() + " added, " + server.clients.size()
+            // + " total");
+          }
+        });
+
     // Make sure the client is allowed
-    if (!handshake.handleConnectionHandshake(conn)) {
-      log.debug("Client closing: bad handshake");
-      close();
-      return;
-    }
-
-    conn.addMessageHandler(this);
-    conn.addDisconnectHandler(this);
-    conn.start();
-
-    log.debug("About to add new client");
-    synchronized (clients) {
-      reapClients();
-
-      log.debug("Adding new client");
-      clients.put(conn.getId(), conn);
-      fireClientConnect(conn);
-      // System.out.println("new client " + conn.getId() + " added, " + server.clients.size()
-      // + " total");
-    }
+    handshake.handleConnectionHandshake(conn);
   }
 }

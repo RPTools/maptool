@@ -16,13 +16,19 @@ package net.rptools.maptool.server;
 
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import javax.crypto.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.client.IClientConnection;
@@ -37,11 +43,17 @@ import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class Handshake {
+  /** Instance used for log messages. */
+  private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+
+  private static String USERNAME_FIELD = "username:";
+  private static String VERSION_FIELD = "version:";
   private Runnable onSuccess;
   private Runnable onFailure;
   private Response response;
   private Exception exception;
   private Thread handshakeThread;
+  private Player player;
 
   public Handshake() {
     onFailure =
@@ -81,127 +93,141 @@ public class Handshake {
     return exception;
   }
 
-  public interface Code {
-    int UNKNOWN = 0;
-    int OK = 1;
-    int ERROR = 2;
+  public Player getPlayer() {
+    return player;
   }
-
-  private static String USERNAME_FIELD = "username:";
-  private static String VERSION_FIELD = "version:";
-
-  /** Instance used for log messages. */
-  private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
 
   /**
    * Server side of the handshake
    *
    * @param server the MapTool server instance
-   * @throws IOException if an I/O error occurs when creating the input stream, the socket is
-   *     closed, the socket is not connected, or the socket input has been shutdown using
    * @return A player structure for the connected player or null on issues
-   * @throws IOException if there is a problem reading from the socket.
    */
-  public Player receiveHandshake(MapToolServer server, IClientConnection conn)
-      throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+  public void receiveHandshake(MapToolServer server, IClientConnection conn) {
+    handshakeThread =
+        new Thread(
+            () -> {
+              try {
+                exception = null;
+                var dos = conn.getOutputSream();
+                var dis = conn.getInputStream();
 
-    var dos = conn.getOutputSream();
-    var dis = conn.getInputStream();
+                // Send the initial salt we expect the first message to use as the MAC
+                byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
+                dos.writeInt(initialMacSalt.length);
+                dos.write(initialMacSalt);
 
-    // Send the initial salt we expect the first message to use as the MAC
-    byte[] initialMacSalt = CipherUtil.getInstance().createSalt();
-    dos.writeInt(initialMacSalt.length);
-    dos.write(initialMacSalt);
+                response = new Response();
+                Request request =
+                    decodeRequest(
+                        dis,
+                        server.getConfig().getPlayerPassword(),
+                        server.getConfig().getGmPassword(),
+                        initialMacSalt);
+                if (request == null) {
+                  response.code = Code.ERROR;
+                  response.message = I18N.getString("Handshake.msg.wrongPassword");
+                } else if (server.isPlayerConnected(request.name)) { // Enforce a unique name
+                  response.code = Code.ERROR;
+                  response.message = I18N.getString("Handshake.msg.duplicateName");
+                } else if (!MapTool.isDevelopment()
+                    && !MapTool.getVersion().equals(request.version)
+                    && !"DEVELOPMENT".equals(request.version)
+                    && !"@buildNumber@".equals(request.version)) {
+                  // Allows a version running without a 'version.txt' to act as client or server to
+                  // any other
+                  // version
 
-    Response response = new Response();
-    Request request =
-        decodeRequest(
-            dis,
-            server.getConfig().getPlayerPassword(),
-            server.getConfig().getGmPassword(),
-            initialMacSalt);
-    if (request == null) {
-      response.code = Code.ERROR;
-      response.message = I18N.getString("Handshake.msg.wrongPassword");
-    } else if (server.isPlayerConnected(request.name)) { // Enforce a unique name
-      response.code = Code.ERROR;
-      response.message = I18N.getString("Handshake.msg.duplicateName");
-    } else if (!MapTool.isDevelopment()
-        && !MapTool.getVersion().equals(request.version)
-        && !"DEVELOPMENT".equals(request.version)
-        && !"@buildNumber@".equals(request.version)) {
-      // Allows a version running without a 'version.txt' to act as client or server to any other
-      // version
+                  response.code = Code.ERROR;
+                  String clientUsed = request.version;
+                  String serverUsed = MapTool.getVersion();
+                  response.message =
+                      I18N.getText("Handshake.msg.wrongVersion", clientUsed, serverUsed);
+                } else {
+                  response.code = Code.OK;
+                }
 
-      response.code = Code.ERROR;
-      String clientUsed = request.version;
-      String serverUsed = MapTool.getVersion();
-      response.message = I18N.getText("Handshake.msg.wrongVersion", clientUsed, serverUsed);
-    } else {
-      response.code = Code.OK;
-    }
+                player = null;
+                dos.writeInt(response.code);
+                if (response.code == Code.OK) {
+                  player =
+                      new Player(request.name, Player.Role.valueOf(request.role), request.password);
+                  HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
+                  String passwordToUse =
+                      player.isGM()
+                          ? MapTool.getServer().getConfig().getGmPassword()
+                          : MapTool.getServer().getConfig().getPlayerPassword();
 
-    Player player = null;
-    dos.writeInt(response.code);
-    if (response.code == Code.OK) {
-      player = new Player(request.name, Player.Role.valueOf(request.role), request.password);
-      HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
-      String passwordToUse =
-          player.isGM()
-              ? MapTool.getServer().getConfig().getGmPassword()
-              : MapTool.getServer().getConfig().getPlayerPassword();
+                  byte[] salt = CipherUtil.getInstance().createSalt();
+                  SecretKeySpec passwordKey =
+                      CipherUtil.getInstance().createSecretKeySpec(passwordToUse, salt);
 
-      byte[] salt = CipherUtil.getInstance().createSalt();
-      SecretKeySpec passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, salt);
+                  byte[] challenge =
+                      encode(
+                          handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8),
+                          passwordKey);
 
-      byte[] challenge =
-          encode(handshakeChallenge.getChallenge().getBytes(StandardCharsets.UTF_8), passwordKey);
+                  dos.writeInt(salt.length);
+                  dos.write(salt);
+                  dos.writeInt(challenge.length);
+                  dos.write(challenge);
+                  dos.write(CipherUtil.getInstance().generateMacAndSalt(passwordToUse));
+                  dos.flush();
 
-      dos.writeInt(salt.length);
-      dos.write(salt);
-      dos.writeInt(challenge.length);
-      dos.write(challenge);
-      dos.write(CipherUtil.getInstance().generateMacAndSalt(passwordToUse));
-      dos.flush();
+                  // Now read the response
+                  int saltLen = dis.readInt();
+                  byte[] responseSalt = dis.readNBytes(saltLen);
+                  if (responseSalt.length != saltLen) {
+                    onFailure.run();
+                    return; // if the salt cant be read then the handshake is invalid
+                  }
 
-      // Now read the response
-      int saltLen = dis.readInt();
-      byte[] responseSalt = dis.readNBytes(saltLen);
-      if (responseSalt.length != saltLen) {
-        return null; // if the salt cant be read then the handshake is invalid
-      }
+                  int len = dis.readInt();
+                  byte[] bytes = dis.readNBytes(len);
+                  if (bytes.length != len) {
+                    onFailure.run();
+                    return; // If the message bytes can not be read then the handshake is invalid
+                  }
 
-      int len = dis.readInt();
-      byte[] bytes = dis.readNBytes(len);
-      if (bytes.length != len) {
-        return null; // If the message bytes can not be read then the handshake is invalid
-      }
+                  byte[] mac = CipherUtil.getInstance().readMac(dis);
+                  if (!CipherUtil.getInstance().validateMac(mac, passwordToUse)) {
+                    onFailure.run();
+                    return;
+                  }
+                  passwordKey =
+                      CipherUtil.getInstance().createSecretKeySpec(passwordToUse, responseSalt);
+                  byte[] responseBytes = decode(bytes, passwordKey);
+                  String challengeResponse = new String(responseBytes);
 
-      byte[] mac = CipherUtil.getInstance().readMac(dis);
-      if (!CipherUtil.getInstance().validateMac(mac, passwordToUse)) {
-        return null;
-      }
-      passwordKey = CipherUtil.getInstance().createSecretKeySpec(passwordToUse, responseSalt);
-      byte[] responseBytes = decode(bytes, passwordKey);
-      String challengeResponse = new String(responseBytes);
+                  if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
+                    response.policy = server.getPolicy();
+                    response.role = player.getRole();
+                  } else {
+                    response.message =
+                        I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
+                    response.code = Code.ERROR;
+                    player = null;
+                  }
 
-      if (handshakeChallenge.getExpectedResponse().equals(challengeResponse)) {
-        response.policy = server.getPolicy();
-        response.role = player.getRole();
-      } else {
-        response.message = I18N.getText("Handshake.msg.badChallengeResponse", player.getName());
-        response.code = Code.ERROR;
-        player = null;
-      }
-
-      HessianOutput output = new HessianOutput(dos);
-      output.getSerializerFactory().setAllowNonSerializable(true);
-      output.writeObject(response);
-    } else {
-      dos.writeInt(response.message.length());
-      dos.writeBytes(response.message);
-    }
-    return player;
+                  HessianOutput output = new HessianOutput(dos);
+                  output.getSerializerFactory().setAllowNonSerializable(true);
+                  output.writeObject(response);
+                } else {
+                  dos.writeInt(response.message.length());
+                  dos.writeBytes(response.message);
+                }
+                if (response.code == Code.OK) onSuccess.run();
+                else onFailure.run();
+              } catch (Exception e) {
+                exception = e;
+                log.warn(e.toString());
+                response = new Response();
+                response.code = Code.ERROR;
+                response.message = I18N.getString("Handshake.msg.wrongPassword");
+                onFailure.run();
+              }
+            });
+    handshakeThread.start();
   }
 
   private byte[] decode(byte[] bytes, SecretKeySpec passwordKey) {
@@ -324,9 +350,9 @@ public class Handshake {
    *
    * @param player the player who wants to handshake
    * @param conn the connection to use for the handshake
+   * @return the response from the srever
    * @throws IOException if an I/O error occurs when creating the input stream, the socket is
    *     closed, the socket is not connected, or the socket input has been shutdown using
-   * @return the response from the srever
    */
   public void sendHandshake(Player player, IClientConnection conn) {
     handshakeThread =
@@ -461,7 +487,13 @@ public class Handshake {
     return byteArrayOutputStream.toByteArray();
   }
 
-  private class Request {
+  public interface Code {
+    int UNKNOWN = 0;
+    int OK = 1;
+    int ERROR = 2;
+  }
+
+  private static class Request {
     public String name;
     public String role;
     public String password;
@@ -479,14 +511,14 @@ public class Handshake {
     }
   }
 
-  public class Response {
+  public static class Response {
     public int code;
     public String message;
     public ServerPolicy policy;
     public Role role;
   }
 
-  private class HandshakeChallenge {
+  private static class HandshakeChallenge {
     private final String challenge;
     private final String expectedResponse;
 
