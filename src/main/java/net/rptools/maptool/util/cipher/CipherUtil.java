@@ -15,6 +15,7 @@
 package net.rptools.maptool.util.cipher;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -143,9 +144,16 @@ public class CipherUtil {
    */
   public Cipher createDecryptor(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
-      throw new AssertionError(
-          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+    if (key.asymmetric()) {
+      if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+        throw new AssertionError(
+            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
+      }
+    } else {
+      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+        throw new AssertionError(
+            "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+      }
     }
     return createCipher(Cipher.DECRYPT_MODE, key);
   }
@@ -161,9 +169,16 @@ public class CipherUtil {
    */
   public Cipher createEncrypter(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
-      throw new AssertionError(
-          "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+    if (key.asymmetric()) {
+      if (!key.privateKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+        throw new AssertionError(
+            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
+      }
+    } else {
+      if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
+        throw new AssertionError(
+            "Expected Algorithm " + CIPHER_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+      }
     }
     return createCipher(Cipher.ENCRYPT_MODE, key);
   }
@@ -180,9 +195,16 @@ public class CipherUtil {
    */
   private static Cipher createCipher(int encryptMode, Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-    cipher.init(encryptMode, key.secretKeySpec);
-    return cipher;
+    if (key.asymmetric()) {
+      Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
+      cipher.init(encryptMode, encryptMode == Cipher.DECRYPT_MODE ? key.publicKey() :
+          key.privateKey());
+      return cipher;
+    } else {
+      Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+      cipher.init(encryptMode, key.secretKeySpec);
+      return cipher;
+    }
   }
 
   private Cipher createPublicKeyCipher(PublicKey key)
@@ -341,12 +363,12 @@ public class CipherUtil {
     return keyPairGenerator.generateKeyPair();
   }
 
-  public static void writeKeyPair(KeyPair keyPair, File publicFile, File privateFile)
+  static void writeKeyPair(KeyPair keyPair, File publicFile, File privateFile)
       throws IOException {
     publicFile.getParentFile().mkdirs();
     privateFile.getParentFile().mkdirs();
     try (FileOutputStream fos = new FileOutputStream(publicFile)) {
-      fos.write(keyPair.getPublic().getEncoded());
+      fos.write(encodedPublicKeyText(keyPair.getPublic()).getBytes(StandardCharsets.UTF_8));
     }
 
     try (FileOutputStream fos = new FileOutputStream(privateFile)) {
@@ -354,8 +376,27 @@ public class CipherUtil {
     }
   }
 
+  public String getEncodedPublicKeyText() {
+    return encodedPublicKeyText(key.publicKey());
+  }
+
   public Key getKey() {
     return key;
+  }
+
+  private static String encodedPublicKeyText(PublicKey publicKey) {
+    byte[] bytes = publicKey.getEncoded();
+    String b64 = Base64.getEncoder().encodeToString(bytes);
+    return b64.replaceAll("(\\S{80})", "$1")
+        .replaceFirst("^", "-- BEGIN PUBLIC KEY --\n")
+        .replaceFirst("$", "\n-- END PUBLIC KEY --\n");
+  }
+
+  private static byte[] decodePublicKeyText(String pks) {
+    return pks.replaceFirst("-- BEGIN PUBLIC KEY --", "")
+        .replaceFirst("-- END PUBLIC KEY --", "")
+        .replaceAll("\\n", "")
+        .getBytes(StandardCharsets.UTF_8);
   }
 
   private static KeyPair readKeyPair(File publicFile, File privateFile)
@@ -363,7 +404,9 @@ public class CipherUtil {
     byte[] privateKeyBytes = Files.readAllBytes(privateFile.toPath());
     PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 
-    byte[] publicKeyBytes = Files.readAllBytes(publicFile.toPath());
+    System.out.println("DEBUG: = " +  decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath()))));
+    byte[] publicKeyBytes =
+        decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath())));
     X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
 
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");

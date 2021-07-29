@@ -26,8 +26,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -50,6 +54,8 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.util.UserJvmOptions.JVM_OPTION;
+import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.webendpoint.WebEndPoint;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -140,6 +146,11 @@ public class PreferencesDialog extends JDialog {
   private final JTextField fileSyncPath;
   private final JButton fileSyncPathButton;
   private final JCheckBox allowExternalMacroAccessCheckBox;
+
+  // Authentication
+  private final JTextArea publicKeyTextArea;
+  private final JButton regeneratePublicKey;
+
   // Startup
   private final JTextField jvmXmxTextField;
   private final JTextField jvmXmsTextField;
@@ -304,6 +315,9 @@ public class PreferencesDialog extends JDialog {
     allowExternalMacroAccessCheckBox = panel.getCheckBox("allowExternalMacroAccessCheckBox");
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
+
+    publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
+    regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -1038,6 +1052,30 @@ public class PreferencesDialog extends JDialog {
 
     chatNotificationColor.setColor(AppPreferences.getChatNotificationColor());
     chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
+
+    CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().getKeys();
+
+    //keys.thenAccept( cu -> {
+      //System.out.println("DEBUG: in getKeys() thenAccept");
+      SwingUtilities.invokeLater(() -> {
+        System.out.println("DEBUG: in getKeys() invokeLater");
+        //byte[] b = cu.getEncodedPublicKey();
+        //byte[] b = new byte[0];
+        String s = "";
+        try {
+          //b = keys.get().getEncodedPublicKey();
+          s = keys.get().getEncodedPublicKeyText();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } catch (ExecutionException e) {
+          e.printStackTrace();
+        }
+        //String s = Base64.getEncoder().encodeToString(b);
+        //System.out.println("DEBUG: pub key(b) = " + b);
+        System.out.println("DEBUG: pub key(s) = " + s);
+        publicKeyTextArea.setText(s);
+      });
+    //});
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */
