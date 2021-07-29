@@ -15,7 +15,7 @@
 package net.rptools.maptool.model.player;
 
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** @author trevor */
 public class Player {

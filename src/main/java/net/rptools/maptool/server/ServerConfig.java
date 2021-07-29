@@ -16,11 +16,7 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
-import javax.crypto.spec.SecretKeySpec;
-import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 
 public class ServerConfig {

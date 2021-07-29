@@ -18,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** Represents the local player. Its methods can depend on AppState and other local properties. */
 public class LocalPlayer extends Player {

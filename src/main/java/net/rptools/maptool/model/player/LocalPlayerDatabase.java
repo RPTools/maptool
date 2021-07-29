@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.ServerConfig;
-import net.rptools.maptool.util.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.CipherUtil.Key;
 
 /**
  * This class provides the implementation for the "database" for the client local player.

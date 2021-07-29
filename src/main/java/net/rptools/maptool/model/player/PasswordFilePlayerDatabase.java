@@ -35,8 +35,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.util.CipherUtil;
-import net.rptools.maptool.util.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

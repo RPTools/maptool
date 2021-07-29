@@ -1337,6 +1337,14 @@ public class MapTool {
     // fire up autosaves
     getAutoSaveManager().start();
 
+    // Initialize the web end point
+    try {
+      WebEndPoint.getWebEndPoint();
+    } catch (Exception e) {
+      log.error(I18N.getText("msg.error.cantStartWebEndPoint"), e);
+      MapTool.showError("msg.error.cantStartWebEndPoint");
+    }
+
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
@@ -1349,13 +1357,7 @@ public class MapTool {
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
 
-    // Initialize the web end point
-    try {
-      WebEndPoint.getWebEndPoint();
-    } catch (Exception e) {
-      log.error(I18N.getText("msg.error.cantStartWebEndPoint"), e);
-      MapTool.showError("msg.error.cantStartWebEndPoint");
-    }
+
   }
 
   /**

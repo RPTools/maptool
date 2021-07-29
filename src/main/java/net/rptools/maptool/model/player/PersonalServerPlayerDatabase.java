@@ -1,6 +1,5 @@
 package net.rptools.maptool.model.player;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
@@ -8,9 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.ServerConfig;
-import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.util.cipher.CipherUtil;
 
 public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
