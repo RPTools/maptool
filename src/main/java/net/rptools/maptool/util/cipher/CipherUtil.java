@@ -65,6 +65,10 @@ public class CipherUtil {
   private static final String ASYNC_KEY_ALGORITHM = "RSA";
 
 
+  private static final String PUBLIC_KEY_FIRST_LINE = "====== Begin Public Key ======";
+  private static final String PUBLIC_KEY_LAST_LINE = "====== End Public Key ======";
+
+
   private final Key key;
   private final Cipher encryptionCipher;
   private final Cipher decryptionCipher;;
@@ -387,16 +391,17 @@ public class CipherUtil {
   private static String encodedPublicKeyText(PublicKey publicKey) {
     byte[] bytes = publicKey.getEncoded();
     String b64 = Base64.getEncoder().encodeToString(bytes);
-    return b64.replaceAll("(\\S{80})", "$1")
-        .replaceFirst("^", "-- BEGIN PUBLIC KEY --\n")
-        .replaceFirst("$", "\n-- END PUBLIC KEY --\n");
+    return b64.replaceAll("(\\S{80})", "$1\n")
+        .replaceFirst("^", PUBLIC_KEY_FIRST_LINE + "\n")
+        .replaceFirst("$", "\n" + PUBLIC_KEY_LAST_LINE + "\n");
   }
 
   private static byte[] decodePublicKeyText(String pks) {
-    return pks.replaceFirst("-- BEGIN PUBLIC KEY --", "")
-        .replaceFirst("-- END PUBLIC KEY --", "")
+    byte[] bytes = pks.replaceFirst(PUBLIC_KEY_FIRST_LINE, "")
+        .replaceFirst(PUBLIC_KEY_LAST_LINE, "")
         .replaceAll("\\n", "")
         .getBytes(StandardCharsets.UTF_8);
+    return Base64.getDecoder().decode(bytes);
   }
 
   private static KeyPair readKeyPair(File publicFile, File privateFile)
@@ -404,7 +409,6 @@ public class CipherUtil {
     byte[] privateKeyBytes = Files.readAllBytes(privateFile.toPath());
     PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 
-    System.out.println("DEBUG: = " +  decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath()))));
     byte[] publicKeyBytes =
         decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath())));
     X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);

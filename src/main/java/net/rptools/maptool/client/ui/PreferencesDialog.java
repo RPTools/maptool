@@ -19,6 +19,8 @@ import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -26,12 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -150,6 +149,7 @@ public class PreferencesDialog extends JDialog {
   // Authentication
   private final JTextArea publicKeyTextArea;
   private final JButton regeneratePublicKey;
+  private final JButton copyPublicKey;
 
   // Startup
   private final JTextField jvmXmxTextField;
@@ -318,6 +318,7 @@ public class PreferencesDialog extends JDialog {
 
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
+    copyPublicKey = (JButton) panel.getButton("copyKey");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -896,6 +897,23 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setDefaultMacroEditorTheme(
                 (String) macroEditorThemeCombo.getSelectedItem()));
 
+
+    copyPublicKey.addActionListener(e -> {
+      Toolkit.getDefaultToolkit()
+          .getSystemClipboard()
+          .setContents(new StringSelection(publicKeyTextArea.getText()), null);
+    });
+
+    regeneratePublicKey.addActionListener(e -> {
+      CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().regenerateKeys();
+
+      keys.thenAccept( cu -> {
+        SwingUtilities.invokeLater(() -> {
+          publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+        });
+      });
+    });
+
     add(panel);
     pack();
   }
@@ -1055,27 +1073,11 @@ public class PreferencesDialog extends JDialog {
 
     CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().getKeys();
 
-    //keys.thenAccept( cu -> {
-      //System.out.println("DEBUG: in getKeys() thenAccept");
+    keys.thenAccept( cu -> {
       SwingUtilities.invokeLater(() -> {
-        System.out.println("DEBUG: in getKeys() invokeLater");
-        //byte[] b = cu.getEncodedPublicKey();
-        //byte[] b = new byte[0];
-        String s = "";
-        try {
-          //b = keys.get().getEncodedPublicKey();
-          s = keys.get().getEncodedPublicKeyText();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        } catch (ExecutionException e) {
-          e.printStackTrace();
-        }
-        //String s = Base64.getEncoder().encodeToString(b);
-        //System.out.println("DEBUG: pub key(b) = " + b);
-        System.out.println("DEBUG: pub key(s) = " + s);
-        publicKeyTextArea.setText(s);
+        publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
       });
-    //});
+    });
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */
