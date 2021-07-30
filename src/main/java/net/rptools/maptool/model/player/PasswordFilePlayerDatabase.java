@@ -29,14 +29,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,6 +50,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   private final File passwordFile;
   private final File backupPasswordFile;
   private final File additionalUsers;
+  private final CipherUtil.Key serverPublicPrivateKey;
 
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
@@ -64,6 +68,19 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
     this.passwordFile = passwordFile;
     this.backupPasswordFile = new File(passwordFile + ".backup");
     this.additionalUsers = additionalUsers;
+    try {
+      this.serverPublicPrivateKey = new PublicPrivateKeyStore().getKeys().get().getKey();
+    } catch (InterruptedException | ExecutionException e) {
+      if (e.getCause() instanceof IOException) {
+        throw (IOException) e.getCause();
+      } if (e.getCause() instanceof NoSuchAlgorithmException) {
+        throw (NoSuchAlgorithmException) e.getCause();
+      } else if (e.getCause() instanceof InvalidKeySpecException)  {
+        throw (InvalidKeySpecException) e.getCause();
+      } else{
+        throw new IOException(e.getCause());
+      }
+    }
   }
 
   public void readPasswordFile()
@@ -109,18 +126,26 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
       for (JsonElement entry : passwords) {
         JsonObject passwordEntry = entry.getAsJsonObject();
         String name = passwordEntry.get("username").getAsString();
-        String passwordString = passwordEntry.get("password").getAsString();
+        String passwordString = null;
+        if (passwordEntry.has("password")) {
+          passwordString = passwordEntry.get("password").getAsString();
+        } else if (passwordEntry.has("publicKeyFile")) {
+
+        }
+
         Role role = Role.valueOf(passwordEntry.get("role").getAsString().toUpperCase());
 
         CipherUtil.Key passwordKey;
-        if (passwordEntry.has("salt")) {
+        if (passwordString != null && passwordEntry.has("salt")) {
           SecretKeySpec password = CipherUtil.decodeBase64(passwordString);
           byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
           passwordKey = new CipherUtil.Key(password, salt);
-        } else {
+        } else if (passwordString != null) {
           CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(passwordString);
           passwordKey = cipherUtil.getKey();
           dirty.set(true);
+        } else if (passwordEntry.has("publicKeys")) {
+          // TODO: CDW
         }
 
         String disabledReason = "";
@@ -276,6 +301,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         details.name(),
         details.role(),
         details.password(),
+        details.publicKeys(),
         reason,
         details.playTimes()
     );
@@ -321,6 +347,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         details.name(),
         details.role(),
         details.password(),
+        details.publicKeys(),
         details.disabledReason(),
         details.playTimes()
     );
@@ -346,10 +373,21 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
 
-  public void putPlayer(String name, Role role, String password, Set<PlayTime> playTimes,
+  public void putPlayer(String name, Role role, String password,
+      Set<String> publicKeyStrings, PlayTime playTimes,
       boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
-    CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(password);
+    CipherUtil cipherUtil = null;
+    if (password != null && password.length() > 0) {
+      cipherUtil = CipherUtil.fromSharedKeyNewSalt(password);
+    }
+
+    HashMap<MD5Key, CipherUtil.Key> publicKeys = new HashMap<>();
+    for (String pk : publicKeyStrings) {
+      byte[] bytes = CipherUtil.decodePublicKeyText(pk);
+      publicKeys.put(new MD5Key(pk), CipherUtil.f)
+    }
+
     PlayerDetails newDetails = new PlayerDetails(
         name,
         role,
@@ -368,6 +406,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
 
   private static record PlayerDetails(String name, Role role, CipherUtil.Key password,
+                                      HashMap<MD5Key, CipherUtil.Key> publicKeys,
                                       String disabledReason, Set<PlayTime> playTimes) {}
 
 

@@ -112,6 +112,11 @@ public class CipherUtil {
     return new CipherUtil(new Key(publicKey, privateKey));
   }
 
+  public static CipherUtil fromPublicKeyString(String pub)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+     CipherUtil.generateKeyPair(pub, null);
+  }
+
   public static CipherUtil fromSharedKey(String pass, byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
     Key key = createKey(pass, salt);
@@ -407,17 +412,29 @@ public class CipherUtil {
   private static KeyPair readKeyPair(File publicFile, File privateFile)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     byte[] privateKeyBytes = Files.readAllBytes(privateFile.toPath());
-    PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-
-    byte[] publicKeyBytes =
+    String publicKey = String.join("\n", Files.readAllLines(publicFile.toPath()));
         decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath())));
-    X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
+    return generateKeyPair(publicKey, privateKeyBytes);
+  }
+
+  private static KeyPair generateKeyPair(String publicKey, byte[] privateKey)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKey);
 
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
     return new KeyPair(
-        keyFactory.generatePublic(publicSpec),
+        getPublicKey(publicKey),
         keyFactory.generatePrivate(privateSpec)
     );
+  }
+
+  private static PublicKey getPublicKey(String pub)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    byte[] publicKeyBytes = decodePublicKeyText(pub);
+    X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
+
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+    return keyFactory.generatePublic(publicSpec);
   }
 
   public PublicKey getPublicKey(byte[] bytes)
