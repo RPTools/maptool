@@ -5,9 +5,14 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.ServerConfig;
+import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 
 /**
  * This class provides the implementation for the "database" for the client local player.
@@ -129,5 +134,10 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   @Override
   public AuthMethod getAuthMethod(Player player) {
     return AuthMethod.PASSWORD; // This will always be password authentication
+  }
+
+  @Override
+  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
+    return new PublicPrivateKeyStore().getKeys();
   }
 }

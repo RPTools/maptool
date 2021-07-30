@@ -5,7 +5,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.crypto.NoSuchPaddingException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 import java.util.Optional;
@@ -107,5 +110,10 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public AuthMethod getAuthMethod(Player player) {
     return AuthMethod.PASSWORD; // Will always be password based
+  }
+
+  @Override
+  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
+    return CompletableFuture.completedFuture(null);
   }
 }

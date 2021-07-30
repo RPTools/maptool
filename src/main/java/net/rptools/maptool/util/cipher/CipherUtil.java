@@ -98,7 +98,11 @@ public class CipherUtil {
     messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
     key = keyToUse;
     decryptionCipher = createDecryptor(key);
-    encryptionCipher = createEncrypter(key);
+    if (!key.asymmetric() || key.privateKey() != null) {
+      encryptionCipher = createEncrypter(key);
+    } else {
+      encryptionCipher = null;
+    }
   }
 
   public static CipherUtil fromPublicPrivatePair(File publicKeyFile, File privateKeyFile)
@@ -112,9 +116,10 @@ public class CipherUtil {
     return new CipherUtil(new Key(publicKey, privateKey));
   }
 
-  public static CipherUtil fromPublicKeyString(String pub)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-     CipherUtil.generateKeyPair(pub, null);
+
+  public static CipherUtil fromPublicKeyString(String pk)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+    return new CipherUtil(new Key(CipherUtil.decodePublicKeyString(pk), null));
   }
 
   public static CipherUtil fromSharedKey(String pass, byte[] salt)
@@ -423,12 +428,12 @@ public class CipherUtil {
 
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
     return new KeyPair(
-        getPublicKey(publicKey),
+        decodePublicKeyString(publicKey),
         keyFactory.generatePrivate(privateSpec)
     );
   }
 
-  private static PublicKey getPublicKey(String pub)
+  public static PublicKey decodePublicKeyString(String pub)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     byte[] publicKeyBytes = decodePublicKeyText(pub);
     X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
@@ -437,7 +442,7 @@ public class CipherUtil {
     return keyFactory.generatePublic(publicSpec);
   }
 
-  public PublicKey getPublicKey(byte[] bytes)
+  public PublicKey decodePublicKeyBytes(byte[] bytes)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     PKCS8EncodedKeySpec publicSpec = new PKCS8EncodedKeySpec(bytes);
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");

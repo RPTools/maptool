@@ -5,6 +5,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.ServerConfig;
@@ -66,6 +69,12 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   @Override
   public AuthMethod getAuthMethod(Player player) {
     return AuthMethod.PASSWORD; // This will always be password authentication
+  }
+
+  @Override
+  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
+      throws ExecutionException, InterruptedException {
+    return CompletableFuture.completedFuture(null);
   }
 
   @Override

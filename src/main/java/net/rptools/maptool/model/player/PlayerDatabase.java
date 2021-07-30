@@ -2,13 +2,17 @@ package net.rptools.maptool.model.player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
@@ -197,4 +201,21 @@ public interface PlayerDatabase {
    * @return the authentication method for the player.
    */
   public AuthMethod getAuthMethod(Player player);
+
+
+  /**
+   * Returns the public key for a player that matches the MD5Key specified.
+   * The MD5Key is generated based on the text representation of the public key
+   * as returned by * {@link CipherUtil#getEncodedPublicKeyText()}
+   *
+   * @param player The player to get the public key for.
+   * @param md5key The {@link MD5Key} of the public key.
+   *
+   * @return A {@link CompletableFuture} which returns a {@link CipherUtil} that can be used to
+   * decode with * the public key, the {@code CompletableFuture} can return {@code null} if there
+   * is no public key.
+   */
+  CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
+      throws ExecutionException, InterruptedException;
+
 }
