@@ -27,12 +27,8 @@ import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,11 +96,11 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     for (Player player : playerMap.values()) {
       server
           .getConnection()
-          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player);
+          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player.getTransferablePlayer());
     }
     server
         .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer);
+        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server
@@ -120,7 +116,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
         .broadcastCallMethod(
             new String[] {conn.getId()},
             ClientCommand.COMMAND.playerDisconnected.name(),
-            playerMap.get(conn.getId().toUpperCase()));
+            playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
     playerMap.remove(conn.getId().toUpperCase());
   }
 }

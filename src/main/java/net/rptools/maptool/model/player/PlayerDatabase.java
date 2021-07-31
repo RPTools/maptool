@@ -196,12 +196,18 @@ public interface PlayerDatabase {
 
 
   /**
+   * Adds a player to the database if the
+   * @param player
+   */
+  //void addPlayer(Player player);
+
+
+  /**
    * Returns the authentication method for the player.
    * @param player the player to get the authentication method for.
    * @return the authentication method for the player.
    */
-  public AuthMethod getAuthMethod(Player player);
-
+  AuthMethod getAuthMethod(Player player);
 
   /**
    * Returns the public key for a player that matches the MD5Key specified.

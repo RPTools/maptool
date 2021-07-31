@@ -50,7 +50,7 @@ public class Player {
     // For serialization
   }
 
-  public Player(String name, Role role, CipherUtil.Key password) {
+  Player(String name, Role role, CipherUtil.Key password) {
     this.name = name;
     this.role = role.name();
     this.password = password;
@@ -103,5 +103,9 @@ public class Player {
   @Override
   public String toString() {
     return String.format("%s (%s)", name, getRole().toString());
+  }
+
+  public Player getTransferablePlayer() {
+    return this;
   }
 }

@@ -154,7 +154,8 @@ public class Handshake {
       Player.Role role = Player.Role.valueOf(request.role);
       CipherUtil.Key passwordToUse = role == Player.Role.GM ? gmPassword : playerPassword;
 
-      player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
+      //player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
+      player =  playerDatabase.getPlayerWithRole(request.name, Player.Role.valueOf(request.role));
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
 
       CipherUtil cipherUtil = CipherUtil.fromKey(passwordToUse);

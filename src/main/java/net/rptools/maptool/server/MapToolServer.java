@@ -33,7 +33,6 @@ import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.transfer.AssetChunk;

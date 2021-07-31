@@ -66,4 +66,9 @@ public class LocalPlayer extends Player {
   public boolean isEffectiveGM() {
     return isGM() && !AppState.isShowAsPlayer();
   }
+
+  @Override
+  public Player getTransferablePlayer() {
+    return new Player(getName(), getRole(), getPassword());
+  }
 }
