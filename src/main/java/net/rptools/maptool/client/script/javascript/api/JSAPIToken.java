@@ -21,7 +21,11 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIToken {
+public class JSAPIToken implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return token.getId().toString();
+  }
 
   private final Token token;
   private Set<String> names;

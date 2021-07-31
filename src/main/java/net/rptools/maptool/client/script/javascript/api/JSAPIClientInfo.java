@@ -23,19 +23,28 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIClientInfo {
+public class JSAPIClientInfo implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.ClientInfo";
+  }
+
+  @HostAccess.Export
   public boolean faceEdge() {
     return AppPreferences.getFaceEdge();
   }
 
+  @HostAccess.Export
   public boolean faceVertex() {
     return AppPreferences.getFaceVertex();
   }
 
+  @HostAccess.Export
   public int portraitSize() {
     return AppPreferences.getPortraitSize();
   }
 
+  @HostAccess.Export
   public boolean showStatSheet() {
     return AppPreferences.getShowStatSheet();
   }
@@ -61,7 +70,7 @@ public class JSAPIClientInfo {
   }
 
   @HostAccess.Export
-  public JSMap libraryTokens() {
+  public Map<String, Object> libraryTokens() {
     Map<String, Object> libInfo = new HashMap<>();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
@@ -75,12 +84,12 @@ public class JSAPIClientInfo {
         }
       }
     }
-    return new JSMap(libInfo);
+    return libInfo;
   }
 
   @HostAccess.Export
-  public JSList userDefinedFunctions() {
-    return JSList.fromArray(UserDefinedMacroFunctions.getInstance().getAliases());
+  public String[] userDefinedFunctions() {
+    return UserDefinedMacroFunctions.getInstance().getAliases();
   }
 
   public String clientId() {
