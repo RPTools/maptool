@@ -55,7 +55,17 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   @HostAccess.Export
   public void mtsAssert(boolean check, String message)
       throws AssertFunction.AssertFunctionException {
+    mtsAssert(check, message, true);
+  }
+
+  @HostAccess.Export
+  public void mtsAssert(boolean check, String message, boolean padError)
+      throws AssertFunction.AssertFunctionException {
     if (!check) {
+      if (padError) {
+        throw new AssertFunction.AssertFunctionException(
+            I18N.getText("macro.function.assert.message", message));
+      }
       throw new AssertFunction.AssertFunctionException(message);
     }
   }
