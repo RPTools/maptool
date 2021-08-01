@@ -69,12 +69,12 @@ public class MacroJavaScriptBridge extends AbstractFunction {
       try {
         return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
       } catch (PolyglotException e) {
-	Throwable je = e.asHostException();
-	ParserException pe = (ParserException) je;
-	if (pe != null) {
-	  throw pe;
-	}
-	throw new ParserException(je);
+        Throwable je = e.asHostException();
+        ParserException pe = (ParserException) je;
+        if (pe != null) {
+          throw pe;
+        }
+        throw new ParserException(je);
       } catch (ScriptException e) {
         throw new ParserException(e);
       } finally {
