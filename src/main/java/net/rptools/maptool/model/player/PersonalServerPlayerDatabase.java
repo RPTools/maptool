@@ -59,6 +59,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsAsymmetricalKeys() {
+    return false;
+  }
+
+  @Override
   public boolean supportsRolePasswords() {
     return false;
   }

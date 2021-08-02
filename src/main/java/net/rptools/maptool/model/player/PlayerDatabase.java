@@ -108,6 +108,8 @@ public interface PlayerDatabase {
    */
   boolean supportsPlayTimes();
 
+  boolean supportsAsymmetricalKeys();
+
 
   /**
    * Returns if this player database supports role based passwords.

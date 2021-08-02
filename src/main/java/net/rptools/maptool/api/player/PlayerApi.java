@@ -55,6 +55,18 @@ public class PlayerApi {
     });
   }
 
+  public CompletableFuture<ApiResult<PlayerDatabaseInfo>> getDatabaseCapabilities() {
+    return CompletableFuture.supplyAsync(() -> {
+      return new ApiResult<PlayerDatabaseInfo>(getPlayerDatabaseInfo());
+    });
+  }
+
+  private PlayerDatabaseInfo getPlayerDatabaseInfo() {
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    return new PlayerDatabaseInfo(playerDatabase.supportsDisabling(),
+        !playerDatabase.supportsRolePasswords(), playerDatabase.supportsAsymmetricalKeys());
+  }
+
 
   private PlayerInfo getPlayerInfo(String name)
       throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException, InvocationTargetException {
@@ -97,12 +109,8 @@ public class PlayerApi {
     return new PlayerInfo(
         name,
         role,
-        individualPassword,
-        supportsBlocking,
         blocked,
         blockedReason,
-        supportsPlayTimes,
-        playTimes,
         connected
     );
   }

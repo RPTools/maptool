@@ -11,8 +11,8 @@ import net.rptools.maptool.model.Path;
 
 public class WebEndPointServletServer  {
 
-  private static String CONTEXT_PATH = "maptool";
-  private static String DEPLOYMENT_NAME = "maptool";
+  private static final String CONTEXT_PATH = "maptool";
+  private static final String DEPLOYMENT_NAME = "maptool";
 
 
   private final PathHandler pathHandler;

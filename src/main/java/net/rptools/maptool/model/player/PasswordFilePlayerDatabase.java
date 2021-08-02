@@ -299,6 +299,11 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean supportsAsymmetricalKeys() {
+    return true;
+  }
+
+  @Override
   public boolean supportsRolePasswords() {
     return false;
   }
