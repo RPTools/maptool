@@ -6,6 +6,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.webendpoint.servlet.WebEndPointServletServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 
 public class WebEndPoint {
 
@@ -14,7 +15,8 @@ public class WebEndPoint {
   private static final String WEB_ENDPOINT_VERSION = "0.0.1";
 
   private final static WebEndPoint webEndPoint = new WebEndPoint();
-  private Undertow server;
+  //private Undertow server;
+  private UndertowJaxrsServer server;
   private int port;
 
 
@@ -44,10 +46,11 @@ public class WebEndPoint {
 
         port = portNumber;
 
-        server = Undertow.builder()
+        server = new UndertowJaxrsServer().start(Undertow.builder()
             .addHttpListener(port, "localhost")
-            .setHandler(new WebEndPointServletServer().getPathHandler())
-            .build();
+        );
+
+        server.deployOldStyle(WebEndPointApp.class);
       }
       log.info(I18N.getText("msg.info.startWebEndWebPoint", port));
       server.start();

@@ -1,5 +1,6 @@
 package net.rptools.maptool.model.player;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
@@ -139,5 +140,11 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   @Override
   public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
     return new PublicPrivateKeyStore().getKeys();
+  }
+
+  @Override
+  public boolean isPlayerRegistered(String name)
+      throws InterruptedException, InvocationTargetException {
+    return localPlayer != null && localPlayer.getName() != null && localPlayer.getName().equals(name);
   }
 }

@@ -44,7 +44,9 @@ public interface PlayerDatabase {
    * @param playerName the name of the player to get the information about from the database
    * @return {@code true} if the player exists.
    * @note if the "database" allows any player name to connect (e.g. default) then this will always
-   *       return true.
+   *       return true. If you want to check if there is actually a player of this name in the
+   *       database then use {@link #isPlayerRegistered(String)}.
+   *
    */
   boolean playerExists(String playerName);
 
@@ -224,4 +226,13 @@ public interface PlayerDatabase {
   CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
       throws ExecutionException, InterruptedException;
 
+
+
+  /**
+   * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
+   * this will not return {@code true} for every input but only for those that are logged on.
+   * @param name the name of the player to check for.
+   * @return {@code true} if the player is registered, {@code false} otherwise.
+   */
+  boolean isPlayerRegistered(String name) throws InterruptedException, InvocationTargetException;
 }

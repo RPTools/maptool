@@ -7,6 +7,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import net.rptools.maptool.api.ApiException;
 import net.rptools.maptool.api.util.ApiCall;
 import net.rptools.maptool.api.util.ApiListResult;
@@ -33,7 +34,9 @@ public class PlayerApi {
   public CompletableFuture<ApiListResult<PlayerInfo>> getConnectedPlayers() {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        return new ApiListResult<>(getPlayersInfo().stream().filter(PlayerInfo::connected).toList());
+        return new ApiListResult<>(
+            getPlayersInfo().stream().filter(PlayerInfo::connected).collect(Collectors.toList())
+        );
       } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
         return new ApiListResult<>(new ApiException("err.internal", e));
         // TODO: CDW: log error
@@ -54,8 +57,11 @@ public class PlayerApi {
 
 
   private PlayerInfo getPlayerInfo(String name)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException, InvocationTargetException {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (!playerDatabase.isPlayerRegistered(name)) {
+      return null;
+    }
     Player player = playerDatabase.getPlayer(name);
     Role role = player.getRole();
     boolean individualPassword = playerDatabase.supportsRolePasswords();
@@ -103,7 +109,7 @@ public class PlayerApi {
 
   private List<PlayerInfo> getPlayersInfo()
       throws InterruptedException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException {
-    List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+    List<PlayerInfo> players = new ArrayList<>();
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     for (Player p : playerDatabase.getAllPlayers()) {
       players.add(getPlayerInfo(p.getName()));

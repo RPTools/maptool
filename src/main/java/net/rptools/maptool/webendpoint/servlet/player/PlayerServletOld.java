@@ -1,4 +1,4 @@
-package net.rptools.maptool.webendpoint.servlet.general;
+package net.rptools.maptool.webendpoint.servlet.player;
 
 
 import com.google.gson.Gson;
@@ -12,13 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.rptools.maptool.api.maptool.MapToolApi;
+import net.rptools.maptool.api.player.PlayerApi;
 import net.rptools.maptool.api.util.ApiResult;
 
-public class MapToolVersionServlet extends HttpServlet {
+public class PlayerServletOld extends HttpServlet {
 
 
   public static String getEndPointServletName() {
-    return "MapToolVersionServlet";
+    return "PlayerServlet";
   }
 
   @Override
@@ -34,7 +35,7 @@ public class MapToolVersionServlet extends HttpServlet {
     PrintWriter writer = response.getWriter();
     Gson gson = new Gson();
     try {
-      JsonObject version = new MapToolApi().getVersion().get().asJsonObject();
+      JsonObject version = new PlayerApi().getPlayer().get().asJsonObject();
       gson.toJson(version, writer);
     } catch (InterruptedException | ExecutionException e) {
       gson.toJson(ApiResult.INTERNAL_ERROR_RESULT, writer);

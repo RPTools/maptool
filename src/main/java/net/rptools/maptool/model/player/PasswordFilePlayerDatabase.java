@@ -1,5 +1,6 @@
 package net.rptools.maptool.model.player;
 
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -383,6 +384,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
     }
 
     return CompletableFuture.completedFuture(pd.publicKeys.get(md5key));
+  }
+
+  @Override
+  public boolean isPlayerRegistered(String name)
+      throws InterruptedException, InvocationTargetException {
+    return playerExists(name);
   }
 
   @Override

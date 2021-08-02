@@ -1,12 +1,12 @@
 package net.rptools.maptool.model.player;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.util.cipher.CipherUtil;
@@ -115,5 +115,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
     return CompletableFuture.completedFuture(null);
+  }
+
+  @Override
+  public boolean isPlayerRegistered(String name)
+      throws InterruptedException, InvocationTargetException {
+    return false;
   }
 }

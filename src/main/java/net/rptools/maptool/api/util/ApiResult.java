@@ -1,6 +1,5 @@
 package net.rptools.maptool.api.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.rptools.maptool.api.ApiData;
 import net.rptools.maptool.api.ApiException;
@@ -17,8 +16,8 @@ public class ApiResult<T extends ApiData> {
 
   public ApiResult(T data) {
     this.data = data;
-    this.status = ApiResultStatus.OK;
     this.exception = null;
+    this.status = data != null ? ApiResultStatus.OK : ApiResultStatus.NONE;
   }
 
   public ApiResult(ApiException e) {
