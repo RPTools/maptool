@@ -12,7 +12,9 @@ import net.rptools.maptool.api.ApiException;
 import net.rptools.maptool.api.util.ApiCall;
 import net.rptools.maptool.api.util.ApiListResult;
 import net.rptools.maptool.api.util.ApiResult;
+import net.rptools.maptool.api.util.NoData;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -56,8 +58,24 @@ public class PlayerApi {
   }
 
   public CompletableFuture<ApiResult<PlayerDatabaseInfo>> getDatabaseCapabilities() {
+    return CompletableFuture.supplyAsync(() -> new ApiResult<>(getPlayerDatabaseInfo()));
+  }
+
+  public CompletableFuture<ApiResult<NoData>> disablePlayer(String playerName, String reason) {
     return CompletableFuture.supplyAsync(() -> {
-      return new ApiResult<PlayerDatabaseInfo>(getPlayerDatabaseInfo());
+      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+      try {
+        Player player = playerDatabase.getPlayer(playerName);
+        if (player == null) {
+          return CompletableFuture.completedFuture(ApiResult.NOT_FOUND);
+        }
+        playerDatabase.disablePlayer(player, reason);
+        return new ApiResult<NoData>();
+      } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException e) {
+        return CompletableFuture.completedFuture(new ApiResult<>(new ApiException("err.internal",
+            e)));
+        // TODO: CDW: log error
+      }
     });
   }
 
@@ -76,7 +94,6 @@ public class PlayerApi {
     }
     Player player = playerDatabase.getPlayer(name);
     Role role = player.getRole();
-    boolean individualPassword = playerDatabase.supportsRolePasswords();
     boolean supportsBlocking = playerDatabase.supportsDisabling();
     String blockedReason = "";
     boolean blocked = false;

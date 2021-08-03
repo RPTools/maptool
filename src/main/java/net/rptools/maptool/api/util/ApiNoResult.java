@@ -4,23 +4,19 @@ import com.google.gson.JsonObject;
 import net.rptools.maptool.api.ApiData;
 import net.rptools.maptool.api.ApiException;
 
-public class ApiResult<T extends ApiData> {
+public class ApiNoResult<T extends ApiData> {
 
-
-  private final T data;
   private final ApiResultStatus status;
   private final ApiException exception;
 
 
-  public static ApiResult<NoData> NOT_FOUND = new ApiResult<>(new NoData());
+  public static ApiNoResult<NoData> NOT_FOUND = new ApiNoResult<>(new NoData());
 
-  public ApiResult(T data) {
-    this.data = data;
+  public ApiNoResult() {
     this.exception = null;
-    this.status = data != null ? ApiResultStatus.OK : ApiResultStatus.NONE;
   }
 
-  public ApiResult(ApiException e) {
+  public ApiNoResult(ApiException e) {
     this.data = null;
     this.status = ApiResultStatus.ERROR;
     this.exception = e;
