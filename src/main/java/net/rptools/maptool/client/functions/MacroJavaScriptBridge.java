@@ -30,7 +30,7 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.graalvm.polyglot.*;
 
-public class MacroJavaScriptBridge extends AbstractFunction {
+public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSpecialVariables {
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private static final MacroJavaScriptBridge instance = new MacroJavaScriptBridge();
@@ -68,6 +68,13 @@ public class MacroJavaScriptBridge extends AbstractFunction {
       callingArgsStack.push(scriptArgs);
       try {
         return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
+      } catch (PolyglotException e) {
+        Throwable je = e.asHostException();
+        ParserException pe = (ParserException) je;
+        if (pe != null) {
+          throw pe;
+        }
+        throw new ParserException(je);
       } catch (ScriptException e) {
         throw new ParserException(e);
       } finally {
@@ -214,5 +221,10 @@ public class MacroJavaScriptBridge extends AbstractFunction {
     } else {
       return callingArgsStack.peek();
     }
+  }
+
+  @Override
+  public String[] getSpecialVariables() {
+    return new String[] {"macro.catchAssert"};
   }
 }
