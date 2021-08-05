@@ -14,22 +14,17 @@
  */
 package net.rptools.clientserver.simple.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.IOException;
 import net.rptools.clientserver.simple.IConnection;
 
 public interface IClientConnection extends IConnection {
-  DataInputStream getInputStream();
-
-  DataOutputStream getOutputSream();
-
   void sendMessage(byte[] message);
 
   void sendMessage(Object channel, byte[] message);
 
-  void start();
-
   boolean isAlive();
 
   String getId();
+
+  void open() throws IOException;
 }

@@ -71,6 +71,7 @@ public class SocketServerConnection extends AbstractServerConnection {
     }
 
     public ListeningThread(SocketServerConnection server, ServerSocket socket) {
+      setName("SocketServerConnection.ListeningThread");
       this.server = server;
       this.socket = socket;
     }

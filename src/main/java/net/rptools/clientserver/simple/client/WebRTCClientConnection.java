@@ -142,16 +142,6 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   @Override
-  public DataInputStream getInputStream() {
-    return dis;
-  }
-
-  @Override
-  public DataOutputStream getOutputSream() {
-    return dos;
-  }
-
-  @Override
   public void sendMessage(byte[] message) {
     sendMessage(null, message);
   }
@@ -164,7 +154,7 @@ public class WebRTCClientConnection extends AbstractConnection
     }
   }
 
-  @Override
+  //  @Override
   public void start() {
     started = true;
   }
@@ -178,6 +168,9 @@ public class WebRTCClientConnection extends AbstractConnection
   public String getId() {
     return id;
   }
+
+  @Override
+  public void open() throws IOException {}
 
   private void handleSignalingMessage(String message) {
     var msg = gson.fromJson(message, Message.class);

@@ -134,19 +134,18 @@ public abstract class AbstractServerConnection extends AbstractConnection
 
   protected void handleConnection(IClientConnection conn) {
     var handshake = handshakeProvider.getConnectionHandshake(conn);
-
+    handshake.addObserver(this);
     // Make sure the client is allowed
-    handshake.receiveHandshake();
+    handshake.triggerHandshake();
   }
 
   @Override
   public void onCompleted(Handshake handshake) {
     handshake.removeObserver(this);
     var conn = handshake.getConnection();
-    if(handshake.isSuccessful()) {
+    if (handshake.isSuccessful()) {
       conn.addMessageHandler(this);
       conn.addDisconnectHandler(this);
-      conn.start();
 
       log.debug("About to add new client");
       synchronized (clients) {

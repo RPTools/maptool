@@ -36,6 +36,7 @@ targetCompatibility = 16
 def grpcVersion = '1.39.0'
 def protobufVersion = '3.17.3'
 def protocVersion = protobufVersion
+def modelMapperVersion = '2.4.2'
 
 
 // Used by gradle assemble & run tasks
@@ -401,6 +402,8 @@ dependencies {
     implementation group: 'dev.onvoid.webrtc', name: 'webrtc-java', version: '0.2.0'
     implementation group: 'dev.onvoid.webrtc', name: 'webrtc-java-windows-x86_64', version: '0.1.0'
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "org.modelmapper:modelmapper:${modelMapperVersion}"
+    implementation "org.modelmapper.extensions:modelmapper-protobuf:${modelMapperVersion}"
     //implementation "io.grpc:grpc-stub:${grpcVersion}"
     //compileOnly "org.apache.tomcat:annotations-api:6.0.53"
 }

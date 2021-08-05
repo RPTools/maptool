@@ -43,8 +43,8 @@ public class ConnectionFactory {
     return new MethodClientConnection(new WebRTCClientConnection(id, config));
   }
 
-  public IMethodServerConnection createServerConnection(ServerConfig config, HandshakeProvider handshake)
-      throws IOException {
+  public IMethodServerConnection createServerConnection(
+      ServerConfig config, HandshakeProvider handshake) throws IOException {
     if (!AppState.useWebRTC())
       return new MethodServerConnection(new SocketServerConnection(config.getPort(), handshake));
 

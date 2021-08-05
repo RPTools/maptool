@@ -19,5 +19,6 @@ import net.rptools.maptool.server.Handshake;
 
 public interface HandshakeProvider {
   Handshake getConnectionHandshake(IClientConnection conn);
+
   void releaseHandshake(IClientConnection conn);
 }

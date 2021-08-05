@@ -28,7 +28,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
-public class MapToolServerConnection implements ServerObserver, HandshakeProvider, Handshake.HandshakeObserver {
+public class MapToolServerConnection
+    implements ServerObserver, HandshakeProvider, Handshake.HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final Map<IClientConnection, Handshake> handshakeMap = new ConcurrentHashMap<>();
@@ -51,12 +52,15 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
     var handshake = new Handshake(conn);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
+    conn.addMessageHandler(handshake);
     return handshake;
   }
 
   @Override
   public void releaseHandshake(IClientConnection conn) {
+    var handshake = handshakeMap.get(conn);
     handshakeMap.remove(conn);
+    conn.removeMessageHandler(handshake);
   }
 
   public Player getPlayer(String id) {
@@ -147,7 +151,7 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
   @Override
   public void onCompleted(Handshake handshake) {
     handshake.removeObserver(this);
-    if(handshake.isSuccessful()) {
+    if (handshake.isSuccessful()) {
       Player player = handshake.getPlayer();
 
       if (player != null) {

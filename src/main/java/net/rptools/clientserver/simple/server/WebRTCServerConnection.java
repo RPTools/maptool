@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessage;
 import net.rptools.clientserver.simple.webrtc.LoginMessage;

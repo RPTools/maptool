@@ -14,8 +14,7 @@
  */
 package net.rptools.clientserver.hessian.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.DisconnectHandler;
@@ -37,16 +36,6 @@ public class MethodClientConnection implements IMethodClientConnection {
   }
 
   @Override
-  public DataInputStream getInputStream() {
-    return connection.getInputStream();
-  }
-
-  @Override
-  public DataOutputStream getOutputSream() {
-    return connection.getOutputSream();
-  }
-
-  @Override
   public void sendMessage(byte[] message) {
     connection.sendMessage(message);
   }
@@ -54,11 +43,6 @@ public class MethodClientConnection implements IMethodClientConnection {
   @Override
   public void sendMessage(Object channel, byte[] message) {
     connection.sendMessage(channel, message);
-  }
-
-  @Override
-  public void start() {
-    connection.start();
   }
 
   @Override
@@ -114,6 +98,11 @@ public class MethodClientConnection implements IMethodClientConnection {
   @Override
   public void removeDisconnectHandler(DisconnectHandler handler) {
     connection.removeDisconnectHandler(handler);
+  }
+
+  @Override
+  public void open() throws IOException {
+    connection.open();
   }
 
   @Override

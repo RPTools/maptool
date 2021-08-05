@@ -16,6 +16,7 @@ package net.rptools.clientserver.simple.client;
 
 import java.io.*;
 import java.net.Socket;
+import net.rptools.clientserver.simple.AbstractConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,46 +25,164 @@ import org.apache.logging.log4j.Logger;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public class SocketClientConnection extends AbstractClientConnection {
+public class SocketClientConnection extends AbstractConnection implements IClientConnection {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(SocketClientConnection.class);
 
+  private final String id;
+  private SendThread send;
+  private ReceiveThread receive;
   private Socket socket;
-  private DataOutputStream dos;
-  private DataInputStream dis;
+  private String hostName;
+  private int port;
 
   public SocketClientConnection(String id, String hostName, int port) throws IOException {
-    this(id, new Socket(hostName, port));
+    this.id = id;
+    this.hostName = hostName;
+    this.port = port;
   }
 
   public SocketClientConnection(String id, Socket socket) throws IOException {
-    super(id);
-    this.socket = socket;
-    this.dis = new DataInputStream(socket.getInputStream());
-    this.dos = new DataOutputStream(socket.getOutputStream());
+    this.id = id;
+    this.hostName = socket.getInetAddress().getHostName();
+    this.port = socket.getPort();
+    initialize(socket);
   }
 
-  public boolean isAlive() {
-    return !socket.isClosed();
+  private void initialize(Socket socket) throws IOException {
+    this.socket = socket;
+    this.send = new SendThread(this, new DataOutputStream(socket.getOutputStream()));
+    this.send.start();
+    this.receive = new ReceiveThread(this, new DataInputStream(socket.getInputStream()));
+    this.receive.start();
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  @Override
+  public void open() throws IOException {
+    initialize(new Socket(hostName, port));
+  }
+
+  public void sendMessage(byte[] message) {
+    sendMessage(null, message);
+  }
+
+  public void sendMessage(Object channel, byte[] message) {
+    addMessage(channel, message);
+    synchronized (send) {
+      send.notify();
+    }
+  }
+
+  protected boolean isStopRequested() {
+    return send.stopRequested;
   }
 
   public synchronized void close() {
     if (isStopRequested()) {
       return;
     }
+    send.requestStop();
+    receive.requestStop();
+
     try {
       socket.close();
     } catch (IOException e) {
       log.warn(e.toString());
     }
-    super.close();
   }
 
-  public DataInputStream getInputStream() {
-    return dis;
+  public boolean isAlive() {
+    return !socket.isClosed();
   }
 
-  public DataOutputStream getOutputSream() {
-    return dos;
+  // /////////////////////////////////////////////////////////////////////////
+  // send thread
+  // /////////////////////////////////////////////////////////////////////////
+  private class SendThread extends Thread {
+    private final SocketClientConnection conn;
+    private final OutputStream out;
+    private boolean stopRequested = false;
+
+    public SendThread(SocketClientConnection conn, OutputStream out) {
+      setName("SocketClientConnection.SendThread");
+      this.conn = conn;
+      this.out = new BufferedOutputStream(out, 1024);
+    }
+
+    public void requestStop() {
+      this.stopRequested = true;
+      synchronized (this) {
+        this.notify();
+      }
+    }
+
+    @Override
+    public void run() {
+      try {
+        while (!stopRequested && conn.isAlive()) {
+          try {
+            while (conn.hasMoreMessages()) {
+              try {
+                byte[] message = conn.nextMessage();
+                if (message == null) {
+                  continue;
+                }
+                conn.writeMessage(out, message);
+              } catch (IndexOutOfBoundsException e) {
+                // just ignore and wait
+              }
+            }
+            synchronized (this) {
+              if (!stopRequested) {
+                this.wait();
+              }
+            }
+          } catch (InterruptedException e) {
+            // do nothing
+          }
+        }
+      } catch (IOException e) {
+        fireDisconnect();
+      }
+    }
+  }
+
+  // /////////////////////////////////////////////////////////////////////////
+  // receive thread
+  // /////////////////////////////////////////////////////////////////////////
+  private class ReceiveThread extends Thread {
+    private final SocketClientConnection conn;
+    private final InputStream in;
+    private boolean stopRequested = false;
+
+    public ReceiveThread(SocketClientConnection conn, InputStream in) {
+      setName("SocketClientConnection.ReceiveThread");
+      this.conn = conn;
+      this.in = in;
+    }
+
+    public void requestStop() {
+      stopRequested = true;
+    }
+
+    @Override
+    public void run() {
+      while (!stopRequested && conn.isAlive()) {
+        try {
+          byte[] message = conn.readMessage(in);
+          conn.dispatchMessage(conn.id, message);
+        } catch (IOException e) {
+          fireDisconnect();
+          break;
+        } catch (Throwable t) {
+          // don't let anything kill this thread via exception
+          t.printStackTrace();
+        }
+      }
+    }
   }
 }

@@ -33,7 +33,7 @@ public class MapToolConnection {
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new Handshake(this.connection);
+    this.handshake = new Handshake(connection, player);
     onCompleted = () -> {};
   }
 
@@ -43,20 +43,22 @@ public class MapToolConnection {
   }
 
   public void start() throws IOException {
-    handshake.addObserver((ignore) ->{
-      if(handshake.isSuccessful()) {
-        MapTool.setServerPolicy(handshake.getResponse().policy);
-        connection.start();
-        onCompleted.run();
-      } else {
-        var exception = handshake.getException();
-        if (exception != null) MapTool.showError("Handshake.msg.encodeInitFail", exception);
-        else MapTool.showError("ERROR: " + handshake.getResponse().message);
-        connection.close();
-        onCompleted.run();
-      }
-    });
-    handshake.sendHandshake(player);
+    connection.addMessageHandler(handshake);
+    handshake.addObserver(
+        (ignore) -> {
+          connection.removeMessageHandler(handshake);
+          if (handshake.isSuccessful()) {
+            onCompleted.run();
+          } else {
+            var exception = handshake.getException();
+            if (exception != null) MapTool.showError("Handshake.msg.encodeInitFail", exception);
+            else MapTool.showError("ERROR: " + handshake.getErrorMessage());
+            connection.close();
+            onCompleted.run();
+          }
+        });
+    // this triggers the handshake from the server side
+    connection.open();
   }
 
   public void addMessageHandler(ClientMethodHandler handler) {

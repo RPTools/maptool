@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "HandshakeProtos";
+
+enum MessageType {
+  InitialSalt = 0;
+  HandshakeRequest = 1;
+  HandshakeResponse = 2;
+  ChallengeRequest = 3;
+  ChallengeResponse = 4;
+}
+
+message HandshakeMsg {
+  MessageType type = 1;
+  InitialSaltMsg initial_salt_msg = 2;
+  HandshakeRequestMsg handshake_request_msg = 3;
+  HandshakeResponseMsg handshake_response_msg = 4;
+  ChallengeRequestMsg challenge_request_msg = 5;
+  ChallengeResponseMsg challenge_response_msg = 6;
+}
+
+message InitialSaltMsg {
+  bytes salt = 1;
+}
+
+message HandshakeRequestMsg {
+  bytes salt = 1;
+  bytes cypher_text = 2;
+  bytes mac = 3;
+}
+
+enum ResponseCode {
+  UNKNOWN = 0;
+  OK = 1;
+  ERROR = 2;
+}
+
+message HandshakeResponseMsg {
+  ResponseCode code = 1;
+  string message = 2;
+  ServerPolicy policy = 3;
+  Role role = 4;
+}
+
+message ChallengeRequestMsg {
+  bytes salt = 1;
+  bytes challenge = 2;
+  bytes mac = 3;
+}
+
+message ChallengeResponseMsg {
+  bytes salt = 1;
+  bytes response = 2;
+  bytes mac = 3;
+}
+
+message ServerPolicy {
+  bool strict_token_movement = 1;
+  bool is_movement_locked = 2;
+  bool is_token_editor_locked = 3;
+  bool players_can_reveal_vision = 4;
+  bool gm_reveals_vision_for_unowned_tokens = 5;
+  bool use_individual_views = 6;
+  bool restricted_impersonation = 7;
+  bool players_receive_campaign_macros = 8;
+  bool use_tool_tips_for_default_roll_format = 9;
+  bool use_individual_FOW = 10;
+  bool is_auto_reveal_on_movement = 11;
+  bool include_owned_NPCs = 12;
+  WalkerMetric movement_metric = 13;
+  bool using_astar_pathfinding = 14;
+  bool vbl_blocks_move = 15;
+}
+
+enum WalkerMetric {
+    NO_DIAGONALS = 0;
+    MANHATTAN = 1;
+    ONE_TWO_ONE = 2;
+    ONE_ONE_ONE = 3;
+}
+
+enum Role {
+    PLAYER = 0;
+    GM = 1;
+}

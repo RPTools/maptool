@@ -258,6 +258,10 @@ public class MapToolServer {
   private class AssetProducerThread extends Thread {
     private boolean stop = false;
 
+    public AssetProducerThread() {
+      setName("AssetProducerThread");
+    }
+
     @Override
     public void run() {
       while (!stop) {
