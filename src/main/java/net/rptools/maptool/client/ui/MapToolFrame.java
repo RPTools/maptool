@@ -1900,7 +1900,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void closingMaintenance() {
-    if (AppPreferences.getSaveReminder()) {
+    if (AppPreferences.getSaveReminder() && MapTool.isCampaignDirty()) {
       if (MapTool.getPlayer().isGM()) {
         int result =
             MapTool.confirmImpl(

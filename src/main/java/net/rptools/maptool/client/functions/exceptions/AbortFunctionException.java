@@ -12,28 +12,19 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.script.javascript.api;
+package net.rptools.maptool.client.functions.exceptions;
 
-import java.util.ArrayList;
-import java.util.List;
-import net.rptools.maptool.client.MapTool;
-import org.graalvm.polyglot.HostAccess;
+import net.rptools.parser.ParserException;
 
-public class JSAPITokens implements MapToolJSAPIInterface {
-  @Override
-  public String serializeToString() {
-    return "MapTool.tokens";
+/**
+ * Exception type thrown by abort() function. Semantics are to silently halt the current execution.
+ */
+public class AbortFunctionException extends ParserException {
+  public AbortFunctionException(Throwable cause) {
+    super(cause);
   }
 
-  @HostAccess.Export
-  public List<Object> getMapTokens() {
-    final List<Object> tokens = new ArrayList<>();
-
-    MapTool.getFrame()
-        .getCurrentZoneRenderer()
-        .getZone()
-        .getTokens()
-        .forEach(t -> tokens.add(new JSAPIToken(t)));
-    return tokens;
+  public AbortFunctionException(String msg) {
+    super(msg);
   }
 }

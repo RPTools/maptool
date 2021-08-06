@@ -44,13 +44,14 @@ import org.apache.logging.log4j.Logger;
 
 /** This class provides utility functions for maptool client. */
 public class AppUtil {
-
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
+  public static final String LOGDIR_PROPERTY_NAME = "MAPTOOL_LOGDIR";
   private static final String CLIENT_ID_FILE = "client-id";
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
+
+  private static Logger log;
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
@@ -72,14 +73,18 @@ public class AppUtil {
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   private static File dataDirPath;
-  private static String packagerCfgFileName;
+  private static String packagerCfgFileName =
+      getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
+          ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
+          : null;
 
-  static {
-    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
-    packagerCfgFileName =
-        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
-            ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
-            : null;
+  /** Sets the MAPTOOL_LOGDIR system property and initializes the first logger. */
+  public static void initLogging() {
+    if (log == null) {
+      // Note: This property MUST be set before the logger is initialized
+      System.setProperty(LOGDIR_PROPERTY_NAME, getAppHome("logs").getAbsolutePath());
+      log = LogManager.getLogger(AppUtil.class);
+    }
   }
 
   /**
@@ -121,7 +126,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log.isInfoEnabled()) {
+        if (log != null && log.isInfoEnabled()) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;
