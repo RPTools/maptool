@@ -35,15 +35,11 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.server.proto.*;
-import net.rptools.maptool.server.proto.ServerPolicy;
 import net.rptools.maptool.util.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.convention.NameTokenizers;
-import org.modelmapper.protobuf.ProtobufModule;
+
 
 /** @author trevor */
 public class Handshake implements MessageHandler {
@@ -52,7 +48,6 @@ public class Handshake implements MessageHandler {
 
   private static String USERNAME_FIELD = "username:";
   private static String VERSION_FIELD = "version:";
-  private final ModelMapper mapper;
   private State currentState = State.AwaitingInitialMacSalt;
   private Request request;
   private Exception exception;
@@ -65,9 +60,6 @@ public class Handshake implements MessageHandler {
 
   public Handshake(IClientConnection connection) {
     this.connection = connection;
-    this.mapper = new ModelMapper();
-    mapper.registerModule(new ProtobufModule());
-    mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
   }
 
   /**
@@ -123,7 +115,7 @@ public class Handshake implements MessageHandler {
 
     var handshakeMsg =
         HandshakeMsg.newBuilder()
-            .setType(MessageType.InitialSalt)
+            .setType(MessageTypeDto.InitialSalt)
             .setInitialSaltMsg(initialSaltMsg)
             .build();
     connection.sendMessage(handshakeMsg.toByteArray());
@@ -261,7 +253,7 @@ public class Handshake implements MessageHandler {
             .build();
 
     return HandshakeMsg.newBuilder()
-        .setType(MessageType.HandshakeRequest)
+        .setType(MessageTypeDto.HandshakeRequest)
         .setHandshakeRequestMsg(req)
         .build();
   }
@@ -269,12 +261,12 @@ public class Handshake implements MessageHandler {
   private void sendErrorResponseAndNotify() {
     var responseMsg =
         HandshakeResponseMsg.newBuilder()
-            .setCode(ResponseCode.ERROR)
+            .setCode(ResponseCodeDto.ERROR)
             .setMessage(errorMessage)
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageType.HandshakeResponse)
+            .setType(MessageTypeDto.HandshakeResponse)
             .setHandshakeResponseMsg(responseMsg)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -288,27 +280,27 @@ public class Handshake implements MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       switch (currentState) {
         case AwaitingInitialMacSalt:
-          if (handshakeMsg.getType() == MessageType.InitialSalt)
+          if (handshakeMsg.getType() == MessageTypeDto.InitialSalt)
             handle(handshakeMsg.getInitialSaltMsg());
           break;
         case AwaitingRequest:
-          if (handshakeMsg.getType() == MessageType.HandshakeRequest)
+          if (handshakeMsg.getType() == MessageTypeDto.HandshakeRequest)
             handle(handshakeMsg.getHandshakeRequestMsg());
           break;
         case AwaitingChallenge:
-          if (handshakeMsg.getType() == MessageType.ChallengeRequest)
+          if (handshakeMsg.getType() == MessageTypeDto.ChallengeRequest)
             handle(handshakeMsg.getChallengeRequestMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageType.HandshakeResponse
-              && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCode.OK)
+          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+              && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
         case AwaitingChallengeResponse:
-          if (handshakeMsg.getType() == MessageType.ChallengeResponse)
+          if (handshakeMsg.getType() == MessageTypeDto.ChallengeResponse)
             handle(handshakeMsg.getChallengeResponseMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageType.HandshakeResponse
-              && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCode.OK)
+          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+              && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
         case AwaitingResponse:
@@ -390,7 +382,7 @@ public class Handshake implements MessageHandler {
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageType.ChallengeRequest)
+            .setType(MessageTypeDto.ChallengeRequest)
             .setChallengeRequestMsg(challengeMsg)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -425,7 +417,7 @@ public class Handshake implements MessageHandler {
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageType.ChallengeResponse)
+            .setType(MessageTypeDto.ChallengeResponse)
             .setChallengeResponseMsg(challengeResp)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -457,25 +449,23 @@ public class Handshake implements MessageHandler {
       sendErrorResponseAndNotify();
       return;
     }
-    var config = mapper.getConfiguration();
-    config.setDestinationNameTokenizer(NameTokenizers.UNDERSCORE);
-    config.setSourceNameTokenizer(NameTokenizers.CAMEL_CASE);
 
-    var policy = mapper.map(server.getPolicy(), ServerPolicy.Builder.class).build();
-    var role = net.rptools.maptool.server.proto.Role.valueOf(player.getRole().name());
+
+    var policy = Mapper.map(server.getPolicy());
+    var role = RoleDto.valueOf(player.getRole().name());
 
     currentState = State.Success;
 
     var responseMsg =
         HandshakeResponseMsg.newBuilder()
-            .setCode(ResponseCode.OK)
+            .setCode(ResponseCodeDto.OK)
             .setPolicy(policy)
             .setRole(role)
             .build();
 
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageType.HandshakeResponse)
+            .setType(MessageTypeDto.HandshakeResponse)
             .setHandshakeResponseMsg(responseMsg)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -492,13 +482,7 @@ public class Handshake implements MessageHandler {
       case OK:
         // If we are here the handshake succeeded so wait for the server policy
         MapTool.getPlayer().setRole(Role.valueOf(handshakeResponseMsg.getRole().name()));
-        var config = mapper.getConfiguration();
-        ;
-        config.setDestinationNameTokenizer(NameTokenizers.CAMEL_CASE);
-        config.setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
-        var policy =
-            mapper.map(
-                handshakeResponseMsg.getPolicy(), net.rptools.maptool.server.ServerPolicy.class);
+        var policy = Mapper.map(handshakeResponseMsg.getPolicy());
         MapTool.setServerPolicy(policy);
         currentState = State.Success;
         notifyObservers();

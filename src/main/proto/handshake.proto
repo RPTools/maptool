@@ -6,7 +6,12 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "HandshakeProtos";
 
-enum MessageType {
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+enum MessageTypeDto {
   InitialSalt = 0;
   HandshakeRequest = 1;
   HandshakeResponse = 2;
@@ -15,7 +20,7 @@ enum MessageType {
 }
 
 message HandshakeMsg {
-  MessageType type = 1;
+  MessageTypeDto type = 1;
   InitialSaltMsg initial_salt_msg = 2;
   HandshakeRequestMsg handshake_request_msg = 3;
   HandshakeResponseMsg handshake_response_msg = 4;
@@ -33,17 +38,17 @@ message HandshakeRequestMsg {
   bytes mac = 3;
 }
 
-enum ResponseCode {
+enum ResponseCodeDto {
   UNKNOWN = 0;
   OK = 1;
   ERROR = 2;
 }
 
 message HandshakeResponseMsg {
-  ResponseCode code = 1;
+  ResponseCodeDto code = 1;
   string message = 2;
-  ServerPolicy policy = 3;
-  Role role = 4;
+  ServerPolicyDto policy = 3;
+  RoleDto role = 4;
 }
 
 message ChallengeRequestMsg {
@@ -58,8 +63,8 @@ message ChallengeResponseMsg {
   bytes mac = 3;
 }
 
-message ServerPolicy {
-  bool strict_token_movement = 1;
+message ServerPolicyDto {
+  bool use_strict_token_management = 1;
   bool is_movement_locked = 2;
   bool is_token_editor_locked = 3;
   bool players_can_reveal_vision = 4;
@@ -71,19 +76,19 @@ message ServerPolicy {
   bool use_individual_FOW = 10;
   bool is_auto_reveal_on_movement = 11;
   bool include_owned_NPCs = 12;
-  WalkerMetric movement_metric = 13;
+  WalkerMetricDto movement_metric = 13;
   bool using_astar_pathfinding = 14;
   bool vbl_blocks_move = 15;
 }
 
-enum WalkerMetric {
+enum WalkerMetricDto {
     NO_DIAGONALS = 0;
     MANHATTAN = 1;
     ONE_TWO_ONE = 2;
     ONE_ONE_ONE = 3;
 }
 
-enum Role {
+enum RoleDto {
     PLAYER = 0;
     GM = 1;
 }
