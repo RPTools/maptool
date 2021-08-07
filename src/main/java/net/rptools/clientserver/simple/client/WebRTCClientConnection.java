@@ -49,7 +49,6 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCDataChannel localDataChannel;
   private RTCDataChannel remoteDataChannel;
 
-
   private boolean started = false;
   private SendThread sendThread;
   private Thread handleConnnect;
@@ -193,6 +192,8 @@ public class WebRTCClientConnection extends AbstractConnection
     var initDict = new RTCDataChannelInit();
     localDataChannel = peerConnection.createDataChannel("myDataChannel", initDict);
     localDataChannel.registerObserver(this);
+    sendThread = new SendThread(this);
+    sendThread.start();
 
     var offerOptions = new RTCOfferOptions();
     peerConnection.createOffer(offerOptions, this);
@@ -426,7 +427,6 @@ public class WebRTCClientConnection extends AbstractConnection
               buffer.put(message);
 
               localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
-
             }
             synchronized (this) {
               if (!stopRequested) {
@@ -439,9 +439,9 @@ public class WebRTCClientConnection extends AbstractConnection
             }
           }
         } catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-            log.error(e.toString());
+          System.out.println(e.toString());
+          e.printStackTrace();
+          log.error(e.toString());
         }
       }
     }

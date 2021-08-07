@@ -40,7 +40,6 @@ import net.rptools.maptool.util.PasswordGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /** @author trevor */
 public class Handshake implements MessageHandler {
   /** Instance used for log messages. */
@@ -449,7 +448,6 @@ public class Handshake implements MessageHandler {
       sendErrorResponseAndNotify();
       return;
     }
-
 
     var policy = Mapper.map(server.getPolicy());
     var role = RoleDto.valueOf(player.getRole().name());
