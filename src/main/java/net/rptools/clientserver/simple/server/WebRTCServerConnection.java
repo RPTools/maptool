@@ -40,7 +40,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private final Gson gson = new Gson();
   private RTCConfiguration rtcConfig;
 
-  public static String WebSocketUrl = "ws://20.101.25.63:9090";
+  public static String WebSocketUrl = "ws://mt-test2.azurewebsites.net";
 
   public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
     super(handshake);
@@ -65,6 +65,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
             log.info("Websocket connected\n");
             var msg = new LoginMessage();
             msg.source = config.getServerName();
+
             send(gson.toJson(msg));
           }
 
@@ -76,7 +77,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
           @Override
           public void onClose(int code, String reason, boolean remote) {
-            log.info("Websocket connected\n");
+            log.info("Websocket closed\n");
           }
 
           @Override

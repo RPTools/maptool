@@ -76,6 +76,17 @@ public class WebRTCClientConnection extends AbstractConnection
     peerConnection.createAnswer(answerOptions, this);
   }
 
+  private boolean isServerSide() {
+    return serverConnection != null;
+  }
+
+  private String getSource() {
+    // on server side the id is alread user@server
+    if (isServerSide()) return getId();
+
+    return getId() + "@" + config.getServerName();
+  }
+
   private void startSignaling() {
     URI uri = null;
     try {
@@ -89,7 +100,7 @@ public class WebRTCClientConnection extends AbstractConnection
           public void onOpen(ServerHandshake handshakedata) {
             log.info("Websocket connected\n");
             var msg = new LoginMessage();
-            msg.source = getId();
+            msg.source = getSource();
             send(gson.toJson(msg));
           }
 
@@ -101,7 +112,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
           @Override
           public void onClose(int code, String reason, boolean remote) {
-            log.info("Websocket connected\n");
+            log.info("Websocket closed\n");
           }
 
           @Override
@@ -200,7 +211,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private String prefix() {
-    return serverConnection == null ? "C " : "S ";
+    return isServerSide() ? "S " : "C ";
   }
 
   @Override
@@ -216,6 +227,9 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onIceConnectionChange(RTCIceConnectionState state) {
     log.info(prefix() + "PeerConnection.onIceConnectionChange " + state);
+
+    // connection established we don't need the signaling server any more
+    if (!isServerSide() && state == RTCIceConnectionState.COMPLETED) signalingCLient.close();
   }
 
   @Override
@@ -237,12 +251,12 @@ public class WebRTCClientConnection extends AbstractConnection
   public void onIceCandidate(RTCIceCandidate candidate) {
     var msg = new CandidateMessage();
 
-    if (serverConnection == null) {
-      msg.destination = config.getServerName();
-      msg.source = getId();
-    } else {
+    if (isServerSide()) {
       msg.source = config.getServerName();
-      msg.destination = getId();
+      msg.destination = getSource();
+    } else {
+      msg.destination = config.getServerName();
+      msg.source = getSource();
     }
     msg.candidate = candidate;
     signalingCLient.send(gson.toJson(msg));
@@ -276,7 +290,7 @@ public class WebRTCClientConnection extends AbstractConnection
     sendThread = new SendThread(this);
     sendThread.start();
 
-    if (serverConnection != null) {
+    if (isServerSide()) {
       handleConnnect =
           new Thread(
               () -> {
@@ -319,7 +333,7 @@ public class WebRTCClientConnection extends AbstractConnection
   public void onSuccess(RTCSessionDescription description) {
     peerConnection.setLocalDescription(description, this);
 
-    if (serverConnection != null) {
+    if (isServerSide()) {
       var msg = new AnswerMessage();
       msg.source = serverConnection.getConfig().getServerName();
       msg.destination = getId();
@@ -328,7 +342,7 @@ public class WebRTCClientConnection extends AbstractConnection
     } else {
       var msg = new OfferMessage();
       msg.offer = description;
-      msg.source = getId();
+      msg.source = getSource();
       msg.destination = config.getServerName();
       signalingCLient.send(gson.toJson(msg));
     }

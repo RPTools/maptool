@@ -92,6 +92,8 @@ public abstract class AbstractConnection implements IConnection {
     }
     List<byte[]> queue = outQueueList.remove(0);
 
+    if (queue.isEmpty()) return null;
+
     byte[] message = queue.remove(0);
     if (!queue.isEmpty()) {
       outQueueList.add(queue);

@@ -143,6 +143,7 @@ public abstract class AbstractServerConnection extends AbstractConnection
   public void onCompleted(Handshake handshake) {
     handshake.removeObserver(this);
     var conn = handshake.getConnection();
+    handshakeProvider.releaseHandshake(conn);
     if (handshake.isSuccessful()) {
       conn.addMessageHandler(this);
       conn.addDisconnectHandler(this);

@@ -36,7 +36,7 @@ public class ConnectionFactory {
 
   public IMethodClientConnection createClientConnection(String id, ServerConfig config)
       throws IOException {
-    if (!AppState.useWebRTC())
+    if (!AppState.useWebRTC() || config.isPersonalServer())
       return new MethodClientConnection(
           new SocketClientConnection(id, config.getHostName(), config.getPort()));
 
@@ -45,7 +45,7 @@ public class ConnectionFactory {
 
   public IMethodServerConnection createServerConnection(
       ServerConfig config, HandshakeProvider handshake) throws IOException {
-    if (!AppState.useWebRTC())
+    if (!AppState.useWebRTC() || config.isPersonalServer())
       return new MethodServerConnection(new SocketServerConnection(config.getPort(), handshake));
 
     return new MethodServerConnection(new WebRTCServerConnection(config, handshake));
