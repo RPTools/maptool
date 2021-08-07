@@ -108,8 +108,19 @@ public class Token extends BaseModel implements Cloneable {
 
   /** Type of character: PC or NPC. */
   public enum Type {
-    PC,
-    NPC
+    PC(),
+    NPC();
+
+    private final String displayName;
+
+    Type() {
+      displayName = I18N.getString("Token.Type." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
   }
 
   /** Type of update for the token. */
@@ -774,6 +785,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /**
+   * Sets the token's type. Sets hasSight to true if the new type is PC.
+   *
+   * @param type The new type
+   */
   public void setType(Type type) {
     tokenType = type.name();
     if (type == Type.PC) {

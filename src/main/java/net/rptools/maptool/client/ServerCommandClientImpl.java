@@ -110,6 +110,10 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.renameZone, zoneGUID, name);
   }
 
+  public void changeZoneDispName(GUID zoneGUID, String name) {
+    makeServerCall(COMMAND.changeZoneDispName, zoneGUID, name);
+  }
+
   public void putAsset(Asset asset) {
     makeServerCall(COMMAND.putAsset, asset);
   }

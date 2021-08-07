@@ -77,6 +77,7 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<LocalizedComboItem> showNumberingCombo;
   private final JComboBox<WalkerMetric> movementMetricCombo;
   private final JComboBox<Zone.VisionType> visionTypeCombo;
+  private final JComboBox<AppPreferences.MapSortType> mapSortType;
   private final JCheckBox showStatSheetCheckBox;
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
@@ -125,6 +126,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
+  private final JTextField defaultUsername;
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -224,6 +226,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
     frameRateCapTextField = panel.getTextField("frameRateCapTextField");
+    defaultUsername = panel.getTextField("defaultUsername");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
@@ -265,6 +268,7 @@ public class PreferencesDialog extends JDialog {
     showAvatarInChat = panel.getCheckBox("showChatAvatar");
     showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
     visionTypeCombo = panel.getComboBox("defaultVisionType");
+    mapSortType = panel.getComboBox("mapSortType");
     movementMetricCombo = panel.getComboBox("movementMetric");
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
@@ -460,11 +464,17 @@ public class PreferencesDialog extends JDialog {
                 return StringUtil.parseInteger(value);
               }
             });
-    // initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
-    // public void actionPerformed(ActionEvent e) {
-    // AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
-    // }
-    // });
+
+    defaultUsername.addFocusListener(
+        new FocusAdapter() {
+          @Override
+          public void focusLost(FocusEvent e) {
+            if (!e.isTemporary()) {
+              StringBuilder userName = new StringBuilder(defaultUsername.getText());
+              AppPreferences.setDefaultUserName(userName.toString());
+            }
+          }
+        });
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -830,6 +840,13 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setDefaultVisionType(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
 
+    mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
+    mapSortType.setSelectedItem(AppPreferences.getMapSortType());
+    mapSortType.addItemListener(
+        e ->
+            AppPreferences.setMapSortType(
+                (AppPreferences.MapSortType) mapSortType.getSelectedItem()));
+
     macroEditorThemeCombo.setModel(new DefaultComboBoxModel<>());
     try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {
       paths
@@ -884,6 +901,7 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
     fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
+    defaultUsername.setText(AppPreferences.getDefaultUserName());
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());

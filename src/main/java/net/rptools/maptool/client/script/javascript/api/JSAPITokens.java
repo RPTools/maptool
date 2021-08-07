@@ -19,10 +19,14 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPITokens {
+public class JSAPITokens implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.tokens";
+  }
 
   @HostAccess.Export
-  public JSList getMapTokens() {
+  public List<Object> getMapTokens() {
     final List<Object> tokens = new ArrayList<>();
 
     MapTool.getFrame()
@@ -30,6 +34,6 @@ public class JSAPITokens {
         .getZone()
         .getTokens()
         .forEach(t -> tokens.add(new JSAPIToken(t)));
-    return new JSList(tokens);
+    return tokens;
   }
 }

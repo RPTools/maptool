@@ -209,6 +209,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
 
+    // TYPE
+    getTypeCombo().setSelectedItem(token.getType());
+
     // SIGHT
     updateSightTypeCombo();
 
@@ -438,14 +441,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   // }
 
   public void initTypeCombo() {
-    DefaultComboBoxModel model = new DefaultComboBoxModel();
-    model.addElement(Token.Type.NPC);
-    model.addElement(Token.Type.PC);
-    // getTypeCombo().setModel(model);
+    getTypeCombo().setModel(new DefaultComboBoxModel<>(Token.Type.values()));
   }
 
   public JComboBox getTypeCombo() {
-    return (JComboBox) getComponent("@type");
+    return (JComboBox) getComponent("type");
   }
 
   public void initTokenIconPanel() {
@@ -606,6 +606,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (!super.commit() || MapTool.getFrame().getCurrentZoneRenderer() == null) {
       return false;
     }
+    // TYPE
+    // Only update this if it actually changed
+    if (getTypeCombo().getSelectedItem() != token.getType()) {
+      token.setType((Token.Type) getTypeCombo().getSelectedItem());
+    }
+
     // SIZE
     token.setSnapToScale(getSizeCombo().getSelectedIndex() != 0);
     if (getSizeCombo().getSelectedIndex() > 0) {

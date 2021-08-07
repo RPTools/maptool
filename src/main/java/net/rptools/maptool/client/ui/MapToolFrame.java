@@ -22,16 +22,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
@@ -170,6 +170,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
   private final ChatTyperObserver chatTyperObserver;
+  private GUID PreRemoveRenderGUID = null;
 
   private final GlassPane glassPane;
   /** Model for the token tree panel of the map explorer. */
@@ -564,6 +565,31 @@ public class MapToolFrame extends DefaultDockableHolder
       getDockingManager().addFrame(frame);
     }
 
+    /* Issue #2485
+     * Layout data is only retained for frames that already exist, so to work around this
+     * create some placeholder frames using the names saved to frames.dat before loading
+     * the layout
+     */
+    String[] frameNames = null;
+    try {
+      Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
+      String data = Files.readString(path, StandardCharsets.UTF_8);
+
+      if (!data.isEmpty()) {
+        frameNames = data.split("\0");
+
+        for (String name : frameNames) {
+          if (name.isBlank()) continue;
+          getDockingManager().addFrame(new DockableFrame(name));
+        }
+      }
+    } catch (NoSuchFileException nsfe) {
+      // Do nothing
+    } catch (IOException ioe) {
+      log.error("Unable to load frames.dat", ioe);
+    }
+    /* /Issue #2485 */
+
     try {
       getDockingManager()
           .loadInitialLayout(
@@ -586,6 +612,15 @@ public class MapToolFrame extends DefaultDockableHolder
     for (MTFrame mtFrame : frameMap.keySet()) {
       setFrameTitle(mtFrame, I18N.getText(mtFrame.getPropertyName()));
     }
+
+    /* Issue #2485 */
+    if (frameNames != null) {
+      for (String name : frameNames) {
+        if (name.isBlank()) continue;
+        getDockingManager().hideFrame(name);
+      }
+    }
+    /* /Issue #2485 */
   }
 
   public DockableFrame getFrame(MTFrame frame) {
@@ -1446,6 +1481,16 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
+    if (renderer.getZone().getId().equals(this.PreRemoveRenderGUID)) {
+      if (MapTool.getPlayer().isGM() || renderer.getZone().isVisible()) {
+        this.PreRemoveRenderGUID = null;
+        setCurrentZoneRenderer(renderer);
+      } else {
+        this.PreRemoveRenderGUID = null;
+      }
+    } else {
+      this.PreRemoveRenderGUID = null;
+    }
   }
 
   /**
@@ -1456,6 +1501,7 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public void removeZoneRenderer(ZoneRenderer renderer) {
     boolean isCurrent = renderer == getCurrentZoneRenderer();
+    this.PreRemoveRenderGUID = getCurrentZoneRenderer().getZone().getId();
     zoneRendererList.remove(renderer);
     if (isCurrent) {
       boolean rendererSet = false;
@@ -1558,7 +1604,18 @@ public class MapToolFrame extends DefaultDockableHolder
             + " - "
             + MapTool.getPlayer()
             + campaignName
-            + (renderer != null ? " - " + renderer.getZone().getName() : ""));
+            + (renderer != null
+                ? " - "
+                    + (((renderer.getZone().getPlayerAlias() != null)
+                            && !MapTool.getPlayer().isGM())
+                        ? renderer.getZone().getPlayerAlias()
+                        : (renderer.getZone().getPlayerAlias().equals(renderer.getZone().getName())
+                            ? renderer.getZone().getName()
+                            : renderer.getZone().getPlayerAlias()
+                                + " ("
+                                + renderer.getZone().getName()
+                                + ")"))
+                : ""));
   }
 
   /**
@@ -1676,8 +1733,10 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolPanel.add(toolbarPanel.getFogButton());
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
 
+    var btn = toolbarPanel.getPointerGroupButton();
+
     var zoneButton = toolbarPanel.createZoneSelectionButton();
-    zoneButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+    zoneButton.setBorder(btn.getBorder());
     fullScreenToolPanel.add(zoneButton);
 
     var initiativeButton =
@@ -1692,8 +1751,8 @@ public class MapToolFrame extends DefaultDockableHolder
           if (initiativePanel.isVisible()) initiativePanel.setVisible(false);
           else initiativePanel.setVisible(true);
         });
-    initiativeButton.setOpaque(false);
-    initiativeButton.setBorder(toolbarPanel.getPointerGroupButton().getBorder());
+
+    initiativeButton.setBorder(btn.getBorder());
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size
@@ -1702,13 +1761,13 @@ public class MapToolFrame extends DefaultDockableHolder
     for (var component : fullScreenToolPanel.getComponents()) {
       if (!(component instanceof AbstractButton)) continue;
 
-      var btn = (AbstractButton) component;
+      var abstractButton = (AbstractButton) component;
       if (first) {
         first = false;
-        size = btn.getSize();
-      } else btn.setPreferredSize(size);
+        size = abstractButton.getSize();
+      } else abstractButton.setPreferredSize(size);
 
-      btn.setText(null);
+      abstractButton.setText(null);
     }
     fullScreenToolPanel.setSize(fullScreenToolPanel.getPreferredSize());
     zoneRendererPanel.add(fullScreenToolPanel, PositionalLayout.Position.NW);
@@ -1841,7 +1900,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void closingMaintenance() {
-    if (AppPreferences.getSaveReminder()) {
+    if (AppPreferences.getSaveReminder() && MapTool.isCampaignDirty()) {
       if (MapTool.getPlayer().isGM()) {
         int result =
             MapTool.confirmImpl(
@@ -1875,6 +1934,22 @@ public class MapToolFrame extends DefaultDockableHolder
 
     getDockingManager()
         .saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+
+    /* Issue #2485
+     * Write the name of macro created frames to frames.dat so they can be used to create
+     * placeholders the next time Maptool is launched
+     */
+    try {
+      List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+      Collection<String> namesToSave = getDockingManager().getAllFrames();
+      namesToSave.removeAll(mtFrameNames);
+
+      Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
+      Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);
+    } catch (IOException ioe) {
+      log.error("Unable to write to frames.dat", ioe);
+    }
+    /* /Issue #2485 */
 
     // If closing cleanly, remove the autosave file
     MapTool.getAutoSaveManager().purge();

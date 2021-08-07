@@ -47,12 +47,13 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
   private final List<Tuple> chunkList = new LinkedList<Tuple>();
   private int maxChunks;
 
-  private double lastDrawableCount;
   private double lastScale;
   private Rectangle lastViewport;
 
   private int horizontalChunkCount;
   private int verticalChunkCount;
+
+  private boolean dirty = false;
 
   private CodeTimer timer;
 
@@ -67,6 +68,11 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     }
     chunkList.clear();
     noImageSet.clear();
+    dirty = false;
+  }
+
+  public void setDirty() {
+    dirty = true;
   }
 
   public void renderDrawables(
@@ -76,12 +82,12 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     timer.setEnabled(false);
 
     // NOTHING TO DO
-    if (drawableList == null || drawableList.size() == 0) {
-      flush();
+    if (drawableList == null || drawableList.isEmpty()) {
+      if (dirty) flush();
       return;
     }
     // View changed ?
-    if (drawableList.size() != lastDrawableCount || lastScale != scale) {
+    if (dirty || lastScale != scale) {
       flush();
     }
     if (lastViewport == null
@@ -175,7 +181,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     }
     // REMEMBER
     lastViewport = viewport;
-    lastDrawableCount = drawableList.size();
     lastScale = scale;
 
     if (timer.isEnabled()) {

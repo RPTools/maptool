@@ -84,6 +84,7 @@ public interface ServerCommand {
     addTopology,
     removeTopology,
     renameZone,
+    changeZoneDispName,
     heartbeat,
     updateCampaign,
     updateInitiative,
@@ -208,6 +209,8 @@ public interface ServerCommand {
   public void setServerPolicy(ServerPolicy policy);
 
   public void renameZone(GUID zoneGUID, String name);
+
+  public void changeZoneDispName(GUID zoneGUID, String name);
 
   public void heartbeat(String data);
 

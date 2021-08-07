@@ -18,18 +18,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.DockingManager;
 import com.jidesoft.docking.event.DockableFrameAdapter;
 import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.parser.ParserException;
 
 /**
  * Represents a dockable frame holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
@@ -135,7 +140,8 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       boolean scrollReset,
       boolean isHTML5,
       Object val,
-      String html) {
+      String html)
+      throws ParserException {
     HTMLFrame frame;
 
     if (frames.containsKey(name)) {
@@ -145,6 +151,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
         frame.getDockingManager().showFrame(name);
       }
     } else {
+      // Make sure there isn't a name conflict with the normal MT frames
+      boolean isMtframeName =
+          Stream.of(MapToolFrame.MTFrame.values())
+                  .filter(e -> e.name().equals(name))
+                  .findFirst()
+                  .orElse(null)
+              != null;
+      if (isMtframeName) {
+        String opt = isHTML5 ? "frame5" : "frame";
+        throw new ParserException(I18N.getText("lineParser.optReservedName", opt, name));
+      }
+
       // Only set size on creation so we don't override players resizing.
       frame = new HTMLFrame(name, width, height, isHTML5);
       frames.put(name, frame);
@@ -211,7 +229,21 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     addHTMLPanel(isHTML5);
 
     this.getContext().setInitMode(DockContext.STATE_FLOATING);
-    MapTool.getFrame().getDockingManager().addFrame(this);
+
+    /* Issue #2485
+     * If the frame exists, then it's a placeholder frame that should be removed
+     * Note: There should be no risk of MT frames being removed, as that is checked
+     * for in showFrame() (the only place this constructor is called)
+     */
+    DockingManager dm = MapTool.getFrame().getDockingManager();
+    if (dm.getFrame(name) != null) {
+      // The frame needs to be shown before being removed otherwise the layout gets messed up
+      dm.showFrame(name);
+      dm.removeFrame(name, true);
+    }
+    /* /Issue #2485 */
+
+    dm.addFrame(this);
     this.setVisible(true);
     addDockableFrameListener(
         new DockableFrameAdapter() {

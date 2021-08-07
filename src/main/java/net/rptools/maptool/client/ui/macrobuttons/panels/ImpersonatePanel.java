@@ -15,19 +15,21 @@
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
 import com.jidesoft.docking.DockableFrame;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
+import javax.swing.*;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.ModelChangeEvent;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone.Event;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
@@ -154,13 +156,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
         || event.eventType == Event.TOKEN_PANEL_CHANGED
         || event.eventType == Event.TOKEN_EDITED) {
       // Only resets if the impersonated token is among those changed/deleted
-      boolean impersonatedChanged;
-      if (event.getArg() instanceof List<?>) {
-        impersonatedChanged = isImpersonatedAmongList((List<Token>) event.getArg());
-      } else {
-        impersonatedChanged = isTokenImpersonated((Token) event.getArg());
-      }
-      if (impersonatedChanged) {
+      if (isImpersonatedAmongList(event.getTokensAsList())) {
         reset();
       }
     }
