@@ -17,11 +17,9 @@ plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.1.0"
     id "com.diffplug.spotless" version "5.2.0"
-    id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.runtime' version '1.12.4'
-    id "com.google.protobuf" version "0.8.17"
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.beryx.runtime' version '1.12.5'
+    id "com.google.protobuf" version "0.8.17"
 }
 
 // Apply the java plugin to add support for Java
