@@ -1,8 +1,10 @@
 //require our websocket library 
 var WebSocketServer = require('ws').Server;
  
+const port = process.env.PORT || 8080
+
 //creating a websocket server 
-var wss = new WebSocketServer({port: 8080}); 
+var wss = new WebSocketServer({ port }); 
 
 //all connected to the server users 
 var users = {};
