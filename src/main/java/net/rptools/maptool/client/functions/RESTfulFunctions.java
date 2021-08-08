@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -269,9 +270,15 @@ public class RESTfulFunctions extends AbstractFunction {
         || (headerIndex == parameters.size() - 1 && isLastParamBoolean(parameters))) {
       return new HashMap<String, List<String>>();
     } else {
-      return gson.fromJson(
-          (String) parameters.get(headerIndex),
-          new TypeToken<Map<String, List<String>>>() {}.getType());
+      String headerString;
+      Object paramHeader = parameters.get(headerIndex);
+      if (paramHeader instanceof JsonObject) {
+        headerString = ((JsonObject) paramHeader).toString();
+      } else {
+        headerString = paramHeader.toString();
+      }
+
+      return gson.fromJson(headerString, new TypeToken<Map<String, List<String>>>() {}.getType());
     }
   }
 
