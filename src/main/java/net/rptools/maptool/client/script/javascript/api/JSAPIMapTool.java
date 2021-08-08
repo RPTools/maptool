@@ -22,6 +22,10 @@ import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
 public class JSAPIMapTool implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool";
+  }
 
   @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
 
