@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.badlogic.gdx.backends.jogamp.JoglSwingCanvas;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
@@ -40,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -86,10 +88,7 @@ import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
-import net.rptools.maptool.client.ui.zone.PointerOverlay;
-import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
-import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -126,6 +125,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final Pen pen = new Pen(Pen.DEFAULT);
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
+  private JoglSwingCanvas glCanvas;
 
   /** Are the drawing measurements being painted? */
   private boolean paintDrawingMeasurement = true;
@@ -477,14 +477,15 @@ public class MapToolFrame extends DefaultDockableHolder
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
 
     Platform.runLater(()->{
-      var gdxCanvas = new Canvas();
+
+      /*var gdxCanvas = new Canvas();
 
       var frame = new JFrame();
       frame.setSize(getSize());
       frame.add(gdxCanvas);
       frame.setVisible(true);
 
-
+*/
 /*
       var panel = new JPanel();
       panel.add(gdxCanvas);
@@ -493,16 +494,16 @@ public class MapToolFrame extends DefaultDockableHolder
       swingNode.setContent(panel);
 */
 
-
-      javafx.scene.control.Label label = new Label(" ");
+      glCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
+      SwingNode swingNode = new SwingNode();
+      swingNode.setContent(glCanvas.getGLCanvas());
+      javafx.scene.control.Label label = new Label("This is a jfx label");
       label.setMouseTransparent(true);
-      //label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
-
-      var canvas = new NativeRenderingCanvas(gdxCanvas);
+      label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
 
       var root = new StackPane();
       //FIXME: find out why gdx doen't render without this label
-      root.getChildren().addAll(/*swingNode, */canvas.getRoot(),label);
+      root.getChildren().addAll(swingNode/*, label*/);
 
       Scene scene = new Scene(root);
       jfxPanel.setScene(scene);

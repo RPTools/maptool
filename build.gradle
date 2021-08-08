@@ -33,7 +33,7 @@ def winUpgradeUUID = UUID.randomUUID().toString();
 // Custom properties
 ext {
 
-    gdxVersion = '1.9.15-SNAPSHOT'
+    gdxVersion = '1.10.0'
     roboVMVersion = '2.3.12'
     box2DLightsVersion = '1.5'
     ashleyVersion = '1.7.3'
@@ -243,6 +243,10 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
@@ -375,6 +379,7 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
+    implementation 'com.github.thelsing:libgdx-jogl-backend:1.10.0'
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     implementation "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
