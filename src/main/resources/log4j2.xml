@@ -2,7 +2,7 @@
 <Configuration status="INFO" packages="net.rptools.maptool.client.ui.logger">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
         <RollingFile
                 name="LogFile"
