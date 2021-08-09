@@ -177,7 +177,8 @@ public class Token extends BaseModel implements Cloneable {
     setHasSight,
     setSightType,
     flipX,
-    flipY
+    flipY,
+    flipIso
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2681,6 +2682,9 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case flipY:
         setFlippedY(!isFlippedY());
+        break;
+      case flipIso:
+        setFlippedIso(!isFlippedIso());
         break;
     }
     if (lightChanged) {
