@@ -19,7 +19,12 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIChat {
+public class JSAPIChat implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.chat";
+  }
+
   @HostAccess.Export
   public void broadcast(String message) {
     MapTool.addGlobalMessage(message);
