@@ -12,19 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.webrtc;
 
-import java.io.IOException;
-import net.rptools.clientserver.simple.Connection;
-
-public interface ClientConnection extends Connection {
-  void sendMessage(byte[] message);
-
-  void sendMessage(Object channel, byte[] message);
-
-  boolean isAlive();
-
-  String getId();
-
-  void open() throws IOException;
+public class MessageDto {
+  public String type;
+  public String source;
+  public String destination;
 }

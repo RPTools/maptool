@@ -12,25 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.server;
+package net.rptools.clientserver.simple.webrtc;
 
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.Connection;
+import dev.onvoid.webrtc.RTCSessionDescription;
 
-public interface ServerConnection extends Connection {
-  void handleDisconnect(AbstractConnection conn);
+public class AnswerMessageDto extends MessageDto {
+  public RTCSessionDescription answer;
 
-  void handleMessage(String id, byte[] message);
-
-  void addObserver(ServerObserver observer);
-
-  void removeObserver(ServerObserver observer);
-
-  void broadcastMessage(byte[] message);
-
-  void broadcastMessage(String[] exclude, byte[] message);
-
-  void sendMessage(String id, byte[] message);
-
-  void sendMessage(String id, Object channel, byte[] message);
+  public AnswerMessageDto() {
+    type = "answer";
+  }
 }
