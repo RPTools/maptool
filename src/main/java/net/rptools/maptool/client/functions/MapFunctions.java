@@ -47,7 +47,8 @@ public class MapFunctions extends AbstractFunction {
         "setMapVisible",
         "setMapName",
         "setMapDisplayName",
-        "copyMap");
+        "copyMap",
+        "getMapName");
   }
 
   public static MapFunctions getInstance() {
@@ -221,6 +222,17 @@ public class MapFunctions extends AbstractFunction {
       } else {
         return StringFunctions.getInstance().join(mapNames, delim);
       }
+    } else if ("getMapName".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      String dispName = parameters.get(0).toString();
+      checkTrusted(functionName);
+
+      for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+        if (zr.getZone().getPlayerAlias().equals(dispName)) {
+          return zr.getZone().getName();
+        }
+      }
+      throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
