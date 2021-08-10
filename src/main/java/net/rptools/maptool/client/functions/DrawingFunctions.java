@@ -428,6 +428,18 @@ public class DrawingFunctions extends AbstractFunction {
     }
   }
 
+  protected void setDrawingName(Zone map, GUID guid, String name)
+          throws ParserException {
+    DrawnElement de = getDrawnElement("setDrawingName", map, guid);
+    AbstractDrawing ad = (AbstractDrawing) de.getDrawable();
+
+    if (name != null) {
+      ad.setName(name);
+      MapTool.getFrame().updateDrawTree();
+      MapTool.getFrame().refresh();
+    }
+  }
+
   /**
    * Looks for a drawing on a specific map that matches a specific id. If found sets the Pen. Throws
    * a <code>ParserException</code> if the drawing is not found.
