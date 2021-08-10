@@ -39,6 +39,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.jogamp.opengl.awt.GLJPanel;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
@@ -55,7 +56,6 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.box2d.NativeRenderingCanvas;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
@@ -125,7 +125,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final Pen pen = new Pen(Pen.DEFAULT);
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
-  private JoglSwingCanvas glCanvas;
+  private JoglSwingCanvas joglSwingCanvas;
 
   /** Are the drawing measurements being painted? */
   private boolean paintDrawingMeasurement = true;
@@ -221,9 +221,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private final GlobalPanel globalPanel = new GlobalPanel();
   private final SelectionPanel selectionPanel = new SelectionPanel();
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
-  private final JFXPanel jfxPanel =  new JFXPanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+  private GLJPanel gdxPanel;
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -476,45 +476,31 @@ public class MapToolFrame extends DefaultDockableHolder
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
 
+    joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);  /*
     Platform.runLater(()->{
 
-      /*var gdxCanvas = new Canvas();
 
-      var frame = new JFrame();
-      frame.setSize(getSize());
-      frame.add(gdxCanvas);
-      frame.setVisible(true);
 
-*/
-/*
-      var panel = new JPanel();
-      panel.add(gdxCanvas);
-      panel.setSize(getSize());
       SwingNode swingNode = new SwingNode();
-      swingNode.setContent(panel);
-*/
-
-      glCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
-      SwingNode swingNode = new SwingNode();
-      swingNode.setContent(glCanvas.getGLCanvas());
+      swingNode.setContent(joglSwingCanvas.getGLCanvas());
       javafx.scene.control.Label label = new Label("This is a jfx label");
       label.setMouseTransparent(true);
       label.setStyle("-fx-font-size: 64pt; -fx-font-family: Arial; -fx-font-weight: bold; -fx-text-fill: white; -fx-opacity: 0.8;");
 
       var root = new StackPane();
       //FIXME: find out why gdx doen't render without this label
-      root.getChildren().addAll(swingNode/*, label*/);
+      root.getChildren().addAll(swingNode);
 
       Scene scene = new Scene(root);
-      jfxPanel.setScene(scene);
-    });
-    zoneRendererPanel.add(jfxPanel, PositionalLayout.Position.CENTER);
-
-    jfxPanel.setVisible(false);
+      gdxPanel.setScene(scene);
+    }); */
+    gdxPanel = joglSwingCanvas.getGLCanvas();
+    zoneRendererPanel.add(gdxPanel, PositionalLayout.Position.CENTER);
+    gdxPanel.setVisible(false);
   }
 
-  public void addJfx() {
-    jfxPanel.setVisible(!jfxPanel.isVisible());
+  public void addGdx() {
+    gdxPanel.setVisible(!gdxPanel.isVisible());
   }
 
   public ChatNotificationTimers getChatNotificationTimers() {
@@ -932,8 +918,8 @@ public class MapToolFrame extends DefaultDockableHolder
     return zoomStatusBar;
   }
 
-  public JFXPanel getJfxPanel() {
-    return jfxPanel;
+  public GLJPanel getGdxPanel() {
+    return gdxPanel;
   }
 
 

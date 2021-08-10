@@ -243,11 +243,12 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
+/*
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
-
+*/
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work

@@ -2043,7 +2043,7 @@ public class AppActions {
 
         @Override
         public void executeAction() {
-            MapTool.getFrame().addJfx();
+            MapTool.getFrame().addGdx();
             //MapTool.loadBox2dTest();
 
         }

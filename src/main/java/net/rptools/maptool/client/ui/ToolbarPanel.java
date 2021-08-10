@@ -412,7 +412,7 @@ public class ToolbarPanel extends JToolBar {
     button.setToolTipText(mutetooltip);
     button.addActionListener(
             e -> {
-              MapTool.getFrame().addJfx();
+              MapTool.getFrame().addGdx();
             });
 
     try {

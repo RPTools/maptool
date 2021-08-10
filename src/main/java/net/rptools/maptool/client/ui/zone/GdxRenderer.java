@@ -1,5 +1,7 @@
 package net.rptools.maptool.client.ui.zone;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
@@ -11,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -54,6 +57,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Polygon;
+import java.awt.Shape;
 import java.awt.geom.*;
 import java.io.ByteArrayInputStream;
 import java.text.NumberFormat;
@@ -67,8 +71,6 @@ import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
  * The world coordinates are y-up, x-left. I moved the world to the 4th quadrant of the
  * coordinate system. So if you would draw a token t awt at (x,y) you have to draw it at (x, -y - t.width)
  * <p>
- * Bugs:
- * - Imageborders are not rotated
  */
 
 
@@ -160,9 +162,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private float pointsPerBezier = 10f;
     private boolean showAstarDebugging = false;
 
+    // Box2D stuff
+    private World world;
+    private RayHandler rayHandler;
+    private Box2DDebugRenderer debugRenderer;
+    private Map<Token, Body> tokenBodies = new HashMap<>();
+
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+        Box2D.init();
     }
 
     public static GdxRenderer getInstance() {
@@ -173,6 +182,19 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
+        world = new World(new Vector2(0, 0), true);
+        rayHandler = new RayHandler(world);
+        rayHandler.setAmbientLight(0.1f, 0.1f, 0.1f, 1f);
+        rayHandler.setBlurNum(3);
+        PointLight pl = new PointLight(rayHandler, 128, new Color(0.2f,1,1,1f), 10,-500,200);
+        PointLight pl2 = new PointLight(rayHandler, 128, new Color(1,0,1,1f), 10,500,200);
+
+        rayHandler.setShadows(true);
+        pl.setStaticLight(false);
+        pl.setSoft(true);
+
+
+        debugRenderer = new Box2DDebugRenderer();
         var resolver = new InternalFileHandleResolver();
         manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
         manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
@@ -253,7 +275,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void render() {
-        stateTime += Gdx.graphics.getDeltaTime();
+        var delta = Gdx.graphics.getDeltaTime();
+        stateTime += delta;
         manager.finishLoading();
         packer.updateTextureAtlas(tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
 
@@ -276,7 +299,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
      //   vfxManager.cleanUpBuffers();
      //   vfxManager.beginInputCapture();
+        ScreenUtils.clear(Color.BLACK);
         doRendering();
+        rayHandler.setCombinedMatrix(cam.combined, cam.position.x, cam.position.y, cam.viewportWidth, cam.viewportHeight);
+        rayHandler.updateAndRender();
+        debugRenderer.render(world, cam.combined);
+        world.step(1/60f, 6, 2);
      //   vfxManager.endInputCapture();
      //   vfxManager.applyEffects();
      //   vfxManager.renderToScreen();
@@ -320,7 +348,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void doRendering() {
-        ScreenUtils.clear(Color.CLEAR);
         batch.enableBlending();
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -3214,20 +3241,31 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     public void modelChanged(ModelChangeEvent event) {
         Object evt = event.getEvent();
         System.out.println("ModelChangend: " + evt);
-        if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-            flushFog();
-            //flushLight();
+        if(!(evt instanceof  Zone.Event))
             return;
+        var eventType = (Zone.Event)evt;
+        switch (eventType) {
+            case TOPOLOGY_CHANGED:
+                flushFog();
+                //flushLight();
+                break;
+            case FOG_CHANGED:
+                flushFog = true;
+                break;
+            case TOKEN_CHANGED: {
+                updateVisibleArea();
+                var token = (Token)event.getArg();
+                updateBodyFor(token);
+                break;
+            }
+            case TOKEN_ADDED: {
+                var token = (Token)event.getArg();
+                addBodyFor(token);
+                System.out.println();
+                break;
+            }
         }
-        if (evt == Zone.Event.FOG_CHANGED) {
-            flushFog = true;
-            return;
-        }
-        if (evt == Zone.Event.TOKEN_CHANGED) {
-            updateVisibleArea();
-            return;
-        }
-        return;
+
         /*
         if (evt == Zone.Event.TOKEN_CHANGED
                 || evt == Zone.Event.TOKEN_REMOVED
@@ -3249,6 +3287,58 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         disposeZoneResources();
         initializeZoneResources(currentZone);
   */
+    }
+
+    private void addBodyFor(Token token) {
+       // zone.getGrid().
+        var body = tokenBodies.get(token);
+        if(body != null)
+            return;
+
+        // First we create a body definition
+        BodyDef bodyDef = new BodyDef();
+// We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+// Set our body's starting position in the world
+       // bodyDef.position.set(0, 0);
+
+// Create our body in the world using our body definition
+        body = world.createBody(bodyDef);
+
+// Create a circle shape and set its radius to 6
+        CircleShape circle = new CircleShape();
+        circle.setRadius(6f);
+
+// Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = circle;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.4f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+
+// Create our fixture and attach it to the body
+        Fixture fixture = body.createFixture(fixtureDef);
+
+// Remember to dispose of any shapes after you're done with them!
+// BodyDef and FixtureDef don't need disposing, but shapes do.
+        circle.dispose();
+
+        tokenBodies.put(token, body);
+        updateBodyFor(token);
+    }
+
+    void updateBodyFor(Token token) {
+        var body = tokenBodies.get(token);
+        if(body == null)
+            return;
+
+        var bounds = token.getBounds(zone);
+
+
+        float x = token.getX() + bounds.width/2 + token.getAnchorX();
+        float y = -(token.getY() + bounds.height/2 + token.getAnchorY());
+
+        body.setTransform(x, y, (float)Math.toRadians(token.getFacingInDegrees()));
     }
 
     public void setScale(Scale scale) {

@@ -54,7 +54,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
-import com.badlogic.gdx.Gdx;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.ImageBorder;
@@ -914,7 +913,7 @@ public class ZoneRenderer extends JComponent
     PlayerView pl = getPlayerView();
     timer.stop("paintComponent:createView");
 
-    skipDrawing = MapTool.getFrame().getJfxPanel().isVisible();
+    skipDrawing = MapTool.getFrame().getGdxPanel().isVisible();
 
     renderZone(g2d, pl);
     int noteVPos = 20;
