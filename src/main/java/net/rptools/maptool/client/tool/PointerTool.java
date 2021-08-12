@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.tool;
 
+import static com.oracle.truffle.js.builtins.RealmFunctionBuiltins.RealmFunction.current;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -103,6 +105,9 @@ public class PointerTool extends DefaultTool {
   private int dragOffsetY = 0;
   private int dragStartX = 0;
   private int dragStartY = 0;
+
+
+  private String currentPointerName;
 
   public PointerTool() {
     try {
@@ -1476,7 +1481,14 @@ public class PointerTool extends DefaultTool {
                   renderer.getWidth(),
                   renderer.getHeight());
         }
-        MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
+
+        if (tokenUnderMouse != null && tokenUnderMouse.getSpeechName() != null && tokenUnderMouse.getSpeechName().length() > 0) {
+          currentPointerName = tokenUnderMouse.getSpeechName();
+        } else {
+         currentPointerName = MapTool.getPlayer().getName();
+        }
+        //MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
+        MapTool.serverCommand().showPointer(currentPointerName, pointer);
       }
       isSpaceDown = true;
     }
@@ -1499,7 +1511,7 @@ public class PointerTool extends DefaultTool {
     public void actionPerformed(ActionEvent e) {
       if (isShowingPointer) {
         isShowingPointer = false;
-        MapTool.serverCommand().hidePointer(MapTool.getPlayer().getName());
+        MapTool.serverCommand().hidePointer(currentPointerName);
 
         if (MapTool.getPlayer().isGM() & restoreZoneView) {
           MapTool.serverCommand().restoreZoneView(renderer.getZone().getId());
