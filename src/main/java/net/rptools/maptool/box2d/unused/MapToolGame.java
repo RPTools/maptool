@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import net.rptools.maptool.box2d.unused.Box2dRenderer;
 import net.rptools.maptool.box2d.unused.DesktopLauncher;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 
 public class MapToolGame extends Game {
@@ -35,15 +36,10 @@ public class MapToolGame extends Game {
 	public BitmapFont font;
 
 	private MapToolFrame mapToolFrame;
-	public DesktopLauncher launcher;
 
-	public MapToolGame(DesktopLauncher desktopLauncher) {
-		launcher = desktopLauncher;
-	}
-	
-	public MapToolGame(MapToolFrame parentFrame, DesktopLauncher desktopLauncher) {
+
+	public MapToolGame(MapToolFrame parentFrame) {
 		mapToolFrame = parentFrame;
-		launcher = desktopLauncher;
 	}
 
 	@Override

@@ -56,6 +56,8 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
+import net.rptools.maptool.box2d.unused.Box2dLightTest;
+import net.rptools.maptool.box2d.unused.MapToolGame;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
@@ -476,7 +478,10 @@ public class MapToolFrame extends DefaultDockableHolder
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
 
-    joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);  /*
+  //  joglSwingCanvas = new JoglSwingCanvas(new Box2dLightTest(), "test", 640, 480);
+  //  joglSwingCanvas = new JoglSwingCanvas(new MapToolGame(this), "test", 640, 480);
+     joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
+  /*
     Platform.runLater(()->{
 
 

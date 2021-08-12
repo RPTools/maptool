@@ -146,9 +146,6 @@ public class Box2dRenderer implements Screen {
 		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT);
 
 		// Suspend all activity while window is closed
-		if (!app.launcher.isVisible())
-			return;
-
 		update(delta);
 		stage.draw();
 
