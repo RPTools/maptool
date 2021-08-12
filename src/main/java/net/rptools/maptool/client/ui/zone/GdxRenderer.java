@@ -30,6 +30,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.box2d.GifDecoder;
+import net.rptools.maptool.box2d.GifDecoder2;
 import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
@@ -3402,9 +3403,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             if(asset.getImageExtension() == "gif") {
 
                 Gdx.app.postRunnable(() -> {
-                    var ass = AssetManager.getAsset(key);
+                    //var ass = AssetManager.getAsset(key);
                     var is = new ByteArrayInputStream(asset.getImage());
-                    var animation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, is);
+                    var animation = GifDecoder2.loadGIFAnimation(Animation.PlayMode.LOOP, is);
+//                    var animation = GifDecoderOptimized.loadGIFAnimation(Animation.PlayMode.LOOP, asset.getImage());
                     animationMap.put(key, animation);
                 });
                 return;
