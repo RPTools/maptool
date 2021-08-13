@@ -2617,6 +2617,9 @@ public class Token extends BaseModel implements Cloneable {
         setGMName((String) parameters[0]);
         panelLookChanged = true;
         break;
+      case setSpeechName:
+        setSpeechName((String) parameters[0]);
+        break;
       case setVisible:
         setVisible((boolean) parameters[0]);
         break;
