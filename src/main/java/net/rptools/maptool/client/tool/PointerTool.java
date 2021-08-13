@@ -34,12 +34,14 @@ import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -47,6 +49,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Player.Role;
+import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -1482,15 +1485,57 @@ public class PointerTool extends DefaultTool {
                   renderer.getHeight());
         }
 
-        if (tokenUnderMouse != null && tokenUnderMouse.getSpeechName() != null && tokenUnderMouse.getSpeechName().length() > 0) {
-          currentPointerName = tokenUnderMouse.getSpeechName();
-        } else {
-         currentPointerName = MapTool.getPlayer().getName();
-        }
-        //MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
+
+        currentPointerName = getPointerName(type);
+
         MapTool.serverCommand().showPointer(currentPointerName, pointer);
       }
       isSpaceDown = true;
+    }
+
+    private String getPointerName(Type type) {
+      String playerName = MapTool.getPlayer().getName();
+
+      if (type != Type.SPEECH_BUBBLE && type != Type.THOUGHT_BUBBLE) {
+        return playerName;
+      }
+      boolean isGM = MapTool.getPlayer().isGM();
+      List<Token> tokenStackAt = renderer.getTokenStackAt(mouseX, mouseY);
+      if (tokenStackAt == null) {
+        if (tokenUnderMouse != null) {
+          tokenStackAt = List.of(tokenUnderMouse);
+        } else {
+          tokenStackAt = List.of();
+        }
+      }
+      Set<Token> tokens = tokenStackAt.stream()
+              .filter(t -> isGM || t.isOwner(playerName))
+              .filter(t -> t.getSpeechName() != null && t.getSpeechName().length() > 0)
+              .collect(Collectors.toSet());
+
+      Token pointerToken = null;
+      Token impersonatedToken = null;
+      GUID guid = MapTool.getFrame().getImpersonatePanel().getTokenId();
+      if (guid != null) {
+        // Searches all maps to find impersonated token
+        impersonatedToken = FindTokenFunctions.findToken(guid.toString());
+      }
+
+      if (impersonatedToken != null && tokens.size() == 0) {
+        pointerToken = impersonatedToken;
+      } else if (impersonatedToken != null && tokens.contains(impersonatedToken)) {
+        pointerToken = impersonatedToken;
+      } else if (tokens.contains(tokenUnderMouse)) {
+        pointerToken = tokenUnderMouse;
+      } else if (tokens.size() > 0) {
+        pointerToken = tokens.iterator().next();
+      }
+
+      if (pointerToken != null) {
+        return pointerToken.getSpeechName();
+      } else {
+        return playerName;
+      }
     }
   }
 
