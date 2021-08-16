@@ -12,25 +12,16 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.server;
+package net.rptools.clientserver.hessian.server;
 
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.Connection;
+import net.rptools.clientserver.simple.server.ServerConnection;
 
-public interface ServerConnection extends Connection {
-  void handleDisconnect(AbstractConnection conn);
+public interface MethodServerConnection extends ServerConnection {
+  void broadcastCallMethod(String method, Object... parameters);
 
-  void handleMessage(String id, byte[] message);
+  void broadcastCallMethod(String[] exclude, String method, Object... parameters);
 
-  void addObserver(ServerObserver observer);
+  void callMethod(String id, String method, Object... parameters);
 
-  void removeObserver(ServerObserver observer);
-
-  void broadcastMessage(byte[] message);
-
-  void broadcastMessage(String[] exclude, byte[] message);
-
-  void sendMessage(String id, byte[] message);
-
-  void sendMessage(String id, Object channel, byte[] message);
+  void callMethod(String id, Object channel, String method, Object... parameters);
 }

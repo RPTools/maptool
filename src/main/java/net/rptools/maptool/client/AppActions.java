@@ -2195,7 +2195,8 @@ public class AppActions {
                         serverProps.getGMPassword(),
                         serverProps.getPlayerPassword(),
                         serverProps.getPort(),
-                        serverProps.getRPToolsName());
+                        serverProps.getRPToolsName(),
+                        "localhost");
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2232,16 +2233,14 @@ public class AppActions {
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
                   if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
                             serverProps.getGMPassword()));
                   } else {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
@@ -2318,9 +2317,16 @@ public class AppActions {
                 boolean failed = false;
                 try {
                   ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
+                  ServerConfig config =
+                      new ServerConfig(
+                          prefs.getUsername(),
+                          "",
+                          "",
+                          dialog.getPort(),
+                          prefs.getServerName(),
+                          dialog.getServer());
                   MapTool.createConnection(
-                      dialog.getServer(),
-                      dialog.getPort(),
+                      config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
 
                   MapTool.getFrame().hideGlassPane();
@@ -3134,6 +3140,23 @@ public class AppActions {
         protected void executeAction() {
           MapTool.getFrame()
               .setPaintDrawingMeasurement(!MapTool.getFrame().isPaintDrawingMeasurement());
+        }
+      };
+
+  public static final Action TOGGLE_WEBRTC =
+      new AdminClientAction() {
+        {
+          init("action.toggleUseWebRTC");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.useWebRTC();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setUseWebRTC(!AppState.useWebRTC());
         }
       };
 
