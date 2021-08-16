@@ -161,10 +161,16 @@ public class MapFunctions extends AbstractFunction {
       String mapName = parameters.get(0).toString();
       String newMapDisplayName = parameters.get(1).toString();
       Zone zone = getNamedMap(functionName, mapName).getZone();
+      String oldName;
+      oldName = zone.getPlayerAlias();
       zone.setPlayerAlias(newMapDisplayName);
+      if (oldName.equals(newMapDisplayName)) return zone.getPlayerAlias();
       MapTool.serverCommand().changeZoneDispName(zone.getId(), newMapDisplayName);
       if (zone == MapTool.getFrame().getCurrentZoneRenderer().getZone())
         MapTool.getFrame().setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+      if (oldName.equals(zone.getPlayerAlias()))
+        throw new ParserException(
+            I18N.getText("macro.function.map.duplicateDisplay", functionName));
       return zone.getPlayerAlias();
 
     } else if ("copyMap".equalsIgnoreCase(functionName)) {
