@@ -57,17 +57,16 @@ public class MapToolServer {
   private HeartbeatThread heartbeatThread;
 
   public MapToolServer(ServerConfig config, ServerPolicy policy) throws IOException {
+    this.config = config;
+    this.policy = policy;
     handler = new ServerMethodHandler(this);
-    conn = new MapToolServerConnection(this, config.getPort());
+    conn = new MapToolServerConnection(this);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
 
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
-
-    this.config = config;
-    this.policy = policy;
 
     // Start a heartbeat if requested
     if (config.isServerRegistered()) {
@@ -98,11 +97,7 @@ public class MapToolServer {
   public void releaseClientConnection(String id) {
     ClientConnection connection = getClientConnection(id);
     if (connection != null) {
-      try {
-        connection.close();
-      } catch (IOException e) {
-        log.error("Could not release connection: " + id, e);
-      }
+      connection.close();
     }
     assetManagerMap.remove(id);
     connectionMap.remove(id);
@@ -262,6 +257,10 @@ public class MapToolServer {
   // CLASSES
   private class AssetProducerThread extends Thread {
     private boolean stop = false;
+
+    public AssetProducerThread() {
+      setName("AssetProducerThread");
+    }
 
     @Override
     public void run() {
