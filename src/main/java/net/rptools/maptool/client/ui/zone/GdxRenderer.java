@@ -111,7 +111,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private float stateTime = 0f;
     private boolean renderZone = false;
     // general resources
-    private OrthographicCamera cam;
+    private PerspectiveCamera cam;
     private OrthographicCamera hudCam;
     private PolygonSpriteBatch batch;
     private NativeRenderer jfxRenderer;
@@ -166,9 +166,9 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private boolean showAstarDebugging = false;
 
     // Box2D stuff
-    private World world;
-    private RayHandler rayHandler;
-    private Box2DDebugRenderer debugRenderer;
+ //   private World world;
+ //   private RayHandler rayHandler;
+//    private Box2DDebugRenderer debugRenderer;
     private Map<Token, Body> tokenBodies = new HashMap<>();
 
 
@@ -185,16 +185,16 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
-        world = new World(new Vector2(0, 0), true);
-        rayHandler = new RayHandler(world);
-        rayHandler.setAmbientLight(0.1f, 0.1f, 0.1f, 1f);
-        rayHandler.setBlurNum(3);
-        PointLight pl = new PointLight(rayHandler, 128, new Color(0.2f,1,1,1f), 10,-500,200);
-        PointLight pl2 = new PointLight(rayHandler, 128, new Color(1,0,1,1f), 10,500,200);
+        //world = new World(new Vector2(0, 0), true);
+        //rayHandler = new RayHandler(world);
+        //rayHandler.setAmbientLight(0.1f, 0.1f, 0.1f, 1f);
+ //       rayHandler.setBlurNum(3);
+  //      PointLight pl = new PointLight(rayHandler, 128, new Color(0.2f,1,1,1f), 10,500,200);
+        //PointLight pl2 = new PointLight(rayHandler, 128, new Color(1,0,1,1f), 10,500,200);
 
-        rayHandler.setShadows(true);
-        pl.setStaticLight(false);
-        pl.setSoft(true);
+        //rayHandler.setShadows(true);
+//        pl.setStaticLight(false);
+        //pl.setSoft(true);
 
         Gdx.input.setInputProcessor(new InputProcessor() {
             @Override
@@ -238,7 +238,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             }
         });
 
-        debugRenderer = new Box2DDebugRenderer();
+        //debugRenderer = new Box2DDebugRenderer();
         var resolver = new InternalFileHandleResolver();
         manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
         manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
@@ -246,11 +246,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
 
-        cam = new OrthographicCamera();
-        cam.setToOrtho(false);
+        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.lookAt(0,0,0);
+
+        //cam.setToOrtho(false);
 
         hudCam = new OrthographicCamera();
         hudCam.setToOrtho(false);
+
+        updateCam();
 
         batch = new PolygonSpriteBatch();
 
@@ -305,9 +309,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private void updateCam() {
         cam.viewportWidth = width;
         cam.viewportHeight = height;
+        cam.near = 0.1f;;
         cam.position.x = zoom * (width / 2f + offsetX);
         cam.position.y = zoom * (height / 2f * -1 + offsetY);
-        cam.zoom = zoom;
+        cam.position.z = (zoom * height) / (2f * (float)Math.tan(Math.toRadians(cam.fieldOfView/2f)));
+        cam.far = cam.position.z + 0.1f;
+
+
+        //cam.zoom = zoom;
         cam.update();
 
         hudCam.viewportWidth = width;
@@ -345,10 +354,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
      //   vfxManager.beginInputCapture();
         ScreenUtils.clear(Color.BLACK);
         doRendering();
-        rayHandler.setCombinedMatrix(cam.combined, cam.position.x, cam.position.y, cam.viewportWidth, cam.viewportHeight);
-        rayHandler.updateAndRender();
-        debugRenderer.render(world, cam.combined);
-        world.step(1/60f, 6, 2);
+   //     rayHandler.setCombinedMatrix(cam.combined, cam.position.x, cam.position.y, cam.viewportWidth, cam.viewportHeight);
+   //     rayHandler.updateAndRender();
+   //     debugRenderer.render(world, cam.combined);
+    //    world.step(1/60f, 6, 2);
      //   vfxManager.endInputCapture();
      //   vfxManager.applyEffects();
      //   vfxManager.renderToScreen();
@@ -3064,7 +3073,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         if (!initialized)
             return;
 
-        cam.zoom = 1.0f;
+        //cam.zoom = 1.0f;
         offsetX = 0;
         offsetY = 0;
         fogX = null;
@@ -3334,7 +3343,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     }
 
     private void addBodyFor(Token token) {
-       // zone.getGrid().
+/*
         var body = tokenBodies.get(token);
         if(body != null)
             return;
@@ -3369,9 +3378,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         tokenBodies.put(token, body);
         updateBodyFor(token);
+        */
     }
 
     void updateBodyFor(Token token) {
+        /*
         var body = tokenBodies.get(token);
         if(body == null)
             return;
@@ -3383,6 +3394,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         float y = -(token.getY() + bounds.height/2 + token.getAnchorY());
 
         body.setTransform(x, y, (float)Math.toRadians(token.getFacingInDegrees()));
+        */
     }
 
     public void setScale(Scale scale) {
