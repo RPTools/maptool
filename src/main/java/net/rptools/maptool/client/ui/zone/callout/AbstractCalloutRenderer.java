@@ -9,9 +9,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
-/**
- * Abstract class containing reusable logic for call out rendering.
- */
+/** Abstract class containing reusable logic for call out rendering. */
 public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   /** The Graphics context to render the callout with. */
@@ -20,6 +18,7 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
   private final ZoneRenderer zoneRenderer;
   /** The font metrics for the graphics context and zone renderer font. */
   private final FontMetrics fontMetrics;
+
   private final int widthPadding;
   private final List<String> lines;
   private final int textWidth;
@@ -37,27 +36,34 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   /**
    * Creates a new {@code AbstractCalloutRenderer}.
+   *
    * @param zrederer the {@link ZoneRenderer} that this call out is rendered in.
    * @param g the {@link Graphics2D} graphics context used to render the callout.
    * @param sp the {@link ScreenPoint} where the callout is rendered.
    * @param text The list of Strings to render.
-   * @param popupLocation the {@link CalloutPopupLocation} where the callout is rendered in
-   *                      relation to the screen point.
+   * @param popupLocation the {@link CalloutPopupLocation} where the callout is rendered in relation
+   *     to the screen point.
    * @param leftMargin the x offset from the left margin where the content bounds start.
    * @param topMargin the y offset from the top margin where the content bounds start.
    */
-  protected AbstractCalloutRenderer(ZoneRenderer zrederer, Graphics2D g, ScreenPoint sp,
-      CalloutPopupLocation popupLocation, int leftMargin, int topMargin, List<String> text) {
+  protected AbstractCalloutRenderer(
+      ZoneRenderer zrederer,
+      Graphics2D g,
+      ScreenPoint sp,
+      CalloutPopupLocation popupLocation,
+      int leftMargin,
+      int topMargin,
+      List<String> text) {
     g2d = g;
     zoneRenderer = zrederer;
-    fontMetrics= g2d.getFontMetrics(zoneRenderer.getFont());
+    fontMetrics = g2d.getFontMetrics(zoneRenderer.getFont());
     widthPadding = SwingUtilities.computeStringWidth(fontMetrics, "M") * 3;
     lines = List.copyOf(text);
 
     // Calculate text sizes
     FontMetrics metrics = g2d.getFontMetrics();
     int tWidth = 0;
-    for (String line :lines) {
+    for (String line : lines) {
       int w = SwingUtilities.computeStringWidth(metrics, line);
       tWidth = Math.max(w, tWidth);
     }
@@ -68,8 +74,8 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
     // Calculate content padding
 
-    contentWidth =  textWidth + 2 * widthPadding;
-    heightPadding = textHeight;
+    contentWidth = textWidth + 2 * widthPadding;
+    heightPadding = textHeight * 2;
     contentHeight = textHeight * text.size() + 2 * heightPadding + lineSpacing * (text.size() - 1);
     this.leftMargin = leftMargin;
     this.topMargin = topMargin;
@@ -77,13 +83,20 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
     this.calloutPopupLocation = popupLocation;
 
     topLeftX =
-        (int) (sp.getX() - (contentWidth * this.calloutPopupLocation.getWidthMultiplier()) + leftMargin);
+        (int)
+            (sp.getX()
+                - (contentWidth * this.calloutPopupLocation.getWidthMultiplier())
+                + this.leftMargin);
     topLeftY =
-        (int) (sp.getY() - (contentHeight * this.calloutPopupLocation.getHeightMultiplier()) + topMargin);
+        (int)
+            (sp.getY()
+                - (contentHeight * this.calloutPopupLocation.getHeightMultiplier())
+                + this.topMargin);
   }
 
   /**
    * Returns the {@link Graphics2D} graphics context used to render the callout.
+   *
    * @return the graphics context.
    */
   protected Graphics2D getGraphics() {
@@ -92,6 +105,7 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   /**
    * Returns the {@link ZoneRenderer} that the callout is rendered for.
+   *
    * @return the zone renderer.
    */
   protected ZoneRenderer getZoneRenderer() {
@@ -100,6 +114,7 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   /**
    * Returns the maximum text width for the strings that make up the text.
+   *
    * @return the maximum width of the text.
    */
   protected int getTextWidth() {
@@ -109,7 +124,6 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
   protected List<String> getLines() {
     return lines;
   }
-
 
   protected int getWidthPadding() {
     return widthPadding;
@@ -133,11 +147,7 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   protected Rectangle2D getContentBounds() {
     return new Rectangle2D.Double(
-        getTopLeftX(),
-        getTopLeftY(),
-        getContentWidth(),
-        getContentHeight()
-    );
+        getTopLeftX(), getTopLeftY(), getContentWidth(), getContentHeight());
   }
 
   protected CalloutPopupLocation getCalloutPopupLocation() {
@@ -148,12 +158,11 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
     Graphics2D g = (Graphics2D) g2d.create();
     g.setPaint(paint);
     Rectangle2D contentBounds = getContentBounds();
-    int y = (int)contentBounds.getY() + heightPadding + lineHeight/2;
-    int x = (int)contentBounds.getX() + widthPadding;
+    int y = (int) contentBounds.getY() + heightPadding + lineHeight / 2;
+    int x = (int) contentBounds.getX() + widthPadding;
     for (String line : lines) {
       g.drawString(line, x, y);
       y += lineHeight;
     }
   }
-
 }

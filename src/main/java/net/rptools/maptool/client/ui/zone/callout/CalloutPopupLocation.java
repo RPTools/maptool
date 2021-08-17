@@ -23,16 +23,13 @@ public enum CalloutPopupLocation {
     BOTTOM_RIGHT.opposite = TOP_LEFT;
   }
 
+  private final double widthMultiplier;
+  private final double heightMultiplier;
+  private CalloutPopupLocation opposite;
   CalloutPopupLocation(double widthMult, double heightMult) {
     widthMultiplier = widthMult;
     heightMultiplier = heightMult;
   }
-
-
-  private final double widthMultiplier;
-  private final double heightMultiplier;
-  private CalloutPopupLocation opposite;
-
 
   public double getWidthMultiplier() {
     return widthMultiplier;
@@ -45,5 +42,4 @@ public enum CalloutPopupLocation {
   public CalloutPopupLocation getOpposite() {
     return opposite;
   }
-
 }

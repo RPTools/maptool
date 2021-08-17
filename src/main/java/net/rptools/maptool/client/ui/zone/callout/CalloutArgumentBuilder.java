@@ -9,14 +9,14 @@ import java.util.Map;
 public class CalloutArgumentBuilder {
   private Color textColor;
   private Color backgroundColor;
+  private Color outlineColor;
   private CalloutPopupLocation popupLocation;
-  private List<String> otherText = new ArrayList<>();
-  private Map<String, String> otherArguments = new HashMap<>();
-
+  private final List<String> otherText = new ArrayList<>();
+  private final Map<String, String> otherArguments = new HashMap<>();
 
   public CalloutArguments build() {
-    return new CalloutArguments(textColor, backgroundColor, popupLocation,
-        otherText, otherArguments);
+    return new CalloutArguments(
+        textColor, backgroundColor, outlineColor, popupLocation, otherText, otherArguments);
   }
 
   public Color getTextColor() {
@@ -44,6 +44,20 @@ public class CalloutArgumentBuilder {
 
   public CalloutArgumentBuilder setBackgroundColor(String backgroundColor) {
     this.backgroundColor = Color.decode(backgroundColor);
+    return this;
+  }
+
+  public Color getOutlineColor() {
+    return outlineColor;
+  }
+
+  public CalloutArgumentBuilder setOutlineColor(Color outlineColor) {
+    this.outlineColor = outlineColor;
+    return this;
+  }
+
+  public CalloutArgumentBuilder setOutlineColor(String outlineColor) {
+    this.outlineColor = Color.decode(outlineColor);
     return this;
   }
 

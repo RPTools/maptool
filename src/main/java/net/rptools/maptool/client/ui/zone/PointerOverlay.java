@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
-import static org.reflections.util.ConfigurationBuilder.build;
-
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -29,6 +27,7 @@ import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArgumentBuilder;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArguments;
 import net.rptools.maptool.client.ui.zone.callout.SpeechBubbleRenderer;
+import net.rptools.maptool.client.ui.zone.callout.ThoughtBubbleRenderer;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -77,17 +76,16 @@ public class PointerOverlay implements ZoneOverlay {
             image = POINTER_IMAGE;
             break;
           case SPEECH_BUBBLE:
-            CalloutArguments calloutArguments = new CalloutArgumentBuilder()
+            CalloutArguments speechCalloutArguments = new CalloutArgumentBuilder()
                 .addText(p.player)
                 .build();
-            new SpeechBubbleRenderer(renderer, g, sPoint, calloutArguments).render();
+            new SpeechBubbleRenderer(renderer, g, sPoint, speechCalloutArguments).render();
             break;
           case THOUGHT_BUBBLE:
-            offX = -13;
-            offY = -65;
-            centX = 36;
-            centY = 23;
-            image = THOUGHT_IMAGE;
+            CalloutArguments thoughtCalloutArguments = new CalloutArgumentBuilder()
+                .addText(p.player)
+                .build();
+            new ThoughtBubbleRenderer(renderer, g, sPoint, thoughtCalloutArguments).render();
             break;
           case LOOK_HERE:
             offX = 0;
