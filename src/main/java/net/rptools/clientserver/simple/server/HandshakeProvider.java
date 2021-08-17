@@ -14,23 +14,11 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.Connection;
+import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.maptool.server.Handshake;
 
-public interface ServerConnection extends Connection {
-  void handleDisconnect(AbstractConnection conn);
+public interface HandshakeProvider {
+  Handshake getConnectionHandshake(ClientConnection conn);
 
-  void handleMessage(String id, byte[] message);
-
-  void addObserver(ServerObserver observer);
-
-  void removeObserver(ServerObserver observer);
-
-  void broadcastMessage(byte[] message);
-
-  void broadcastMessage(String[] exclude, byte[] message);
-
-  void sendMessage(String id, byte[] message);
-
-  void sendMessage(String id, Object channel, byte[] message);
+  void releaseHandshake(ClientConnection conn);
 }

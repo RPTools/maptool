@@ -15,63 +15,73 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import net.rptools.clientserver.hessian.client.ClientConnection;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.hessian.client.MethodClientConnection;
+import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.server.Handshake;
+import net.rptools.maptool.server.ServerConfig;
 
 /** @author trevor */
-public class MapToolConnection extends ClientConnection {
+public class MapToolConnection {
   private final Player player;
+  private MethodClientConnection connection;
+  private Handshake handshake;
+  private Runnable onCompleted;
 
-  public MapToolConnection(String host, int port, Player player) throws IOException {
-    super(host, port, null);
+  public MapToolConnection(ServerConfig config, Player player) throws IOException {
+    this.connection =
+        ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
+    this.handshake = new Handshake(connection, player);
+    onCompleted = () -> {};
   }
 
-  public MapToolConnection(Socket socket, Player player) throws IOException {
-    super(socket, null);
-    this.player = player;
+  public void setOnCompleted(Runnable onCompleted) {
+    if (onCompleted == null) this.onCompleted = () -> {};
+    else this.onCompleted = onCompleted;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.clientserver.simple.client.ClientConnection#sendHandshake( java.net.Socket)
-   */
-  @Override
-  public boolean sendHandshake(Socket s) throws IOException {
-    Handshake.Response response = null;
-    try {
-      response =
-          Handshake.sendHandshake(
-              new Handshake.Request(
-                  player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()),
-              s);
-    } catch (IllegalBlockSizeException
-        | InvalidKeyException
-        | BadPaddingException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException
-        | InvalidKeySpecException e) {
-      MapTool.showError("Handshake.msg.encodeInitFail", e);
-      return false;
-    }
+  public void start() throws IOException {
+    connection.addMessageHandler(handshake);
+    handshake.addObserver(
+        (ignore) -> {
+          connection.removeMessageHandler(handshake);
+          if (handshake.isSuccessful()) {
+            onCompleted.run();
+          } else {
+            var exception = handshake.getException();
+            if (exception != null) MapTool.showError("Handshake.msg.encodeInitFail", exception);
+            else MapTool.showError("ERROR: " + handshake.getErrorMessage());
+            connection.close();
+            onCompleted.run();
+          }
+        });
+    // this triggers the handshake from the server side
+    connection.open();
+  }
 
-    if (response.code != Handshake.Code.OK) {
-      MapTool.showError("ERROR: " + response.message);
-      return false;
-    }
-    boolean result = response.code == Handshake.Code.OK;
-    if (result) {
-      MapTool.setServerPolicy(response.policy);
-    }
-    return result;
+  public void addMessageHandler(ClientMethodHandler handler) {
+    connection.addMessageHandler(handler);
+  }
+
+  public void addActivityListener(ActivityMonitorPanel activityMonitor) {
+    connection.addActivityListener(activityMonitor);
+  }
+
+  public void addDisconnectHandler(ServerDisconnectHandler serverDisconnectHandler) {
+    connection.addDisconnectHandler(serverDisconnectHandler);
+  }
+
+  public boolean isAlive() {
+    return connection.isAlive();
+  }
+
+  public void close() throws IOException {
+    connection.close();
+  }
+
+  public void callMethod(String name, Object[] params) {
+    connection.callMethod(name, params);
   }
 }

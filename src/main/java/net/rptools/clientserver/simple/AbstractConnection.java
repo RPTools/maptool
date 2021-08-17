@@ -33,7 +33,7 @@ import net.rptools.clientserver.ActivityListener.State;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public abstract class AbstractConnection {
+public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
   protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();
@@ -51,7 +51,7 @@ public abstract class AbstractConnection {
     messageHandlers.remove(handler);
   }
 
-  protected final void dispatchMessage(String id, byte[] message) {
+  public final void dispatchMessage(String id, byte[] message) {
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
     }
@@ -91,6 +91,8 @@ public abstract class AbstractConnection {
       return null;
     }
     List<byte[]> queue = outQueueList.remove(0);
+
+    if (queue.isEmpty()) return null;
 
     byte[] message = queue.remove(0);
     if (!queue.isEmpty()) {
@@ -152,7 +154,7 @@ public abstract class AbstractConnection {
     notifyListeners(Direction.Outbound, State.Complete, length, length);
   }
 
-  protected final byte[] readMessage(InputStream in) throws IOException {
+  public final byte[] readMessage(InputStream in) throws IOException {
     int b32 = in.read();
     int b24 = in.read();
     int b16 = in.read();
