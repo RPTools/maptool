@@ -16,99 +16,173 @@ package net.rptools.maptool.client.ui.zone.callout;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/** Builder class for {@link CalloutArguments}. */
 public class CalloutArgumentBuilder {
+  /** The {@link Color} used to render the text if applicable. */
   private Color textColor;
+  /** The {@link Color} used to render the background of the callout. */
   private Color backgroundColor;
+  /** The {@link Color} used to render the outline of the callout if applicable. */
   private Color outlineColor;
+  /** The anchor location of the callout. */
   private CalloutPopupLocation popupLocation;
-  private final List<String> otherText = new ArrayList<>();
-  private final Map<String, String> otherArguments = new HashMap<>();
+  /** The text lines to be rendered in the callout. */
+  private final List<String> text = new ArrayList<>();
 
+  /**
+   * Builds a {@link CalloutArguments} object based on the parameters set using this builder.
+   *
+   * @return the {@link CalloutArguments}.
+   */
   public CalloutArguments build() {
-    return new CalloutArguments(
-        textColor, backgroundColor, outlineColor, popupLocation, otherText, otherArguments);
+    return new CalloutArguments(textColor, backgroundColor, outlineColor, popupLocation, text);
   }
 
+  /**
+   * Returns the {@link Color} used to render the text.
+   *
+   * @return the {@link Color} used to render the text.
+   */
   public Color getTextColor() {
     return textColor;
   }
 
+  /**
+   * Sets the {@link Color} used to render text.
+   *
+   * @param textColor the {@link Color} used to render the text.
+   * @return {@code this} so that methods can be chained.
+   */
   public CalloutArgumentBuilder setTextColor(Color textColor) {
     this.textColor = textColor;
     return this;
   }
 
+  /**
+   * Sets the {@link Color} used to render text from a {@link String}.
+   *
+   * @param textColor the {@link Color} used to render the text from a {@link String}.
+   * @return {@code this} so that methods can be chained.
+   * @see Color#decode(String)
+   */
   public CalloutArgumentBuilder setTextColor(String textColor) {
     this.textColor = Color.decode(textColor);
     return this;
   }
 
+  /**
+   * Returns the background {@link Color} for the callout.
+   *
+   * @return the background {@link Color} for the callout.
+   */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
 
+  /**
+   * Sets the {@link Color} used to render the background.
+   *
+   * @param backgroundColor the {@link Color} used to render the background.
+   * @return {@code this} so that methods can be chained.
+   */
   public CalloutArgumentBuilder setBackgroundColor(Color backgroundColor) {
     this.backgroundColor = backgroundColor;
     return this;
   }
 
+  /**
+   * Sets the {@link Color} used to render the background from a {@link String}.
+   *
+   * @param backgroundColor the {@link Color} used to render the background from a {@link String}.
+   * @return {@code this} so that methods can be chained.
+   * @see Color#decode(String)
+   */
   public CalloutArgumentBuilder setBackgroundColor(String backgroundColor) {
     this.backgroundColor = Color.decode(backgroundColor);
     return this;
   }
 
+  /**
+   * Returns the {@link Color} used to render the outline of the callout.
+   *
+   * @return the {@link Color} used to render the outline of the callout.
+   */
   public Color getOutlineColor() {
     return outlineColor;
   }
 
+  /**
+   * Sets the {@link Color} used to render the outline.
+   *
+   * @param outlineColor the {@link Color} used to render the outline.
+   * @return {@code this} so that methods can be chained.
+   */
   public CalloutArgumentBuilder setOutlineColor(Color outlineColor) {
     this.outlineColor = outlineColor;
     return this;
   }
 
+  /**
+   * Sets the {@link Color} used to render the outline from a {@link String}.
+   *
+   * @param outlineColor the {@link Color} used to render the outline from a {@link String}.
+   * @return {@code this} so that methods can be chained.
+   * @see Color#decode(String)
+   */
   public CalloutArgumentBuilder setOutlineColor(String outlineColor) {
     this.outlineColor = Color.decode(outlineColor);
     return this;
   }
 
+  /**
+   * Returns the anchor location for the callout.
+   *
+   * @return the anchor location for the callout.
+   */
   public CalloutPopupLocation getPopupLocation() {
     return popupLocation;
   }
 
+  /**
+   * Sets the anchor location for the callout.
+   *
+   * @param popupLocation the anchor location for the callout.
+   * @return {@code this} so that the methods can be chained.
+   */
   public CalloutArgumentBuilder setPopupLocation(CalloutPopupLocation popupLocation) {
     this.popupLocation = popupLocation;
     return this;
   }
 
-  public List<String> getOtherText() {
-    return otherText;
+  /**
+   * Returns the text to be rendered in the callout.
+   *
+   * @return the text to be rednered in the callout.
+   */
+  public List<String> getText() {
+    return text;
   }
 
-  public CalloutArgumentBuilder addText(String otherText) {
-    this.otherText.add(otherText);
+  /**
+   * Adds a text line to the text to be rendered in the callout.
+   *
+   * @param text the line of text to be added.
+   * @return {@code this} so that the methods can be chained.
+   */
+  public CalloutArgumentBuilder addText(String text) {
+    this.text.add(text);
     return this;
   }
 
+  /**
+   * Removes all the lines of text to be rendered in the callout.
+   *
+   * @return {@code this} so that the methods can be chained.
+   */
   public CalloutArgumentBuilder clearText() {
-    this.otherText.clear();
-    return this;
-  }
-
-  public Map<String, String> getOtherArguments() {
-    return otherArguments;
-  }
-
-  public CalloutArgumentBuilder putOtherArguments(String name, String value) {
-    otherArguments.put(name, value);
-    return this;
-  }
-
-  public CalloutArgumentBuilder removeOtherArgument(String name) {
-    otherArguments.remove(name);
+    this.text.clear();
     return this;
   }
 }

@@ -30,22 +30,25 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
   private final Graphics2D g2d;
   /** The zone render that this callout will be rendered in. */
   private final ZoneRenderer zoneRenderer;
-  /** The font metrics for the graphics context and zone renderer font. */
-  private final FontMetrics fontMetrics;
-
+  /** Padding to use either side of the text that is rendered. */
   private final int widthPadding;
+  /** The lines of text to be rendered. */
   private final List<String> lines;
+  /** The width of the maximum text line to be rendered. */
   private final int textWidth;
+  /** The width of the content area. */
   private final int contentWidth;
-  private final int textHeight;
+  /** The height of a single line. */
   private final int lineHeight;
+  /** The padding size for the height of the content area. */
   private final int heightPadding;
-  private final int lineSpacing;
+  /** The height of the content area. */
   private final int contentHeight;
-  private final int leftMargin;
-  private final int topMargin;
+  /** The anchor location of the callout. */
   private final CalloutPopupLocation calloutPopupLocation;
+  /** The X co-ordinate of the top left of the callout. */
   private final int topLeftX;
+  /** The Y co-ordinate of the top left of the callout. */
   private final int topLeftY;
 
   /**
@@ -70,7 +73,8 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
       List<String> text) {
     g2d = g;
     zoneRenderer = zrederer;
-    fontMetrics = g2d.getFontMetrics(zoneRenderer.getFont());
+    /** The font metrics for the graphics context and zone renderer font. */
+    FontMetrics fontMetrics = g2d.getFontMetrics(zoneRenderer.getFont());
     widthPadding = SwingUtilities.computeStringWidth(fontMetrics, "M") * 3;
     lines = List.copyOf(text);
 
@@ -82,8 +86,8 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
       tWidth = Math.max(w, tWidth);
     }
     textWidth = tWidth;
-    textHeight = fontMetrics.getHeight();
-    lineSpacing = Math.min(10, textHeight / 4);
+    int textHeight = fontMetrics.getHeight();
+    int lineSpacing = Math.min(10, textHeight / 4);
     lineHeight = textHeight + lineSpacing;
 
     // Calculate content padding
@@ -91,8 +95,6 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
     contentWidth = textWidth + 2 * widthPadding;
     heightPadding = textHeight * 2;
     contentHeight = textHeight * text.size() + 2 * heightPadding + lineSpacing * (text.size() - 1);
-    this.leftMargin = leftMargin;
-    this.topMargin = topMargin;
 
     this.calloutPopupLocation = popupLocation;
 
@@ -100,12 +102,12 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
         (int)
             (sp.getX()
                 - (contentWidth * this.calloutPopupLocation.getWidthMultiplier())
-                + this.leftMargin);
+                + leftMargin);
     topLeftY =
         (int)
             (sp.getY()
                 - (contentHeight * this.calloutPopupLocation.getHeightMultiplier())
-                + this.topMargin);
+                + topMargin);
   }
 
   /**
@@ -135,39 +137,84 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
     return textWidth;
   }
 
+  /**
+   * Returns the lines to render in the callout.
+   *
+   * @return the lines to render.
+   */
   protected List<String> getLines() {
     return lines;
   }
 
+  /**
+   * Returns the padding for sides of the callout content.
+   *
+   * @return the padding for the sides of the callout content.
+   */
   protected int getWidthPadding() {
     return widthPadding;
   }
 
+  /**
+   * Returns the X co-ordinate of the top left corner of the callout.
+   *
+   * @return the X co-ordinate of the top left corner of the callout.
+   */
   protected int getTopLeftX() {
     return topLeftX;
   }
 
+  /**
+   * Returns the Y co-ordinate of the top left corner of the callout.
+   *
+   * @return the Y co-ordinate of the top left corner of the callout.
+   */
   protected int getTopLeftY() {
     return topLeftY;
   }
 
+  /**
+   * Returns the width of the content area for the callout.
+   *
+   * @return the width of the content are for the callout.
+   */
   protected int getContentWidth() {
     return contentWidth;
   }
 
+  /**
+   * Returns the height of the content area for the callout.
+   *
+   * @return the height of the content are for the callout.
+   */
   protected int getContentHeight() {
     return contentHeight;
   }
 
+  /**
+   * Returns the bounds of the content area for the callout.
+   *
+   * @return the bounds of the content area for the callout.
+   */
   protected Rectangle2D getContentBounds() {
     return new Rectangle2D.Double(
         getTopLeftX(), getTopLeftY(), getContentWidth(), getContentHeight());
   }
 
+  /**
+   * Returns the anchor location for the callout.
+   *
+   * @return the anchor location for the callout.
+   */
   protected CalloutPopupLocation getCalloutPopupLocation() {
     return calloutPopupLocation;
   }
 
+  /**
+   * Renders the text inside the content area,
+   *
+   * @param paint the {@link Paint} used to render the text.
+   */
   protected void renderText(Paint paint) {
     Graphics2D g = (Graphics2D) g2d.create();
     g.setPaint(paint);

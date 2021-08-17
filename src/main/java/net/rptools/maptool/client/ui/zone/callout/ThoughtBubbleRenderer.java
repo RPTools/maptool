@@ -21,8 +21,10 @@ import java.util.Map;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
+/** Class that implements the renderer for a callout for a speech bubble. */
 public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
 
+  /** Offsets to from the standard anchor point to the actual top left of the callout. */
   private static final Map<CalloutPopupLocation, Offset> OFFSETS =
       Map.of(
           CalloutPopupLocation.TOP_LEFT, new Offset(0, 2),
@@ -35,20 +37,35 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
           CalloutPopupLocation.BOTTOM, new Offset(0, -14),
           CalloutPopupLocation.BOTTOM_RIGHT, new Offset(0, -2));
 
+  /** The default anchor point for the callout when none is specified. */
   private static final CalloutPopupLocation DEFAULT_POPUP_LOCATION =
       CalloutPopupLocation.BOTTOM_LEFT;
+  /** The default color used for rendering text if none is specified. */
   private static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
+  /** The default color used to rendering the background if none is specified. */
   private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+  /** The color used to render the shadows for the callout. */
   private static final Color SHADOW_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.5f);
 
+  /** The x offset for the shadow. */
   private static final int SHADOW_OFFSET_X = 1;
+  /** The y offset for the shadow. */
   private static final int SHADOW_OFFSET_Y = 3;
 
+  /**
+   * The maximum number of lines before the callout is rendered as a rounded rectangle instead of an
+   * oval.
+   */
   private static final int MAX_OVAL_LINES = 5;
+  /** The arc width to use for the rounded rectangle. */
   private static final int DEFAULT_ARC_WIDTH = 75;
+  /** The arc height to use for the rounded rectangle. */
   private static final int DEFAULT_ARC_HEIGHT = 75;
+
+  /** The default color used to render the outline of the callout if nont is specified. */
   private static final Color DEFAULT_OUTLINE_COLOR = Color.BLACK;
 
+  /** The arguments used to build the callout. */
   private final CalloutArguments calloutArguments;
 
   /**
@@ -73,6 +90,22 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
     calloutArguments = arguments;
   }
 
+  /**
+   * Calculates the triangle for the callout tail.
+   *
+   * @param x populated with the X co-ordinates for the center of the bubbles.
+   * @param y populated with the Y co-ordinates for the center of the bubbles.
+   * @param shadowX populated with the X co-ordinates for the shadow of the center of the bubbles.
+   * @param shadowY populated with the Y co-ordinates for the shadow of the center of the bubbles.
+   * @param width populated with the widths of the bubbles.
+   * @param height populated with the heights of the bubbles.
+   * @param halfX the halfway x offset.
+   * @param halfY the halfway y offset.
+   * @param minX the minimum X co-ordinate of the content area of the callout.
+   * @param minY the minimum Y co-ordinate of the content area of the callout.
+   * @param width the width of the content area of the callout.
+   * @param height the height of the content area of the callout.
+   */
   private void calculateTail(
       int[] x,
       int[] y,
@@ -296,5 +329,6 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
     renderText(textColor);
   }
 
+  /** Record used to hold the offset from the top left corner. */
   private static record Offset(int x, int y) {}
 }

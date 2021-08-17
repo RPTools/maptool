@@ -16,76 +16,126 @@ package net.rptools.maptool.client.ui.zone.callout;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.Map;
 
+/** Class representing tha arguments used to build the callout. */
 public class CalloutArguments {
+  /** The color used to render the text. */
   private final Color textColor;
+  /* The color used to render the background. */
   private final Color backgroundColor;
+  /** The color used to render the outline. */
   private final Color outlineColor;
+  /** The anchor location of the callout. */
   private final CalloutPopupLocation popupLocation;
+  /** The text to be displayed in the callout. */
   private final List<String> text;
-  private final Map<String, String> otherArguments;
 
+  /**
+   * Creates a new {@code CalloutArguments} object.
+   *
+   * @param textColor the color used to render the text of the callout.
+   * @param backgroundColor the color used to render the background of the callout.
+   * @param outlineColor the color used to render the outline of the callout.
+   * @param popupLocation the anchor location for the callout.
+   * @param text the text to be displayed in the callout.
+   */
   CalloutArguments(
       Color textColor,
       Color backgroundColor,
       Color outlineColor,
       CalloutPopupLocation popupLocation,
-      List<String> text,
-      Map<String, String> otherArguments) {
+      List<String> text) {
     this.textColor = textColor;
     this.backgroundColor = backgroundColor;
     this.outlineColor = outlineColor;
     this.popupLocation = popupLocation;
     this.text = List.copyOf(text);
-    this.otherArguments = Map.copyOf(otherArguments);
   }
 
+  /**
+   * Returns the {@link Color} used to render the text of the callout.
+   *
+   * @return the {@link Color} used to render the text of the callout.
+   */
   public Color getTextColor() {
     return textColor;
   }
 
+  /**
+   * Returns the {@link Color} used to render the text of the callout or {@code defaultColor} if it
+   * is not set.
+   *
+   * @param defaultColor the {@link Color} to return if the text color has not been set.
+   * @return the {@link Color} used to render the text of the callout.
+   */
   public Color getTextColorOr(Color defaultColor) {
     return textColor != null ? textColor : defaultColor;
   }
 
+  /**
+   * Returns the {@link Color} used to render the background of the callout.
+   *
+   * @return the {@link Color} used to render the background of the callout.
+   */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
 
+  /**
+   * Returns the {@link Color} used to render the background of the callout or {@code defaultColor}
+   * if it is not set.
+   *
+   * @param defaultColor the {@link Color} to return if the background color has not been set.
+   * @return the {@link Color} used to render the background of the callout.
+   */
   public Color getBackgroundColorOr(Color defaultColor) {
     return backgroundColor != null ? backgroundColor : defaultColor;
   }
 
+  /**
+   * Returns the anchor location of the callout.
+   *
+   * @return the anchor location of the callout.
+   */
   public CalloutPopupLocation getPopupLocation() {
     return popupLocation;
   }
 
+  /**
+   * Returns the anchor location of the callout or {@code defaultPopupLocation} if it is not set.
+   *
+   * @param defaultPopupLocation the anchor location to return if one has not been set.
+   * @return the anchor location of the callout.
+   */
   public CalloutPopupLocation getPopupLocationOr(CalloutPopupLocation defaultPopupLocation) {
     return popupLocation != null ? popupLocation : defaultPopupLocation;
   }
 
+  /**
+   * Returns the text to render in the callout.
+   *
+   * @return the text to render in the callout.
+   */
   public List<String> getText() {
     return text;
   }
 
-  public Map<String, String> getOtherArguments() {
-    return otherArguments;
+  /**
+   * Returns the {@link Color} used to render the outline of the callout or {@code defaultColor} if
+   * it is not set.
+   *
+   * @param defaultColor the {@link Color} to return if the outline color has not been set.
+   * @return the {@link Color} used to render the outline of the callout.
+   */
+  public Color getOutlineColorOr(Color defaultColor) {
+    return outlineColor != null ? outlineColor : defaultColor;
   }
 
-  public String getOtherArgument(String name) {
-    return otherArguments.get(name);
-  }
-
-  public String getOtherArgumentOr(String name, String defaultValue) {
-    String val = getOtherArgument(name);
-    return val != null ? val : defaultValue;
-  }
-
-  public Color getOutlineColorOr(Color defaultOutlineColor) {
-    return outlineColor != null ? outlineColor : defaultOutlineColor;
-  }
-
+  /**
+   * Returns the {@link Color} used to render the outline of the callout.
+   *
+   * @return the {@link Color} used to render the outline of the callout.
+   */
   public Color getOutlineColor() {
     return outlineColor;
   }
