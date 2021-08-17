@@ -82,6 +82,5 @@ public class TokenSpeechNameFunction extends AbstractFunction {
    */
   public static void setSpeechName(Token token, String name) throws ParserException {
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSpeechName, name);
-
   }
 }

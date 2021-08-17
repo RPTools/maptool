@@ -684,9 +684,9 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOpacity;
   }
 
-
   /**
    * Returns the name to be displayed in speech and thought bubbles.
+   *
    * @return the name to be displayed in speech and thought bubbles/
    */
   public String getSpeechName() {
@@ -695,6 +695,7 @@ public class Token extends BaseModel implements Cloneable {
 
   /**
    * Sets the name to be displayed in speech and thought bubbles.
+   *
    * @param name the name to be displayed.
    */
   public void setSpeechName(String name) {

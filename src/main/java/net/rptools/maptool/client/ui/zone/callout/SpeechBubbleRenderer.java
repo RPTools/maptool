@@ -1,5 +1,18 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.zone.callout;
-
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -10,18 +23,17 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
 
-
-  private final static Map<CalloutPopupLocation, Offset> OFFSETS = Map.of(
-      CalloutPopupLocation.TOP_LEFT, new Offset(0, 0),
-      CalloutPopupLocation.TOP, new Offset(0, 20),
-      CalloutPopupLocation.TOP_RIGHT, new Offset(0, 0),
-      CalloutPopupLocation.LEFT, new Offset(20, 0),
-      CalloutPopupLocation.CENTER, new Offset(0, 0),
-      CalloutPopupLocation.RIGHT, new Offset(-20, 0),
-      CalloutPopupLocation.BOTTOM_LEFT, new Offset(0, 0),
-      CalloutPopupLocation.BOTTOM, new Offset(0, -20),
-      CalloutPopupLocation.BOTTOM_RIGHT, new Offset(0, 0)
-  );
+  private static final Map<CalloutPopupLocation, Offset> OFFSETS =
+      Map.of(
+          CalloutPopupLocation.TOP_LEFT, new Offset(0, 0),
+          CalloutPopupLocation.TOP, new Offset(0, 20),
+          CalloutPopupLocation.TOP_RIGHT, new Offset(0, 0),
+          CalloutPopupLocation.LEFT, new Offset(20, 0),
+          CalloutPopupLocation.CENTER, new Offset(0, 0),
+          CalloutPopupLocation.RIGHT, new Offset(-20, 0),
+          CalloutPopupLocation.BOTTOM_LEFT, new Offset(0, 0),
+          CalloutPopupLocation.BOTTOM, new Offset(0, -20),
+          CalloutPopupLocation.BOTTOM_RIGHT, new Offset(0, 0));
 
   private static final CalloutPopupLocation DEFAULT_POPUP_LOCATION =
       CalloutPopupLocation.BOTTOM_LEFT;
@@ -38,16 +50,16 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
 
   private final CalloutArguments calloutArguments;
 
-
   /**
    * Creates a new {@link SpeechBubbleRenderer}.
+   *
    * @param zoneRenderer the {@link ZoneRenderer} the callout is rendered for.
    * @param g2d the {@link Graphics2D} graphics context used to render the callout.
    * @param sp the {@link ScreenPoint} where the callout is rendered.
    * @param arguments the {@link CalloutArguments} for this callout.
    */
-  public SpeechBubbleRenderer(ZoneRenderer zoneRenderer, Graphics2D g2d, ScreenPoint sp,
-      CalloutArguments arguments) {
+  public SpeechBubbleRenderer(
+      ZoneRenderer zoneRenderer, Graphics2D g2d, ScreenPoint sp, CalloutArguments arguments) {
     super(
         zoneRenderer,
         g2d,
@@ -55,14 +67,17 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
         arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION),
         OFFSETS.get(arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION)).x(),
         OFFSETS.get(arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION)).y(),
-         arguments.getText()
-    );
+        arguments.getText());
 
     calloutArguments = arguments;
   }
 
-  private void calculateTail(int[] tailX, int[] tailY, int[] tailXShadow,
-      int[] tailYShadow, int minX,
+  private void calculateTail(
+      int[] tailX,
+      int[] tailY,
+      int[] tailXShadow,
+      int[] tailYShadow,
+      int minX,
       int minY,
       int width,
       int height) {
@@ -71,72 +86,71 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
     int maxX = minX + width;
     int maxY = minY + height;
 
-
     switch (getCalloutPopupLocation()) {
-      case TOP_LEFT -> {
+      case TOP_LEFT:
         tailX[0] = minX;
         tailX[1] = minX + 20;
         tailX[2] = minX + 70;
         tailY[0] = minY;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
-      case TOP -> {
+        break;
+      case TOP:
         tailX[0] = halfX;
         tailX[1] = halfX + 20;
         tailX[2] = halfX + 70;
         tailY[0] = minY - 20;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
-      case TOP_RIGHT -> {
+        break;
+      case TOP_RIGHT:
         tailX[0] = maxX;
         tailX[1] = maxX - 20;
         tailX[2] = maxX - 70;
         tailY[0] = minY;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
-      case LEFT -> {
+        break;
+      case LEFT:
         tailX[0] = minX - 20;
         tailX[1] = halfX;
         tailX[2] = halfX;
         tailY[0] = halfY;
         tailY[1] = Math.max(halfY - 25, minY);
         tailY[2] = halfY + 15;
-      }
-      case RIGHT -> {
+        break;
+      case RIGHT:
         tailX[0] = maxX + 20;
         tailX[1] = halfX;
         tailX[2] = halfX;
         tailY[0] = halfY;
         tailY[1] = Math.max(halfY - 25, minY);
         tailY[2] = halfY + 15;
-      }
-      case BOTTOM_LEFT -> {
+        break;
+      case BOTTOM_LEFT:
         tailX[0] = minX;
         tailX[1] = minX + 20;
-        tailX[2] = minX +70;
+        tailX[2] = minX + 70;
         tailY[0] = maxY;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
-      case BOTTOM -> {
+        break;
+      case BOTTOM:
         tailX[0] = halfX;
         tailX[1] = halfX + 20;
         tailX[2] = halfX + 70;
         tailY[0] = maxY + 20;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
-      case BOTTOM_RIGHT -> {
+        break;
+      case BOTTOM_RIGHT:
         tailX[0] = maxX;
         tailX[1] = maxX - 20;
         tailX[2] = maxX - 70;
         tailY[0] = maxY;
         tailY[1] = halfY;
         tailY[2] = halfY;
-      }
+        break;
     }
 
     tailXShadow[0] = tailX[0] + SHADOW_OFFSET_X;
@@ -147,7 +161,6 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
     tailYShadow[1] = tailY[1] + SHADOW_OFFSET_Y;
     tailYShadow[2] = tailY[2] + SHADOW_OFFSET_Y;
   }
-
 
   @Override
   public void render() {
@@ -166,8 +179,13 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
     // First draw shadow offset
     g.setPaint(SHADOW_COLOR);
     if (numberLines > MAX_OVAL_LINES) {
-      g.fillRoundRect(minX + SHADOW_OFFSET_X, minY + SHADOW_OFFSET_Y, width, height,
-          DEFAULT_ARC_WIDTH, DEFAULT_ARC_HEIGHT);
+      g.fillRoundRect(
+          minX + SHADOW_OFFSET_X,
+          minY + SHADOW_OFFSET_Y,
+          width,
+          height,
+          DEFAULT_ARC_WIDTH,
+          DEFAULT_ARC_HEIGHT);
     } else {
       g.fillOval(minX + SHADOW_OFFSET_X, minY + SHADOW_OFFSET_Y, width, height);
     }
@@ -175,10 +193,10 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
     CalloutPopupLocation calloutPopupLocation = getCalloutPopupLocation();
 
     if (getCalloutPopupLocation() != CalloutPopupLocation.CENTER) {
-      int [] tailX = { 0, 0, 0 };
-      int [] tailY = { 0, 0, 0 };
-      int[] tailXShadow  = { 0, 0, 0 };
-      int[] tailYShadow = { 0, 0, 0 };
+      int[] tailX = {0, 0, 0};
+      int[] tailY = {0, 0, 0};
+      int[] tailXShadow = {0, 0, 0};
+      int[] tailYShadow = {0, 0, 0};
 
       calculateTail(tailX, tailY, tailXShadow, tailYShadow, minX, minY, width, height);
 
@@ -195,7 +213,6 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
       g.fillOval(minX, minY, width, height);
     }
     renderText(textColor);
-
   }
 
   private static record Offset(int x, int y) {}

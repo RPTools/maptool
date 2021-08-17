@@ -76,15 +76,13 @@ public class PointerOverlay implements ZoneOverlay {
             image = POINTER_IMAGE;
             break;
           case SPEECH_BUBBLE:
-            CalloutArguments speechCalloutArguments = new CalloutArgumentBuilder()
-                .addText(p.player)
-                .build();
+            CalloutArguments speechCalloutArguments =
+                new CalloutArgumentBuilder().addText(p.player).build();
             new SpeechBubbleRenderer(renderer, g, sPoint, speechCalloutArguments).render();
             break;
           case THOUGHT_BUBBLE:
-            CalloutArguments thoughtCalloutArguments = new CalloutArgumentBuilder()
-                .addText(p.player)
-                .build();
+            CalloutArguments thoughtCalloutArguments =
+                new CalloutArgumentBuilder().addText(p.player).build();
             new ThoughtBubbleRenderer(renderer, g, sPoint, thoughtCalloutArguments).render();
             break;
           case LOOK_HERE:

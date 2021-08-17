@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.tool;
 
-import static com.oracle.truffle.js.builtins.RealmFunctionBuiltins.RealmFunction.current;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -108,7 +106,6 @@ public class PointerTool extends DefaultTool {
   private int dragOffsetY = 0;
   private int dragStartX = 0;
   private int dragStartY = 0;
-
 
   private String currentPointerName;
 
@@ -1485,7 +1482,6 @@ public class PointerTool extends DefaultTool {
                   renderer.getHeight());
         }
 
-
         currentPointerName = getPointerName(type);
 
         MapTool.serverCommand().showPointer(currentPointerName, pointer);
@@ -1508,7 +1504,8 @@ public class PointerTool extends DefaultTool {
           tokenStackAt = List.of();
         }
       }
-      Set<Token> tokens = tokenStackAt.stream()
+      Set<Token> tokens =
+          tokenStackAt.stream()
               .filter(t -> isGM || t.isOwner(playerName))
               .filter(t -> t.getSpeechName() != null && t.getSpeechName().length() > 0)
               .collect(Collectors.toSet());

@@ -1,5 +1,18 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.zone.callout;
-
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -10,18 +23,17 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
 
-
-  private final static Map<CalloutPopupLocation, Offset> OFFSETS = Map.of(
-      CalloutPopupLocation.TOP_LEFT, new Offset(0, 2),
-      CalloutPopupLocation.TOP, new Offset(0, 10),
-      CalloutPopupLocation.TOP_RIGHT, new Offset(0, 2),
-      CalloutPopupLocation.LEFT, new Offset(18, -6),
-      CalloutPopupLocation.CENTER, new Offset(0, 0),
-      CalloutPopupLocation.RIGHT, new Offset(-18, -6),
-      CalloutPopupLocation.BOTTOM_LEFT, new Offset(0, -2),
-      CalloutPopupLocation.BOTTOM, new Offset(0, -14),
-      CalloutPopupLocation.BOTTOM_RIGHT, new Offset(0, -2)
-  );
+  private static final Map<CalloutPopupLocation, Offset> OFFSETS =
+      Map.of(
+          CalloutPopupLocation.TOP_LEFT, new Offset(0, 2),
+          CalloutPopupLocation.TOP, new Offset(0, 10),
+          CalloutPopupLocation.TOP_RIGHT, new Offset(0, 2),
+          CalloutPopupLocation.LEFT, new Offset(18, -6),
+          CalloutPopupLocation.CENTER, new Offset(0, 0),
+          CalloutPopupLocation.RIGHT, new Offset(-18, -6),
+          CalloutPopupLocation.BOTTOM_LEFT, new Offset(0, -2),
+          CalloutPopupLocation.BOTTOM, new Offset(0, -14),
+          CalloutPopupLocation.BOTTOM_RIGHT, new Offset(0, -2));
 
   private static final CalloutPopupLocation DEFAULT_POPUP_LOCATION =
       CalloutPopupLocation.BOTTOM_LEFT;
@@ -39,16 +51,16 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
 
   private final CalloutArguments calloutArguments;
 
-
   /**
    * Creates a new {@link ThoughtBubbleRenderer}.
+   *
    * @param zoneRenderer the {@link ZoneRenderer} the callout is rendered for.
    * @param g2d the {@link Graphics2D} graphics context used to render the callout.
    * @param sp the {@link ScreenPoint} where the callout is rendered.
    * @param arguments the {@link CalloutArguments} for this callout.
    */
-  public ThoughtBubbleRenderer(ZoneRenderer zoneRenderer, Graphics2D g2d, ScreenPoint sp,
-      CalloutArguments arguments) {
+  public ThoughtBubbleRenderer(
+      ZoneRenderer zoneRenderer, Graphics2D g2d, ScreenPoint sp, CalloutArguments arguments) {
     super(
         zoneRenderer,
         g2d,
@@ -56,18 +68,27 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION),
         OFFSETS.get(arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION)).x(),
         OFFSETS.get(arguments.getPopupLocationOr(DEFAULT_POPUP_LOCATION)).y(),
-         arguments.getText()
-    );
+        arguments.getText());
 
     calloutArguments = arguments;
   }
 
-
-  private void calculateTail(int[] x, int[] y, int[] shadowX, int[] shadowY, int[] width,
-      int[] height, int halfX, int halfY, int minX, int minY, int maxX, int maxY) {
-    CalloutPopupLocation calloutPopupLocation =getCalloutPopupLocation();
+  private void calculateTail(
+      int[] x,
+      int[] y,
+      int[] shadowX,
+      int[] shadowY,
+      int[] width,
+      int[] height,
+      int halfX,
+      int halfY,
+      int minX,
+      int minY,
+      int maxX,
+      int maxY) {
+    CalloutPopupLocation calloutPopupLocation = getCalloutPopupLocation();
     switch (calloutPopupLocation) {
-      case TOP_LEFT -> {
+      case TOP_LEFT:
         x[0] = minX + 4;
         y[0] = minY + 10;
         width[0] = 20;
@@ -80,8 +101,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = minY + 6;
         width[2] = 6;
         height[2] = 3;
-      }
-      case TOP -> {
+        break;
+      case TOP:
         x[0] = halfX - 10;
         y[0] = minY - 8;
         width[0] = 20;
@@ -94,8 +115,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = minY - 14;
         width[2] = 6;
         height[2] = 3;
-      }
-      case TOP_RIGHT -> {
+        break;
+      case TOP_RIGHT:
         x[0] = maxX - 24;
         y[0] = minY + 10;
         width[0] = 20;
@@ -108,8 +129,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = minY + 6;
         width[2] = 6;
         height[2] = 3;
-      }
-      case LEFT -> {
+        break;
+      case LEFT:
         x[0] = minX - 10;
         y[0] = halfY - 5;
         width[0] = 20;
@@ -122,8 +143,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = halfY + 2;
         width[2] = 6;
         height[2] = 3;
-      }
-      case RIGHT -> {
+        break;
+      case RIGHT:
         x[0] = maxX - 10;
         y[0] = halfY - 5;
         width[0] = 20;
@@ -136,8 +157,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = halfY + 2;
         width[2] = 6;
         height[2] = 3;
-      }
-      case BOTTOM_LEFT -> {
+        break;
+      case BOTTOM_LEFT:
         x[0] = minX + 4;
         y[0] = maxY - 14;
         width[0] = 20;
@@ -150,8 +171,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = maxY + 2;
         width[2] = 6;
         height[2] = 3;
-      }
-      case BOTTOM -> {
+        break;
+      case BOTTOM:
         x[0] = halfX - 10;
         y[0] = maxY - 4;
         width[0] = 20;
@@ -164,8 +185,8 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = maxY + 12;
         width[2] = 6;
         height[2] = 3;
-      }
-      case BOTTOM_RIGHT -> {
+        break;
+      case BOTTOM_RIGHT:
         x[0] = maxX - 24;
         y[0] = maxY - 14;
         width[0] = 20;
@@ -178,7 +199,7 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         y[2] = maxY + 2;
         width[2] = 6;
         height[2] = 3;
-      }
+        break;
     }
 
     for (int i = 0; i < x.length; i++) {
@@ -207,18 +228,14 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
     Color textColor = calloutArguments.getTextColorOr(DEFAULT_TEXT_COLOR);
     Color outlineColor = calloutArguments.getOutlineColorOr(DEFAULT_OUTLINE_COLOR);
 
+    CalloutPopupLocation calloutPopupLocation = getCalloutPopupLocation();
 
-
-    CalloutPopupLocation calloutPopupLocation =getCalloutPopupLocation();
-
-
-
-    int[] tailBubbleX = { 0, 0, 0};
-    int[] tailBubbleY = { 0, 0, 0};
-    int[] tailBubbleWidth = { 0, 0, 0};
-    int[] tailBubbleHeight = { 0, 0, 0 };
-    int[] shadowTailBubbleX = { 0, 0, 0};
-    int[] shadowTailBubbleY = { 0, 0, 0};
+    int[] tailBubbleX = {0, 0, 0};
+    int[] tailBubbleY = {0, 0, 0};
+    int[] tailBubbleWidth = {0, 0, 0};
+    int[] tailBubbleHeight = {0, 0, 0};
+    int[] shadowTailBubbleX = {0, 0, 0};
+    int[] shadowTailBubbleY = {0, 0, 0};
 
     calculateTail(
         tailBubbleX,
@@ -232,23 +249,26 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
         minX,
         minY,
         maxX,
-        maxY
-    );
-
+        maxY);
 
     // First draw shadow offset
     g.setPaint(SHADOW_COLOR);
     if (numberLines > MAX_OVAL_LINES) {
-      g.fillRoundRect(minX + SHADOW_OFFSET_X, minY + SHADOW_OFFSET_Y, width, height,
-          DEFAULT_ARC_WIDTH, DEFAULT_ARC_HEIGHT);
+      g.fillRoundRect(
+          minX + SHADOW_OFFSET_X,
+          minY + SHADOW_OFFSET_Y,
+          width,
+          height,
+          DEFAULT_ARC_WIDTH,
+          DEFAULT_ARC_HEIGHT);
     } else {
       g.fillOval(minX + SHADOW_OFFSET_X, minY + SHADOW_OFFSET_Y, width, height);
     }
 
     if (calloutPopupLocation != CalloutPopupLocation.CENTER) {
       for (int i = 0; i < tailBubbleX.length; i++) {
-        g.fillOval(shadowTailBubbleX[i], shadowTailBubbleY[i], tailBubbleWidth[i],
-            tailBubbleHeight[i]);
+        g.fillOval(
+            shadowTailBubbleX[i], shadowTailBubbleY[i], tailBubbleWidth[i], tailBubbleHeight[i]);
       }
     }
 
@@ -264,20 +284,16 @@ public class ThoughtBubbleRenderer extends AbstractCalloutRenderer {
       g.drawOval(minX, minY, width, height);
     }
 
-
     if (calloutPopupLocation != CalloutPopupLocation.CENTER) {
       for (int i = 0; i < tailBubbleX.length; i++) {
         g.setColor(backgroundColor);
-        g.fillOval(tailBubbleX[i], tailBubbleY[i], tailBubbleWidth[i],
-            tailBubbleHeight[i]);
+        g.fillOval(tailBubbleX[i], tailBubbleY[i], tailBubbleWidth[i], tailBubbleHeight[i]);
         g.setColor(outlineColor);
-        g.drawOval(tailBubbleX[i], tailBubbleY[i], tailBubbleWidth[i],
-            tailBubbleHeight[i]);
+        g.drawOval(tailBubbleX[i], tailBubbleY[i], tailBubbleWidth[i], tailBubbleHeight[i]);
       }
     }
 
     renderText(textColor);
-
   }
 
   private static record Offset(int x, int y) {}
