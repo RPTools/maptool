@@ -1498,11 +1498,12 @@ public class PointerTool extends DefaultTool {
      * <ul>
      *   <li>If there is an impersonated token with a speech bubble name
      *       <ul>
-     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech Name
+     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech
+     *         Name</li>
      *         <li>If one of the tokens under mouse is the Impersonated token; Result = Impersonated
-     *             Token Speech Name
+     *             Token Speech Name</li>
      *         <li>If there is single token under the mouse with speech name; Result = Token under
-     *             mouse Speech Name
+     *             mouse Speech Name</li>
      *         <li>If there is a token stack under the mouse and some have speech name; Result = one
      *             of the tokens in the stack (will be top one if it has speech name)
      *         <li>Otherwise player name</li>
@@ -1518,6 +1519,7 @@ public class PointerTool extends DefaultTool {
      *       </ul>
      *   </li>
      *   <li>Otherwise Player name</li>
+     * </ul>
      *
      * @param type the type of pointer
      * @return the name to be displayed.
