@@ -1498,27 +1498,24 @@ public class PointerTool extends DefaultTool {
      * <ul>
      *   <li>If there is an impersonated token with a speech bubble name
      *       <ul>
-     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech
-     *         Name</li>
+     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech Name
      *         <li>If one of the tokens under mouse is the Impersonated token; Result = Impersonated
-     *             Token Speech Name</li>
+     *             Token Speech Name
      *         <li>If there is single token under the mouse with speech name; Result = Token under
-     *             mouse Speech Name</li>
+     *             mouse Speech Name
      *         <li>If there is a token stack under the mouse and some have speech name; Result = one
      *             of the tokens in the stack (will be top one if it has speech name)
-     *         <li>Otherwise player name</li>
+     *         <li>Otherwise player name
      *       </ul>
-     *   </li>
      *   <li>If there is no impersonated token, and there is a token under the mouse
      *       <ul>
      *         <li>If there is a single token under the mouse with speech name; Result = token under
-     *             mouse speech name</li>
+     *             mouse speech name
      *         <li>If there is a token stack under the mouse and one has speech name; Result = one
-     *             of the tokens in the stack (will be top one if it has speech name)</li>
-     *         <li>otherwise player name</li>
+     *             of the tokens in the stack (will be top one if it has speech name)
+     *         <li>otherwise player name
      *       </ul>
-     *   </li>
-     *   <li>Otherwise Player name</li>
+     *   <li>Otherwise Player name
      * </ul>
      *
      * @param type the type of pointer
@@ -1556,10 +1553,10 @@ public class PointerTool extends DefaultTool {
         if (impersonatedToken.getSpeechName() == null
             || impersonatedToken.getSpeechName().length() == 0) {
           impersonatedToken = null;
-       }
+        }
       }
 
-      Token tUnder =  null;
+      Token tUnder = null;
       if (tokenUnderMouse != null && (isGM || tokenUnderMouse.isOwner(playerName))) {
         tUnder = tokenUnderMouse;
       }
