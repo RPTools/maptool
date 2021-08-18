@@ -1489,6 +1489,39 @@ public class PointerTool extends DefaultTool {
       isSpaceDown = true;
     }
 
+    /**
+     * Returns the name to be displayed in the pointer callout.
+     *
+     * <p>If the pointer type is not speech or thought bubble then it will be the player name. For
+     * speech and thought bubble the following logic applies.
+     *
+     * <ul>
+     *   <li>If there is an impersonated token with a speech bubble name
+     *       <ul>
+     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech Name
+     *         <li>If one of the tokens under mouse is the Impersonated token; Result = Impersonated
+     *             Token Speech Name
+     *         <li>If there is single token under the mouse with speech name; Result = Token under
+     *             mouse Speech Name
+     *         <li>If there is a token stack under the mouse and some have speech name; Result = one
+     *             of the tokens in the stack (will be top one if it has speech name)
+     *         <li>Otherwise player name</li>
+     *       </ul>
+     *   </li>
+     *   <li>If there is no impersonated token, and there is a token under the mouse
+     *       <ul>
+     *         <li>If there is a single token under the mouse with speech name; Result = token under
+     *             mouse speech name</li>
+     *         <li>If there is a token stack under the mouse and one has speech name; Result = one
+     *             of the tokens in the stack (will be top one if it has speech name)</li>
+     *         <li>otherwise player name</li>
+     *       </ul>
+     *   </li>
+     *   <li>Otherwise Player name</li>
+     *
+     * @param type the type of pointer
+     * @return the name to be displayed.
+     */
     private String getPointerName(Type type) {
       String playerName = MapTool.getPlayer().getName();
 
@@ -1517,15 +1550,40 @@ public class PointerTool extends DefaultTool {
         // Searches all maps to find impersonated token
         impersonatedToken = FindTokenFunctions.findToken(guid.toString());
       }
+      if (impersonatedToken != null) {
+        if (impersonatedToken.getSpeechName() == null
+            || impersonatedToken.getSpeechName().length() == 0) {
+          impersonatedToken = null;
+       }
+      }
 
-      if (impersonatedToken != null && tokens.size() == 0) {
+      Token tUnder =  null;
+      if (tokenUnderMouse != null && (isGM || tokenUnderMouse.isOwner(playerName))) {
+        tUnder = tokenUnderMouse;
+      }
+
+      if (impersonatedToken != null && tUnder == null) {
         pointerToken = impersonatedToken;
-      } else if (impersonatedToken != null && tokens.contains(impersonatedToken)) {
-        pointerToken = impersonatedToken;
-      } else if (tokens.contains(tokenUnderMouse)) {
-        pointerToken = tokenUnderMouse;
-      } else if (tokens.size() > 0) {
-        pointerToken = tokens.iterator().next();
+      } else if (impersonatedToken != null) {
+        if (tokens.contains(impersonatedToken)) {
+          pointerToken = impersonatedToken;
+        } else if (tUnder.getSpeechName() != null && tUnder.getSpeechName().length() > 0) {
+          pointerToken = tUnder;
+        } else if (tokens.size() > 0) {
+          pointerToken = tokens.iterator().next();
+        } else {
+          pointerToken = null;
+        }
+      } else if (tUnder != null) {
+        if (tUnder.getSpeechName() != null && tUnder.getSpeechName().length() > 0) {
+          pointerToken = tokenUnderMouse;
+        } else if (tokens.size() > 0) {
+          pointerToken = tokens.iterator().next();
+        } else {
+          pointerToken = null;
+        }
+      } else {
+        pointerToken = null;
       }
 
       if (pointerToken != null) {
