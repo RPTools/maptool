@@ -57,6 +57,10 @@ public class PositionalLayout implements LayoutManager2 {
     compPositionMap.put(comp, (Position) constraints);
   }
 
+  public Object getComponentConstraints(Component comp) {
+    return compPositionMap.get(comp);
+  }
+
   public void addLayoutComponent(String name, Component comp) {
     throw new IllegalArgumentException("Use add(comp, Position)");
   }

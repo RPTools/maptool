@@ -93,8 +93,8 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
     private final String FONT_NORMAL = "normalFont.ttf";
     private final String FONT_DISTANCE = "distanceFont.ttf";
-    PixmapPacker packer = createPacker();
-    TextureAtlas tokenAtlas = new TextureAtlas();
+    PixmapPacker packer;
+    TextureAtlas tokenAtlas;
     private boolean flushFog = true;
     //from renderToken:
     private Area visibleScreenArea;
@@ -128,7 +128,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private VfxFrameBuffer backBuffer;
     private Integer fogX;
     private Integer fogY;
-    private com.badlogic.gdx.assets.AssetManager manager = new com.badlogic.gdx.assets.AssetManager();
+    private com.badlogic.gdx.assets.AssetManager manager;
     private TextureAtlas atlas;
     private NinePatch grayLabel;
     private NinePatch blueLabel;
@@ -185,58 +185,28 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
     @Override
     public void create() {
-        //world = new World(new Vector2(0, 0), true);
-        //rayHandler = new RayHandler(world);
-        //rayHandler.setAmbientLight(0.1f, 0.1f, 0.1f, 1f);
- //       rayHandler.setBlurNum(3);
-  //      PointLight pl = new PointLight(rayHandler, 128, new Color(0.2f,1,1,1f), 10,500,200);
-        //PointLight pl2 = new PointLight(rayHandler, 128, new Color(1,0,1,1f), 10,500,200);
+        // with jogl create is called every time we change the parent frame of the GLJPanel
+        // e.g. change from fullcreen to window or the other way around. Reinit everthing in this case.
+        if(initialized) {
+            initialized = false;
+            dispose();
 
-        //rayHandler.setShadows(true);
-//        pl.setStaticLight(false);
-        //pl.setSoft(true);
+            atlas = null;
+            blueLabel = null;
+            grayLabel = null;
+            darkGrayLabel = null;
+            normalFont = null;
+            distanceFont = null;
+            fetchedSprites.clear();
+            isoSprites.clear();
+            fetchedRegions.clear();
+            bigSprites.clear();
+            animationMap.clear();
+        }
 
-        Gdx.input.setInputProcessor(new InputProcessor() {
-            @Override
-            public boolean keyDown(int i) {
-                return false;
-            }
-
-            @Override
-            public boolean keyUp(int i) {
-                return false;
-            }
-
-            @Override
-            public boolean keyTyped(char c) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDown(int i, int i1, int i2, int i3) {
-                return false;
-            }
-
-            @Override
-            public boolean touchUp(int i, int i1, int i2, int i3) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDragged(int i, int i1, int i2) {
-                return false;
-            }
-
-            @Override
-            public boolean mouseMoved(int i, int i1) {
-                return false;
-            }
-
-            @Override
-            public boolean scrolled(float v, float v1) {
-                return false;
-            }
-        });
+        tokenAtlas = new TextureAtlas();
+        manager = new com.badlogic.gdx.assets.AssetManager();
+        packer = createPacker();
 
         //debugRenderer = new Box2DDebugRenderer();
         var resolver = new InternalFileHandleResolver();
@@ -286,8 +256,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         manager.dispose();
         batch.dispose();
         vfxManager.dispose();
-        vfxEffect.dispose();
+        if(vfxEffect != null)
+            vfxEffect.dispose();
         disposeZoneResources();
+        disposeZoneTextures();
         onePixel.dispose();
         packer.updateTextureAtlas(atlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
         packer.dispose();
@@ -3085,30 +3057,34 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         oldPacker.dispose();
 
         Gdx.app.postRunnable(() -> {
-            updateCam();
-            var background = this.background;
-            this.background = null;
-            if (background != null) {
-                background.dispose();
-            }
-
-            var fog = this.fog;
-            this.fog = null;
-            if (fog != null) {
-                fog.dispose();
-            }
-
-            for (var sprite : isoSprites.values()) {
-                sprite.getTexture().dispose();
-            }
-            isoSprites.clear();
-
-            for (var sprite : bigSprites.values()) {
-                sprite.getTexture().dispose();
-            }
-            bigSprites.clear();
-            animationMap.clear();
+            disposeZoneTextures();
         });
+    }
+
+    private void disposeZoneTextures() {
+        updateCam();
+        var background = this.background;
+        this.background = null;
+        if (background != null) {
+            background.dispose();
+        }
+
+        var fog = this.fog;
+        this.fog = null;
+        if (fog != null) {
+            fog.dispose();
+        }
+
+        for (var sprite : isoSprites.values()) {
+            sprite.getTexture().dispose();
+        }
+        isoSprites.clear();
+
+        for (var sprite : bigSprites.values()) {
+            sprite.getTexture().dispose();
+        }
+        bigSprites.clear();
+        animationMap.clear();
     }
 
     private void initializeZoneResources(Zone newZone) {
