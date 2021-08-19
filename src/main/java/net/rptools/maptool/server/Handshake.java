@@ -112,11 +112,7 @@ public class Handshake implements MessageHandler {
     var initialSaltMsg =
         InitialSaltMsg.newBuilder().setSalt(ByteString.copyFrom(initialMacSalt)).build();
 
-    var handshakeMsg =
-        HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.InitialSalt)
-            .setInitialSaltMsg(initialSaltMsg)
-            .build();
+    var handshakeMsg = HandshakeMsg.newBuilder().setInitialSaltMsg(initialSaltMsg).build();
     connection.sendMessage(handshakeMsg.toByteArray());
     currentState = State.AwaitingRequest;
   }
@@ -251,10 +247,7 @@ public class Handshake implements MessageHandler {
             .setMac(ByteString.copyFrom(mac))
             .build();
 
-    return HandshakeMsg.newBuilder()
-        .setType(MessageTypeDto.HandshakeRequest)
-        .setHandshakeRequestMsg(req)
-        .build();
+    return HandshakeMsg.newBuilder().setHandshakeRequestMsg(req).build();
   }
 
   private void sendErrorResponseAndNotify() {
@@ -263,11 +256,7 @@ public class Handshake implements MessageHandler {
             .setCode(ResponseCodeDto.ERROR)
             .setMessage(errorMessage)
             .build();
-    var msg =
-        HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.HandshakeResponse)
-            .setHandshakeResponseMsg(responseMsg)
-            .build();
+    var msg = HandshakeMsg.newBuilder().setHandshakeResponseMsg(responseMsg).build();
     connection.sendMessage(msg.toByteArray());
     currentState = State.Error;
     notifyObservers();
@@ -279,26 +268,31 @@ public class Handshake implements MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       switch (currentState) {
         case AwaitingInitialMacSalt:
-          if (handshakeMsg.getType() == MessageTypeDto.InitialSalt)
+          if (handshakeMsg.getMessageTypeCase() == HandshakeMsg.MessageTypeCase.INITIAL_SALT_MSG)
             handle(handshakeMsg.getInitialSaltMsg());
           break;
         case AwaitingRequest:
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeRequest)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.HANDSHAKE_REQUEST_MSG)
             handle(handshakeMsg.getHandshakeRequestMsg());
           break;
         case AwaitingChallenge:
-          if (handshakeMsg.getType() == MessageTypeDto.ChallengeRequest)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.CHALLENGE_REQUEST_MSG)
             handle(handshakeMsg.getChallengeRequestMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+          if (handshakeMsg.getMessageTypeCase()
+                  == HandshakeMsg.MessageTypeCase.HANDSHAKE_RESPONSE_MSG
               && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
         case AwaitingChallengeResponse:
-          if (handshakeMsg.getType() == MessageTypeDto.ChallengeResponse)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.CHALLENGE_RESPONSE_MSG)
             handle(handshakeMsg.getChallengeResponseMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+          if (handshakeMsg.getMessageTypeCase()
+                  == HandshakeMsg.MessageTypeCase.HANDSHAKE_RESPONSE_MSG
               && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
@@ -379,11 +373,7 @@ public class Handshake implements MessageHandler {
             .setChallenge(ByteString.copyFrom(challenge))
             .setMac(ByteString.copyFrom(CipherUtil.getInstance().generateMacAndSalt(passwordToUse)))
             .build();
-    var msg =
-        HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.ChallengeRequest)
-            .setChallengeRequestMsg(challengeMsg)
-            .build();
+    var msg = HandshakeMsg.newBuilder().setChallengeRequestMsg(challengeMsg).build();
     connection.sendMessage(msg.toByteArray());
     currentState = State.AwaitingChallengeResponse;
   }
@@ -414,11 +404,7 @@ public class Handshake implements MessageHandler {
             .setMac(
                 ByteString.copyFrom(CipherUtil.getInstance().generateMacAndSalt(request.password)))
             .build();
-    var msg =
-        HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.ChallengeResponse)
-            .setChallengeResponseMsg(challengeResp)
-            .build();
+    var msg = HandshakeMsg.newBuilder().setChallengeResponseMsg(challengeResp).build();
     connection.sendMessage(msg.toByteArray());
     currentState = State.AwaitingResponse;
   }
@@ -461,11 +447,7 @@ public class Handshake implements MessageHandler {
             .setRole(role)
             .build();
 
-    var msg =
-        HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.HandshakeResponse)
-            .setHandshakeResponseMsg(responseMsg)
-            .build();
+    var msg = HandshakeMsg.newBuilder().setHandshakeResponseMsg(responseMsg).build();
     connection.sendMessage(msg.toByteArray());
     notifyObservers();
   }

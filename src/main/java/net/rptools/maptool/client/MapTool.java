@@ -1162,13 +1162,17 @@ public class MapTool {
     // Connect to server
     MapTool.createConnection(
         config,
-        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
-
-    // connecting
-    MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
+        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()),
+        () -> {
+          // connecting
+          MapTool.getFrame()
+              .getConnectionStatusPanel()
+              .setStatus(ConnectionStatusPanel.Status.server);
+        });
   }
 
-  public static void createConnection(ServerConfig config, LocalPlayer player) throws IOException {
+  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
+      throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
@@ -1186,6 +1190,7 @@ public class MapTool {
           }
           clientFrame.getLookupTablePanel().updateView();
           clientFrame.getInitiativePanel().updateView();
+          onCompleted.run();
         });
 
     clientConn.start();
