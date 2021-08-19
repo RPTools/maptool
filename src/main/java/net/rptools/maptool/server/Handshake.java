@@ -114,7 +114,6 @@ public class Handshake implements MessageHandler {
 
     var handshakeMsg =
         HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.InitialSalt)
             .setInitialSaltMsg(initialSaltMsg)
             .build();
     connection.sendMessage(handshakeMsg.toByteArray());
@@ -252,7 +251,6 @@ public class Handshake implements MessageHandler {
             .build();
 
     return HandshakeMsg.newBuilder()
-        .setType(MessageTypeDto.HandshakeRequest)
         .setHandshakeRequestMsg(req)
         .build();
   }
@@ -265,7 +263,6 @@ public class Handshake implements MessageHandler {
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.HandshakeResponse)
             .setHandshakeResponseMsg(responseMsg)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -279,26 +276,31 @@ public class Handshake implements MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       switch (currentState) {
         case AwaitingInitialMacSalt:
-          if (handshakeMsg.getType() == MessageTypeDto.InitialSalt)
+          if (handshakeMsg.getMessageTypeCase() == HandshakeMsg.MessageTypeCase.INITIAL_SALT_MSG)
             handle(handshakeMsg.getInitialSaltMsg());
           break;
         case AwaitingRequest:
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeRequest)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.HANDSHAKE_REQUEST_MSG)
             handle(handshakeMsg.getHandshakeRequestMsg());
           break;
         case AwaitingChallenge:
-          if (handshakeMsg.getType() == MessageTypeDto.ChallengeRequest)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.CHALLENGE_REQUEST_MSG)
             handle(handshakeMsg.getChallengeRequestMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+          if (handshakeMsg.getMessageTypeCase()
+                  == HandshakeMsg.MessageTypeCase.HANDSHAKE_RESPONSE_MSG
               && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
         case AwaitingChallengeResponse:
-          if (handshakeMsg.getType() == MessageTypeDto.ChallengeResponse)
+          if (handshakeMsg.getMessageTypeCase()
+              == HandshakeMsg.MessageTypeCase.CHALLENGE_RESPONSE_MSG)
             handle(handshakeMsg.getChallengeResponseMsg());
           // we only accept error responses in this state
-          if (handshakeMsg.getType() == MessageTypeDto.HandshakeResponse
+          if (handshakeMsg.getMessageTypeCase()
+                  == HandshakeMsg.MessageTypeCase.HANDSHAKE_RESPONSE_MSG
               && handshakeMsg.getHandshakeResponseMsg().getCode() != ResponseCodeDto.OK)
             handle(handshakeMsg.getHandshakeResponseMsg());
           break;
@@ -381,7 +383,6 @@ public class Handshake implements MessageHandler {
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.ChallengeRequest)
             .setChallengeRequestMsg(challengeMsg)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -416,7 +417,6 @@ public class Handshake implements MessageHandler {
             .build();
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.ChallengeResponse)
             .setChallengeResponseMsg(challengeResp)
             .build();
     connection.sendMessage(msg.toByteArray());
@@ -463,7 +463,6 @@ public class Handshake implements MessageHandler {
 
     var msg =
         HandshakeMsg.newBuilder()
-            .setType(MessageTypeDto.HandshakeResponse)
             .setHandshakeResponseMsg(responseMsg)
             .build();
     connection.sendMessage(msg.toByteArray());

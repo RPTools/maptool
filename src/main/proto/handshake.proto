@@ -11,21 +11,14 @@ option java_outer_classname = "HandshakeProtos";
  * protobuf classes end with "Dto" or "Msg".
  */
 
-enum MessageTypeDto {
-  InitialSalt = 0;
-  HandshakeRequest = 1;
-  HandshakeResponse = 2;
-  ChallengeRequest = 3;
-  ChallengeResponse = 4;
-}
-
 message HandshakeMsg {
-  MessageTypeDto type = 1;
-  InitialSaltMsg initial_salt_msg = 2;
-  HandshakeRequestMsg handshake_request_msg = 3;
-  HandshakeResponseMsg handshake_response_msg = 4;
-  ChallengeRequestMsg challenge_request_msg = 5;
-  ChallengeResponseMsg challenge_response_msg = 6;
+  oneof message_type {
+    InitialSaltMsg initial_salt_msg = 1;
+    HandshakeRequestMsg handshake_request_msg = 2;
+    HandshakeResponseMsg handshake_response_msg = 3;
+    ChallengeRequestMsg challenge_request_msg = 4;
+    ChallengeResponseMsg challenge_response_msg = 5;
+  }
 }
 
 message InitialSaltMsg {

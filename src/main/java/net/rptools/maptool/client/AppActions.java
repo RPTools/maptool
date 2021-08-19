@@ -2231,28 +2231,34 @@ public class AppActions {
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  Runnable onConnected =
+                      () -> {
+                        // connecting
+                        MapTool.getFrame()
+                            .getConnectionStatusPanel()
+                            .setStatus(ConnectionStatusPanel.Status.server);
+                        MapTool.addLocalMessage(
+                            MessageUtil.getFormattedSystemMsg(
+                                I18N.getText("msg.info.startServer")));
+                      };
+
                   if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
                         config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
-                            serverProps.getGMPassword()));
+                            serverProps.getGMPassword()),
+                        onConnected);
                   } else {
                     MapTool.createConnection(
                         config,
                         new LocalPlayer(
                             dialog.getUsernameTextField().getText(),
                             playerType,
-                            serverProps.getPlayerPassword()));
+                            serverProps.getPlayerPassword()),
+                        onConnected);
                   }
-
-                  // connecting
-                  MapTool.getFrame()
-                      .getConnectionStatusPanel()
-                      .setStatus(ConnectionStatusPanel.Status.server);
-                  MapTool.addLocalMessage(
-                      MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;
@@ -2327,12 +2333,14 @@ public class AppActions {
                           dialog.getServer());
                   MapTool.createConnection(
                       config,
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()),
+                      () -> {
+                        MapTool.getFrame().hideGlassPane();
+                        MapTool.getFrame()
+                            .showFilledGlassPane(
+                                new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                      });
 
-                  MapTool.getFrame().hideGlassPane();
-                  MapTool.getFrame()
-                      .showFilledGlassPane(
-                          new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
                 } catch (UnknownHostException e1) {
                   MapTool.showError("msg.error.unknownHost", e1);
                   failed = true;
@@ -2340,7 +2348,7 @@ public class AppActions {
                   MapTool.showError("msg.error.failedLoadCampaign", e1);
                   failed = true;
                 }
-                if (failed || MapTool.getConnection() == null) {
+                if (failed) {
                   MapTool.getFrame().hideGlassPane();
                   try {
                     MapTool.startPersonalServer(oldCampaign);
