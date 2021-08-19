@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -461,7 +461,7 @@ public class MacroLinkFunction extends AbstractFunction {
         }
       } catch (AbortFunctionException e) {
         // Do nothing
-      } catch (AssertFunction.AssertFunctionException afe) {
+      } catch (AssertFunctionException afe) {
         MapTool.addLocalMessage(afe.getMessage());
       } catch (ParserException e) {
         e.addMacro(macroName);

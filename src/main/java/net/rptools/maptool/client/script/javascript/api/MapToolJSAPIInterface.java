@@ -14,4 +14,12 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-public interface MapToolJSAPIInterface {}
+public interface MapToolJSAPIInterface {
+  /**
+   * Serialize the object to a String, suitable for embedding in the JSONified return of js.eval For
+   * objects with a unique ID, like tokens, this should return the unique ID, without extra quotes.
+   *
+   * @return the serialized output.
+   */
+  String serializeToString();
+}
