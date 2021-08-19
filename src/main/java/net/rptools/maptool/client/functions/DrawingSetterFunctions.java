@@ -42,7 +42,8 @@ public class DrawingSetterFunctions extends DrawingFunctions {
         "setFillColor",
         "setDrawingEraser",
         "setPenWidth",
-        "setLineCap");
+        "setLineCap",
+        "setDrawingName");
   }
 
   @Override
@@ -99,6 +100,10 @@ public class DrawingSetterFunctions extends DrawingFunctions {
       boolean squareCap = parseBoolean(functionName, parameters, 2);
       Pen p = getPen(functionName, map, guid);
       p.setSquareCap(squareCap);
+      return "";
+    } else if ("setDrawingName".equalsIgnoreCase(functionName)) {
+      String name = parameters.get(2).toString();
+      setDrawingName(map, guid, name);
       return "";
     }
     return null;
