@@ -160,6 +160,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private float pointsPerBezier = 10f;
     private boolean showAstarDebugging = false;
 
+
     // Box2D stuff
  //   private World world;
  //   private RayHandler rayHandler;
