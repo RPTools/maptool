@@ -428,8 +428,7 @@ public class DrawingFunctions extends AbstractFunction {
     }
   }
 
-  protected void setDrawingName(Zone map, GUID guid, String name)
-          throws ParserException {
+  protected void setDrawingName(Zone map, GUID guid, String name) throws ParserException {
     DrawnElement de = getDrawnElement("setDrawingName", map, guid);
     AbstractDrawing ad = (AbstractDrawing) de.getDrawable();
 

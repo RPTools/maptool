@@ -104,7 +104,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
     } else if ("setDrawingName".equalsIgnoreCase(functionName)) {
       String name = parameters.get(2).toString();
       setDrawingName(map, guid, name);
-      return"";
+      return "";
     }
     return null;
   }
