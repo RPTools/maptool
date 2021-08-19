@@ -178,6 +178,7 @@ public class Token extends BaseModel implements Cloneable {
     setSightType,
     flipX,
     flipY,
+    flipIso,
     setSpeechName
   }
 
@@ -2707,6 +2708,9 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case flipY:
         setFlippedY(!isFlippedY());
+        break;
+      case flipIso:
+        setFlippedIso(!isFlippedIso());
         break;
     }
     if (lightChanged) {

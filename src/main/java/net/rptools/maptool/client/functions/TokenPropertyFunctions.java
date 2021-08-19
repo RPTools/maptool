@@ -89,6 +89,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "getMatchingProperties",
         "getMatchingLibProperties",
         "isSnapToGrid",
+        "isFlippedX",
+        "isFlippedY",
+        "isFlippedIso",
+        "flipTokenX",
+        "flipTokenY",
+        "flipTokenIso",
         "setOwner",
         "setOwnedByAll",
         "getTokenNativeWidth",
@@ -629,6 +635,33 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
+     * Number zeroOne = isFlippedX(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedX")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Number zeroOne = isFlippedY(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Number zeroOne = isFlippedIso(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedIso")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
      * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setOwner")) {
@@ -796,6 +829,42 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Boolean toGrid = FunctionUtil.getBooleanValue(parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToGrid, toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Boolean flippedX   = flipTokenX(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped X setting
+     */
+    if (functionName.equals("flipTokenX")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Boolean flippedY   = flipTokenY(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped Y setting
+     */
+    if (functionName.equals("flipTokenY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Boolean flippedIso   = flipTokenIso(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped Iso setting
+     */
+    if (functionName.equals("flipTokenIso")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipIso);
+      return token.isFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
