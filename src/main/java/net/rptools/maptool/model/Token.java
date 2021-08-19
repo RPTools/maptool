@@ -177,7 +177,8 @@ public class Token extends BaseModel implements Cloneable {
     setHasSight,
     setSightType,
     flipX,
-    flipY
+    flipY,
+    setSpeechName
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -252,6 +253,8 @@ public class Token extends BaseModel implements Cloneable {
 
   // Jamz: allow token alpha channel modification
   private float tokenOpacity = 1.0f;
+
+  private String speechName = "";
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
@@ -457,6 +460,8 @@ public class Token extends BaseModel implements Cloneable {
     if (token.terrainModifiersIgnored != null) {
       terrainModifiersIgnored = new HashSet<>(token.terrainModifiersIgnored);
     }
+
+    speechName = token.speechName;
   }
 
   public Token() {
@@ -677,6 +682,24 @@ public class Token extends BaseModel implements Cloneable {
     tokenOpacity = alpha;
 
     return tokenOpacity;
+  }
+
+  /**
+   * Returns the name to be displayed in speech and thought bubbles.
+   *
+   * @return the name to be displayed in speech and thought bubbles/
+   */
+  public String getSpeechName() {
+    return speechName;
+  }
+
+  /**
+   * Sets the name to be displayed in speech and thought bubbles.
+   *
+   * @param name the name to be displayed.
+   */
+  public void setSpeechName(String name) {
+    speechName = name;
   }
 
   public double getTerrainModifier() {
@@ -2594,6 +2617,9 @@ public class Token extends BaseModel implements Cloneable {
       case setGMName:
         setGMName((String) parameters[0]);
         panelLookChanged = true;
+        break;
+      case setSpeechName:
+        setSpeechName((String) parameters[0]);
         break;
       case setVisible:
         setVisible((boolean) parameters[0]);
