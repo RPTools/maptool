@@ -61,6 +61,7 @@ public class PlayerApi {
     return CompletableFuture.supplyAsync(() -> new ApiResult<>(getPlayerDatabaseInfo()));
   }
 
+  /*
   public CompletableFuture<ApiResult<NoData>> disablePlayer(String playerName, String reason) {
     return CompletableFuture.supplyAsync(() -> {
       PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
@@ -78,6 +79,7 @@ public class PlayerApi {
       }
     });
   }
+  */
 
   private PlayerDatabaseInfo getPlayerDatabaseInfo() {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();

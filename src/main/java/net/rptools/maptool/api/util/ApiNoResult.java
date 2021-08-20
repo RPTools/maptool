@@ -8,12 +8,13 @@ public class ApiNoResult<T extends ApiData> {
 
   private final ApiResultStatus status;
   private final ApiException exception;
+  private final T data;
 
 
-  public static ApiNoResult<NoData> NOT_FOUND = new ApiNoResult<>(new NoData());
+  //public static ApiNoResult<NoData> NOT_FOUND = new ApiNoResult<>(new NoData());
 
   public ApiNoResult() {
-    this.exception = null;
+    this(null);
   }
 
   public ApiNoResult(ApiException e) {
