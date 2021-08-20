@@ -102,6 +102,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               TokenTerrainModifierFunctions.getInstance(),
               TestFunctions.getInstance(),
               TextLabelFunctions.getInstance(),
+              TokenSpeechNameFunction.getInstance(),
               new MarkDownFunctions())
           .collect(Collectors.toList());
 

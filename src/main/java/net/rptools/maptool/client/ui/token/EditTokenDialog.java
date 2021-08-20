@@ -922,6 +922,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JTextField) getComponent("@name");
   }
 
+  private JTextField getSpeechNameField() {
+    return (JTextField) getComponent("@speechName");
+  }
+
   public CheckBoxListWithSelectable getOwnerList() {
     return (CheckBoxListWithSelectable) getComponent("ownerList");
   }
