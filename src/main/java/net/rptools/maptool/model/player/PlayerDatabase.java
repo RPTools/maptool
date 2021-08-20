@@ -25,7 +25,7 @@ public interface PlayerDatabase {
 
   public enum AuthMethod {
     PASSWORD,
-    ASYMETRIC_KEY
+    ASYMMETRIC_KEY
   };
 
 
