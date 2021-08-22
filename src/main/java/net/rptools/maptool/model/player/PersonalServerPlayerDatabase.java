@@ -54,11 +54,6 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean supportsPlayTimes() {
-    return false;
-  }
-
-  @Override
   public boolean supportsAsymmetricalKeys() {
     return false;
   }
@@ -66,11 +61,6 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   @Override
   public boolean supportsRolePasswords() {
     return false;
-  }
-
-  @Override
-  public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
-    throw new PasswordDatabaseException("msg.err.passFile.cantSetPlayTimes");
   }
 
   @Override
@@ -88,11 +78,6 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return player != null && player.getName() != null && player.getName().equals(name);
-  }
-
-  @Override
-  public Set<PlayTime> getPlayTimes(Player player) {
-    return ANY_TIME;
   }
 
   @Override

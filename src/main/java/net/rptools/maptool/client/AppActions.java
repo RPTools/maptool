@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import static net.rptools.maptool.model.player.PlayerDatabase.ANY_TIME;
 
 import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
@@ -2248,11 +2247,11 @@ public class AppActions {
                     if (serverProps.getRole() == Role.GM) {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.GM,
                           gmPassword, Set.of(),
-                          ANY_TIME, false);
+                          false);
                     } else {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.PLAYER,
                           playerPassword, Set.of(),
-                          ANY_TIME, false);
+                          false);
                     }
                   } else {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);

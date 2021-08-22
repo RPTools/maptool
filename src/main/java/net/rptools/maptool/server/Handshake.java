@@ -26,20 +26,28 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javax.crypto.*;
 import net.rptools.clientserver.hessian.HessianUtils;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
+import net.rptools.maptool.util.cipher.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.cert.ocsp.Req;
 
 /** @author trevor */
 public class Handshake {
+
 
   public interface Code {
     int UNKNOWN = 0;
@@ -49,6 +57,8 @@ public class Handshake {
 
   private static final String USERNAME_FIELD = "username:";
   private static final String VERSION_FIELD = "version:";
+  private static final String USE_SHARED_PASSWORD     = "!SHARED!";
+  private static final String USE_ASYMMETRIC_PASSWORD = "!ASYMMETRIC!";
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
@@ -85,21 +95,97 @@ public class Handshake {
       throw new IOException("Unable to read username");
     }
 
-    String username = new String(nameBytes);
 
+
+    String username = new String(nameBytes);
+    if (!playerDatabase.playerExists(username)) {
+      log.error(username + " does not exist.");
+      return null;
+    }
+
+    AuthMethod authMethod = playerDatabase.getAuthMethod(playerDatabase.getPlayer(username));
+
+    if (authMethod == AuthMethod.ASYMMETRIC_KEY) {
+      return receiveHandshakeAsymmetricPassword(server, s, username);
+    } else {
+      return receiveHandshakeSharedPassword(server, s,  username);
+   }
+ }
+  private Player receiveHandshakeAsymmetricPassword(MapToolServer server, Socket socket,
+      String username)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+
+    DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+    DataInputStream dis = new DataInputStream(socket.getInputStream());
+
+
+    // Tell client to use asymmetric password.
+    dos.writeInt(USE_ASYMMETRIC_PASSWORD.length());
+    dos.write(USE_ASYMMETRIC_PASSWORD.getBytes(StandardCharsets.UTF_8));
+
+    // Wait for the MD5Key of public key to use
+    int md5Len = dis.readInt();
+    String md5 = new String(dis.readNBytes(md5Len));
+    MD5Key md5Key = new MD5Key(md5);
+
+    CipherUtil cipherUtil;
+    try {
+      cipherUtil = playerDatabase.getPublicKey(playerDatabase.getPlayer(username),
+          md5Key).get();
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
+
+    // Encrypt random password string with the clients public password, the client should then
+    // be able to decrypt it using the private key and send it back if they are who they say they
+    // are.
+    String password = new PasswordGenerator().getPassword();
+    Cipher playerEncoder = cipherUtil.getEncryptionCipher();
+    byte[] passwordBytes = playerEncoder.doFinal(password.getBytes(StandardCharsets.UTF_8));
+
+    dos.writeInt(passwordBytes.length);
+    dos.write(passwordBytes);
+
+    int passResponseLen = dis.readInt();
+    String passResponse = new String(dis.readNBytes(passResponseLen));
+
+    if (!password.equals(passResponse)) {
+      Player player = playerDatabase.getPlayer(username);
+      Response response = new Response();
+      response.code = Code.OK;
+      response.role = player.getRole();
+      response.policy = server.getPolicy();
+
+      HessianOutput output = new HessianOutput(socket.getOutputStream());
+      output.getSerializerFactory().setAllowNonSerializable(true);
+      output.writeObject(response);
+      return playerDatabase.getPlayer(username);
+    } else {
+      dos.writeInt(Code.ERROR);
+      return null;
+    }
+
+
+  }
+
+ private Player receiveHandshakeSharedPassword(MapToolServer server, Socket socket, String username)
+     throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+
+   DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+   DataInputStream dis = new DataInputStream(socket.getInputStream());
+
+   // Tell client we are expecting a shared password
+   dos.writeInt(USE_SHARED_PASSWORD.length());
+   dos.write(USE_SHARED_PASSWORD.getBytes(StandardCharsets.UTF_8));
 
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.createSalt();
     dos.writeInt(initialMacSalt.length);
     dos.write(initialMacSalt);
 
-    if (!playerDatabase.playerExists(username)) {
-      log.error(username + " does not exist.");
-      return null;
-    }
-    System.err.println(playerDatabase);
-
     Optional<CipherUtil.Key> key = playerDatabase.getPlayerPassword(username);
+
+
     CipherUtil.Key playerPassword;
     CipherUtil.Key gmPassword;
     byte[] passwordSalt;
@@ -120,7 +206,7 @@ public class Handshake {
     Response response = new Response();
     Request request =
         decodeRequest(
-            s,
+            socket,
             playerPassword,
             gmPassword,
             username,
@@ -203,7 +289,7 @@ public class Handshake {
         player = null;
       }
 
-      HessianOutput output = new HessianOutput(s.getOutputStream());
+      HessianOutput output = new HessianOutput(socket.getOutputStream());
       output.getSerializerFactory().setAllowNonSerializable(true);
       output.writeObject(response);
     } else {
@@ -212,6 +298,7 @@ public class Handshake {
     }
     return player;
   }
+
 
   private static Request extractRequestDetails(byte[] bytes, Role role) {
     String[] lines = new String(bytes).split("\n");
@@ -321,6 +408,58 @@ public class Handshake {
 
     DataInputStream dis = new DataInputStream(s.getInputStream());
 
+    // Read the message from the server telling us what type of authentication it expects
+    int authTypeLen = dis.readInt();
+    String authType = new String(dis.readNBytes(authTypeLen));
+
+    if (USE_SHARED_PASSWORD.equals(authType)) {
+      return sendHandshakeSharedPassword(request, s);
+    } else {
+      return sendHandshakeAsymmetricPassword(request, s);
+    }
+  }
+
+
+  private Response sendHandshakeAsymmetricPassword(Request request, Socket socket)
+      throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+    DataInputStream dis = new DataInputStream(socket.getInputStream());
+
+    try {
+      CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
+      Cipher decryptionCipher = cipherUtil.getDecryptionCipher();
+      // Send MD5 of the public key on this machine
+      String s = cipherUtil.getEncodedPublicKeyText().replaceAll("\\s", "");
+      dos.writeInt(s.length());
+      dos.write(s.getBytes(StandardCharsets.UTF_8));
+
+      int passwordLen = dis.readInt();
+      byte[] passwordBytes = dis.readNBytes(passwordLen);
+      String password = new String(decryptionCipher.doFinal(passwordBytes));
+      dos.writeInt(password.length());
+      dos.write(password.getBytes(StandardCharsets.UTF_8));
+      int status = dis.readInt();
+      if (status != Code.OK) {
+        Response response = new Response();
+        response.code = Code.ERROR;
+        return response;
+      } else {
+        // If we are here the handshake succeeded so wait for the server policy
+        HessianInput input = HessianUtils.createSafeHessianInput(socket.getInputStream());
+        Response response = (Response) input.readObject();
+        MapTool.getPlayer().setRole(response.role);
+        return response;
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private Response sendHandshakeSharedPassword(Request request, Socket socket)
+      throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {
+    DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+    DataInputStream dis = new DataInputStream(socket.getInputStream());
+
     // Read the salt we are expected to use for initial messages MAC
     int macSaltLen = dis.readInt();
     byte[] macSalt = dis.readNBytes(macSaltLen);
@@ -407,7 +546,7 @@ public class Handshake {
     }
 
     // If we are here the handshake succeeded so wait for the server policy
-    HessianInput input = HessianUtils.createSafeHessianInput(s.getInputStream());
+    HessianInput input = HessianUtils.createSafeHessianInput(socket.getInputStream());
     Response response = (Response) input.readObject();
     MapTool.getPlayer().setRole(response.role);
     return response;

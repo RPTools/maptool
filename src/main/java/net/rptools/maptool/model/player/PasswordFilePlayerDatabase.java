@@ -134,8 +134,6 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         String passwordString = null;
         if (passwordEntry.has("password")) {
           passwordString = passwordEntry.get("password").getAsString();
-        } else if (passwordEntry.has("publicKeyFile")) {
-
         }
 
         Role role = Role.valueOf(passwordEntry.get("role").getAsString().toUpperCase());
@@ -156,7 +154,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           for (JsonElement je : pkeys) {
             String publicKeyFile = je.getAsString();
             String pk = String.join("\n", Files.readAllLines(databaseDir.resolve(publicKeyFile)));
-            publicKeys.put(new MD5Key(pk), CipherUtil.fromPublicKeyString(pk));
+            publicKeys.put(new MD5Key(pk.replaceFirst("\\s","")), CipherUtil.fromPublicKeyString(pk));
           }
         }
 
@@ -165,28 +163,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           disabledReason = passwordEntry.get("disabled").getAsString();
         }
 
-        Set<PlayTime> playTimes = new HashSet<>();
-
-        if (passwordEntry.has("times")) {
-          JsonArray times = passwordEntry.get("times").getAsJsonArray();
-          for (JsonElement t : times) {
-            JsonObject time = t.getAsJsonObject();
-            PlayTime playTime = new PlayTime(
-                DayOfWeek.of(time.get("day").getAsInt()),
-                LocalTime.parse(time.get("start").getAsString()),
-                LocalTime.parse(time.get("end").getAsString())
-            );
-            playTimes.add(playTime);
-          }
-        }
-
         players.put(name, new PlayerDetails(
             name,
             role,
             passwordKey,
             publicKeys,
-            disabledReason,
-            Collections.unmodifiableSet(playTimes)
+            disabledReason
         ));
       }
       return players;
@@ -294,11 +276,6 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean supportsPlayTimes() {
-    return true;
-  }
-
-  @Override
   public boolean supportsAsymmetricalKeys() {
     return true;
   }
@@ -320,8 +297,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         details.role(),
         details.password(),
         details.publicKeys(),
-        reason,
-        details.playTimes()
+        reason
     );
     playerDetails.put(player.getName(), newDetails);
 
@@ -344,40 +320,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Set<PlayTime> getPlayTimes(Player player) {
-    PlayerDetails details = playerDetails.get(player.getName());
-    if (details == null) {
-      throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
-    }
-    return details.playTimes();
-  }
-
-  @Override
-  public void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException {
-    PlayerDetails details = playerDetails.get(player.getName());
-    if (details == null) {
-      throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
-    }
-
-    Set<PlayTime> playTimes = Set.copyOf(times);
-
-    PlayerDetails newDetails = new PlayerDetails(
-        details.name(),
-        details.role(),
-        details.password(),
-        details.publicKeys(),
-        details.disabledReason(),
-        details.playTimes()
-    );
-    playerDetails.put(player.getName(), newDetails);
-
-    dirty.set(true);
-    writePasswordFile();
-  }
-
-  @Override
   public AuthMethod getAuthMethod(Player player) {
-    return null;
+    PlayerDetails details = playerDetails.get(player.getName());
+    if (details == null) {
+      throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
+    }
+    return details.publicKeys().size() == 0 ? AuthMethod.PASSWORD : AuthMethod.ASYMMETRIC_KEY;
   }
 
   @Override
@@ -409,7 +357,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
 
   public void putPlayer(String name, Role role, String password,
-      Set<String> publicKeyStrings, Set<PlayTime> playTimes,
+      Set<String> publicKeyStrings,
       boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
     CipherUtil cipherUtil = null;
@@ -427,8 +375,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         role,
         cipherUtil == null ? null : cipherUtil.getKey(),
         publicKeys,
-        "",
-        playTimes
+        ""
     );
     if (persisted) {
       playerDetails.put(name, newDetails);
@@ -442,7 +389,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   private static record PlayerDetails(String name, Role role, CipherUtil.Key password,
                                       Map<MD5Key, CipherUtil> publicKeys,
-                                      String disabledReason, Set<PlayTime> playTimes) {}
+                                      String disabledReason) {}
 
 
 }

@@ -105,17 +105,6 @@ public class PlayerApi {
         blocked = true;
       }
     }
-    boolean supportsPlayTimes = playerDatabase.supportsPlayTimes();
-
-    PlayTimeInfo[] playTimes;
-    if (supportsPlayTimes || playerDatabase.allowedAnyPlayTime(player)) {
-      playTimes = new PlayTimeInfo[0];
-    } else {
-      playTimes =
-          playerDatabase.getPlayTimes(player).stream().map(pt -> new PlayTimeInfo(pt.dayOfWeek(),
-              pt.startTime(), pt.endTime())).toArray(PlayTimeInfo[]::new);
-    }
-
     boolean connected = false;
     for (Player p : MapTool.getPlayerList()) {
       if (name.equals(p.getName())) {

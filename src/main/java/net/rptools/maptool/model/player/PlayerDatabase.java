@@ -28,16 +28,6 @@ public interface PlayerDatabase {
     ASYMMETRIC_KEY
   };
 
-
-  Set<PlayTime> ANY_TIME = Set.of(
-      new PlayTime(DayOfWeek.MONDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.TUESDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.WEDNESDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.THURSDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.FRIDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.SATURDAY, LocalTime.MIN, LocalTime.MAX),
-      new PlayTime(DayOfWeek.SUNDAY, LocalTime.MIN, LocalTime.MAX)
-  );
   /**
    * Returns {@code true} if a player with the given name is known.
    *
@@ -102,11 +92,6 @@ public interface PlayerDatabase {
    */
   boolean supportsDisabling();
 
-  /**
-   * Returns if this player database supports valid play times.
-   * @return {@code true} if this player database supports valid play times.
-   */
-  boolean supportsPlayTimes();
 
   boolean supportsAsymmetricalKeys();
 
@@ -143,26 +128,6 @@ public interface PlayerDatabase {
   String getDisabledReason(Player player);
 
   /**
-   * Returns the play times that the player is allowed on during.
-   * @note Times are in the time zone of the server.
-   *
-   * @param player The player to get the play times from.
-   * @return the times that player is allowed on.
-   */
-  Set<PlayTime> getPlayTimes(Player player);
-
-  /**
-   *  Returns if the player is allowed to log in at any time.
-   * @return {@code true} if the player can log in at any time.
-   * @note The default implementation checks to see if play time is set to {@link #ANY_TIME} and
-   * will not perform an exhaustive check of all valid times.
-   * @param player The player to get the play times from.
-   */
-  default boolean allowedAnyPlayTime(Player player ) {
-    return ANY_TIME.equals(getPlayTimes(player));
-  }
-
-  /**
    * Returns the known players. For many player databases this will be the players
    * that are currently connected.
    *
@@ -187,16 +152,6 @@ public interface PlayerDatabase {
 
      return players;
    }
-
-  /**
-   * Sets the play times that the player is allowed on during.
-   * This will not boot a player if the current time is outside of the allowed times.
-   * @param player The player to set the play times for
-   * @param times the times that the player was allowed on during.
-   *
-   * @throws PasswordDatabaseException if the player database does not support setting play times.
-   */
-  void setPlayTimes(Player player, Collection<PlayTime> times) throws PasswordDatabaseException;
 
 
   /**

@@ -156,7 +156,7 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createDecryptor(Key key)
+  public static Cipher createDecryptor(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
       if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
@@ -181,7 +181,7 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public Cipher createEncrypter(Key key)
+  public static Cipher createEncrypter(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
       if (!key.privateKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
@@ -398,6 +398,14 @@ public class CipherUtil {
     return key;
   }
 
+  public Cipher getEncryptionCipher() {
+    return encryptionCipher;
+  }
+
+  public Cipher getDecryptionCipher() {
+    return decryptionCipher;
+  }
+
   private static String encodedPublicKeyText(PublicKey publicKey) {
     byte[] bytes = publicKey.getEncoded();
     String b64 = Base64.getEncoder().encodeToString(bytes);
@@ -409,7 +417,7 @@ public class CipherUtil {
   private static byte[] decodePublicKeyText(String pks) {
     byte[] bytes = pks.replaceFirst(PUBLIC_KEY_FIRST_LINE, "")
         .replaceFirst(PUBLIC_KEY_LAST_LINE, "")
-        .replaceAll("\\n", "")
+        .replaceAll("\\s", "")
         .getBytes(StandardCharsets.UTF_8);
     return Base64.getDecoder().decode(bytes);
   }

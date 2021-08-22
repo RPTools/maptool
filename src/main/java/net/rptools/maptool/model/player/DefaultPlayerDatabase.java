@@ -73,11 +73,6 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean supportsPlayTimes() {
-    return false;
-  }
-
-  @Override
   public boolean supportsAsymmetricalKeys() {
     return false;
   }
@@ -100,16 +95,6 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public String getDisabledReason(Player player) {
     return "";
-  }
-
-  @Override
-  public Set<PlayTime> getPlayTimes(Player player) {
-    return ANY_TIME;
-  }
-
-  @Override
-  public void setPlayTimes(Player player, Collection<PlayTime> times) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
