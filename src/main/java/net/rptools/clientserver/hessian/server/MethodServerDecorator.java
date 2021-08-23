@@ -22,6 +22,8 @@ import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 
+import java.io.IOException;
+
 /** @author drice */
 public class MethodServerDecorator implements MethodServerConnection {
   private ServerConnection connection;
@@ -97,6 +99,11 @@ public class MethodServerDecorator implements MethodServerConnection {
   @Override
   public void removeDisconnectHandler(DisconnectHandler handler) {
     connection.removeDisconnectHandler(handler);
+  }
+
+  @Override
+  public void open() throws IOException {
+    connection.open();
   }
 
   @Override

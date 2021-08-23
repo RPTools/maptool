@@ -24,11 +24,17 @@ import org.apache.log4j.Logger;
 public class SocketServerConnection extends AbstractServerConnection {
 
   private static final Logger log = Logger.getLogger(SocketServerConnection.class);
-  private final ServerSocket socket;
-  private final ListeningThread listeningThread;
+  private final int port;
+  private ServerSocket socket;
+  private ListeningThread listeningThread;
 
-  public SocketServerConnection(int port, HandshakeProvider handshake) throws IOException {
+  public SocketServerConnection(int port, HandshakeProvider handshake){
     super(handshake);
+    this.port = port;
+  }
+
+  @Override
+  public void open() throws IOException {
     socket = new ServerSocket(port);
     listeningThread = new ListeningThread(this, socket);
     listeningThread.start();
@@ -53,6 +59,11 @@ public class SocketServerConnection extends AbstractServerConnection {
     } catch (InterruptedException e) {
       log.error(e.getMessage(), e);
     }
+  }
+
+  @Override
+  public String getError() {
+    return null;
   }
 
   ////

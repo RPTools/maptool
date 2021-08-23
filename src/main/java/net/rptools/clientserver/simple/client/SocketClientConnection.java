@@ -99,6 +99,11 @@ public class SocketClientConnection extends AbstractConnection implements Client
     return !socket.isClosed();
   }
 
+  @Override
+  public String getError() {
+    return null;
+  }
+
   // /////////////////////////////////////////////////////////////////////////
   // send thread
   // /////////////////////////////////////////////////////////////////////////

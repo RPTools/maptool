@@ -48,8 +48,9 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCPeerConnection peerConnection;
   private RTCDataChannel localDataChannel;
   private RTCDataChannel remoteDataChannel;
+  private String lastError = null;
 
-  private boolean started = false;
+  private RTCDataChannelState currentState = RTCDataChannelState.CLOSED;
   private SendThread sendThread;
   private Thread handleConnnect;
 
@@ -112,12 +113,17 @@ public class WebRTCClientConnection extends AbstractConnection
 
           @Override
           public void onClose(int code, String reason, boolean remote) {
-            log.info("Websocket closed\n");
+            lastError = "Websocket closed: (" + code + ") " + reason;
+            log.info(lastError);
+            if(!isAlive())
+              fireDisconnect();
           }
 
           @Override
           public void onError(Exception ex) {
-            log.info("Websocket error: " + ex.toString() + "\n");
+            lastError = "Websocket error: " + ex.toString() + "\n";
+            log.info(lastError);
+            //onClose will be called after this
           }
         };
     signalingCLient.connect();
@@ -146,7 +152,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    return localDataChannel.getState() == RTCDataChannelState.OPEN;
+    return currentState == RTCDataChannelState.OPEN;
   }
 
   @Override
@@ -367,6 +373,7 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onStateChange() {
     log.info(prefix() + "localDataChannel onStateChange " + localDataChannel.getState());
+    currentState = localDataChannel.getState();
   }
 
   // datachannel
@@ -397,11 +404,20 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void close() {
+    // signalingClient should be closed if connection was established
+    if(signalingCLient.isOpen())
+      signalingCLient.close();
+
     if (sendThread.stopRequested) {
-      return;
+        return;
     }
     sendThread.requestStop();
     peerConnection.close();
+  }
+
+  @Override
+  public String getError() {
+    return lastError;
   }
 
   private class SendThread extends Thread {

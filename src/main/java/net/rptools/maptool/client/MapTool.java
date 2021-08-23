@@ -1055,6 +1055,7 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+    server.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {

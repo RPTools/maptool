@@ -159,21 +159,20 @@ public class MapToolServer {
   }
 
   public void stop() {
-    try {
-      conn.close();
-      if (heartbeatThread != null) {
-        heartbeatThread.shutdown();
-      }
-      if (assetProducerThread != null) {
-        assetProducerThread.shutdown();
-      }
-    } catch (IOException e) {
-      // Not too concerned about this
-      log.info("Couldn't close connection", e);
+    conn.close();
+    if (heartbeatThread != null) {
+      heartbeatThread.shutdown();
+    }
+    if (assetProducerThread != null) {
+      assetProducerThread.shutdown();
     }
   }
 
   private static final Random random = new Random();
+
+  public void start() throws IOException {
+    conn.open();
+  }
 
   private class HeartbeatThread extends Thread {
     private boolean stop = false;

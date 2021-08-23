@@ -25,6 +25,4 @@ public interface ClientConnection extends Connection {
   boolean isAlive();
 
   String getId();
-
-  void open() throws IOException;
 }

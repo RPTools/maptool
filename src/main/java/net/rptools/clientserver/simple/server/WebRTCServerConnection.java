@@ -39,8 +39,11 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private final ServerConfig config;
   private final Gson gson = new Gson();
   private RTCConfiguration rtcConfig;
+  private String lastError = null;
 
-  public static String WebSocketUrl = "ws://mt-test2.azurewebsites.net";
+  //public static String WebSocketUrl = "ws://mt-test2.azurewebsites.net";
+  public static String WebSocketUrl = "ws://172.31.222.156:8080";
+
 
   public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
     super(handshake);
@@ -55,8 +58,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
     try {
       uri = new URI(WebSocketUrl);
-    } catch (Exception e) {
-    }
+    } catch (Exception e) {}
 
     signalingCLient =
         new WebSocketClient(uri) {
@@ -77,15 +79,18 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
           @Override
           public void onClose(int code, String reason, boolean remote) {
-            log.info("Websocket closed\n");
+            lastError = "Websocket closed: remote:" + remote + " (" + code + ") " + reason;
+            log.info(lastError);
+            MapTool.stopServer();
           }
 
           @Override
           public void onError(Exception ex) {
-            log.error("Websocket error: " + ex.toString() + "\n");
+            lastError = "Websocket error: " + ex.toString() + "\n";
+            log.error(lastError);
+            // onClose will be called after this method
           }
         };
-    signalingCLient.connect();
   }
 
   private void handleSignalingMessage(String message) {
@@ -156,5 +161,20 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public String getError() {
+    return lastError;
+  }
+
+  @Override
+  public void open() throws IOException {
+    signalingCLient.connect();
+  }
+
+  @Override
+  public void close() {
+    signalingCLient.close();
   }
 }
