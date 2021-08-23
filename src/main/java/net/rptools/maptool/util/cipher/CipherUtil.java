@@ -22,8 +22,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -32,6 +35,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
@@ -463,5 +467,34 @@ public class CipherUtil {
 
   public byte[] decode(byte[] toDecode) throws IllegalBlockSizeException, BadPaddingException {
     return decryptionCipher.doFinal(toDecode);
+  }
+
+  public static String[] splitPublicKeys(String concatKeys) {
+    List<String> publicKeys = new ArrayList<>();
+
+    StringBuilder sb = new StringBuilder();
+    for (String line : concatKeys.split("\\n")) {
+      line = line.replaceAll("\\s", "");
+      if (line.length() > 0 && !line.startsWith("#")) {
+        sb.append(line);
+        if (line.equals(PUBLIC_KEY_LAST_LINE)) {
+          publicKeys.add(sb.toString());
+          sb.setLength(0);
+        }
+      }
+    }
+    return publicKeys.toArray(new String[0]);
+  }
+
+  public static String concatenatePublicKeys(List<String> keys) {
+    return String.join("\n\n", keys);
+  }
+
+  public static MD5Key publicKeyMD5(String key) {
+    key = key.trim();
+    if (!key.startsWith(PUBLIC_KEY_FIRST_LINE) || !key.endsWith(PUBLIC_KEY_LAST_LINE)) {
+      throw new IllegalArgumentException("Not a public key string.");
+    }
+    return new MD5Key(key.replaceAll("\\s", ""));
   }
 }

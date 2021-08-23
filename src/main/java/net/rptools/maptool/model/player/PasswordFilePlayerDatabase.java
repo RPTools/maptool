@@ -19,11 +19,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,11 +28,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.lib.MD5Key;
@@ -51,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
+  private static final String PUBLIC_KEY_DIR = "keys";
 
   private final File passwordFile;
   private final File backupPasswordFile;
@@ -150,11 +145,15 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           dirty.set(true);
         } else if (passwordEntry.has("publicKeys")) {
           JsonArray pkeys = passwordEntry.get("publicKeys").getAsJsonArray();
-          Path databaseDir = passwordFile.getParentFile().toPath();
+          Path publicKeyDir = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR);
           for (JsonElement je : pkeys) {
             String publicKeyFile = je.getAsString();
-            String pk = String.join("\n", Files.readAllLines(databaseDir.resolve(publicKeyFile)));
-            publicKeys.put(new MD5Key(pk.replaceFirst("\\s","")), CipherUtil.fromPublicKeyString(pk));
+            String pkString = String.join("\n",
+                Files.readAllLines(publicKeyDir.resolve(publicKeyFile)));
+
+            for (String pk : CipherUtil.splitPublicKeys(pkString)) {
+              publicKeys.put(CipherUtil.publicKeyMD5(pk), CipherUtil.fromPublicKeyString(pk));
+            }
           }
         }
 
@@ -312,7 +311,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   @Override
   public String getDisabledReason(Player player) {
-    PlayerDetails details = playerDetails.get(player.getName());
+    PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
     }
@@ -321,7 +320,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   @Override
   public AuthMethod getAuthMethod(Player player) {
-    PlayerDetails details = playerDetails.get(player.getName());
+    PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
     }
@@ -331,7 +330,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   @Override
   public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
       throws ExecutionException, InterruptedException {
-    PlayerDetails pd = playerDetails.get(player.getName());
+    PlayerDetails pd = getPlayerDetails(player.getName());
     if (pd == null) {
       CompletableFuture.completedFuture(null);
     }

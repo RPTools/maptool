@@ -429,7 +429,7 @@ public class Handshake {
       CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
       Cipher decryptionCipher = cipherUtil.getDecryptionCipher();
       // Send MD5 of the public key on this machine
-      String s = cipherUtil.getEncodedPublicKeyText().replaceAll("\\s", "");
+      String s = CipherUtil.publicKeyMD5(cipherUtil.getEncodedPublicKeyText()).toString();
       dos.writeInt(s.length());
       dos.write(s.getBytes(StandardCharsets.UTF_8));
 
