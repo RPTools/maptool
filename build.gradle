@@ -89,6 +89,13 @@ spotless {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
             exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
+            exclude '**/MapToolInfo.java' // Temporary until supported.
+            exclude '**/PlayerDatabaseInfo.java' // Temporary until supported.
+            exclude '**/PlayerInfo.java' // Temporary until supported.
+            exclude '**/PlayTimeInfo.java' // Temporary until supported.
+            exclude '**/NoData.java' // Temporary until supported.
+            exclude '**/PlayTime.java' // Temporary until supported.
+            exclude '**/CipherUtil.java' // Temporary until supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -395,6 +402,10 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
+
+
+    // HTTP End Point
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 }
 
 

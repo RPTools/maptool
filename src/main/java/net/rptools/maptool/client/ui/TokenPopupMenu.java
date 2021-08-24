@@ -58,11 +58,11 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.FunctionUtil;
 
 public class TokenPopupMenu extends AbstractTokenPopupMenu {

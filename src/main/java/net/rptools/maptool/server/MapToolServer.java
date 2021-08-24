@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.server;
 
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +33,8 @@ import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
@@ -45,6 +49,7 @@ public class MapToolServer {
   private final MapToolServerConnection conn;
   private final ServerMethodHandler handler;
   private final ServerConfig config;
+  private final PlayerDatabase playerDatabase;
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
@@ -56,9 +61,11 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy) throws IOException {
+  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
+      throws IOException {
     handler = new ServerMethodHandler(this);
-    conn = new MapToolServerConnection(this, config.getPort());
+    playerDatabase = playerDb;
+    conn = new MapToolServerConnection(this, config.getPort(), playerDatabase);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
@@ -305,6 +312,9 @@ public class MapToolServer {
   // STANDALONE SERVER
   public static void main(String[] args) throws IOException {
     // This starts the server thread.
-    MapToolServer server = new MapToolServer(new ServerConfig(), new ServerPolicy());
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    MapToolServer server =
+        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
   }
 }

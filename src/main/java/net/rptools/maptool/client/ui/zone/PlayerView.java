@@ -15,8 +15,8 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.util.List;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.player.Player;
 
 public class PlayerView {
   /** The role of the player (GM or PLAYER). */

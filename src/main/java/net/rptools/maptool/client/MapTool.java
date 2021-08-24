@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
+
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -41,6 +43,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -75,12 +79,14 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -677,9 +683,8 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-    player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
-
     try {
+      player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // This was previously being done in the server thread and didn't always get done
       // before the campaign was accessed by the postInitialize() method below.
@@ -741,6 +746,7 @@ public class MapTool {
   public static boolean isDevelopment() {
     return "DEVELOPMENT".equals(version)
         || "@buildNumber@".equals(version)
+        || "0.0.1".equals(version)
         || (version != null && version.startsWith("SNAPSHOT"));
   }
 
@@ -1007,11 +1013,17 @@ public class MapTool {
    * @param config the server configuration.
    * @param policy the server policy configuration to use.
    * @param campaign the campaign.
+   * @param playerDatabase the player database to use for the connection.
    * @param copyCampaign should the campaign be a copy of the one provided.
    * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
-      String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign)
+      String id,
+      ServerConfig config,
+      ServerPolicy policy,
+      Campaign campaign,
+      PlayerDatabase playerDatabase,
+      boolean copyCampaign)
       throws IOException {
     if (server != null) {
       Thread.dumpStack();
@@ -1023,7 +1035,7 @@ public class MapTool {
 
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
-    server = new MapToolServer(config, policy);
+    server = new MapToolServer(config, policy, playerDatabase);
 
     serverPolicy = server.getPolicy();
     if (copyCampaign) {
@@ -1154,16 +1166,16 @@ public class MapTool {
     return player;
   }
 
-  public static void startPersonalServer(Campaign campaign) throws IOException {
+  public static void startPersonalServer(Campaign campaign)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
-    MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false);
 
     String username = AppPreferences.getDefaultUserName();
-    // Connect to server
-    MapTool.createConnection(
-        "localhost",
-        config.getPort(),
-        new LocalPlayer(username, Player.Role.GM, ServerConfig.getPersonalServerGMPassword()));
+    LocalPlayer localPlayer = (LocalPlayer) playerDatabase.getPlayer(username);
+    MapTool.createConnection("localhost", config.getPort(), localPlayer);
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
