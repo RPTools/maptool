@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.player;
 
 import java.io.File;
@@ -21,9 +35,7 @@ public class PlayerDatabaseFactory {
     PASSWORD_FILE
   }
 
-
   private static PlayerDatabase currentPlayerDatabase;
-
 
   private static final Map<PlayerDatabaseType, PlayerDatabase> playerDatabaseMap =
       new ConcurrentHashMap<>();
@@ -35,8 +47,6 @@ public class PlayerDatabaseFactory {
   private static final File PASSWORD_ADDITION_FILE =
       AppUtil.getAppHome("config").toPath().resolve("passwords_add.json").toFile();
   private static ServerConfig serverConfig;
-
-
 
   public static void setServerConfig(ServerConfig config) {
     try {
@@ -75,16 +85,15 @@ public class PlayerDatabaseFactory {
   }
 
   public static PlayerDatabase getPlayerDatabase(PlayerDatabaseType databaseType) {
-      switch (databaseType) {
-        case LOCAL_PLAYER:
-        case PASSWORD_FILE:
-          return playerDatabaseMap.computeIfAbsent(databaseType,
-              PlayerDatabaseFactory::createPlayerDatabase);
-        default:
-          return createPlayerDatabase(databaseType);
-      }
+    switch (databaseType) {
+      case LOCAL_PLAYER:
+      case PASSWORD_FILE:
+        return playerDatabaseMap.computeIfAbsent(
+            databaseType, PlayerDatabaseFactory::createPlayerDatabase);
+      default:
+        return createPlayerDatabase(databaseType);
+    }
   }
-
 
   private static PlayerDatabase createPlayerDatabase(PlayerDatabaseType databaseType) {
     try {
@@ -97,14 +106,14 @@ public class PlayerDatabaseFactory {
           return new PersonalServerPlayerDatabase();
         default:
           ServerConfig config = getServerConfig();
-          return new DefaultPlayerDatabase(
-              config.getPlayerPassword(),
-              config.getGmPassword()
-          );
+          return new DefaultPlayerDatabase(config.getPlayerPassword(), config.getGmPassword());
       }
-    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException e) {
+    } catch (IOException
+        | NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | NoSuchPaddingException
+        | InvalidKeyException e) {
       throw new IllegalStateException(e);
     }
   }
-
 }

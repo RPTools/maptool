@@ -1,21 +1,32 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Collection;
-import java.util.Set;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
-import java.util.Optional;
-
 /**
- * This class provides the implementation for the default player database, where any one can connect as long as they
- * know the role password. This follows the standard behaviour for 1.9 and earlier.
+ * This class provides the implementation for the default player database, where any one can connect
+ * as long as they know the role password. This follows the standard behaviour for 1.9 and earlier.
  */
 public class DefaultPlayerDatabase implements PlayerDatabase {
 
@@ -23,7 +34,8 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   private final CipherUtil gmPassword;
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     byte[] salt = CipherUtil.createSalt();
     this.playerPassword = CipherUtil.fromSharedKey(playerPassword, salt);
     this.gmPassword = CipherUtil.fromSharedKey(gmPassword, salt);

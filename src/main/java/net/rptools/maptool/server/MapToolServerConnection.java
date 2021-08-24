@@ -39,7 +39,8 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   private final MapToolServer server;
   private final PlayerDatabase playerDatabase;
 
-  public MapToolServerConnection(MapToolServer server, int port, PlayerDatabase playerDatabase) throws IOException {
+  public MapToolServerConnection(MapToolServer server, int port, PlayerDatabase playerDatabase)
+      throws IOException {
     super(port);
     this.server = server;
     this.playerDatabase = playerDatabase;
@@ -61,7 +62,13 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
         playerMap.put(id.toUpperCase(), player);
         return true;
       }
-    } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+    } catch (IOException
+        | InvalidKeySpecException
+        | NoSuchAlgorithmException
+        | NoSuchPaddingException
+        | InvalidKeyException
+        | IllegalBlockSizeException
+        | BadPaddingException e) {
       log.error("Handshake failure: " + e, e);
     }
     return false;
@@ -96,11 +103,15 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     for (Player player : playerMap.values()) {
       server
           .getConnection()
-          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player.getTransferablePlayer());
+          .callMethod(
+              conn.getId(),
+              ClientCommand.COMMAND.playerConnected.name(),
+              player.getTransferablePlayer());
     }
     server
         .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
+        .broadcastCallMethod(
+            ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server

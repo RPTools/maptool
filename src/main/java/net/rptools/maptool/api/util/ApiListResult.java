@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.api.util;
 
 import com.google.gson.JsonArray;
@@ -19,9 +33,7 @@ public class ApiListResult<T extends ApiData> {
     this.data = List.copyOf(data);
     this.exception = null;
     this.status = data != null ? ApiResultStatus.OK : ApiResultStatus.NONE;
-
   }
-
 
   public ApiListResult(ApiException e) {
     this.data = null;
@@ -29,8 +41,7 @@ public class ApiListResult<T extends ApiData> {
     this.exception = e;
   }
 
-
-    public List<T> getData() {
+  public List<T> getData() {
     return data;
   }
 
@@ -49,8 +60,10 @@ public class ApiListResult<T extends ApiData> {
   public JsonObject asJsonObject() {
     JsonObject json = new JsonObject();
     if (data != null) {
-      JsonArray objList = data.stream().map(ApiData::asJsonObject)
-          .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+      JsonArray objList =
+          data.stream()
+              .map(ApiData::asJsonObject)
+              .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
       json.add("data", objList);
     }
     json.addProperty("status", status.getTextValue());
@@ -61,6 +74,4 @@ public class ApiListResult<T extends ApiData> {
 
     return json;
   }
-
-
 }

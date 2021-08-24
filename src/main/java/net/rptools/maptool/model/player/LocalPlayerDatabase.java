@@ -1,13 +1,24 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.ServerConfig;
@@ -15,11 +26,8 @@ import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 
-/**
- * This class provides the implementation for the "database" for the client local player.
- */
+/** This class provides the implementation for the "database" for the client local player. */
 public class LocalPlayerDatabase implements PlayerDatabase {
-
 
   private LocalPlayer localPlayer;
 
@@ -34,7 +42,6 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   private synchronized LocalPlayer getLocalPlayer() {
     return localPlayer;
   }
-
 
   @Override
   public boolean playerExists(String playerName) {
@@ -76,12 +83,13 @@ public class LocalPlayerDatabase implements PlayerDatabase {
     if (player != null && player.getName().equals(playerName)) {
       player.setRole(role);
     } else {
-      player = new LocalPlayer(
-          playerName,
-          role,
-          role == Role.GM ? ServerConfig.getPersonalServerGMPassword() :
-              ServerConfig.getPersonalServerPlayerPassword()
-      );
+      player =
+          new LocalPlayer(
+              playerName,
+              role,
+              role == Role.GM
+                  ? ServerConfig.getPersonalServerGMPassword()
+                  : ServerConfig.getPersonalServerPlayerPassword());
     }
     setLocalPlayer(player);
     return player;
@@ -135,6 +143,8 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
-    return localPlayer != null && localPlayer.getName() != null && localPlayer.getName().equals(name);
+    return localPlayer != null
+        && localPlayer.getName() != null
+        && localPlayer.getName().equals(name);
   }
 }

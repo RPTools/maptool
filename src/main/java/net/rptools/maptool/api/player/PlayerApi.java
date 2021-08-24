@@ -1,5 +1,18 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.api.player;
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
@@ -12,9 +25,7 @@ import net.rptools.maptool.api.ApiException;
 import net.rptools.maptool.api.util.ApiCall;
 import net.rptools.maptool.api.util.ApiListResult;
 import net.rptools.maptool.api.util.ApiResult;
-import net.rptools.maptool.api.util.NoData;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -31,34 +42,45 @@ public class PlayerApi {
   }
 
   public CompletableFuture<ApiResult<PlayerInfo>> getPlayer() {
-    return new ApiCall<PlayerInfo>().runOnSwingThread(() -> {
-      Player player = MapTool.getPlayer();
-      return getPlayerInfo(player.getName());
-    });
+    return new ApiCall<PlayerInfo>()
+        .runOnSwingThread(
+            () -> {
+              Player player = MapTool.getPlayer();
+              return getPlayerInfo(player.getName());
+            });
   }
 
   public CompletableFuture<ApiListResult<PlayerInfo>> getConnectedPlayers() {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
-        return new ApiListResult<>(
-            getPlayersInfo().stream().filter(PlayerInfo::connected).collect(Collectors.toList())
-        );
-      } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-        log.error(e);
-        return new ApiListResult<>(new ApiException("err.internal", e));
-      }
-    });
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            return new ApiListResult<>(
+                getPlayersInfo().stream()
+                    .filter(PlayerInfo::connected)
+                    .collect(Collectors.toList()));
+          } catch (InterruptedException
+              | InvocationTargetException
+              | NoSuchAlgorithmException
+              | InvalidKeySpecException e) {
+            log.error(e);
+            return new ApiListResult<>(new ApiException("err.internal", e));
+          }
+        });
   }
 
   public CompletableFuture<ApiListResult<PlayerInfo>> getDatabasePlayers() {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
-        return new ApiListResult<>(getPlayersInfo());
-      } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-        log.error(e);
-        return new ApiListResult<>(new ApiException("err.internal", e));
-      }
-    });
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            return new ApiListResult<>(getPlayersInfo());
+          } catch (InterruptedException
+              | InvocationTargetException
+              | NoSuchAlgorithmException
+              | InvalidKeySpecException e) {
+            log.error(e);
+            return new ApiListResult<>(new ApiException("err.internal", e));
+          }
+        });
   }
 
   public CompletableFuture<ApiResult<PlayerDatabaseInfo>> getDatabaseCapabilities() {
@@ -86,13 +108,15 @@ public class PlayerApi {
 
   private PlayerDatabaseInfo getPlayerDatabaseInfo() {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    return new PlayerDatabaseInfo(playerDatabase.supportsDisabling(),
-        !playerDatabase.supportsRolePasswords(), playerDatabase.supportsAsymmetricalKeys());
+    return new PlayerDatabaseInfo(
+        playerDatabase.supportsDisabling(),
+        !playerDatabase.supportsRolePasswords(),
+        playerDatabase.supportsAsymmetricalKeys());
   }
 
-
   private PlayerInfo getPlayerInfo(String name)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException, InvocationTargetException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException,
+          InvocationTargetException {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (!playerDatabase.isPlayerRegistered(name)) {
       return null;
@@ -116,18 +140,12 @@ public class PlayerApi {
       }
     }
 
-
-    return new PlayerInfo(
-        name,
-        role,
-        blocked,
-        blockedReason,
-        connected
-    );
+    return new PlayerInfo(name, role, blocked, blockedReason, connected);
   }
 
   private List<PlayerInfo> getPlayersInfo()
-      throws InterruptedException, InvocationTargetException, NoSuchAlgorithmException, InvalidKeySpecException {
+      throws InterruptedException, InvocationTargetException, NoSuchAlgorithmException,
+          InvalidKeySpecException {
     List<PlayerInfo> players = new ArrayList<>();
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     for (Player p : playerDatabase.getAllPlayers()) {
@@ -137,4 +155,3 @@ public class PlayerApi {
     return players;
   }
 }
-

@@ -17,8 +17,8 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.player.Player;
 
 /**
  * An overlay that may be applied to a token to show state.

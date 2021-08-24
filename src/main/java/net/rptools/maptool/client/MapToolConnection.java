@@ -24,10 +24,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.Handshake;
 
 /** @author trevor */
@@ -58,7 +56,9 @@ public class MapToolConnection extends ClientConnection {
       response =
           handshake.sendHandshake(
               new Handshake.Request(
-                  player.getName(), player.getPlainTextPassword(), player.getRole(),
+                  player.getName(),
+                  player.getPlainTextPassword(),
+                  player.getRole(),
                   MapTool.getVersion()),
               s);
     } catch (IllegalBlockSizeException

@@ -14,10 +14,8 @@
  */
 package net.rptools.maptool.server;
 
-
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
-import com.rometools.rome.io.impl.Base64;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.crypto.*;
 import net.rptools.clientserver.hessian.HessianUtils;
@@ -37,17 +34,14 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
-import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
+import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cert.ocsp.Req;
 
 /** @author trevor */
 public class Handshake {
-
 
   public interface Code {
     int UNKNOWN = 0;
@@ -57,20 +51,17 @@ public class Handshake {
 
   private static final String USERNAME_FIELD = "username:";
   private static final String VERSION_FIELD = "version:";
-  private static final String USE_SHARED_PASSWORD     = "!SHARED!";
+  private static final String USE_SHARED_PASSWORD = "!SHARED!";
   private static final String USE_ASYMMETRIC_PASSWORD = "!ASYMMETRIC!";
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
 
-
   private final PlayerDatabase playerDatabase;
-
 
   public Handshake(PlayerDatabase database) {
     playerDatabase = database;
   }
-
 
   /**
    * Server side of the handshake
@@ -83,7 +74,8 @@ public class Handshake {
    * @throws IOException if there is a problem reading from the socket.
    */
   public Player receiveHandshake(MapToolServer server, Socket s)
-      throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+      throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException,
+          InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
     DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
@@ -94,8 +86,6 @@ public class Handshake {
     if (nameLen != nameBytes.length) {
       throw new IOException("Unable to read username");
     }
-
-
 
     String username = new String(nameBytes);
     if (!playerDatabase.playerExists(username)) {
@@ -108,16 +98,17 @@ public class Handshake {
     if (authMethod == AuthMethod.ASYMMETRIC_KEY) {
       return receiveHandshakeAsymmetricPassword(server, s, username);
     } else {
-      return receiveHandshakeSharedPassword(server, s,  username);
-   }
- }
-  private Player receiveHandshakeAsymmetricPassword(MapToolServer server, Socket socket,
-      String username)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+      return receiveHandshakeSharedPassword(server, s, username);
+    }
+  }
+
+  private Player receiveHandshakeAsymmetricPassword(
+      MapToolServer server, Socket socket, String username)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
     DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
     DataInputStream dis = new DataInputStream(socket.getInputStream());
-
 
     // Tell client to use asymmetric password.
     dos.writeInt(USE_ASYMMETRIC_PASSWORD.length());
@@ -130,8 +121,7 @@ public class Handshake {
 
     CipherUtil cipherUtil;
     try {
-      cipherUtil = playerDatabase.getPublicKey(playerDatabase.getPlayer(username),
-          md5Key).get();
+      cipherUtil = playerDatabase.getPublicKey(playerDatabase.getPlayer(username), md5Key).get();
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }
@@ -166,19 +156,19 @@ public class Handshake {
       dos.writeInt(Code.ERROR);
       return null;
     }
-
-
   }
 
- private Player receiveHandshakeSharedPassword(MapToolServer server, Socket socket, String username)
-     throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+  private Player receiveHandshakeSharedPassword(
+      MapToolServer server, Socket socket, String username)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
-   DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-   DataInputStream dis = new DataInputStream(socket.getInputStream());
+    DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+    DataInputStream dis = new DataInputStream(socket.getInputStream());
 
-   // Tell client we are expecting a shared password
-   dos.writeInt(USE_SHARED_PASSWORD.length());
-   dos.write(USE_SHARED_PASSWORD.getBytes(StandardCharsets.UTF_8));
+    // Tell client we are expecting a shared password
+    dos.writeInt(USE_SHARED_PASSWORD.length());
+    dos.write(USE_SHARED_PASSWORD.getBytes(StandardCharsets.UTF_8));
 
     // Send the initial salt we expect the first message to use as the MAC
     byte[] initialMacSalt = CipherUtil.createSalt();
@@ -186,7 +176,6 @@ public class Handshake {
     dos.write(initialMacSalt);
 
     Optional<CipherUtil.Key> key = playerDatabase.getPlayerPassword(username);
-
 
     CipherUtil.Key playerPassword;
     CipherUtil.Key gmPassword;
@@ -207,13 +196,7 @@ public class Handshake {
 
     Response response = new Response();
     Request request =
-        decodeRequest(
-            socket,
-            playerPassword,
-            gmPassword,
-            username,
-            initialMacSalt,
-            passwordSalt);
+        decodeRequest(socket, playerPassword, gmPassword, username, initialMacSalt, passwordSalt);
     if (request == null) {
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
@@ -242,8 +225,8 @@ public class Handshake {
       Player.Role role = Player.Role.valueOf(request.role);
       CipherUtil.Key passwordToUse = role == Player.Role.GM ? gmPassword : playerPassword;
 
-      //player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
-      player =  playerDatabase.getPlayerWithRole(request.name, Player.Role.valueOf(request.role));
+      // player = new Player(request.name, Player.Role.valueOf(request.role), passwordToUse);
+      player = playerDatabase.getPlayerWithRole(request.name, Player.Role.valueOf(request.role));
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge();
 
       CipherUtil cipherUtil = CipherUtil.fromKey(passwordToUse);
@@ -255,9 +238,8 @@ public class Handshake {
       dos.write(passwordToUse.salt());
       dos.writeInt(challenge.length);
       dos.write(challenge);
-      dos.write(CipherUtil.generateMacAndSalt(
-          CipherUtil.encodeBase64(passwordToUse.secretKeySpec())
-      ));
+      dos.write(
+          CipherUtil.generateMacAndSalt(CipherUtil.encodeBase64(passwordToUse.secretKeySpec())));
       dos.flush();
 
       // Now read the response
@@ -274,8 +256,7 @@ public class Handshake {
       }
 
       byte[] mac = CipherUtil.readMac(dis);
-      if (!CipherUtil.validateMac(mac,
-          CipherUtil.encodeBase64(passwordToUse.secretKeySpec()))) {
+      if (!CipherUtil.validateMac(mac, CipherUtil.encodeBase64(passwordToUse.secretKeySpec()))) {
         return null;
       }
 
@@ -300,7 +281,6 @@ public class Handshake {
     }
     return player;
   }
-
 
   private static Request extractRequestDetails(byte[] bytes, Role role) {
     String[] lines = new String(bytes).split("\n");
@@ -331,7 +311,10 @@ public class Handshake {
    * @return The decrypted {@link Request}.
    */
   private static Request decodeRequest(
-      Socket socket, CipherUtil.Key playerPassword, CipherUtil.Key gmPassword, String username,
+      Socket socket,
+      CipherUtil.Key playerPassword,
+      CipherUtil.Key gmPassword,
+      String username,
       byte[] expectedInitialMacSalt,
       byte[] passwordSalt)
       throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
@@ -364,12 +347,12 @@ public class Handshake {
 
     CipherUtil.Key cipherKey = null;
     Role playerRole = null;
-    if (playerPassword != null && CipherUtil.validateMac(mac,
-        CipherUtil.encodeBase64(playerPassword.secretKeySpec()))) {
+    if (playerPassword != null
+        && CipherUtil.validateMac(mac, CipherUtil.encodeBase64(playerPassword.secretKeySpec()))) {
       cipherKey = playerPassword;
       playerRole = Role.PLAYER;
-    } else if (gmPassword != null && CipherUtil.validateMac(mac,
-        CipherUtil.encodeBase64(gmPassword.secretKeySpec()))) {
+    } else if (gmPassword != null
+        && CipherUtil.validateMac(mac, CipherUtil.encodeBase64(gmPassword.secretKeySpec()))) {
       cipherKey = gmPassword;
       playerRole = Role.GM;
     } else {
@@ -421,9 +404,9 @@ public class Handshake {
     }
   }
 
-
   private Response sendHandshakeAsymmetricPassword(Request request, Socket socket)
-      throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+      throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          IllegalBlockSizeException, BadPaddingException {
     DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
     DataInputStream dis = new DataInputStream(socket.getInputStream());
 
@@ -431,8 +414,7 @@ public class Handshake {
       CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
       Cipher decryptionCipher = cipherUtil.getDecryptionCipher();
       // Send MD5 of the public key on this machine
-      String s =
-          CipherUtil.publicKeyMD5(cipherUtil.getEncodedPublicKeyText()).toString();
+      String s = CipherUtil.publicKeyMD5(cipherUtil.getEncodedPublicKeyText()).toString();
       dos.writeInt(s.length());
       dos.write(s.getBytes(StandardCharsets.UTF_8));
 
@@ -460,14 +442,15 @@ public class Handshake {
   }
 
   private Response sendHandshakeSharedPassword(Request request, Socket socket)
-      throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {
+      throws IOException, NoSuchPaddingException, IllegalBlockSizeException,
+          NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException,
+          InvalidKeyException {
     DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
     DataInputStream dis = new DataInputStream(socket.getInputStream());
 
     // Read the salt we are expected to use for initial messages MAC
     int macSaltLen = dis.readInt();
     byte[] macSalt = dis.readNBytes(macSaltLen);
-
 
     if (macSaltLen != macSalt.length) {
       Response response = new Response();
@@ -480,14 +463,12 @@ public class Handshake {
     int passwordSaltLen = dis.readInt();
     byte[] passwordSalt = dis.readNBytes(passwordSaltLen);
 
-
     if (passwordSaltLen != passwordSalt.length) {
       Response response = new Response();
       response.code = Code.ERROR;
       response.message = I18N.getString("Handshake.msg.wrongPassword");
       return response;
     }
-
 
     byte[] reqBytes = buildRequest(request, macSalt, passwordSalt);
     dos.write(reqBytes);
@@ -519,26 +500,27 @@ public class Handshake {
 
       CipherUtil cipherUtil = CipherUtil.fromSharedKey(request.password, passwordSalt);
 
-
-      if (!CipherUtil.validateMac(mac,
-          CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()))) {
+      if (!CipherUtil.validateMac(
+          mac, CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()))) {
         Response response = new Response();
         response.code = Code.ERROR;
         response.message = I18N.getString("Handshake.msg.wrongPassword");
         return response;
       }
 
-
       byte[] resp = cipherUtil.decode(bytes);
       HandshakeChallenge handshakeChallenge = new HandshakeChallenge(new String(resp));
       byte[] responseSalt = CipherUtil.createSalt();
       byte[] response =
-          cipherUtil.encode(handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8));
+          cipherUtil.encode(
+              handshakeChallenge.getExpectedResponse().getBytes(StandardCharsets.UTF_8));
       dos.writeInt(responseSalt.length);
       dos.write(responseSalt);
       dos.writeInt(response.length);
       dos.write(response);
-      dos.write(CipherUtil.generateMacAndSalt(CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec())));
+      dos.write(
+          CipherUtil.generateMacAndSalt(
+              CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec())));
     } else {
       Response response = new Response();
       response.code = code;
@@ -568,12 +550,11 @@ public class Handshake {
 
     CipherUtil cipherUtil = CipherUtil.fromSharedKey(request.password, passwordSalt);
 
-    byte[] cipherBytes =  cipherUtil.encode(sb.toString().getBytes(StandardCharsets.UTF_8));
+    byte[] cipherBytes = cipherUtil.encode(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-    byte[] mac = CipherUtil.generateMacWithSalt(
-        CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()),
-        macSalt
-    );
+    byte[] mac =
+        CipherUtil.generateMacWithSalt(
+            CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()), macSalt);
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 

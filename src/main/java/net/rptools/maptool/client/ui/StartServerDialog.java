@@ -48,7 +48,6 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JTextField playerPassword;
   private JCheckBox usePasswordFile;
 
-
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
     panelInit();
@@ -106,10 +105,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
           boolean passwordFile = usePasswordFile.isSelected();
           playerPassword.setEnabled(!passwordFile);
           gmPassword.setEnabled(!passwordFile);
-        }
-    );
-
-
+        });
 
     movementMetricCombo = getMovementMetric();
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
@@ -212,7 +208,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
               }
               try {
                 Integer.parseInt(getPortTextField().getText());
-              } catch (NumberFormatException nfe){
+              } catch (NumberFormatException nfe) {
                 MapTool.showError("ServerDialog.error.port");
                 return;
               }

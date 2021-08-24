@@ -1,12 +1,23 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.player;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
@@ -19,12 +30,12 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   private final LocalPlayer player;
 
-   public PersonalServerPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
-     player = new LocalPlayer(
-         AppPreferences.getDefaultUserName(),
-         Role.GM,
-         ServerConfig.getPersonalServerGMPassword()
-     );
+  public PersonalServerPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    player =
+        new LocalPlayer(
+            AppPreferences.getDefaultUserName(),
+            Role.GM,
+            ServerConfig.getPersonalServerGMPassword());
   }
 
   @Override
@@ -45,7 +56,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   @Override
   public byte[] getPlayerPasswordSalt(String playerName) {
-     return player.getPassword().salt();
+    return player.getPassword().salt();
   }
 
   @Override
@@ -98,7 +109,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   @Override
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
     if (role == Role.GM) {
-       return Optional.of(player.getPassword());
+      return Optional.of(player.getPassword());
     } else {
       return Optional.empty();
     }

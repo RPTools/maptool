@@ -46,10 +46,9 @@ public class LocalPlayer extends Player {
     super.setRole(role);
   }
 
-
   public void setPasswordSalt(byte[] salt)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
-    if (password == null  || Arrays.compare(password.salt(), salt) != 0) {
+    if (password == null || Arrays.compare(password.salt(), salt) != 0) {
       password = CipherUtil.createKey(plainTextPassword, salt);
     }
   }

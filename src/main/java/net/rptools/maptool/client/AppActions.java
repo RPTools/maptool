@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-
 import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -108,10 +107,6 @@ import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.LookupTable;
-import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.PasswordDatabaseException;
-import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -120,6 +115,10 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PasswordDatabaseException;
+import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
@@ -2240,17 +2239,27 @@ public class AppActions {
 
                   PlayerDatabaseFactory.setServerConfig(config);
                   if (serverProps.getUsePasswordFile()) {
-                    PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.PASSWORD_FILE);
+                    PlayerDatabaseFactory.setCurrentPlayerDatabase(
+                        PlayerDatabaseType.PASSWORD_FILE);
                     PasswordFilePlayerDatabase db =
-                        (PasswordFilePlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
+                        (PasswordFilePlayerDatabase)
+                            PlayerDatabaseFactory.getCurrentPlayerDatabase();
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
-                      db.putPlayer(dialog.getUsernameTextField().getText(), Role.GM,
-                          gmPassword, Set.of(), null,
+                      db.putPlayer(
+                          dialog.getUsernameTextField().getText(),
+                          Role.GM,
+                          gmPassword,
+                          Set.of(),
+                          null,
                           false);
                     } else {
-                      db.putPlayer(dialog.getUsernameTextField().getText(), Role.PLAYER,
-                          playerPassword, Set.of(), null,
+                      db.putPlayer(
+                          dialog.getUsernameTextField().getText(),
+                          Role.PLAYER,
+                          playerPassword,
+                          Set.of(),
+                          null,
                           false);
                     }
                   } else {
@@ -2282,17 +2291,13 @@ public class AppActions {
                         "localhost",
                         serverProps.getPort(),
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(),
-                            playerType,
-                            gmPassword));
+                            dialog.getUsernameTextField().getText(), playerType, gmPassword));
                   } else {
                     MapTool.createConnection(
                         "localhost",
                         serverProps.getPort(),
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(),
-                            playerType,
-                            playerPassword));
+                            dialog.getUsernameTextField().getText(), playerType, playerPassword));
                   }
 
                   // connecting
@@ -2307,7 +2312,10 @@ public class AppActions {
                 } catch (IOException ioe) {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
-                } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException e) {
+                } catch (NoSuchAlgorithmException
+                    | InvalidKeySpecException
+                    | NoSuchPaddingException
+                    | InvalidKeyException e) {
                   MapTool.showError("msg.error.initializeCrypto", e);
                   failed = true;
                 } catch (PasswordDatabaseException pwde) {

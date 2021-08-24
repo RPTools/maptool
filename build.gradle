@@ -94,6 +94,8 @@ spotless {
             exclude '**/PlayerInfo.java' // Temporary until supported.
             exclude '**/PlayTimeInfo.java' // Temporary until supported.
             exclude '**/NoData.java' // Temporary until supported.
+            exclude '**/PlayTime.java' // Temporary until supported.
+            exclude '**/CipherUtil.java' // Temporary until supported.
         }
         licenseHeaderFile 'spotless.license.java'
 

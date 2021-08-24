@@ -61,10 +61,11 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb) throws IOException {
+  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
+      throws IOException {
     handler = new ServerMethodHandler(this);
     playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, config.getPort(), playerDatabase );
+    conn = new MapToolServerConnection(this, config.getPort(), playerDatabase);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
@@ -313,7 +314,7 @@ public class MapToolServer {
     // This starts the server thread.
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    MapToolServer server = new MapToolServer(new ServerConfig(), new ServerPolicy(),
-        playerDatabase);
+    MapToolServer server =
+        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
   }
 }

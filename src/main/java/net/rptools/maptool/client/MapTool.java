@@ -80,15 +80,13 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.LocalPlayerDatabase;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -685,7 +683,6 @@ public class MapTool {
 
     serverCommand = new ServerCommandClientImpl();
 
-
     try {
       player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
@@ -1021,8 +1018,12 @@ public class MapTool {
    * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
-      String id, ServerConfig config, ServerPolicy policy, Campaign campaign,
-      PlayerDatabase playerDatabase,  boolean copyCampaign)
+      String id,
+      ServerConfig config,
+      ServerPolicy policy,
+      Campaign campaign,
+      PlayerDatabase playerDatabase,
+      boolean copyCampaign)
       throws IOException {
     if (server != null) {
       Thread.dumpStack();
@@ -1174,7 +1175,7 @@ public class MapTool {
 
     String username = AppPreferences.getDefaultUserName();
     LocalPlayer localPlayer = (LocalPlayer) playerDatabase.getPlayer(username);
-    MapTool.createConnection( "localhost", config.getPort(), localPlayer);
+    MapTool.createConnection("localhost", config.getPort(), localPlayer);
 
     // connecting
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
@@ -1336,7 +1337,6 @@ public class MapTool {
     // fire up autosaves
     getAutoSaveManager().start();
 
-
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
@@ -1348,8 +1348,6 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyMode(AppPreferences.getTopologyDrawingMode());
-
-
   }
 
   /**

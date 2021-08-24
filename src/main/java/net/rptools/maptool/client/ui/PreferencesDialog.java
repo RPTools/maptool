@@ -883,22 +883,25 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setDefaultMacroEditorTheme(
                 (String) macroEditorThemeCombo.getSelectedItem()));
 
-
-    copyPublicKey.addActionListener(e -> {
-      Toolkit.getDefaultToolkit()
-          .getSystemClipboard()
-          .setContents(new StringSelection(publicKeyTextArea.getText()), null);
-    });
-
-    regeneratePublicKey.addActionListener(e -> {
-      CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().regenerateKeys();
-
-      keys.thenAccept( cu -> {
-        SwingUtilities.invokeLater(() -> {
-          publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+    copyPublicKey.addActionListener(
+        e -> {
+          Toolkit.getDefaultToolkit()
+              .getSystemClipboard()
+              .setContents(new StringSelection(publicKeyTextArea.getText()), null);
         });
-      });
-    });
+
+    regeneratePublicKey.addActionListener(
+        e -> {
+          CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().regenerateKeys();
+
+          keys.thenAccept(
+              cu -> {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+                    });
+              });
+        });
 
     add(panel);
     pack();
@@ -1056,11 +1059,13 @@ public class PreferencesDialog extends JDialog {
 
     CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().getKeys();
 
-    keys.thenAccept( cu -> {
-      SwingUtilities.invokeLater(() -> {
-        publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
-      });
-    });
+    keys.thenAccept(
+        cu -> {
+          SwingUtilities.invokeLater(
+              () -> {
+                publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+              });
+        });
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */
