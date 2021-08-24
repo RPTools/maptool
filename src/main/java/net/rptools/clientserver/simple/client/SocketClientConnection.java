@@ -66,6 +66,7 @@ public class SocketClientConnection extends AbstractConnection implements Client
     initialize(new Socket(hostName, port));
   }
 
+  @Override
   public void sendMessage(byte[] message) {
     sendMessage(null, message);
   }

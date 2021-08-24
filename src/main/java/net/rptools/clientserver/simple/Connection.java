@@ -14,9 +14,8 @@
  */
 package net.rptools.clientserver.simple;
 
-import net.rptools.clientserver.ActivityListener;
-
 import java.io.IOException;
+import net.rptools.clientserver.ActivityListener;
 
 public interface Connection {
   void addMessageHandler(MessageHandler handler);
@@ -40,5 +39,6 @@ public interface Connection {
   void removeDisconnectHandler(DisconnectHandler handler);
 
   void open() throws IOException;
+
   void close();
 }

@@ -14,6 +14,7 @@
  */
 package net.rptools.clientserver.hessian.server;
 
+import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.AbstractConnection;
@@ -21,8 +22,6 @@ import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
-
-import java.io.IOException;
 
 /** @author drice */
 public class MethodServerDecorator implements MethodServerConnection {

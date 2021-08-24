@@ -1407,6 +1407,9 @@ public class MapTool {
   }
 
   private static class ServerHeartBeatThread extends Thread {
+    public ServerHeartBeatThread() {
+      super("MapTool.ServerHeartBeatThread");
+    }
 
     @Override
     public void run() {

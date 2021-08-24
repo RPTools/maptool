@@ -28,7 +28,7 @@ public class SocketServerConnection extends AbstractServerConnection {
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServerConnection(int port, HandshakeProvider handshake){
+  public SocketServerConnection(int port, HandshakeProvider handshake) {
     super(handshake);
     this.port = port;
   }

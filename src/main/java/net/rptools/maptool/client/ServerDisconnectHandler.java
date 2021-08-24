@@ -33,7 +33,7 @@ public class ServerDisconnectHandler implements DisconnectHandler {
     if (!disconnectExpected) {
       var errorText = I18N.getText("msg.error.server.disconnected");
       var connectionError = connection.getError();
-      var errorMessage = errorText  + (connectionError != null ? (": " + connectionError): "");
+      var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
       MapTool.showError(errorMessage);
 
       // hide map so player doesn't get a brief GM view

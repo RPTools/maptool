@@ -136,7 +136,7 @@ public class MapToolServerConnection
     connection.callMethod(id, channel, method, parameters);
   }
 
-  public void open() throws  IOException  {
+  public void open() throws IOException {
     connection.open();
   }
 
