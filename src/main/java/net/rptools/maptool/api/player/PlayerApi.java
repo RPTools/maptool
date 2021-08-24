@@ -19,8 +19,12 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PlayerApi {
+
+  private static final Logger log = LogManager.getLogger(PlayerApi.class);
 
   public CompletableFuture<ApiResult<PlayerInfo>> getPlayer(String name) {
     return new ApiCall<PlayerInfo>().runOnSwingThread(() -> getPlayerInfo(name));
@@ -40,8 +44,8 @@ public class PlayerApi {
             getPlayersInfo().stream().filter(PlayerInfo::connected).collect(Collectors.toList())
         );
       } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        log.error(e);
         return new ApiListResult<>(new ApiException("err.internal", e));
-        // TODO: CDW: log error
       }
     });
   }
@@ -51,8 +55,8 @@ public class PlayerApi {
       try {
         return new ApiListResult<>(getPlayersInfo());
       } catch (InterruptedException  | InvocationTargetException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        log.error(e);
         return new ApiListResult<>(new ApiException("err.internal", e));
-        // TODO: CDW: log error
       }
     });
   }
@@ -75,7 +79,6 @@ public class PlayerApi {
       } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException e) {
         return CompletableFuture.completedFuture(new ApiResult<>(new ApiException("err.internal",
             e)));
-        // TODO: CDW: log error
       }
     });
   }

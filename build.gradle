@@ -89,6 +89,11 @@ spotless {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
             exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
+            exclude '**/MapToolInfo.java' // Temporary until supported.
+            exclude '**/PlayerDatabaseInfo.java' // Temporary until supported.
+            exclude '**/PlayerInfo.java' // Temporary until supported.
+            exclude '**/PlayTimeInfo.java' // Temporary until supported.
+            exclude '**/NoData.java' // Temporary until supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
