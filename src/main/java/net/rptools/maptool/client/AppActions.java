@@ -2246,11 +2246,11 @@ public class AppActions {
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.GM,
-                          gmPassword, Set.of(),
+                          gmPassword, Set.of(), null,
                           false);
                     } else {
                       db.putPlayer(dialog.getUsernameTextField().getText(), Role.PLAYER,
-                          playerPassword, Set.of(),
+                          playerPassword, Set.of(), null,
                           false);
                     }
                   } else {

@@ -473,9 +473,9 @@ public class CipherUtil {
     List<String> publicKeys = new ArrayList<>();
 
     StringBuilder sb = new StringBuilder();
-    for (String line : concatKeys.split("\\n")) {
-      line = line.replaceAll("\\s", "");
-      if (line.length() > 0 && !line.startsWith("#")) {
+    for (String line : concatKeys.split("\n")) {
+      String strippedLine = line.replaceAll("\\s", "");
+      if (strippedLine.length() > 0 && !strippedLine.startsWith("#")) {
         sb.append(line);
         if (line.equals(PUBLIC_KEY_LAST_LINE)) {
           publicKeys.add(sb.toString());

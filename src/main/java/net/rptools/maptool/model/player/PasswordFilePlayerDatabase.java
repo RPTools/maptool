@@ -19,9 +19,11 @@ import java.nio.file.StandardCopyOption;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -135,6 +137,8 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
         CipherUtil.Key passwordKey = null;
         Map<MD5Key, CipherUtil> publicKeys = new HashMap<>();
+        String publicKeyFile = null;
+        List<String> publicKeyFileList = new ArrayList<>();
         if (passwordString != null && passwordEntry.has("salt")) {
           SecretKeySpec password = CipherUtil.decodeBase64(passwordString);
           byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
@@ -147,13 +151,15 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           JsonArray pkeys = passwordEntry.get("publicKeys").getAsJsonArray();
           Path publicKeyDir = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR);
           for (JsonElement je : pkeys) {
-            String publicKeyFile = je.getAsString();
+            publicKeyFile = je.getAsString();
             String pkString = String.join("\n",
                 Files.readAllLines(publicKeyDir.resolve(publicKeyFile)));
 
             for (String pk : CipherUtil.splitPublicKeys(pkString)) {
               publicKeys.put(CipherUtil.publicKeyMD5(pk), CipherUtil.fromPublicKeyString(pk));
             }
+
+            publicKeyFileList.add(publicKeyFile);
           }
         }
 
@@ -167,6 +173,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
             role,
             passwordKey,
             publicKeys,
+            publicKeyFileList.size() > 0 ? publicKeyFileList.toArray(new String[0]) : null,
             disabledReason
         ));
       }
@@ -196,9 +203,16 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
           (k, v) -> {
             JsonObject pwObject = new JsonObject();
             pwObject.addProperty("username", v.name());
-            pwObject.addProperty("password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
-            pwObject.addProperty(
-                "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
+            if (v.publicKeys() != null && v.publicKeys().size() > 0) {
+              JsonArray pubKeysArray = new JsonArray();
+              v.publicKeys().values().forEach(pk -> pubKeysArray.add(pk.getEncodedPublicKeyText()));
+              pwObject.add("publicKeys", pubKeysArray);
+            } else {
+              pwObject.addProperty("password",
+                  CipherUtil.encodeBase64(v.password().secretKeySpec()));
+              pwObject.addProperty(
+                  "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
+            }
             pwObject.addProperty("role", v.role().toString());
             passwords.add(pwObject);
           });
@@ -296,6 +310,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         details.role(),
         details.password(),
         details.publicKeys(),
+        details.publicKeyFile(),
         reason
     );
     playerDetails.put(player.getName(), newDetails);
@@ -357,6 +372,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
   public void putPlayer(String name, Role role, String password,
       Set<String> publicKeyStrings,
+      String[] publicKeyFile,
       boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
     CipherUtil cipherUtil = null;
@@ -374,6 +390,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
         role,
         cipherUtil == null ? null : cipherUtil.getKey(),
         publicKeys,
+        publicKeyFile,
         ""
     );
     if (persisted) {
@@ -387,7 +404,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
 
 
   private static record PlayerDetails(String name, Role role, CipherUtil.Key password,
-                                      Map<MD5Key, CipherUtil> publicKeys,
+                                      Map<MD5Key, CipherUtil> publicKeys, String[] publicKeyFile,
                                       String disabledReason) {}
 
 
