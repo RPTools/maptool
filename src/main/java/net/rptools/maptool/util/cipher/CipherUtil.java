@@ -101,11 +101,11 @@ public class CipherUtil {
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
     key = keyToUse;
-    decryptionCipher = createDecryptor(key);
+    encryptionCipher = createEncrypter(key);
     if (!key.asymmetric() || key.privateKey() != null) {
-      encryptionCipher = createEncrypter(key);
+      decryptionCipher = createDecryptor(key);
     } else {
-      encryptionCipher = null;
+      decryptionCipher = null;
     }
   }
 
@@ -163,9 +163,9 @@ public class CipherUtil {
   public static Cipher createDecryptor(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
-      if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+      if (!key.privateKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
         throw new AssertionError(
-            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
+            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
       }
     } else {
       if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
@@ -188,9 +188,9 @@ public class CipherUtil {
   public static Cipher createEncrypter(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
-      if (!key.privateKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+      if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
         throw new AssertionError(
-            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
+            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
       }
     } else {
       if (!key.secretKeySpec.getAlgorithm().equals(CIPHER_ALGORITHM)) {
@@ -215,7 +215,7 @@ public class CipherUtil {
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
       Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
-      cipher.init(encryptMode, encryptMode == Cipher.DECRYPT_MODE ? key.publicKey() :
+      cipher.init(encryptMode, encryptMode == Cipher.ENCRYPT_MODE ? key.publicKey() :
           key.privateKey());
       return cipher;
     } else {
@@ -495,6 +495,6 @@ public class CipherUtil {
     if (!key.startsWith(PUBLIC_KEY_FIRST_LINE) || !key.endsWith(PUBLIC_KEY_LAST_LINE)) {
       throw new IllegalArgumentException("Not a public key string.");
     }
-    return new MD5Key(key.replaceAll("\\s", ""));
+    return new MD5Key(key.replaceAll("\\s", "").getBytes(StandardCharsets.UTF_8));
   }
 }

@@ -30,7 +30,6 @@ public class PublicPrivateKeyStore {
 
     return CompletableFuture.supplyAsync(
         () -> {
-          System.out.println("DEBUG: in getKeys() async call");
           try {
             if (!PUBLIC_KEY_FILE.exists() || !PRIVATE_KEY_FILE.exists()) {
               KeyPair keyPair = null;

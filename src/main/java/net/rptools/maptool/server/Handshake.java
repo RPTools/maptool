@@ -149,12 +149,14 @@ public class Handshake {
     int passResponseLen = dis.readInt();
     String passResponse = new String(dis.readNBytes(passResponseLen));
 
-    if (!password.equals(passResponse)) {
+    if (password.equals(passResponse)) {
       Player player = playerDatabase.getPlayer(username);
       Response response = new Response();
       response.code = Code.OK;
       response.role = player.getRole();
       response.policy = server.getPolicy();
+
+      dos.writeInt(response.code);
 
       HessianOutput output = new HessianOutput(socket.getOutputStream());
       output.getSerializerFactory().setAllowNonSerializable(true);
@@ -429,7 +431,8 @@ public class Handshake {
       CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
       Cipher decryptionCipher = cipherUtil.getDecryptionCipher();
       // Send MD5 of the public key on this machine
-      String s = CipherUtil.publicKeyMD5(cipherUtil.getEncodedPublicKeyText()).toString();
+      String s =
+          CipherUtil.publicKeyMD5(cipherUtil.getEncodedPublicKeyText()).toString();
       dos.writeInt(s.length());
       dos.write(s.getBytes(StandardCharsets.UTF_8));
 
@@ -442,6 +445,7 @@ public class Handshake {
       if (status != Code.OK) {
         Response response = new Response();
         response.code = Code.ERROR;
+        response.message = I18N.getString("Handshake.msg.unableToConnectPublicKey");
         return response;
       } else {
         // If we are here the handshake succeeded so wait for the server policy
@@ -476,7 +480,6 @@ public class Handshake {
     int passwordSaltLen = dis.readInt();
     byte[] passwordSalt = dis.readNBytes(passwordSaltLen);
 
-    System.out.println("DEBUG: sendHS PW Salt = " + new String(Base64.encode(passwordSalt)));
 
     if (passwordSaltLen != passwordSalt.length) {
       Response response = new Response();
@@ -567,7 +570,6 @@ public class Handshake {
 
     byte[] cipherBytes =  cipherUtil.encode(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-    System.out.println("DEBUG: Send = " + CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()));
     byte[] mac = CipherUtil.generateMacWithSalt(
         CipherUtil.encodeBase64(cipherUtil.getKey().secretKeySpec()),
         macSalt
