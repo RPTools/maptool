@@ -16,14 +16,19 @@ package net.rptools.maptool.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.hessian.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,10 +37,13 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
   private final MapToolServer server;
+  private final PlayerDatabase playerDatabase;
 
-  public MapToolServerConnection(MapToolServer server, int port) throws IOException {
+  public MapToolServerConnection(MapToolServer server, int port, PlayerDatabase playerDatabase)
+      throws IOException {
     super(port);
     this.server = server;
+    this.playerDatabase = playerDatabase;
     addObserver(this);
   }
 
@@ -47,16 +55,21 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   @Override
   public boolean handleConnectionHandshake(String id, Socket socket) {
     try {
-      Player player = Handshake.receiveHandshake(server, socket);
+      Handshake handshake = new Handshake(playerDatabase);
+      Player player = handshake.receiveHandshake(server, socket);
 
       if (player != null) {
         playerMap.put(id.toUpperCase(), player);
         return true;
       }
-    } catch (IOException ioe) {
-      log.error("Handshake failure: " + ioe, ioe);
-    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-      e.printStackTrace();
+    } catch (IOException
+        | InvalidKeySpecException
+        | NoSuchAlgorithmException
+        | NoSuchPaddingException
+        | InvalidKeyException
+        | IllegalBlockSizeException
+        | BadPaddingException e) {
+      log.error("Handshake failure: " + e, e);
     }
     return false;
   }
@@ -90,11 +103,15 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     for (Player player : playerMap.values()) {
       server
           .getConnection()
-          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player);
+          .callMethod(
+              conn.getId(),
+              ClientCommand.COMMAND.playerConnected.name(),
+              player.getTransferablePlayer());
     }
     server
         .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer);
+        .broadcastCallMethod(
+            ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server
@@ -110,7 +127,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
         .broadcastCallMethod(
             new String[] {conn.getId()},
             ClientCommand.COMMAND.playerDisconnected.name(),
-            playerMap.get(conn.getId().toUpperCase()));
+            playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
     playerMap.remove(conn.getId().toUpperCase());
   }
 }
