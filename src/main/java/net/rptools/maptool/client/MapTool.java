@@ -1055,6 +1055,7 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+    server.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1406,6 +1407,9 @@ public class MapTool {
   }
 
   private static class ServerHeartBeatThread extends Thread {
+    public ServerHeartBeatThread() {
+      super("MapTool.ServerHeartBeatThread");
+    }
 
     @Override
     public void run() {

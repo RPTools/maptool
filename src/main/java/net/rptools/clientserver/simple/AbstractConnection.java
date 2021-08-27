@@ -178,4 +178,6 @@ public abstract class AbstractConnection implements Connection {
     notifyListeners(Direction.Inbound, State.Complete, length, length);
     return ret;
   }
+
+  public abstract String getError();
 }

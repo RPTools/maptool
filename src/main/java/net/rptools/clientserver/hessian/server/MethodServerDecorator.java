@@ -14,6 +14,7 @@
  */
 package net.rptools.clientserver.hessian.server;
 
+import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.AbstractConnection;
@@ -97,6 +98,11 @@ public class MethodServerDecorator implements MethodServerConnection {
   @Override
   public void removeDisconnectHandler(DisconnectHandler handler) {
     connection.removeDisconnectHandler(handler);
+  }
+
+  @Override
+  public void open() throws IOException {
+    connection.open();
   }
 
   @Override
