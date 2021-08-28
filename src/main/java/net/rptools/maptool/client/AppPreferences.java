@@ -188,6 +188,9 @@ public class AppPreferences {
   private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
   private static final String DEFAULT_TOPOLOGY_DRAWING_MODE = "VBL";
 
+  private static final String KEY_WEB_END_POINT_PORT = "webEndPointPort";
+  private static final int DEFAULT_WEB_END_POINT = 654555;
+
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
   }
@@ -1245,6 +1248,14 @@ public class AppPreferences {
   public static TopologyMode getTopologyDrawingMode() {
     return TopologyMode.valueOf(
         prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
+  }
+
+  public static void setWebEndPointPort(int value) {
+    prefs.putInt(KEY_WEB_END_POINT_PORT, value);
+  }
+
+  public static int getWebEndPointPort() {
+    return prefs.getInt(KEY_WEB_END_POINT_PORT, DEFAULT_WEB_END_POINT);
   }
 
   // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if

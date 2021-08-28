@@ -18,6 +18,7 @@ message HandshakeMsg {
     HandshakeResponseMsg handshake_response_msg = 3;
     ChallengeRequestMsg challenge_request_msg = 4;
     ChallengeResponseMsg challenge_response_msg = 5;
+    ClientInitMsg  client_init_msg = 6;
   }
 }
 
@@ -35,13 +36,14 @@ enum ResponseCodeDto {
   UNKNOWN = 0;
   OK = 1;
   ERROR = 2;
+  PLAYER_CONNECTED = 3;
+  WRONG_VERSION = 4;
 }
 
 message HandshakeResponseMsg {
   ResponseCodeDto code = 1;
-  string message = 2;
-  ServerPolicyDto policy = 3;
-  RoleDto role = 4;
+  ServerPolicyDto policy = 2;
+  RoleDto role = 3;
 }
 
 message ChallengeRequestMsg {
@@ -55,6 +57,12 @@ message ChallengeResponseMsg {
   bytes response = 2;
   bytes mac = 3;
 }
+
+message ClientInitMsg {
+  string player_name = 1;
+  string version = 2;
+}
+
 
 message ServerPolicyDto {
   bool use_strict_token_management = 1;

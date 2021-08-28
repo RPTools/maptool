@@ -18,22 +18,24 @@ import java.io.IOException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
 
 /** @author trevor */
 public class MapToolConnection {
-  private final Player player;
+  private final LocalPlayer player;
   private MethodClientConnection connection;
   private Handshake handshake;
   private Runnable onCompleted;
 
-  public MapToolConnection(ServerConfig config, Player player) throws IOException {
+  public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new Handshake(connection, player);
+    this.handshake = new Handshake(connection, PlayerDatabaseFactory.getCurrentPlayerDatabase(), player);
     onCompleted = () -> {};
   }
 

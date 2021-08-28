@@ -32,11 +32,19 @@ import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.Player.Role;
-import net.rptools.maptool.server.proto.*;
-import net.rptools.maptool.util.CipherUtil;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.server.proto.ChallengeRequestMsg;
+import net.rptools.maptool.server.proto.ChallengeResponseMsg;
+import net.rptools.maptool.server.proto.HandshakeMsg;
+import net.rptools.maptool.server.proto.HandshakeRequestMsg;
+import net.rptools.maptool.server.proto.HandshakeResponseMsg;
+import net.rptools.maptool.server.proto.InitialSaltMsg;
+import net.rptools.maptool.server.proto.ResponseCodeDto;
+import net.rptools.maptool.server.proto.RoleDto;
 import net.rptools.maptool.util.PasswordGenerator;
+import net.rptools.maptool.util.cipher.CipherUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,8 +53,8 @@ public class Handshake implements MessageHandler {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
 
-  private static String USERNAME_FIELD = "username:";
-  private static String VERSION_FIELD = "version:";
+  private static final String USERNAME_FIELD = "username:";
+  private static final  String VERSION_FIELD = "version:";
   private State currentState = State.AwaitingInitialMacSalt;
   private Request request;
   private Exception exception;
@@ -56,9 +64,11 @@ public class Handshake implements MessageHandler {
   private byte[] initialMacSalt;
   private HandshakeChallenge handshakeChallenge;
   private String errorMessage;
+  private final PlayerDatabase playerDatabase;
 
-  public Handshake(ClientConnection connection) {
+  public Handshake(ClientConnection connection, PlayerDatabase playerDatabase) {
     this.connection = connection;
+    this.playerDatabase = playerDatabase;
   }
 
   /**
@@ -66,8 +76,8 @@ public class Handshake implements MessageHandler {
    *
    * @param player the player who wants to handshake
    */
-  public Handshake(ClientConnection connection, Player player) {
-    this(connection);
+  public Handshake(ClientConnection connection, PlayerDatabase playerDatabase, Player player) {
+    this(connection, playerDatabase);
     this.player = player;
   }
 
@@ -108,7 +118,7 @@ public class Handshake implements MessageHandler {
     exception = null;
 
     // Send the initial salt we expect the first message to use as the MAC
-    initialMacSalt = CipherUtil.getInstance().createSalt();
+    initialMacSalt = CipherUtil.createSalt();
     var initialSaltMsg =
         InitialSaltMsg.newBuilder().setSalt(ByteString.copyFrom(initialMacSalt)).build();
 
@@ -119,8 +129,7 @@ public class Handshake implements MessageHandler {
 
   private byte[] decode(byte[] bytes, SecretKeySpec passwordKey) {
     try {
-      Cipher cipher = CipherUtil.getInstance().createDecryptor(passwordKey);
-      return cipher.doFinal(bytes);
+      return CipherUtil.fromSecretKeySpec(passwordKey).decode(bytes);
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
         | InvalidKeyException
@@ -132,8 +141,7 @@ public class Handshake implements MessageHandler {
 
   private byte[] encode(byte[] bytes, SecretKeySpec passwordKey) {
     try {
-      Cipher cipher = CipherUtil.getInstance().createEncrypter(passwordKey);
-      return cipher.doFinal(bytes);
+      return CipherUtil.fromSecretKeySpec(passwordKey).decode(bytes);
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
         | InvalidKeyException
@@ -189,7 +197,7 @@ public class Handshake implements MessageHandler {
 
     byte[] mac = handshakeRequestMsg.getMac().toByteArray();
 
-    if (Arrays.compare(expectedInitialMacSalt, CipherUtil.getInstance().getMacSalt(mac)) != 0) {
+    if (Arrays.compare(expectedInitialMacSalt, CipherUtil.getMacSalt(mac)) != 0) {
       return null; // handshake is invalid
     }
 
