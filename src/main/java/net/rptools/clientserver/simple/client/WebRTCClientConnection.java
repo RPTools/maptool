@@ -154,8 +154,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    if(peerConnection == null)
-      return false;
+    if (peerConnection == null) return false;
 
     return peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED;
   }
@@ -233,7 +232,7 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onConnectionChange(RTCPeerConnectionState state) {
     log.info(prefix() + "PeerConnection.onConnectionChange " + state);
-    if(state == RTCPeerConnectionState.DISCONNECTED) {
+    if (state == RTCPeerConnectionState.DISCONNECTED) {
       peerConnection = null;
       fireDisconnectAsync();
     }
@@ -415,11 +414,13 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private void fireDisconnectAsync() {
-    handleDisconnect = new Thread(() -> {
-      fireDisconnect();
-      if(isServerSide())
-        serverConnection.clearClients();
-    }, "WebRTCClientConnection.handeDisconnect");
+    handleDisconnect =
+        new Thread(
+            () -> {
+              fireDisconnect();
+              if (isServerSide()) serverConnection.clearClients();
+            },
+            "WebRTCClientConnection.handeDisconnect");
     handleDisconnect.start();
   }
 

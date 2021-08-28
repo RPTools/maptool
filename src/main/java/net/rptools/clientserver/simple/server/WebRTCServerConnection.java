@@ -44,7 +44,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private Thread reconnectThread;
   private Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
 
-  //public static String WebSocketUrl = "ws://172.31.222.156:8080";
+  // public static String WebSocketUrl = "ws://172.31.222.156:8080";
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
