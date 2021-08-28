@@ -52,9 +52,9 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCDataChannel remoteDataChannel;
   private String lastError = null;
 
-  private RTCDataChannelState currentState = RTCDataChannelState.CLOSED;
-  private SendThread sendThread;
+  private SendThread sendThread = new SendThread(this);;
   private Thread handleConnnect;
+  private Thread handleDisconnect;
 
   // used from client side
   public WebRTCClientConnection(String id, ServerConfig config) throws IOException {
@@ -117,7 +117,7 @@ public class WebRTCClientConnection extends AbstractConnection
           public void onClose(int code, String reason, boolean remote) {
             lastError = "Websocket closed: (" + code + ") " + reason;
             log.info(lastError);
-            if (!isAlive()) fireDisconnect();
+            if (!isAlive()) fireDisconnectAsync();
           }
 
           @Override
@@ -154,7 +154,10 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    return currentState == RTCDataChannelState.OPEN;
+    if(peerConnection == null)
+      return false;
+
+    return peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED;
   }
 
   @Override
@@ -230,6 +233,10 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onConnectionChange(RTCPeerConnectionState state) {
     log.info(prefix() + "PeerConnection.onConnectionChange " + state);
+    if(state == RTCPeerConnectionState.DISCONNECTED) {
+      peerConnection = null;
+      fireDisconnectAsync();
+    }
   }
 
   @Override
@@ -372,12 +379,10 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onStateChange() {
     log.info(prefix() + "localDataChannel onStateChange " + localDataChannel.getState());
-    currentState = localDataChannel.getState();
-    if (isAlive()) {
+    if (localDataChannel.getState() == RTCDataChannelState.OPEN) {
       // connection established we don't need the signaling server anymore
       if (!isServerSide() && signalingCLient.isOpen()) signalingCLient.close();
 
-      sendThread = new SendThread(this);
       sendThread.start();
     }
   }
@@ -409,16 +414,24 @@ public class WebRTCClientConnection extends AbstractConnection
     }
   }
 
+  private void fireDisconnectAsync() {
+    handleDisconnect = new Thread(() -> {
+      fireDisconnect();
+      if(isServerSide())
+        serverConnection.clearClients();
+    }, "WebRTCClientConnection.handeDisconnect");
+    handleDisconnect.start();
+  }
+
   @Override
   public void close() {
     // signalingClient should be closed if connection was established
-    if (signalingCLient.isOpen()) signalingCLient.close();
+    if (!isServerSide() && signalingCLient.isOpen()) signalingCLient.close();
 
-    if (sendThread.stopRequested) {
-      return;
-    }
+    if (sendThread.stopRequested) return;
+
     sendThread.requestStop();
-    peerConnection.close();
+    if (peerConnection != null) peerConnection.close();
   }
 
   @Override
