@@ -34,7 +34,6 @@ import org.java_websocket.handshake.ServerHandshake;
 public class WebRTCServerConnection extends AbstractServerConnection {
   private static final Logger log = Logger.getLogger(WebRTCServerConnection.class);
 
-  private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private WebSocketClient signalingCLient;
   private final ServerConfig config;
   private final Gson gson = new Gson();
@@ -43,9 +42,11 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private URI websocketUri = null;
   private int reconnectCounter = -1;
   private Thread reconnectThread;
+  private Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
 
-  // public static String WebSocketUrl = "ws://mt-test2.azurewebsites.net";
-  public static String WebSocketUrl = "ws://172.31.222.156:8080";
+  // public static String WebSocketUrl = "ws://172.31.222.156:8080";
+  public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
+  private boolean disconnectExpected;
 
   public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
     super(handshake);
@@ -87,6 +88,8 @@ public class WebRTCServerConnection extends AbstractServerConnection {
       public void onClose(int code, String reason, boolean remote) {
         lastError = "Websocket closed: remote:" + remote + " (" + code + ") " + reason;
         log.info(lastError);
+        if (disconnectExpected) return;
+
         // if the connection get closed remotely the rptools.net server disconnected. Try to
         // reconnect.
         if (reconnectCounter > 0) retryConnect();
@@ -139,8 +142,6 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     }
   }
 
-  private Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
-
   private void onOffer(OfferMessageDto message) {
     WebRTCClientConnection clientConnection = null;
     try {
@@ -184,6 +185,9 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
   @Override
   public void close() {
+    super.close();
+    disconnectExpected = true;
+    reconnectCounter = -1;
     signalingCLient.close();
   }
 
@@ -205,5 +209,9 @@ public class WebRTCServerConnection extends AbstractServerConnection {
             });
     reconnectThread.setName("WebRTCServerConnection.reconnectThread");
     reconnectThread.start();
+  }
+
+  public void clearClients() {
+    reapClients();
   }
 }
