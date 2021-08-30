@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.util.ImageManager;
 
 /**
@@ -49,8 +51,15 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
     @Override
     public InputStream getInputStream() throws IOException {
-      BufferedImage img = ImageManager.getImageFromUrl(url);
-      return new ByteArrayInputStream(ImageUtil.imageToBytes(img, "png"));
+      String id = url.getHost();
+      if(url.getQuery() == null) {
+        var asset = AssetManager.getAssetAndWait(new MD5Key(id));
+        var stream = new ByteArrayInputStream(asset.getImage());
+        return stream;
+      }
+
+       BufferedImage img = ImageManager.getImageFromUrl(url);
+       return new ByteArrayInputStream(ImageUtil.imageToBytes(img, "png"));
     }
   }
 }

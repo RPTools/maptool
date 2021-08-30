@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.rptools.lib.FileUtil;
@@ -680,6 +682,40 @@ public class AssetManager {
    */
   public static File getAssetCacheFile(Asset asset) {
     return getAssetCacheFile(asset.getId());
+  }
+
+  /**
+   * Loads the asset, and waits for the asset to load.
+   *
+   * @param assetId Load image data from this asset
+   * @return Asset Return the loaded asset
+   */
+  public static Asset getAssetAndWait(final MD5Key assetId) {
+    if (assetId == null) {
+      return null;
+    }
+    Asset asset = null;
+    final CountDownLatch loadLatch = new CountDownLatch(1);
+    getAssetAsynchronously(assetId,
+        (key) -> {
+          // If we're here then the image has just finished loading
+          // release the blocked thread
+          log.debug("Countdown: " + assetId);
+          loadLatch.countDown();
+        });
+    if (asset == null) {
+      try {
+        log.debug("Wait for:  " + assetId);
+        loadLatch.await();
+        // This time we'll get the cached version
+        asset = getAsset(assetId);
+      } catch (InterruptedException ie) {
+        log.error(
+            "getAssetAndWait(" + assetId + "):  asset not resolved; InterruptedException", ie);
+        asset = null;
+      }
+    }
+    return asset;
   }
 
   /**
