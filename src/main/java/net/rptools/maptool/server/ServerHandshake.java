@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ServerHandshake implements MessageHandler {
   /** Instance used for log messages. */
-  private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+  private static final Logger log = LogManager.getLogger(ServerHandshake.class);
 
   /** The database used for retrieving players. */
   private final PlayerDatabase playerDatabase;
@@ -186,8 +186,8 @@ public class ServerHandshake implements MessageHandler {
           }
       }
     } catch (Exception e) {
-      exception = e;
       log.warn(e.toString());
+      exception = e;
       currentState = State.Error;
       errorMessage = e.getMessage();
       notifyObservers();

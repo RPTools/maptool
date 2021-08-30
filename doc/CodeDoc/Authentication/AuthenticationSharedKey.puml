@@ -35,5 +35,5 @@ note right
    challenge_response = Encrypted HandshakeChallenge.response
 end note
 Server -> Server: Compare client challenge response to\npreencrypted challenge response on server\nside to determine which password was used
-Server -> Client: Send ServerPolicyDto
+Server -> Client: Send ConnectionSuccessfulMsg
 @enduml

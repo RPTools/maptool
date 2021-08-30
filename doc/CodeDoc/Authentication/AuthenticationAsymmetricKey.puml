@@ -14,9 +14,9 @@ end note
 Client -> Client: Decrypt challenge
 Client -> Server: Send ClientAuthMsg
 note right
-    challenge_response = HandshakeChallenge.response\n
+    challenge_response = HandshakeChallenge.response
     (not encrypted)
 end note
-Server -> Client: Send ServerPolicyDto
+Server -> Client: Send ConnectionSuccessfulMsg
 
 @enduml
