@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -696,7 +695,8 @@ public class AssetManager {
     }
     Asset asset = null;
     final CountDownLatch loadLatch = new CountDownLatch(1);
-    getAssetAsynchronously(assetId,
+    getAssetAsynchronously(
+        assetId,
         (key) -> {
           // If we're here then the image has just finished loading
           // release the blocked thread

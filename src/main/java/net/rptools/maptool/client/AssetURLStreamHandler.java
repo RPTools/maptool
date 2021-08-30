@@ -52,14 +52,14 @@ public class AssetURLStreamHandler extends URLStreamHandler {
     @Override
     public InputStream getInputStream() throws IOException {
       String id = url.getHost();
-      if(url.getQuery() == null) {
+      if (url.getQuery() == null) {
         var asset = AssetManager.getAssetAndWait(new MD5Key(id));
         var stream = new ByteArrayInputStream(asset.getImage());
         return stream;
       }
 
-       BufferedImage img = ImageManager.getImageFromUrl(url);
-       return new ByteArrayInputStream(ImageUtil.imageToBytes(img, "png"));
+      BufferedImage img = ImageManager.getImageFromUrl(url);
+      return new ByteArrayInputStream(ImageUtil.imageToBytes(img, "png"));
     }
   }
 }
