@@ -233,6 +233,7 @@ public class WebRTCClientConnection extends AbstractConnection
   public void onConnectionChange(RTCPeerConnectionState state) {
     log.info(prefix() + "PeerConnection.onConnectionChange " + state);
     if (state == RTCPeerConnectionState.DISCONNECTED) {
+      lastError = "Peerconnection disconnected";
       peerConnection = null;
       fireDisconnectAsync();
     }
