@@ -1067,6 +1067,7 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+    server.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1245,9 +1246,7 @@ public class MapTool {
       announcer.stop();
       announcer = null;
     }
-    if (conn == null || !conn.isAlive()) {
-      return;
-    }
+
     // Unregister ourselves
     if (server != null && server.getConfig().isServerRegistered() && !isPersonalServer) {
       try {
@@ -1258,13 +1257,14 @@ public class MapTool {
     }
 
     try {
-      conn.close();
-      conn = null;
-      playerList.clear();
+      if (conn != null || conn.isAlive()) {
+        conn.close();
+      }
     } catch (IOException ioe) {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
     }
+    playerList.clear();
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);
@@ -1422,6 +1422,9 @@ public class MapTool {
   }
 
   private static class ServerHeartBeatThread extends Thread {
+    public ServerHeartBeatThread() {
+      super("MapTool.ServerHeartBeatThread");
+    }
 
     @Override
     public void run() {

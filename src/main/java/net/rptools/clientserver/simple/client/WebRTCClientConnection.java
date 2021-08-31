@@ -17,7 +17,9 @@ package net.rptools.clientserver.simple.client;
 import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import net.rptools.clientserver.simple.AbstractConnection;
@@ -48,10 +50,11 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCPeerConnection peerConnection;
   private RTCDataChannel localDataChannel;
   private RTCDataChannel remoteDataChannel;
+  private String lastError = null;
 
-  private boolean started = false;
-  private SendThread sendThread;
+  private SendThread sendThread = new SendThread(this);;
   private Thread handleConnnect;
+  private Thread handleDisconnect;
 
   // used from client side
   public WebRTCClientConnection(String id, ServerConfig config) throws IOException {
@@ -112,12 +115,16 @@ public class WebRTCClientConnection extends AbstractConnection
 
           @Override
           public void onClose(int code, String reason, boolean remote) {
-            log.info("Websocket closed\n");
+            lastError = "Websocket closed: (" + code + ") " + reason;
+            log.info(lastError);
+            if (!isAlive()) fireDisconnectAsync();
           }
 
           @Override
           public void onError(Exception ex) {
-            log.info("Websocket error: " + ex.toString() + "\n");
+            lastError = "Websocket error: " + ex.toString() + "\n";
+            log.info(lastError);
+            // onClose will be called after this
           }
         };
     signalingCLient.connect();
@@ -138,6 +145,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void sendMessage(Object channel, byte[] message) {
+    log.debug(prefix() + "added message");
     addMessage(channel, message);
     synchronized (sendThread) {
       sendThread.notify();
@@ -146,7 +154,9 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    return localDataChannel.getState() == RTCDataChannelState.OPEN;
+    if (peerConnection == null) return false;
+
+    return peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED;
   }
 
   @Override
@@ -203,8 +213,6 @@ public class WebRTCClientConnection extends AbstractConnection
     var initDict = new RTCDataChannelInit();
     localDataChannel = peerConnection.createDataChannel("myDataChannel", initDict);
     localDataChannel.registerObserver(this);
-    sendThread = new SendThread(this);
-    sendThread.start();
 
     var offerOptions = new RTCOfferOptions();
     peerConnection.createOffer(offerOptions, this);
@@ -216,20 +224,24 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void onSignalingChange(RTCSignalingState state) {
+    // set thread name for better logs.
+    Thread.currentThread().setName("WebRTCClientConnection.WebRTCThread_" + getId());
     log.info(prefix() + "PeerConnection.onSignalingChange: " + state);
   }
 
   @Override
   public void onConnectionChange(RTCPeerConnectionState state) {
     log.info(prefix() + "PeerConnection.onConnectionChange " + state);
+    if (state == RTCPeerConnectionState.DISCONNECTED) {
+      lastError = "Peerconnection disconnected";
+      peerConnection = null;
+      fireDisconnectAsync();
+    }
   }
 
   @Override
   public void onIceConnectionChange(RTCIceConnectionState state) {
     log.info(prefix() + "PeerConnection.onIceConnectionChange " + state);
-
-    // connection established we don't need the signaling server any more
-    if (!isServerSide() && state == RTCIceConnectionState.COMPLETED) signalingCLient.close();
   }
 
   @Override
@@ -287,8 +299,6 @@ public class WebRTCClientConnection extends AbstractConnection
     log.info(prefix() + "PeerConnection.onDataChannel");
     this.localDataChannel = newDataChannel;
     localDataChannel.registerObserver(this);
-    sendThread = new SendThread(this);
-    sendThread.start();
 
     if (isServerSide()) {
       handleConnnect =
@@ -307,6 +317,8 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void onRenegotiationNeeded() {
+    // set thread name for better logs
+    Thread.currentThread().setName("WebRTCClientConnection.WebRTCThread_" + getId());
     log.info(prefix() + "PeerConnection.onRenegotiationNeeded");
   }
 
@@ -367,12 +379,19 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onStateChange() {
     log.info(prefix() + "localDataChannel onStateChange " + localDataChannel.getState());
+    if (localDataChannel.getState() == RTCDataChannelState.OPEN) {
+      // connection established we don't need the signaling server anymore
+      if (!isServerSide() && signalingCLient.isOpen()) signalingCLient.close();
+
+      sendThread.start();
+    }
   }
 
   // datachannel
   @Override
   public void onMessage(RTCDataChannelBuffer channelBuffer) {
-    // log.info(prefix() + "localDataChannel onMessage: got " + buffer.data.capacity() + " bytes" );
+    log.debug(
+        prefix() + "localDataChannel onMessage: got " + channelBuffer.data.capacity() + " bytes");
     var buffer = channelBuffer.data;
 
     if (Thread.currentThread().getContextClassLoader() == null) {
@@ -395,13 +414,31 @@ public class WebRTCClientConnection extends AbstractConnection
     }
   }
 
+  private void fireDisconnectAsync() {
+    handleDisconnect =
+        new Thread(
+            () -> {
+              fireDisconnect();
+              if (isServerSide()) serverConnection.clearClients();
+            },
+            "WebRTCClientConnection.handeDisconnect");
+    handleDisconnect.start();
+  }
+
   @Override
   public void close() {
-    if (sendThread.stopRequested) {
-      return;
-    }
+    // signalingClient should be closed if connection was established
+    if (!isServerSide() && signalingCLient.isOpen()) signalingCLient.close();
+
+    if (sendThread.stopRequested) return;
+
     sendThread.requestStop();
-    peerConnection.close();
+    if (peerConnection != null) peerConnection.close();
+  }
+
+  @Override
+  public String getError() {
+    return lastError;
   }
 
   private class SendThread extends Thread {
@@ -422,42 +459,44 @@ public class WebRTCClientConnection extends AbstractConnection
 
     @Override
     public void run() {
-      while (!stopRequested) {
-        try {
-          while (!stopRequested && connection.isAlive()) {
-            while (connection.hasMoreMessages()) {
-              byte[] message = connection.nextMessage();
-              if (message == null) {
-                continue;
-              }
-
-              var length = message.length;
-              var buffer = ByteBuffer.allocate(length + 4);
-
-              buffer.put((byte) (length >> 24));
-              buffer.put((byte) (length >> 16));
-              buffer.put((byte) (length >> 8));
-              buffer.put((byte) (length));
-              buffer.put(message);
-
-              localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
+      log.debug(prefix() + " sendthread started");
+      try {
+        while (!stopRequested && connection.isAlive()) {
+          while (connection.hasMoreMessages()) {
+            byte[] message = connection.nextMessage();
+            if (message == null) {
+              continue;
             }
-            synchronized (this) {
-              if (!stopRequested) {
-                try {
-                  this.wait();
-                } catch (InterruptedException e) {
-                  // ignore
-                }
+
+            var length = message.length;
+            var buffer = ByteBuffer.allocate(length + 4);
+
+            buffer.put((byte) (length >> 24));
+            buffer.put((byte) (length >> 16));
+            buffer.put((byte) (length >> 8));
+            buffer.put((byte) (length));
+            buffer.put(message);
+
+            localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
+            log.debug(prefix() + " sent " + (length + 4) + " bytes");
+          }
+          synchronized (this) {
+            if (!stopRequested) {
+              try {
+                log.debug(prefix() + "sendthread -> sleep");
+                this.wait();
+                log.debug(prefix() + "sendthread -> woke up");
+              } catch (InterruptedException e) {
+                log.debug(prefix() + "sendthread -> interrupted");
               }
             }
           }
-        } catch (Exception e) {
-          System.out.println(e.toString());
-          e.printStackTrace();
-          log.error(e.toString());
         }
+      } catch (Exception e) {
+        log.error(e.toString());
+        fireDisconnect();
       }
+      log.debug(prefix() + " sendthread ended");
     }
   }
 }

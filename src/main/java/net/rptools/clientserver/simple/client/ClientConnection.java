@@ -14,7 +14,6 @@
  */
 package net.rptools.clientserver.simple.client;
 
-import java.io.IOException;
 import net.rptools.clientserver.simple.Connection;
 
 public interface ClientConnection extends Connection {
@@ -25,6 +24,4 @@ public interface ClientConnection extends Connection {
   boolean isAlive();
 
   String getId();
-
-  void open() throws IOException;
 }

@@ -27,13 +27,16 @@ public class ServerDisconnectHandler implements DisconnectHandler {
   // TODO: This is a temporary hack until I can come up with a cleaner mechanism
   public static boolean disconnectExpected;
 
-  public void handleDisconnect(AbstractConnection arg0) {
+  public void handleDisconnect(AbstractConnection connection) {
     // Update internal state
     MapTool.disconnect();
 
     // TODO: attempt to reconnect if this was unexpected
     if (!disconnectExpected) {
-      MapTool.showError(I18N.getText("msg.error.server.disconnected"));
+      var errorText = I18N.getText("msg.error.server.disconnected");
+      var connectionError = connection.getError();
+      var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
+      MapTool.showError(errorMessage);
 
       // hide map so player doesn't get a brief GM view
       MapTool.getFrame().setCurrentZoneRenderer(null);

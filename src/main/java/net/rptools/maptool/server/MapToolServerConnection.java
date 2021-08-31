@@ -144,7 +144,11 @@ public class MapToolServerConnection
     connection.callMethod(id, channel, method, parameters);
   }
 
-  public void close() throws IOException {
+  public void open() throws IOException {
+    connection.open();
+  }
+
+  public void close() {
     connection.close();
   }
 
