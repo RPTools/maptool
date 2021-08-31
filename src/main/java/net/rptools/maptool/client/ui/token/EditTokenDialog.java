@@ -100,6 +100,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -919,6 +920,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   private JTextField getNameField() {
     return (JTextField) getComponent("@name");
+  }
+
+  private JTextField getSpeechNameField() {
+    return (JTextField) getComponent("@speechName");
   }
 
   public CheckBoxListWithSelectable getOwnerList() {

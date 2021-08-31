@@ -19,7 +19,7 @@ import java.util.prefs.Preferences;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerConfig;
 
 public class StartServerDialogPreferences {
@@ -44,6 +44,7 @@ public class StartServerDialogPreferences {
   private static final String KEY_WALKER_METRIC = "movementMetric";
   private static final String KEY_USE_INDIVIDUAL_FOW = "useIndividualFOW";
   private static final String KEY_AUTO_REVEAL_ON_MOVE = "autoRevealOnMovement";
+  private static final String KEY_USE_PASSWORD_FILE = "usePasswordFile";
 
   private static Boolean useToolTipsForUnformattedRolls = null;
 
@@ -203,5 +204,13 @@ public class StartServerDialogPreferences {
 
   public void setAutoRevealOnMovement(boolean flag) {
     prefs.putBoolean(KEY_AUTO_REVEAL_ON_MOVE, flag);
+  }
+
+  public boolean getUsePasswordFile() {
+    return prefs.getBoolean(KEY_USE_PASSWORD_FILE, false);
+  }
+
+  public void setUsePasswordFile(boolean flag) {
+    prefs.putBoolean(KEY_USE_PASSWORD_FILE, flag);
   }
 }
