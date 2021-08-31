@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.htmlframe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.sun.webkit.dom.HTMLSelectElementImpl;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
@@ -615,13 +616,18 @@ public class HTMLWebViewManager {
         if (element.getMultiple()) {
           // If multiple selection enabled, returns a JSON array of selected values
           JsonArray selected = new JsonArray();
-          HTMLCollection options = element.getOptions();
-          for (int o = 0; o < options.getLength(); o++) {
-            HTMLOptionElement option = (HTMLOptionElement) options.item(o);
-            if (option.getSelected()) {
+          // We avoid iterating over the result of `element.getOptions()` in order to workaround a
+          // missing symbol for `HTMLOptionsCollectionImpl::itemImpl()` on linux. Ideally we would
+          // go back to using `element.getOptions()` in the future so we don't keep a dependency on
+          // `HTMLSelectElementImpl`.
+          for (int o = 0; o < element.getLength(); o++) {
+            var node = ((HTMLSelectElementImpl) element).item(o);
+            // instanceof check always seems to be true, but we'll keep it to be safe.
+            if (node instanceof HTMLOptionElement option && option.getSelected()) {
               selected.add(option.getValue());
             }
           }
+
           value = selected.toString();
         } else {
           value = element.getValue();
