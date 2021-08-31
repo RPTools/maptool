@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.server;
 
 import com.google.protobuf.ByteString;
@@ -35,10 +49,8 @@ import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Class used to handle the server side part of the connection handshake.
- */
-public class ServerHandshake implements MessageHandler {
+/** Class used to handle the server side part of the connection handshake. */
+public class ServerHandshake implements Handshake, MessageHandler {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(ServerHandshake.class);
 
@@ -49,43 +61,36 @@ public class ServerHandshake implements MessageHandler {
   private final ClientConnection connection;
 
   /** Observers that want to be notified when the status changes. */
-  private final List<ServerHandshakeObserver> observerList = new CopyOnWriteArrayList<>();
+  private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
 
   /** The index in the array for the GM handshake challenge, only used for role based auth */
-  private final static int GM_CHALLENGE = 0;
+  private static final int GM_CHALLENGE = 0;
   /** The index in the array for the Player handshake challenge, only used for role based auth */
-  private final static int PLAYER_CHALLENGE = 1;
-
+  private static final int PLAYER_CHALLENGE = 1;
 
   /** Message for any error that has occurred, {@code null} if no error has occurred. */
   private String errorMessage;
 
   /**
-   * Any exception that occurred that causes an error, {@code null} if no
-   * exception which causes an error has occurred.
+   * Any exception that occurred that causes an error, {@code null} if no exception which causes an
+   * error has occurred.
    */
   private Exception exception;
 
-  /**
-   * The player that this connection is for.
-   */
+  /** The player that this connection is for. */
   private Player player;
 
-
-  /**
-   * The current state of the handshake process.
-   */
+  /** The current state of the handshake process. */
   private State currentState = State.AwaitingClientInit;
 
-  /**
-   * Challenges sent to the client.
-   */
+  /** Challenges sent to the client. */
   private HandshakeChallenge[] handshakeChallenges;
 
   private MD5Key playerPublicKeyMD5;
 
   /**
    * Creates a new {@code ServerHandshake} instance.
+   *
    * @param connection The client connection for the handshake.
    * @param playerDatabase The database of players.
    */
@@ -94,51 +99,35 @@ public class ServerHandshake implements MessageHandler {
     this.playerDatabase = playerDatabase;
   }
 
-  /**
-   * Returns if the handshake has been successful or not.
-   * @return {@code true} if the handshake has been successful, {code false} if it has failed or is
-   * still in progress.
-   */
+  @Override
   public boolean isSuccessful() {
     return currentState == State.Success;
   }
 
-  /**
-   * Returns the message for the error -- if any -- that occurred during the handshake.
-   * @return the message for the error that occurred during handshake.
-   */
+  @Override
   public String getErrorMessage() {
     return errorMessage;
   }
 
-  /**
-   * Returns the connection for this {@code ServerHandshake}.
-   * @return the connection for this {@code ServerHandshake}.
-   */
+  @Override
   public ClientConnection getConnection() {
     return connection;
   }
 
-  /**
-   * Returns the exception -- if any -- that occurred during processing of the handshake.
-   * @return the exception that occurred during the processing of the handshake.
-   */
+  @Override
   public Exception getException() {
     return exception;
   }
 
-  /**
-   * Returns the player associated with the handshake.
-   * @return the player associated with the handshake.
-   */
+  @Override
   public Player getPlayer() {
     return player;
   }
 
-
   /**
    * Sends an error response to the client and notifies any observers of the handshake that the
    * status has changed.
+   *
    * @param errorCode The error code that should be sent to the client.
    */
   private void sendErrorResponseAndNotify(HandshakeResponseCodeMsg errorCode) {
@@ -153,6 +142,8 @@ public class ServerHandshake implements MessageHandler {
     try {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
+
+      System.out.println("DEBUG: " + id + " :: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
@@ -192,7 +183,6 @@ public class ServerHandshake implements MessageHandler {
       errorMessage = e.getMessage();
       notifyObservers();
     }
-
   }
 
   private void handle(ClientAuthMsg clientAuthMessage)
@@ -201,8 +191,9 @@ public class ServerHandshake implements MessageHandler {
     if (handshakeChallenges.length > 1) {
       if (Arrays.compare(response, handshakeChallenges[GM_CHALLENGE].getExpectedResponse()) == 0) {
         player = playerDatabase.getPlayerWithRole(player.getName(), Role.GM);
-      } else if ( Arrays.compare(response,
-          handshakeChallenges[PLAYER_CHALLENGE].getExpectedResponse()) == 0) {
+      } else if (Arrays.compare(
+              response, handshakeChallenges[PLAYER_CHALLENGE].getExpectedResponse())
+          == 0) {
         player = playerDatabase.getPlayerWithRole(player.getName(), Role.PLAYER);
       } else {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
@@ -220,10 +211,11 @@ public class ServerHandshake implements MessageHandler {
   private void sendConnectionSuccessful() {
     var server = MapTool.getServer();
     var policy = Mapper.map(server.getPolicy());
-    var connectionSuccessfulMsg = ConnectionSuccessfulMsg.newBuilder()
-        .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
-        .setServerPolicyDto(policy)
-        .build();
+    var connectionSuccessfulMsg =
+        ConnectionSuccessfulMsg.newBuilder()
+            .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
+            .setServerPolicyDto(policy)
+            .build();
     connection.sendMessage(connectionSuccessfulMsg.toByteArray());
   }
 
@@ -231,7 +223,6 @@ public class ServerHandshake implements MessageHandler {
    * This method handles the initial message that the client sends as part of the handshake process.
    *
    * @param clientInitMsg The initial message sent from the client.
-   *
    * @throws ExecutionException when there is an error fetching the public key.
    * @throws InterruptedException when there is an error fetching the public key.
    * @throws NoSuchPaddingException when there is an error during encryption.
@@ -289,6 +280,7 @@ public class ServerHandshake implements MessageHandler {
 
   /**
    * Send the authentication type message when using per player shared passwords.
+   *
    * @throws NoSuchPaddingException when there is an error during encryption.
    * @throws IllegalBlockSizeException when there is an error during encryption.
    * @throws NoSuchAlgorithmException when there is an error during encryption.
@@ -296,23 +288,26 @@ public class ServerHandshake implements MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+          BadPaddingException, InvalidKeyException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String password = new PasswordGenerator().getPassword();
     handshakeChallenges = new HandshakeChallenge[0];
     Key key = playerDatabase.getPlayerPassword(player.getName()).get();
     handshakeChallenges[0] = HandshakeChallenge.createChallenge(player.getName(), password, key);
 
-    var authTypeMsg = UseAuthTypeMsg.newBuilder()
-        .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
-        .setSalt(ByteString.copyFrom(playerPasswordSalt))
-        .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()))
-        .build();
+    var authTypeMsg =
+        UseAuthTypeMsg.newBuilder()
+            .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
+            .setSalt(ByteString.copyFrom(playerPasswordSalt))
+            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()))
+            .build();
     connection.sendMessage(authTypeMsg.toByteArray());
   }
 
   /**
    * Send the authentication type message when using role based shared passwords.
+   *
    * @throws NoSuchPaddingException when there is an error during encryption.
    * @throws IllegalBlockSizeException when there is an error during encryption.
    * @throws NoSuchAlgorithmException when there is an error during encryption.
@@ -320,7 +315,8 @@ public class ServerHandshake implements MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendRoleSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+          BadPaddingException, InvalidKeyException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String[] password = new String[2];
     password[GM_CHALLENGE] = new PasswordGenerator().getPassword();
@@ -328,12 +324,17 @@ public class ServerHandshake implements MessageHandler {
 
     handshakeChallenges[GM_CHALLENGE] =
         HandshakeChallenge.createChallenge(
-            player.getName(), password[GM_CHALLENGE], playerDatabase.getRolePassword(Role.GM).get());
+            player.getName(),
+            password[GM_CHALLENGE],
+            playerDatabase.getRolePassword(Role.GM).get());
     handshakeChallenges[PLAYER_CHALLENGE] =
         HandshakeChallenge.createChallenge(
-            player.getName(), password[GM_CHALLENGE], playerDatabase.getRolePassword(Role.PLAYER).get());
+            player.getName(),
+            password[GM_CHALLENGE],
+            playerDatabase.getRolePassword(Role.PLAYER).get());
 
-    var authTypeMsg = UseAuthTypeMsg.newBuilder()
+    var authTypeMsg =
+        UseAuthTypeMsg.newBuilder()
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[GM_CHALLENGE].getChallenge()))
@@ -341,7 +342,6 @@ public class ServerHandshake implements MessageHandler {
             .build();
     connection.sendMessage(authTypeMsg.toByteArray());
   }
-
 
   /**
    * Send the authentication type message when using asymmetric keys
@@ -355,12 +355,14 @@ public class ServerHandshake implements MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendAsymmetricKeyAuthType()
-      throws ExecutionException, InterruptedException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+      throws ExecutionException, InterruptedException, NoSuchPaddingException,
+          IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
+          InvalidKeyException {
     handshakeChallenges = new HandshakeChallenge[1];
     CipherUtil cipherUtil = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
-    handshakeChallenges[1] = HandshakeChallenge.createChallenge(player.getName(),
-        password, cipherUtil.getKey());
+    handshakeChallenges[1] =
+        HandshakeChallenge.createChallenge(player.getName(), password, cipherUtil.getKey());
 
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()
@@ -372,47 +374,37 @@ public class ServerHandshake implements MessageHandler {
 
   /**
    * Adds an observer to the handshake process.
+   *
    * @param observer the observer of the handshake process.
    */
-  public void addObserver(ServerHandshakeObserver observer) {
+  public void addObserver(HandshakeObserver observer) {
     observerList.add(observer);
   }
 
   /**
    * Removes an observer from the handshake process.
+   *
    * @param observer the observer of the handshake process.
    */
-  public void removeObserver(ServerHandshakeObserver observer) {
+  public void removeObserver(HandshakeObserver observer) {
     observerList.remove(observer);
   }
 
-  /**
-   * Notifies observers that the handshake has completed or errored out..
-   */
+  /** Notifies observers that the handshake has completed or errored out.. */
   private void notifyObservers() {
     for (var observer : observerList) observer.onCompleted(this);
   }
 
-  /**
-   * Entry point for server side of the handshake.
-   */
+  @Override
   public void startHandshake() {
     currentState = State.AwaitingClientInit;
   }
 
-
-  public interface ServerHandshakeObserver {
-    void onCompleted(ServerHandshake handshake);
-  }
-
-  /**
-   * The states that the server side of the server side of the handshake process can be in.
-   */
+  /** The states that the server side of the server side of the handshake process can be in. */
   private enum State {
     Error,
     Success,
     AwaitingClientInit,
     AwaitingClientAuth
   }
-
 }

@@ -1169,7 +1169,7 @@ public class MapTool {
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
 
-PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false);
 

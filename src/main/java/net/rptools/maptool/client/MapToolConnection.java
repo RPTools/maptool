@@ -19,8 +19,8 @@ import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
 
@@ -35,7 +35,8 @@ public class MapToolConnection {
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new Handshake(connection, PlayerDatabaseFactory.getCurrentPlayerDatabase(), player);
+    this.handshake =
+        new ClientHandshake(connection, PlayerDatabaseFactory.getCurrentPlayerDatabase(), player);
     onCompleted = () -> {};
   }
 

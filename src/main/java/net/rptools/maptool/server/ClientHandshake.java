@@ -1,5 +1,18 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.server;
-
 
 import com.google.protobuf.ByteString;
 import java.security.InvalidKeyException;
@@ -16,6 +29,7 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.server.proto.AuthTypeEnum;
@@ -33,7 +47,7 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ClientHandshake implements MessageHandler {
+public class ClientHandshake implements Handshake, MessageHandler {
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(ClientHandshake.class);
@@ -42,11 +56,12 @@ public class ClientHandshake implements MessageHandler {
   private static final int GM_CHALLENGE = 0;
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
+
   private final ClientConnection connection;
   private LocalPlayer player;
   private final PlayerDatabase playerDatabase;
   /** Observers that want to be notified when the status changes. */
-  private final List<ClientHandshakeObserver> observerList = new CopyOnWriteArrayList<>();
+  private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
   /** Message for any error that has occurred, {@code null} if no error has occurred. */
   private String errorMessage;
 
@@ -66,7 +81,7 @@ public class ClientHandshake implements MessageHandler {
     this.playerDatabase = playerDatabase;
   }
 
-  /** Entry point for server side of the handshake. */
+  @Override
   public void startHandshake() throws ExecutionException, InterruptedException {
     var md5key =
         CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().getKey().publicKey());
@@ -86,6 +101,8 @@ public class ClientHandshake implements MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
+      System.out.println("DEBUG: " + id + " :: " + msgType);
+
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
         if (code.equals(HandshakeResponseCodeMsg.INVALID_PASSWORD)) {
@@ -103,7 +120,7 @@ public class ClientHandshake implements MessageHandler {
         return;
       }
 
-      switch(currentState) {
+      switch (currentState) {
         case AwaitingUseAuthType:
           if (msgType == MessageTypeCase.USE_AUTH_TYPE_MSG) {
             handle(handshakeMsg.getUseAuthTypeMsg());
@@ -133,21 +150,28 @@ public class ClientHandshake implements MessageHandler {
 
   private void handle(UseAuthTypeMsg useAuthTypeMsg)
       throws ExecutionException, InterruptedException, IllegalBlockSizeException,
-   BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+          BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException,
+          InvalidKeyException {
 
     HandshakeChallenge handshakeChallenge = null;
 
     if (useAuthTypeMsg.getAuthType() == AuthTypeEnum.ASYMMETRIC_KEY) {
       CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
-      handshakeChallenge = HandshakeChallenge.fromChallengeBytes(player.getName(),
-          useAuthTypeMsg.getChallenge(0).toByteArray(), cipherUtil.getKey());
+      handshakeChallenge =
+          HandshakeChallenge.fromChallengeBytes(
+              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), cipherUtil.getKey());
     } else {
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
           Key key = playerDatabase.getPlayerPassword(player.getName()).get();
-          handshakeChallenge = HandshakeChallenge.fromChallengeBytes(player.getName(),
-              useAuthTypeMsg.toByteArray(), key);
-        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+          handshakeChallenge =
+              HandshakeChallenge.fromChallengeBytes(
+                  player.getName(), useAuthTypeMsg.toByteArray(), key);
+        } catch (NoSuchPaddingException
+            | IllegalBlockSizeException
+            | NoSuchAlgorithmException
+            | BadPaddingException
+            | InvalidKeyException e) {
           // ignore exception unless is the last one
           if (i == useAuthTypeMsg.getChallengeCount() - 1) {
             throw e;
@@ -156,43 +180,35 @@ public class ClientHandshake implements MessageHandler {
       }
     }
 
-    var clientAuthMsg = ClientAuthMsg.newBuilder()
-        .setChallengeResponse(ByteString.copyFrom(handshakeChallenge.getExpectedResponse()))
-        .build();
+    var clientAuthMsg =
+        ClientAuthMsg.newBuilder()
+            .setChallengeResponse(ByteString.copyFrom(handshakeChallenge.getExpectedResponse()))
+            .build();
 
     connection.sendMessage(clientAuthMsg.toByteArray());
     currentState = State.AwaitingConnectionSuccessful;
   }
 
-
   private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
-    player = (LocalPlayer) playerDatabase.getPlayerWithRole(
-        player.getName(),
-        connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER
-    );
+    player =
+        (LocalPlayer)
+            playerDatabase.getPlayerWithRole(
+                player.getName(),
+                connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     currentState = State.Success;
     notifyObservers();
   }
 
-
-  /**
-   * Adds an observer to the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  public void addObserver(ClientHandshakeObserver observer) {
+  @Override
+  public void addObserver(HandshakeObserver observer) {
     observerList.add(observer);
   }
 
-  /**
-   * Removes an observer from the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  public void removeObserver(ClientHandshakeObserver observer) {
+  @Override
+  public void removeObserver(HandshakeObserver observer) {
     observerList.remove(observer);
   }
 
@@ -201,15 +217,36 @@ public class ClientHandshake implements MessageHandler {
     for (var observer : observerList) observer.onCompleted(this);
   }
 
+  @Override
+  public boolean isSuccessful() {
+    return currentState == State.Success;
+  }
+
+  @Override
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  @Override
+  public ClientConnection getConnection() {
+    return connection;
+  }
+
+  @Override
+  public Exception getException() {
+    return exception;
+  }
+
+  @Override
+  public Player getPlayer() {
+    return player;
+  }
+
   /** The states that the server side of the server side of the handshake process can be in. */
   private enum State {
     Error,
     Success,
     AwaitingUseAuthType,
     AwaitingConnectionSuccessful
-  }
-
-  public interface ClientHandshakeObserver {
-    void onCompleted(ClientHandshake handshake);
   }
 }

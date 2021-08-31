@@ -14,20 +14,68 @@
  */
 package net.rptools.maptool.server;
 
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.maptool.model.player.Player;
 
 public interface Handshake extends MessageHandler {
 
+  /**
+   * Returns if the handshake has been successful or not.
+   *
+   * @return {@code true} if the handshake has been successful, {code false} if it has failed or is
+   *     still in progress.
+   */
   boolean isSuccessful();
 
+  /**
+   * Returns the message for the error -- if any -- that occurred during the handshake.
+   *
+   * @return the message for the error that occurred during handshake.
+   */
   String getErrorMessage();
 
+  /**
+   * Returns the connection for this {@code ServerHandshake}.
+   *
+   * @return the connection for this {@code ServerHandshake}.
+   */
   ClientConnection getConnection();
 
+  /**
+   * Returns the exception -- if any -- that occurred during processing of the handshake.
+   *
+   * @return the exception that occurred during the processing of the handshake.
+   */
   Exception getException();
 
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
   Player getPlayer();
 
+  /**
+   * Adds an observer to the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void addObserver(HandshakeObserver observer);
+
+  /**
+   * Removes an observer from the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void removeObserver(HandshakeObserver observer);
+
+  /**
+   * Starts the handshake process.
+   *
+   * @throws ExecutionException when there is an exception in the background task.
+   * @throws InterruptedException when the background task is interrupted.
+   */
+  void startHandshake() throws ExecutionException, InterruptedException;
 }
