@@ -176,7 +176,7 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 
   public void keyTyped(KeyEvent e) {}
 
-  public void updateButtonState() {};
+  public void updateButtonState() {}
 
   /**
    * Perform the escape action on a tool.
