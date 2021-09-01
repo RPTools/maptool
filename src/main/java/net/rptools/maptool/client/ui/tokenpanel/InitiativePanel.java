@@ -568,7 +568,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           list.nextInitiative();
-        };
+        }
       };
 
   /** This action will reverse initiative to the previous token in the list. */
@@ -577,7 +577,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           list.prevInitiative();
-        };
+        }
       };
 
   /** This action will remove the selected token from the list. */
@@ -589,7 +589,7 @@ public class InitiativePanel extends JPanel
           if (ti == null) return;
           int index = list.indexOf(ti);
           list.removeToken(index);
-        };
+        }
       };
 
   /** This action will turn the selected token's initiative on and off. */
@@ -600,7 +600,7 @@ public class InitiativePanel extends JPanel
           TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           ti.setHolding(!ti.isHolding());
-        };
+        }
       };
 
   /** This action will make the selected token the current token. */
@@ -611,7 +611,7 @@ public class InitiativePanel extends JPanel
           TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           list.setCurrent(list.indexOf(ti));
-        };
+        }
       };
 
   /** This action toggles the display of token images. */
@@ -624,7 +624,7 @@ public class InitiativePanel extends JPanel
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
           AppPreferences.setInitShowTokens(showTokens);
-        };
+        }
       };
 
   /** This action toggles the display of token images. */
@@ -637,7 +637,7 @@ public class InitiativePanel extends JPanel
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
           AppPreferences.setInitShowTokenStates(showTokenStates);
-        };
+        }
       };
 
   /** This action toggles the display of token images. */
@@ -650,7 +650,7 @@ public class InitiativePanel extends JPanel
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
           AppPreferences.setInitShowInitiative(showInitState);
-        };
+        }
       };
 
   /** This action toggles the display of token images. */
@@ -663,7 +663,7 @@ public class InitiativePanel extends JPanel
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
           AppPreferences.setInitShow2ndLine(initStateSecondLine);
-        };
+        }
       };
 
   /** This action sorts the tokens in the list. */
@@ -672,7 +672,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           list.sort(initUseReverseSort);
-        };
+        }
       };
 
   /** Toggle the Use Reverse Sort Order preference */
@@ -683,7 +683,7 @@ public class InitiativePanel extends JPanel
           initUseReverseSort = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           MapTool.getCampaign().setInitiativeUseReverseSort(initUseReverseSort);
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-        };
+        }
       };
 
   /** Enable/Disable the Next & Previous buttons on the Panel */
@@ -695,7 +695,7 @@ public class InitiativePanel extends JPanel
           setInitPanelButtonsDisabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
           MapTool.getCampaign().setInitiativePanelButtonsDisabled(isInitPanelButtonsDisabled());
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-        };
+        }
       };
 
   /** This action will set the initiative state of the currently selected token. */
@@ -716,7 +716,7 @@ public class InitiativePanel extends JPanel
           String input = JOptionPane.showInputDialog(s, ti.getState());
           if (input == null) return;
           ti.setState(input.trim());
-        };
+        }
       };
 
   /** This action will clear the initiative state of the currently selected token. */
@@ -727,7 +727,7 @@ public class InitiativePanel extends JPanel
           TokenInitiative ti = displayList.getSelectedValue();
           if (ti == null) return;
           ti.setState(null);
-        };
+        }
       };
 
   /** This action will remove all tokens from the initiative panel. */
@@ -736,7 +736,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           clearTokens();
-        };
+        }
       };
 
   /** This action will add all tokens in the zone to this initiative panel. */
@@ -745,7 +745,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           list.insertTokens(list.getZone().getTokens());
-        };
+        }
       };
 
   /** This action will add all PC tokens in the zone to this initiative panel. */
@@ -758,7 +758,7 @@ public class InitiativePanel extends JPanel
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
-        };
+        }
       };
 
   /** This action will hide all initiative items with NPC tokens from players */
@@ -769,7 +769,7 @@ public class InitiativePanel extends JPanel
           list.setHideNPC(!list.isHideNPC());
           if (list.isHideNPC() != hideNPCMenuItem.isSelected())
             hideNPCMenuItem.setSelected(list.isHideNPC());
-        };
+        }
       };
 
   /**
@@ -783,7 +783,7 @@ public class InitiativePanel extends JPanel
           if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
           MapTool.getCampaign().setInitiativeOwnerPermissions(op);
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-        };
+        }
       };
 
   /**
@@ -797,7 +797,7 @@ public class InitiativePanel extends JPanel
           if (movementLockMenuItem != null) movementLockMenuItem.setSelected(mvLock);
           MapTool.getCampaign().setInitiativeMovementLock(mvLock);
           MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-        };
+        }
       };
 
   /** This action will reset the round counter for the initiative panel. */
@@ -813,7 +813,7 @@ public class InitiativePanel extends JPanel
           list.setRound(-1);
           list.setCurrent(-1);
           list.finishUnitOfWork();
-        };
+        }
       };
 
   /*---------------------------------------------------------------------------------------------

@@ -44,7 +44,7 @@ public class TokenInitHoldFunction extends AbstractFunction {
   /** @return singleton instance */
   public static TokenInitHoldFunction getInstance() {
     return singletonInstance;
-  };
+  }
 
   @Override
   public Object childEvaluate(
