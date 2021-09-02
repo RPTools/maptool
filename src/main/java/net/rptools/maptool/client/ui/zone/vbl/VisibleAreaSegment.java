@@ -14,9 +14,9 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.BasicStroke;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
@@ -27,10 +27,9 @@ import org.jetbrains.annotations.NotNull;
 public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   private final Point2D origin;
   private final List<AreaFace> faceList = new LinkedList<AreaFace>();
-  private final double EPSILON = 0.01;
 
   private Point2D centerPoint;
-  private Area pathArea;
+  private Path2D path;
 
   public VisibleAreaSegment(Point2D origin) {
     this.origin = origin;
@@ -45,7 +44,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   }
 
   public long getDistanceFromOrigin() {
-    // return GeometryUtil.getDistance(getCenterPoint(), origin);
     return (long) (getCenterPoint().distance(origin) * 1000);
   }
 
@@ -55,18 +53,14 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 
   public Point2D getCenterPoint() {
     if (centerPoint == null) {
-      Area path = getPath();
-      Rectangle2D bounds = path.getBounds2D();
-      // Jamz: getCenter points now available from class
-      // centerPoint = new Point2D.Double(bounds.getX() + bounds.getWidth() / 2.0, bounds.getY() +
-      // bounds.getHeight() / 2.0);
+      Rectangle2D bounds = getPath().getBounds2D();
       centerPoint = new Point2D.Double(bounds.getCenterX(), bounds.getCenterY());
     }
     return centerPoint;
   }
 
-  public Area getPath() {
-    if (pathArea == null) {
+  public Path2D getPath() {
+    if (path == null) {
       List<Point2D> pathPoints = new LinkedList<Point2D>();
 
       for (AreaFace face : faceList) {
@@ -76,7 +70,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
         }
         pathPoints.add(face.getP2());
       }
-      GeneralPath path = null;
+
       for (Point2D p : pathPoints) {
         if (path == null) {
           path = new GeneralPath();
@@ -85,10 +79,8 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
         }
         path.lineTo((float) p.getX(), (float) p.getY());
       }
-      BasicStroke stroke = new BasicStroke(1);
-      pathArea = new Area(stroke.createStrokedShape(path));
     }
-    return pathArea;
+    return path;
   }
 
   public Area getArea() {
@@ -109,7 +101,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
       pathPoints.add(
           0, GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2));
     }
-    // System.out.println("Skipped: " + skipCount);
 
     GeneralPath path = null;
     for (Point2D p : pathPoints) {
