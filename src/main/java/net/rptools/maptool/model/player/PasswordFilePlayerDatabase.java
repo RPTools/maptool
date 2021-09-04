@@ -389,6 +389,11 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
     return players;
   }
 
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return false;
+  }
+
   public void putPlayer(
       String name,
       Role role,

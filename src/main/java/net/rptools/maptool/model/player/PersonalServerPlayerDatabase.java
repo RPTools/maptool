@@ -97,6 +97,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
+  }
+
+  @Override
   public boolean isDisabled(Player player) {
     return false;
   }

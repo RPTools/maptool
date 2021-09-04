@@ -33,7 +33,10 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public interface PlayerDatabase {
 
-  public enum AuthMethod {
+  /**
+   * The type of authentication for the player.
+   */
+  enum AuthMethod {
     PASSWORD,
     ASYMMETRIC_KEY
   };
@@ -100,6 +103,10 @@ public interface PlayerDatabase {
    */
   boolean supportsDisabling();
 
+  /**
+   * Returns {@code true} if the database supports asymmetric keys for authentication.
+   * @return {@code true} if the database supports asymmetric keys for authentication.
+   */
   boolean supportsAsymmetricalKeys();
 
   /**
@@ -161,12 +168,12 @@ public interface PlayerDatabase {
     return players;
   }
 
+
   /**
-   * Adds a player to the database if the
-   *
-   * @param player
+   * Returns if this player database records information about only currently connected players.
+   * @return if this player database records information about only currently connected players.
    */
-  // void addPlayer(Player player);
+  boolean recordsOnlyConnectedPlayers();
 
   /**
    * Returns the authentication method for the player.

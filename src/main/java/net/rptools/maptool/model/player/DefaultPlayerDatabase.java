@@ -110,6 +110,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
+  }
+
+  @Override
   public AuthMethod getAuthMethod(Player player) {
     return AuthMethod.PASSWORD; // Will always be password based
   }
