@@ -15,6 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
@@ -45,7 +46,7 @@ public class MapToolConnection {
     else this.onCompleted = onCompleted;
   }
 
-  public void start() throws IOException {
+  public void start() throws IOException, ExecutionException, InterruptedException {
     connection.addMessageHandler(handshake);
     handshake.addObserver(
         (ignore) -> {
@@ -62,6 +63,7 @@ public class MapToolConnection {
         });
     // this triggers the handshake from the server side
     connection.open();
+    handshake.startHandshake();
   }
 
   public void addMessageHandler(ClientMethodHandler handler) {
