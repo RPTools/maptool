@@ -132,9 +132,15 @@ public class ServerHandshake implements Handshake, MessageHandler {
    */
   private void sendErrorResponseAndNotify(HandshakeResponseCodeMsg errorCode) {
     var msg = HandshakeMsg.newBuilder().setHandshakeResponseCodeMsg(errorCode).build();
-    connection.sendMessage(msg.toByteArray());
+    sendMessage(msg);
     currentState = State.Error;
     notifyObservers();
+  }
+
+  private void sendMessage(HandshakeMsg message) {
+    var msgType = message.getMessageTypeCase();
+    log.info(connection.getId() + " :send: " + msgType);
+    connection.sendMessage(message.toByteArray());
   }
 
   @Override
@@ -143,7 +149,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      System.out.println("DEBUG: " + id + " :: " + msgType);
+      log.info(id + " :got: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
@@ -175,6 +181,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
             sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
           }
+          break;
       }
     } catch (Exception e) {
       log.warn(e.toString());
@@ -214,9 +221,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
-            .setServerPolicyDto(policy)
-            .build();
-    connection.sendMessage(connectionSuccessfulMsg.toByteArray());
+            .setServerPolicyDto(policy);
+    var handshakeMsg = HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
+    sendMessage(handshakeMsg);
+    currentState = State.Success;
+    notifyObservers();
   }
 
   /**
@@ -292,7 +301,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
           BadPaddingException, InvalidKeyException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String password = new PasswordGenerator().getPassword();
-    handshakeChallenges = new HandshakeChallenge[0];
+    handshakeChallenges = new HandshakeChallenge[1];
     Key key = playerDatabase.getPlayerPassword(player.getName()).get();
     handshakeChallenges[0] = HandshakeChallenge.createChallenge(player.getName(), password, key);
 
@@ -300,9 +309,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
         UseAuthTypeMsg.newBuilder()
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
-            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()))
-            .build();
-    connection.sendMessage(authTypeMsg.toByteArray());
+            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
+    var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
+    sendMessage(handshakeMsg);
   }
 
   /**
@@ -338,9 +347,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[GM_CHALLENGE].getChallenge()))
-            .addChallenge(ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()))
-            .build();
-    connection.sendMessage(authTypeMsg.toByteArray());
+            .addChallenge(ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()));
+    var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
+    sendMessage(handshakeMsg);
   }
 
   /**
@@ -367,9 +376,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()
             .setAuthType(AuthTypeEnum.ASYMMETRIC_KEY)
-            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()))
-            .build();
-    connection.sendMessage(authTypeMsg.toByteArray());
+            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
+    var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
+    sendMessage(handshakeMsg);
   }
 
   /**

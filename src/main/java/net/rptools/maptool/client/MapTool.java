@@ -1168,7 +1168,8 @@ public class MapTool {
   }
 
   public static void startPersonalServer(Campaign campaign)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException, InterruptedException {
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
+          InterruptedException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
 
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
