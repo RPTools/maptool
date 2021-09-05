@@ -15,15 +15,17 @@
 package net.rptools.clientserver.simple.server;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.maptool.server.Handshake;
+import net.rptools.maptool.server.HandshakeObserver;
 import org.apache.log4j.Logger;
 
 public abstract class AbstractServerConnection extends AbstractConnection
-    implements MessageHandler, DisconnectHandler, ServerConnection, Handshake.HandshakeObserver {
+    implements MessageHandler, DisconnectHandler, ServerConnection, HandshakeObserver {
 
   private static final Logger log = Logger.getLogger(AbstractServerConnection.class);
   //    private final ReaperThread reaperThread;
@@ -102,8 +104,12 @@ public abstract class AbstractServerConnection extends AbstractConnection
         if (!conn.isAlive()) {
           log.debug("\tReaping: " + conn.getId());
           i.remove();
-          fireClientDisconnect(conn);
-          conn.close();
+          try {
+            fireClientDisconnect(conn);
+            conn.close();
+          } catch (Exception e) {
+            // Don't want to raise an error if notification of removing a dead connection failed
+          }
         }
       }
     }
@@ -132,14 +138,14 @@ public abstract class AbstractServerConnection extends AbstractConnection
     }
   }
 
-  protected void handleConnection(ClientConnection conn) {
+  protected void handleConnection(ClientConnection conn)
+      throws ExecutionException, InterruptedException {
     var handshake = handshakeProvider.getConnectionHandshake(conn);
     handshake.addObserver(this);
     // Make sure the client is allowed
-    handshake.triggerHandshake();
+    handshake.startHandshake();
   }
 
-  @Override
   public void onCompleted(Handshake handshake) {
     handshake.removeObserver(this);
     var conn = handshake.getConnection();

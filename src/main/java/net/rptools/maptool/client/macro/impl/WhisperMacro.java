@@ -22,8 +22,8 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 

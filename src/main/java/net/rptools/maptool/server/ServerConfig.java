@@ -43,8 +43,8 @@ public class ServerConfig {
 
   private int port;
   private String hostPlayerId;
-  private String gmPassword;
-  private String playerPassword;
+  private final String gmPassword;
+  private final String playerPassword;
   private boolean personalServer;
   private String serverName;
   private String hostName;

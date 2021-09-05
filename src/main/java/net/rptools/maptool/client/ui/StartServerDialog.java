@@ -26,7 +26,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
@@ -46,6 +46,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JButton generatePlayerPassword;
   private JTextField gmPassword;
   private JTextField playerPassword;
+  private JCheckBox usePasswordFile;
 
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
@@ -69,6 +70,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     generatePlayerPassword = (JButton) getComponent("@generatePlayerPassword");
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
+    usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
 
     getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
     getRoleCombo().setSelectedItem(prefs.getRole());
@@ -93,6 +95,16 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
           } else {
             autoRevealOnMovement.setEnabled(true);
           }
+        });
+
+    boolean usePf = usePasswordFile.isSelected();
+    playerPassword.setEnabled(!usePf);
+    gmPassword.setEnabled(!usePf);
+    usePasswordFile.addItemListener(
+        e -> {
+          boolean passwordFile = usePasswordFile.isSelected();
+          playerPassword.setEnabled(!passwordFile);
+          gmPassword.setEnabled(!passwordFile);
         });
 
     movementMetricCombo = getMovementMetric();
@@ -182,13 +194,17 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 MapTool.showError("ServerDialog.error.port");
                 return;
               }
-              if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
-                MapTool.showError("ServerDialog.error.passwordMissing");
-                return;
-              }
-              if (gmPassword.getText().equals(playerPassword.getText())) {
-                MapTool.showError("ServerDialog.error.passwordMustDiffer");
-                return;
+              // If not using the password file then both the player and GM passwords must be
+              // present and must differ.
+              if (!usePasswordFile.isSelected()) {
+                if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
+                  MapTool.showError("ServerDialog.error.passwordMissing");
+                  return;
+                }
+                if (gmPassword.getText().equals(playerPassword.getText())) {
+                  MapTool.showError("ServerDialog.error.passwordMustDiffer");
+                  return;
+                }
               }
               try {
                 Integer.parseInt(getPortTextField().getText());
@@ -204,6 +220,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setRole((Player.Role) getRoleCombo().getSelectedItem());
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
+                prefs.setUsePasswordFile(usePasswordFile.isSelected());
                 accepted = true;
                 dialog.closeDialog();
               }

@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import org.apache.log4j.Logger;
 
@@ -105,7 +106,7 @@ public class SocketServerConnection extends AbstractServerConnection {
           String id = nextClientId(s);
           SocketClientConnection conn = new SocketClientConnection(id, s);
           server.handleConnection(conn);
-        } catch (IOException e) {
+        } catch (IOException | ExecutionException | InterruptedException e) {
           if (!suppressErrors) {
             log.error(e.getMessage(), e);
           }

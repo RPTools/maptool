@@ -23,23 +23,27 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class MapToolServerConnection
-    implements ServerObserver, HandshakeProvider, Handshake.HandshakeObserver {
+    implements ServerObserver, HandshakeProvider, HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
-  private final Map<ClientConnection, Handshake> handshakeMap = new ConcurrentHashMap<>();
+  private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
   private final MethodServerConnection connection;
+  private final PlayerDatabase playerDatabase;
 
-  public MapToolServerConnection(MapToolServer server) throws IOException {
+  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
+      throws IOException {
     this.connection =
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
+    this.playerDatabase = playerDatabase;
     addObserver(this);
   }
 
@@ -49,7 +53,7 @@ public class MapToolServerConnection
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
   public Handshake getConnectionHandshake(ClientConnection conn) {
-    var handshake = new Handshake(conn);
+    var handshake = new ServerHandshake(conn, playerDatabase);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
     conn.addMessageHandler(handshake);
@@ -92,11 +96,15 @@ public class MapToolServerConnection
     for (Player player : playerMap.values()) {
       server
           .getConnection()
-          .callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), player);
+          .callMethod(
+              conn.getId(),
+              ClientCommand.COMMAND.playerConnected.name(),
+              player.getTransferablePlayer());
     }
     server
         .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), connectedPlayer);
+        .broadcastCallMethod(
+            ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server
@@ -112,7 +120,7 @@ public class MapToolServerConnection
         .broadcastCallMethod(
             new String[] {conn.getId()},
             ClientCommand.COMMAND.playerDisconnected.name(),
-            playerMap.get(conn.getId().toUpperCase()));
+            playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
     playerMap.remove(conn.getId().toUpperCase());
   }
 

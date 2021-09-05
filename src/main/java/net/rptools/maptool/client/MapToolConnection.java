@@ -15,25 +15,34 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.hessian.client.MethodClientConnection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class MapToolConnection {
-  private final Player player;
+
+  /** Instance used for log messages. */
+  private static final Logger log = LogManager.getLogger(MapToolConnection.class);
+
+  private final LocalPlayer player;
   private MethodClientConnection connection;
   private Handshake handshake;
   private Runnable onCompleted;
 
-  public MapToolConnection(ServerConfig config, Player player) throws IOException {
+  public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
+
     this.connection =
         ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new Handshake(connection, player);
+    this.handshake = new ClientHandshake(connection, player);
     onCompleted = () -> {};
   }
 
@@ -42,7 +51,7 @@ public class MapToolConnection {
     else this.onCompleted = onCompleted;
   }
 
-  public void start() throws IOException {
+  public void start() throws IOException, ExecutionException, InterruptedException {
     connection.addMessageHandler(handshake);
     handshake.addObserver(
         (ignore) -> {
@@ -50,15 +59,21 @@ public class MapToolConnection {
           if (handshake.isSuccessful()) {
             onCompleted.run();
           } else {
+            // For client side only show the error message as its more likely to make sense
+            // for players, the exception is logged just in case more info is required
             var exception = handshake.getException();
-            if (exception != null) MapTool.showError("Handshake.msg.encodeInitFail", exception);
-            else MapTool.showError("ERROR: " + handshake.getErrorMessage());
+            if (exception != null) {
+              log.warn(exception);
+            }
+            MapTool.showError(handshake.getErrorMessage());
             connection.close();
             onCompleted.run();
+            AppActions.disconnectFromServer();
           }
         });
     // this triggers the handshake from the server side
     connection.open();
+    handshake.startHandshake();
   }
 
   public void addMessageHandler(ClientMethodHandler handler) {
