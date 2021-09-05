@@ -107,11 +107,6 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
-    throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
-  }
-
-  @Override
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
     if (role == Role.GM) {
       return Optional.of(player.getPassword());

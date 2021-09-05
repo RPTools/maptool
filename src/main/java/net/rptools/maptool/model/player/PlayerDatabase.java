@@ -115,15 +115,6 @@ public interface PlayerDatabase {
   boolean supportsRolePasswords();
 
   /**
-   * Disables the specified player. This will not boot the player from the server.
-   *
-   * @param player The player to disable.
-   * @param reason The reason that the player is disabled, this can be a key in i18n properties.
-   * @throws PasswordDatabaseException If the password database does not support disabling players.
-   */
-  void disablePlayer(Player player, String reason) throws PasswordDatabaseException;
-
-  /**
    * Returns if the player has been disabled.
    *
    * @param player {@code true} the player to check if they have been disabled.

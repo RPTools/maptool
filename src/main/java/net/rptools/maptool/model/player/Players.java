@@ -106,7 +106,7 @@ public class Players {
    */
   private PlayerInfo getPlayerInfo(String name) {
     try {
-      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+      var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
       if (!playerDatabase.isPlayerRegistered(name)) {
         return null;
       }
@@ -146,7 +146,7 @@ public class Players {
    */
   private Set<PlayerInfo> getPlayersInfo() {
     Set<PlayerInfo> players = new HashSet<>();
-    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     try {
       for (Player p : playerDatabase.getAllPlayers()) {
         players.add(getPlayerInfo(p.getName()));
@@ -161,4 +161,36 @@ public class Players {
 
     return players;
   }
+
+  /**
+   * Returns if the current player database only records players that are connected.
+   * @return {@code true} if the player database only records players while they are connected.
+   */
+  public boolean recordsOnlyConnectedPlayers() {
+    return PlayerDatabaseFactory.getCurrentPlayerDatabase().recordsOnlyConnectedPlayers();
+  }
+
+  /**
+   * Returns if this current player database supports per player passwords.
+   * @return {@code true} if the player database supports per player passwords.
+   */
+  public boolean supportsPerPlayerPasswords() {
+    return !PlayerDatabaseFactory.getCurrentPlayerDatabase().supportsRolePasswords();
+  }
+
+  /**
+   * Returns if the current player database supports asymmetric keys.
+   * @return {@code true} if the player database supports asymmetric keys.
+   */
+  public boolean supportsAsymmetricKeys() {
+    return PlayerDatabaseFactory.getCurrentPlayerDatabase().supportsAsymmetricalKeys();
+  }
+
+
+  public boolean addPlayer(PlayerInfo playerInfo) {
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    playerDatabase.
+  }
+
+
 }

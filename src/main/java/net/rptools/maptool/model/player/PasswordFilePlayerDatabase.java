@@ -57,7 +57,7 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PasswordFilePlayerDatabase implements PlayerDatabase {
+public final class PasswordFilePlayerDatabase implements PlayerDatabase, PersistedPlayerDatabase {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -317,8 +317,8 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
-    PlayerDetails details = getPlayerDetails(player.getName());
+  public void disablePlayer(String player, String reason) throws PasswordDatabaseException {
+    PlayerDetails details = getPlayerDetails(player);
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
     }
@@ -331,7 +331,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase {
             details.publicKeys(),
             details.publicKeyFile(),
             reason);
-    playerDetails.put(player.getName(), newDetails);
+    playerDetails.put(player, newDetails);
 
     dirty.set(true);
     writePasswordFile();
