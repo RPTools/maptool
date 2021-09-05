@@ -2609,9 +2609,11 @@ public class AppActions {
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {
-        if (t.getCause() instanceof AppState.FailedToAcquireLockException)
+        if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
-        else MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        } else {
+          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        }
       }
     }
   }

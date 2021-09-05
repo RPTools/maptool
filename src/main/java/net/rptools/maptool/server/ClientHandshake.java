@@ -31,7 +31,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.server.proto.AuthTypeEnum;
 import net.rptools.maptool.server.proto.ClientAuthMsg;
 import net.rptools.maptool.server.proto.ClientInitMsg;
@@ -47,6 +46,7 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/** Class that implements the client side of the handshake. */
 public class ClientHandshake implements Handshake, MessageHandler {
 
   /** Instance used for log messages. */
@@ -57,9 +57,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
 
+  /** The connection for the handshake. */
   private final ClientConnection connection;
-  private LocalPlayer player;
-  private final PlayerDatabase playerDatabase;
+  /** The player for the client. */
+  private final LocalPlayer player;
   /** Observers that want to be notified when the status changes. */
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
   /** Message for any error that has occurred, {@code null} if no error has occurred. */
@@ -74,11 +75,9 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(
-      ClientConnection connection, PlayerDatabase playerDatabase, LocalPlayer player) {
+  public ClientHandshake(ClientConnection connection, LocalPlayer player) {
     this.connection = connection;
     this.player = player;
-    this.playerDatabase = playerDatabase;
   }
 
   @Override
@@ -152,7 +151,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
       log.warn(e.toString());
       exception = e;
       currentState = State.Error;
-      errorMessage = e.getMessage();
+      errorMessage = I18N.getText("Handshake.msg.incorrectPassword");
       notifyObservers();
     }
   }
@@ -179,11 +178,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
               HandshakeChallenge.fromChallengeBytes(
                   player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key);
           break;
-        } catch (NoSuchPaddingException
-            | IllegalBlockSizeException
-            | NoSuchAlgorithmException
-            | BadPaddingException
-            | InvalidKeyException e) {
+        } catch (Exception e) {
           // ignore exception unless is the last one
           if (i == useAuthTypeMsg.getChallengeCount() - 1) {
             throw e;
