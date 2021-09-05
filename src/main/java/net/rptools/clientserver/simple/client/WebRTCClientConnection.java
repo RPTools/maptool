@@ -52,7 +52,7 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCDataChannel remoteDataChannel;
   private String lastError = null;
 
-  private SendThread sendThread = new SendThread(this);;
+  private SendThread sendThread = new SendThread(this);
   private Thread handleConnnect;
   private Thread handleDisconnect;
 
