@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
@@ -33,9 +32,7 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public interface PlayerDatabase {
 
-  /**
-   * The type of authentication for the player.
-   */
+  /** The type of authentication for the player. */
   enum AuthMethod {
     PASSWORD,
     ASYMMETRIC_KEY
@@ -105,6 +102,7 @@ public interface PlayerDatabase {
 
   /**
    * Returns {@code true} if the database supports asymmetric keys for authentication.
+   *
    * @return {@code true} if the database supports asymmetric keys for authentication.
    */
   boolean supportsAsymmetricalKeys();
@@ -158,19 +156,12 @@ public interface PlayerDatabase {
    * @return The players that are currently connected.
    */
   default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
-    Set<Player> players = new HashSet<>();
-    if (SwingUtilities.isEventDispatchThread()) {
-      MapTool.getPlayerList().forEach(players::add);
-    } else {
-      SwingUtilities.invokeAndWait(() -> MapTool.getPlayerList().forEach(players::add));
-    }
-
-    return players;
+    return new HashSet<>(MapTool.getPlayerSetThreadSafe());
   }
-
 
   /**
    * Returns if this player database records information about only currently connected players.
+   *
    * @return if this player database records information about only currently connected players.
    */
   boolean recordsOnlyConnectedPlayers();

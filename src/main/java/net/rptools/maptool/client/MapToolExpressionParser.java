@@ -53,7 +53,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               MacroLinkFunction.getInstance(),
               MapFunctions.getInstance(),
               MiscInitiativeFunction.getInstance(),
-              PlayerFunctions.getInstance(),
+              PlayerNameFunctions.getInstance(),
               RemoveAllFromInitiativeFunction.getInstance(),
               ReturnFunction.getInstance(),
               SoundFunctions.getInstance(),
@@ -103,7 +103,8 @@ public class MapToolExpressionParser extends ExpressionParser {
               TestFunctions.getInstance(),
               TextLabelFunctions.getInstance(),
               TokenSpeechNameFunction.getInstance(),
-              new MarkDownFunctions())
+              new MarkDownFunctions(),
+              new PlayerFunctions())
           .collect(Collectors.toList());
 
   public MapToolExpressionParser() {

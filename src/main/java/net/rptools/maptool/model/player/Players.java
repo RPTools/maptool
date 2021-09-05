@@ -14,29 +14,18 @@
  */
 package net.rptools.maptool.model.player;
 
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import net.rptools.maptool.api.ApiException;
-import net.rptools.maptool.api.util.ApiCall;
-import net.rptools.maptool.api.util.ApiListResult;
-import net.rptools.maptool.api.util.ApiResult;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Class for interacting with players and player information.
- */
+/** Class for interacting with players and player information. */
 public class Players {
 
   /** Instance for logging messages. */
@@ -49,11 +38,12 @@ public class Players {
    * @return the information about the player.
    */
   public CompletableFuture<PlayerInfo> getPlayer(String name) {
-    return new ThreadExecutionHelper<PlayerInfo>().runOnSwingThread(() -> getPlayerInfo(name));
+    return CompletableFuture.supplyAsync(() -> getPlayerInfo(name));
   }
 
   /**
    * Returns the information about the player for the client.
+   *
    * @return the information about the player for the client.
    */
   public CompletableFuture<PlayerInfo> getPlayer() {
@@ -62,21 +52,17 @@ public class Players {
             () -> {
               Player player = MapTool.getPlayer();
               return getPlayerInfo(player.getName());
-            }
-        );
+            });
   }
 
   /**
    * Returns the information about all the currently connected players.
+   *
    * @return the information about all the currently connected players.
    */
   public CompletableFuture<Set<PlayerInfo>> getConnectedPlayers() {
     return CompletableFuture.supplyAsync(
-        () -> {
-                return getPlayersInfo().stream()
-                    .filter(PlayerInfo::connected)
-                    .collect(Collectors.toSet());
-        });
+        () -> getPlayersInfo().stream().filter(PlayerInfo::connected).collect(Collectors.toSet()));
   }
 
   /**
@@ -89,9 +75,9 @@ public class Players {
     return CompletableFuture.supplyAsync(this::getPlayersInfo);
   }
 
-
   /**
    * Returns the information about the current player database capabilities.
+   *
    * @return the information about the current player database capabilities.
    */
   public CompletableFuture<PlayerDatabaseInfo> getDatabaseCapabilities() {
@@ -100,6 +86,7 @@ public class Players {
 
   /**
    * Returns the information about the current player databases capabilities.
+   *
    * @return the information about the current player databases capabilities.
    */
   private PlayerDatabaseInfo getPlayerDatabaseInfo() {
@@ -108,53 +95,53 @@ public class Players {
         playerDatabase.supportsDisabling(),
         !playerDatabase.supportsRolePasswords(),
         playerDatabase.supportsAsymmetricalKeys(),
-        playerDatabase.recordsOnlyConnectedPlayers()
-        );
+        playerDatabase.recordsOnlyConnectedPlayers());
   }
 
   /**
    * Returns information about the specified player.
+   *
    * @param name the name of the player to return the information about.
    * @return the information about the player.
-   *
-   * @throws NoSuchAlgorithmException if there is a problem getting the required encryption
-   * algorithm.
-   * @throws InvalidKeySpecException if the key specification for the players key is invalid.
-   * @throws InterruptedException if the background task was interrupted.
-   * @throws InvocationTargetException if there was an exception that occurred in the background
-   * task.
    */
-  private PlayerInfo getPlayerInfo(String name)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException,
-          InvocationTargetException {
-    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    if (!playerDatabase.isPlayerRegistered(name)) {
-      return null;
-    }
-    Player player = playerDatabase.getPlayer(name);
-    Role role = player.getRole();
-    boolean supportsBlocking = playerDatabase.supportsDisabling();
-    String blockedReason = "";
-    boolean blocked = false;
-    if (supportsBlocking) {
-      blockedReason = playerDatabase.getDisabledReason(player);
-      if (blockedReason.length() > 0) {
-        blocked = true;
+  private PlayerInfo getPlayerInfo(String name) {
+    try {
+      PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+      if (!playerDatabase.isPlayerRegistered(name)) {
+        return null;
       }
-    }
-    boolean connected = false;
-    for (Player p : MapTool.getPlayerList()) {
-      if (name.equals(p.getName())) {
-        connected = true;
-        break;
+      Player player = playerDatabase.getPlayer(name);
+      Role role = player.getRole();
+      boolean supportsBlocking = playerDatabase.supportsDisabling();
+      String blockedReason = "";
+      boolean blocked = false;
+      if (supportsBlocking) {
+        blockedReason = playerDatabase.getDisabledReason(player);
+        if (blockedReason.length() > 0) {
+          blocked = true;
+        }
       }
-    }
+      boolean connected = false;
+      for (Player p : MapTool.getPlayerList()) {
+        if (name.equals(p.getName())) {
+          connected = true;
+          break;
+        }
+      }
 
-    return new PlayerInfo(name, role, blocked, blockedReason, connected);
+      return new PlayerInfo(name, role, blocked, blockedReason, connected);
+    } catch (Exception e) {
+      if (e instanceof CompletionException ce) {
+        throw ce;
+      } else {
+        throw new CompletionException(e);
+      }
+    }
   }
 
   /**
    * Returns the information about all the known players.
+   *
    * @return the information about all the known players.
    */
   private Set<PlayerInfo> getPlayersInfo() {

@@ -20,14 +20,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import javafx.application.Platform;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.api.ApiException;
-import net.rptools.maptool.api.util.ApiResult;
-import okhttp3.Call;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * Utility for helping execute tasks on the correct thread.
+ *
  * @param <T> the type that this execution helper will be dealing with..
  */
 public class ThreadExecutionHelper<T> {
@@ -36,9 +34,9 @@ public class ThreadExecutionHelper<T> {
   private static final Logger log = LogManager.getLogger(ThreadExecutionHelper.class);
 
   /**
-   * This method ensures tht the callable argument passed to it is executed on the swing thread.
-   * If called from the swing thread it will execute immediately and return an already completed
-   * {@link CompletableFuture}.
+   * This method ensures tht the callable argument passed to it is executed on the swing thread. If
+   * called from the swing thread it will execute immediately and return an already completed {@link
+   * CompletableFuture}.
    *
    * @param callable the task to be executed on the swing thread.
    * @return A {@link CompletableFuture} for the task to be executed.
@@ -52,9 +50,9 @@ public class ThreadExecutionHelper<T> {
   }
 
   /**
-   * This method ensures tht the callable argument passed to it is executed on the JavaFX thread.
-   * If called from the swing thread it will execute immediately and return an already completed
-   * {@link CompletableFuture}.
+   * This method ensures tht the callable argument passed to it is executed on the JavaFX thread. If
+   * called from the swing thread it will execute immediately and return an already completed {@link
+   * CompletableFuture}.
    *
    * @param callable the task to be executed on the swing thread.
    * @return A {@link CompletableFuture} for the task to be executed.
@@ -72,7 +70,6 @@ public class ThreadExecutionHelper<T> {
    *
    * @param callable the task to be executed.
    * @return the value returned by the task.
-   *
    * @throws CompletionException if any exception occurs while running the task.
    */
   private T doCall(Callable<T> callable) {

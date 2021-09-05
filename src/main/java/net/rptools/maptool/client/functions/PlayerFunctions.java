@@ -15,55 +15,95 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonPrimitive;
-import java.util.Arrays;
-import java.util.Iterator;
+import com.google.gson.JsonObject;
+import java.util.Collection;
 import java.util.List;
-import net.rptools.maptool.client.MapTool;
+import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerInfo;
+import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
+/** Class that implements player macro functions. */
 public class PlayerFunctions extends AbstractFunction {
-  private static final PlayerFunctions instance = new PlayerFunctions();
 
-  private PlayerFunctions() {
-    super(0, 1, "getPlayerName", "getAllPlayerNames");
-  }
-
-  public static PlayerFunctions getInstance() {
-    return instance;
+  /** Creates a new {@code PlayerFunctions} object. */
+  public PlayerFunctions() {
+    super(
+        0,
+        1,
+        "player.getName",
+        "player.getInfo",
+        "player.getConnectedPlayers",
+        "player.getPlayers");
   }
 
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("getPlayerName")) {
-      return MapTool.getPlayer().getName();
-    } else if ("getAllPlayerNames".equalsIgnoreCase(functionName)) {
-      ObservableList<Player> players = MapTool.getPlayerList();
-      String[] playerArray = new String[players.size()];
-      Iterator<Player> iter = players.iterator();
 
-      int i = 0;
-      while (iter.hasNext()) {
-        playerArray[i] = iter.next().getName();
-        i++;
-      }
-      String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
-      if ("json".equals(delim)) {
-        JsonArray jarr = new JsonArray();
-        Arrays.stream(playerArray).forEach(p -> jarr.add(new JsonPrimitive(p)));
-        return jarr;
-      } else {
-        return StringFunctions.getInstance().join(playerArray, delim);
-      }
+    try {
+      Players players = new Players();
+      return switch (functionName) {
+        case "player.getName" -> players.getPlayer().get().name();
+        case "player.getInfo" -> {
+          if (parameters.size() > 0) {
+            FunctionUtil.blockUntrustedMacro("player.getName");
+            yield players
+                .getPlayer(parameters.get(0).toString())
+                .thenApply(this::playerAsJson)
+                .get();
+          } else {
+            yield players.getPlayer().thenApply(this::playerAsJson).get();
+          }
+        }
+        case "player.getConnectedPlayers" -> players
+            .getConnectedPlayers()
+            .thenApply(this::playersAsJson)
+            .get();
+        case "player.getPlayers" -> players
+            .getDatabasePlayers()
+            .thenApply(this::playersAsJson)
+            .get();
+        default -> throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
+      };
+    } catch (InterruptedException | ExecutionException e) {
+      throw new ParserException(e);
     }
-    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  /**
+   * Returns a collection of {@link PlayerInfo} mapped to a Json Array.
+   *
+   * @param playerInfos the PlayerInfo objects to map
+   * @return a collection of {@link PlayerInfo} mapped to a Json Array.
+   */
+  private JsonArray playersAsJson(Collection<PlayerInfo> playerInfos) {
+    JsonArray players = new JsonArray();
+
+    playerInfos.stream().map(this::playerAsJson).forEach(players::add);
+
+    return players;
+  }
+
+  /**
+   * Returns a {@link PlayerInfo} mapped to a Json object.
+   *
+   * @param playerInfo the PlayerInfo to map.
+   * @return a {@link PlayerInfo} mapped to a Json object.
+   */
+  private JsonObject playerAsJson(PlayerInfo playerInfo) {
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("name", playerInfo.name());
+    jobj.addProperty("role", playerInfo.role().name());
+    jobj.addProperty("connected", playerInfo.connected());
+
+    return jobj;
   }
 }
