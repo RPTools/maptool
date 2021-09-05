@@ -48,11 +48,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
@@ -160,7 +160,7 @@ public class MapTool {
   private static ObservableList<TextMessage> messageList;
   private static LocalPlayer player;
 
-  private static ClientConnection conn;
+  private static MapToolConnection conn;
   private static ClientMethodHandler handler;
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
@@ -1072,6 +1072,7 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+    server.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1175,39 +1176,51 @@ public class MapTool {
   }
 
   public static void startPersonalServer(Campaign campaign)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
+          InterruptedException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
+
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     MapTool.startServer(null, config, new ServerPolicy(), campaign, playerDatabase, false);
 
     String username = AppPreferences.getDefaultUserName();
     LocalPlayer localPlayer = (LocalPlayer) playerDatabase.getPlayer(username);
-    MapTool.createConnection("localhost", config.getPort(), localPlayer);
-
-    // connecting
-    MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
+    // Connect to server
+    MapTool.createConnection(
+        config,
+        localPlayer,
+        () -> {
+          // connecting
+          MapTool.getFrame()
+              .getConnectionStatusPanel()
+              .setStatus(ConnectionStatusPanel.Status.server);
+        });
   }
 
-  public static void createConnection(String host, int port, LocalPlayer player)
-      throws IOException {
+  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
+      throws IOException, ExecutionException, InterruptedException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
-    ClientConnection clientConn = new MapToolConnection(host, port, player);
+    MapToolConnection clientConn = new MapToolConnection(config, player);
 
-    clientConn.addMessageHandler(handler);
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.addDisconnectHandler(new ServerDisconnectHandler());
 
-    clientConn.start();
+    clientConn.setOnCompleted(
+        () -> {
+          clientConn.addMessageHandler(handler);
+          // LATER: I really, really, really don't like this startup pattern
+          if (clientConn.isAlive()) {
+            conn = clientConn;
+          }
+          clientFrame.getLookupTablePanel().updateView();
+          clientFrame.getInitiativePanel().updateView();
+          onCompleted.run();
+        });
 
-    // LATER: I really, really, really don't like this startup pattern
-    if (clientConn.isAlive()) {
-      conn = clientConn;
-    }
-    clientFrame.getLookupTablePanel().updateView();
-    clientFrame.getInitiativePanel().updateView();
+    clientConn.start();
   }
 
   public static void closeConnection() throws IOException {
@@ -1216,7 +1229,7 @@ public class MapTool {
     }
   }
 
-  public static ClientConnection getConnection() {
+  public static MapToolConnection getConnection() {
     return conn;
   }
 
@@ -1243,9 +1256,7 @@ public class MapTool {
       announcer.stop();
       announcer = null;
     }
-    if (conn == null || !conn.isAlive()) {
-      return;
-    }
+
     // Unregister ourselves
     if (server != null && server.getConfig().isServerRegistered() && !isPersonalServer) {
       try {
@@ -1256,13 +1267,14 @@ public class MapTool {
     }
 
     try {
-      conn.close();
-      conn = null;
-      playerList.clear();
+      if (conn != null || conn.isAlive()) {
+        conn.close();
+      }
     } catch (IOException ioe) {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
     }
+    playerList.clear();
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);
@@ -1420,6 +1432,9 @@ public class MapTool {
   }
 
   private static class ServerHeartBeatThread extends Thread {
+    public ServerHeartBeatThread() {
+      super("MapTool.ServerHeartBeatThread");
+    }
 
     @Override
     public void run() {

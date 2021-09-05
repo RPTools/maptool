@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -2217,7 +2218,8 @@ public class AppActions {
                         gmPassword,
                         playerPassword,
                         serverProps.getPort(),
-                        serverProps.getRPToolsName());
+                        serverProps.getRPToolsName(),
+                        "localhost");
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2286,26 +2288,30 @@ public class AppActions {
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  Runnable onConnected =
+                      () -> {
+                        // connecting
+                        MapTool.getFrame()
+                            .getConnectionStatusPanel()
+                            .setStatus(ConnectionStatusPanel.Status.server);
+                        MapTool.addLocalMessage(
+                            MessageUtil.getFormattedSystemMsg(
+                                I18N.getText("msg.info.startServer")));
+                      };
+
                   if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(), playerType, gmPassword));
+                            dialog.getUsernameTextField().getText(), playerType, gmPassword),
+                        onConnected);
                   } else {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(), playerType, playerPassword));
+                            dialog.getUsernameTextField().getText(), playerType, playerPassword),
+                        onConnected);
                   }
-
-                  // connecting
-                  MapTool.getFrame()
-                      .getConnectionStatusPanel()
-                      .setStatus(ConnectionStatusPanel.Status.server);
-                  MapTool.addLocalMessage(
-                      MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;
@@ -2315,7 +2321,9 @@ public class AppActions {
                 } catch (NoSuchAlgorithmException
                     | InvalidKeySpecException
                     | NoSuchPaddingException
-                    | InvalidKeyException e) {
+                    | InvalidKeyException
+                    | ExecutionException
+                    | InterruptedException e) {
                   MapTool.showError("msg.error.initializeCrypto", e);
                   failed = true;
                 } catch (PasswordDatabaseException pwde) {
@@ -2326,7 +2334,11 @@ public class AppActions {
                 if (failed) {
                   try {
                     MapTool.startPersonalServer(campaign);
-                  } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+                  } catch (IOException
+                      | NoSuchAlgorithmException
+                      | InvalidKeySpecException
+                      | ExecutionException
+                      | InterruptedException e) {
                     MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
@@ -2379,30 +2391,46 @@ public class AppActions {
                 boolean failed = false;
                 try {
                   ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
+                  ServerConfig config =
+                      new ServerConfig(
+                          prefs.getUsername(),
+                          "",
+                          "",
+                          dialog.getPort(),
+                          prefs.getServerName(),
+                          dialog.getServer());
                   MapTool.createConnection(
-                      dialog.getServer(),
-                      dialog.getPort(),
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+                      config,
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()),
+                      () -> {
+                        MapTool.getFrame().hideGlassPane();
+                        MapTool.getFrame()
+                            .showFilledGlassPane(
+                                new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                      });
 
-                  MapTool.getFrame().hideGlassPane();
-                  MapTool.getFrame()
-                      .showFilledGlassPane(
-                          new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
                 } catch (UnknownHostException e1) {
                   MapTool.showError("msg.error.unknownHost", e1);
                   failed = true;
                 } catch (IOException e1) {
                   MapTool.showError("msg.error.failedLoadCampaign", e1);
                   failed = true;
-                } catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
+                } catch (NoSuchAlgorithmException
+                    | InvalidKeySpecException
+                    | ExecutionException
+                    | InterruptedException e1) {
                   MapTool.showError("msg.error.initializeCrypto", e1);
                   failed = true;
                 }
-                if (failed || MapTool.getConnection() == null) {
+                if (failed) {
                   MapTool.getFrame().hideGlassPane();
                   try {
                     MapTool.startPersonalServer(oldCampaign);
-                  } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+                  } catch (IOException
+                      | NoSuchAlgorithmException
+                      | InvalidKeySpecException
+                      | ExecutionException
+                      | InterruptedException e) {
                     MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
@@ -2438,7 +2466,11 @@ public class AppActions {
     MapTool.disconnect();
     try {
       MapTool.startPersonalServer(campaign);
-    } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+    } catch (IOException
+        | NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | ExecutionException
+        | InterruptedException e) {
       MapTool.showError("msg.error.failedStartPersonalServer", e);
     }
   }
@@ -2577,9 +2609,11 @@ public class AppActions {
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {
-        if (t.getCause() instanceof AppState.FailedToAcquireLockException)
+        if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
-        else MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        } else {
+          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        }
       }
     }
   }
@@ -3198,6 +3232,23 @@ public class AppActions {
         protected void executeAction() {
           MapTool.getFrame()
               .setPaintDrawingMeasurement(!MapTool.getFrame().isPaintDrawingMeasurement());
+        }
+      };
+
+  public static final Action TOGGLE_WEBRTC =
+      new AdminClientAction() {
+        {
+          init("action.toggleUseWebRTC");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.useWebRTC();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setUseWebRTC(!AppState.useWebRTC());
         }
       };
 

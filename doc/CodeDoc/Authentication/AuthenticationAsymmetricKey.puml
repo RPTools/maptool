@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+Client -> Server: ClientInitMsg
+Server -> Server: Lookup Player from ClientInitMsg and\nretrieve password salt
+Server -> Server: Create HandshakeChallenge
+Server -> Server: Encrypt Challenge with public key
+Server -> Client: Send UseAuthTypeMsg
+note right
+    auth_type = ASYMMETRIC_KEY
+    challenge[0] = HandshakeChallenge.challenge
+end note
+Client -> Client: Decrypt challenge
+Client -> Server: Send ClientAuthMsg
+note right
+    challenge_response = HandshakeChallenge.response
+    (not encrypted)
+end note
+Server -> Client: Send ConnectionSuccessfulMsg
+
+@enduml
