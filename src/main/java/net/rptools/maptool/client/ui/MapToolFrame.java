@@ -1986,15 +1986,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   public void updateKeyStrokes() {
-    /*
-     * Lee: This causes input map conflicts in Java 7. Going over the code, this line does nothing as key mapping here does not conflict with hotkeys set aside for macros; unless someone modifies
-     * the accelerators in the i18n file. Commenting it out.
-     */
-    // updateKeyStrokes(menuBar);
-
-    for (DockableFrame frame : frameMap.values()) {
-      updateKeyStrokes(frame);
-    }
+    updateKeyStrokes(menuBar);
   }
 
   public Timer getChatTimer() {
