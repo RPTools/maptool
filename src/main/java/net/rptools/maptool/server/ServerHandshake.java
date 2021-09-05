@@ -222,7 +222,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
             .setServerPolicyDto(policy);
-    var handshakeMsg = HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
+    var handshakeMsg =
+        HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
     sendMessage(handshakeMsg);
     currentState = State.Success;
     notifyObservers();
@@ -347,7 +348,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[GM_CHALLENGE].getChallenge()))
-            .addChallenge(ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()));
+            .addChallenge(
+                ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
     sendMessage(handshakeMsg);
   }
@@ -370,7 +372,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
     handshakeChallenges = new HandshakeChallenge[1];
     CipherUtil cipherUtil = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
-    handshakeChallenges[1] =
+    handshakeChallenges[0] =
         HandshakeChallenge.createChallenge(player.getName(), password, cipherUtil.getKey());
 
     var authTypeMsg =

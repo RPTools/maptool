@@ -85,7 +85,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
   public void startHandshake() throws ExecutionException, InterruptedException {
     var md5key =
         CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().getKey().publicKey());
-    var clientInitMsg = ClientInitMsg.newBuilder()
+    var clientInitMsg =
+        ClientInitMsg.newBuilder()
             .setPlayerName(player.getName())
             .setVersion(MapTool.getVersion())
             .setPublicKeyMd5(md5key.toString());
@@ -159,7 +160,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
   private void handle(UseAuthTypeMsg useAuthTypeMsg)
       throws ExecutionException, InterruptedException, IllegalBlockSizeException,
           BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidKeySpecException {
 
     HandshakeChallenge handshakeChallenge = null;
 
@@ -169,12 +170,15 @@ public class ClientHandshake implements Handshake, MessageHandler {
           HandshakeChallenge.fromChallengeBytes(
               player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), cipherUtil.getKey());
     } else {
+      player.setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
-          Key key = playerDatabase.getPlayerPassword(player.getName()).get();
+          Key key = player.getPassword();
+          // Key key = playerDatabase.getPlayerPassword(player.getName()).get();
           handshakeChallenge =
               HandshakeChallenge.fromChallengeBytes(
                   player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key);
+          break;
         } catch (NoSuchPaddingException
             | IllegalBlockSizeException
             | NoSuchAlgorithmException
@@ -201,11 +205,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
-    player =
-        (LocalPlayer)
-            playerDatabase.getPlayerWithRole(
-                player.getName(),
-                connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
+    player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     currentState = State.Success;
     notifyObservers();
   }

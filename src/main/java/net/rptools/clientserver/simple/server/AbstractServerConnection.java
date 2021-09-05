@@ -104,8 +104,12 @@ public abstract class AbstractServerConnection extends AbstractConnection
         if (!conn.isAlive()) {
           log.debug("\tReaping: " + conn.getId());
           i.remove();
-          fireClientDisconnect(conn);
-          conn.close();
+          try {
+            fireClientDisconnect(conn);
+            conn.close();
+          } catch (Exception e) {
+            // Don't want to raise an error if notification of removing a dead connection failed
+          }
         }
       }
     }
