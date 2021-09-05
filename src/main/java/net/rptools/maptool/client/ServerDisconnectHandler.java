@@ -44,7 +44,11 @@ public class ServerDisconnectHandler implements DisconnectHandler {
 
       try {
         MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
-      } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | ExecutionException | InterruptedException e) {
+      } catch (IOException
+          | NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | ExecutionException
+          | InterruptedException e) {
         MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
       }
     } else if (!MapTool.isPersonalServer() && !MapTool.isHostingServer()) {

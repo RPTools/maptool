@@ -85,14 +85,20 @@ public class ClientHandshake implements Handshake, MessageHandler {
   public void startHandshake() throws ExecutionException, InterruptedException {
     var md5key =
         CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().getKey().publicKey());
-    var clientInitMsg =
-        ClientInitMsg.newBuilder()
+    var clientInitMsg = ClientInitMsg.newBuilder()
             .setPlayerName(player.getName())
             .setVersion(MapTool.getVersion())
-            .setPublicKeyMd5(md5key.toString())
-            .build();
-    connection.sendMessage(clientInitMsg.toByteArray());
+            .setPublicKeyMd5(md5key.toString());
+    var handshakeMsg = HandshakeMsg.newBuilder().setClientInitMsg(clientInitMsg).build();
+
+    sendMessage(handshakeMsg);
     currentState = State.AwaitingUseAuthType;
+  }
+
+  private void sendMessage(HandshakeMsg message) {
+    var msgType = message.getMessageTypeCase();
+    log.info(connection.getId() + " :send: " + msgType);
+    connection.sendMessage(message.toByteArray());
   }
 
   @Override
@@ -101,7 +107,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      System.out.println("DEBUG: " + id + " :: " + msgType);
+      log.info(id + " :got: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
@@ -129,6 +135,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
             currentState = State.Error;
             notifyObservers();
           }
+          break;
         case AwaitingConnectionSuccessful:
           if (msgType == MessageTypeCase.CONNECTION_SUCCESSFUL_MSG) {
             handle(handshakeMsg.getConnectionSuccessfulMsg());
@@ -137,6 +144,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
             currentState = State.Error;
             notifyObservers();
           }
+          break;
       }
 
     } catch (Exception e) {
@@ -166,7 +174,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
           Key key = playerDatabase.getPlayerPassword(player.getName()).get();
           handshakeChallenge =
               HandshakeChallenge.fromChallengeBytes(
-                  player.getName(), useAuthTypeMsg.toByteArray(), key);
+                  player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key);
         } catch (NoSuchPaddingException
             | IllegalBlockSizeException
             | NoSuchAlgorithmException
@@ -182,10 +190,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
     var clientAuthMsg =
         ClientAuthMsg.newBuilder()
-            .setChallengeResponse(ByteString.copyFrom(handshakeChallenge.getExpectedResponse()))
-            .build();
+            .setChallengeResponse(ByteString.copyFrom(handshakeChallenge.getExpectedResponse()));
 
-    connection.sendMessage(clientAuthMsg.toByteArray());
+    var handshakeMsg = HandshakeMsg.newBuilder().setClientAuthMessage(clientAuthMsg).build();
+    sendMessage(handshakeMsg);
     currentState = State.AwaitingConnectionSuccessful;
   }
 
