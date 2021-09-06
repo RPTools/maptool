@@ -138,12 +138,6 @@ javafx {
 
 protobuf {
     protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
- //   plugins {
- //       grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
- //   }
-  //  generateProtoTasks {
-  //      all()*.plugins { grpc {} }
-  //  }
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
@@ -436,13 +430,18 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
+    // webrtc
     implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.1'
-    implementation group: 'dev.onvoid.webrtc', name: 'webrtc-java', version: '0.2.0'
-    implementation group: 'dev.onvoid.webrtc', name: 'webrtc-java-windows-x86_64', version: '0.1.0'
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    //implementation "io.grpc:grpc-stub:${grpcVersion}"
-    //compileOnly "org.apache.tomcat:annotations-api:6.0.53"
+    implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0'
+    if (osdetector.os.is('windows'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:windows-x86_64'
+    else if (osdetector.os.is('osx'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:macos-x86_64'
+    else if (osdetector.os.is('linux'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:linux-x86_64'
 
+        // protobuf
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
 
     // HTTP End Point
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
