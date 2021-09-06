@@ -12,16 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.maptool.server;
 
-import net.rptools.clientserver.simple.Connection;
+public interface HandshakeObserver {
 
-public interface ClientConnection extends Connection {
-  void sendMessage(byte[] message);
-
-  void sendMessage(Object channel, byte[] message);
-
-  boolean isAlive();
-
-  String getId();
+  void onCompleted(Handshake handshake);
 }
