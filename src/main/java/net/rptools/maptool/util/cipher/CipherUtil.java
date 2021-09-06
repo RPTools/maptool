@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -101,7 +100,7 @@ public class CipherUtil {
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     messageDigest = MessageDigest.getInstance(MESSAGE_DIGEST_ALGORITHM);
     key = keyToUse;
-    encryptionCipher = createEncrypter(key);
+    encryptionCipher = createEncryptor(key);
     if (!key.asymmetric() || key.privateKey() != null) {
       decryptionCipher = createDecryptor(key);
     } else {
@@ -185,7 +184,7 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public static Cipher createEncrypter(Key key)
+  public static Cipher createEncryptor(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
       if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
@@ -496,5 +495,9 @@ public class CipherUtil {
       throw new IllegalArgumentException("Not a public key string.");
     }
     return new MD5Key(key.replaceAll("\\s", "").getBytes(StandardCharsets.UTF_8));
+  }
+
+  public static MD5Key publicKeyMD5(PublicKey publicKey) {
+    return publicKeyMD5(CipherUtil.encodedPublicKeyText(publicKey));
   }
 }

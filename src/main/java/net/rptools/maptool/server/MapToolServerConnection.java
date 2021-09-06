@@ -15,16 +15,12 @@
 package net.rptools.maptool.server;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import net.rptools.clientserver.hessian.server.ServerConnection;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.hessian.server.MethodServerConnection;
+import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.player.Player;
@@ -33,15 +29,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
-public class MapToolServerConnection extends ServerConnection implements ServerObserver {
+public class MapToolServerConnection
+    implements ServerObserver, HandshakeProvider, HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
-  private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
+  private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
+  private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
+  private final MethodServerConnection connection;
   private final PlayerDatabase playerDatabase;
 
-  public MapToolServerConnection(MapToolServer server, int port, PlayerDatabase playerDatabase)
+  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
       throws IOException {
-    super(port);
+    this.connection =
+        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     this.playerDatabase = playerDatabase;
     addObserver(this);
@@ -52,26 +52,19 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  @Override
-  public boolean handleConnectionHandshake(String id, Socket socket) {
-    try {
-      Handshake handshake = new Handshake(playerDatabase);
-      Player player = handshake.receiveHandshake(server, socket);
+  public Handshake getConnectionHandshake(ClientConnection conn) {
+    var handshake = new ServerHandshake(conn, playerDatabase);
+    handshakeMap.put(conn, handshake);
+    handshake.addObserver(this);
+    conn.addMessageHandler(handshake);
+    return handshake;
+  }
 
-      if (player != null) {
-        playerMap.put(id.toUpperCase(), player);
-        return true;
-      }
-    } catch (IOException
-        | InvalidKeySpecException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException
-        | InvalidKeyException
-        | IllegalBlockSizeException
-        | BadPaddingException e) {
-      log.error("Handshake failure: " + e, e);
-    }
-    return false;
+  @Override
+  public void releaseHandshake(ClientConnection conn) {
+    var handshake = handshakeMap.get(conn);
+    handshakeMap.remove(conn);
+    conn.removeMessageHandler(handshake);
   }
 
   public Player getPlayer(String id) {
@@ -96,7 +89,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
   // SERVER OBSERVER
 
   /** Handle late connections */
-  public void connectionAdded(net.rptools.clientserver.simple.client.ClientConnection conn) {
+  public void connectionAdded(ClientConnection conn) {
     server.configureClientConnection(conn);
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
@@ -120,7 +113,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
     // }
   }
 
-  public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {
+  public void connectionRemoved(ClientConnection conn) {
     server.releaseClientConnection(conn.getId());
     server
         .getConnection()
@@ -129,5 +122,56 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
             ClientCommand.COMMAND.playerDisconnected.name(),
             playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
     playerMap.remove(conn.getId().toUpperCase());
+  }
+
+  public void addMessageHandler(ServerMethodHandler handler) {
+    connection.addMessageHandler(handler);
+  }
+
+  public void broadcastCallMethod(String method, Object... parameters) {
+    connection.broadcastCallMethod(method, parameters);
+  }
+
+  public void broadcastCallMethod(String[] exclude, String method, Object... parameters) {
+    connection.broadcastCallMethod(exclude, method, parameters);
+  }
+
+  public void callMethod(String id, String method, Object... parameters) {
+    connection.callMethod(id, method, parameters);
+  }
+
+  public void callMethod(String id, Object channel, String method, Object... parameters) {
+    connection.callMethod(id, channel, method, parameters);
+  }
+
+  public void open() throws IOException {
+    connection.open();
+  }
+
+  public void close() {
+    connection.close();
+  }
+
+  public void addObserver(ServerObserver observer) {
+    connection.addObserver(observer);
+  }
+
+  public void removeObserver(ServerObserver observer) {
+    connection.removeObserver(observer);
+  }
+
+  @Override
+  public void onCompleted(Handshake handshake) {
+    handshake.removeObserver(this);
+    if (handshake.isSuccessful()) {
+      Player player = handshake.getPlayer();
+
+      if (player != null) {
+        playerMap.put(handshake.getConnection().getId().toUpperCase(), player);
+      }
+    } else {
+      var exception = handshake.getException();
+      if (exception != null) log.error("Handshake failure: " + exception, exception);
+    }
   }
 }

@@ -195,7 +195,7 @@ public class ServerPolicy {
     return useAstarPathfinding;
   }
 
-  public void setUseAstarPathfinding(boolean useAstarPathfinding) {
+  public void setUsingAstarPathfinding(boolean useAstarPathfinding) {
     this.useAstarPathfinding = useAstarPathfinding;
   }
 
