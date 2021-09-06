@@ -2249,14 +2249,10 @@ public class AppActions {
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
                       db.addTemporaryPlayer(
-                          dialog.getUsernameTextField().getText(),
-                          Role.GM,
-                          gmPassword);
+                          dialog.getUsernameTextField().getText(), Role.GM, gmPassword);
                     } else {
                       db.addTemporaryPlayer(
-                          dialog.getUsernameTextField().getText(),
-                          Role.PLAYER,
-                          playerPassword);
+                          dialog.getUsernameTextField().getText(), Role.PLAYER, playerPassword);
                     }
                   } else {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);

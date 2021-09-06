@@ -164,6 +164,7 @@ public class Players {
 
   /**
    * Returns if the current player database only records players that are connected.
+   *
    * @return {@code true} if the player database only records players while they are connected.
    */
   public boolean recordsOnlyConnectedPlayers() {
@@ -172,6 +173,7 @@ public class Players {
 
   /**
    * Returns if this current player database supports per player passwords.
+   *
    * @return {@code true} if the player database supports per player passwords.
    */
   public boolean supportsPerPlayerPasswords() {
@@ -180,12 +182,12 @@ public class Players {
 
   /**
    * Returns if the current player database supports asymmetric keys.
+   *
    * @return {@code true} if the player database supports asymmetric keys.
    */
   public boolean supportsAsymmetricKeys() {
     return PlayerDatabaseFactory.getCurrentPlayerDatabase().supportsAsymmetricalKeys();
   }
-
 
   public boolean addPlayer(PlayerInfo playerInfo) {
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
@@ -193,7 +195,4 @@ public class Players {
     // TODO CDW: here
     return false;
   }
-
-
-
 }

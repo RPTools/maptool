@@ -30,18 +30,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -64,7 +60,7 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements PlayerDatabase, PersistedPlayerDatabase {
+public final class PasswordFilePlayerDatabase implements PlayerDatabase, PersistedPlayerDatabase {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -181,7 +177,8 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
             for (String pk : CipherUtil.splitPublicKeys(pkString)) {
               MD5Key md5Key = CipherUtil.publicKeyMD5(pk);
               publicKeyDetails.add(
-              new PublicKeyDetails(pk, md5Key, CipherUtil.fromPublicKeyString(pk), publicKeyFile));
+                  new PublicKeyDetails(
+                      pk, md5Key, CipherUtil.fromPublicKeyString(pk), publicKeyFile));
             }
           }
         }
@@ -192,13 +189,7 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
         }
 
         players.put(
-            name,
-            new PlayerDetails(
-                name,
-                role,
-                passwordKey,
-                publicKeyDetails,
-                disabledReason));
+            name, new PlayerDetails(name, role, passwordKey, publicKeyDetails, disabledReason));
       }
       return players;
     } catch (IOException ioe) {
@@ -211,10 +202,7 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
     if (dirty.compareAndSet(true, false)) {
 
       try {
-        Files.copy(
-            passwordFile.toPath(),
-            backupPasswordFile.toPath(),
-            REPLACE_EXISTING);
+        Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(), REPLACE_EXISTING);
       } catch (IOException ioe) {
         String msg = I18N.getText("msg.err.passFile.errorCopyingBackup");
         log.error(msg, ioe);
@@ -240,8 +228,7 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
           v.publicKeyDetails.stream().map(PublicKeyDetails::filename).forEach(pubKeysArray::add);
           pwObject.add("publicKeys", pubKeysArray);
         } else {
-          pwObject.addProperty(
-              "password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
+          pwObject.addProperty("password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
           pwObject.addProperty(
               "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
         }
@@ -274,24 +261,26 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
     Set<String> dirtyFiles =
         playerDirtyKeys.stream().map(PublicKeyDetails::filename).collect(Collectors.toSet());
 
-
     // Backup they key file and overwrite
     for (String filename : dirtyFiles) {
       Path pkFile = passwordFile.getParentFile().toPath().resolve(filename);
       Path pkFileBackup = passwordFile.getParentFile().toPath().resolve("backup").resolve(filename);
       Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
 
-      Set<PublicKeyDetails> keysInFile = publicKeyDetails.stream()
-          .filter(pkd -> pkd.filename().equals(filename)).collect(Collectors.toSet());
+      Set<PublicKeyDetails> keysInFile =
+          publicKeyDetails.stream()
+              .filter(pkd -> pkd.filename().equals(filename))
+              .collect(Collectors.toSet());
 
       keysInFile.forEach(k -> dirtyPublicKeys.remove(k));
 
       String fileKeys =
-          publicKeyDetails.stream().filter(pkd -> pkd.filename().equals(filename)).map(
-              PublicKeyDetails::keyString).collect(Collectors.joining("\n"));
+          publicKeyDetails.stream()
+              .filter(pkd -> pkd.filename().equals(filename))
+              .map(PublicKeyDetails::keyString)
+              .collect(Collectors.joining("\n"));
       Files.writeString(pkFile, fileKeys, CREATE, TRUNCATE_EXISTING);
     }
-
   }
 
   @Override
@@ -372,11 +361,7 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
 
     PlayerDetails newDetails =
         new PlayerDetails(
-            details.name(),
-            details.role(),
-            details.password(),
-            details.publicKeyDetails(),
-            reason);
+            details.name(), details.role(), details.password(), details.publicKeyDetails(), reason);
     playerDetails.put(player, newDetails);
 
     dirty.set(true);
@@ -385,41 +370,74 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
 
   @Override
   public void addPlayerSharedPassword(String name, Role role, String password)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
+          NoSuchPaddingException, InvalidKeyException {
     if (playerExists(name)) {
-      throw new PasswordDatabaseException(I18N.getText("Password.playerExists ", name));
+      throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
-
     putPlayer(name, role, password, Set.of(), true);
   }
 
   @Override
   public void addPlayerAsymmetricKey(String name, Role role, Set<String> publicKeyStrings)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
+          NoSuchPaddingException, InvalidKeyException {
     if (playerExists(name)) {
-      throw new PasswordDatabaseException(I18N.getText("Password.playerExists ", name));
+      throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
-
-    // TODO: CDW here
+    putPlayer(name, role, null, publicKeyStrings, true);
   }
 
   @Override
   public void setSharedPassword(String name, String password)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
+    if (!playerExists(name)) {
+      throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
+    }
 
-    // TODO: CDW here
+    var pd = getPlayerDetails(name);
+
+    // if we already have public keys make sure we remove them from dirty list
+    pd.publicKeyDetails().forEach(dirtyPublicKeys::remove);
+
+    var newpd =
+        new PlayerDetails(
+            pd.name(),
+            pd.role(),
+            CipherUtil.fromSharedKeyNewSalt(password).getKey(),
+            Set.of(),
+            pd.disabledReason);
+
+    dirty.set(true);
+    writePasswordFile();
   }
 
   @Override
   public void setAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
+    if (!playerExists(name)) {
+      throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
+    }
 
-    // TODO: CDW here
+    var pd = getPlayerDetails(name);
+
+    // if we already have public keys make sure we remove them from dirty list
+    pd.publicKeyDetails().forEach(dirtyPublicKeys::remove);
+
+    Set<PublicKeyDetails> publicKeyDetails = createPublicKeyDetails(keys, pd.name());
+    var newpd = new PlayerDetails(pd.name(), pd.role(), null, publicKeyDetails, pd.disabledReason);
+    publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, newpd));
+    playerDetails.put(newpd.name(), newpd);
+    dirty.set(true);
+    writePasswordFile();
   }
 
   @Override
   public void addAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
 
     // TODO: CDW here
   }
@@ -455,17 +473,18 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
       CompletableFuture.completedFuture(null);
     }
 
-    return CompletableFuture.supplyAsync(() -> {
-      assert pd != null;
-      Optional<PublicKeyDetails> key = pd.publicKeyDetails().stream()
-          .filter(pk -> pk.md5Key().equals(md5key)).findFirst();
-      if (key.isPresent()) {
-        return key.get().cipherUtil();
-      } else {
-        throw new CompletionException(new IllegalArgumentException(I18N.getText("Password"
-            + ".publicKeyNotFound")));
-      }
-    });
+    return CompletableFuture.supplyAsync(
+        () -> {
+          assert pd != null;
+          Optional<PublicKeyDetails> key =
+              pd.publicKeyDetails().stream().filter(pk -> pk.md5Key().equals(md5key)).findFirst();
+          if (key.isPresent()) {
+            return key.get().cipherUtil();
+          } else {
+            throw new CompletionException(
+                new IllegalArgumentException(I18N.getText("Password" + ".publicKeyNotFound")));
+          }
+        });
   }
 
   @Override
@@ -493,25 +512,21 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
 
   /**
    * Adds a player to the database.
+   *
    * @param name The name of the player to add.
    * @param role The role of the player to add.
    * @param password The password for the player.
    * @param publicKeyStrings The public key Strings
    * @param persisted should the player entry be persisted or not.
-   *
    * @throws PasswordDatabaseException if there is a problem added the player
    * @throws NoSuchAlgorithmException If there is an error hashing the password.
    * @throws InvalidKeySpecException If there is an error hashing the password.
    * @throws NoSuchPaddingException If there is an error hashing the password.
    * @throws InvalidKeyException If there is an error hashing the password.
-   * @throws IllegalStateException  If there is an error hashing the password.
+   * @throws IllegalStateException If there is an error hashing the password.
    */
   private void putPlayer(
-      String name,
-      Role role,
-      String password,
-      Set<String> publicKeyStrings,
-      boolean persisted)
+      String name, Role role, String password, Set<String> publicKeyStrings, boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
           NoSuchPaddingException, InvalidKeyException {
     CipherUtil cipherUtil = null;
@@ -519,49 +534,48 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
       cipherUtil = CipherUtil.fromSharedKeyNewSalt(password);
     }
 
-    String pkFilename = derivePublicKeyFilename(name);
-
-    Set<PublicKeyDetails> publicKeyDetails = new HashSet<>();
-    for (String pk : publicKeyStrings) {
-      MD5Key md5Key = new MD5Key(pk.getBytes(StandardCharsets.UTF_8));
-      var pkd = new PublicKeyDetails(pk, md5Key,
-          CipherUtil.fromPublicKeyString(pk),
-          publicKeyFileMap.get(md5Key));
-
-      publicKeyDetails.add(pkd);
-
-      publicKeys.put(md5Key, CipherUtil.fromPublicKeyString(pk));
-      publicKeyFileMap.put(md5Key, pk);
-      var pd = new PlayerDetails(
-          name,
-          role,
-          password != null & password.length() > 0 ?
-              CipherUtil.fromSharedKeyNewSalt(password).getKey() : null,
-          publicKeyDetails,
-          "");
-      dirtyPublicKeys.put(pkd, pd);
-
-      playerDetails.put(pd.name(), pd);
-    }
-
-    PlayerDetails newDetails =
+    Set<PublicKeyDetails> publicKeyDetails = createPublicKeyDetails(publicKeyStrings, name);
+    var pd =
         new PlayerDetails(
             name,
             role,
-            cipherUtil == null ? null : cipherUtil.getKey(),
+            password != null & password.length() > 0
+                ? CipherUtil.fromSharedKeyNewSalt(password).getKey()
+                : null,
             publicKeyDetails,
             "");
+    playerDetails.put(pd.name(), pd);
     if (persisted) {
-      playerDetails.put(name, newDetails);
+      publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
+      dirty.set(true);
+
+      playerDetails.put(name, pd);
       dirty.set(true);
       writePasswordFile();
     } else {
-      transientPlayerDetails.put(name, newDetails);
+      transientPlayerDetails.put(name, pd);
     }
+  }
+
+  private Set<PublicKeyDetails> createPublicKeyDetails(
+      Set<String> publicKeyStrings, String playerName)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          InvalidKeyException {
+    Set<PublicKeyDetails> pkDetails = new HashSet<>();
+
+    for (String pk : publicKeyStrings) {
+      MD5Key md5Key = CipherUtil.publicKeyMD5(pk);
+      String pkFilename = derivePublicKeyFilename(playerName);
+      pkDetails.add(
+          new PublicKeyDetails(pk, md5Key, CipherUtil.fromPublicKeyString(pk), pkFilename));
+    }
+
+    return pkDetails;
   }
 
   /**
    * Returns a file safe filename based on the player name
+   *
    * @param name the name of the player.
    * @return a file safe filename based on the player name
    */
@@ -570,32 +584,26 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
   }
 
   /**
-   * Adds a temporary non persisted player to the database. This is useful for things like
-   * ensuring that the player that created the server is registered and can log in.
+   * Adds a temporary non persisted player to the database. This is useful for things like ensuring
+   * that the player that created the server is registered and can log in.
    *
    * @param name the name of the player to add
    * @param role the role for the player
    * @param password the password for the player
-   *
    * @throws PasswordDatabaseException if there is a problem added the player
    * @throws NoSuchAlgorithmException If there is an error hashing the password.
    * @throws InvalidKeySpecException If there is an error hashing the password.
    * @throws NoSuchPaddingException If there is an error hashing the password.
    * @throws InvalidKeyException If there is an error hashing the password.
-   * @throws IllegalStateException  If there is an error hashing the password.
+   * @throws IllegalStateException If there is an error hashing the password.
    */
-  public void addTemporaryPlayer(
-      String name,
-      Role role,
-      String password
-  )
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
-    putPlayer(name, role, password, Set.of(),false);
+  public void addTemporaryPlayer(String name, Role role, String password)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
+    putPlayer(name, role, password, Set.of(), false);
   }
 
-  /**
-   *  Record containing player details
-   */
+  /** Record containing player details */
   private static record PlayerDetails(
       String name,
       Role role,
@@ -603,14 +611,7 @@ public final class PasswordFilePlayerDatabase<DirtyPublicKeys> implements Player
       Set<PublicKeyDetails> publicKeyDetails,
       String disabledReason) {}
 
-  /**
-   * Record containing the public key information
-   */
+  /** Record containing the public key information */
   private static record PublicKeyDetails(
-      String keyString,
-      MD5Key md5Key,
-      CipherUtil cipherUtil,
-      String filename
-  ) {
-  }
+      String keyString, MD5Key md5Key, CipherUtil cipherUtil, String filename) {}
 }
