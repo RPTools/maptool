@@ -2248,21 +2248,15 @@ public class AppActions {
                             PlayerDatabaseFactory.getCurrentPlayerDatabase();
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
-                      db.putPlayer(
+                      db.addTemporaryPlayer(
                           dialog.getUsernameTextField().getText(),
                           Role.GM,
-                          gmPassword,
-                          Set.of(),
-                          null,
-                          false);
+                          gmPassword);
                     } else {
-                      db.putPlayer(
+                      db.addTemporaryPlayer(
                           dialog.getUsernameTextField().getText(),
                           Role.PLAYER,
-                          playerPassword,
-                          Set.of(),
-                          null,
-                          false);
+                          playerPassword);
                     }
                   } else {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
