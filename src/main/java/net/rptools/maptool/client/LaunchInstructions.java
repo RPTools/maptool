@@ -32,6 +32,10 @@ public class LaunchInstructions {
 
   public static void main(String[] args) {
     try {
+      // This is called just to make sure there's a valid data dir
+      AppUtil.getAppHome();
+      // Initialize the first logger with the correct log path
+      AppUtil.initLogging();
 
       long mem = Runtime.getRuntime().maxMemory();
       String msg = String.format(USAGE, mem / (1024 * 1024));
@@ -50,6 +54,7 @@ public class LaunchInstructions {
     } catch (Exception e) {
       // Shows a proper error message if MapTool can't initialize. Fix #1678.
       JOptionPane.showMessageDialog(new JFrame(), e.getMessage());
+      System.exit(1);
     }
   }
 }

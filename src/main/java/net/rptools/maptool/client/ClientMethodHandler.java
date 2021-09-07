@@ -42,7 +42,6 @@ import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
@@ -53,6 +52,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
@@ -522,6 +522,22 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               if (zone != null) {
                 zone.setName(name);
               }
+              MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+              return;
+
+            case changeZoneDispName:
+              zoneGUID = (GUID) parameters[0];
+              String dispName = (String) parameters[1];
+
+              zone = MapTool.getCampaign().getZone(zoneGUID);
+              if (zone != null) {
+                zone.setPlayerAlias(dispName);
+              }
+              MapTool.getFrame()
+                  .setTitleViaRenderer(
+                      MapTool.getFrame()
+                          .getCurrentZoneRenderer()); // fixes a bug where the display name at the
+              // program title was not updating
               return;
 
             case updateCampaign:

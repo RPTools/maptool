@@ -31,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -44,7 +45,6 @@ import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
 import net.tsc.servicediscovery.AnnouncementListener;
 import net.tsc.servicediscovery.ServiceFinder;
-import org.jdesktop.swingworker.SwingWorker;
 import yasb.Binder;
 
 /** @author trevor */
@@ -144,7 +144,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
                   handleOK();
                 }
-              };
+              }
             });
   }
 
@@ -198,7 +198,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
                       .setText(rem.getModel().getValueAt(rem.getSelectedRow(), 0).toString());
                   if (e.getClickCount() == 2) handleOK();
                 }
-              };
+              }
             });
   }
 

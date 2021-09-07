@@ -21,7 +21,12 @@ import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import org.graalvm.polyglot.*;
 
-public class JSAPIDrawing {
+public class JSAPIDrawing implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return guid.toString();
+  }
+
   @HostAccess.Export public final AbstractDrawing drawing;
 
   @HostAccess.Export public final GUID guid;
@@ -66,12 +71,12 @@ public class JSAPIDrawing {
   }
 
   @HostAccess.Export
-  public static JSList getAllDrawings() {
+  public static ArrayList<Object> getAllDrawings() {
     ArrayList<Object> out = new ArrayList<>();
     for (DrawnElement e :
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getAllDrawnElements()) {
       out.add(new JSAPIDrawing((AbstractDrawing) e.getDrawable()));
     }
-    return new JSList(out);
+    return out;
   }
 }

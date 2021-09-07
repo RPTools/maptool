@@ -14,23 +14,26 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.BasicStroke;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.jetbrains.annotations.NotNull;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
+  private static final GeometryFactory geometryFactory = new GeometryFactory();
+
   private final Point2D origin;
   private final List<AreaFace> faceList = new LinkedList<AreaFace>();
-  private final double EPSILON = 0.01;
 
   private Point2D centerPoint;
-  private Area pathArea;
+  private Geometry boundary = null;
 
   public VisibleAreaSegment(Point2D origin) {
     this.origin = origin;
@@ -45,7 +48,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
   }
 
   public long getDistanceFromOrigin() {
-    // return GeometryUtil.getDistance(getCenterPoint(), origin);
     return (long) (getCenterPoint().distance(origin) * 1000);
   }
 
@@ -55,40 +57,10 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 
   public Point2D getCenterPoint() {
     if (centerPoint == null) {
-      Area path = getPath();
-      Rectangle2D bounds = path.getBounds2D();
-      // Jamz: getCenter points now available from class
-      // centerPoint = new Point2D.Double(bounds.getX() + bounds.getWidth() / 2.0, bounds.getY() +
-      // bounds.getHeight() / 2.0);
-      centerPoint = new Point2D.Double(bounds.getCenterX(), bounds.getCenterY());
+      var center = getBoundingBox().getEnvelopeInternal().centre();
+      centerPoint = new Point2D.Double(center.getX(), center.getY());
     }
     return centerPoint;
-  }
-
-  public Area getPath() {
-    if (pathArea == null) {
-      List<Point2D> pathPoints = new LinkedList<Point2D>();
-
-      for (AreaFace face : faceList) {
-        // Initial point
-        if (pathPoints.size() == 0) {
-          pathPoints.add(face.getP1());
-        }
-        pathPoints.add(face.getP2());
-      }
-      GeneralPath path = null;
-      for (Point2D p : pathPoints) {
-        if (path == null) {
-          path = new GeneralPath();
-          path.moveTo((float) p.getX(), (float) p.getY());
-          continue;
-        }
-        path.lineTo((float) p.getX(), (float) p.getY());
-      }
-      BasicStroke stroke = new BasicStroke(1);
-      pathArea = new Area(stroke.createStrokedShape(path));
-    }
-    return pathArea;
   }
 
   public Area getArea() {
@@ -109,7 +81,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
       pathPoints.add(
           0, GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2));
     }
-    // System.out.println("Skipped: " + skipCount);
 
     GeneralPath path = null;
     for (Point2D p : pathPoints) {
@@ -121,6 +92,62 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
       path.lineTo((float) p.getX(), (float) p.getY());
     }
     return new Area(path);
+  }
+
+  public Geometry getBoundingBox() {
+    if (boundary == null) {
+      boundary = getBoundaryPoints(faceList).getEnvelope();
+    }
+    return boundary;
+  }
+
+  private static Geometry getBoundaryPoints(List<AreaFace> faceList) {
+    if (faceList.isEmpty()) {
+      return geometryFactory.createMultiPoint();
+    }
+    Coordinate[] pathPoints = new Coordinate[1 + faceList.size()];
+    int index = 0;
+    for (AreaFace face : faceList) {
+      // Initial point
+      if (index == 0) {
+        pathPoints[index++] = toCoordinate(face.getP1());
+      }
+      pathPoints[index++] = toCoordinate(face.getP2());
+    }
+    return geometryFactory.createMultiPointFromCoords(pathPoints);
+  }
+
+  public Geometry getGeometry() {
+    if (faceList.isEmpty()) {
+      return geometryFactory.createGeometryCollection();
+    }
+
+    List<Coordinate> pathPoints = new ArrayList<>();
+
+    for (AreaFace face : faceList) {
+      // Initial point
+      if (pathPoints.size() == 0) {
+        pathPoints.add(toCoordinate(face.getP1()));
+        pathPoints.add(
+            0,
+            toCoordinate(
+                GraphicsUtil.getProjectedPoint(origin, face.getP1(), Integer.MAX_VALUE / 2)));
+      }
+      // Add to the path
+      pathPoints.add(toCoordinate(face.getP2()));
+      pathPoints.add(
+          0,
+          toCoordinate(
+              GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2)));
+    }
+    // We need the ring to be closed.
+    pathPoints.add(pathPoints.get(0));
+
+    return geometryFactory.createPolygon(pathPoints.toArray(Coordinate[]::new));
+  }
+
+  private static Coordinate toCoordinate(Point2D point2D) {
+    return new Coordinate(point2D.getX(), point2D.getY());
   }
 
   ////

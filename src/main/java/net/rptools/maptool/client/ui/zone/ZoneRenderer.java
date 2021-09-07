@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -24,52 +25,23 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
-import java.awt.geom.QuadCurve2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TooManyListenersException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-
+import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.DebounceExecutor;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.TransferableHelper;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
@@ -84,39 +56,15 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.AbstractPoint;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.GridCapabilities;
-import net.rptools.maptool.model.IsometricGrid;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.Path;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.TokenShape;
-import net.rptools.maptool.model.TokenFootprint;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableNoise;
-import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.drawing.*;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -285,7 +233,7 @@ public class ZoneRenderer extends JComponent
   public void setAutoResizeStamp(boolean value) {
     this.autoResizeStamp = value;
   }
-  
+
   public Map<GUID, SelectionSet> getSelectionSetMap() { return selectionSetMap; }
 
   public boolean isAutoResizeStamp() {
@@ -2104,7 +2052,7 @@ public class ZoneRenderer extends JComponent
     loadingProgress =
         String.format(
             " Loading Map '%s' - %d/%d Loaded %d/%d Cached",
-            zone.getName(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
+            zone.getPlayerAlias(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
     isLoaded = loaded;
     if (isLoaded) {
       // Notify the token tree that it should update
@@ -2310,13 +2258,14 @@ public class ZoneRenderer extends JComponent
 
         // Show current Blocked Movement directions for A*
         if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
-          Collection<AStarCellPoint> checkPoints = walker.getCheckedPoints();
+          Map<CellPoint, Set<CellPoint>> blockedMovesByTarget = walker.getBlockedMoves();
           // Color currentColor = g.getColor();
-          for (AStarCellPoint acp : checkPoints) {
-            Set<Point2D> validMoves = acp.getValidMoves();
+          for (var entry : blockedMovesByTarget.entrySet()) {
+            var position = entry.getKey();
+            var blockedMoves = entry.getValue();
 
-            for (Point2D point : validMoves) {
-              ZonePoint zp = acp.offsetZonePoint(getZone().getGrid(), point.getX(), point.getY());
+            for (CellPoint point : blockedMoves) {
+              ZonePoint zp = point.midZonePoint(getZone().getGrid(), position);
               double r = (zp.x - 1) * 45;
               showBlockedMoves(g, zp, r, AppStyle.blockMoveImage, 1.0f);
             }
@@ -4910,18 +4859,29 @@ public class ZoneRenderer extends JComponent
       if (evt == Zone.Event.TOKEN_CHANGED
           || evt == Zone.Event.TOKEN_REMOVED
           || evt == Zone.Event.TOKEN_ADDED) {
-        if (event.getArg() instanceof List<?>) {
-          @SuppressWarnings("unchecked")
-          List<Token> list = (List<Token>) (event.getArg());
-          for (Token token : list) {
-            flush(token);
-          }
-        } else {
-          flush((Token) event.getArg());
+        for (Token token : event.getTokensAsList()) {
+          flush(token);
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
         flushFog = true;
+      }
+      if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
+        DrawnElement de = (DrawnElement) event.getArg();
+        switch (de.getDrawable().getLayer()) {
+          case TOKEN:
+            tokenDrawableRenderer.setDirty();
+            break;
+          case GM:
+            gmDrawableRenderer.setDirty();
+            break;
+          case OBJECT:
+            objectDrawableRenderer.setDirty();
+            break;
+          case BACKGROUND:
+            backgroundDrawableRenderer.setDirty();
+            break;
+        }
       }
       MapTool.getFrame().updateTokenTree(); // for any event
       repaintDebouncer.dispatch();

@@ -14,10 +14,10 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import net.rptools.maptool.client.functions.AbortFunction;
-import net.rptools.maptool.client.functions.AssertFunction;
+import java.util.List;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.*;
@@ -25,6 +25,10 @@ import org.graalvm.polyglot.*;
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
 public class JSAPIMTScript implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MTScript";
+  }
 
   @HostAccess.Export
   public Object getVariable(String name) throws ParserException {
@@ -32,26 +36,34 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public void setVariable(String name, Object value) throws ParserException {
+  public void setVariable(String name, Value value) throws ParserException {
     MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
   }
 
   @HostAccess.Export
   public void raiseError(String msg) throws ParserException {
-    throw new ParserException(msg);
+    throw new JavascriptFunctionException(msg);
   }
 
   @HostAccess.Export
   public void abort() throws ParserException {
-    throw new AbortFunction.AbortFunctionException(
+    throw new AbortFunctionException(
         I18N.getText("macro.function.abortFunction.message", "MTScript.abort()"));
   }
 
   @HostAccess.Export
-  public void mtsAssert(boolean check, String message)
-      throws AssertFunction.AssertFunctionException {
+  public void mtsAssert(boolean check, String message) throws AssertFunctionException {
+    mtsAssert(check, message, true);
+  }
+
+  @HostAccess.Export
+  public void mtsAssert(boolean check, String message, boolean padError)
+      throws AssertFunctionException {
     if (!check) {
-      throw new AssertFunction.AssertFunctionException(message);
+      if (padError) {
+        throw new AssertFunctionException(I18N.getText("macro.function.assert.message", message));
+      }
+      throw new AssertFunctionException(message);
     }
   }
 
@@ -71,7 +83,7 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public JSList getMTScriptCallingArgs() {
-    return new JSList(MacroJavaScriptBridge.getInstance().getCallingArgs());
+  public List<Object> getMTScriptCallingArgs() {
+    return MacroJavaScriptBridge.getInstance().getCallingArgs();
   }
 }

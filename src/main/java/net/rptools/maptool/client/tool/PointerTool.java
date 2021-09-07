@@ -32,21 +32,25 @@ import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Player.Role;
+import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -103,6 +107,8 @@ public class PointerTool extends DefaultTool {
   private int dragOffsetY = 0;
   private int dragStartX = 0;
   private int dragStartY = 0;
+
+  private String currentPointerName;
 
   public PointerTool() {
     try {
@@ -1476,9 +1482,115 @@ public class PointerTool extends DefaultTool {
                   renderer.getWidth(),
                   renderer.getHeight());
         }
-        MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
+
+        currentPointerName = getPointerName(type);
+
+        MapTool.serverCommand().showPointer(currentPointerName, pointer);
       }
       isSpaceDown = true;
+    }
+
+    /**
+     * Returns the name to be displayed in the pointer callout.
+     *
+     * <p>If the pointer type is not speech or thought bubble then it will be the player name. For
+     * speech and thought bubble the following logic applies.
+     *
+     * <ul>
+     *   <li>If there is an impersonated token with a speech bubble name
+     *       <ul>
+     *         <li>If there is no token under the mouse; Result = Impersonated Token Speech Name
+     *         <li>If one of the tokens under mouse is the Impersonated token; Result = Impersonated
+     *             Token Speech Name
+     *         <li>If there is single token under the mouse with speech name; Result = Token under
+     *             mouse Speech Name
+     *         <li>If there is a token stack under the mouse and some have speech name; Result = one
+     *             of the tokens in the stack (will be top one if it has speech name)
+     *         <li>Otherwise player name
+     *       </ul>
+     *   <li>If there is no impersonated token, and there is a token under the mouse
+     *       <ul>
+     *         <li>If there is a single token under the mouse with speech name; Result = token under
+     *             mouse speech name
+     *         <li>If there is a token stack under the mouse and one has speech name; Result = one
+     *             of the tokens in the stack (will be top one if it has speech name)
+     *         <li>otherwise player name
+     *       </ul>
+     *   <li>Otherwise Player name
+     * </ul>
+     *
+     * @param type the type of pointer
+     * @return the name to be displayed.
+     */
+    private String getPointerName(Type type) {
+      String playerName = MapTool.getPlayer().getName();
+
+      if (type != Type.SPEECH_BUBBLE && type != Type.THOUGHT_BUBBLE) {
+        return playerName;
+      }
+      boolean isGM = MapTool.getPlayer().isGM();
+      List<Token> tokenStackAt = renderer.getTokenStackAt(mouseX, mouseY);
+      if (tokenStackAt == null) {
+        if (tokenUnderMouse != null) {
+          tokenStackAt = List.of(tokenUnderMouse);
+        } else {
+          tokenStackAt = List.of();
+        }
+      }
+      Set<Token> tokens =
+          tokenStackAt.stream()
+              .filter(t -> isGM || t.isOwner(playerName))
+              .filter(t -> t.getSpeechName() != null && t.getSpeechName().length() > 0)
+              .collect(Collectors.toSet());
+
+      Token pointerToken = null;
+      Token impersonatedToken = null;
+      GUID guid = MapTool.getFrame().getImpersonatePanel().getTokenId();
+      if (guid != null) {
+        // Searches all maps to find impersonated token
+        impersonatedToken = FindTokenFunctions.findToken(guid.toString());
+      }
+      if (impersonatedToken != null) {
+        if (impersonatedToken.getSpeechName() == null
+            || impersonatedToken.getSpeechName().length() == 0) {
+          impersonatedToken = null;
+        }
+      }
+
+      Token tUnder = null;
+      if (tokenUnderMouse != null && (isGM || tokenUnderMouse.isOwner(playerName))) {
+        tUnder = tokenUnderMouse;
+      }
+
+      if (impersonatedToken != null && tUnder == null) {
+        pointerToken = impersonatedToken;
+      } else if (impersonatedToken != null) {
+        if (tokens.contains(impersonatedToken)) {
+          pointerToken = impersonatedToken;
+        } else if (tUnder.getSpeechName() != null && tUnder.getSpeechName().length() > 0) {
+          pointerToken = tUnder;
+        } else if (tokens.size() > 0) {
+          pointerToken = tokens.iterator().next();
+        } else {
+          pointerToken = null;
+        }
+      } else if (tUnder != null) {
+        if (tUnder.getSpeechName() != null && tUnder.getSpeechName().length() > 0) {
+          pointerToken = tokenUnderMouse;
+        } else if (tokens.size() > 0) {
+          pointerToken = tokens.iterator().next();
+        } else {
+          pointerToken = null;
+        }
+      } else {
+        pointerToken = null;
+      }
+
+      if (pointerToken != null) {
+        return pointerToken.getSpeechName();
+      } else {
+        return playerName;
+      }
     }
   }
 
@@ -1499,7 +1611,7 @@ public class PointerTool extends DefaultTool {
     public void actionPerformed(ActionEvent e) {
       if (isShowingPointer) {
         isShowingPointer = false;
-        MapTool.serverCommand().hidePointer(MapTool.getPlayer().getName());
+        MapTool.serverCommand().hidePointer(currentPointerName);
 
         if (MapTool.getPlayer().isGM() & restoreZoneView) {
           MapTool.serverCommand().restoreZoneView(renderer.getZone().getId());

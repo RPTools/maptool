@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
@@ -38,6 +39,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.ZoneFactory;
+import org.apache.commons.io.FilenameUtils;
 
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
@@ -61,6 +63,8 @@ public class DungeonDraftImporter {
   private static final int WALL_VBL_WIDTH = 3;
   /** The width to used for VBL for doors. */
   private static final int DOOR_VBL_WIDTH = 1;
+  /** The width to used for VBL for objects. */
+  private static final int OBJECT_VBL_WIDTH = 1;
 
   /** Stroke to use t create VBL path for walls. */
   private static final BasicStroke WALL_VBL_STROKE =
@@ -69,6 +73,10 @@ public class DungeonDraftImporter {
   /** Stroke to use t create VBL path for doors. */
   private static final BasicStroke DOOR_VBL_STROKE =
       new BasicStroke(DOOR_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+  /** Stroke to use t create VBL path for doors. */
+  private static final BasicStroke OBJECT_VBL_STROKE =
+      new BasicStroke(OBJECT_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
   /** Width of the Light source icon. */
   private static final int LIGHT_WIDTH = 20;
@@ -98,6 +106,8 @@ public class DungeonDraftImporter {
    */
   public void importVTT() throws IOException {
     JsonObject ddvtt;
+    double dd2vtt_format;
+
     try (InputStreamReader reader = new InputStreamReader(new FileInputStream(dungeonDraftFile))) {
       ddvtt = JsonParser.parseReader(reader).getAsJsonObject();
     }
@@ -105,7 +115,8 @@ public class DungeonDraftImporter {
     Zone zone = ZoneFactory.createZone();
 
     // Make sure this is a file format we understand
-    if (ddvtt.get(VTT_FIELD_FORMAT).getAsDouble() != 0.2) {
+    dd2vtt_format = ddvtt.get(VTT_FIELD_FORMAT).getAsDouble();
+    if (dd2vtt_format != 0.2 && dd2vtt_format != 0.3) {
       MapTool.showError("dungeondraft.import.unknownVersion");
       return;
     }
@@ -129,7 +140,9 @@ public class DungeonDraftImporter {
     String imageString = ddvtt.get(VTT_FIELD_IMAGE).getAsString();
 
     byte[] imageBytes = Base64.decode(imageString);
-    Asset asset = new Asset(dungeonDraftFile.getName(), imageBytes);
+    String mapName = FilenameUtils.removeExtension(dungeonDraftFile.getName());
+    Asset asset = new Asset(mapName, imageBytes);
+    zone.setPlayerAlias(mapName);
     AssetManager.putAsset(asset);
     MapPropertiesDialog dialog =
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
@@ -150,6 +163,20 @@ public class DungeonDraftImporter {
             Area vblArea =
                 new Area(
                     WALL_VBL_STROKE.createStrokedShape(
+                        getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
+            zone.addTopology(vblArea, TopologyMode.VBL);
+            zone.addTopology(vblArea, TopologyMode.MBL);
+          });
+    }
+
+    // Handle Objects - added with Dungeondraft 1.0.2.1
+    vbl = ddvtt.getAsJsonArray("objects_line_of_sight");
+    if (vbl != null) {
+      vbl.forEach(
+          v -> {
+            Area vblArea =
+                new Area(
+                    OBJECT_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
             zone.addTopology(vblArea, TopologyMode.VBL);
             zone.addTopology(vblArea, TopologyMode.MBL);
@@ -209,6 +236,21 @@ public class DungeonDraftImporter {
 
         lightToken.setX((int) (position.get("x").getAsDouble() * pixelsPerCell) - LIGHT_WIDTH / 2);
         lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
+
+        JsonObject lightValues = new JsonObject();
+        lightValues.addProperty(
+            "range", ele.getAsJsonObject().getAsJsonPrimitive("range").getAsBigDecimal());
+        lightValues.addProperty(
+            "intensity", ele.getAsJsonObject().getAsJsonPrimitive("intensity").getAsBigDecimal());
+        lightValues.addProperty(
+            "color", ele.getAsJsonObject().getAsJsonPrimitive("color").getAsString());
+        lightValues.addProperty(
+            "shadows",
+            ele.getAsJsonObject().getAsJsonPrimitive("shadows").getAsBoolean()
+                ? BigDecimal.ONE
+                : BigDecimal.ZERO);
+        lightToken.setGMNotes(lightValues.toString());
+
         zone.putToken(lightToken);
         lightNo++;
       } else {
