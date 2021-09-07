@@ -275,7 +275,8 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
 
       // First get all the public keys files with a public key marked dirty
       Set<PublicKeyDetails> playerDirtyKeys =
-          publicKeyDetails.stream().filter(dirtyPublicKeys::containsKey)
+          publicKeyDetails.stream()
+              .filter(dirtyPublicKeys::containsKey)
               .collect(Collectors.toSet());
 
       if (playerDirtyKeys.size() == 0) {
@@ -288,8 +289,8 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
       // Backup they key file and overwrite
       for (String filename : dirtyFiles) {
         Path pkFile = passwordFile.getParentFile().toPath().resolve(filename);
-        Path pkFileBackup = passwordFile.getParentFile().toPath().resolve("backup")
-            .resolve(filename);
+        Path pkFileBackup =
+            passwordFile.getParentFile().toPath().resolve("backup").resolve(filename);
         Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
 
         Set<PublicKeyDetails> keysInFile =

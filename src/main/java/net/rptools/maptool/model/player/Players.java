@@ -33,9 +33,7 @@ import org.apache.logging.log4j.Logger;
 /** Class for interacting with players and player information. */
 public class Players {
 
-  /**
-   * Return statuses possible when attempting to add a player.
-   */
+  /** Return statuses possible when attempting to add a player. */
   public enum AddPlayerStatus {
     OK,
     ERROR,
@@ -206,10 +204,10 @@ public class Players {
 
   /**
    * Adds a player to the current player database,
+   *
    * @param name The name of the player to add.
    * @param role The role for the player.
    * @param password the password for the player
-   *
    * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
   public AddPlayerStatus addPlayerWithPassword(String name, Role role, String password) {
@@ -223,8 +221,11 @@ public class Players {
       try {
         playerDb.addPlayerSharedPassword(name, role, password);
         return AddPlayerStatus.OK;
-      } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException |
-          NoSuchPaddingException | InvalidKeyException e) {
+      } catch (NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | PasswordDatabaseException
+          | NoSuchPaddingException
+          | InvalidKeyException e) {
         log.error(e);
         MapTool.showError(I18N.getText("msg.error.playerDB.errorAdding", name), e);
         return AddPlayerStatus.ERROR;
@@ -237,10 +238,10 @@ public class Players {
 
   /**
    * Adds a player to the current player database,
+   *
    * @param name The name of the player to add.
    * @param role The role for the player.
    * @param publicKeyString the public key string for the player.
-   *
    * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
   public AddPlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
@@ -254,8 +255,11 @@ public class Players {
       try {
         playerDb.addPlayerAsymmetricKey(name, role, Set.of(publicKeyString));
         return AddPlayerStatus.OK;
-      } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException |
-          NoSuchPaddingException | InvalidKeyException e) {
+      } catch (NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | PasswordDatabaseException
+          | NoSuchPaddingException
+          | InvalidKeyException e) {
         log.error(e);
         MapTool.showError(I18N.getText("msg.error.playerDB.cantAddPlayerPublicKey", name), e);
         return AddPlayerStatus.ERROR;
@@ -265,6 +269,4 @@ public class Players {
       return AddPlayerStatus.NOT_SUPPORTED;
     }
   }
-
-
 }
