@@ -48,6 +48,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
@@ -74,6 +75,8 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
   private final Map<PublicKeyDetails, PlayerDetails> dirtyPublicKeys = new ConcurrentHashMap<>();
+
+  private final ReentrantLock passwordFileLock = new ReentrantLock();
 
   public PasswordFilePlayerDatabase(File passwordFile)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -105,15 +108,21 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   public void readPasswordFile()
       throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
           NoSuchPaddingException, InvalidKeyException {
-    playerDetails.clear();
-    if (this.passwordFile.exists()) {
-      playerDetails.putAll(readPasswordFile(this.passwordFile));
+
+    try {
+      passwordFileLock.lock();
+      playerDetails.clear();
+      if (this.passwordFile.exists()) {
+        playerDetails.putAll(readPasswordFile(this.passwordFile));
+      }
+      if (additionalUsers != null && additionalUsers.exists()) {
+        playerDetails.putAll(readPasswordFile(additionalUsers));
+        additionalUsers.delete();
+      }
+      writePasswordFile(); // Write out the password file if there were any passwords generated
+    } finally {
+      passwordFileLock.unlock();
     }
-    if (additionalUsers != null && additionalUsers.exists()) {
-      playerDetails.putAll(readPasswordFile(additionalUsers));
-      additionalUsers.delete();
-    }
-    writePasswordFile(); // Write out the password file if there were any passwords generated
   }
 
   public void initialize()
@@ -127,159 +136,178 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
       throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
           NoSuchPaddingException, InvalidKeyException {
 
-    Map<String, PlayerDetails> players = new HashMap<>();
+    try {
+      passwordFileLock.lock();
 
-    try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file))) {
-      JsonObject passwordsJson;
-      try {
-        passwordsJson = JsonParser.parseReader(reader).getAsJsonObject();
-      } catch (Exception e) {
-        String msg = I18N.getText("msg.error.passFile.errorInJson");
-        log.error(msg, e);
-        throw new PasswordDatabaseException(msg, e);
-      }
+      Map<String, PlayerDetails> players = new HashMap<>();
 
-      if (!passwordsJson.has("passwords")) {
-        String msg = I18N.getText("msg.error.passFile.missingPasswordsField");
-        log.error(msg);
-        throw new PasswordDatabaseException(msg);
-      }
-      JsonArray passwords = passwordsJson.get("passwords").getAsJsonArray();
-      for (JsonElement entry : passwords) {
-        JsonObject passwordEntry = entry.getAsJsonObject();
-        String name = passwordEntry.get("username").getAsString();
-        String passwordString = null;
-        if (passwordEntry.has("password")) {
-          passwordString = passwordEntry.get("password").getAsString();
+      try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file))) {
+        JsonObject passwordsJson;
+        try {
+          passwordsJson = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (Exception e) {
+          String msg = I18N.getText("msg.error.passFile.errorInJson");
+          log.error(msg, e);
+          throw new PasswordDatabaseException(msg, e);
         }
 
-        Role role = Role.valueOf(passwordEntry.get("role").getAsString().toUpperCase());
+        if (!passwordsJson.has("passwords")) {
+          String msg = I18N.getText("msg.error.passFile.missingPasswordsField");
+          log.error(msg);
+          throw new PasswordDatabaseException(msg);
+        }
+        JsonArray passwords = passwordsJson.get("passwords").getAsJsonArray();
+        for (JsonElement entry : passwords) {
+          JsonObject passwordEntry = entry.getAsJsonObject();
+          String name = passwordEntry.get("username").getAsString();
+          String passwordString = null;
+          if (passwordEntry.has("password")) {
+            passwordString = passwordEntry.get("password").getAsString();
+          }
 
-        CipherUtil.Key passwordKey = null;
-        String publicKeyFile = null;
-        Set<PublicKeyDetails> publicKeyDetails = new HashSet<>();
-        if (passwordString != null && passwordEntry.has("salt")) {
-          SecretKeySpec password = CipherUtil.decodeBase64(passwordString);
-          byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
-          passwordKey = new CipherUtil.Key(password, salt);
-        } else if (passwordString != null) {
-          CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(passwordString);
-          passwordKey = cipherUtil.getKey();
-          dirty.set(true);
-        } else if (passwordEntry.has("publicKeys")) {
-          JsonArray pkeys = passwordEntry.get("publicKeys").getAsJsonArray();
-          Path publicKeyDir = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR);
-          for (JsonElement je : pkeys) {
-            publicKeyFile = je.getAsString();
-            String pkString =
-                String.join("\n", Files.readAllLines(publicKeyDir.resolve(publicKeyFile)));
+          Role role = Role.valueOf(passwordEntry.get("role").getAsString().toUpperCase());
 
-            for (String pk : CipherUtil.splitPublicKeys(pkString)) {
-              MD5Key md5Key = CipherUtil.publicKeyMD5(pk);
-              publicKeyDetails.add(
-                  new PublicKeyDetails(
-                      pk, md5Key, CipherUtil.fromPublicKeyString(pk), publicKeyFile));
+          CipherUtil.Key passwordKey = null;
+          String publicKeyFile = null;
+          Set<PublicKeyDetails> publicKeyDetails = new HashSet<>();
+          if (passwordString != null && passwordEntry.has("salt")) {
+            SecretKeySpec password = CipherUtil.decodeBase64(passwordString);
+            byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
+            passwordKey = new CipherUtil.Key(password, salt);
+          } else if (passwordString != null) {
+            CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(passwordString);
+            passwordKey = cipherUtil.getKey();
+            dirty.set(true);
+          } else if (passwordEntry.has("publicKeys")) {
+            JsonArray pkeys = passwordEntry.get("publicKeys").getAsJsonArray();
+            Path publicKeyDir = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR);
+            for (JsonElement je : pkeys) {
+              publicKeyFile = je.getAsString();
+              String pkString =
+                  String.join("\n", Files.readAllLines(publicKeyDir.resolve(publicKeyFile)));
+
+              for (String pk : CipherUtil.splitPublicKeys(pkString)) {
+                MD5Key md5Key = CipherUtil.publicKeyMD5(pk);
+                publicKeyDetails.add(
+                    new PublicKeyDetails(
+                        pk, md5Key, CipherUtil.fromPublicKeyString(pk), publicKeyFile));
+              }
             }
           }
-        }
 
-        String disabledReason = "";
-        if (passwordEntry.has("disabled")) {
-          disabledReason = passwordEntry.get("disabled").getAsString();
-        }
+          String disabledReason = "";
+          if (passwordEntry.has("disabled")) {
+            disabledReason = passwordEntry.get("disabled").getAsString();
+          }
 
-        players.put(
-            name, new PlayerDetails(name, role, passwordKey, publicKeyDetails, disabledReason));
+          players.put(
+              name, new PlayerDetails(name, role, passwordKey, publicKeyDetails, disabledReason));
+        }
+        return players;
+      } catch (IOException ioe) {
+        throw new PasswordDatabaseException("msg.err.passFile.errorReadingFile", ioe);
       }
-      return players;
-    } catch (IOException ioe) {
-      throw new PasswordDatabaseException("msg.err.passFile.errorReadingFile", ioe);
+    } finally {
+      passwordFileLock.unlock();
     }
   }
 
   private void writePasswordFile() throws PasswordDatabaseException {
 
-    if (dirty.compareAndSet(true, false)) {
+    try {
+      passwordFileLock.lock();
 
-      try {
-        Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(), REPLACE_EXISTING);
-      } catch (IOException ioe) {
-        String msg = I18N.getText("msg.err.passFile.errorCopyingBackup");
-        log.error(msg, ioe);
-        throw new PasswordDatabaseException(msg, ioe);
-      }
+      if (dirty.compareAndSet(true, false)) {
 
-      JsonObject passwordDetails = new JsonObject();
-      JsonArray passwords = new JsonArray();
-      passwordDetails.add("passwords", passwords);
-      for (Entry<String, PlayerDetails> entry : playerDetails.entrySet()) {
-        String k = entry.getKey();
-        PlayerDetails v = entry.getValue();
-        JsonObject pwObject = new JsonObject();
-        pwObject.addProperty("username", v.name());
-        if (v.publicKeyDetails() != null && v.publicKeyDetails.size() > 0) {
-          try {
-            writePublicKeys(v);
-          } catch (IOException e) {
-            throw new PasswordDatabaseException(I18N.getText("Password.publicKeyWriteFailed"));
-          }
-
-          JsonArray pubKeysArray = new JsonArray();
-          v.publicKeyDetails.stream().map(PublicKeyDetails::filename).forEach(pubKeysArray::add);
-          pwObject.add("publicKeys", pubKeysArray);
-        } else {
-          pwObject.addProperty("password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
-          pwObject.addProperty(
-              "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
+        try {
+          Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(), REPLACE_EXISTING);
+        } catch (IOException ioe) {
+          String msg = I18N.getText("msg.err.passFile.errorCopyingBackup");
+          log.error(msg, ioe);
+          throw new PasswordDatabaseException(msg, ioe);
         }
-        pwObject.addProperty("role", v.role().toString());
-        passwords.add(pwObject);
-      }
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-      try (FileWriter writer = new FileWriter(passwordFile)) {
-        gson.toJson(passwordDetails, writer);
-      } catch (IOException ioe) {
-        String msg = I18N.getText("msg.err.passFile.errorWritingFile");
-        log.error(msg, ioe);
-        throw new PasswordDatabaseException(msg, ioe);
+        JsonObject passwordDetails = new JsonObject();
+        JsonArray passwords = new JsonArray();
+        passwordDetails.add("passwords", passwords);
+        for (Entry<String, PlayerDetails> entry : playerDetails.entrySet()) {
+          String k = entry.getKey();
+          PlayerDetails v = entry.getValue();
+          JsonObject pwObject = new JsonObject();
+          pwObject.addProperty("username", v.name());
+          if (v.publicKeyDetails() != null && v.publicKeyDetails.size() > 0) {
+            try {
+              writePublicKeys(v);
+            } catch (IOException e) {
+              throw new PasswordDatabaseException(I18N.getText("Password.publicKeyWriteFailed"));
+            }
+
+            JsonArray pubKeysArray = new JsonArray();
+            v.publicKeyDetails.stream().map(PublicKeyDetails::filename).forEach(pubKeysArray::add);
+            pwObject.add("publicKeys", pubKeysArray);
+          } else {
+            pwObject.addProperty("password", CipherUtil.encodeBase64(v.password().secretKeySpec()));
+            pwObject.addProperty(
+                "salt", Base64.getEncoder().withoutPadding().encodeToString(v.password.salt()));
+          }
+          pwObject.addProperty("role", v.role().toString());
+          passwords.add(pwObject);
+        }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        try (FileWriter writer = new FileWriter(passwordFile)) {
+          gson.toJson(passwordDetails, writer);
+        } catch (IOException ioe) {
+          String msg = I18N.getText("msg.err.passFile.errorWritingFile");
+          log.error(msg, ioe);
+          throw new PasswordDatabaseException(msg, ioe);
+        }
       }
+    } finally {
+      passwordFileLock.unlock();
     }
   }
 
   private void writePublicKeys(PlayerDetails playerDetails) throws IOException {
-    Set<PublicKeyDetails> publicKeyDetails = playerDetails.publicKeyDetails();
+    try {
+      passwordFileLock.lock();
+      Set<PublicKeyDetails> publicKeyDetails = playerDetails.publicKeyDetails();
 
-    // First get all the public keys files with a public key marked dirty
-    Set<PublicKeyDetails> playerDirtyKeys =
-        publicKeyDetails.stream().filter(dirtyPublicKeys::containsKey).collect(Collectors.toSet());
-
-    if (playerDirtyKeys.size() == 0) {
-      return; // Nothing to do here
-    }
-
-    Set<String> dirtyFiles =
-        playerDirtyKeys.stream().map(PublicKeyDetails::filename).collect(Collectors.toSet());
-
-    // Backup they key file and overwrite
-    for (String filename : dirtyFiles) {
-      Path pkFile = passwordFile.getParentFile().toPath().resolve(filename);
-      Path pkFileBackup = passwordFile.getParentFile().toPath().resolve("backup").resolve(filename);
-      Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
-
-      Set<PublicKeyDetails> keysInFile =
-          publicKeyDetails.stream()
-              .filter(pkd -> pkd.filename().equals(filename))
+      // First get all the public keys files with a public key marked dirty
+      Set<PublicKeyDetails> playerDirtyKeys =
+          publicKeyDetails.stream().filter(dirtyPublicKeys::containsKey)
               .collect(Collectors.toSet());
 
-      keysInFile.forEach(k -> dirtyPublicKeys.remove(k));
+      if (playerDirtyKeys.size() == 0) {
+        return; // Nothing to do here
+      }
 
-      String fileKeys =
-          publicKeyDetails.stream()
-              .filter(pkd -> pkd.filename().equals(filename))
-              .map(PublicKeyDetails::keyString)
-              .collect(Collectors.joining("\n"));
-      Files.writeString(pkFile, fileKeys, CREATE, TRUNCATE_EXISTING);
+      Set<String> dirtyFiles =
+          playerDirtyKeys.stream().map(PublicKeyDetails::filename).collect(Collectors.toSet());
+
+      // Backup they key file and overwrite
+      for (String filename : dirtyFiles) {
+        Path pkFile = passwordFile.getParentFile().toPath().resolve(filename);
+        Path pkFileBackup = passwordFile.getParentFile().toPath().resolve("backup")
+            .resolve(filename);
+        Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
+
+        Set<PublicKeyDetails> keysInFile =
+            publicKeyDetails.stream()
+                .filter(pkd -> pkd.filename().equals(filename))
+                .collect(Collectors.toSet());
+
+        keysInFile.forEach(k -> dirtyPublicKeys.remove(k));
+
+        String fileKeys =
+            publicKeyDetails.stream()
+                .filter(pkd -> pkd.filename().equals(filename))
+                .map(PublicKeyDetails::keyString)
+                .collect(Collectors.joining("\n"));
+        Files.writeString(pkFile, fileKeys, CREATE, TRUNCATE_EXISTING);
+      }
+    } finally {
+      passwordFileLock.unlock();
     }
   }
 
@@ -438,8 +466,22 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   public void addAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
+    if (!playerExists(name)) {
+      throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
+    }
 
-    // TODO: CDW here
+    var pd = getPlayerDetails(name);
+    Set<PublicKeyDetails> pKeys = pd.publicKeyDetails();
+
+    Set<PublicKeyDetails> newKeys = createPublicKeyDetails(keys, name);
+
+    pKeys.addAll(newKeys);
+
+    var newpd = new PlayerDetails(pd.name(), pd.role(), null, pKeys, pd.disabledReason());
+    newKeys.forEach(p -> dirtyPublicKeys.put(p, newpd));
+    playerDetails.put(newpd.name(), newpd);
+    dirty.set(true);
+    writePasswordFile();
   }
 
   @Override

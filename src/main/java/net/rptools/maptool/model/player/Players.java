@@ -14,12 +14,17 @@
  */
 package net.rptools.maptool.model.player;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +32,16 @@ import org.apache.logging.log4j.Logger;
 
 /** Class for interacting with players and player information. */
 public class Players {
+
+  /**
+   * Return statuses possible when attempting to add a player.
+   */
+  public enum AddPlayerStatus {
+    OK,
+    ERROR,
+    PLAYER_EXISTS,
+    NOT_SUPPORTED
+  }
 
   /** Instance for logging messages. */
   private static final Logger log = LogManager.getLogger(Players.class);
@@ -189,10 +204,67 @@ public class Players {
     return PlayerDatabaseFactory.getCurrentPlayerDatabase().supportsAsymmetricalKeys();
   }
 
-  public boolean addPlayer(PlayerInfo playerInfo) {
-    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+  /**
+   * Adds a player to the current player database,
+   * @param name The name of the player to add.
+   * @param role The role for the player.
+   * @param password the password for the player
+   *
+   * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public AddPlayerStatus addPlayerWithPassword(String name, Role role, String password) {
+    if (!supportsPerPlayerPasswords()) {
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      return AddPlayerStatus.NOT_SUPPORTED;
+    }
 
-    // TODO CDW: here
-    return false;
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      try {
+        playerDb.addPlayerSharedPassword(name, role, password);
+        return AddPlayerStatus.OK;
+      } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException |
+          NoSuchPaddingException | InvalidKeyException e) {
+        log.error(e);
+        MapTool.showError(I18N.getText("msg.error.playerDB.errorAdding", name), e);
+        return AddPlayerStatus.ERROR;
+      }
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      return AddPlayerStatus.NOT_SUPPORTED;
+    }
   }
+
+  /**
+   * Adds a player to the current player database,
+   * @param name The name of the player to add.
+   * @param role The role for the player.
+   * @param publicKeyString the public key string for the player.
+   *
+   * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public AddPlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
+    if (!supportsAsymmetricKeys()) {
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      return AddPlayerStatus.NOT_SUPPORTED;
+    }
+
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      try {
+        playerDb.addPlayerAsymmetricKey(name, role, Set.of(publicKeyString));
+        return AddPlayerStatus.OK;
+      } catch (NoSuchAlgorithmException | InvalidKeySpecException | PasswordDatabaseException |
+          NoSuchPaddingException | InvalidKeyException e) {
+        log.error(e);
+        MapTool.showError(I18N.getText("msg.error.playerDB.cantAddPlayerPublicKey", name), e);
+        return AddPlayerStatus.ERROR;
+      }
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      return AddPlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+
 }
