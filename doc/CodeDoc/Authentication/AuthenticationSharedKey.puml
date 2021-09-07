@@ -1,0 +1,39 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+Client -> Server: ClientInitMsg
+Server -> Server: Lookup Player from ClientInitMsg and\nretrieve password salt
+Server -> Server: Create HandshakeChallenge\nPlayer Password
+note right
+ If using player database
+ with known players and player
+ is GM then a new random
+ password is used so this
+ could never be decrypted
+end note
+Server -> Server: Create HandshakeChallenge\nGM Password
+note right
+ If using player database
+ with known players and player
+ is not GM then a new random
+ password is used so this
+ could never be decrypted
+end note
+Server -> Client: Send UseAuthTypeMsg
+note right
+    auth_type = SHARED_PASSWORD
+    salt = retrieved password salt
+    challenge[0] = HandshakeChallenge.challenge (gm)
+    challenge[1] = HandshakeChallenge.challenge (player)
+end note
+Client -> Client: Hash password with\nPBKDF2WithHmacSHA1\nusing salt sent by Server
+Client -> Client: Try decrypt both challenges
+Client -> Client: Encrypt HandshakeChallenge.response
+Client -> Server: Send ClientAuthMsg
+note right
+   challenge_response = Encrypted HandshakeChallenge.response
+end note
+Server -> Server: Compare client challenge response to\npreencrypted challenge response on server\nside to determine which password was used
+Server -> Client: Send ConnectionSuccessfulMsg
+@enduml

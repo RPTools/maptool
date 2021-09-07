@@ -394,9 +394,9 @@ public class AppMenuBar extends JMenuBar {
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
 
-    // Jamz: Box2d Testing...
-    // menu.addSeparator();
-    // menu.add(new JMenuItem(AppActions.SHOW_BOX2D_TEST));
+    JCheckBoxMenuItem item = new RPCheckBoxMenuItem(AppActions.TOGGLE_WEBRTC, menu);
+    item.setSelected(AppState.useWebRTC());
+    menu.add(item);
 
     if (!AppUtil.MAC_OS_X) {
       menu.addSeparator();

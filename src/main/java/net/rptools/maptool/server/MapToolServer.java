@@ -63,18 +63,17 @@ public class MapToolServer {
 
   public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
       throws IOException {
+    this.config = config;
+    this.policy = policy;
     handler = new ServerMethodHandler(this);
     playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, config.getPort(), playerDatabase);
+    conn = new MapToolServerConnection(this, playerDatabase);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
 
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
-
-    this.config = config;
-    this.policy = policy;
 
     // Start a heartbeat if requested
     if (config.isServerRegistered()) {
@@ -105,11 +104,7 @@ public class MapToolServer {
   public void releaseClientConnection(String id) {
     ClientConnection connection = getClientConnection(id);
     if (connection != null) {
-      try {
-        connection.close();
-      } catch (IOException e) {
-        log.error("Could not release connection: " + id, e);
-      }
+      connection.close();
     }
     assetManagerMap.remove(id);
     connectionMap.remove(id);
@@ -171,21 +166,20 @@ public class MapToolServer {
   }
 
   public void stop() {
-    try {
-      conn.close();
-      if (heartbeatThread != null) {
-        heartbeatThread.shutdown();
-      }
-      if (assetProducerThread != null) {
-        assetProducerThread.shutdown();
-      }
-    } catch (IOException e) {
-      // Not too concerned about this
-      log.info("Couldn't close connection", e);
+    conn.close();
+    if (heartbeatThread != null) {
+      heartbeatThread.shutdown();
+    }
+    if (assetProducerThread != null) {
+      assetProducerThread.shutdown();
     }
   }
 
   private static final Random random = new Random();
+
+  public void start() throws IOException {
+    conn.open();
+  }
 
   private class HeartbeatThread extends Thread {
     private boolean stop = false;
@@ -269,6 +263,10 @@ public class MapToolServer {
   // CLASSES
   private class AssetProducerThread extends Thread {
     private boolean stop = false;
+
+    public AssetProducerThread() {
+      setName("AssetProducerThread");
+    }
 
     @Override
     public void run() {
