@@ -31,12 +31,11 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import net.rptools.lib.CodeTimer;
@@ -45,6 +44,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaOcean;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
 import net.rptools.maptool.client.ui.zone.vbl.VisibleAreaSegment;
+import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
@@ -57,6 +57,11 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.player.Player.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
@@ -93,44 +98,43 @@ public class FogUtil {
         new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
     Collections.sort(segmentList);
 
-    List<Area> clearedAreaList = new LinkedList<>();
+    List<PreparedGeometry> clearedAreaList = new ArrayList<>();
     nextSegment:
     for (VisibleAreaSegment segment : segmentList) {
-      Rectangle r = segment.getPath().getBounds();
-      for (Area clearedArea : clearedAreaList) {
-        if (clearedArea.contains(r)) {
+      Geometry boundingBox = segment.getBoundingBox();
+      for (var clearedArea : clearedAreaList) {
+        if (clearedArea.contains(boundingBox)) {
           skippedAreas++;
           continue nextSegment;
         }
       }
-      Area area = segment.getArea();
+      var area = segment.getGeometry();
 
       timer.start("combine");
-      Area intersectedArea = null;
-      for (ListIterator<Area> iter = clearedAreaList.listIterator(); iter.hasNext(); ) {
-        Area clearedArea = iter.next();
-        if (clearedArea.intersects(r)) {
-          clearedArea.add(area);
+      Geometry intersectedArea = area;
+      for (var iter = clearedAreaList.listIterator(); iter.hasNext(); ) {
+        var clearedArea = iter.next();
+        if (clearedArea.intersects(boundingBox)) {
+          intersectedArea = clearedArea.getGeometry().union(area);
           iter.remove(); // we'll put it on the back of the list to prevent crazy growth at the
           // front
-          intersectedArea = clearedArea;
           break;
         }
       }
       timer.stop("combine");
-      clearedAreaList.add(intersectedArea != null ? intersectedArea : area);
+
+      clearedAreaList.add(PreparedGeometryFactory.prepare(intersectedArea));
     }
 
-    while (clearedAreaList.size() > 1) {
-      Area a1 = clearedAreaList.remove(0);
-      Area a2 = clearedAreaList.remove(0);
+    if (!clearedAreaList.isEmpty()) {
+      List<Geometry> plainGeometries =
+          clearedAreaList.stream().map(PreparedGeometry::getGeometry).toList();
+      var totalClearedArea = new UnaryUnionOp(plainGeometries).union();
 
-      a1.add(a2);
-      clearedAreaList.add(a1);
-    }
-
-    if (clearedAreaList.size() > 0) {
-      vision.subtract(clearedAreaList.get(0));
+      // Convert back to AWT area to modify vision.
+      var shapeWriter = new ShapeWriter();
+      var area = new Area(shapeWriter.toShape(totalClearedArea));
+      vision.subtract(area);
     }
 
     // For simplicity, this catches some of the edge cases
@@ -356,53 +360,50 @@ public class FogUtil {
       final Token token = zone.getToken(tokenGUID);
       timer.start("exposeLastPath-" + token.getName());
 
-      @SuppressWarnings("unchecked")
-      Path<CellPoint> lastPath = (Path<CellPoint>) token.getLastPath();
+      Path<? extends AbstractPoint> lastPath = token.getLastPath();
 
       if (lastPath == null) return;
 
       Map<GUID, ExposedAreaMetaData> fullMeta = zone.getExposedAreaMetaData();
       GUID exposedGUID = token.getExposedAreaGUID();
-      ExposedAreaMetaData meta = fullMeta.get(exposedGUID);
+      final ExposedAreaMetaData meta =
+          fullMeta.computeIfAbsent(exposedGUID, guid -> new ExposedAreaMetaData());
 
-      if (meta == null) {
-        meta = new ExposedAreaMetaData();
-        fullMeta.put(exposedGUID, meta);
-      }
-
-      /*
-       * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't, not in the context of a snapped to grid follower following an unsnapped key
-       * token. Commenting out and replacing... for (CellPoint cell : lastPath.getCellPath()) {
-       */
-      final ExposedAreaMetaData metaCopy = meta;
       final Token tokenClone = new Token(token);
       final ZoneView zoneView = renderer.getZoneView();
       Area visionArea = new Area();
 
       // Lee: get path according to zone's way point exposure toggle...
-      List<CellPoint> processPath =
+      List<? extends AbstractPoint> processPath =
           zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
 
       int stepCount = processPath.size();
       log.debug("Path size = " + stepCount);
 
-      for (final Object cell : processPath) {
-        if (cell instanceof CellPoint) {
-          // timer.start("expose" + cell.toString());
-          ZonePoint zp = grid.convert((CellPoint) cell);
-          tokenClone.setX(zp.x);
-          tokenClone.setY(zp.y);
-          metaCopy.addToExposedAreaHistory(zoneView.getVisibleArea(tokenClone));
-          // zoneView.flush(tokenClone);
-          // timer.start("expose" + cell.toString());
-        }
+      Consumer<ZonePoint> revealAt =
+          zp -> {
+            tokenClone.setX(zp.x);
+            tokenClone.setY(zp.y);
 
-        Area currVisionArea = zoneView.getVisibleArea(tokenClone);
-        if (currVisionArea != null) {
-          visionArea.add(currVisionArea);
-          meta.addToExposedAreaHistory(currVisionArea);
+            Area currVisionArea = zoneView.getVisibleArea(tokenClone);
+            if (currVisionArea != null) {
+              visionArea.add(currVisionArea);
+              meta.addToExposedAreaHistory(currVisionArea);
+            }
+
+            zoneView.flush(tokenClone);
+          };
+      if (token.isSnapToGrid()) {
+        // For each cell point along the path, reveal FoW.
+        for (final AbstractPoint cell : processPath) {
+          assert cell instanceof CellPoint;
+          revealAt.accept(grid.convert((CellPoint) cell));
         }
-        zoneView.flush(tokenClone);
+      } else {
+        // Only reveal the final position.
+        final AbstractPoint finalCell = processPath.get(processPath.size() - 1);
+        assert finalCell instanceof ZonePoint;
+        revealAt.accept((ZonePoint) finalCell);
       }
 
       timer.stop("exposeLastPath-" + token.getName());
@@ -412,7 +413,7 @@ public class FogUtil {
       filteredToks.add(token.getId());
       zone.putToken(token);
       MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
-      MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, metaCopy);
+      MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
     }
 
     String results = timer.toString();

@@ -252,7 +252,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       return;
     }
 
-    if (!MapTool.isDevelopment() && MapTool.getVersion().equals(clientInitMsg.getVersion())) {
+    if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(clientInitMsg.getVersion())) {
       errorMessage = I18N.getText("Handshake.msg.wrongVersion");
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.WRONG_VERSION);
     }
