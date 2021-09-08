@@ -51,8 +51,6 @@ import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.PositionalLayout;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.box2d.Gears;
-import net.rptools.maptool.box2d.HelloWorld;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.swing.*;
@@ -200,11 +198,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private ChatTypingNotification chatTypingPanel;
   private Timer chatTimer;
   private long chatNotifyDuration;
-  private final ChatNotificationTimers chatTyperTimers;
-  private final ChatTyperObserver chatTyperObserver;
   private GUID PreRemoveRenderGUID = null;
 
-  private final GlassPane glassPane;
   /** Model for the token tree panel of the map explorer. */
   private TokenPanelTreeModel tokenPanelTreeModel;
   private DrawPanelTreeModel drawPanelTreeModel;
@@ -366,8 +361,6 @@ public class MapToolFrame extends DefaultDockableHolder
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
   }
 
-  private final Animator animator = new Animator();
-  final Gears gears = new Gears();
   private void initGdx() {
     joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
     //gdxPanel = new GLJPanel();
@@ -1388,12 +1381,6 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneMiniMapPanel.repaint();
   }
 
-  public void clearZoneRendererList() {
-    zoneRendererList.clear();
-    zoneMiniMapPanel.flush();
-    zoneMiniMapPanel.repaint();
-  }
-
   /** Stop the drag of the token, if any is being dragged. */
   private void stopTokenDrag() {
     Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -1455,58 +1442,10 @@ public class MapToolFrame extends DefaultDockableHolder
     getZoomStatusBar().update();
   }
 
-  /**
-   * @return the HTML Overlay Panel
-   */
-  public HTMLOverlayPanel getOverlayPanel() {
-    return overlayPanel;
-  }
-
-  public void addZoneRenderer(ZoneRenderer renderer) {
-    zoneRendererList.add(renderer);
-  }
-
-  /**
-   * Remove the ZoneRenderer. If it's the current ZoneRenderer, set a new current ZoneRenderer.
-   * Flush zoneMiniMapPanel.
-   *
-   * @param renderer the ZoneRenderer to remove.
-   */
-  public void removeZoneRenderer(ZoneRenderer renderer) {
-    boolean isCurrent = renderer == getCurrentZoneRenderer();
-    zoneRendererList.remove(renderer);
-    if (isCurrent) {
-      boolean rendererSet = false;
-      for (ZoneRenderer currRenderer : zoneRendererList) {
-        if (MapTool.getPlayer().isGM() || currRenderer.getZone().isVisible()) {
-          setCurrentZoneRenderer(currRenderer);
-          rendererSet = true;
-          break;
-        }
-      }
-      if (!rendererSet) {
-        setCurrentZoneRenderer(null);
-      }
-    }
-    zoneMiniMapPanel.flush();
-    zoneMiniMapPanel.repaint();
-  }
-
   public void clearZoneRendererList() {
     zoneRendererList.clear();
     zoneMiniMapPanel.flush();
     zoneMiniMapPanel.repaint();
-  }
-
-  /**
-   * Stop the drag of the token, if any is being dragged.
-   */
-  private void stopTokenDrag() {
-    Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
-    if (tool instanceof PointerTool) {
-      PointerTool pointer = (PointerTool) tool;
-      if (pointer.isDraggingToken()) pointer.stopTokenDrag();
-    }
   }
 
   /**

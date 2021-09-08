@@ -415,11 +415,11 @@ public class TransferableHelper extends TransferHandler {
           // Get the MediaType so we can use it when creating the Asset later
           MediaType mediaType = getFileMediaType(url);
 
-          if (!checkValidType(mediaType)) {
+         /* if (!checkValidType(mediaType)) {
             MapTool.showError("dragdrop.unsupportedType");
             log.info("Unsupported file type: " + mediaType.toString() + " (" + url + ")");
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
-          } else {
+          } else*/ {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) // `null' means no image available
               assets.add(temp);

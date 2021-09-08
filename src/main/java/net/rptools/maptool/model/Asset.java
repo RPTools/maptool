@@ -29,6 +29,11 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 
 /** The binary representation of an image. */
 public class Asset {
@@ -44,13 +49,22 @@ public class Asset {
 
   protected Asset() {}
 
-  public Asset(String name, byte[] image) {
+  public Asset(String name, byte[] image){
     this.image = image;
     this.name = name;
     if (image != null) {
       this.id = new MD5Key(image);
       extension = null;
       getImageExtension();
+    }
+  }
+
+  public Asset(String name, String extension, byte[] image) {
+    this.image = image;
+    this.name = name;
+    this.extension = extension;
+    if (image != null) {
+      this.id = new MD5Key(image);
     }
   }
 
@@ -103,6 +117,7 @@ public class Asset {
             reader.setInput(iis);
             extension = reader.getFormatName().toLowerCase();
           }
+
           // We can store more than images, eg HeroLabData in the form of a HashMap, assume this if
           // an image type can not be established
           if (extension.isEmpty()) extension = DATA_EXTENSION;

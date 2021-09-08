@@ -3,6 +3,8 @@ package net.rptools.maptool.client.ui.zone;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
+import com.badlogic.gdx.backends.lwjgl.audio.OpenALLwjglAudio;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -16,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.video.VideoPlayer;
+import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
 import com.crashinvaders.vfx.framebuffer.VfxFrameBuffer;
@@ -27,8 +31,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.box2d.GifDecoder;
-import net.rptools.maptool.box2d.GifDecoder2;
-import net.rptools.maptool.box2d.NativeRenderer;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
 import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
@@ -38,7 +40,6 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.walker.ZoneWalker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.*;
@@ -58,6 +59,7 @@ import java.awt.*;
 import java.awt.Shape;
 import java.awt.geom.*;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -83,6 +85,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private final Map<String, TextureRegion> fetchedRegions = new HashMap<>();
     private final Map<MD5Key, Sprite> bigSprites = new HashMap<>();
     private final Map<MD5Key, Animation<TextureRegion>> animationMap = new HashMap<>();
+    private final Map<MD5Key, VideoPlayer> videoPlayerMap = new HashMap<>();
 
     //renderFog
     private final String ATLAS = "net/rptools/maptool/client/maptool.atlas";
@@ -109,7 +112,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private PerspectiveCamera cam;
     private OrthographicCamera hudCam;
     private PolygonSpriteBatch batch;
-    private NativeRenderer jfxRenderer;
     private boolean initialized = false;
     private int width;
     private int height;
@@ -166,7 +168,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
  //   private RayHandler rayHandler;
 //    private Box2DDebugRenderer debugRenderer;
     private Map<Token, Body> tokenBodies = new HashMap<>();
-
+ //   private VideoPlayer videoPlayer;
 
     public GdxRenderer() {
         MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
@@ -200,6 +202,7 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
             animationMap.clear();
         }
 
+        //videoPlayer = VideoPlayerCreator.createVideoPlayer();
         tokenAtlas = new TextureAtlas();
         manager = new com.badlogic.gdx.assets.AssetManager();
         packer = createPacker();
@@ -294,9 +297,12 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         hudCam.update();
     }
 
+    private boolean videostarted = false;
+
     @Override
     public void render() {
         var delta = Gdx.graphics.getDeltaTime();
+        var audio = Gdx.audio;
         stateTime += delta;
         manager.finishLoading();
         packer.updateTextureAtlas(tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
@@ -315,7 +321,15 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         if (normalFont == null)
             normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
-
+/*
+        if(!videoPlayer.isPlaying())
+            try {
+                videoPlayer.play(Gdx.files.internal("big-buck-bunny_trailer.webm"));
+                videostarted = true;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+*/
         ensureCorrectDistanceFont();
 
      //   vfxManager.cleanUpBuffers();
@@ -329,7 +343,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
      //   vfxManager.endInputCapture();
      //   vfxManager.applyEffects();
      //   vfxManager.renderToScreen();
-        copyFramebufferToJfx();
     }
 
     @NotNull
@@ -413,6 +426,10 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
         drawString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
         drawString(String.valueOf(batch.renderCalls), width - 10, 10);
+
+      //  videoPlayer.update();
+ //       var frame = videoPlayer.getTexture();
+  //      if (frame != null) batch.draw(frame, 20, 20, 100, 100);
         batch.end();
         collectTimerResults();
     }
@@ -432,15 +449,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
         timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
         timer.clear();
         timer.setThreshold(10);
-    }
-
-    private void copyFramebufferToJfx() {
-        if (jfxRenderer != null) {
-            Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, width, height);
-            jfxRenderer.setGdxBuffer(pixmap.getPixels());
-
-            pixmap.dispose();
-        }
     }
 
     public void invalidateCurrentViewCache() {
@@ -1033,13 +1041,14 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
 
                 // Show current Blocked Movement directions for A*
                 if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
-                    Collection<AStarCellPoint> checkPoints = walker.getCheckedPoints();
+                    Map<CellPoint, Set<CellPoint>> blockedMovesByTarget = walker.getBlockedMoves();
                     // Color currentColor = g.getColor();
-                    for (AStarCellPoint acp : checkPoints) {
-                        Set<Point2D> validMoves = acp.getValidMoves();
+                    for (var entry : blockedMovesByTarget.entrySet()) {
+                        var position = entry.getKey();
+                        var blockedMoves = entry.getValue();
 
-                        for (Point2D point : validMoves) {
-                            ZonePoint zp = acp.offsetZonePoint(zoneRenderer.getZone().getGrid(), point.getX(), point.getY());
+                        for (CellPoint point : blockedMoves) {
+                            ZonePoint zp = point.midZonePoint(zoneRenderer.getZone().getGrid(), position);
                             double r = (zp.x - 1) * 45;
                             showBlockedMoves(zp, r, getSprite("block_move"), 1.0f);
                         }
@@ -2028,6 +2037,30 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
     private Sprite getSprite(MD5Key key) {
         if (key == null)
             return null;
+
+        var videoPlayer = videoPlayerMap.get(key);
+        if(videoPlayer != null) {
+            boolean skip = false;
+            if(!videoPlayer.isPlaying()) {
+                try {
+                    var file = AssetManager.getAssetCacheFile(key);
+                    if (file != null) {
+                        videoPlayer.play(Gdx.files.absolute(file.getAbsolutePath()));
+                        videoPlayer.setVolume(0);
+                    } else skip = true;
+
+                } catch (FileNotFoundException ex) {
+                    log.warn(ex.toString());
+                }
+            }
+            if(!skip) {
+                videoPlayer.update();
+                var texture = videoPlayer.getTexture();
+                var sprite = new Sprite(texture);
+                sprite.setSize(texture.getWidth(), texture.getHeight());
+                return sprite;
+            }
+        }
 
         var animation = animationMap.get(key);
         if(animation != null) {
@@ -3023,10 +3056,6 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                 1f, 1f, rotation);
     }
 
-    public void setJfxRenderer(NativeRenderer renderer) {
-        jfxRenderer = renderer;
-    }
-
     private void createScreenShot(String fileName) {
         var handle = Gdx.files.absolute(fileName + ".png");
         if (!handle.exists()) {
@@ -3393,6 +3422,11 @@ public class GdxRenderer extends ApplicationAdapter implements AppEventListener,
                     var animation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, is);
                     animationMap.put(key, animation);
                 });
+                return;
+            }
+            if(asset.getImageExtension() == "data") {
+                var videoPlayer = VideoPlayerCreator.createVideoPlayer();
+                videoPlayerMap.put(key, videoPlayer);
                 return;
             }
             var img = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage(), asset.getName()), null);
