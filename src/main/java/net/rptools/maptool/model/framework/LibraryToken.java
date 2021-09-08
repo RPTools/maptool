@@ -149,6 +149,7 @@ class LibraryToken implements Library {
    * @param name the name of the token to find.
    * @return the library token or {@code null} if it can not be found.
    */
+  // TODO: CDW this needs to be path
   private static Library findLibrary(String name) {
     for (var zone : MapTool.getCampaign().getZones()) {
       List<Token> tokensFiltered = zone.getTokensFiltered(t -> name.equals(t.getName()));

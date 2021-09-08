@@ -16,7 +16,6 @@ package net.rptools.maptool.model;
 
 import com.withay.util.HexCode;
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +35,7 @@ public class GUID implements Serializable, Comparable<GUID> {
   private final byte[] baGUID;
 
   // Cache of the hashCode for a GUID
-  private transient int hash = -1;
+  private transient int hash;
 
   public GUID() {
     this.baGUID = generateGUID();
@@ -139,19 +138,22 @@ public class GUID implements Serializable, Comparable<GUID> {
   }
 
   /**
-   * Returns a hashcode for this GUID.
+   * Returns a hashcode for this GUID. This function is based on the algorithm that JDK 1.3 uses for
+   * a String.
    *
    * @return a hash code value for this object.
    */
   @Override
   public int hashCode() {
-    synchronized (this) {
-      if (hash == -1) {
-        hash = Objects.hashCode(baGUID);
-      }
+    int h = hash;
+    if (h == 0) {
+      byte val[] = baGUID;
+      int len = GUID_LENGTH;
 
-      return hash;
+      for (int i = 0; i < len; i++) h = 31 * h + val[i];
+      hash = h;
     }
+    return h;
   }
 
   /**
