@@ -31,7 +31,7 @@ import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 class LibraryToken implements Library {
 
   /** Prefix for library tokens. */
-  private static final String LIBRARY_PREFIX = "lib:";
+  private static final String LIBRARY_PREFIX = "lib://";
 
   /** The name of the property that holds the library version. */
   private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
@@ -41,6 +41,17 @@ class LibraryToken implements Library {
 
   /** The id of the library token. */
   private final GUID id;
+
+  /**
+   * Does LibraryToken handles libraries with this path. This does not check that the library exists
+   * instead performs a less expensive check to see if its a path it would manage.
+   *
+   * @param path the path for the library (can be full path or just part of path).
+   * @return if the library at the path is handled by the LibraryToken class.
+   */
+  static boolean handles(String path) {
+    return path.toLowerCase().startsWith(LIBRARY_PREFIX);
+  }
 
   /**
    * Returns the {@link Library} representing the lib:token.
