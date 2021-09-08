@@ -229,7 +229,8 @@ class LibraryToken implements Library {
      */
     static Location getLocation(String location) throws IOException {
 
-      String[] vals = location.replaceFirst("/*", "").split("/", 2);
+      String[] vals =
+          location.replaceFirst("^" + LIBRARY_PREFIX, "").replaceFirst("^/*", "").split("/", 2);
       if (vals.length < 2) {
         throw new IOException("Invalid Location");
       }
