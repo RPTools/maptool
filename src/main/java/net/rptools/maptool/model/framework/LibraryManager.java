@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.framework;
 
+import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +27,7 @@ public class LibraryManager {
    * @param path the path for the library (can be full path or just part of path).
    * @return the library.
    */
-  public CompletableFuture<Optional<Library>> getLibrary(String path) {
+  public CompletableFuture<Optional<Library>> getLibrary(URL path) {
     if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path);
     } else {
@@ -40,7 +41,7 @@ public class LibraryManager {
    * @param path the path for the library (can be full path or just part of path).
    * @return {@code true} if the library exists {@code false} if it does not.
    */
-  public CompletableFuture<Boolean> libraryExists(String path) {
+  public CompletableFuture<Boolean> libraryExists(URL path) {
     if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path).thenApply(Optional::isPresent);
     } else {

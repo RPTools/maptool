@@ -16,6 +16,7 @@ package net.rptools.maptool.model.framework;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
 /** Interface for classes that represents a framework library. */
@@ -35,7 +36,7 @@ public interface Library {
    * @return {@code true} if the location exists, otherwise {@code false}.
    * @throws IOException if there is an io error reading the location.
    */
-  CompletableFuture<Boolean> locationExists(String location) throws IOException;
+  CompletableFuture<Boolean> locationExists(URL location) throws IOException;
 
   /**
    * Reads the location as a string.
@@ -44,7 +45,7 @@ public interface Library {
    * @return the contents of the location as a string.
    * @throws IOException if there is an io error reading the location.
    */
-  CompletableFuture<String> readAsString(String location) throws IOException;
+  CompletableFuture<String> readAsString(URL location) throws IOException;
 
   /**
    * Returns an {@link InputStream} for the location specified.
@@ -53,5 +54,5 @@ public interface Library {
    * @return the inpute stream for the location
    * @throws IOException if there is an io error reading the location.
    */
-  CompletableFuture<InputStream> read(String location) throws IOException;
+  CompletableFuture<InputStream> read(URL location) throws IOException;
 }

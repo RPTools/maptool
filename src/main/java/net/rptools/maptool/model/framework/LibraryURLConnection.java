@@ -39,15 +39,14 @@ public class LibraryURLConnection extends URLConnection {
 
   @Override
   public InputStream getInputStream() throws IOException {
-    String location = url.toExternalForm();
     try {
-      Optional<Library> libraryOpt = new LibraryManager().getLibrary(location).get();
+      Optional<Library> libraryOpt = new LibraryManager().getLibrary(url).get();
       if (libraryOpt.isEmpty()) {
-        throw new IOException("Unable to read location " + location);
+        throw new IOException("Unable to read location " + url.toExternalForm());
       }
 
       var library = libraryOpt.get();
-      return library.read(location).get();
+      return library.read(url).get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }

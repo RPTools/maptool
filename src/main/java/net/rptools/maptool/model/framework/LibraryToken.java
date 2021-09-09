@@ -17,6 +17,7 @@ package net.rptools.maptool.model.framework;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -30,8 +31,8 @@ import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 /** Class that represents Lib:Token libraries. */
 class LibraryToken implements Library {
 
-  /** Prefix for library tokens. */
-  private static final String LIBRARY_PREFIX = "lib://";
+  /** "Protocol" for library tokens. */
+  private static final String LIBRARY_PROTOCOL = "lib";
 
   /** The name of the property that holds the library version. */
   private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
@@ -49,23 +50,23 @@ class LibraryToken implements Library {
    * @param path the path for the library (can be full path or just part of path).
    * @return if the library at the path is handled by the LibraryToken class.
    */
-  static boolean handles(String path) {
-    return path.toLowerCase().startsWith(LIBRARY_PREFIX);
+  static boolean handles(URL path) {
+    return path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL);
   }
 
   /**
    * Returns the {@link Library} representing the lib:token.
    *
-   * @param name the name of the lib:token.
+   * @param path the path of the lib:token.
    * @return the {@link Library} representing the lib:token.
    */
-  static CompletableFuture<Optional<Library>> getLibrary(String name) {
-    if (!name.toLowerCase().startsWith(LIBRARY_PREFIX)) {
+  static CompletableFuture<Optional<Library>> getLibrary(URL path) {
+    if (!handles(path)) {
       return CompletableFuture.completedFuture(Optional.empty());
     }
 
     return new ThreadExecutionHelper<Optional<Library>>()
-        .runOnSwingThread(() -> Optional.ofNullable(findLibrary(name)));
+        .runOnSwingThread(() -> Optional.ofNullable(findLibrary(path)));
   }
 
   /**
@@ -88,7 +89,7 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public CompletableFuture<Boolean> locationExists(String location) throws IOException {
+  public CompletableFuture<Boolean> locationExists(URL location) throws IOException {
     final var loc = Location.getLocation(location);
     return new ThreadExecutionHelper<Boolean>()
         .runOnSwingThread(
@@ -102,12 +103,12 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public CompletableFuture<String> readAsString(String location) throws IOException {
+  public CompletableFuture<String> readAsString(URL location) throws IOException {
     final var loc = Location.getLocation(location);
     return new ThreadExecutionHelper<String>()
         .runOnSwingThread(
             () -> {
-              String text = null;
+              String text;
               if (loc.locationType() == LocationType.MACRO) {
                 text = getMacroText(loc.location());
               } else {
@@ -123,12 +124,12 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public CompletableFuture<InputStream> read(String location) throws IOException {
+  public CompletableFuture<InputStream> read(URL location) throws IOException {
     final var loc = Location.getLocation(location);
     return new ThreadExecutionHelper<InputStream>()
         .runOnSwingThread(
             () -> {
-              String text = null;
+              String text;
               if (loc.locationType() == LocationType.MACRO) {
                 text = getMacroText(loc.location());
               } else {
@@ -144,15 +145,16 @@ class LibraryToken implements Library {
   }
 
   /**
-   * Finds the library token with the specific name.
+   * Finds the library token with the specific path.
    *
-   * @param name the name of the token to find.
+   * @param path the path of the token to find.
    * @return the library token or {@code null} if it can not be found.
    */
   // TODO: CDW this needs to be path
-  private static Library findLibrary(String name) {
+  private static Library findLibrary(URL path) {
+    String name = "lib:" + path.getHost();
     for (var zone : MapTool.getCampaign().getZones()) {
-      List<Token> tokensFiltered = zone.getTokensFiltered(t -> name.equals(t.getName()));
+      List<Token> tokensFiltered = zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName()));
       if (tokensFiltered.size() > 0) {
         return new LibraryToken(tokensFiltered.get(0).getId());
       }
@@ -228,10 +230,9 @@ class LibraryToken implements Library {
      * @return the location for the location string.
      * @throws IOException if the location is invalid.
      */
-    static Location getLocation(String location) throws IOException {
+    static Location getLocation(URL location) throws IOException {
 
-      String[] vals =
-          location.replaceFirst("^" + LIBRARY_PREFIX, "").replaceFirst("^/*", "").split("/", 2);
+      String[] vals = location.getPath().replaceFirst("^/", "").split("/", 2);
       if (vals.length < 2) {
         throw new IOException("Invalid Location");
       }
