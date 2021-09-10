@@ -50,7 +50,8 @@ public class MacroDialogFunctions extends AbstractFunction {
         "getFrameProperties",
         "getDialogProperties",
         "getOverlayProperties",
-        "runJsFunction");
+        "runJsFunction"
+        );
   }
 
   public static MacroDialogFunctions getInstance() {
