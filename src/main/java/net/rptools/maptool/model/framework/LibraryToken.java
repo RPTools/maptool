@@ -207,11 +207,7 @@ class LibraryToken implements Library {
   private String getProperty(String name) {
     var token = findLibrary(id);
 
-    if (!token.getPropertyNames().contains(name)) {
-      return null;
-    } else {
       return token.getProperty(name).toString();
-    }
   }
 
   /** Enumeration for location types. */
