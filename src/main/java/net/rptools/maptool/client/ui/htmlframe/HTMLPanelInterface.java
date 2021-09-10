@@ -78,9 +78,9 @@ interface HTMLPanelInterface {
 
     // Web view doesn't have any way to turn off caching for a link so we have to resort to a bit
     // of a hack
-    html = html.replaceAll("(lib://[^>]+)([?&])cachelib=false",
-        "$1$2cachelib=" + System.currentTimeMillis());
-
+    html =
+        html.replaceAll(
+            "(lib://[^>]+)([?&])cachelib=false", "$1$2cachelib=" + System.currentTimeMillis());
 
     return html;
   }

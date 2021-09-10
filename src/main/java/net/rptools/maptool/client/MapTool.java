@@ -41,7 +41,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.ResponseCache;
 import java.net.URI;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -1699,7 +1698,6 @@ public class MapTool {
     RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
     factory.registerProtocol("asset", new AssetURLStreamHandler());
     factory.registerProtocol("lib", new LibraryURLStreamHandler());
-
 
     // Syrinscape Protocols
     if (AppPreferences.getSyrinscapeActive()) {

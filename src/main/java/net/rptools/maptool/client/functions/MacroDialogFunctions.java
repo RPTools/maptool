@@ -16,17 +16,23 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -50,8 +56,10 @@ public class MacroDialogFunctions extends AbstractFunction {
         "getFrameProperties",
         "getDialogProperties",
         "getOverlayProperties",
-        "runJsFunction"
-        );
+        "runJsFunction",
+        "html5.frame",
+        "html5.dialog",
+        "html5.overlay");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -130,6 +138,38 @@ public class MacroDialogFunctions extends AbstractFunction {
         argsArray = new JsonArray();
       }
       runJsFunction(name, type, func, thisArg, argsArray);
+      return "";
+    }
+    if (functionName.equalsIgnoreCase("html5.frame")
+        || functionName.equalsIgnoreCase("html5.dialog")
+        || functionName.equalsIgnoreCase("html5.overlay")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String name = parameters.get(0).toString();
+      String opts = parameters.size() > 2 ? parameters.get(2).toString() : "";
+
+      FrameType frameType =
+          switch (functionName.toLowerCase()) {
+            case "html5.frame" -> FrameType.FRAME;
+            case "html5.dialog" -> FrameType.DIALOG;
+            case "html5.overlay" -> FrameType.OVERLAY;
+            default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
+          };
+
+      String htmlString = "";
+      try {
+        URL url = new URL(parameters.get(1).toString());
+
+        Optional<Library> library = new LibraryManager().getLibrary(url).get();
+        if (library.isEmpty()) {
+          throw new ParserException(I18N.getText("macro.function.html5.invalidURL"));
+        }
+
+        htmlString = library.get().readAsString(url).get();
+
+      } catch (InterruptedException | ExecutionException | IOException e) {
+        throw new ParserException(e);
+      }
+      HTMLFrameFactory.show(name, frameType, true, opts, htmlString);
       return "";
     }
 
