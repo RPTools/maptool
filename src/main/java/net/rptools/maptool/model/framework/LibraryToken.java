@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -240,7 +241,7 @@ class LibraryToken implements Library {
         throw new IOException("Invalid Location");
       }
 
-      return new Location(locType, vals[1]);
+      return new Location(locType, URLDecoder.decode(vals[1], StandardCharsets.UTF_8));
     }
   }
 }
