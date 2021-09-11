@@ -62,14 +62,20 @@ public class PlayerFunctions extends AbstractFunction {
             yield players.getPlayer().thenApply(this::playerAsJson).get();
           }
         }
-        case "player.getConnectedPlayers" -> players
-            .getConnectedPlayers()
-            .thenApply(this::playersAsJson)
-            .get();
-        case "player.getPlayers" -> players
-            .getDatabasePlayers()
-            .thenApply(this::playersAsJson)
-            .get();
+        case "player.getConnectedPlayers" -> {
+          FunctionUtil.blockUntrustedMacro("player.getName");
+          yield players
+              .getConnectedPlayers()
+              .thenApply(this::playersAsJson)
+              .get();
+        }
+        case "player.getPlayers" -> {
+          FunctionUtil.blockUntrustedMacro("player.getName");
+          yield players
+              .getDatabasePlayers()
+              .thenApply(this::playersAsJson)
+              .get();
+        }
         default -> throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
       };
