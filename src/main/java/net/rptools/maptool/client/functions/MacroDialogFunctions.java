@@ -62,7 +62,7 @@ public class MacroDialogFunctions extends AbstractFunction {
         "html.dialog",
         "html.frame5",
         "html.dialog5",
-        "html5.overlay");
+        "html.overlay");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -143,7 +143,7 @@ public class MacroDialogFunctions extends AbstractFunction {
       runJsFunction(name, type, func, thisArg, argsArray);
       return "";
     }
-    if (functionName.toLowerCase().startsWith("html."))  {
+    if (functionName.toLowerCase().startsWith("html.")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String name = parameters.get(0).toString();
       String opts = parameters.size() > 2 ? parameters.get(2).toString() : "";
@@ -151,17 +151,17 @@ public class MacroDialogFunctions extends AbstractFunction {
       try {
         url = new URL(parameters.get(1).toString());
       } catch (MalformedURLException e) {
-       throw new ParserException(e);
+        throw new ParserException(e);
       }
 
       return switch (functionName.toLowerCase()) {
-            case "html.frame5" -> showURL(name, url, opts, FrameType.FRAME, true);
-            case "html.dialog5" -> showURL(name, url, opts, FrameType.DIALOG, true);
-            case "html.frame" -> showURL(name, url, opts, FrameType.FRAME, false);
-            case "html.dialog" -> showURL(name, url, opts, FrameType.DIALOG, false);
-            case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
-            default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
-          };
+        case "html.frame5" -> showURL(name, url, opts, FrameType.FRAME, true);
+        case "html.dialog5" -> showURL(name, url, opts, FrameType.DIALOG, true);
+        case "html.frame" -> showURL(name, url, opts, FrameType.FRAME, false);
+        case "html.dialog" -> showURL(name, url, opts, FrameType.DIALOG, false);
+        case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
+        default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
+      };
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

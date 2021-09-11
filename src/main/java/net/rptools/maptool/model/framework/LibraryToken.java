@@ -207,7 +207,7 @@ class LibraryToken implements Library {
   private String getProperty(String name) {
     var token = findLibrary(id);
 
-      return token.getProperty(name).toString();
+    return token.getProperty(name).toString();
   }
 
   /** Enumeration for location types. */
