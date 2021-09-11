@@ -159,7 +159,16 @@ import org.apache.logging.log4j.Logger;
 public class AppActions {
   private static final Logger log = LogManager.getLogger(AppActions.class);
 
+  /**
+   * Hold copies of tokens for a future paste.
+   *
+   * <p>Note that the tokens stored in this set have had their positions modified to be measured
+   * relative to a reference token. This is inconsistent with the coordinate system for
+   * `ZonePoint`s, so be sure not to assume these token positions cna be used as `ZonePoint`s
+   * without further adjustment.
+   */
   private static Set<Token> tokenCopySet = null;
+
   public static final int menuShortcut = getMenuShortcutKeyMask();
   private static boolean keepIdsOnPaste = false;
 
@@ -1159,19 +1168,28 @@ public class AppActions {
         MapTool.serverCommand()
             .updateExposedAreaMeta(zone.getId(), token.getExposedAreaGUID(), meta);
       }
+
+      ZonePoint tokenOffset;
       if (newZoneSupportsSnapToGrid && gridCopiedFromSupportsSnapToGrid && token.isSnapToGrid()) {
         // Convert (x,y) offset to a cell offset using the grid from the zone where the tokens were
-        // copied from
-        CellPoint cp = gridCopiedFrom.convert(new ZonePoint(token.getX(), token.getY()));
+        // copied from. Note that the token coordinates are relative to the "top-left" token's
+        // position, so they can't be used as a ZonePoint without first adding back the grid offset.
+        CellPoint cp =
+            gridCopiedFrom.convert(
+                new ZonePoint(
+                    token.getX() + gridCopiedFrom.getOffsetX(),
+                    token.getY() + gridCopiedFrom.getOffsetY()));
         ZonePoint zp = grid.convert(cp);
-        token.setX(zp.x + destination.x);
-        token.setY(zp.y + destination.y);
+        tokenOffset =
+            new ZonePoint(zp.x - gridCopiedFrom.getOffsetX(), zp.y - gridCopiedFrom.getOffsetY());
       } else {
         // For gridless sources, gridless destinations, or tokens that are not SnapToGrid: just use
         // the pixel offsets
-        token.setX(token.getX() + destination.x);
-        token.setY(token.getY() + destination.y);
+        tokenOffset = new ZonePoint(token.getX(), token.getY());
       }
+      token.setX(tokenOffset.x + destination.x);
+      token.setY(tokenOffset.y + destination.y);
+
       // paste into correct layer
       token.setLayer(layer);
 
