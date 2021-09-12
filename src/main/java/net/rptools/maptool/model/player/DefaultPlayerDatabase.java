@@ -95,11 +95,6 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public boolean isDisabled(Player player) {
     return false;
   }
@@ -107,6 +102,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public String getDisabledReason(Player player) {
     return "";
+  }
+
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
   }
 
   @Override

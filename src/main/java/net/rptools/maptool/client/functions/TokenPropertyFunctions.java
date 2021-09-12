@@ -111,7 +111,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setNotes",
         "getTokenLayoutProps",
         "setTokenLayoutProps",
-        "setTokenSnapToGrid");
+        "setTokenSnapToGrid",
+        "getAllowsURLAccess",
+        "setAllowsURLAccess");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -918,6 +920,28 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       MapTool.serverCommand()
           .updateTokenProperty(token, Token.Update.setLayout, scale, xOffset, yOffset);
+      return "";
+    }
+
+    /*
+     * getAllowsURLAccess(token: currentToken(), mapName = current map)
+     */
+    if (functionName.equalsIgnoreCase("getAllowsURLAccess")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.getAllowURLAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * setAllowsURLAccess(token: currentToken(), mapName = current map)
+     */
+    if (functionName.equalsIgnoreCase("setAllowsURLAccess")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      BigDecimal allowURLAccess = getBigDecimalFromParam(functionName, parameters, 0);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      token.setAllowURLAccess(!allowURLAccess.equals(BigDecimal.ZERO));
       return "";
     }
 

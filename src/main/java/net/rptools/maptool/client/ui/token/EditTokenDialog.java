@@ -80,6 +80,8 @@ import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
@@ -333,6 +335,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
+    setLibTokenPaneEnabled(token.isLibToken());
+
+    getAllowURLAccess().setSelected(token.getAllowURLAccess());
+
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();
     String heroLabTitle = I18N.getString("EditTokenDialog.tab.hero");
@@ -417,6 +423,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     super.bind(token);
   }
 
+  private void setLibTokenPaneEnabled(boolean show) {
+    JTabbedPane tabbedPane = getTabbedPane();
+    String libTokenTile = I18N.getString("EditTokenDialog.tab.libToken");
+    tabbedPane.setEnabledAt(tabbedPane.indexOfTab(libTokenTile), show);
+    getAllowURLAccess().setEnabled(show);
+  }
+
   public JTabbedPane getTabbedPane() {
     return (JTabbedPane) getComponent("TabPane");
   }
@@ -443,6 +456,32 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public void initTypeCombo() {
     getTypeCombo().setModel(new DefaultComboBoxModel<>(Token.Type.values()));
+  }
+
+  public void initLibTokenTable() {
+    getNameField()
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              private void checkName() {
+                setLibTokenPaneEnabled(Token.isValidLibTokenName(getNameField().getText()));
+              }
+
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                checkName();
+              }
+            });
   }
 
   public JComboBox getTypeCombo() {
@@ -992,6 +1031,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public GridView getVblToolView() {
     return (GridView) getComponent("vblToolView");
+  }
+
+  public JCheckBox getAllowURLAccess() {
+    return (JCheckBox) getComponent("@allowURLAccess");
   }
 
   public void initSpeechPanel() {

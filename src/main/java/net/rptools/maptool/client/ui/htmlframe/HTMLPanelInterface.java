@@ -52,7 +52,7 @@ interface HTMLPanelInterface {
   void addActionListener(final ActionListener container);
 
   /**
-   * Modify the rolls and hyperlinks in the HTML.
+   * Modify the rolls and hyperlinks, and lib:// links in the HTML.
    *
    * @param html the HTML to modify
    * @return the modified HTML
@@ -75,6 +75,13 @@ interface HTMLPanelInterface {
             "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;");
     // Auto inline expansion
     html = html.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
+
+    // Web view doesn't have any way to turn off caching for a link so we have to resort to a bit
+    // of a hack
+    html =
+        html.replaceAll(
+            "(lib://[^>]+)([?&])cachelib=false", "$1$2cachelib=" + System.currentTimeMillis());
+
     return html;
   }
 

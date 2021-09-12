@@ -47,6 +47,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
@@ -83,6 +84,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.framework.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -155,6 +157,7 @@ public class MapTool {
   private static Campaign campaign;
 
   private static ObservableList<Player> playerList;
+  private static Set<Player> playerSetThreadSafe = ConcurrentHashMap.newKeySet();
   private static ObservableList<TextMessage> messageList;
   private static LocalPlayer player;
 
@@ -766,6 +769,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
+      playerSetThreadSafe.add(player);
 
       // LATER: Make this non-anonymous
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
@@ -792,6 +796,7 @@ public class MapTool {
       return;
     }
     playerList.remove(player);
+    playerSetThreadSafe.remove(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
@@ -1091,6 +1096,10 @@ public class MapTool {
 
   public static ObservableList<Player> getPlayerList() {
     return playerList;
+  }
+
+  public static Set<Player> getPlayerSetThreadSafe() {
+    return playerSetThreadSafe;
   }
 
   /** Returns the list of non-gm names. */
@@ -1688,6 +1697,7 @@ public class MapTool {
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
     RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
     factory.registerProtocol("asset", new AssetURLStreamHandler());
+    factory.registerProtocol("lib", new LibraryURLStreamHandler());
 
     // Syrinscape Protocols
     if (AppPreferences.getSyrinscapeActive()) {

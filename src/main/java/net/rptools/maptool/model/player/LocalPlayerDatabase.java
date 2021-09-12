@@ -116,11 +116,6 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
-    throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
-  }
-
-  @Override
   public boolean isDisabled(Player player) {
     return false;
   }
@@ -128,6 +123,11 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   @Override
   public String getDisabledReason(Player player) {
     return "";
+  }
+
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
   }
 
   @Override

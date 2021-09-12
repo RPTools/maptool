@@ -97,13 +97,13 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean isDisabled(Player player) {
-    return false;
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
-    throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
+  public boolean isDisabled(Player player) {
+    return false;
   }
 
   @Override
