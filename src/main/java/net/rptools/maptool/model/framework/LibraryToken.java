@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -151,11 +152,13 @@ class LibraryToken implements Library {
    * @param path the path of the token to find.
    * @return the library token or {@code null} if it can not be found.
    */
-  // TODO: CDW this needs to be path
   private static Library findLibrary(URL path) {
     String name = "lib:" + path.getHost();
     for (var zone : MapTool.getCampaign().getZones()) {
-      List<Token> tokensFiltered = zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName()));
+      List<Token> tokensFiltered =
+          zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream()
+              .filter(Token::getAllowURLAccess)
+              .collect(Collectors.toList());
       if (tokensFiltered.size() > 0) {
         return new LibraryToken(tokensFiltered.get(0).getId());
       }
