@@ -163,7 +163,7 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_BLOCK_EXT =
       "<meta http-equiv=\"Content-Security-Policy\" "
           + "content=\" "
-          + " default-src asset: "
+          + " default-src asset: lib: "
           + " https://code.jquery.com " // JQuery CDN
           + " https://cdn.jsdelivr.net " // JSDelivr CDN
           + " https://stackpath.bootstrapcdn.com " // Bootstrap CDN

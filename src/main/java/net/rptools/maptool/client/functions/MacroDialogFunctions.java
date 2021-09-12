@@ -16,17 +16,24 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -50,7 +57,12 @@ public class MacroDialogFunctions extends AbstractFunction {
         "getFrameProperties",
         "getDialogProperties",
         "getOverlayProperties",
-        "runJsFunction");
+        "runJsFunction",
+        "html.frame",
+        "html.dialog",
+        "html.frame5",
+        "html.dialog5",
+        "html.overlay");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -131,8 +143,46 @@ public class MacroDialogFunctions extends AbstractFunction {
       runJsFunction(name, type, func, thisArg, argsArray);
       return "";
     }
+    if (functionName.toLowerCase().startsWith("html.")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String name = parameters.get(0).toString();
+      String opts = parameters.size() > 2 ? parameters.get(2).toString() : "";
+      URL url = null;
+      try {
+        url = new URL(parameters.get(1).toString());
+      } catch (MalformedURLException e) {
+        throw new ParserException(e);
+      }
+
+      return switch (functionName.toLowerCase()) {
+        case "html.frame5" -> showURL(name, url, opts, FrameType.FRAME, true);
+        case "html.dialog5" -> showURL(name, url, opts, FrameType.DIALOG, true);
+        case "html.frame" -> showURL(name, url, opts, FrameType.FRAME, false);
+        case "html.dialog" -> showURL(name, url, opts, FrameType.DIALOG, false);
+        case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
+        default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
+      };
+    }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  private String showURL(String name, URL url, String opts, FrameType frameType, boolean isHTML5)
+      throws ParserException {
+    String htmlString = "";
+    try {
+      Optional<Library> library = new LibraryManager().getLibrary(url).get();
+      if (library.isEmpty()) {
+        throw new ParserException(I18N.getText("macro.function.html5.invalidURL"));
+      }
+
+      htmlString = library.get().readAsString(url).get();
+
+    } catch (InterruptedException | ExecutionException | IOException e) {
+      throw new ParserException(e);
+    }
+    HTMLFrameFactory.show(name, frameType, true, opts, htmlString);
+    return "";
   }
 
   /**
