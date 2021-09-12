@@ -173,7 +173,7 @@ public class MacroDialogFunctions extends AbstractFunction {
     try {
       Optional<Library> library = new LibraryManager().getLibrary(url).get();
       if (library.isEmpty()) {
-        throw new ParserException(I18N.getText("macro.function.html5.invalidURL"));
+        throw new ParserException(I18N.getText("macro.function.html5.invalidURL", url.toExternalForm()));
       }
 
       htmlString = library.get().readAsString(url).get();
