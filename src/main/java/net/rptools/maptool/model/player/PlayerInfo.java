@@ -1,8 +1,5 @@
-package net.rptools.maptool.api.player;
+package net.rptools.maptool.model.player;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.rptools.maptool.api.ApiData;
 import net.rptools.maptool.model.player.Player.Role;
 
 public record PlayerInfo(
@@ -11,6 +8,5 @@ public record PlayerInfo(
     boolean blocked,
     String blockedReason,
     boolean connected
-)  implements ApiData {
-
+)  {
 }

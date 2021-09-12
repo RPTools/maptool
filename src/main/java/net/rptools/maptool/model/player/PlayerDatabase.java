@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
@@ -33,7 +32,8 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public interface PlayerDatabase {
 
-  public enum AuthMethod {
+  /** The type of authentication for the player. */
+  enum AuthMethod {
     PASSWORD,
     ASYMMETRIC_KEY
   };
@@ -100,6 +100,11 @@ public interface PlayerDatabase {
    */
   boolean supportsDisabling();
 
+  /**
+   * Returns {@code true} if the database supports asymmetric keys for authentication.
+   *
+   * @return {@code true} if the database supports asymmetric keys for authentication.
+   */
   boolean supportsAsymmetricalKeys();
 
   /**
@@ -108,15 +113,6 @@ public interface PlayerDatabase {
    * @return {@code true} if this player database supports role based passwords.
    */
   boolean supportsRolePasswords();
-
-  /**
-   * Disables the specified player. This will not boot the player from the server.
-   *
-   * @param player The player to disable.
-   * @param reason The reason that the player is disabled, this can be a key in i18n properties.
-   * @throws PasswordDatabaseException If the password database does not support disabling players.
-   */
-  void disablePlayer(Player player, String reason) throws PasswordDatabaseException;
 
   /**
    * Returns if the player has been disabled.
@@ -151,22 +147,15 @@ public interface PlayerDatabase {
    * @return The players that are currently connected.
    */
   default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
-    Set<Player> players = new HashSet<>();
-    if (SwingUtilities.isEventDispatchThread()) {
-      MapTool.getPlayerList().forEach(players::add);
-    } else {
-      SwingUtilities.invokeAndWait(() -> MapTool.getPlayerList().forEach(players::add));
-    }
-
-    return players;
+    return new HashSet<>(MapTool.getPlayerSetThreadSafe());
   }
 
   /**
-   * Adds a player to the database if the
+   * Returns if this player database records information about only currently connected players.
    *
-   * @param player
+   * @return if this player database records information about only currently connected players.
    */
-  // void addPlayer(Player player);
+  boolean recordsOnlyConnectedPlayers();
 
   /**
    * Returns the authentication method for the player.

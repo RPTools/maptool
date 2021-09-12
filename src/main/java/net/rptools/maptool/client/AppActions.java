@@ -2266,21 +2266,11 @@ public class AppActions {
                             PlayerDatabaseFactory.getCurrentPlayerDatabase();
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
-                      db.putPlayer(
-                          dialog.getUsernameTextField().getText(),
-                          Role.GM,
-                          gmPassword,
-                          Set.of(),
-                          null,
-                          false);
+                      db.addTemporaryPlayer(
+                          dialog.getUsernameTextField().getText(), Role.GM, gmPassword);
                     } else {
-                      db.putPlayer(
-                          dialog.getUsernameTextField().getText(),
-                          Role.PLAYER,
-                          playerPassword,
-                          Set.of(),
-                          null,
-                          false);
+                      db.addTemporaryPlayer(
+                          dialog.getUsernameTextField().getText(), Role.PLAYER, playerPassword);
                     }
                   } else {
                     PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
