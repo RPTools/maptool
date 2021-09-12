@@ -81,12 +81,37 @@ public class Token extends BaseModel implements Cloneable {
   public static final String NUM_ON_GM = "GM Name";
   public static final String NUM_ON_BOTH = "Both";
 
+  public static final String LIB_TOKEN_PREFIX = "lib:";
+
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
       new Gson().getAdapter(JsonObject.class);
+
+  public boolean getAllowURLAccess() {
+    if (allowURLAccess && !isLibToken()) {
+      allowURLAccess = false;
+    }
+    return allowURLAccess;
+  }
+
+  public void setAllowURLAccess(boolean allowURLAccess) {
+    if (isLibToken()) {
+      this.allowURLAccess = allowURLAccess;
+    } else {
+      this.allowURLAccess = false;
+    }
+  }
+
+  public boolean isLibToken() {
+    return isValidLibTokenName(name);
+  }
+
+  public static boolean isValidLibTokenName(String name) {
+    return name.toLowerCase().startsWith(LIB_TOKEN_PREFIX);
+  }
 
   public enum TokenShape {
     TOP_DOWN(),
@@ -328,6 +353,8 @@ public class Token extends BaseModel implements Cloneable {
   private Map<String, String> speechMap;
 
   private HeroLabData heroLabData;
+
+  private boolean allowURLAccess = false;
 
   /**
    * Constructor from another token, with the option to keep the token id
@@ -2443,6 +2470,7 @@ public class Token extends BaseModel implements Cloneable {
     if (exposedAreaGUID == null) {
       exposedAreaGUID = new GUID();
     }
+
     return this;
   }
 
