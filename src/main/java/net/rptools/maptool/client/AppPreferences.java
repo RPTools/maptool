@@ -182,6 +182,9 @@ public class AppPreferences {
   private static final String KEY_VBL_BLOCKS_MOVE = "vblBlocksMove";
   private static final boolean DEFAULT_VBL_BLOCKS_MOVE = true;
 
+  private static final String KEY_DRAW_TERRAIN_VBL = "drawTerrainVbl";
+  private static final boolean DEFAULT_DRAW_TERRAIN_VBL = false;
+
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
 
@@ -1235,6 +1238,14 @@ public class AppPreferences {
 
   public static void setVblBlocksMove(boolean use) {
     prefs.putBoolean(KEY_VBL_BLOCKS_MOVE, use);
+  }
+
+  public static boolean getDrawTerrainVbl() {
+    return prefs.getBoolean(KEY_DRAW_TERRAIN_VBL, DEFAULT_DRAW_TERRAIN_VBL);
+  }
+
+  public static void setDrawTerrainVbl(boolean drawTerrainVbl) {
+    prefs.putBoolean(KEY_DRAW_TERRAIN_VBL, drawTerrainVbl);
   }
 
   public static String getDefaultMacroEditorTheme() {

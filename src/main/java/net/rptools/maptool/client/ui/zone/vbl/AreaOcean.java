@@ -14,43 +14,54 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import org.locationtech.jts.geom.GeometryFactory;
 
+/**
+ * Represents a hole in the topology.
+ *
+ * <p>An ocean may contain islands of topology within it, and may or may not be contained within an
+ * island.
+ */
 public class AreaOcean implements AreaContainer {
 
   private AreaMeta meta;
+  private AreaIsland parentIsland = null;
   private Set<AreaIsland> islandSet = new HashSet<AreaIsland>();
 
-  public AreaOcean(AreaMeta meta) {
+  /**
+   * Creates a new ocean with a given boundary.
+   *
+   * @param meta The boundary of a hole.
+   */
+  public AreaOcean(@Nullable AreaMeta meta) {
+    assert meta == null || meta.isHole();
     this.meta = meta;
   }
 
-  public Set<VisibleAreaSegment> getVisibleAreaSegments(Point2D origin) {
+  public AreaIsland getParentIsland() {
+    return parentIsland;
+  }
 
-    Set<VisibleAreaSegment> segSet = new HashSet<VisibleAreaSegment>();
+  public void setParentIsland(AreaIsland parentIsland) {
+    this.parentIsland = parentIsland;
+  }
 
-    // If an island contains the point, then we're
-    // not in this ocean, short circuit out
-    for (AreaIsland island : islandSet) {
-      if (island.getBounds().contains(origin)) {
-        return segSet;
-      }
+  @Override
+  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+      GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
+    if (meta == null) {
+      return Collections.emptyList();
     }
 
-    // Inside boundaries
-    for (AreaIsland island : islandSet) {
-      segSet.addAll(island.getVisibleAreaSegments(origin));
-    }
-
-    // Outside boundary
-    if (meta != null) {
-      segSet.addAll(meta.getVisibleAreas(origin));
-    }
-
-    return segSet;
+    return meta.getFacingSegments(geometryFactory, origin, frontSegments);
   }
 
   public AreaOcean getDeepestOceanAt(Point2D point) {
@@ -61,8 +72,9 @@ public class AreaOcean implements AreaContainer {
 
     // If the point is in an island, then let the island figure it out
     for (AreaIsland island : islandSet) {
-      if (island.getBounds().contains(point)) {
-        return island.getDeepestOceanAt(point);
+      AreaOcean ocean = island.getDeepestOceanAt(point);
+      if (ocean != null) {
+        return ocean;
       }
     }
 

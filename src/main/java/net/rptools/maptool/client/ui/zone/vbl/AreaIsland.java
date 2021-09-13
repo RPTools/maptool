@@ -14,23 +14,49 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.locationtech.jts.geom.GeometryFactory;
 
+/**
+ * Represents a piece of solid topology.
+ *
+ * <p>An island can contain holes, known as oceans, and will itself belong to an ocean.
+ */
 public class AreaIsland implements AreaContainer {
 
   private AreaMeta meta;
+  private boolean isTerrainVbl;
+  private AreaOcean parentOcean;
   private Set<AreaOcean> oceanSet = new HashSet<AreaOcean>();
 
-  public AreaIsland(AreaMeta meta) {
+  /**
+   * Creates a new island with a given boundary.
+   *
+   * @param meta The boundary of the island. Must be a hole.
+   */
+  public AreaIsland(AreaMeta meta, boolean isTerrainVbl) {
+    assert !meta.isHole();
     this.meta = meta;
+    this.isTerrainVbl = isTerrainVbl;
+    this.parentOcean = null;
   }
 
-  public Set<VisibleAreaSegment> getVisibleAreaSegments(Point2D origin) {
+  /** @return true if this island represents terrain VBL. */
+  public boolean isTerrain() {
+    return isTerrainVbl;
+  }
 
-    return meta.getVisibleAreas(origin);
+  public AreaOcean getParentOcean() {
+    return parentOcean;
+  }
+
+  public void setParentOcean(AreaOcean parentOcean) {
+    this.parentOcean = parentOcean;
   }
 
   public AreaOcean getDeepestOceanAt(Point2D point) {
@@ -63,5 +89,11 @@ public class AreaIsland implements AreaContainer {
   // AREA CONTAINER
   public Area getBounds() {
     return meta.area;
+  }
+
+  @Override
+  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+      GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
+    return meta.getFacingSegments(geometryFactory, origin, !frontSegments);
   }
 }

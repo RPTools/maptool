@@ -200,12 +200,17 @@ public class TokenVBL {
       return area;
     }
 
+    // TODO Allow tokens to either be terrain or not.
+    boolean isTerrain = false;
+
     if (erase) {
-      renderer.getZone().removeTopology(area, topologyMode);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyMode);
+      renderer.getZone().removeTopology(area, topologyMode, isTerrain);
+      MapTool.serverCommand()
+          .removeTopology(renderer.getZone().getId(), area, topologyMode, isTerrain);
     } else {
-      renderer.getZone().addTopology(area, topologyMode);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyMode);
+      renderer.getZone().addTopology(area, topologyMode, isTerrain);
+      MapTool.serverCommand()
+          .addTopology(renderer.getZone().getId(), area, topologyMode, isTerrain);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();

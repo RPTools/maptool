@@ -18,12 +18,12 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.GeometryUtil.PointNode;
+import org.locationtech.jts.geom.GeometryFactory;
 
+/** Represents the boundary of a piece of topology. */
 public class AreaMeta {
   Area area;
   Point2D centerPoint;
@@ -47,45 +47,45 @@ public class AreaMeta {
     return centerPoint;
   }
 
-  public Set<VisibleAreaSegment> getVisibleAreas(Point2D origin) {
-    Set<VisibleAreaSegment> segSet = new HashSet<VisibleAreaSegment>();
+  /**
+   * @param origin
+   * @param faceAway If `true`, only return segments facing away from origin.
+   * @return
+   */
+  public List<VisibleAreaSegment> getFacingSegments(
+      GeometryFactory geometryFactory, Point2D origin, boolean faceAway) {
+    List<VisibleAreaSegment> segments = new ArrayList<>();
+    List<AreaFace> currentSegmentFaces = new ArrayList<>();
 
-    VisibleAreaSegment segment = null;
     for (AreaFace face : faceList) {
       double originAngle = GeometryUtil.getAngle(origin, face.getMidPoint());
-      double delta = GeometryUtil.getAngleDelta(originAngle, face.getFacing());
+      double delta = Math.abs(GeometryUtil.getAngleDelta(originAngle, face.getFacing()));
 
-      if (Math.abs(delta) > 90) {
-        if (segment != null) {
-          segSet.add(segment);
-          segment = null;
-        }
-        continue;
+      boolean shouldIncludeFace = (delta > 90) == faceAway;
+      if (Math.abs(delta - 90) < 1e-7) {
+        // Do not include faces that are exactly parallel to the line of sight. It breaks JTS.
+        shouldIncludeFace = false;
       }
-      // Continuous face
-      if (segment == null) {
-        segment = new VisibleAreaSegment(origin);
+      if (shouldIncludeFace) {
+        // Since we're including this face, the existing segment can be extended.
+        currentSegmentFaces.add(face);
+      } else if (!currentSegmentFaces.isEmpty()) {
+        // Since we're skipping this face, the segment is broken and we must start a new one.
+        segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
+        currentSegmentFaces = new ArrayList<>();
       }
-      segment.addAtEnd(face);
     }
-    if (segment != null) {
-      // We finished the list while visible, see if we can combine with the first segment
-      // TODO: attempt to combine with the first segment somehow
-      segSet.add(segment);
+    // In case there is still current segment, we add it.
+    if (!currentSegmentFaces.isEmpty()) {
+      segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
     }
-    // System.out.println("Segs: " + segSet.size());
-    return segSet;
-  }
 
-  public Area getArea() {
-    return new Area(area);
+    return segments;
   }
 
   public boolean isHole() {
     return isHole;
   }
-
-  private static final int skippedPoints = 0;
 
   public void addPoint(float x, float y) {
     // Cut out redundant points

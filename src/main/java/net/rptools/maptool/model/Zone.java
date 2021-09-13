@@ -150,6 +150,10 @@ public class Zone extends BaseModel {
   }
 
   // Control what topology layer(s) to add/get drawing to/from
+  // TODO Replace with a class that has the following information:
+  //  - draw VBL: no / yes / terrain
+  //  - draw MBL: no / yes
+  //  - Define constants for common cases?
   public enum TopologyMode {
     VBL,
     MBL,
@@ -208,6 +212,8 @@ public class Zone extends BaseModel {
 
   /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
+
+  private Area terrainVbl = new Area();
 
   // New topology to hold Movement Blocking Only
   private Area topologyTerrain = new Area();
@@ -472,6 +478,7 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    terrainVbl = (Area) zone.terrainVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
     topologyMode = zone.topologyMode;
@@ -765,36 +772,29 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
-  public void clearTopology() {
-    topology = new Area();
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
    * @param topologyMode the mode of the topology
    */
-  public void addTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
+  public void addTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
+    if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
+      if (!drawTerrainVbl) {
         getTopology().add(area);
-        break;
-      case MBL:
-        getTopologyTerrain().add(area);
-        break;
-      case COMBINED:
-        getTopology().add(area);
-        getTopologyTerrain().add(area);
-        break;
+      } else {
+        getTerrainVbl().add(area);
+      }
+    }
+    if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
+      getTopologyTerrain().add(area);
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void addTopology(Area area) {
-    addTopology(area, getTopologyMode());
+    addTopology(area, getTopologyMode(), AppPreferences.getDrawTerrainVbl());
   }
 
   /**
@@ -803,25 +803,23 @@ public class Zone extends BaseModel {
    * @param area the area
    * @param topologyMode the mode of the topology
    */
-  public void removeTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
+  public void removeTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
+    if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
+      if (!drawTerrainVbl) {
         getTopology().subtract(area);
-        break;
-      case MBL:
-        getTopologyTerrain().subtract(area);
-        break;
-      case COMBINED:
-        getTopology().subtract(area);
-        getTopologyTerrain().subtract(area);
-        break;
+      } else {
+        getTerrainVbl().subtract(area);
+      }
+    }
+    if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
+      getTopologyTerrain().subtract(area);
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void removeTopology(Area area) {
-    removeTopology(area, getTopologyMode());
+    removeTopology(area, getTopologyMode(), AppPreferences.getDrawTerrainVbl());
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
@@ -832,6 +830,10 @@ public class Zone extends BaseModel {
   /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
+  }
+
+  public Area getTerrainVbl() {
+    return terrainVbl;
   }
 
   /** @return the terrain topology of the zone */
@@ -2009,6 +2011,9 @@ public class Zone extends BaseModel {
       undo = new UndoPerZone(this);
     }
 
+    if (terrainVbl == null) {
+      terrainVbl = new Area();
+    }
     // Movement Blocking Layer
     if (topologyTerrain == null) {
       topologyTerrain = new Area();

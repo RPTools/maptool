@@ -14,8 +14,14 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import java.awt.Point;
 import java.awt.geom.Area;
+import java.util.List;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public interface AreaContainer {
   public Area getBounds();
+
+  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+      GeometryFactory geometryFactory, Point origin, boolean frontSegments);
 }

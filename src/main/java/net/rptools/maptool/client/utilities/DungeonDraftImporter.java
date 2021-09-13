@@ -164,8 +164,8 @@ public class DungeonDraftImporter {
                 new Area(
                     WALL_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
-            zone.addTopology(vblArea, TopologyMode.VBL);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            zone.addTopology(vblArea, TopologyMode.VBL, false);
+            zone.addTopology(vblArea, TopologyMode.MBL, false);
           });
     }
 
@@ -178,8 +178,8 @@ public class DungeonDraftImporter {
                 new Area(
                     OBJECT_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
-            zone.addTopology(vblArea, TopologyMode.VBL);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            zone.addTopology(vblArea, TopologyMode.VBL, false);
+            zone.addTopology(vblArea, TopologyMode.MBL, false);
           });
     }
 
@@ -201,8 +201,8 @@ public class DungeonDraftImporter {
 
               Area vblArea =
                   new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
-              zone.addTopology(vblArea, TopologyMode.COMBINED);
-              zone.addTopology(vblArea, TopologyMode.MBL);
+              zone.addTopology(vblArea, TopologyMode.COMBINED, false);
+              zone.addTopology(vblArea, TopologyMode.MBL, false);
             }
           });
     }

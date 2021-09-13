@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import net.rptools.lib.swing.ColorPicker;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.AssetPaint;
@@ -588,11 +589,19 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     if (isEraser) {
       renderer.getZone().removeTopology(area);
       MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+          .removeTopology(
+              renderer.getZone().getId(),
+              area,
+              renderer.getZone().getTopologyMode(),
+              AppPreferences.getDrawTerrainVbl());
     } else {
       renderer.getZone().addTopology(area);
       MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+          .addTopology(
+              renderer.getZone().getId(),
+              area,
+              renderer.getZone().getTopologyMode(),
+              AppPreferences.getDrawTerrainVbl());
     }
     renderer.repaint();
   }

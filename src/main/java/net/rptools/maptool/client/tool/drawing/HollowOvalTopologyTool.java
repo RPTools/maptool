@@ -22,6 +22,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
@@ -113,10 +114,19 @@ public class HollowOvalTopologyTool extends AbstractDrawingTool implements Mouse
         if (isEraser(e)) {
           getZone().removeTopology(area);
           MapTool.serverCommand()
-              .removeTopology(getZone().getId(), area, getZone().getTopologyMode());
+              .removeTopology(
+                  getZone().getId(),
+                  area,
+                  getZone().getTopologyMode(),
+                  AppPreferences.getDrawTerrainVbl());
         } else {
           getZone().addTopology(area);
-          MapTool.serverCommand().addTopology(getZone().getId(), area, getZone().getTopologyMode());
+          MapTool.serverCommand()
+              .addTopology(
+                  getZone().getId(),
+                  area,
+                  getZone().getTopologyMode(),
+                  AppPreferences.getDrawTerrainVbl());
         }
         renderer.repaint();
 

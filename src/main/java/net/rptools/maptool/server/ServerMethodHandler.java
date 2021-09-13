@@ -227,10 +227,18 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           setServerPolicy((ServerPolicy) context.get(0));
           break;
         case addTopology:
-          addTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
+          addTopology(
+              context.getGUID(0),
+              (Area) context.get(1),
+              (TopologyMode) context.get(2),
+              (boolean) context.get(3));
           break;
         case removeTopology:
-          removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
+          removeTopology(
+              context.getGUID(0),
+              (Area) context.get(1),
+              (TopologyMode) context.get(2),
+              (boolean) context.get(3));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -794,15 +802,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     MapTool.getFrame().getToolbox().updateTools();
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void addTopology(
+      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode);
+    zone.addTopology(area, topologyMode, drawTerrainVbl);
     forwardToClients();
   }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void removeTopology(
+      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area, topologyMode);
+    zone.removeTopology(area, topologyMode, drawTerrainVbl);
     forwardToClients();
   }
 

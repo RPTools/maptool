@@ -34,6 +34,7 @@ import net.rptools.maptool.client.tool.MeasureTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.TextTool;
+import net.rptools.maptool.client.tool.UseTerrainVblSelectionTool;
 import net.rptools.maptool.client.tool.drawing.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -338,6 +339,7 @@ public class ToolbarPanel extends JToolBar {
 
     // Add with space to denote button is not part of the Topology Panel button group
     final SidePanel topologySelectionPanel = new SidePanel();
+    topologySelectionPanel.add(UseTerrainVblSelectionTool.class);
     topologySelectionPanel.add(DrawTopologySelectionTool.class);
 
     panel.add(Box.createHorizontalStrut(5));
