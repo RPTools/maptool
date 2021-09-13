@@ -24,10 +24,10 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
+import net.rptools.maptool.client.swing.TopologyModeSelectionPanel;
 import net.rptools.maptool.client.tool.AI_Tool;
 import net.rptools.maptool.client.tool.AI_UseVblTool;
 import net.rptools.maptool.client.tool.BoardTool;
-import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.tool.MeasureTool;
@@ -336,12 +336,11 @@ public class ToolbarPanel extends JToolBar {
     panel.add(DiamondTopologyTool.class);
     panel.add(HollowDiamondTopologyTool.class);
 
-    // Add with space to denote button is not part of the Topology Panel button group
-    final SidePanel topologySelectionPanel = new SidePanel();
-    topologySelectionPanel.add(DrawTopologySelectionTool.class);
+    // Add with space to separate mode button group from shape button group.
+    panel.add(Box.createHorizontalStrut(10));
 
-    panel.add(Box.createHorizontalStrut(5));
-    panel.add(topologySelectionPanel);
+    final var topologyModeSelectionPanel = new TopologyModeSelectionPanel();
+    panel.add(topologyModeSelectionPanel);
 
     return panel;
   }
