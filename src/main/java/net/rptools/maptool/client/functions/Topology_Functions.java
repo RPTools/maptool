@@ -1005,6 +1005,8 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
+    // TODO Handle terrain VBL as appropriate.
+
     switch (mode) {
       case VBL:
         area.intersect(renderer.getZone().getTopology());
