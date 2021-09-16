@@ -222,14 +222,7 @@ public class FogUtil {
         clearedAreaList.stream().map(PreparedGeometry::getGeometry).collect(Collectors.toList());
 
     Geometry geometryCollection =
-        geometryFactory.createGeometryCollection(plainGeometries.toArray(Geometry[]::new));
-    // Interesting tradeoff here. GeometryFixer is way faster than .buffer(0) and is specialized
-    // for fixing geometry. But when we use, the subsequent unions becomes much slower. In
-    // total, the time taken is basically the same either way (though there is more overhead for
-    // small cases with GeometryFixer).
-    // Also GeometryFixer isn't available on 1.16.1 and may not even be stable yet on 1.18.2
-    // geometryCollection = new GeometryFixer(geometryCollection).getResult();
-    geometryCollection = geometryCollection.buffer(0);
+        geometryFactory.createGeometryCollection(plainGeometries.toArray(Geometry[]::new)).buffer(0);
 
     return new UnaryUnionOp(geometryCollection).union();
   }
