@@ -190,7 +190,6 @@ public class FogUtil {
       }
     }
 
-    System.out.printf("# vision blocking segments: %d%n", visionBlockingSegments.size());
     return visionBlockingSegments;
   }
 
