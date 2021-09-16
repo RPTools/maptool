@@ -121,9 +121,6 @@ public class FogUtil {
             visionBlockingSegments.addAll(
                 container.getVisibleBoundarySegements(geometryFactory, origin, frontSide));
 
-    // TODO We need to attach terrain VBL information to each AreaContainer and take action
-    // appropriately. So I likely need to invert these conditions for the future.
-
     if (island != null) {
       // We're in an island. For normal VBL, vision is entirely blocked. But for terrain VBL,
       // vision can continue until we hit the front of any contained ocean or the boundary of
@@ -473,11 +470,6 @@ public class FogUtil {
 
             Area currVisionArea = zoneView.getVisibleArea(tokenClone);
             if (currVisionArea != null) {
-              // TODO These together account for nearly 200ms. I believe this is the major
-              // difference between this and the previous implementation.
-              //  Previously, I expect these are very quick while they are dominantly slow for
-              // JTS-converted `Area`s. I don't know why, but it
-              //  could be do to more subtle geometry thanks to the necessary buffering.
               visionArea.add(currVisionArea);
               meta.addToExposedAreaHistory(currVisionArea);
             }

@@ -393,6 +393,7 @@ public class Topology_Functions extends AbstractFunction {
         }
       }
 
+      // TODO Set terrain VBL as appropriate.
       if (vblFromToken) {
         TokenVBL.renderTopology(renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL);
         if (delete) {

@@ -66,6 +66,8 @@ public class ZoneView implements ModelChangeListener {
   private AreaTree terrainVblTree;
   /** The VBL area of the zone VBL and the tokens VBL. */
   private Area tokenTopology;
+  /** The VBL area of the zone terrain VBL and the tokens terrain VBL. */
+  private Area tokenTerrainVbl;
 
   /** Lumen for personal vision (darkvision). */
   private static final double LUMEN_VISION = 100;
@@ -135,6 +137,10 @@ public class ZoneView implements ModelChangeListener {
     return topologyTree;
   }
 
+  public synchronized AreaTree getTerrainVblTree() {
+    return getTerrainVblTree(true);
+  }
+
   /**
    * Get the topologyTree. The topologyTree is "cached" and should only regenerate when topologyTree
    * is null which should happen on flush calls.
@@ -144,8 +150,21 @@ public class ZoneView implements ModelChangeListener {
    * @param useTokenVBL using token VBL? If so and topology null, create one from VBL tokens.
    * @return the AreaTree (topologyTree).
    */
-  public synchronized AreaTree getTerrainVblTree() {
-    if (terrainVblTree == null) {
+  public synchronized AreaTree getTerrainVblTree(boolean useTokenVBL) {
+    if (tokenTerrainVbl == null && useTokenVBL) {
+      log.debug("ZoneView topologyTree is null, generating...");
+
+      tokenTerrainVbl = new Area(zone.getTerrainVbl());
+      List<Token> vblTokens =
+              MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
+
+      for (Token vblToken : vblTokens) {
+        tokenTerrainVbl.add(vblToken.getTransformedTerrainVBL());
+      }
+
+      terrainVblTree = new AreaTree(tokenTerrainVbl, false);
+    }
+    else if (terrainVblTree == null) {
       terrainVblTree = new AreaTree(zone.getTerrainVbl(), true);
     }
 
@@ -838,6 +857,7 @@ public class ZoneView implements ModelChangeListener {
         topologyTree = null;
         terrainVblTree = null;
         tokenTopology = null;
+        tokenTerrainVbl = null;
         tokenVisibleAreaCache.clear();
 
         // topologyAreaData = null; // Jamz: This isn't used, probably never completed code.

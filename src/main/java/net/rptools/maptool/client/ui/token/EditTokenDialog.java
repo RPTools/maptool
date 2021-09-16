@@ -784,6 +784,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       token.setColorSensitivity(-1);
     }
 
+    // TODO Terrain VBL.
+
     token.setHeroLabData(heroLabData);
 
     // OTHER
