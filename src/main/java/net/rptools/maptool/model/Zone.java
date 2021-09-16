@@ -1668,11 +1668,11 @@ public class Zone extends BaseModel {
   }
 
   public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(Token::hasVBL);
+    return getTokensFiltered(token -> token.hasVBL() && !token.getIsTerrainVbl());
   }
 
   public List<Token> getTokensWithTerrainVBL() {
-    return getTokensFiltered(Token::hasTerrainVBL);
+    return getTokensFiltered(token -> token.hasVBL() && token.getIsTerrainVbl());
   }
 
   public List<Token> getTokensWithTerrainModifiers() {

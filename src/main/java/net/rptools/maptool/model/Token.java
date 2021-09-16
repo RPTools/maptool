@@ -414,6 +414,7 @@ public class Token extends BaseModel implements Cloneable {
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
+    isTerrainVbl = token.isTerrainVbl;
 
     name = token.name;
     notes = token.notes;
@@ -1531,16 +1532,7 @@ public class Token extends BaseModel implements Cloneable {
    * @return true if the token's vbl is not null, and false otherwise
    */
   public boolean hasVBL() {
-    return vbl != null && !isTerrainVbl;
-  }
-
-  /**
-   * Return the existence of the token's terrain VBL
-   *
-   * @return true if the token's vbl is not null, and false otherwise
-   */
-  public boolean hasTerrainVBL() {
-    return vbl != null && isTerrainVbl;
+    return vbl != null;
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {

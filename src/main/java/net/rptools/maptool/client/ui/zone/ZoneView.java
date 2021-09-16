@@ -162,7 +162,7 @@ public class ZoneView implements ModelChangeListener {
         tokenTerrainVbl.add(vblToken.getTransformedVBL());
       }
 
-      terrainVblTree = new AreaTree(tokenTerrainVbl, false);
+      terrainVblTree = new AreaTree(tokenTerrainVbl, true);
     }
     else if (terrainVblTree == null) {
       terrainVblTree = new AreaTree(zone.getTerrainVbl(), true);
