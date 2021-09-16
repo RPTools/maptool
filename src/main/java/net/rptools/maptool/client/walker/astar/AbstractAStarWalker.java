@@ -173,6 +173,12 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       if (MapTool.getServerPolicy().getVblBlocksMove()) {
         newVbl =
             MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+        newVbl.add(
+            MapTool.getFrame()
+                .getCurrentZoneRenderer()
+                .getZoneView()
+                .getTerrainVblTree()
+                .getArea());
 
         if (tokenVBL != null) {
           newVbl.subtract(tokenVBL);
