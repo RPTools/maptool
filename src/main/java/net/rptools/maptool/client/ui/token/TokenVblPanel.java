@@ -266,14 +266,12 @@ public class TokenVblPanel extends JPanel {
       AffineTransform atArea = AffineTransform.getTranslateInstance(x, y);
       atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
-      var baseColor = token.getIsTerrainVbl() ? AppStyle.tokenTerrainVblColor : AppStyle.tokenTopologyColor;
+      var baseColor =
+          editTokenDialog.getIsTerrainButton().isSelected()
+              ? AppStyle.tokenTerrainVblColor
+              : AppStyle.tokenTopologyColor;
       if (isHideTokenImage()) {
-        Color color =
-            new Color(
-                baseColor.getRed(),
-                baseColor.getGreen(),
-                baseColor.getBlue(),
-                200);
+        Color color = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), 200);
 
         g2d.setColor(color);
       } else {

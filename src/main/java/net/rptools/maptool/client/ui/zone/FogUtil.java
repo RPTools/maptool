@@ -219,7 +219,9 @@ public class FogUtil {
         clearedAreaList.stream().map(PreparedGeometry::getGeometry).collect(Collectors.toList());
 
     Geometry geometryCollection =
-        geometryFactory.createGeometryCollection(plainGeometries.toArray(Geometry[]::new)).buffer(0);
+        geometryFactory
+            .createGeometryCollection(plainGeometries.toArray(Geometry[]::new))
+            .buffer(0);
 
     return new UnaryUnionOp(geometryCollection).union();
   }

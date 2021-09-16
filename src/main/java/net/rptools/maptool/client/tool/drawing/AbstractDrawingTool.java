@@ -248,7 +248,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
   protected Area getTokenTerrainVbl() {
     List<Token> vblTokens =
-            MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
 
     Area tokenTopolgy = new Area();
     for (Token vblToken : vblTokens) {

@@ -145,9 +145,8 @@ public class ZoneView implements ModelChangeListener {
    * Get the topologyTree. The topologyTree is "cached" and should only regenerate when topologyTree
    * is null which should happen on flush calls.
    *
-   * <p>TODO Account for token VBL for any terrain tokens.
-   *
-   * @param useTokenVBL using token VBL? If so and topology null, create one from VBL tokens.
+   * @param useTokenVBL using token VBL? If so and terrain VBL null, create one from terrain VBL
+   *     tokens.
    * @return the AreaTree (topologyTree).
    */
   public synchronized AreaTree getTerrainVblTree(boolean useTokenVBL) {
@@ -156,15 +155,14 @@ public class ZoneView implements ModelChangeListener {
 
       tokenTerrainVbl = new Area(zone.getTerrainVbl());
       List<Token> vblTokens =
-              MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
+          MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
 
       for (Token vblToken : vblTokens) {
         tokenTerrainVbl.add(vblToken.getTransformedVBL());
       }
 
       terrainVblTree = new AreaTree(tokenTerrainVbl, true);
-    }
-    else if (terrainVblTree == null) {
+    } else if (terrainVblTree == null) {
       terrainVblTree = new AreaTree(zone.getTerrainVbl(), true);
     }
 

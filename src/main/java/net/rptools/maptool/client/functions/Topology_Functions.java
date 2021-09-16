@@ -394,8 +394,10 @@ public class Topology_Functions extends AbstractFunction {
       }
 
       // TODO Set terrain VBL as appropriate.
+      boolean isTerrainVbl = false;
       if (vblFromToken) {
-        TokenVBL.renderTopology(renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL);
+        TokenVBL.renderTopology(
+            renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL, isTerrainVbl);
         if (delete) {
           token.setVBL(null);
         }
@@ -403,7 +405,7 @@ public class Topology_Functions extends AbstractFunction {
         Area vbl = TokenVBL.getVBL_underToken(renderer, token);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
         if (delete) {
-          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL);
+          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL, isTerrainVbl);
         }
       }
     } else {
@@ -555,7 +557,9 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    // TODO Handle terrain VBL as appropriate.
+    boolean isTerrainVbl = false;
+    return TokenVBL.renderTopology(renderer, area, erase, mode, isTerrainVbl);
   }
 
   private void applyTranslate(
@@ -707,7 +711,9 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    // TODO Handle terrain VBL as appropriate.
+    boolean isTerrainVbl = false;
+    return TokenVBL.renderTopology(renderer, area, erase, mode, isTerrainVbl);
   }
 
   /**
@@ -801,7 +807,9 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    // TODO Handle terrain VBL as appropriate.
+    boolean isTerrainVbl = false;
+    return TokenVBL.renderTopology(renderer, area, erase, mode, isTerrainVbl);
   }
 
   /**
@@ -908,7 +916,9 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    // TODO Handle terrain VBL as appropriate.
+    boolean isTerrainVbl = false;
+    return TokenVBL.renderTopology(renderer, area, erase, mode, isTerrainVbl);
   }
 
   /**
