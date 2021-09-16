@@ -402,8 +402,9 @@ public class Topology_Functions extends AbstractFunction {
           token.setVBL(null);
         }
       } else {
-        Area vbl = TokenVBL.getVBL_underToken(renderer, token);
-        token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
+        // TODO Set terrain VBL as appropriate
+        Area vbl = TokenVBL.getVBL_underToken(renderer, token, false);
+        token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token, false));
         if (delete) {
           TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL, isTerrainVbl);
         }

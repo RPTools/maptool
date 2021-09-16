@@ -220,7 +220,9 @@ public class TokenVBL {
     return null;
   }
 
-  public static Area getMapVBL_transformed(ZoneRenderer renderer, Token token) {
+  // TODO Lots of similarity between this and getVBL_underToken().
+  public static Area getMapVBL_transformed(
+      ZoneRenderer renderer, Token token, boolean isTerrainVbl) {
     Rectangle footprintBounds = token.getBounds(renderer.getZone());
     Area newTokenVBL = new Area(footprintBounds);
     Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
@@ -250,6 +252,9 @@ public class TokenVBL {
 
     atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
+    Area mapArea =
+        isTerrainVbl ? renderer.getZone().getTerrainVbl() : renderer.getZone().getTopology();
+
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
       // Get the center of the token bounds
@@ -262,7 +267,7 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
 
       // Capture the VBL via intersection
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(mapArea);
 
       // Rotate the area back to prep to store on Token
       captureArea =
@@ -270,7 +275,7 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
     } else {
       // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(mapArea);
     }
 
     // Translate the capture to zero out the x,y to store on the Token
@@ -295,7 +300,7 @@ public class TokenVBL {
     return newTokenVBL;
   }
 
-  public static Area getVBL_underToken(ZoneRenderer renderer, Token token) {
+  public static Area getVBL_underToken(ZoneRenderer renderer, Token token, boolean isTerrainVbl) {
     Rectangle footprintBounds = token.getBounds(renderer.getZone());
     Area newTokenVBL = new Area(footprintBounds);
     Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
@@ -303,6 +308,8 @@ public class TokenVBL {
     AffineTransform atArea = new AffineTransform();
 
     double sx, sy;
+    Area vblOnMap =
+        isTerrainVbl ? renderer.getZone().getTerrainVbl() : renderer.getZone().getTopology();
 
     if (token.isSnapToScale()) {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
@@ -326,10 +333,10 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
 
       // Capture the VBL via intersection
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(vblOnMap);
     } else {
       // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(vblOnMap);
     }
 
     return newTokenVBL;
