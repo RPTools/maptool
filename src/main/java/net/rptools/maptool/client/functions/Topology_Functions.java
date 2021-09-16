@@ -96,15 +96,9 @@ public class Topology_Functions extends AbstractFunction {
     int results = -1;
 
     // TODO Despite the similarities, *VBL and *MBL are now diverging in parameter requirements and I think should be split.
-    if (functionName.equals("drawVBL")
-        || functionName.equals("eraseVBL")
-        || functionName.equals("drawMBL")
-        || functionName.equals("eraseMBL")) {
+    if (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) {
       boolean erase = false;
-      Zone.TopologyMode mode =
-              (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
-                      ? Zone.TopologyMode.VBL
-                      : Zone.TopologyMode.MBL;
+      Zone.TopologyMode mode = Zone.TopologyMode.VBL;
       if (parameters.size() < 1) {
         throw new ParserException(
                 I18N.getText(
@@ -120,7 +114,7 @@ public class Topology_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (functionName.equals("eraseVBL") || functionName.equals("eraseMBL")) {
+      if (functionName.equals("eraseVBL")) {
         erase = true;
       }
 
@@ -159,6 +153,65 @@ public class Topology_Functions extends AbstractFunction {
             break;
           case CIRCLE:
             drawCircleTopology(renderer, topologyObject, erase, mode, isTerrainVbl, functionName);
+            break;
+          case NONE:
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    else if (functionName.equals("drawMBL") || functionName.equals("eraseMBL")) {
+      boolean erase = false;
+      Zone.TopologyMode mode = Zone.TopologyMode.MBL;
+      if (parameters.size() != 1) {
+        throw new ParserException(
+                I18N.getText(
+                        "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+      }
+
+      if (!MapTool.getParser().isMacroTrusted()) {
+        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+      }
+
+      if (functionName.equals("eraseMBL")) {
+        erase = true;
+      }
+
+      JsonElement json =
+              JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+
+      JsonArray topologyArray;
+      if (json.isJsonArray()) {
+        topologyArray = json.getAsJsonArray();
+      } else if (json.isJsonObject()) {
+        topologyArray = new JsonArray();
+        topologyArray.add(json.getAsJsonObject());
+      } else {
+        throw new ParserException(
+                I18N.getText(
+                        "macro.function.json.unknownType",
+                        json == null ? parameters.get(0).toString() : json.toString(),
+                        functionName));
+      }
+
+      for (int i = 0; i < topologyArray.size(); i++) {
+        JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
+
+        Shape topologyShape =
+                Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
+        switch (topologyShape) {
+          case RECTANGLE:
+            drawRectangleTopology(renderer, topologyObject, erase, mode, false, functionName);
+            break;
+          case POLYGON:
+            drawPolygonTopology(renderer, topologyObject, erase, mode, false, functionName);
+            break;
+          case CROSS:
+            drawCrossTopology(renderer, topologyObject, erase, mode, false, functionName);
+            break;
+          case CIRCLE:
+            drawCircleTopology(renderer, topologyObject, erase, mode, false, functionName);
             break;
           case NONE:
             break;
