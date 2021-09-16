@@ -95,6 +95,7 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
+    // TODO Despite the similarities, *VBL and *MBL are now diverging in parameter requirements and I think should be split.
     if (functionName.equals("drawVBL")
         || functionName.equals("eraseVBL")
         || functionName.equals("drawMBL")
@@ -104,13 +105,15 @@ public class Topology_Functions extends AbstractFunction {
               (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
                       ? Zone.TopologyMode.VBL
                       : Zone.TopologyMode.MBL;
-      // TODO Set to true based on parameters.
-      boolean isTerrainVbl = false;
-
-      if (parameters.size() != 1) {
+      if (parameters.size() < 1) {
         throw new ParserException(
                 I18N.getText(
-                        "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+                        "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      }
+      if (parameters.size() > 2) {
+        throw new ParserException(
+                I18N.getText(
+                        "macro.function.general.tooManyParam", functionName, 2, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -123,6 +126,7 @@ public class Topology_Functions extends AbstractFunction {
 
       JsonElement json =
               JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+      boolean isTerrainVbl = parameters.size() >= 2 && BigDecimal.ONE.equals(parameters.get(1));
 
       JsonArray topologyArray;
       if (json.isJsonArray()) {
@@ -164,9 +168,10 @@ public class Topology_Functions extends AbstractFunction {
       }
     }
     else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
+      // TODO Wiki needs updating. `format` (parameter 2) is optional, defaulting to 0.
+
       Zone.TopologyMode mode =
               functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
-      boolean isTerrainVbl = false; // TODO Set to true based on parameters.
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
@@ -185,9 +190,10 @@ public class Topology_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
+      if (parameters.size() >= 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
         simpleJSON = true;
       }
+      boolean isTerrainVbl = parameters.size() >= 3 && BigDecimal.ONE.equals(parameters.get(2));
 
       JsonElement json =
               JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
