@@ -159,7 +159,7 @@ public class ZoneView implements ModelChangeListener {
               MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
 
       for (Token vblToken : vblTokens) {
-        tokenTerrainVbl.add(vblToken.getTransformedTerrainVBL());
+        tokenTerrainVbl.add(vblToken.getTransformedVBL());
       }
 
       terrainVblTree = new AreaTree(tokenTerrainVbl, false);

@@ -192,7 +192,7 @@ public class Token extends BaseModel implements Cloneable {
     setTerrainModifierOperation,
     setTerrainModifiersIgnored,
     setVBL,
-    setTerrainVBL,
+    setIsTerrainVBL,
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
@@ -253,8 +253,12 @@ public class Token extends BaseModel implements Cloneable {
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
+  // This can be regular VBL or terrain VBL.
   private Area vbl;
-  private Area terrainVbl;
+  // New tokens will be terrain VBL by default as that is a common case. Due to deserialization
+  // behaviour tokens without this field will have it set to false, which preserves backwards
+  // compatibility with pre 1.10.
+  private boolean isTerrainVbl = true;
 
   private String name;
   private Set<String> ownerList;
@@ -410,7 +414,6 @@ public class Token extends BaseModel implements Cloneable {
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
-    terrainVbl = token.terrainVbl;
 
     name = token.name;
     notes = token.notes;
@@ -1424,19 +1427,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the terrain VBL of the token. If terrain vbl null, set vblAplphaSensitivity to -1.
-   *
-   * @param terrainVbl the terrain VBL to set.
-   */
-  public void setTerrainVBL(Area terrainVbl) {
-    this.terrainVbl = vbl;
-    if (terrainVbl == null) {
-      // TODO Evaluate whether this is the right decision.
-      vblColorSensitivity = -1;
-    }
-  }
-
-  /**
    * Return the vbl area of the token
    *
    * @return the current VBL of the token
@@ -1445,21 +1435,16 @@ public class Token extends BaseModel implements Cloneable {
     return vbl;
   }
 
-  /**
-   * Return the terrain vbl area of the token
-   *
-   * @return the current terrain VBL of the token
-   */
-  public Area getTerrainVBL() {
-    return terrainVbl;
+  public boolean getIsTerrainVbl() {
+    return this.isTerrainVbl;
+  }
+
+  public void setIsTerrainVBL(boolean isTerrainVbl) {
+    this.isTerrainVbl = isTerrainVbl;
   }
 
   public Area getTransformedVBL() {
     return getTransformedVBL(vbl);
-  }
-
-  public Area getTransformedTerrainVBL() {
-    return getTransformedVBL(terrainVbl);
   }
 
   /**
@@ -1546,16 +1531,16 @@ public class Token extends BaseModel implements Cloneable {
    * @return true if the token's vbl is not null, and false otherwise
    */
   public boolean hasVBL() {
-    return vbl != null;
+    return vbl != null && !isTerrainVbl;
   }
 
   /**
    * Return the existence of the token's terrain VBL
    *
-   * @return true if the token's terrain vbl is not null, and false otherwise
+   * @return true if the token's vbl is not null, and false otherwise
    */
   public boolean hasTerrainVBL() {
-    return terrainVbl != null;
+    return vbl != null && isTerrainVbl;
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -2715,11 +2700,9 @@ public class Token extends BaseModel implements Cloneable {
           zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
         }
         break;
-      case setTerrainVBL:
-        setTerrainVBL((Area) parameters[0]);
-        if (!hasTerrainVBL()) { // if VBL removed
-          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
-        }
+      case setIsTerrainVBL:
+        setIsTerrainVBL((boolean) parameters[0]);
+        zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
         break;
       case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);

@@ -68,6 +68,7 @@ public class AppStyle {
   public static Color topologyTerrainColor = new Color(255, 0, 255, 128);
 
   public static Color tokenTopologyColor = new Color(255, 255, 0, 128);
+  public static Color tokenTerrainVblColor = new Color(255, 165, 0, 128);
 
   public static BufferedImage boundedBackgroundTile;
 
