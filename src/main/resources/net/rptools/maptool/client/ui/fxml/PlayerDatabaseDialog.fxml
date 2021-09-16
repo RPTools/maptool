@@ -1,29 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.players.PlayerDatabaseDialogController">
    <center>
-      <TableView fx:id="playersTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <columns>
-          <TableColumn editable="false" prefWidth="75.0" text="%playerDB.dialog.player" />
-          <TableColumn prefWidth="75.0" text="%playerDB.dialog.role" />
-            <TableColumn prefWidth="75.0" text="%playerDB.passwordType" />
-            <TableColumn prefWidth="75.0" text="%playerDB.disabled" />
-            <TableColumn prefWidth="75.0" text="%playerDB.disabledReason" />
-        </columns>
-      </TableView>
+      <TableView fx:id="playersTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="cancelButton" mnemonicParsing="false" text="%playerDB.cancel" />
-            <Button fx:id="saveChangesButton" mnemonicParsing="false" text="%playerDB.saveChanges" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" text="%playerDB.dialog.cancel" />
+            <Button fx:id="saveChangesButton" mnemonicParsing="false" text="%playerDB.dialog.saveChanges" />
          </children>
       </HBox>
    </bottom>

@@ -2485,7 +2485,6 @@ public class AppActions {
     }
   }
 
-
   public static final Action PLAYER_DATABASE =
       new DefaultClientAction() {
         {
@@ -2494,7 +2493,8 @@ public class AppActions {
 
         @Override
         public boolean isAvailable() {
-          return PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase;
+          return PlayerDatabaseFactory.getCurrentPlayerDatabase()
+              instanceof PersistedPlayerDatabase;
         }
 
         @Override
@@ -2502,7 +2502,6 @@ public class AppActions {
           new PlayerDatabaseDialog().show();
         }
       };
-
 
   public static final Action LOAD_CAMPAIGN =
       new DefaultClientAction() {

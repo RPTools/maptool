@@ -18,6 +18,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -26,6 +27,7 @@ import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,8 +143,9 @@ public class Players {
           break;
         }
       }
+      AuthMethod authMethod = playerDatabase.getAuthMethod(player);
 
-      return new PlayerInfo(name, role, blocked, blockedReason, connected);
+      return new PlayerInfo(name, role, blocked, blockedReason, connected, authMethod);
     } catch (Exception e) {
       if (e instanceof CompletionException ce) {
         throw ce;
@@ -172,7 +175,7 @@ public class Players {
       }
     }
 
-    return players;
+    return players.stream().filter(Objects::nonNull).collect(Collectors.toSet());
   }
 
   /**
