@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "DataTranferObjectProtos";
+
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+message ServerPolicyDto {
+  bool use_strict_token_management = 1;
+  bool is_movement_locked = 2;
+  bool is_token_editor_locked = 3;
+  bool players_can_reveal_vision = 4;
+  bool gm_reveals_vision_for_unowned_tokens = 5;
+  bool use_individual_views = 6;
+  bool restricted_impersonation = 7;
+  bool players_receive_campaign_macros = 8;
+  bool use_tool_tips_for_default_roll_format = 9;
+  bool use_individual_FOW = 10;
+  bool is_auto_reveal_on_movement = 11;
+  bool include_owned_NPCs = 12;
+  WalkerMetricDto movement_metric = 13;
+  bool using_astar_pathfinding = 14;
+  bool vbl_blocks_move = 15;
+}
+
+enum WalkerMetricDto {
+  NO_DIAGONALS = 0;
+  MANHATTAN = 1;
+  ONE_TWO_ONE = 2;
+  ONE_ONE_ONE = 3;
+}
+
+enum RoleDto {
+  PLAYER = 0;
+  GM = 1;
+}
+

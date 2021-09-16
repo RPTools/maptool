@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "MessageTypeProtos";
+
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+import "data_transfer_objects.proto";
+import "drawing_dto.proto";
+
+message BootPlayerMsg {
+  string player_name = 1;
+}
+
+message BringTokensToFrontMsg {
+  string zoneGuid = 1;
+  repeated string tokenGuids = 2;
+}
+
+message DrawMsg {
+  string zoneGuid = 1;
+  PenDto pen = 2;
+  DrawableDto drawable = 3;
+}
+
+

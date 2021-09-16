@@ -1,0 +1,251 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto.drawing";
+option java_outer_classname = "DrawingDtoProtos";
+
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+message PenDto {
+  enum mode {
+    MODE_SOLID = 0;
+    MODE_TRANSPARENT = 1;
+  }
+  mode foreground_mode = 1;
+  DrawablePaintDto foreground_color = 2;
+  mode background_mode = 3;
+  DrawablePaintDto background_color = 4;
+  float thickness = 5;
+  bool eraser = 6;
+  bool square_cap = 7;
+  float opacity = 8;
+}
+
+message DrawableDto {
+  oneof drawable_type {
+    ShapeDrawableDto shape_drawable = 1;
+    RectangleDrawableDto rectangle_drawable = 2;
+    OvalDrawableDto oval_drawable = 3;
+    CrossDrawableDto cross_drawable = 4;
+    DrawnLabelDto drawn_label = 5;
+    LineSegmentDrawableDto line_segment = 6;
+    DrawablesGroupDto drawables_group = 7;
+    RadiusCellTemplateDto radius_cell_template = 8;
+    LineCellTemplateDto line_cell_template = 9;
+    RadiusTemplateDto radius_template = 10;
+    BurstTemplateDto burst_template = 11;
+    ConeTemplateDto cone_template = 12;
+    BlastTemplateDto blast_template = 13;
+    LineCellTemplateDto line_template = 14;
+    WallTemplateDto wall_template = 15;
+  }
+}
+
+message WallTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+  bool mouse_slope_greater = 4;
+  string quadrant = 5;
+  IntPointDto path_vertex = 6;
+  bool double_wide = 7;
+}
+
+message LineTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+  bool mouse_slope_greater = 4;
+  string quadrant = 5;
+  IntPointDto path_vertex = 6;
+  bool double_wide = 7;
+}
+
+message BlastTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+  string direction = 4;
+  int32 offset_x = 5;
+  int32 offset_y = 6;
+}
+
+message ConeTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+  string direction = 4;
+}
+
+message BurstTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+}
+
+message RadiusTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+}
+
+message LineCellTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+  bool mouse_slope_greater = 4;
+  string quadrant = 5;
+  IntPointDto path_vertex = 6;
+}
+
+message RadiusCellTemplateDto {
+  string zoneId = 1;
+  IntPointDto vertex = 2;
+  int32 radius = 3;
+}
+
+message DrawablesGroupDto {
+  repeated DrawableDto drawables = 1;
+}
+
+message LineSegmentDrawableDto {
+  repeated IntPointDto points = 1;
+  float width = 2;
+  bool square_cap = 3;
+}
+
+message DrawnLabelDto {
+  RectangleDto bounds = 1;
+  string text = 2;
+  string font = 3;
+}
+
+message RectangleDrawableDto {
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+message OvalDrawableDto {
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+message CrossDrawableDto {
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+
+message ShapeDrawableDto {
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  ShapeDto shape = 4;
+  bool use_anti_aliasing = 5;
+}
+
+message ShapeDto {
+  oneof shape_type  {
+    RectangleDto rectangle = 1;
+    AreaDto area = 2;
+    PolygonDto polygon = 3;
+    EllipseDto ellipse = 4;
+  }
+}
+
+message AreaDto {
+  repeated CurveDto curves = 1;
+}
+
+message CurveDto {
+  oneof curve_type {
+    Order0CurveDto order_0 = 1;
+    Order1CurveDto order_1 = 2;
+    Order2CurveDto order_2 = 3;
+    Order3CurveDto order_3 = 4;
+  }
+}
+
+message Order0CurveDto {
+  int32 direction = 1;
+  DoublePointDto point = 2;
+}
+
+message Order1CurveDto {
+  int32 direction = 1;
+  DoublePointDto point_0 = 2;
+  DoublePointDto point_1 = 3;
+}
+
+message Order2CurveDto {
+  int32 direction = 1;
+  DoublePointDto point_0 = 2;
+  DoublePointDto point_c0 = 3;
+  DoublePointDto point_1 = 4;
+}
+
+message Order3CurveDto {
+  int32 direction = 1;
+  DoublePointDto point_0 = 2;
+  DoublePointDto point_c0 = 3;
+  DoublePointDto point_c1 = 4;
+  DoublePointDto point_1 = 5;
+}
+
+message IntPointDto {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message DoublePointDto {
+  double x = 1;
+  double y = 2;
+}
+
+message PolygonDto {
+  repeated IntPointDto points = 1;
+}
+
+message RectangleDto {
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+
+message EllipseDto {
+  float x = 1;
+  float y = 2;
+  float width = 3;
+  float height = 4;
+}
+
+message DrawablePaintDto {
+  oneof paint_type {
+    DrawableColorPaintDto color_paint = 1;
+    DrawableTexturePaintDto texture_paint = 2;
+  }
+}
+
+message DrawableColorPaintDto {
+  int32 color = 1;
+}
+
+message DrawableTexturePaintDto {
+  string asset_id = 1;
+  double scale = 2;
+}
