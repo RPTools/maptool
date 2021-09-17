@@ -25,9 +25,9 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -95,32 +95,36 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    // TODO Despite the similarities, *VBL and *MBL are now diverging in parameter requirements and I think should be split.
-    if (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) {
+    // TODO Consider putting the isTerrainVBL parameter into the shape information instead of
+    //  passing as a parameter that filters what kind of VBL to draw.
+
+    // TODO Despite the similarities, *VBL and *MBL are now diverging in parameter requirements and
+    // I think should be split.
+    if (functionName.equals("drawVBL")
+        || functionName.equals("eraseVBL")
+        || functionName.equals("drawMBL")
+        || functionName.equals("eraseMBL")) {
       boolean erase = false;
-      Zone.TopologyMode mode = Zone.TopologyMode.VBL;
-      if (parameters.size() < 1) {
+      Zone.TopologyMode mode =
+          (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
+              ? Zone.TopologyMode.VBL
+              : Zone.TopologyMode.MBL;
+      if (parameters.size() != 1) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
-      if (parameters.size() > 2) {
-        throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.tooManyParam", functionName, 2, parameters.size()));
+            I18N.getText(
+                "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (functionName.equals("eraseVBL")) {
+      if (functionName.equals("eraseVBL") || functionName.equals("eraseMBL")) {
         erase = true;
       }
 
       JsonElement json =
-              JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
-      boolean isTerrainVbl = parameters.size() >= 2 && BigDecimal.ONE.equals(parameters.get(1));
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
 
       JsonArray topologyArray;
       if (json.isJsonArray()) {
@@ -130,20 +134,26 @@ public class Topology_Functions extends AbstractFunction {
         topologyArray.add(json.getAsJsonObject());
       } else {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.json.unknownType",
-                        json == null ? parameters.get(0).toString() : json.toString(),
-                        functionName));
+            I18N.getText(
+                "macro.function.json.unknownType",
+                json == null ? parameters.get(0).toString() : json.toString(),
+                functionName));
       }
 
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
 
         Shape topologyShape =
-                Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
+            Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
+
+        boolean isTerrainVbl =
+            topologyObject.has("terrain")
+                && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
+        System.out.println(isTerrainVbl);
         switch (topologyShape) {
           case RECTANGLE:
-            drawRectangleTopology(renderer, topologyObject, erase, mode, isTerrainVbl, functionName);
+            drawRectangleTopology(
+                renderer, topologyObject, erase, mode, isTerrainVbl, functionName);
             break;
           case POLYGON:
             drawPolygonTopology(renderer, topologyObject, erase, mode, isTerrainVbl, functionName);
@@ -160,83 +170,23 @@ public class Topology_Functions extends AbstractFunction {
             break;
         }
       }
-    }
-    else if (functionName.equals("drawMBL") || functionName.equals("eraseMBL")) {
-      boolean erase = false;
-      Zone.TopologyMode mode = Zone.TopologyMode.MBL;
-      if (parameters.size() != 1) {
-        throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
-      }
-
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
-
-      if (functionName.equals("eraseMBL")) {
-        erase = true;
-      }
-
-      JsonElement json =
-              JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
-
-      JsonArray topologyArray;
-      if (json.isJsonArray()) {
-        topologyArray = json.getAsJsonArray();
-      } else if (json.isJsonObject()) {
-        topologyArray = new JsonArray();
-        topologyArray.add(json.getAsJsonObject());
-      } else {
-        throw new ParserException(
-                I18N.getText(
-                        "macro.function.json.unknownType",
-                        json == null ? parameters.get(0).toString() : json.toString(),
-                        functionName));
-      }
-
-      for (int i = 0; i < topologyArray.size(); i++) {
-        JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
-
-        Shape topologyShape =
-                Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
-        switch (topologyShape) {
-          case RECTANGLE:
-            drawRectangleTopology(renderer, topologyObject, erase, mode, false, functionName);
-            break;
-          case POLYGON:
-            drawPolygonTopology(renderer, topologyObject, erase, mode, false, functionName);
-            break;
-          case CROSS:
-            drawCrossTopology(renderer, topologyObject, erase, mode, false, functionName);
-            break;
-          case CIRCLE:
-            drawCircleTopology(renderer, topologyObject, erase, mode, false, functionName);
-            break;
-          case NONE:
-            break;
-          default:
-            break;
-        }
-      }
-    }
-    else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
+    } else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
       // TODO Wiki needs updating. `format` (parameter 2) is optional, defaulting to 0.
 
       Zone.TopologyMode mode =
-              functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
+          functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 3) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.tooManyParam", functionName, 3, parameters.size()));
+            I18N.getText(
+                "macro.function.general.tooManyParam", functionName, 3, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -246,10 +196,11 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.size() >= 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
         simpleJSON = true;
       }
+      // TODO Make this only valid for VBL.
       boolean isTerrainVbl = parameters.size() >= 3 && BigDecimal.ONE.equals(parameters.get(2));
 
       JsonElement json =
-              JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
       JsonArray topologyArray;
       if (json.isJsonArray()) {
         topologyArray = json.getAsJsonArray();
@@ -258,16 +209,17 @@ public class Topology_Functions extends AbstractFunction {
         topologyArray.add(json.getAsJsonObject());
       } else {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.json.unknownType",
-                        json == null ? parameters.get(0).toString() : json.toString(),
-                        functionName));
+            I18N.getText(
+                "macro.function.json.unknownType",
+                json == null ? parameters.get(0).toString() : json.toString(),
+                functionName));
       }
 
       Area topologyArea = null;
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
-        Area tempTopologyArea = getTopology(renderer, topologyObject, mode, isTerrainVbl, functionName);
+        Area tempTopologyArea =
+            getTopology(renderer, topologyObject, mode, isTerrainVbl, functionName);
         if (topologyArea == null) {
           topologyArea = tempTopologyArea;
         } else {
@@ -275,30 +227,29 @@ public class Topology_Functions extends AbstractFunction {
         }
       }
       return getAreaPoints(topologyArea, simpleJSON);
-    }
-    else if (functionName.equals("getTokenVBL")) {
+    } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
         token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
         if (token == null) {
           throw new ParserException(
-                  I18N.getText(
-                          "macro.function.general.unknownToken",
-                          "getTokenVBL",
-                          parameters.get(0).toString()));
+              I18N.getText(
+                  "macro.function.general.unknownToken",
+                  "getTokenVBL",
+                  parameters.get(0).toString()));
         }
       } else if (parameters.size() == 0) {
         MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
-                  I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+              I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
         }
       } else {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
       }
 
       Area vblArea = token.getVBL();
@@ -307,20 +258,19 @@ public class Topology_Functions extends AbstractFunction {
       } else {
         return "";
       }
-    }
-    else if (functionName.equals("setTokenVBL")) {
+    } else if (functionName.equals("setTokenVBL")) {
       Token token = null;
 
       if (parameters.size() > 2) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -328,7 +278,7 @@ public class Topology_Functions extends AbstractFunction {
       }
 
       JsonElement jsonArea =
-              JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
       JsonArray vblArray;
       if (jsonArea.isJsonArray()) {
         vblArray = jsonArea.getAsJsonArray();
@@ -337,10 +287,10 @@ public class Topology_Functions extends AbstractFunction {
         vblArray.add(jsonArea.getAsJsonObject());
       } else {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.json.unknownType",
-                        jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
-                        functionName));
+            I18N.getText(
+                "macro.function.json.unknownType",
+                jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
+                functionName));
       }
 
       if (parameters.size() == 2) {
@@ -351,7 +301,7 @@ public class Topology_Functions extends AbstractFunction {
       }
       if (token == null) {
         throw new ParserException(
-                I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+            I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
       }
 
       // TODO Why does setTokenVBL need to know about VBL vs MBL vs terrain VBL?
@@ -364,19 +314,23 @@ public class Topology_Functions extends AbstractFunction {
         switch (vblShape) {
           case RECTANGLE:
             tokenVBL.add(
-                    drawRectangleTopology(null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
+                drawRectangleTopology(
+                    null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
             break;
           case POLYGON:
             tokenVBL.add(
-                    drawPolygonTopology(null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
+                drawPolygonTopology(
+                    null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
             break;
           case CROSS:
             tokenVBL.add(
-                    drawCrossTopology(null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
+                drawCrossTopology(
+                    null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
             break;
           case CIRCLE:
             tokenVBL.add(
-                    drawCircleTopology(null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
+                drawCircleTopology(
+                    null, vblObject, false, Zone.TopologyMode.VBL, isTerrainVbl, functionName));
             break;
           case AUTO:
             tokenVBL = autoGenerateVBL(token, vblObject);
@@ -400,20 +354,19 @@ public class Topology_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    }
-    else if (functionName.equals("transferVBL")) {
+    } else if (functionName.equals("transferVBL")) {
       Token token = null;
 
       if (parameters.size() > 3) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
         throw new ParserException(
-                I18N.getText(
-                        "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+            I18N.getText(
+                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -422,23 +375,23 @@ public class Topology_Functions extends AbstractFunction {
 
       // make sure only to check the last parameter as token if it is not the BigDecimal for delete
       if (parameters.size() >= 2
-              && (!(parameters.get(parameters.size() - 1) instanceof BigDecimal))) {
+          && (!(parameters.get(parameters.size() - 1) instanceof BigDecimal))) {
         token =
-                FindTokenFunctions.findToken(parameters.get(parameters.size() - 1).toString(), null);
+            FindTokenFunctions.findToken(parameters.get(parameters.size() - 1).toString(), null);
 
         if (token == null) {
           throw new ParserException(
-                  I18N.getText(
-                          "macro.function.general.unknownToken",
-                          "getTokenVBL",
-                          parameters.get(0).toString()));
+              I18N.getText(
+                  "macro.function.general.unknownToken",
+                  "getTokenVBL",
+                  parameters.get(0).toString()));
         }
       } else {
         MapToolVariableResolver res = (MapToolVariableResolver) resolver;
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
-                  I18N.getText("macro.function.general.noImpersonated", "transferVBL"));
+              I18N.getText("macro.function.general.noImpersonated", "transferVBL"));
         }
       }
       boolean isTerrainVbl = token.getIsTerrainVbl();
@@ -465,7 +418,7 @@ public class Topology_Functions extends AbstractFunction {
 
       if (vblFromToken) {
         TokenVBL.renderTopology(
-                renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL, isTerrainVbl);
+            renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL, isTerrainVbl);
         if (delete) {
           token.setVBL(null);
         }
@@ -476,8 +429,7 @@ public class Topology_Functions extends AbstractFunction {
           TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL, isTerrainVbl);
         }
       }
-    }
-    else {
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
     }
@@ -998,7 +950,11 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area getTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode, boolean isTerrainVbl, String funcname)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      Zone.TopologyMode mode,
+      boolean isTerrainVbl,
+      String funcname)
       throws ParserException {
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -1085,8 +1041,7 @@ public class Topology_Functions extends AbstractFunction {
     if (mode == Zone.TopologyMode.VBL || mode == Zone.TopologyMode.COMBINED) {
       if (!isTerrainVbl) {
         area.intersect(renderer.getZone().getTopology());
-      }
-      else {
+      } else {
         area.intersect(renderer.getZone().getTerrainVbl());
       }
     }
