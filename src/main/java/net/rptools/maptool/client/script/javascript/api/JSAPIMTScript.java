@@ -38,8 +38,15 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public void registerMacro(String macroName, Function callable) {
+  public void registerMacro(String macroName, Function callable) throws ParserException {
     boolean trusted = JSScriptEngine.inTrustedContext();
+    if (macroName.equals("eval")
+        || macroName.equals("evalNS")
+        || macroName.equals("evalURI")
+        || macroName.equals("removeNS")
+        || macroName.equals("createNS")) {
+      throw new ParserException(I18N.getText("macro.function.general.reservedJS", macroName));
+    }
     if (trusted) {
       new JSAPIRegisteredMacro(macroName, callable);
     }
