@@ -370,6 +370,7 @@ public class Topology_Functions extends AbstractFunction {
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
     } else if (functionName.equals("transferVBL")) {
+      // TODO Wiki needs updating to not talk about yellow and blue VBL since there is now orange and cyan.
       Token token = null;
 
       if (parameters.size() > 3) {
