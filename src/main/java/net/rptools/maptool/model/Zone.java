@@ -779,18 +779,22 @@ public class Zone extends BaseModel {
    * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
+    Area topology = null;
     if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
       if (!drawTerrainVbl) {
-        getTopology().add(area);
+        topology = getTopology();
       } else {
-        getTerrainVbl().add(area);
+        topology = getTerrainVbl();
       }
     }
     if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
-      getTopologyTerrain().add(area);
+      topology = getTopologyTerrain();
     }
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    if (topology != null) {
+      topology.add(area);
+      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    }
   }
 
   public void addTopology(Area area) {
