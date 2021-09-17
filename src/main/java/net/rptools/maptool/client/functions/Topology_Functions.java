@@ -28,6 +28,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import javax.annotation.Nullable;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -208,21 +210,36 @@ public class Topology_Functions extends AbstractFunction {
                 functionName));
       }
 
-      Area topologyArea = null;
+      Area topologyArea = new Area();
+      Area terrainVblArea = new Area();
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
         boolean isTerrainVbl =
-                topologyObject.has("terrain")
-                        && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
+            (mode == Zone.TopologyMode.VBL)
+                && topologyObject.has("terrain")
+                && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
         Area tempTopologyArea =
             getTopology(renderer, topologyObject, mode, isTerrainVbl, functionName);
-        if (topologyArea == null) {
-          topologyArea = tempTopologyArea;
-        } else {
-          topologyArea.add(tempTopologyArea);
-        }
+
+        (isTerrainVbl ? terrainVblArea : topologyArea).add(tempTopologyArea);
       }
-      return getAreaPoints(topologyArea, simpleJSON);
+
+      if (simpleJSON) {
+        // Build a single list of points for all areas.
+        // TODO Is this good behaviour? Not sure what the use case is for a raw list of coordinates.
+        return getAreaPoints(List.of(topologyArea, terrainVblArea));
+      } else {
+        // Build separate objects for each area.
+        JsonArray allShapes = new JsonArray();
+        if (!topologyArea.isEmpty()) {
+          allShapes.add(
+              getAreaShapeObject(topologyArea, mode == Zone.TopologyMode.MBL ? null : false));
+        }
+        if (!terrainVblArea.isEmpty()) {
+          allShapes.add(getAreaShapeObject(terrainVblArea, true));
+        }
+        return allShapes.toString();
+      }
     } else if (functionName.equals("getTokenVBL")) {
       Token token;
 
@@ -250,7 +267,9 @@ public class Topology_Functions extends AbstractFunction {
 
       Area vblArea = token.getVBL();
       if (vblArea != null) {
-        return getAreaPoints(vblArea, false);
+        JsonArray allShapes = new JsonArray();
+        allShapes.add(getAreaShapeObject(vblArea, token.getIsTerrainVbl()));
+        return allShapes.toString();
       } else {
         return "";
       }
@@ -1048,14 +1067,52 @@ public class Topology_Functions extends AbstractFunction {
     return area;
   }
 
-  /**
-   * Get the required parameters needed from the JSON to get/set topology within a defined
-   * rectangle.
-   *
-   * @param area Area passed in to convert to path of points
-   * @param simpleJSON Boolean to set output to array of points or key/value pairs
-   */
-  private String getAreaPoints(Area area, boolean simpleJSON) {
+  private JsonObject getAreaShapeObject(Area area, @Nullable Boolean isTerrain) {
+    // Each shape will be it's own json object which each object contains an  array of x,y coords
+    JsonObject polygon = new JsonObject();
+
+    polygon.addProperty("generated", 1);
+    polygon.addProperty("shape", "polygon");
+    if (isTerrain != null) {
+      polygon.addProperty("terrain", isTerrain ? 1 : 0);
+    }
+
+    polygon.addProperty("fill", 1);
+    polygon.addProperty("close", 1);
+    polygon.addProperty("thickness", 0);
+
+    JsonArray points = new JsonArray();
+    consumeAreaPoints(
+        area,
+        (x, y) -> {
+          var point = new JsonObject();
+          point.addProperty("x", x);
+          point.addProperty("y", y);
+          points.add(point);
+        });
+    polygon.add("points", points);
+
+    return polygon;
+  }
+
+  private JsonArray getAreaPoints(List<Area> areas) {
+    JsonArray allPoints = new JsonArray();
+    for (var area : areas) {
+      if (area.isEmpty()) {
+        continue;
+      }
+
+      consumeAreaPoints(
+          area,
+          (x, y) -> {
+            allPoints.add(x);
+            allPoints.add(y);
+          });
+    }
+    return allPoints;
+  }
+
+  private void consumeAreaPoints(Area area, BiConsumer<Double, Double> pointConsumer) {
     ArrayList<double[]> areaPoints = new ArrayList<>();
     double[] coords = new double[6];
 
@@ -1069,23 +1126,11 @@ public class Topology_Functions extends AbstractFunction {
       areaPoints.add(pathIteratorCoords);
     }
     // Now that we have the Area defined as commands, lets record the points
-    // into a json array of json objects.
-    // Each shape will be it's own json object which each object contains an
-    // array of x,y coords
-    JsonObject polygon = new JsonObject();
-    JsonArray linePoints = new JsonArray();
-    JsonArray allPolygons = new JsonArray();
-
-    polygon.addProperty("generated", 1);
-    polygon.addProperty("shape", "polygon");
 
     double[] defaultPos = null;
     double[] moveTo = null;
 
     for (double[] currentElement : areaPoints) {
-      // Create a json object to hold the x,y key/value pairs
-      JsonObject line = new JsonObject();
-
       // 2 decimals is precise enough, we will deal in .5 pixels mostly.
       currentElement[1] = Math.floor(currentElement[1] * 100) / 100;
       currentElement[2] = Math.floor(currentElement[2] * 100) / 100;
@@ -1095,43 +1140,19 @@ public class Topology_Functions extends AbstractFunction {
         if (defaultPos == null) {
           defaultPos = currentElement;
         } else {
-          line.addProperty("x", defaultPos[1]);
-          line.addProperty("y", defaultPos[2]);
-          linePoints.add(line);
-          line = new JsonObject();
+          pointConsumer.accept(defaultPos[1], defaultPos[2]);
         }
         moveTo = currentElement;
 
-        line.addProperty("x", currentElement[1]);
-        line.addProperty("y", currentElement[2]);
-        linePoints.add(line);
+        pointConsumer.accept(currentElement[1], currentElement[2]);
       } else if (currentElement[0] == PathIterator.SEG_LINETO) {
-        line.addProperty("x", currentElement[1]);
-        line.addProperty("y", currentElement[2]);
-        linePoints.add(line);
+        pointConsumer.accept(currentElement[1], currentElement[2]);
       } else if (currentElement[0] == PathIterator.SEG_CLOSE) {
-        line.addProperty("x", moveTo[1]);
-        line.addProperty("y", moveTo[2]);
-        linePoints.add(line);
+        pointConsumer.accept(moveTo[1], moveTo[2]);
       } else {
         // System.out.println("in getAreaPoints(): found a curve, ignoring");
       }
     }
-    if (simpleJSON) {
-      for (int i = 0; i < linePoints.size(); i++) {
-        JsonObject points = linePoints.get(i).getAsJsonObject();
-        allPolygons.add(points.get("x"));
-        allPolygons.add(points.get("y"));
-      }
-    } else {
-      polygon.addProperty("fill", 1);
-      polygon.addProperty("close", 1);
-      polygon.addProperty("thickness", 0);
-      polygon.add("points", linePoints);
-      allPolygons.add(polygon);
-    }
-
-    return allPolygons.toString();
   }
 
   /**
