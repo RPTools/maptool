@@ -95,11 +95,6 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    // TODO Consider putting the isTerrainVBL parameter into the shape information instead of
-    //  passing as a parameter that filters what kind of VBL to draw.
-
-    // TODO Despite the similarities, *VBL and *MBL are now diverging in parameter requirements and
-    // I think should be split.
     if (functionName.equals("drawVBL")
         || functionName.equals("eraseVBL")
         || functionName.equals("drawMBL")
@@ -145,10 +140,10 @@ public class Topology_Functions extends AbstractFunction {
 
         Shape topologyShape =
             Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
-
         boolean isTerrainVbl =
             topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
+
         switch (topologyShape) {
           case RECTANGLE:
             drawRectangleTopology(
@@ -176,10 +171,10 @@ public class Topology_Functions extends AbstractFunction {
           functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
       boolean simpleJSON = false; // If true, send only array of x,y
 
-      if (parameters.size() > 3) {
+      if (parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.tooManyParam", functionName, 3, parameters.size()));
+                "macro.function.general.tooManyParam", functionName, 2, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
@@ -195,11 +190,10 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.size() >= 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
         simpleJSON = true;
       }
-      // TODO Make this only valid for VBL.
-      boolean isTerrainVbl = parameters.size() >= 3 && BigDecimal.ONE.equals(parameters.get(2));
 
       JsonElement json =
           JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+      // TODO Update the wiki. The first parameter can be a single shape or a list thereof.
       JsonArray topologyArray;
       if (json.isJsonArray()) {
         topologyArray = json.getAsJsonArray();
@@ -217,6 +211,9 @@ public class Topology_Functions extends AbstractFunction {
       Area topologyArea = null;
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
+        boolean isTerrainVbl =
+                topologyObject.has("terrain")
+                        && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
         Area tempTopologyArea =
             getTopology(renderer, topologyObject, mode, isTerrainVbl, functionName);
         if (topologyArea == null) {
