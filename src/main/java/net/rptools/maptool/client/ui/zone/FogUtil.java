@@ -59,6 +59,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
@@ -110,26 +111,19 @@ public class FogUtil {
       }
       var area = segment.getGeometry();
 
-      timer.start("combine");
-      Geometry intersectedArea = area;
-      for (var iter = clearedAreaList.listIterator(); iter.hasNext(); ) {
-        var clearedArea = iter.next();
-        if (clearedArea.intersects(boundingBox)) {
-          intersectedArea = clearedArea.getGeometry().union(area);
-          iter.remove(); // we'll put it on the back of the list to prevent crazy growth at the
-          // front
-          break;
-        }
-      }
-      timer.stop("combine");
-
-      clearedAreaList.add(PreparedGeometryFactory.prepare(intersectedArea));
+      clearedAreaList.add(PreparedGeometryFactory.prepare(area));
     }
 
     if (!clearedAreaList.isEmpty()) {
-      List<Geometry> plainGeometries =
-          clearedAreaList.stream().map(PreparedGeometry::getGeometry).toList();
-      var totalClearedArea = new UnaryUnionOp(plainGeometries).union();
+
+      var geometry =
+          new GeometryFactory()
+              .createGeometryCollection(
+                  clearedAreaList.stream()
+                      .map(PreparedGeometry::getGeometry)
+                      .toArray(Geometry[]::new))
+              .buffer(0);
+      var totalClearedArea = new UnaryUnionOp(geometry).union();
 
       // Convert back to AWT area to modify vision.
       var shapeWriter = new ShapeWriter();
