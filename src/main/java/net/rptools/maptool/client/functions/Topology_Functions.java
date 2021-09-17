@@ -149,7 +149,6 @@ public class Topology_Functions extends AbstractFunction {
         boolean isTerrainVbl =
             topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
-        System.out.println(isTerrainVbl);
         switch (topologyShape) {
           case RECTANGLE:
             drawRectangleTopology(
