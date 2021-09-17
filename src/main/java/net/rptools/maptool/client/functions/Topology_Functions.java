@@ -227,10 +227,10 @@ public class Topology_Functions extends AbstractFunction {
               functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
       boolean simpleJSON = false; // If true, send only array of x,y
 
-      if (parameters.size() > 2) {
+      if (parameters.size() > 3) {
         throw new ParserException(
                 I18N.getText(
-                        "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+                        "macro.function.general.tooManyParam", functionName, 3, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
