@@ -16,6 +16,7 @@ package net.rptools.maptool.client.script.javascript;
 
 import com.oracle.truffle.js.scriptengine.*;
 import java.util.*;
+import java.util.List;
 import javax.script.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
@@ -34,7 +35,7 @@ public class JSScriptEngine {
   private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
   private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
   private static final Map<String, JSContext> contexts = new HashMap<String, JSContext>();
-  private Stack<JSContext> contextStack = new Stack<>();
+  private static final Stack<JSContext> contextStack = new Stack<>();
 
   public static boolean inTrustedContext() {
     if (jsScriptEngine.contextStack.empty()) {
@@ -63,30 +64,36 @@ public class JSScriptEngine {
     cbuilder.option("js.ecmascript-version", "2021");
   }
 
-  public JSContext registerContext(String name, boolean trusted) throws ParserException {
-    JSContext jc = contexts.get(name);
-    if (jc != null) {
-      throw new ParserException("Context " + name + " already exists");
+  public static JSContext registerContext(String name, boolean trusted, boolean makeTrusted)
+      throws ParserException {
+    if (!trusted) {
+      JSContext jc = contexts.get(name);
+      if (jc != null) {
+        throw new ParserException("Context " + name + " already exists");
+      }
     }
-    JSContext c = new JSContext(trusted, makeContext());
+    if (!trusted && makeTrusted) {
+      throw new ParserException("Cannot make a trusted JS context from an untrusted context");
+    }
+    JSContext c = new JSContext(makeTrusted, jsScriptEngine.makeContext(), name);
     contexts.put(name, c);
     return c;
   }
 
-  public void removeContext(String name, boolean trusted) {
+  public static void removeContext(String name, boolean trusted) throws ParserException {
     if (trusted) {
       contexts.remove(name);
       return;
     }
     JSContext c = contexts.get(name);
     if (c == null || c.isTrusted) {
-      return;
+      throw new ParserException(I18N.getText("macro.function.general.noPermJS", name));
     }
     contexts.remove(name);
     return;
   }
 
-  public void resetContexts() {
+  public static void resetContexts() {
     contexts.clear();
   }
 
@@ -122,10 +129,14 @@ public class JSScriptEngine {
     }
     JSContext jc = contexts.get(contextName);
     if (jc == null) {
-      jc = registerContext(contextName, MapTool.getParser().isMacroTrusted());
+      jc =
+          registerContext(
+              contextName,
+              MapTool.getParser().isMacroTrusted(),
+              MapTool.getParser().isMacroTrusted());
     }
     if (jc.isTrusted && !MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPerm", contextName));
+      throw new ParserException(I18N.getText("macro.function.general.noPermJS", contextName));
     }
     contextStack.push(jc);
     try {
@@ -143,7 +154,7 @@ public class JSScriptEngine {
         .append(script)
         .append("})();");
     Context c = makeContext();
-    JSContext jc = new JSContext(false, c);
+    JSContext jc = new JSContext(false, c, "<anonymous>");
     contextStack.push(jc);
     try {
       return makeContext().eval("js", wrapped.toString());

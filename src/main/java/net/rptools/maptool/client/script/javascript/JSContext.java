@@ -23,9 +23,11 @@ import org.graalvm.polyglot.HostAccess.*;
 public class JSContext {
   public boolean isTrusted;
   public Context context;
+  public String name;
 
-  public JSContext(boolean t, Context c) {
+  public JSContext(boolean t, Context c, String name) {
     this.isTrusted = t;
     this.context = c;
+    this.name = name;
   }
 }

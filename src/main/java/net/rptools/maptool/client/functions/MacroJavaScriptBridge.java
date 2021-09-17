@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.script.ScriptException;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
@@ -46,7 +47,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   private Stack<List<Object>> callingArgsStack = new Stack<>();
 
   private MacroJavaScriptBridge() {
-    super(1, UNLIMITED_PARAMETERS, "js.eval", "js.evalNS", "js.evalURI");
+    super(
+        1,
+        UNLIMITED_PARAMETERS,
+        "js.eval",
+        "js.evalNS",
+        "js.evalURI",
+        "js.removeNS",
+        "js.createNS");
   }
 
   public static MacroJavaScriptBridge getInstance() {
@@ -65,6 +73,22 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
       }
       contextName = (String) args.remove(0);
+    }
+
+    if ("js.removeNS".equals(functionName)) {
+      contextName = (String) args.remove(0);
+      JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
+      return "removed";
+    }
+    if ("js.createNS".equals(functionName)) {
+      contextName = (String) args.remove(0);
+      boolean makeTrusted = MapTool.getParser().isMacroTrusted();
+      if (args.size() > 0) {
+        makeTrusted = ((int) args.remove(0)) > 0;
+      }
+      JSScriptEngine.registerContext(
+          contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
+      return "created";
     }
 
     String script;
@@ -118,19 +142,16 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
 
   public Object HostObjectToMTScriptType(Object obj, ArrayList seen) {
 
-    if (obj instanceof MapToolJSAPIInterface) {
-      MapToolJSAPIInterface maptoolWrapper = (MapToolJSAPIInterface) obj;
+    if (obj instanceof MapToolJSAPIInterface maptoolWrapper) {
       return maptoolWrapper.serializeToString();
     }
     if (obj.getClass().isArray()) {
       obj = Arrays.asList(obj);
     }
-    if (obj instanceof List) {
-      List list = (List) obj;
+    if (obj instanceof List list) {
       ArrayList outList = new ArrayList();
       for (Object li : list) {
-        if (li instanceof Value) {
-          Value val = (Value) li;
+        if (li instanceof Value val) {
           outList.add(ValueToMTScriptType(val, seen));
         } else {
           outList.add(HostObjectToMTScriptType(li, seen));
@@ -149,8 +170,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         } else {
           key = HostObjectToMTScriptType(key, seen);
         }
-        if (value instanceof Value) {
-          Value val = (Value) value;
+        if (value instanceof Value val) {
           value = ValueToMTScriptType(val, seen);
         } else {
           value = HostObjectToMTScriptType(value, seen);

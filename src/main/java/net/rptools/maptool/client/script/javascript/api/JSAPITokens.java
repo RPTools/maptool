@@ -17,6 +17,7 @@ package net.rptools.maptool.client.script.javascript.api;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.script.javascript.*;
 import org.graalvm.polyglot.HostAccess;
 
 public class JSAPITokens implements MapToolJSAPIInterface {
@@ -28,12 +29,19 @@ public class JSAPITokens implements MapToolJSAPIInterface {
   @HostAccess.Export
   public List<Object> getMapTokens() {
     final List<Object> tokens = new ArrayList<>();
-
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
     MapTool.getFrame()
         .getCurrentZoneRenderer()
         .getZone()
         .getTokens()
-        .forEach(t -> tokens.add(new JSAPIToken(t)));
+        .forEach(
+            (t -> {
+              if (trusted || t.isOwner(playerId)) {
+                tokens.add(new JSAPIToken(t));
+              }
+            }));
+
     return tokens;
   }
 }
