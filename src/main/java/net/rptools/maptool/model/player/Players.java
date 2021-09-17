@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.model.player;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -43,8 +46,63 @@ public class Players {
     NOT_SUPPORTED
   }
 
+  /**
+   * Property change event name for when a player is added.
+   * Some databases may not support this event, so you will also need to listen to
+   * {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes to players in the database.
+   */
+  public static final String PROPERTY_CHANGE_PLAYER_ADDED =
+      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED;
+
+  /**
+   * Property change event name for when a player is removed.
+   * Some databases may not support this event, so you will also need to listen to
+   * {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes to players in the database.
+   */
+  public static final String PROPERTY_CHANGE_PLAYER_REMOVE =
+      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVE;
+
+  /** Property change event name for when a player is changed. */
+  public static final String PROPERTY_CHANGE_PLAYER_CHANGED =
+      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED;
+  /**
+   * Property change event name for when the database is changed or there are mas updates.
+   * Some databases may only support this event and not player added/removed/changed
+   */
+  public static final String PROPERTY_CHANGE_DATABASE_CHANGED =
+      PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED;
+
   /** Instance for logging messages. */
   private static final Logger log = LogManager.getLogger(Players.class);
+
+
+  /** instance variable for property change support. */
+  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+
+  private final PropertyChangeListener databaseChangeListener = new PropertyChangeListener() {
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      propertyChangeSupport.firePropertyChange(evt);
+    }
+  };
+
+  private final PropertyChangeListener databaseTypeChangeListener = new PropertyChangeListener() {
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      PlayerDatabase oldDb = (PlayerDatabase) evt.getOldValue();
+      PlayerDatabase newDb = (PlayerDatabase) evt.getNewValue();
+
+      if (oldDb instanceof PlayerDBPropertyChange playerdb) {
+        playerdb.removePropertyChangeListener(databaseChangeListener);
+      }
+
+      if (newDb instanceof PlayerDBPropertyChange playerdb) {
+        playerdb.addPropertyChangeListener(databaseChangeListener);
+      }
+    }
+  };
+
 
   /**
    * Return the information about a specific known player.
@@ -144,8 +202,12 @@ public class Players {
         }
       }
       AuthMethod authMethod = playerDatabase.getAuthMethod(player);
+      boolean persisted = false;
+      if (playerDatabase instanceof PersistedPlayerDatabase persistedPlayerDatabase) {
+        persisted = persistedPlayerDatabase.isPersisted(name);
+      }
 
-      return new PlayerInfo(name, role, blocked, blockedReason, connected, authMethod);
+      return new PlayerInfo(name, role, blocked, blockedReason, connected, authMethod, persisted);
     } catch (Exception e) {
       if (e instanceof CompletionException ce) {
         throw ce;
@@ -272,4 +334,57 @@ public class Players {
       return AddPlayerStatus.NOT_SUPPORTED;
     }
   }
+
+  /**
+   * Adds a property change listener for player database events.
+   * @param listener The property change listener to add.
+   */
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+    if (propertyChangeSupport.getPropertyChangeListeners().length == 0) {
+      PlayerDatabaseFactory.getDatabaseChangeTypeSupport().addPropertyChangeListener(databaseTypeChangeListener);
+    }
+    propertyChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  /**
+   * Removes a property change listener for player database events.
+   * @param listener The property change listener to remove.
+   */
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    propertyChangeSupport.removePropertyChangeListener(listener);
+    if (propertyChangeSupport.getPropertyChangeListeners().length == 0) {
+      PlayerDatabaseFactory.getDatabaseChangeTypeSupport().removePropertyChangeListener(databaseTypeChangeListener);
+    }
+  }
+
+  public void playerSignedIn(Player player) {
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    var oldInfo = getPlayerInfo(player.getName());
+    playerDatabase.playerSignedIn(player);
+    var newInfo = getPlayerInfo(player.getName());
+    if (newInfo != null) {
+      if (oldInfo != null) {
+        propertyChangeSupport.firePropertyChange(
+            PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
+      } else {
+        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_ADDED, null, newInfo);
+      }
+    }
+  }
+
+  public void playerSignedOut(Player player) {
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    var oldInfo = getPlayerInfo(player.getName());
+    playerDatabase.playerSignedOut(player);
+    var newInfo = getPlayerInfo(player.getName());
+    if (oldInfo != null) {
+      if (newInfo != null) {
+        propertyChangeSupport.firePropertyChange(
+            PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
+      } else {
+        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_ADDED, oldInfo, null);
+      }
+    }
+  }
+
 }

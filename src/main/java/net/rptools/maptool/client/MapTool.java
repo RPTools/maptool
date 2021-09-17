@@ -89,6 +89,7 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -157,7 +158,6 @@ public class MapTool {
   private static Campaign campaign;
 
   private static ObservableList<Player> playerList;
-  private static Set<Player> playerSetThreadSafe = ConcurrentHashMap.newKeySet();
   private static ObservableList<TextMessage> messageList;
   private static LocalPlayer player;
 
@@ -769,7 +769,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
-      playerSetThreadSafe.add(player);
+      new Players().playerSignedIn(player);
 
       // LATER: Make this non-anonymous
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
@@ -796,7 +796,7 @@ public class MapTool {
       return;
     }
     playerList.remove(player);
-    playerSetThreadSafe.remove(player);
+    new Players().playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
@@ -1096,10 +1096,6 @@ public class MapTool {
 
   public static ObservableList<Player> getPlayerList() {
     return playerList;
-  }
-
-  public static Set<Player> getPlayerSetThreadSafe() {
-    return playerSetThreadSafe;
   }
 
   /** Returns the list of non-gm names. */

@@ -24,6 +24,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -61,7 +63,8 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PasswordFilePlayerDatabase implements PlayerDatabase, PersistedPlayerDatabase {
+public final class PasswordFilePlayerDatabase implements
+    PlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -71,12 +74,21 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   private final File additionalUsers;
   private final CipherUtil.Key serverPublicPrivateKey;
 
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
+
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
   private final Map<PublicKeyDetails, PlayerDetails> dirtyPublicKeys = new ConcurrentHashMap<>();
 
+  private final Map<String, PlayerDetails> uncommittedPlayerDetails = new HashMap<>();
+  private final Map<PublicKeyDetails, PlayerDetails> uncommittedPublicKeys = new HashMap<>();
+
   private final ReentrantLock passwordFileLock = new ReentrantLock();
+  private final ReentrantLock uncommittedChangesLock = new ReentrantLock();
+
+  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
 
   public PasswordFilePlayerDatabase(File passwordFile)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -130,6 +142,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
           NoSuchPaddingException, InvalidKeyException {
     transientPlayerDetails.clear();
     readPasswordFile();
+    propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
@@ -268,6 +281,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
     }
   }
 
+  /**
+   * Writes the public keys for the specified player.
+   *
+   * @param playerDetails The player to write the public keys for.
+   * @throws IOException if an error occurs writing out the public keys.
+   */
   private void writePublicKeys(PlayerDetails playerDetails) throws IOException {
     try {
       passwordFileLock.lock();
@@ -324,6 +343,15 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
     PlayerDetails pd = transientPlayerDetails.get(playerName);
     if (pd != null) {
       return pd;
+    }
+    try {
+      uncommittedChangesLock.lock();
+      PlayerDetails upd = uncommittedPlayerDetails.get(playerName);
+      if (upd != null) {
+        return upd;
+      }
+    } finally {
+      uncommittedChangesLock.unlock();
     }
     return playerDetails.get(playerName);
   }
@@ -391,10 +419,12 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
     PlayerDetails newDetails =
         new PlayerDetails(
             details.name(), details.role(), details.password(), details.publicKeyDetails(), reason);
-    playerDetails.put(player, newDetails);
-
-    dirty.set(true);
-    writePasswordFile();
+    try {
+      uncommittedChangesLock.lock();
+      uncommittedPlayerDetails.put(player, newDetails);
+    } finally {
+      uncommittedChangesLock.unlock();
+    }
   }
 
   @Override
@@ -404,7 +434,7 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
     if (playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
-    putPlayer(name, role, password, Set.of(), true);
+    putUncommittedPlayer(name, role, password, Set.of(), "", true);
   }
 
   @Override
@@ -414,53 +444,67 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
     if (playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
-    putPlayer(name, role, null, publicKeyStrings, true);
+    putUncommittedPlayer(name, role, publicKeyStrings, "", true);
   }
 
   @Override
   public void setSharedPassword(String name, String password)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
+
+    clearUncommittedPublicKeys(name);
+
+    var pd = getPlayerDetails(name);
+    boolean persisted = isPersisted(name);
+    putUncommittedPlayer(pd.name(), pd.role(), password, Set.of(), pd.disabledReason, persisted);
+  }
+
+  /**
+   * Clears any uncommitted public key values for the specified player
+   *
+   * @param name the name of the player.
+   * @throws PasswordDatabaseException if the player does not exist.
+   */
+  private void clearUncommittedPublicKeys(String name) throws PasswordDatabaseException {
     if (!playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
     }
 
     var pd = getPlayerDetails(name);
 
-    // if we already have public keys make sure we remove them from dirty list
-    pd.publicKeyDetails().forEach(dirtyPublicKeys::remove);
+    // if we already have public keys make sure we remove them from the uncommitted list
+    try {
+      uncommittedChangesLock.lock();
+      pd.publicKeyDetails().forEach(uncommittedPublicKeys::remove);
+    } finally {
+      uncommittedChangesLock.unlock();
+    }
+  }
 
-    var newpd =
-        new PlayerDetails(
-            pd.name(),
-            pd.role(),
-            CipherUtil.fromSharedKeyNewSalt(password).getKey(),
-            Set.of(),
-            pd.disabledReason);
-
-    dirty.set(true);
-    writePasswordFile();
+  @Override
+  public boolean isPersisted(String name) {
+    try {
+      uncommittedChangesLock.lock();
+      return playerDetails.containsKey(name) || uncommittedPlayerDetails.containsKey(name);
+    } finally {
+      uncommittedChangesLock.unlock();
+    }
   }
 
   @Override
   public void setAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
-    if (!playerExists(name)) {
-      throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
-    }
 
+    clearUncommittedPublicKeys(name);
     var pd = getPlayerDetails(name);
 
-    // if we already have public keys make sure we remove them from dirty list
-    pd.publicKeyDetails().forEach(dirtyPublicKeys::remove);
-
     Set<PublicKeyDetails> publicKeyDetails = createPublicKeyDetails(keys, pd.name());
-    var newpd = new PlayerDetails(pd.name(), pd.role(), null, publicKeyDetails, pd.disabledReason);
-    publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, newpd));
-    playerDetails.put(newpd.name(), newpd);
-    dirty.set(true);
-    writePasswordFile();
+    boolean persisted = isPersisted(name);
+    var newpd =
+        putUncommittedPlayer(
+            pd.name(), pd.role(), null, publicKeyDetails, pd.disabledReason(), persisted);
+    publicKeyDetails.forEach(p -> uncommittedPublicKeys.put(p, newpd));
   }
 
   @Override
@@ -478,11 +522,41 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
 
     pKeys.addAll(newKeys);
 
-    var newpd = new PlayerDetails(pd.name(), pd.role(), null, pKeys, pd.disabledReason());
+    boolean persisted = isPersisted(name);
+    var newpd =
+        putUncommittedPlayer(name, pd.role(), null, newKeys, pd.disabledReason(), persisted);
+
     newKeys.forEach(p -> dirtyPublicKeys.put(p, newpd));
-    playerDetails.put(newpd.name(), newpd);
+  }
+
+  @Override
+  public void commitChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
+    try {
+      uncommittedChangesLock.lock();
+      dirtyPublicKeys.putAll(uncommittedPublicKeys);
+      uncommittedPublicKeys.clear();
+      playerDetails.putAll(uncommittedPlayerDetails);
+    } finally {
+      uncommittedChangesLock.unlock();
+    }
     dirty.set(true);
     writePasswordFile();
+  }
+
+  @Override
+  public void rollbackChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
+    try {
+      uncommittedChangesLock.lock();
+      uncommittedPublicKeys.clear();
+      uncommittedPlayerDetails.clear();
+    } finally {
+      uncommittedChangesLock.unlock();
+    }
+    propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
   }
 
   @Override
@@ -537,6 +611,16 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   }
 
   @Override
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
+  }
+
+  @Override
   public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 
@@ -549,18 +633,25 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   }
 
   @Override
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return new HashSet<>(loggedInPlayers.getPlayers());
+  }
+
+  @Override
   public boolean recordsOnlyConnectedPlayers() {
     return false;
   }
 
   /**
-   * Adds a player to the database.
+   * Adds a player to the database with the specified password. The {@link #commitChanges} method
+   * must be called to commit these changes to persistent storage.
    *
    * @param name The name of the player to add.
    * @param role The role of the player to add.
    * @param password The password for the player.
-   * @param publicKeyStrings The public key Strings
+   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
    * @param persisted should the player entry be persisted or not.
+   * @return the newly added {@link PlayerDetails}
    * @throws PasswordDatabaseException if there is a problem added the player
    * @throws NoSuchAlgorithmException If there is an error hashing the password.
    * @throws InvalidKeySpecException If there is an error hashing the password.
@@ -568,36 +659,105 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
    * @throws InvalidKeyException If there is an error hashing the password.
    * @throws IllegalStateException If there is an error hashing the password.
    */
-  private void putPlayer(
-      String name, Role role, String password, Set<String> publicKeyStrings, boolean persisted)
+  private PlayerDetails putUncommittedPlayer(
+      String name, Role role, String password, String disabledReason, boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
           NoSuchPaddingException, InvalidKeyException {
-    CipherUtil cipherUtil = null;
-    if (password != null && password.length() > 0) {
-      cipherUtil = CipherUtil.fromSharedKeyNewSalt(password);
-    }
+    return putUncommittedPlayer(name, role, password, Set.of(), disabledReason, persisted);
+  }
 
-    Set<PublicKeyDetails> publicKeyDetails = createPublicKeyDetails(publicKeyStrings, name);
+  /**
+   * Adds a player to the database with the specified public keys. The {@link #commitChanges} method
+   * must be called to commit these changes to persistent storage.
+   *
+   * @param name The name of the player to add.
+   * @param role The role of the player to add.
+   * @param publicKeyStrings The public key Strings
+   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
+   * @param persisted should the player entry be persisted or not.
+   * @return the newly added {@link PlayerDetails}
+   * @throws PasswordDatabaseException if there is a problem added the player
+   * @throws NoSuchAlgorithmException If there is an error hashing the password.
+   * @throws InvalidKeySpecException If there is an error hashing the password.
+   * @throws NoSuchPaddingException If there is an error hashing the password.
+   * @throws InvalidKeyException If there is an error hashing the password.
+   * @throws IllegalStateException If there is an error hashing the password.
+   */
+  private PlayerDetails putUncommittedPlayer (
+      String name,
+      Role role,
+      Set<String> publicKeyStrings,
+      String disabledReason,
+      boolean persisted)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
+          NoSuchPaddingException, InvalidKeyException {
+    return putUncommittedPlayer(
+        name,
+        role,
+        null,
+        createPublicKeyDetails(publicKeyStrings, name),
+        disabledReason,
+        persisted);
+  }
+
+  /**
+   * Adds a player to the database with the specified public keys. The {@link #commitChanges} method
+   * must be called to commit these changes to persistent storage.
+   *
+   * @param name The name of the player to add.
+   * @param role The role of the player to add.
+   * @param password The password for the player.
+   * @param publicKeyDetails The public keys
+   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
+   * @param persisted should the player entry be persisted or not.
+   * @return the newly added {@link PlayerDetails}
+   * @throws PasswordDatabaseException if there is a problem added the player
+   * @throws NoSuchAlgorithmException If there is an error hashing the password.
+   * @throws InvalidKeySpecException If there is an error hashing the password.
+   * @throws NoSuchPaddingException If there is an error hashing the password.
+   * @throws InvalidKeyException If there is an error hashing the password.
+   * @throws IllegalStateException If there is an error hashing the password.
+   */
+  private PlayerDetails putUncommittedPlayer(
+      String name,
+      Role role,
+      String password,
+      Set<PublicKeyDetails> publicKeyDetails,
+      String disabledReason,
+      boolean persisted)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
+          NoSuchPaddingException, InvalidKeyException {
+
+    disabledReason = Objects.requireNonNullElse(disabledReason, "");
+
+    var oldPd = getPlayerDetails(name);
     var pd =
         new PlayerDetails(
             name,
             role,
-            password != null & password.length() > 0
+            password != null && password.length() > 0
                 ? CipherUtil.fromSharedKeyNewSalt(password).getKey()
                 : null,
             publicKeyDetails,
-            "");
-    playerDetails.put(pd.name(), pd);
+            disabledReason);
     if (persisted) {
-      publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
-      dirty.set(true);
-
-      playerDetails.put(name, pd);
-      dirty.set(true);
-      writePasswordFile();
+      try {
+        uncommittedChangesLock.lock();
+        publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
+        uncommittedPlayerDetails.put(name, pd);
+      } finally {
+        uncommittedChangesLock.unlock();
+      }
     } else {
       transientPlayerDetails.put(name, pd);
     }
+
+    if (oldPd != null) {
+      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldPd, pd);
+    } else {
+      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, pd);
+    }
+    return pd;
   }
 
   private Set<PublicKeyDetails> createPublicKeyDetails(
@@ -643,7 +803,17 @@ public final class PasswordFilePlayerDatabase implements PlayerDatabase, Persist
   public void addTemporaryPlayer(String name, Role role, String password)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
-    putPlayer(name, role, password, Set.of(), false);
+    putUncommittedPlayer(name, role, password, Set.of(), "", false);
+  }
+
+  @Override
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+    propertyChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  @Override
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    propertyChangeSupport.addPropertyChangeListener(listener);
   }
 
   /** Record containing player details */

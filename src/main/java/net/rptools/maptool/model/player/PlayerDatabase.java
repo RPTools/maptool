@@ -146,9 +146,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are currently connected.
    */
-  default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
-    return new HashSet<>(MapTool.getPlayerSetThreadSafe());
-  }
+  Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException;
 
   /**
    * Returns if this player database records information about only currently connected players.
@@ -181,10 +179,26 @@ public interface PlayerDatabase {
 
   /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
-   * this will not return {@code true} for every input but only for those that are logged on.
+   * this will not return {@code true} for every input but only for those that are actually
+   * known.
    *
    * @param name the name of the player to check for.
    * @return {@code true} if the player is registered, {@code false} otherwise.
    */
   boolean isPlayerRegistered(String name) throws InterruptedException, InvocationTargetException;
+
+  /**
+   * Inform the database that the player has signed in.
+   * @param player the player that has signed in.
+   */
+  void playerSignedIn(Player player);
+
+  /**
+   * Inform the database that the player has signed out.
+   * @param player the player that has signed out.
+   */
+  void playerSignedOut(Player player);
+
+
+
 }

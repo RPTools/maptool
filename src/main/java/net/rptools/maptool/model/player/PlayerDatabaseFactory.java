@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.player;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -35,12 +37,48 @@ public class PlayerDatabaseFactory {
     PASSWORD_FILE
   }
 
+  interface DatabaseChangeTypeSupport {
+    /**
+     * Adds a property change listener for player database events.
+     * Only one type is valid {@link PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     * @param listener The property change listener to add.
+     */
+    void addPropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * Removes a property change listener for player database events.
+     * Only one type is valid {@link PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     * @param listener The property change listener to remove.
+     */
+    void removePropertyChangeListener(PropertyChangeListener listener);
+  }
+
   private static PlayerDatabase currentPlayerDatabase;
 
   private static final Map<PlayerDatabaseType, PlayerDatabase> playerDatabaseMap =
       new ConcurrentHashMap<>();
 
   private static final ReentrantLock lock = new ReentrantLock();
+
+  private static final DatabaseChangeTypeSupport databaseChangeTypeSupport =
+      new DatabaseChangeTypeSupport() {
+
+    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+      propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+      propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    void databaseChanged(PlayerDatabase oldDb, PlayerDatabase newDb) {
+      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED, oldDb, newDb);
+    }
+  };
 
   private static final File PASSWORD_FILE =
       AppUtil.getAppHome("config").toPath().resolve("passwords.json").toFile();
@@ -95,6 +133,10 @@ public class PlayerDatabaseFactory {
     }
   }
 
+  static DatabaseChangeTypeSupport getDatabaseChangeTypeSupport() {
+    return databaseChangeTypeSupport;
+  }
+
   private static PlayerDatabase createPlayerDatabase(PlayerDatabaseType databaseType) {
     try {
       switch (databaseType) {
@@ -116,4 +158,5 @@ public class PlayerDatabaseFactory {
       throw new IllegalStateException(e);
     }
   }
+
 }

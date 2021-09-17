@@ -121,4 +121,21 @@ public interface PersistedPlayerDatabase {
   void addAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException;
+
+
+  /**
+   * Returns if the specified player is persisted or not. Persisted players include
+   * those that are not yet committed but will be persisted when committed.
+   * @param name the name of the player to check.
+   * @return if the player is/will be persisted.
+   */
+  boolean isPersisted(String name);
+
+  void commitChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException;
+
+  void rollbackChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException;
 }

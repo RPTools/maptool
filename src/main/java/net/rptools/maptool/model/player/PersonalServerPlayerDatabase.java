@@ -17,7 +17,9 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
@@ -29,6 +31,7 @@ import net.rptools.maptool.util.cipher.CipherUtil;
 public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   private final LocalPlayer player;
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   public PersonalServerPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
     player =
@@ -92,8 +95,23 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
+  }
+
+  @Override
   public String getDisabledReason(Player player) {
     return "";
+  }
+
+  @Override
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return new HashSet<>(loggedInPlayers.getPlayers());
   }
 
   @Override

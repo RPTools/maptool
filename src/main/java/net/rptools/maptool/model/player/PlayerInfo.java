@@ -9,6 +9,6 @@ public record PlayerInfo(
     boolean blocked,
     String blockedReason,
     boolean connected,
-    AuthMethod authMethod
-)  {
-}
+    AuthMethod authMethod,
+    boolean persistent
+)  { }

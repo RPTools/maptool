@@ -19,7 +19,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -56,6 +58,12 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @FXML // fx:id="saveChangesButton"
   private Button saveChangesButton; // Value injected by FXMLLoader
 
+  @FXML // fx:id="addButton"
+  private Button addButton; // Value injected by FXMLLoader
+
+
+  private Players players;
+
   @FXML // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
     assert playersTable != null
@@ -64,6 +72,8 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         : "fx:id=\"cancelButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
     assert saveChangesButton != null
         : "fx:id=\"saveChangesButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
+    assert addButton != null
+        : "fx:id=\"addButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
   }
 
   @Override
@@ -88,23 +98,23 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     var playerCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.player"));
     playerCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().name()));
     var roleCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.role"));
-    roleCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(
-        p.getValue().role() == Role.GM ? gmI81n : playerI81n
-        ));
+    roleCol.setCellValueFactory(
+        p -> new ReadOnlyObjectWrapper<>(p.getValue().role() == Role.GM ? gmI81n : playerI81n));
     var authCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.authType"));
-    authCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(
-        p.getValue().authMethod() == AuthMethod.PASSWORD ? passI81n : pubKeyI81n
-    ));
+    authCol.setCellValueFactory(
+        p ->
+            new ReadOnlyObjectWrapper<>(
+                p.getValue().authMethod() == AuthMethod.PASSWORD ? passI81n : pubKeyI81n));
     var disabledCol =
         new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.disabled"));
-    disabledCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().blocked()));
+    disabledCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().blocked()));
     disabledCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(disabledCol));
     var reasonCol =
         new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.disabledReason"));
     reasonCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().blockedReason()));
     var connectedCol =
         new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.connected"));
-    connectedCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().connected()));
+    connectedCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().connected()));
     connectedCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(connectedCol));
 
     playersTable
@@ -115,7 +125,8 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     playersTable.setItems(playerInfoList);
     new Players()
         .getDatabasePlayers()
-        .thenAccept(p -> Platform.runLater(() -> playerInfoList.addAll(p)));
+        .thenAccept(p -> Platform.runLater(() -> playerInfoList.addAll(p.stream().filter(
+            PlayerInfo::persistent).collect(Collectors.toList()))));
     // TODO: CDW
   }
 }

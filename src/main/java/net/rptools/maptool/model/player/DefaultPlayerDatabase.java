@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.lib.MD5Key;
@@ -32,6 +33,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
 
   private final CipherUtil playerPassword;
   private final CipherUtil gmPassword;
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
@@ -105,6 +107,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return loggedInPlayers.getPlayers();
+  }
+
+  @Override
   public boolean recordsOnlyConnectedPlayers() {
     return true;
   }
@@ -123,5 +130,15 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return false;
+  }
+
+  @Override
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
   }
 }
