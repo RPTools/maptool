@@ -16,6 +16,7 @@ package net.rptools.maptool.client.script.javascript.api;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.Function;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -34,6 +35,14 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   @Override
   public String serializeToString() {
     return "MTScript";
+  }
+
+  @HostAccess.Export
+  public void registerMacro(String macroName, Function callable) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    if (trusted) {
+      new JSAPIRegisteredMacro(macroName, callable);
+    }
   }
 
   @HostAccess.Export

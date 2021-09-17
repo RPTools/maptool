@@ -141,7 +141,6 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   }
 
   public Object HostObjectToMTScriptType(Object obj, ArrayList seen) {
-
     if (obj instanceof MapToolJSAPIInterface maptoolWrapper) {
       return maptoolWrapper.serializeToString();
     }
