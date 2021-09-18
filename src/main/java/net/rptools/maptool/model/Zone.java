@@ -149,6 +149,19 @@ public class Zone extends BaseModel {
     }
   }
 
+  public enum VblMode {
+    OFF,
+    REGULAR,
+    TERRAIN
+  }
+
+  public enum MblMode {
+    OFF,
+    ON
+  }
+
+  public record BlMode(VblMode vblMode, MblMode mblMode) {}
+
   // Control what topology layer(s) to add/get drawing to/from
   // TODO Replace with a class that has the following information:
   //  - draw VBL: no / yes / terrain
@@ -185,7 +198,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private TopologyMode topologyMode = null; // get default from AppPreferences
+  private BlMode blMode = null;
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -481,7 +494,7 @@ public class Zone extends BaseModel {
     terrainVbl = (Area) zone.terrainVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
-    topologyMode = zone.topologyMode;
+    blMode = zone.blMode;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -1143,15 +1156,39 @@ public class Zone extends BaseModel {
   }
 
   public TopologyMode getTopologyMode() {
-    if (topologyMode == null) {
-      topologyMode = AppPreferences.getTopologyDrawingMode();
+    if (blMode == null) {
+      // TODO Retrieve from app preferences.
+      blMode = new BlMode(VblMode.REGULAR, MblMode.OFF);
     }
 
-    return topologyMode;
+    // TODO Not accurate. But this is a stand-in for the future when we just return blMode.
+    return switch (blMode.vblMode()) {
+      case OFF -> (blMode.mblMode() == MblMode.ON) ? TopologyMode.MBL : null;
+      case REGULAR -> (blMode.mblMode() == MblMode.ON) ? TopologyMode.COMBINED : TopologyMode.VBL;
+      case TERRAIN -> (blMode.mblMode() == MblMode.ON) ? TopologyMode.COMBINED : TopologyMode.VBL;
+    };
   }
 
   public void setTopologyMode(TopologyMode topologyMode) {
-    this.topologyMode = topologyMode;
+    VblMode vblMode;
+    MblMode mblMode;
+    switch (topologyMode) {
+      default:
+      case VBL:
+        vblMode = VblMode.REGULAR;
+        mblMode = MblMode.OFF;
+        break;
+
+      case MBL:
+        vblMode = VblMode.OFF;
+        mblMode = MblMode.ON;
+
+      case COMBINED:
+        vblMode = VblMode.REGULAR;
+        mblMode = MblMode.ON;
+    }
+
+    this.blMode = new BlMode(vblMode, mblMode);
   }
 
   public int getLargestZOrder() {
