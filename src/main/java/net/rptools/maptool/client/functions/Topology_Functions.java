@@ -146,14 +146,15 @@ public class Topology_Functions extends AbstractFunction {
             topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
 
-        Area newArea = switch (topologyShape) {
-          case RECTANGLE -> makeRectangle(topologyObject, functionName);
-          case POLYGON -> makePolygon(topologyObject, functionName);
-          case CROSS -> makeCross(topologyObject, functionName);
-          case CIRCLE -> makeCircle(topologyObject, functionName);
-          case NONE -> null;
-          default -> null;
-        };
+        Area newArea =
+            switch (topologyShape) {
+              case RECTANGLE -> makeRectangle(topologyObject, functionName);
+              case POLYGON -> makePolygon(topologyObject, functionName);
+              case CROSS -> makeCross(topologyObject, functionName);
+              case CIRCLE -> makeCircle(topologyObject, functionName);
+              case NONE -> null;
+              default -> null;
+            };
         if (newArea != null) {
           TokenVBL.renderTopology(renderer, newArea, erase, mode, isTerrainVbl);
         }
@@ -359,7 +360,8 @@ public class Topology_Functions extends AbstractFunction {
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
     } else if (functionName.equals("transferVBL")) {
-      // TODO Wiki needs updating to not talk about yellow and blue VBL since there is now orange and cyan.
+      // TODO Wiki needs updating to not talk about yellow and blue VBL since there is now orange
+      // and cyan.
       Token token = null;
 
       if (parameters.size() > 3) {
@@ -486,7 +488,7 @@ public class Topology_Functions extends AbstractFunction {
     String[] requiredParms = {"x", "y", "w", "h"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
+          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
     }
 
     int x = getJSONint(topologyObject, "x", funcname);
@@ -577,7 +579,6 @@ public class Topology_Functions extends AbstractFunction {
     return area;
   }
 
-
   /**
    * Get the required parameters needed from the JSON to draw a Polygon and render as topology.
    *
@@ -591,14 +592,14 @@ public class Topology_Functions extends AbstractFunction {
     String requiredParms[] = {"points"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeA", funcname, "points"));
+          I18N.getText("macro.function.general.argumentKeyTypeA", funcname, "points"));
     }
 
     // Get all the x,y coords for the Polygon, must have at least 2
     JsonArray points = topologyObject.get("points").getAsJsonArray();
     if (points.size() < 2) {
       throw new ParserException(
-              I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
+          I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
     }
     // Optional Parameters
     int fill = getJSONint(topologyObject, "fill", funcname);
@@ -626,7 +627,7 @@ public class Topology_Functions extends AbstractFunction {
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
-                  I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
+              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
         }
 
         double x = getJSONdouble(point, "x", funcname);
@@ -641,7 +642,7 @@ public class Topology_Functions extends AbstractFunction {
         }
       }
       BasicStroke stroke =
-              new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+          new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
     } else {
       // User requests for polygon to be closed, so a Polygon is used which is automatically
@@ -654,7 +655,7 @@ public class Topology_Functions extends AbstractFunction {
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname)) {
           throw new ParserException(
-                  I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
+              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
         }
 
         int x = getJSONint(point, "x", funcname);
@@ -665,7 +666,7 @@ public class Topology_Functions extends AbstractFunction {
       // A strokedShape will not be filled in and have a defined thickness.
       if (fill == 0) {
         BasicStroke stroke =
-                new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         area = new Area(stroke.createStrokedShape(poly));
       } else {
         area = new Area(poly);
@@ -717,7 +718,7 @@ public class Topology_Functions extends AbstractFunction {
     String requiredParms[] = {"x", "y", "w", "h"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
+          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,w,h}"));
     }
 
     int x = getJSONint(topologyObject, "x", funcname);
@@ -801,7 +802,7 @@ public class Topology_Functions extends AbstractFunction {
     String requiredParms[] = {"x", "y", "radius", "sides"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
       throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,radius,sides}"));
+          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y,radius,sides}"));
     }
 
     int x = getJSONint(topologyObject, "x", funcname);
