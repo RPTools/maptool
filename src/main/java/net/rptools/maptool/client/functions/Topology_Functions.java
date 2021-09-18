@@ -314,6 +314,13 @@ public class Topology_Functions extends AbstractFunction {
       Area tokenVBL = new Area();
       for (int i = 0; i < vblArray.size(); i++) {
         JsonObject vblObject = vblArray.get(i).getAsJsonObject();
+        if (vblObject.has("terrain")) {
+          boolean isTerrainToken = token.getIsTerrainVbl();
+          boolean isTerrainVbl = BigInteger.ONE.equals(vblObject.get("terrain").getAsBigInteger());
+          if (isTerrainToken != isTerrainVbl) {
+            continue;
+          }
+        }
 
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
