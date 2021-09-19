@@ -167,4 +167,9 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   public void playerSignedOut(Player player) {
     loggedInPlayers.playerSignedOut(player);
   }
+
+  @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
+  }
 }

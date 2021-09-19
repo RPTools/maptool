@@ -200,5 +200,12 @@ public interface PlayerDatabase {
   void playerSignedOut(Player player);
 
 
+  /**
+   * Returns if a player is connected or not.
+   * @param name the player to check.
+   * @return if a player is connected or not.
+   */
+  boolean isPlayerConnected(String name);
+
 
 }

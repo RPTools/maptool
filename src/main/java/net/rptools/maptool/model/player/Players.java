@@ -77,17 +77,20 @@ public class Players {
 
 
   /** instance variable for property change support. */
-  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+  private static final PropertyChangeSupport propertyChangeSupport =
+      new PropertyChangeSupport(Players.class);
 
 
-  private final PropertyChangeListener databaseChangeListener = new PropertyChangeListener() {
+  private static final PropertyChangeListener databaseChangeListener =
+      new PropertyChangeListener() {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
       propertyChangeSupport.firePropertyChange(evt);
     }
   };
 
-  private final PropertyChangeListener databaseTypeChangeListener = new PropertyChangeListener() {
+  private static final PropertyChangeListener databaseTypeChangeListener =
+      new PropertyChangeListener() {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
       PlayerDatabase oldDb = (PlayerDatabase) evt.getOldValue();
@@ -102,6 +105,14 @@ public class Players {
       }
     }
   };
+
+
+  static {
+    PlayerDatabaseFactory.getDatabaseChangeTypeSupport().addPropertyChangeListener(databaseTypeChangeListener);
+    if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PlayerDBPropertyChange pdb) {
+      pdb.addPropertyChangeListener(databaseChangeListener);
+   }
+  }
 
 
   /**
@@ -194,13 +205,8 @@ public class Players {
           blocked = true;
         }
       }
-      boolean connected = false;
-      for (Player p : MapTool.getPlayerList()) {
-        if (name.equals(p.getName())) {
-          connected = true;
-          break;
-        }
-      }
+      boolean connected = PlayerDatabaseFactory.getCurrentPlayerDatabase().isPlayerConnected(name);
+
       AuthMethod authMethod = playerDatabase.getAuthMethod(player);
       boolean persisted = false;
       if (playerDatabase instanceof PersistedPlayerDatabase persistedPlayerDatabase) {
@@ -339,10 +345,7 @@ public class Players {
    * Adds a property change listener for player database events.
    * @param listener The property change listener to add.
    */
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    if (propertyChangeSupport.getPropertyChangeListeners().length == 0) {
-      PlayerDatabaseFactory.getDatabaseChangeTypeSupport().addPropertyChangeListener(databaseTypeChangeListener);
-    }
+  public static void addPropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.addPropertyChangeListener(listener);
   }
 
@@ -350,11 +353,8 @@ public class Players {
    * Removes a property change listener for player database events.
    * @param listener The property change listener to remove.
    */
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
+  public static void removePropertyChangeListener(PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(listener);
-    if (propertyChangeSupport.getPropertyChangeListeners().length == 0) {
-      PlayerDatabaseFactory.getDatabaseChangeTypeSupport().removePropertyChangeListener(databaseTypeChangeListener);
-    }
   }
 
   public void playerSignedIn(Player player) {
@@ -382,7 +382,7 @@ public class Players {
         propertyChangeSupport.firePropertyChange(
             PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
       } else {
-        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_ADDED, oldInfo, null);
+        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_REMOVE, oldInfo, null);
       }
     }
   }

@@ -105,6 +105,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
+  }
+
+  @Override
   public String getDisabledReason(Player player) {
     return "";
   }

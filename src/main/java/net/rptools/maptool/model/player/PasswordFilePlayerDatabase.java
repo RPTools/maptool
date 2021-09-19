@@ -621,6 +621,11 @@ public final class PasswordFilePlayerDatabase implements
   }
 
   @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
+  }
+
+  @Override
   public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 

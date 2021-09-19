@@ -15,10 +15,14 @@
 package net.rptools.maptool.client.ui.players;
 
 /** Sample Skeleton for 'PlayerDatabaseDialog.fxml' Controller Class */
+
+
+
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -27,9 +31,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.util.Callback;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
@@ -40,7 +46,7 @@ import net.rptools.maptool.model.player.Players;
 
 public class PlayerDatabaseDialogController implements SwingJavaFXDialogController {
 
-  private final KeySetView<SwingJavaFXDialogEventHandler, Boolean> eventHandlers =
+  private final Set<SwingJavaFXDialogEventHandler> eventHandlers =
       ConcurrentHashMap.newKeySet();
 
   @FXML // ResourceBundle that was given to the FXMLLoader
@@ -61,8 +67,27 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @FXML // fx:id="addButton"
   private Button addButton; // Value injected by FXMLLoader
 
+  private final PropertyChangeListener changeListener = e -> {
+    Platform.runLater(() -> {
+      switch (e.getPropertyName()) {
+        case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
+          removePlayer((PlayerInfo) e.getOldValue());
+          addPlayer((PlayerInfo) e.getNewValue());
+        }
+        case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
+          addPlayer((PlayerInfo) e.getNewValue());
+        }
+        case Players.PROPERTY_CHANGE_PLAYER_REMOVE -> {
+          removePlayer((PlayerInfo) e.getOldValue());
+        }
+        case Players.PROPERTY_CHANGE_DATABASE_CHANGED -> {
+          addPlayers();
+        }
+      }
+    });
+  };
 
-  private Players players;
+  ObservableList<PlayerInfo> playerInfoList = FXCollections.observableArrayList();
 
   @FXML // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
@@ -84,10 +109,14 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @Override
   public void deregisterEventHandler(SwingJavaFXDialogEventHandler handler) {
     eventHandlers.remove(handler);
+    Players.removePropertyChangeListener(changeListener);
   }
 
   @Override
   public void init() {
+
+    Players.addPropertyChangeListener(changeListener);
+
     String gmI81n = I18N.getString("userTerm.GM");
     String playerI81n = I18N.getString("userTerm.Player");
 
@@ -117,16 +146,42 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     connectedCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().connected()));
     connectedCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(connectedCol));
 
+    var editCol = new TableColumn<PlayerInfo, Void>();
+    var editCallFactory = new Callback<TableColumn<PlayerInfo, Void>,
+        TableCell<PlayerInfo, Void>>() {
+
+      private final Button editButton = new Button("...");
+      @Override
+      public TableCell<PlayerInfo, Void> call(TableColumn<PlayerInfo, Void> param) {
+        return null;
+      }
+    };
+    editCol.setCellFactory(editCallFactory);
+
     playersTable
         .getColumns()
         .addAll(playerCol, roleCol, authCol, disabledCol, reasonCol, connectedCol);
 
-    ObservableList<PlayerInfo> playerInfoList = FXCollections.observableArrayList();
     playersTable.setItems(playerInfoList);
+    addPlayers();
+  }
+
+  private void addPlayer(PlayerInfo playerInfo) {
+    playerInfoList.add(playerInfo);
+  }
+
+  private void removePlayer(PlayerInfo playerInfo) {
+    playerInfoList.remove(playerInfo);
+  }
+
+  private void addPlayers() {
     new Players()
         .getDatabasePlayers()
-        .thenAccept(p -> Platform.runLater(() -> playerInfoList.addAll(p.stream().filter(
-            PlayerInfo::persistent).collect(Collectors.toList()))));
-    // TODO: CDW
+        .thenAccept(p -> Platform.runLater(() -> {
+          playerInfoList.clear();
+          playerInfoList.addAll(p.stream().filter(
+              PlayerInfo::persistent).collect(Collectors.toList()));
+        }));
   }
+
 }
