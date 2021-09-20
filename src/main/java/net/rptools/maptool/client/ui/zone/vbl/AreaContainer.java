@@ -18,9 +18,8 @@ import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.List;
-import org.locationtech.jts.geom.GeometryFactory;
-
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public interface AreaContainer {
   public Area getBounds();
@@ -29,5 +28,4 @@ public interface AreaContainer {
 
   public List<VisibleAreaSegment> getVisibleBoundarySegements(
       GeometryFactory geometryFactory, Point origin, boolean frontSegments);
-
 }

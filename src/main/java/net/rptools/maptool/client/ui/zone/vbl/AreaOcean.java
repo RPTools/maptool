@@ -65,7 +65,7 @@ public class AreaOcean implements AreaContainer {
   }
 
   @Override
-  public @Nullable  AreaContainer getDeepestContainerAt(Point2D point) {
+  public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
     if (meta != null && !meta.area.contains(point)) {
       // Point not contained within this ocean, so nothing to return.
       return null;

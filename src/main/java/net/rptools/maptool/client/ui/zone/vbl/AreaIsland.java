@@ -20,9 +20,8 @@ import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.locationtech.jts.geom.GeometryFactory;
-
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.GeometryFactory;
 
 /**
  * Represents a piece of solid topology.
