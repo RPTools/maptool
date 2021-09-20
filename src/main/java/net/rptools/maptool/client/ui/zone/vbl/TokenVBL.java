@@ -182,16 +182,12 @@ public class TokenVBL {
    * @param erase Set to true to erase the VBL, otherwise draw it
    * @return the untouched area if the renderer is null, and null otherwise
    */
-  public static Area renderTopology(
+  public static void renderTopology(
       ZoneRenderer renderer,
       Area area,
       boolean erase,
       Zone.TopologyMode topologyMode,
       boolean isTerrain) {
-    if (renderer == null) {
-      return area;
-    }
-
     if (erase) {
       renderer.getZone().removeTopology(area, topologyMode, isTerrain);
       MapTool.serverCommand()
@@ -204,7 +200,6 @@ public class TokenVBL {
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
     renderer.repaint();
-    return null;
   }
 
   // TODO Lots of similarity between this and getVBL_underToken().
