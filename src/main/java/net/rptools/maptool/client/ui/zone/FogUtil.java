@@ -78,15 +78,11 @@ public class FogUtil {
 
     Point origin = new Point(x, y);
     List<VisibleAreaSegment> visionBlockingSegments = new ArrayList<>();
-    List<VisibleAreaSegment> vblBlockingSegments = findVisibleAreaSegments(topology, origin);
-    List<VisibleAreaSegment> terrainVblBlockingSegments = findVisibleAreaSegments(terrainVbl, origin);
-    if (vblBlockingSegments == null || terrainVblBlockingSegments == null) {
+    if (!addVisionBlockingSegments(visionBlockingSegments, topology, origin)
+        || !addVisionBlockingSegments(visionBlockingSegments, terrainVbl, origin)) {
       // Vision has been completely blocked by topology.
       return null;
     }
-
-    visionBlockingSegments.addAll(vblBlockingSegments);
-    visionBlockingSegments.addAll(terrainVblBlockingSegments);
 
     Geometry totalClearedArea = calculateShadows(visionBlockingSegments);
 
@@ -101,19 +97,29 @@ public class FogUtil {
     return vision;
   }
 
-  private static @Nullable List<VisibleAreaSegment> findVisibleAreaSegments(
-      AreaTree topology, Point origin) {
+  /**
+   * Finds all topology segments that can take part in blocking vision.
+   *
+   * If false is returned, no segments are added to visionBlockingSegments.
+   *
+   * @param visionBlockingSegments
+   * @param topology
+   * @param origin
+   * @return false if the vision has been completely blocked by topology, or true if vision can be
+   *   blocked by particular segments.
+   */
+  private static boolean addVisionBlockingSegments(
+      List<VisibleAreaSegment> visionBlockingSegments, AreaTree topology, Point origin) {
     final AreaContainer container = topology.getContainerAt(origin);
     if (container == null) {
       // Should never happen since the global ocean should catch everything.
-      return null;
+      return false;
     }
 
-    final List<VisibleAreaSegment> visionBlockingSegments = new ArrayList<>();
     final BiConsumer<AreaContainer, Boolean> addVisionBlockingSegments =
-        (c, frontSide) ->
+        (areaContainer, frontSide) ->
             visionBlockingSegments.addAll(
-                c.getVisibleBoundarySegements(geometryFactory, origin, frontSide));
+                areaContainer.getVisibleBoundarySegements(geometryFactory, origin, frontSide));
 
     if (container instanceof AreaIsland island) {
       // We're in an island. For normal VBL, vision is entirely blocked. But for terrain VBL,
@@ -121,7 +127,7 @@ public class FogUtil {
       // the island.
       if (!island.isTerrain()) {
         // Since we're contained in a non-terrain island, there can be no vision through it.
-        return null;
+        return false;
       } else {
         // Since we're inside this island, the facing edges are like the back side.
         addVisionBlockingSegments.accept(island, false);
@@ -180,7 +186,7 @@ public class FogUtil {
       }
     }
 
-    return visionBlockingSegments;
+    return true;
   }
 
   private static @Nullable Geometry calculateShadows(
