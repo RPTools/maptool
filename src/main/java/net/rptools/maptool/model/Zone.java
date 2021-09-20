@@ -160,7 +160,23 @@ public class Zone extends BaseModel {
     ON
   }
 
-  public record BlMode(VblMode vblMode, MblMode mblMode) {
+  public static class BlMode {
+    private final VblMode vblMode;
+    private final MblMode mblMode;
+
+    public BlMode(VblMode vblMode, MblMode mblMode) {
+      this.vblMode = vblMode;
+      this.mblMode = mblMode;
+    }
+
+    public VblMode vblMode() {
+      return vblMode;
+    }
+
+    public MblMode mblMode() {
+      return mblMode;
+    }
+
     public TopologyMode toTopologyMode() {
       // TODO Not accurate. But this is a stand-in for the future when we just return blMode.
       return switch (this.vblMode()) {
@@ -823,22 +839,18 @@ public class Zone extends BaseModel {
    * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
-    Area topology = null;
     if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
       if (!drawTerrainVbl) {
-        topology = getTopology();
+        getTopology().add(area);
       } else {
-        topology = getTerrainVbl();
+        getTerrainVbl().add(area);
       }
     }
     if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
-      topology = getTopologyTerrain();
+      getTopologyTerrain().add(area);
     }
 
-    if (topology != null) {
-      topology.add(area);
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-    }
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void addTopology(Area area) {
