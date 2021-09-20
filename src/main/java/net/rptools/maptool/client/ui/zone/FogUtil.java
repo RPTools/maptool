@@ -76,12 +76,10 @@ public class FogUtil {
     vision = new Area(vision);
     vision.transform(AffineTransform.getTranslateInstance(x, y));
 
-    final Point origin = new Point(x, y);
-
+    Point origin = new Point(x, y);
     List<VisibleAreaSegment> visionBlockingSegments = new ArrayList<>();
-    var vblBlockingSegments = findVisibleAreaSegments(topology, origin);
-    var terrainVblBlockingSegments = findVisibleAreaSegments(terrainVbl, origin);
-
+    List<VisibleAreaSegment> vblBlockingSegments = findVisibleAreaSegments(topology, origin);
+    List<VisibleAreaSegment> terrainVblBlockingSegments = findVisibleAreaSegments(terrainVbl, origin);
     if (vblBlockingSegments == null || terrainVblBlockingSegments == null) {
       // Vision has been completely blocked by topology.
       return null;

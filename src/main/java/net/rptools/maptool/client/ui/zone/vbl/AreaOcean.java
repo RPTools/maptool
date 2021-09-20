@@ -89,8 +89,7 @@ public class AreaOcean implements AreaContainer {
     islandSet.add(island);
   }
 
-  ////
-  // AREA CONTAINER
+  @Override
   public Area getBounds() {
     return meta != null ? meta.area : null;
   }
