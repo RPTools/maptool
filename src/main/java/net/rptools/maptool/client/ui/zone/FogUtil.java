@@ -103,27 +103,22 @@ public class FogUtil {
 
   private static @Nullable List<VisibleAreaSegment> findVisibleAreaSegments(
       AreaTree topology, Point origin) {
-    AreaOcean ocean = topology.getOceanAt(origin);
-    if (ocean == null) {
+    final AreaContainer container = topology.getContainerAt(origin);
+    if (container == null) {
       // Should never happen since the global ocean should catch everything.
       return null;
     }
-    final AreaIsland island =
-        ocean.getIslands().stream()
-            .filter(i -> i.getBounds().contains(origin))
-            .findFirst()
-            .orElse(null);
+
     final List<VisibleAreaSegment> visionBlockingSegments = new ArrayList<>();
     final BiConsumer<AreaContainer, Boolean> addVisionBlockingSegments =
-        (container, frontSide) ->
+        (c, frontSide) ->
             visionBlockingSegments.addAll(
-                container.getVisibleBoundarySegements(geometryFactory, origin, frontSide));
+                c.getVisibleBoundarySegements(geometryFactory, origin, frontSide));
 
-    if (island != null) {
+    if (container instanceof AreaIsland island) {
       // We're in an island. For normal VBL, vision is entirely blocked. But for terrain VBL,
       // vision can continue until we hit the front of any contained ocean or the boundary of
       // the island.
-
       if (!island.isTerrain()) {
         // Since we're contained in a non-terrain island, there can be no vision through it.
         return null;
@@ -136,7 +131,7 @@ public class FogUtil {
           addVisionBlockingSegments.accept(nestedOcean, true);
         }
       }
-    } else {
+    } else if (container instanceof AreaOcean ocean) {
       // We're in an ocean. Vision is blocked in one way or another by the parent island and
       // containing island.
       // For the parent island, if it is regular VBL, vision is blocked by the near side of the

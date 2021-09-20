@@ -70,8 +70,6 @@ public class AreaTreeInspector extends JPanel {
     g.setColor(Color.white);
     g.fillRect(0, 0, size.width, size.height);
 
-    AreaOcean ocean = tree.getOcean();
-
     // paintOcean((Graphics2D)g, ocean, 0);
 
     if (point != null) {
@@ -80,16 +78,16 @@ public class AreaTreeInspector extends JPanel {
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
       g2d.setColor(Color.blue);
 
-      ocean = tree.getOceanAt(point);
-      if (ocean != null && ocean.getBounds() != null) {
-        g2d.fill(ocean.getBounds());
+      var container = tree.getContainerAt(point);
+      if (container != null && container.getBounds() != null) {
+        g2d.fill(container.getBounds());
       }
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .25f));
       g2d.setColor(Color.red);
 
-      if (ocean != null) {
+      if (container != null) {
         for (VisibleAreaSegment segment :
-            ocean.getVisibleBoundarySegements(geometryFactory, point, false)) {
+            container.getVisibleBoundarySegements(geometryFactory, point, false)) {
           var shadow = segment.castShadow(Integer.MAX_VALUE / 2);
           Area area = new Area(shapeWriter.toShape(shadow));
           if (area != null) {

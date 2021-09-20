@@ -64,15 +64,16 @@ public class AreaOcean implements AreaContainer {
     return meta.getFacingSegments(geometryFactory, origin, frontSegments);
   }
 
-  public AreaOcean getDeepestOceanAt(Point2D point) {
-
+  @Override
+  public @Nullable  AreaContainer getDeepestContainerAt(Point2D point) {
     if (meta != null && !meta.area.contains(point)) {
+      // Point not contained within this ocean, so nothing to return.
       return null;
     }
 
     // If the point is in an island, then let the island figure it out
     for (AreaIsland island : islandSet) {
-      AreaOcean ocean = island.getDeepestOceanAt(point);
+      AreaContainer ocean = island.getDeepestContainerAt(point);
       if (ocean != null) {
         return ocean;
       }

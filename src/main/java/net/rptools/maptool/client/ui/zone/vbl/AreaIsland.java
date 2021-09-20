@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import org.locationtech.jts.geom.GeometryFactory;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents a piece of solid topology.
  *
@@ -59,22 +61,21 @@ public class AreaIsland implements AreaContainer {
     this.parentOcean = parentOcean;
   }
 
-  public AreaOcean getDeepestOceanAt(Point2D point) {
-
+  @Override
+  public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
     if (!meta.area.contains(point)) {
+      // Point not contained within this island, so nothing to return.
       return null;
     }
 
     for (AreaOcean ocean : oceanSet) {
-      AreaOcean deepOcean = ocean.getDeepestOceanAt(point);
-      if (deepOcean != null) {
-        return deepOcean;
+      AreaContainer deepContainer = ocean.getDeepestContainerAt(point);
+      if (deepContainer != null) {
+        return deepContainer;
       }
     }
 
-    // If we don't have an ocean that contains the point then
-    // the point is not technically in an ocean
-    return null;
+    return this;
   }
 
   public Set<AreaOcean> getOceans() {

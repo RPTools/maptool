@@ -41,20 +41,13 @@ public class AreaTree {
   }
 
   /**
-   * Gets the most nested ocean that contains `point`.
-   *
-   * <p>If `point` is in an island, the containing ocean is instead returned.
+   * Gets the most nested ocean or island that contains `point`.
    *
    * @param point
    * @return
    */
-  public AreaOcean getOceanAt(Point2D point) {
-    return theOcean.getDeepestOceanAt(point);
-  }
-
-  // Package level for testing purposes
-  AreaOcean getOcean() {
-    return theOcean;
+  public AreaContainer getContainerAt(Point2D point) {
+    return theOcean.getDeepestContainerAt(point);
   }
 
   public Area getArea() {
