@@ -1195,12 +1195,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 }
 
                 var isTerrainVbl = getIsTerrainButton().isSelected();
-                TokenVBL.renderVBL(
+                TokenVBL.renderTopology(
                     MapTool.getFrame().getCurrentZoneRenderer(),
                     getTokenVblPanel()
                         .getToken()
                         .getTransformedVBL(getTokenVblPanel().getTokenVBL_optimized()),
                     false,
+                    Zone.TopologyMode.VBL,
                     isTerrainVbl);
 
                 if (getCopyOrMoveCheckbox().isSelected()) {
@@ -1230,8 +1231,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                         MapTool.getFrame().getCurrentZoneRenderer(),
                         getTokenVblPanel().getToken(),
                         isTerrainVbl);
-                TokenVBL.renderVBL(
-                    MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true, isTerrainVbl);
+                TokenVBL.renderTopology(
+                        MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true, Zone.TopologyMode.VBL, isTerrainVbl);
               }
 
               getTokenVblPanel().repaint();

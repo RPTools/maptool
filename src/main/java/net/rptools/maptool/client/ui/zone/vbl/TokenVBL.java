@@ -180,19 +180,6 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
-   * @param isTerrain Set to true to make terrain VBL instead of regular VBL.
-   * @return the untouched area if the renderer is null, and null otherwise
-   */
-  public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase, boolean isTerrain) {
-    return renderTopology(renderer, area, erase, renderer.getZone().getTopologyMode(), isTerrain);
-  }
-
-  /**
-   * This is a convenience method to send the VBL Area to be rendered to the server
-   *
-   * @param renderer Reference to the ZoneRenderer
-   * @param area A valid Area containing VBL polygons
-   * @param erase Set to true to erase the VBL, otherwise draw it
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderTopology(
