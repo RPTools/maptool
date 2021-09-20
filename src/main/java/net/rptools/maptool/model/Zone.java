@@ -149,76 +149,12 @@ public class Zone extends BaseModel {
     }
   }
 
-  public enum VblMode {
-    OFF,
-    REGULAR,
-    TERRAIN
-  }
-
-  public enum MblMode {
-    OFF,
-    ON
-  }
-
-  public static class BlMode {
-    private final VblMode vblMode;
-    private final MblMode mblMode;
-
-    public BlMode(VblMode vblMode, MblMode mblMode) {
-      this.vblMode = vblMode;
-      this.mblMode = mblMode;
-    }
-
-    public VblMode vblMode() {
-      return vblMode;
-    }
-
-    public MblMode mblMode() {
-      return mblMode;
-    }
-
-    public TopologyMode toTopologyMode() {
-      // TODO Not accurate. But this is a stand-in for the future when we just return blMode.
-      return switch (this.vblMode()) {
-        case OFF -> (this.mblMode() == MblMode.ON) ? TopologyMode.MBL : null;
-        case REGULAR -> (this.mblMode() == MblMode.ON) ? TopologyMode.COMBINED : TopologyMode.VBL;
-        case TERRAIN -> (this.mblMode() == MblMode.ON) ? TopologyMode.COMBINED : TopologyMode.VBL;
-      };
-    }
-  }
-
   // Control what topology layer(s) to add/get drawing to/from
-  // TODO Replace with a class that has the following information:
-  //  - draw VBL: no / yes / terrain
-  //  - draw MBL: no / yes
-  //  - Define constants for common cases?
+  // TODO Somehow attach `isTerrainVbl` flags to this enum.
   public enum TopologyMode {
     VBL,
     MBL,
-    COMBINED;
-
-    public BlMode toBlMode() {
-      VblMode vblMode;
-      MblMode mblMode;
-      switch (this) {
-        default:
-        case VBL:
-          vblMode = VblMode.REGULAR;
-          mblMode = MblMode.OFF;
-          break;
-
-        case MBL:
-          vblMode = VblMode.OFF;
-          mblMode = MblMode.ON;
-          break;
-
-        case COMBINED:
-          vblMode = VblMode.REGULAR;
-          mblMode = MblMode.ON;
-      }
-
-      return new BlMode(vblMode, mblMode);
-    }
+    COMBINED
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -246,7 +182,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private BlMode blMode = null;
+  private TopologyMode topologyMode = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -542,7 +478,7 @@ public class Zone extends BaseModel {
     terrainVbl = (Area) zone.terrainVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
-    blMode = zone.blMode;
+    topologyMode = zone.topologyMode;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -1199,25 +1135,16 @@ public class Zone extends BaseModel {
     this.aStarRounding = aStarRounding;
   }
 
-  public BlMode getBlMode() {
-    return blMode;
-  }
-
-  public void setBlMode(BlMode blMode) {
-    this.blMode = blMode;
-  }
-
   public TopologyMode getTopologyMode() {
-    if (blMode == null) {
-      // TODO Retrieve from app preferences.
-      blMode = new BlMode(VblMode.REGULAR, MblMode.OFF);
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
     }
 
-    return blMode.toTopologyMode();
+    return topologyMode;
   }
 
   public void setTopologyMode(TopologyMode topologyMode) {
-    this.blMode = topologyMode.toBlMode();
+    this.topologyMode = topologyMode;
   }
 
   public int getLargestZOrder() {
