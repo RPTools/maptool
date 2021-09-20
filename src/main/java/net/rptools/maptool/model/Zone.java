@@ -210,6 +210,7 @@ public class Zone extends BaseModel {
         case MBL:
           vblMode = VblMode.OFF;
           mblMode = MblMode.ON;
+          break;
 
         case COMBINED:
           vblMode = VblMode.REGULAR;
