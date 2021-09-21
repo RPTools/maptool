@@ -29,6 +29,11 @@ message BringTokensToFrontMsg {
   repeated string tokenGuids = 2;
 }
 
+message ChangeZoneDisplayNameMsg {
+  string zoneGuid = 1;
+  string name = 2;
+}
+
 message DrawMsg {
   string zoneGuid = 1;
   PenDto pen = 2;

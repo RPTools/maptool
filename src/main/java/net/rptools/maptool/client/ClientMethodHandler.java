@@ -58,6 +58,7 @@ import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.AddTopologyMsg;
 import net.rptools.maptool.server.proto.BootPlayerMsg;
+import net.rptools.maptool.server.proto.ChangeZoneDisplayNameMsg;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
@@ -84,8 +85,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
       log.info(id + ": p got: " + msgType);
 
       switch (msgType) {
-        case ADD_TOPOLOGY_MSG -> handle(id, msg.getAddTopologyMsg());
-        case BOOT_PLAYER_MSG -> handle(id, msg.getBootPlayerMsg());
+        case ADD_TOPOLOGY_MSG -> handle(msg.getAddTopologyMsg());
+        case BOOT_PLAYER_MSG -> handle(msg.getBootPlayerMsg());
+        case CHANGE_ZONE_DISPLAY_NAME_MSG -> handle(msg.getChangeZoneDisplayNameMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -94,7 +96,25 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void handle(String id, AddTopologyMsg addTopologyMsg) {
+  private void handle(ChangeZoneDisplayNameMsg changeZoneDisplayNameMsg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(changeZoneDisplayNameMsg.getZoneGuid());
+          String dispName = changeZoneDisplayNameMsg.getName();
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setPlayerAlias(dispName);
+          }
+          MapTool.getFrame()
+              .setTitleViaRenderer(
+                  MapTool.getFrame()
+                      .getCurrentZoneRenderer()); // fixes a bug where the display name at the
+          // program title was not updating
+        });
+  }
+
+  private void handle(AddTopologyMsg addTopologyMsg) {
     var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
     var area = Mapper.map(addTopologyMsg.getArea());
     TopologyMode topologyMode = TopologyMode.valueOf(addTopologyMsg.getMode().name());
@@ -105,7 +125,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
   }
 
-  private void handle(String id, BootPlayerMsg bootPlayerMsg) {
+  private void handle(BootPlayerMsg bootPlayerMsg) {
     String playerName = bootPlayerMsg.getPlayerName();
     if (MapTool.getPlayer().getName().equals(playerName))
       EventQueue.invokeLater(
@@ -551,21 +571,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 zone.setName(name);
               }
               MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
-              return;
-
-            case changeZoneDispName:
-              zoneGUID = (GUID) parameters[0];
-              String dispName = (String) parameters[1];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              if (zone != null) {
-                zone.setPlayerAlias(dispName);
-              }
-              MapTool.getFrame()
-                  .setTitleViaRenderer(
-                      MapTool.getFrame()
-                          .getCurrentZoneRenderer()); // fixes a bug where the display name at the
-              // program title was not updating
               return;
 
             case updateCampaign:

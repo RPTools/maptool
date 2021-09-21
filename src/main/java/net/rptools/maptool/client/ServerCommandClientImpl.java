@@ -44,10 +44,7 @@ import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
-import net.rptools.maptool.server.proto.AddTopologyMsg;
-import net.rptools.maptool.server.proto.BootPlayerMsg;
-import net.rptools.maptool.server.proto.Message;
-import net.rptools.maptool.server.proto.TopologyModeDto;
+import net.rptools.maptool.server.proto.*;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -120,7 +117,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void changeZoneDispName(GUID zoneGUID, String name) {
-    makeServerCall(COMMAND.changeZoneDispName, zoneGUID, name);
+    var msg = Message.newBuilder();
+    var changeZoneDispNameMsg = ChangeZoneDisplayNameMsg.newBuilder();
+    changeZoneDispNameMsg.setName(name).setZoneGuid(zoneGUID.toString());
+    msg.setChangeZoneDisplayNameMsg(changeZoneDispNameMsg);
+    makeServerCall(msg.build());
   }
 
   public void putAsset(Asset asset) {
@@ -329,7 +330,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenList) {
-    makeServerCall(COMMAND.bringTokensToFront, zoneGUID, tokenList);
+    var msg = Message.newBuilder();
+    var bringToFrontMsg = BringTokensToFrontMsg.newBuilder();
+    bringToFrontMsg.setZoneGuid(zoneGUID.toString());
+    tokenList.stream().forEach(guid -> bringToFrontMsg.addTokenGuids(guid.toString()));
+    msg.setBringTokensToFrontMsg(bringToFrontMsg);
+    makeServerCall(msg.build());
   }
 
   public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenList) {

@@ -16,6 +16,7 @@ package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
 import java.util.*;
+import java.util.stream.Collectors;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ClientCommand;
@@ -46,9 +47,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.proto.AddTopologyMsg;
-import net.rptools.maptool.server.proto.BootPlayerMsg;
-import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,9 +83,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getAddTopologyMsg());
           forwardToClients(id, msg);
         }
+        case BRING_TOKENS_TO_FRONT_MSG -> {
+          handle(msg.getBringTokensToFrontMsg());
+        }
         case BOOT_PLAYER_MSG -> {
           handle(msg.getBootPlayerMsg());
           forwardToClients(id, msg);
+        }
+        case CHANGE_ZONE_DISPLAY_NAME_MSG -> {
+          handle(msg.getChangeZoneDisplayNameMsg(), msg);
         }
         default -> log.warn(msgType + "not handled.");
       }
@@ -94,6 +99,26 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ChangeZoneDisplayNameMsg changeZoneDisplayNameMsg, Message msg) {
+    var zoneGUID = GUID.valueOf(changeZoneDisplayNameMsg.getZoneGuid());
+    var name = changeZoneDisplayNameMsg.getName();
+
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    if (zone != null) {
+      zone.setPlayerAlias(name);
+      forwardToAllClients(msg);
+    }
+  }
+
+  private void handle(BringTokensToFrontMsg bringTokensToFrontMsg) {
+    var zoneGuid = GUID.valueOf(bringTokensToFrontMsg.getZoneGuid());
+    var tokenSet =
+        bringTokensToFrontMsg.getTokenGuidsList().stream()
+            .map(str -> GUID.valueOf(str))
+            .collect(Collectors.toSet());
+    bringTokensToFront(zoneGuid, tokenSet);
   }
 
   private void handle(AddTopologyMsg addTopologyMsg) {
@@ -118,9 +143,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       RPCContext context = new RPCContext(id, method, parameters);
       RPCContext.setCurrent(context);
       switch (cmd) {
-        case bringTokensToFront:
-          bringTokensToFront(context.getGUID(0), (Set<GUID>) context.get(1));
-          break;
         case draw:
           draw(context.getGUID(0), (Pen) context.get(1), (Drawable) context.get(2));
           break;
@@ -273,9 +295,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
           break;
-        case changeZoneDispName:
-          changeZoneDispName(context.getGUID(0), context.getString(1));
-          break;
         case heartbeat:
           heartbeat(context.getString(0));
           break;
@@ -331,6 +350,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   private void forwardToClients(String id, Message message) {
     server.getConnection().broadcastMessage(new String[] {id}, message.toByteArray());
+  }
+
+  private void forwardToAllClients(Message message) {
+    server.getConnection().broadcastMessage(new String[] {}, message.toByteArray());
   }
 
   /** Send the current call to all other clients except for the sender */
@@ -581,14 +604,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     if (zone != null) {
       zone.setName(name);
-      forwardToAllClients();
-    }
-  }
-
-  private void changeZoneDispName(GUID zoneGUID, String name) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    if (zone != null) {
-      zone.setPlayerAlias(name);
       forwardToAllClients();
     }
   }

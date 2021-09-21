@@ -60,7 +60,6 @@ public class ClientCommand {
     setServerPolicy,
     removeTopology,
     renameZone,
-    changeZoneDispName,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,

@@ -18,6 +18,7 @@ message Message {
     AddTopologyMsg add_topology_msg = 1;
     BootPlayerMsg boot_player_msg = 2;
     BringTokensToFrontMsg bring_tokens_to_front_msg = 3;
-    DrawMsg draw_msg = 4;
+    ChangeZoneDisplayNameMsg change_zone_display_name_msg = 4;
+    DrawMsg draw_msg = 7;
   }
 }
