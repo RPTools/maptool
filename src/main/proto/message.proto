@@ -19,6 +19,7 @@ message Message {
     BootPlayerMsg boot_player_msg = 2;
     BringTokensToFrontMsg bring_tokens_to_front_msg = 3;
     ChangeZoneDisplayNameMsg change_zone_display_name_msg = 4;
+    ClearAllDrawingsMsg clear_all_drawings_msg = 5;
     DrawMsg draw_msg = 7;
   }
 }

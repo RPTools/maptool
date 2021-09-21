@@ -56,10 +56,7 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
-import net.rptools.maptool.server.proto.AddTopologyMsg;
-import net.rptools.maptool.server.proto.BootPlayerMsg;
-import net.rptools.maptool.server.proto.ChangeZoneDisplayNameMsg;
-import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
@@ -88,12 +85,24 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case ADD_TOPOLOGY_MSG -> handle(msg.getAddTopologyMsg());
         case BOOT_PLAYER_MSG -> handle(msg.getBootPlayerMsg());
         case CHANGE_ZONE_DISPLAY_NAME_MSG -> handle(msg.getChangeZoneDisplayNameMsg());
+        case CLEAR_ALL_DRAWINGS_MSG -> handle(msg.getClearAllDrawingsMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ClearAllDrawingsMsg clearAllDrawingsMsg) {
+    EventQueue.invokeLater(()-> {
+        var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
+        var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
+
+        var zone = MapTool.getCampaign().getZone(zoneGUID);
+        zone.clearDrawables(zone.getDrawnElements(layer));
+        MapTool.getFrame().refresh();
+    });
   }
 
   private void handle(ChangeZoneDisplayNameMsg changeZoneDisplayNameMsg) {
@@ -192,14 +201,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   && (renderer.getZone().isVisible() || MapTool.getPlayer().isGM())) {
                 MapTool.getFrame().setCurrentZoneRenderer(renderer);
               }
-              return;
-
-            case clearAllDrawings:
-              zoneGUID = (GUID) parameters[0];
-              Zone.Layer layer = (Zone.Layer) parameters[1];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.clearDrawables(zone.getDrawnElements(layer));
-              MapTool.getFrame().refresh();
               return;
 
             case setZoneHasFoW:

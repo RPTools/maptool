@@ -55,7 +55,6 @@ public interface ServerCommand {
     updateTokenProperty,
     draw,
     updateDrawing,
-    clearAllDrawings,
     setZoneGridSize,
     message,
     execLink,

@@ -34,6 +34,11 @@ message ChangeZoneDisplayNameMsg {
   string name = 2;
 }
 
+message ClearAllDrawingsMsg {
+  string zoneGuid = 1;
+  string layer = 2;
+}
+
 message DrawMsg {
   string zoneGuid = 1;
   PenDto pen = 2;

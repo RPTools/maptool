@@ -32,7 +32,6 @@ public class ClientCommand {
     removeToken,
     removeTokens,
     draw,
-    clearAllDrawings,
     updateDrawing,
     setZoneGridSize,
     setZoneVisibility,

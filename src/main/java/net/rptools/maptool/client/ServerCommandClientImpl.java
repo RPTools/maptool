@@ -70,11 +70,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void bootPlayer(String player) {
-    var msg =
-        Message.newBuilder()
-            .setBootPlayerMsg(BootPlayerMsg.newBuilder().setPlayerName(player))
-            .build();
-    makeServerCall(msg);
+    var msg = BootPlayerMsg.newBuilder().setPlayerName(player);
+    makeServerCall(Message.newBuilder().setBootPlayerMsg(msg).build());
   }
 
   public void setCampaign(Campaign campaign) {
@@ -117,11 +114,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void changeZoneDispName(GUID zoneGUID, String name) {
-    var msg = Message.newBuilder();
-    var changeZoneDispNameMsg = ChangeZoneDisplayNameMsg.newBuilder();
-    changeZoneDispNameMsg.setName(name).setZoneGuid(zoneGUID.toString());
-    msg.setChangeZoneDisplayNameMsg(changeZoneDispNameMsg);
-    makeServerCall(msg.build());
+    var msg = ChangeZoneDisplayNameMsg.newBuilder()
+        .setName(name)
+        .setZoneGuid(zoneGUID.toString());
+
+    makeServerCall(Message.newBuilder().setChangeZoneDisplayNameMsg(msg).build());
   }
 
   public void putAsset(Asset asset) {
@@ -218,7 +215,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
-    makeServerCall(COMMAND.clearAllDrawings, zoneGUID, layer);
+    var msg = ClearAllDrawingsMsg.newBuilder()
+        .setZoneGuid(zoneGUID.toString())
+        .setLayer(layer.name());
+
+    makeServerCall(Message.newBuilder().setClearAllDrawingsMsg(msg).build());
   }
 
   public void undoDraw(GUID zoneGUID, GUID drawableGUID) {
@@ -292,15 +293,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    var msg =
-        Message.newBuilder()
-            .setAddTopologyMsg(
-                AddTopologyMsg.newBuilder()
-                    .setZoneGuid(zoneGUID.toString())
-                    .setMode(TopologyModeDto.valueOf(topologyMode.name()))
-                    .setArea(Mapper.map(area)))
-            .build();
-    makeServerCall(msg);
+    var msg = AddTopologyMsg.newBuilder()
+        .setZoneGuid(zoneGUID.toString())
+        .setMode(TopologyModeDto.valueOf(topologyMode.name()))
+        .setArea(Mapper.map(area));
+
+    makeServerCall(Message.newBuilder().setAddTopologyMsg(msg).build());
   }
 
   public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
@@ -330,12 +328,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenList) {
-    var msg = Message.newBuilder();
-    var bringToFrontMsg = BringTokensToFrontMsg.newBuilder();
-    bringToFrontMsg.setZoneGuid(zoneGUID.toString());
-    tokenList.stream().forEach(guid -> bringToFrontMsg.addTokenGuids(guid.toString()));
-    msg.setBringTokensToFrontMsg(bringToFrontMsg);
-    makeServerCall(msg.build());
+    var msg= BringTokensToFrontMsg.newBuilder()
+        .setZoneGuid(zoneGUID.toString());
+    tokenList.stream().forEach(guid -> msg.addTokenGuids(guid.toString()));
+
+    makeServerCall(Message.newBuilder().setBringTokensToFrontMsg(msg).build());
   }
 
   public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenList) {

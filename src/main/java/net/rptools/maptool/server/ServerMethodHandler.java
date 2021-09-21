@@ -93,12 +93,24 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case CHANGE_ZONE_DISPLAY_NAME_MSG -> {
           handle(msg.getChangeZoneDisplayNameMsg(), msg);
         }
+        case CLEAR_ALL_DRAWINGS_MSG -> {
+          handle(msg.getClearAllDrawingsMsg());
+          forwardToAllClients(msg);
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ClearAllDrawingsMsg clearAllDrawingsMsg) {
+    var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
+    var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    List<DrawnElement> list = zone.getDrawnElements(layer);
+    zone.clearDrawables(list); // FJE Empties the DrawableUndoManager and empties the list
   }
 
   private void handle(ChangeZoneDisplayNameMsg changeZoneDisplayNameMsg, Message msg) {
@@ -280,9 +292,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           updateTokenMove(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
           break;
-        case clearAllDrawings:
-          clearAllDrawings(context.getGUID(0), (Zone.Layer) context.get(1));
-          break;
         case enforceZone:
           enforceZone(context.getGUID(0));
           break;
@@ -456,13 +465,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       }
       zone.sortZOrder(); // update new ZOrder on server zone
     }
-  }
-
-  private void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    List<DrawnElement> list = zone.getDrawnElements(layer);
-    zone.clearDrawables(list); // FJE Empties the DrawableUndoManager and empties the list
-    forwardToAllClients();
   }
 
   public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
