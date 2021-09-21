@@ -35,18 +35,24 @@ public class DrawTopologySelectionTool extends DefaultTool {
   private static DrawTopologySelectionTool drawTopologySelectionTool;
 
   private ImageIcon vblImageIcon = new ImageIcon();
+  private ImageIcon terrainVblImageIcon = new ImageIcon();
   private ImageIcon mblImageIcon = new ImageIcon();
   private ImageIcon combinedImageIcon = new ImageIcon();
+  private ImageIcon combinedTerrainVblImageIcon = new ImageIcon();
 
   public DrawTopologySelectionTool() {
     drawTopologySelectionTool = this;
     try {
       vblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/vbl-only.png"));
+      terrainVblImageIcon =
+              new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/terrain-vbl-only.png"));
       mblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-only.png"));
       combinedImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-vbl-on.png"));
+      combinedTerrainVblImageIcon =
+              new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-terrain-vbl-on.png"));
 
       setIcon(vblImageIcon);
       setSelectedIcon(combinedImageIcon);
@@ -93,18 +99,21 @@ public class DrawTopologySelectionTool extends DefaultTool {
 
   /** Set the Selection Tool to the next mode ({@literal Combined -> MBL -> VBL -> Combined}). */
   public void nextMode() {
-    if (isSelected()) {
-      // If Combined, switch to MBL
-      setMode(TopologyMode.MBL);
-    } else {
-      if (getActionCommand().equals(TopologyMode.MBL.toString())) {
-        // If MBL, switch to VBL
-        setMode(TopologyMode.VBL);
-      } else {
-        // If VBL, switch to Combined
-        setMode(TopologyMode.COMBINED);
-      }
+    TopologyMode currentMode;
+    try {
+      currentMode = TopologyMode.valueOf(getActionCommand());
+    } catch (IllegalArgumentException e) {
+      currentMode = TopologyMode.MBL;
     }
+
+    var nextMode = switch (currentMode) {
+      case MBL -> TopologyMode.VBL;
+      case VBL -> TopologyMode.COMBINED;
+      case COMBINED -> TopologyMode.TERRAIN_VBL;
+      case TERRAIN_VBL -> TopologyMode.COMBINED_TERRAIN_VBL;
+      case COMBINED_TERRAIN_VBL -> TopologyMode.MBL;
+    };
+    setMode(nextMode);
   }
 
   /**
@@ -134,14 +143,26 @@ public class DrawTopologySelectionTool extends DefaultTool {
    * @param topologyMode the topology mode
    */
   private void updateIcon(TopologyMode topologyMode) {
-    if (topologyMode == TopologyMode.VBL) {
-      setSelected(false);
-      setIcon(vblImageIcon);
-    } else if (topologyMode == TopologyMode.MBL) {
-      setSelected(false);
-      setIcon(mblImageIcon);
-    } else if (topologyMode == TopologyMode.COMBINED) {
-      setSelected(true);
+    switch (topologyMode) {
+      case VBL:
+        setSelected(false);
+        setIcon(vblImageIcon);
+        break;
+      case MBL:
+        setSelected(false);
+        setIcon(mblImageIcon);
+        break;
+      case COMBINED:
+        setSelected(true);
+        break;
+      case TERRAIN_VBL:
+        setSelected(false);
+        setIcon(terrainVblImageIcon);
+        break;
+      case COMBINED_TERRAIN_VBL:
+        setSelected(false);
+        setIcon(combinedTerrainVblImageIcon);
+        break;
     }
   }
 

@@ -150,11 +150,24 @@ public class Zone extends BaseModel {
   }
 
   // Control what topology layer(s) to add/get drawing to/from
-  // TODO Somehow attach `isTerrainVbl` flags to this enum.
   public enum TopologyMode {
     VBL,
     MBL,
-    COMBINED
+    TERRAIN_VBL,
+    COMBINED,
+    COMBINED_TERRAIN_VBL;
+
+    public boolean isRegularVbl() {
+      return this == VBL || this == COMBINED;
+    }
+
+    public boolean isTerrainVbl() {
+      return this == TERRAIN_VBL || this == COMBINED_TERRAIN_VBL;
+    }
+
+    public boolean isMbl() {
+      return this == MBL || this == COMBINED || this == COMBINED_TERRAIN_VBL;
+    }
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -775,15 +788,14 @@ public class Zone extends BaseModel {
    * @param area the area
    * @param topologyMode the mode of the topology
    */
-  public void addTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
-    if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
-      if (!drawTerrainVbl) {
-        getTopology().add(area);
-      } else {
-        getTerrainVbl().add(area);
-      }
+  public void addTopology(Area area, TopologyMode topologyMode) {
+    if (topologyMode.isRegularVbl()) {
+      getTopology().add(area);
     }
-    if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
+    if (topologyMode.isTerrainVbl()) {
+      getTerrainVbl().add(area);
+    }
+    if (topologyMode.isMbl()) {
       getTopologyTerrain().add(area);
     }
 
@@ -791,7 +803,7 @@ public class Zone extends BaseModel {
   }
 
   public void addTopology(Area area) {
-    addTopology(area, getTopologyMode(), AppPreferences.getDrawTerrainVbl());
+    addTopology(area, getTopologyMode());
   }
 
   /**
@@ -800,15 +812,14 @@ public class Zone extends BaseModel {
    * @param area the area
    * @param topologyMode the mode of the topology
    */
-  public void removeTopology(Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
-    if (topologyMode == TopologyMode.VBL || topologyMode == TopologyMode.COMBINED) {
-      if (!drawTerrainVbl) {
-        getTopology().subtract(area);
-      } else {
-        getTerrainVbl().subtract(area);
-      }
+  public void removeTopology(Area area, TopologyMode topologyMode) {
+    if (topologyMode.isRegularVbl()) {
+      getTopology().subtract(area);
     }
-    if (topologyMode == TopologyMode.MBL || topologyMode == TopologyMode.COMBINED) {
+    if (topologyMode.isTerrainVbl()) {
+      getTerrainVbl().subtract(area);
+    }
+    if (topologyMode.isMbl()) {
       getTopologyTerrain().subtract(area);
     }
 
@@ -816,7 +827,7 @@ public class Zone extends BaseModel {
   }
 
   public void removeTopology(Area area) {
-    removeTopology(area, getTopologyMode(), AppPreferences.getDrawTerrainVbl());
+    removeTopology(area, getTopologyMode());
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */

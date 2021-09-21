@@ -117,16 +117,14 @@ public class HollowOvalTopologyTool extends AbstractDrawingTool implements Mouse
               .removeTopology(
                   getZone().getId(),
                   area,
-                  getZone().getTopologyMode(),
-                  AppPreferences.getDrawTerrainVbl());
+                  getZone().getTopologyMode());
         } else {
           getZone().addTopology(area);
           MapTool.serverCommand()
               .addTopology(
                   getZone().getId(),
                   area,
-                  getZone().getTopologyMode(),
-                  AppPreferences.getDrawTerrainVbl());
+                  getZone().getTopologyMode());
         }
         renderer.repaint();
 

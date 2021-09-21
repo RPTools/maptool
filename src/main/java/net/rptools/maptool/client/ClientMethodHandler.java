@@ -496,10 +496,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
               TopologyMode topologyMode = (TopologyMode) parameters[2];
-              boolean drawTerrainVbl = (boolean) parameters[3];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addTopology(area, topologyMode, drawTerrainVbl);
+              zone.addTopology(area, topologyMode);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;
@@ -508,10 +507,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
               topologyMode = (TopologyMode) parameters[2];
-              drawTerrainVbl = (boolean) parameters[3];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.removeTopology(area, topologyMode, drawTerrainVbl);
+              zone.removeTopology(area, topologyMode);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;

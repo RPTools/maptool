@@ -116,10 +116,10 @@ public interface ServerCommand {
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
   public void addTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl);
+      GUID zoneGUID, Area area, TopologyMode topologyMode);
 
   public void removeTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl);
+      GUID zoneGUID, Area area, TopologyMode topologyMode);
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 

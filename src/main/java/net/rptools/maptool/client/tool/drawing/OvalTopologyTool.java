@@ -105,16 +105,14 @@ public class OvalTopologyTool extends AbstractDrawingTool implements MouseMotion
               .removeTopology(
                   getZone().getId(),
                   area,
-                  getZone().getTopologyMode(),
-                  AppPreferences.getDrawTerrainVbl());
+                  getZone().getTopologyMode());
         } else {
           getZone().addTopology(area);
           MapTool.serverCommand()
               .addTopology(
                   getZone().getId(),
                   area,
-                  getZone().getTopologyMode(),
-                  AppPreferences.getDrawTerrainVbl());
+                  getZone().getTopologyMode());
         }
         renderer.repaint();
         oval = null;

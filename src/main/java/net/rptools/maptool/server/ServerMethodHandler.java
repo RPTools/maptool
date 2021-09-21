@@ -230,15 +230,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           addTopology(
               context.getGUID(0),
               (Area) context.get(1),
-              (TopologyMode) context.get(2),
-              (boolean) context.get(3));
+              (TopologyMode) context.get(2));
           break;
         case removeTopology:
           removeTopology(
               context.getGUID(0),
               (Area) context.get(1),
-              (TopologyMode) context.get(2),
-              (boolean) context.get(3));
+              (TopologyMode) context.get(2));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -802,17 +800,19 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     MapTool.getFrame().getToolbox().updateTools();
   }
 
+  @Override
   public void addTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
+      GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode, drawTerrainVbl);
+    zone.addTopology(area, topologyMode);
     forwardToClients();
   }
 
+  @Override
   public void removeTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
+      GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area, topologyMode, drawTerrainVbl);
+    zone.removeTopology(area, topologyMode);
     forwardToClients();
   }
 

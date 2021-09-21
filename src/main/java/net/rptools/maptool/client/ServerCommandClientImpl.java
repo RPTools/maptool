@@ -281,14 +281,16 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
+  @Override
   public void addTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode, drawTerrainVbl);
+      GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
   }
 
+  @Override
   public void removeTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode, boolean drawTerrainVbl) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode, drawTerrainVbl);
+      GUID zoneGUID, Area area, TopologyMode topologyMode) {
+    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
   }
 
   public void exposePCArea(GUID zoneGUID) {

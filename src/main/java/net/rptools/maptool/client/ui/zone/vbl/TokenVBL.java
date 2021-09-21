@@ -186,16 +186,15 @@ public class TokenVBL {
       ZoneRenderer renderer,
       Area area,
       boolean erase,
-      Zone.TopologyMode topologyMode,
-      boolean isTerrain) {
+      Zone.TopologyMode topologyMode) {
     if (erase) {
-      renderer.getZone().removeTopology(area, topologyMode, isTerrain);
+      renderer.getZone().removeTopology(area, topologyMode);
       MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, topologyMode, isTerrain);
+          .removeTopology(renderer.getZone().getId(), area, topologyMode);
     } else {
-      renderer.getZone().addTopology(area, topologyMode, isTerrain);
+      renderer.getZone().addTopology(area, topologyMode);
       MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, topologyMode, isTerrain);
+          .addTopology(renderer.getZone().getId(), area, topologyMode);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();

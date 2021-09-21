@@ -102,10 +102,6 @@ public class Topology_Functions extends AbstractFunction {
         || functionName.equals("drawMBL")
         || functionName.equals("eraseMBL")) {
       boolean erase = false;
-      Zone.TopologyMode mode =
-          (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
-              ? Zone.TopologyMode.VBL
-              : Zone.TopologyMode.MBL;
       if (parameters.size() != 1) {
         throw new ParserException(
             I18N.getText(
@@ -146,6 +142,10 @@ public class Topology_Functions extends AbstractFunction {
             topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
 
+        Zone.TopologyMode mode =
+                (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
+                        ? (isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL)
+                        : Zone.TopologyMode.MBL;
         Area newArea =
             switch (topologyShape) {
               case RECTANGLE -> makeRectangle(topologyObject, functionName);
@@ -156,7 +156,7 @@ public class Topology_Functions extends AbstractFunction {
               default -> null;
             };
         if (newArea != null) {
-          TokenVBL.renderTopology(renderer, newArea, erase, mode, isTerrainVbl);
+          TokenVBL.renderTopology(renderer, newArea, erase, mode);
         }
       }
     } else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
@@ -212,7 +212,7 @@ public class Topology_Functions extends AbstractFunction {
                 && topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
         Area tempTopologyArea =
-            getTopology(renderer, topologyObject, mode, isTerrainVbl, functionName);
+            getTopology(renderer, topologyObject, mode, functionName);
 
         (isTerrainVbl ? terrainVblArea : topologyArea).add(tempTopologyArea);
       }
@@ -425,7 +425,7 @@ public class Topology_Functions extends AbstractFunction {
 
       if (vblFromToken) {
         TokenVBL.renderTopology(
-            renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL, isTerrainVbl);
+            renderer, token.getTransformedVBL(), false, isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
         if (delete) {
           token.setVBL(null);
         }
@@ -433,7 +433,7 @@ public class Topology_Functions extends AbstractFunction {
         Area vbl = TokenVBL.getVBL_underToken(renderer, token, isTerrainVbl);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token, isTerrainVbl));
         if (delete) {
-          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL, isTerrainVbl);
+          TokenVBL.renderTopology(renderer, vbl, true, isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
         }
       }
     } else {
@@ -920,7 +920,6 @@ public class Topology_Functions extends AbstractFunction {
       ZoneRenderer renderer,
       JsonObject topologyObject,
       Zone.TopologyMode mode,
-      boolean isTerrainVbl,
       String funcname)
       throws ParserException {
     // Required Parameters
@@ -1005,14 +1004,13 @@ public class Topology_Functions extends AbstractFunction {
     }
 
     // Note: when COMBINED, the overlap between VBL and MBL is returned.
-    if (mode == Zone.TopologyMode.VBL || mode == Zone.TopologyMode.COMBINED) {
-      if (!isTerrainVbl) {
-        area.intersect(renderer.getZone().getTopology());
-      } else {
-        area.intersect(renderer.getZone().getTerrainVbl());
-      }
+    if (mode.isRegularVbl()) {
+      area.intersect(renderer.getZone().getTopology());
     }
-    if (mode == Zone.TopologyMode.MBL || mode == Zone.TopologyMode.COMBINED) {
+    if (mode.isTerrainVbl()) {
+      area.intersect(renderer.getZone().getTerrainVbl());
+    }
+    if (mode.isMbl()) {
       area.intersect(renderer.getZone().getTopologyTerrain());
     }
 

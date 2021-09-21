@@ -592,16 +592,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
           .removeTopology(
               renderer.getZone().getId(),
               area,
-              renderer.getZone().getTopologyMode(),
-              AppPreferences.getDrawTerrainVbl());
+              renderer.getZone().getTopologyMode());
     } else {
       renderer.getZone().addTopology(area);
       MapTool.serverCommand()
           .addTopology(
               renderer.getZone().getId(),
               area,
-              renderer.getZone().getTopologyMode(),
-              AppPreferences.getDrawTerrainVbl());
+              renderer.getZone().getTopologyMode());
     }
     renderer.repaint();
   }
