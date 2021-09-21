@@ -794,14 +794,12 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     MapTool.getFrame().getToolbox().updateTools();
   }
 
-  @Override
   public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.addTopology(area, topologyMode);
     forwardToClients();
   }
 
-  @Override
   public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeTopology(area, topologyMode);
