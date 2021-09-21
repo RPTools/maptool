@@ -25,7 +25,6 @@ import java.awt.geom.Path2D;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -116,18 +115,10 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
     }
     if (pen.isEraser()) {
       getZone().removeTopology(area);
-      MapTool.serverCommand()
-          .removeTopology(
-              getZone().getId(),
-              area,
-              getZone().getTopologyMode());
+      MapTool.serverCommand().removeTopology(getZone().getId(), area, getZone().getTopologyMode());
     } else {
       getZone().addTopology(area);
-      MapTool.serverCommand()
-          .addTopology(
-              getZone().getId(),
-              area,
-              getZone().getTopologyMode());
+      MapTool.serverCommand().addTopology(getZone().getId(), area, getZone().getTopologyMode());
     }
     renderer.repaint();
   }

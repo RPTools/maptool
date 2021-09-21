@@ -46,13 +46,15 @@ public class DrawTopologySelectionTool extends DefaultTool {
       vblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/vbl-only.png"));
       terrainVblImageIcon =
-              new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/terrain-vbl-only.png"));
+          new ImageIcon(
+              ImageUtil.getImage("net/rptools/maptool/client/image/tool/terrain-vbl-only.png"));
       mblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-only.png"));
       combinedImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-vbl-on.png"));
       combinedTerrainVblImageIcon =
-              new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-terrain-vbl-on.png"));
+          new ImageIcon(
+              ImageUtil.getImage("net/rptools/maptool/client/image/tool/mbl-terrain-vbl-on.png"));
 
       setIcon(vblImageIcon);
       setSelectedIcon(combinedImageIcon);
@@ -106,13 +108,14 @@ public class DrawTopologySelectionTool extends DefaultTool {
       currentMode = TopologyMode.MBL;
     }
 
-    var nextMode = switch (currentMode) {
-      case MBL -> TopologyMode.VBL;
-      case VBL -> TopologyMode.COMBINED;
-      case COMBINED -> TopologyMode.TERRAIN_VBL;
-      case TERRAIN_VBL -> TopologyMode.COMBINED_TERRAIN_VBL;
-      case COMBINED_TERRAIN_VBL -> TopologyMode.MBL;
-    };
+    var nextMode =
+        switch (currentMode) {
+          case MBL -> TopologyMode.VBL;
+          case VBL -> TopologyMode.COMBINED;
+          case COMBINED -> TopologyMode.TERRAIN_VBL;
+          case TERRAIN_VBL -> TopologyMode.COMBINED_TERRAIN_VBL;
+          case COMBINED_TERRAIN_VBL -> TopologyMode.MBL;
+        };
     setMode(nextMode);
   }
 

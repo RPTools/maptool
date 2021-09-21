@@ -100,13 +100,13 @@ public class FogUtil {
   /**
    * Finds all topology segments that can take part in blocking vision.
    *
-   * If false is returned, no segments are added to visionBlockingSegments.
+   * <p>If false is returned, no segments are added to visionBlockingSegments.
    *
    * @param visionBlockingSegments
    * @param topology
    * @param origin
    * @return false if the vision has been completely blocked by topology, or true if vision can be
-   *   blocked by particular segments.
+   *     blocked by particular segments.
    */
   private static boolean addVisionBlockingSegments(
       List<VisibleAreaSegment> visionBlockingSegments, AreaTree topology, Point origin) {

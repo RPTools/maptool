@@ -1231,7 +1231,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                         getTokenVblPanel().getToken(),
                         isTerrainVbl);
                 TokenVBL.renderTopology(
-                        MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true, isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
+                    MapTool.getFrame().getCurrentZoneRenderer(),
+                    newTokenVBL,
+                    true,
+                    isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
               }
 
               getTokenVblPanel().repaint();

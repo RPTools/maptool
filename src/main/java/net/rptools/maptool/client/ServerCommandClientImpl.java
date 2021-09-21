@@ -282,14 +282,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
-  public void addTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
   }
 
   @Override
-  public void removeTopology(
-      GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
   }
 

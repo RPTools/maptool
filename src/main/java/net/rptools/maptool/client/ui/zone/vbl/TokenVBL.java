@@ -183,18 +183,13 @@ public class TokenVBL {
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static void renderTopology(
-      ZoneRenderer renderer,
-      Area area,
-      boolean erase,
-      Zone.TopologyMode topologyMode) {
+      ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyMode topologyMode) {
     if (erase) {
       renderer.getZone().removeTopology(area, topologyMode);
-      MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, topologyMode);
+      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyMode);
     } else {
       renderer.getZone().addTopology(area, topologyMode);
-      MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, topologyMode);
+      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyMode);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();

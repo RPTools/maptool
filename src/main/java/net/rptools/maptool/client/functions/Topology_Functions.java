@@ -143,9 +143,9 @@ public class Topology_Functions extends AbstractFunction {
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
 
         Zone.TopologyMode mode =
-                (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
-                        ? (isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL)
-                        : Zone.TopologyMode.MBL;
+            (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
+                ? (isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL)
+                : Zone.TopologyMode.MBL;
         Area newArea =
             switch (topologyShape) {
               case RECTANGLE -> makeRectangle(topologyObject, functionName);
@@ -211,8 +211,7 @@ public class Topology_Functions extends AbstractFunction {
             (mode == Zone.TopologyMode.VBL)
                 && topologyObject.has("terrain")
                 && BigInteger.ONE.equals(topologyObject.get("terrain").getAsBigInteger());
-        Area tempTopologyArea =
-            getTopology(renderer, topologyObject, mode, functionName);
+        Area tempTopologyArea = getTopology(renderer, topologyObject, mode, functionName);
 
         (isTerrainVbl ? terrainVblArea : topologyArea).add(tempTopologyArea);
       }
@@ -425,7 +424,10 @@ public class Topology_Functions extends AbstractFunction {
 
       if (vblFromToken) {
         TokenVBL.renderTopology(
-            renderer, token.getTransformedVBL(), false, isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
+            renderer,
+            token.getTransformedVBL(),
+            false,
+            isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
         if (delete) {
           token.setVBL(null);
         }
@@ -433,7 +435,11 @@ public class Topology_Functions extends AbstractFunction {
         Area vbl = TokenVBL.getVBL_underToken(renderer, token, isTerrainVbl);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token, isTerrainVbl));
         if (delete) {
-          TokenVBL.renderTopology(renderer, vbl, true, isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
+          TokenVBL.renderTopology(
+              renderer,
+              vbl,
+              true,
+              isTerrainVbl ? Zone.TopologyMode.TERRAIN_VBL : Zone.TopologyMode.VBL);
         }
       }
     } else {
@@ -917,10 +923,7 @@ public class Topology_Functions extends AbstractFunction {
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area getTopology(
-      ZoneRenderer renderer,
-      JsonObject topologyObject,
-      Zone.TopologyMode mode,
-      String funcname)
+      ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode, String funcname)
       throws ParserException {
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
