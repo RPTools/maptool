@@ -146,25 +146,26 @@ public class DrawTopologySelectionTool extends DefaultTool {
    * @param topologyMode the topology mode
    */
   private void updateIcon(TopologyMode topologyMode) {
-    var selected = switch (topologyMode) {
-      case VBL -> {
-        setIcon(vblImageIcon);
-        yield false;
-      }
-      case MBL -> {
-        setIcon(mblImageIcon);
-        yield false;
-      }
-      case COMBINED -> true;
-      case TERRAIN_VBL -> {
-        setIcon(terrainVblImageIcon);
-        yield false;
-      }
-      case COMBINED_TERRAIN_VBL -> {
-        setIcon(combinedTerrainVblImageIcon);
-        yield false;
-      }
-    };
+    var selected =
+        switch (topologyMode) {
+          case VBL -> {
+            setIcon(vblImageIcon);
+            yield false;
+          }
+          case MBL -> {
+            setIcon(mblImageIcon);
+            yield false;
+          }
+          case COMBINED -> true;
+          case TERRAIN_VBL -> {
+            setIcon(terrainVblImageIcon);
+            yield false;
+          }
+          case COMBINED_TERRAIN_VBL -> {
+            setIcon(combinedTerrainVblImageIcon);
+            yield false;
+          }
+        };
     setSelected(selected);
   }
 

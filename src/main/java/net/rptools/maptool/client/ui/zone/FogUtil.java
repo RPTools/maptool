@@ -119,7 +119,8 @@ public class FogUtil {
     final BiConsumer<AreaContainer, Boolean> addVisionBlockingSegments =
         (areaContainer, frontSide) ->
             visionBlockingSegments.addAll(
-                areaContainer.getVisionBlockingBoundarySegements(geometryFactory, origin, frontSide));
+                areaContainer.getVisionBlockingBoundarySegements(
+                    geometryFactory, origin, frontSide));
 
     if (container instanceof AreaIsland island) {
       // We're in an island. For normal VBL, vision is entirely blocked. But for terrain VBL,
