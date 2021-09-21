@@ -14,6 +14,12 @@ option java_outer_classname = "MessageTypeProtos";
 import "data_transfer_objects.proto";
 import "drawing_dto.proto";
 
+message AddTopologyMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  TopologyModeDto mode = 3;
+}
+
 message BootPlayerMsg {
   string player_name = 1;
 }

@@ -46,7 +46,12 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.server.proto.AddTopologyMsg;
+import net.rptools.maptool.server.proto.BootPlayerMsg;
+import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.transfer.AssetProducer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -57,26 +62,62 @@ import net.rptools.maptool.transfer.AssetProducer;
  *
  * @author drice *
  */
-public class ServerMethodHandler extends AbstractMethodHandler implements ServerCommand {
+public class ServerMethodHandler extends AbstractMethodHandler {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
+  /** Instance used for log messages. */
+  private static final Logger log = LogManager.getLogger(ServerMethodHandler.class);
 
   public ServerMethodHandler(MapToolServer server) {
     this.server = server;
   }
 
+  @Override
+  public void handleMessage(String id, byte[] message) {
+    try {
+      var msg = Message.parseFrom(message);
+      var msgType = msg.getMessageTypeCase();
+      log.info(id + " :got: " + msgType);
+
+      switch (msgType) {
+        case ADD_TOPOLOGY_MSG -> {
+          handle(msg.getAddTopologyMsg());
+          forwardToClients(id, msg);
+        }
+        case BOOT_PLAYER_MSG -> {
+          handle(msg.getBootPlayerMsg());
+          forwardToClients(id, msg);
+        }
+        default -> log.warn(msgType + "not handled.");
+      }
+
+    } catch (Exception e) {
+      super.handleMessage(id, message);
+    }
+  }
+
+  private void handle(AddTopologyMsg addTopologyMsg) {
+    var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
+    var area = Mapper.map(addTopologyMsg.getArea());
+    var topologyMode = TopologyMode.valueOf(addTopologyMsg.getMode().name());
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.addTopology(area, topologyMode);
+  }
+
+  private void handle(BootPlayerMsg bootPlayerMsg) {
+    // And just to be sure, remove them from the server
+    server.releaseClientConnection(server.getConnectionId(bootPlayerMsg.getPlayerName()));
+  }
+
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-    // System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());
+    log.info("got " + id + ": " + cmd.name());
 
     try {
       RPCContext context = new RPCContext(id, method, parameters);
       RPCContext.setCurrent(context);
       switch (cmd) {
-        case bootPlayer:
-          bootPlayer(context.getString(0));
-          break;
         case bringTokensToFront:
           bringTokensToFront(context.getGUID(0), (Set<GUID>) context.get(1));
           break;
@@ -226,9 +267,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case setServerPolicy:
           setServerPolicy((ServerPolicy) context.get(0));
           break;
-        case addTopology:
-          addTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
-          break;
         case removeTopology:
           removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
           break;
@@ -291,6 +329,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
+  private void forwardToClients(String id, Message message) {
+    server.getConnection().broadcastMessage(new String[] {id}, message.toByteArray());
+  }
+
   /** Send the current call to all other clients except for the sender */
   private void forwardToClients() {
     server
@@ -343,7 +385,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   ////
   // SERVER COMMAND
-  public void setVisionType(GUID zoneGUID, VisionType visionType) {
+  private void setVisionType(GUID zoneGUID, VisionType visionType) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setVisionType(visionType);
     server
@@ -352,20 +394,20 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.setUseVision.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void heartbeat(String data) {
+  private void heartbeat(String data) {
     // Nothing to do yet
   }
 
-  public void enforceZone(GUID zoneGUID) {
+  private void enforceZone(GUID zoneGUID) {
     forwardToClients();
   }
 
-  public void updateCampaign(CampaignProperties properties) {
+  private void updateCampaign(CampaignProperties properties) {
     server.getCampaign().replaceCampaignProperties(properties);
     forwardToClients();
   }
 
-  public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet) {
+  private void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet) {
     synchronized (MUTEX) {
       Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -393,7 +435,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
-  public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
+  private void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     List<DrawnElement> list = zone.getDrawnElements(layer);
     zone.clearDrawables(list); // FJE Empties the DrawableUndoManager and empties the list
@@ -408,7 +450,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     zone.addDrawable(new DrawnElement(drawable, pen));
   }
 
-  public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
+  private void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
     server
         .getConnection()
         .broadcastCallMethod(
@@ -417,7 +459,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     zone.updateDrawable(drawnElement, pen);
   }
 
-  public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
+  private void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
     forwardToClients();
   }
 
@@ -425,13 +467,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
-  public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+  private void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.exposeArea(area, selectedToks);
     forwardToClients();
   }
 
-  public void exposePCArea(GUID zoneGUID) {
+  private void exposePCArea(GUID zoneGUID) {
     ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
     FogUtil.exposePCArea(renderer);
     server
@@ -440,7 +482,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.exposePCArea.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void getAsset(MD5Key assetID) {
+  private void getAsset(MD5Key assetID) {
     if (assetID == null) {
       return;
     }
@@ -471,7 +513,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
-  public void getZone(GUID zoneGUID) {
+  private void getZone(GUID zoneGUID) {
     server
         .getConnection()
         .callMethod(
@@ -480,7 +522,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             server.getCampaign().getZone(zoneGUID));
   }
 
-  public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+  private void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.hideArea(area, selectedToks);
     server
@@ -489,7 +531,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.hideFoW.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
+  private void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setFogArea(area, selectedToks);
     server
@@ -498,15 +540,15 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.setFoW.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void hidePointer(String player) {
+  private void hidePointer(String player) {
     forwardToAllClients();
   }
 
-  public void movePointer(String player, int x, int y) {
+  private void movePointer(String player, int x, int y) {
     forwardToAllClients();
   }
 
-  public void updateInitiative(InitiativeList list, Boolean ownerPermission) {
+  private void updateInitiative(InitiativeList list, Boolean ownerPermission) {
     if (list != null) {
       if (list.getZone() == null) return;
       Zone zone = server.getCampaign().getZone(list.getZone().getId());
@@ -517,7 +559,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToAllClients();
   }
 
-  public void updateTokenInitiative(
+  private void updateTokenInitiative(
       GUID zoneId, GUID tokenId, Boolean hold, String state, Integer index) {
     Zone zone = server.getCampaign().getZone(zoneId);
     InitiativeList list = zone.getInitiativeList();
@@ -535,7 +577,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToAllClients();
   }
 
-  public void renameZone(GUID zoneGUID, String name) {
+  private void renameZone(GUID zoneGUID, String name) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     if (zone != null) {
       zone.setName(name);
@@ -543,7 +585,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
-  public void changeZoneDispName(GUID zoneGUID, String name) {
+  private void changeZoneDispName(GUID zoneGUID, String name) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     if (zone != null) {
       zone.setPlayerAlias(name);
@@ -551,35 +593,33 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
-  public void message(TextMessage message) {
+  private void message(TextMessage message) {
     forwardToClients();
   }
 
-  @Override
-  public void execFunction(String target, String source, String functionName, List<Object> args) {
+  private void execFunction(String target, String source, String functionName, List<Object> args) {
     forwardToClients();
   }
 
-  @Override
-  public void execLink(String link, String target, String source) {
+  private void execLink(String link, String target, String source) {
     forwardToClients();
   }
 
-  public void putAsset(Asset asset) {
+  private void putAsset(Asset asset) {
     AssetManager.putAsset(asset);
   }
 
-  public void putLabel(GUID zoneGUID, Label label) {
+  private void putLabel(GUID zoneGUID, Label label) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.putLabel(label);
     forwardToClients();
   }
 
-  public void editToken(GUID zoneGUID, Token token) {
+  private void editToken(GUID zoneGUID, Token token) {
     putToken(zoneGUID, token);
   }
 
-  public void putToken(GUID zoneGUID, Token token) {
+  private void putToken(GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
     int zOrder = 0;
@@ -603,16 +643,16 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
-  public void putZone(Zone zone) {
+  private void putZone(Zone zone) {
     server.getCampaign().putZone(zone);
     forwardToClients();
   }
 
-  public void removeAsset(MD5Key assetID) {
+  private void removeAsset(MD5Key assetID) {
     AssetManager.removeAsset(assetID);
   }
 
-  public void removeLabel(GUID zoneGUID, GUID labelGUID) {
+  private void removeLabel(GUID zoneGUID, GUID labelGUID) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeLabel(labelGUID);
     server
@@ -627,21 +667,19 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
    * @param zoneGUID the GUID of the zone where the token is
    * @param tokenGUID the GUID of the token
    */
-  @Override
-  public void removeToken(GUID zoneGUID, GUID tokenGUID) {
+  private void removeToken(GUID zoneGUID, GUID tokenGUID) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeToken(tokenGUID); // remove server tokens
     forwardToClients();
   }
 
-  @Override
-  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+  private void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeTokens(tokenGUIDs); // remove server tokens
     forwardToClients();
   }
 
-  public void updateTokenProperty(
+  private void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Token token = zone.getToken(tokenGUID);
@@ -651,14 +689,14 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   /** never actually called, but necessary to satisfy interface requirements */
-  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
+  private void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
 
-  public void removeZone(GUID zoneGUID) {
+  private void removeZone(GUID zoneGUID) {
     server.getCampaign().removeZone(zoneGUID);
     forwardToClients();
   }
 
-  public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet) {
+  private void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet) {
     synchronized (MUTEX) {
       Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -686,17 +724,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
   }
 
-  public void setCampaign(Campaign campaign) {
+  private void setCampaign(Campaign campaign) {
     server.setCampaign(campaign);
     forwardToClients();
   }
 
-  public void setCampaignName(String name) {
+  private void setCampaignName(String name) {
     server.getCampaign().setName(name);
     forwardToClients();
   }
 
-  public void setZoneGridSize(GUID zoneGUID, int offsetX, int offsetY, int size, int color) {
+  private void setZoneGridSize(GUID zoneGUID, int offsetX, int offsetY, int size, int color) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Grid grid = zone.getGrid();
     grid.setSize(size);
@@ -708,7 +746,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.setZoneGridSize.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
+  private void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setHasFog(hasFog);
     server
@@ -717,7 +755,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.setZoneHasFoW.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void setZoneVisibility(GUID zoneGUID, boolean visible) {
+  private void setZoneVisibility(GUID zoneGUID, boolean visible) {
     server.getCampaign().getZone(zoneGUID).setVisible(visible);
     server
         .getConnection()
@@ -725,41 +763,34 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             ClientCommand.COMMAND.setZoneVisibility.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void showPointer(String player, Pointer pointer) {
+  private void showPointer(String player, Pointer pointer) {
     server
         .getConnection()
         .broadcastCallMethod(
             ClientCommand.COMMAND.showPointer.name(), RPCContext.getCurrent().parameters);
   }
 
-  public void setLiveTypingLabel(String label, boolean show) {
+  private void setLiveTypingLabel(String label, boolean show) {
     forwardToClients();
   }
 
-  public void enforceNotification(Boolean enforce) {
+  private void enforceNotification(Boolean enforce) {
     forwardToClients();
   }
 
-  public void bootPlayer(String player) {
-    forwardToClients();
-
-    // And just to be sure, remove them from the server
-    server.releaseClientConnection(server.getConnectionId(player));
-  }
-
-  public void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
+  private void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
     forwardToClients();
   }
 
-  public void stopTokenMove(GUID zoneGUID, GUID tokenGUID) {
+  private void stopTokenMove(GUID zoneGUID, GUID tokenGUID) {
     forwardToClients();
   }
 
-  public void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp) {
+  private void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp) {
     forwardToClients();
   }
 
-  public void undoDraw(GUID zoneGUID, GUID drawableGUID) {
+  private void undoDraw(GUID zoneGUID, GUID drawableGUID) {
     // This is a problem. The contents of the UndoManager are not synchronized across machines
     // so if one machine uses Meta-Z to undo a drawing, that drawable will be removed on all
     // machines, but there is no attempt to keep the UndoManager in sync. So that same drawable
@@ -780,47 +811,41 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     zone.removeDrawable(drawableGUID);
   }
 
-  public void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y) {
+  private void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y) {
     forwardToClients();
   }
 
-  public void setTokenLocation(GUID zoneGUID, GUID tokenGUID, int x, int y) {
+  private void setTokenLocation(GUID zoneGUID, GUID tokenGUID, int x, int y) {
     forwardToClients();
   }
 
-  public void setServerPolicy(ServerPolicy policy) {
+  private void setServerPolicy(ServerPolicy policy) {
     server.updateServerPolicy(policy); // updates the server policy, fixes #1648
     forwardToClients();
     MapTool.getFrame().getToolbox().updateTools();
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode);
-    forwardToClients();
-  }
-
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  private void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeTopology(area, topologyMode);
     forwardToClients();
   }
 
-  public void updateCampaignMacros(List<MacroButtonProperties> properties) {
+  private void updateCampaignMacros(List<MacroButtonProperties> properties) {
     ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
     MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 
-  public void updateGmMacros(List<MacroButtonProperties> properties) {
+  private void updateGmMacros(List<MacroButtonProperties> properties) {
     ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
     MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 
-  public void setBoard(GUID zoneGUID, MD5Key mapId, int x, int y) {
+  private void setBoard(GUID zoneGUID, MD5Key mapId, int x, int y) {
     forwardToClients();
   }
 
@@ -834,7 +859,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
    *     net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
    *     net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
    */
-  public void updateExposedAreaMeta(
+  private void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
@@ -847,7 +872,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
    * @param zoneGUID the GUID of the zone
    * @param globalOnly should only the global area be cleared?
    */
-  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
+  private void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.clearExposedArea(globalOnly);
     forwardToClients();

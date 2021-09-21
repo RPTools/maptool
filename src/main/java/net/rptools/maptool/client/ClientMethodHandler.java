@@ -53,11 +53,17 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.server.proto.AddTopologyMsg;
+import net.rptools.maptool.server.proto.BootPlayerMsg;
+import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -66,12 +72,54 @@ import net.rptools.maptool.transfer.AssetHeader;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
+  private static final Logger log = LogManager.getLogger(ClientMethodHandler.class);
+
   public ClientMethodHandler() {}
+
+  @Override
+  public void handleMessage(String id, byte[] message) {
+    try {
+      var msg = Message.parseFrom(message);
+      var msgType = msg.getMessageTypeCase();
+      log.info(id + ": p got: " + msgType);
+
+      switch (msgType) {
+        case ADD_TOPOLOGY_MSG -> handle(id, msg.getAddTopologyMsg());
+        case BOOT_PLAYER_MSG -> handle(id, msg.getBootPlayerMsg());
+        default -> log.warn(msgType + "not handled.");
+      }
+
+    } catch (Exception e) {
+      super.handleMessage(id, message);
+    }
+  }
+
+  private void handle(String id, AddTopologyMsg addTopologyMsg) {
+    var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
+    var area = Mapper.map(addTopologyMsg.getArea());
+    TopologyMode topologyMode = TopologyMode.valueOf(addTopologyMsg.getMode().name());
+
+    var zone = MapTool.getCampaign().getZone(zoneGUID);
+    zone.addTopology(area, topologyMode);
+
+    MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
+  }
+
+  private void handle(String id, BootPlayerMsg bootPlayerMsg) {
+    String playerName = bootPlayerMsg.getPlayerName();
+    if (MapTool.getPlayer().getName().equals(playerName))
+      EventQueue.invokeLater(
+          () -> {
+            ServerDisconnectHandler.disconnectExpected = true;
+            AppActions.disconnectFromServer();
+            MapTool.showInformation("You have been booted from the server.");
+          });
+  }
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
 
-    // System.out.println("ClientMethodHandler#handleMethod: " + cmd.name());
+    log.info("got " + id + ": " + cmd.name());
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
@@ -115,15 +163,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           List<GUID> tokenGUIDs;
 
           switch (cmd) {
-            case bootPlayer:
-              String playerName = (String) parameters[0];
-              if (MapTool.getPlayer().getName().equals(playerName)) {
-                ServerDisconnectHandler.disconnectExpected = true;
-                AppActions.disconnectFromServer();
-                MapTool.showInformation("You have been booted from the server.");
-              }
-              return;
-
             case enforceZone:
               zoneGUID = (GUID) parameters[0];
               ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
@@ -492,21 +531,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().getToolbox().updateTools();
               return;
 
-            case addTopology:
-              zoneGUID = (GUID) parameters[0];
-              area = (Area) parameters[1];
-              TopologyMode topologyMode = (TopologyMode) parameters[2];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addTopology(area, topologyMode);
-
-              MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
-              return;
-
             case removeTopology:
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
-              topologyMode = (TopologyMode) parameters[2];
+              var topologyMode = (TopologyMode) parameters[2];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.removeTopology(area, topologyMode);

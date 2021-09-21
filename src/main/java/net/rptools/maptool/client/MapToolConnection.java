@@ -23,6 +23,7 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
+import net.rptools.maptool.server.proto.Message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -98,5 +99,9 @@ public class MapToolConnection {
 
   public void callMethod(String name, Object[] params) {
     connection.callMethod(name, params);
+  }
+
+  public void sendMessage(Message msg) {
+    connection.sendMessage(msg.toByteArray());
   }
 }

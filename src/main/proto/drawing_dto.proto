@@ -168,42 +168,45 @@ message ShapeDto {
 }
 
 message AreaDto {
-  repeated CurveDto curves = 1;
+  enum WindingRule {
+    EVEN_ODD = 0;
+    NON_ZERO = 1;
+  }
+  WindingRule winding = 1;
+  repeated SegmentDto segments = 2;
 }
 
-message CurveDto {
-  oneof curve_type {
-    Order0CurveDto order_0 = 1;
-    Order1CurveDto order_1 = 2;
-    Order2CurveDto order_2 = 3;
-    Order3CurveDto order_3 = 4;
+message SegmentDto {
+  oneof segment_type {
+    MoveToSegment move_to = 1;
+    LineToSegment line_to = 2;
+    QuadToSegment quad_to = 3;
+    CubicToSegment cubic_to = 4;
+    CloseSegment close = 5;
   }
 }
 
-message Order0CurveDto {
-  int32 direction = 1;
-  DoublePointDto point = 2;
+message MoveToSegment {
+  DoublePointDto point_0 = 1;
 }
 
-message Order1CurveDto {
-  int32 direction = 1;
-  DoublePointDto point_0 = 2;
-  DoublePointDto point_1 = 3;
+message LineToSegment {
+  DoublePointDto point_0 = 1;
 }
 
-message Order2CurveDto {
-  int32 direction = 1;
-  DoublePointDto point_0 = 2;
-  DoublePointDto point_c0 = 3;
-  DoublePointDto point_1 = 4;
+message QuadToSegment {
+  DoublePointDto point_0 = 1;
+  DoublePointDto point_1 = 2;
 }
 
-message Order3CurveDto {
-  int32 direction = 1;
-  DoublePointDto point_0 = 2;
-  DoublePointDto point_c0 = 3;
-  DoublePointDto point_c1 = 4;
-  DoublePointDto point_1 = 5;
+message CubicToSegment {
+  DoublePointDto point_0 = 1;
+  DoublePointDto point_1 = 2;
+  DoublePointDto point_2 = 3;
+}
+
+message CloseSegment {
+
 }
 
 message IntPointDto {

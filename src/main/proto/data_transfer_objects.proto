@@ -41,3 +41,8 @@ enum RoleDto {
   GM = 1;
 }
 
+enum TopologyModeDto {
+    VBL = 0;
+    MBL = 1;
+    COMBINED = 2;
+}

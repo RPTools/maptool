@@ -4,7 +4,7 @@ package maptool;
 
 option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
-option java_outer_classname = "ServerProtos";
+option java_outer_classname = "MessageProtos";
 
 /*
  * For easier differentiation between protobuf classes and "normal" classes
@@ -13,10 +13,11 @@ option java_outer_classname = "ServerProtos";
 
 import "message_types.proto";
 
-message ServerMsg {
+message Message {
   oneof message_type {
-    BootPlayerMsg boot_player_msg = 1;
-    BringTokensToFrontMsg bring_tokens_to_front_msg = 2;
-    DrawMsg draw_msg = 3;
+    AddTopologyMsg add_topology_msg = 1;
+    BootPlayerMsg boot_player_msg = 2;
+    BringTokensToFrontMsg bring_tokens_to_front_msg = 3;
+    DrawMsg draw_msg = 4;
   }
 }

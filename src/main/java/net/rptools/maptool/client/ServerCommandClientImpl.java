@@ -40,9 +40,14 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool.server.proto.AddTopologyMsg;
+import net.rptools.maptool.server.proto.BootPlayerMsg;
+import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.TopologyModeDto;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -68,7 +73,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void bootPlayer(String player) {
-    makeServerCall(COMMAND.bootPlayer, player);
+    var msg =
+        Message.newBuilder()
+            .setBootPlayerMsg(BootPlayerMsg.newBuilder().setPlayerName(player))
+            .build();
+    makeServerCall(msg);
   }
 
   public void setCampaign(Campaign campaign) {
@@ -282,7 +291,15 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
+    var msg =
+        Message.newBuilder()
+            .setAddTopologyMsg(
+                AddTopologyMsg.newBuilder()
+                    .setZoneGuid(zoneGUID.toString())
+                    .setMode(TopologyModeDto.valueOf(topologyMode.name()))
+                    .setArea(Mapper.map(area)))
+            .build();
+    makeServerCall(msg);
   }
 
   public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
@@ -353,6 +370,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     // System.out.println("in ServerCommandClientImpl");
     makeServerCall(COMMAND.clearExposedArea, zoneGUID, globalOnly);
+  }
+
+  private static void makeServerCall(Message msg) {
+    if (MapTool.getConnection() != null) {
+      MapTool.getConnection().sendMessage(msg);
+    }
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {

@@ -20,7 +20,6 @@ public class ClientCommand {
     // @formatter:off
     startAssetTransfer,
     updateAssetTransfer,
-    bootPlayer,
     setCampaign,
     putZone,
     removeZone,
@@ -59,7 +58,6 @@ public class ClientCommand {
     removeLabel,
     enforceZone,
     setServerPolicy,
-    addTopology,
     removeTopology,
     renameZone,
     changeZoneDispName,

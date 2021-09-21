@@ -144,6 +144,10 @@ public class MapToolServerConnection
     connection.callMethod(id, channel, method, parameters);
   }
 
+  public void broadcastMessage(String[] exclude, byte[] message) {
+    connection.broadcastMessage(exclude, message);
+  }
+
   public void open() throws IOException {
     connection.open();
   }

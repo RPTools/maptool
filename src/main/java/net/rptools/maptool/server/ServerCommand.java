@@ -40,7 +40,6 @@ import net.rptools.maptool.model.drawing.Pen;
 public interface ServerCommand {
   public enum COMMAND {
     // @formatter:off
-    bootPlayer,
     setCampaign,
     setCampaignName,
     getZone,
@@ -81,7 +80,6 @@ public interface ServerCommand {
     bringTokensToFront,
     enforceZone,
     setServerPolicy,
-    addTopology,
     removeTopology,
     renameZone,
     changeZoneDispName,
