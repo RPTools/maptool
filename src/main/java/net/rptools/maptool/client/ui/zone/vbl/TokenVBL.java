@@ -180,6 +180,7 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
+   * @param topologyMode Determines which topology (VBL, terrain VBL, MBL) to modify.
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static void renderTopology(

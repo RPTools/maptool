@@ -46,7 +46,7 @@ public class AreaOcean implements AreaContainer {
     this.meta = meta;
   }
 
-  public AreaIsland getParentIsland() {
+  public @Nullable AreaIsland getParentIsland() {
     return parentIsland;
   }
 
@@ -55,7 +55,7 @@ public class AreaOcean implements AreaContainer {
   }
 
   @Override
-  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
       GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
     if (meta == null) {
       return Collections.emptyList();

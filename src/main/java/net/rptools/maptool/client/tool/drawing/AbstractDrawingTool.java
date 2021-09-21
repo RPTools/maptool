@@ -247,15 +247,15 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   }
 
   protected Area getTokenTerrainVbl() {
-    List<Token> vblTokens =
+    List<Token> terrainVblTokens =
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTerrainVBL();
 
-    Area tokenTopolgy = new Area();
-    for (Token vblToken : vblTokens) {
-      tokenTopolgy.add(vblToken.getTransformedVBL());
+    Area tokenTopology = new Area();
+    for (Token vblToken : terrainVblTokens) {
+      tokenTopology.add(vblToken.getTransformedVBL());
     }
 
-    return tokenTopolgy;
+    return tokenTopology;
   }
 
   @Override
@@ -307,11 +307,11 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.setColor(AppStyle.topologyTerrainColor);
       g2.fill(zone.getTopologyTerrain());
 
-      g2.setColor(AppStyle.terrainVblColor);
-      g2.fill(zone.getTerrainVbl());
-
       g2.setColor(AppStyle.topologyColor);
       g2.fill(zone.getTopology());
+
+      g2.setColor(AppStyle.terrainVblColor);
+      g2.fill(zone.getTerrainVbl());
 
       g2.dispose();
     }

@@ -105,7 +105,7 @@ public class ZoneView implements ModelChangeListener {
     return zone.getVisionType() != Zone.VisionType.OFF;
   }
 
-  /** @return the current combined VBL (terrain VBL + base VBL + TokenVBL) */
+  /** @return the current combined VBL (terrain VBL + base VBL + token terrain VBL + TokenVBL) */
   public synchronized AreaTree getTopologyTree() {
     return getTopologyTree(true);
   }
@@ -151,7 +151,7 @@ public class ZoneView implements ModelChangeListener {
    */
   public synchronized AreaTree getTerrainVblTree(boolean useTokenVBL) {
     if (tokenTerrainVbl == null && useTokenVBL) {
-      log.debug("ZoneView topologyTree is null, generating...");
+      log.debug("ZoneView terrain topologyTree is null, generating...");
 
       tokenTerrainVbl = new Area(zone.getTerrainVbl());
       List<Token> vblTokens =

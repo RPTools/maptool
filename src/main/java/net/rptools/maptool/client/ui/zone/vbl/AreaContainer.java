@@ -26,6 +26,6 @@ public interface AreaContainer {
 
   public @Nullable AreaContainer getDeepestContainerAt(Point2D point);
 
-  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
       GeometryFactory geometryFactory, Point origin, boolean frontSegments);
 }

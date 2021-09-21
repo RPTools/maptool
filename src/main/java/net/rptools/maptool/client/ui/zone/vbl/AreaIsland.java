@@ -92,7 +92,7 @@ public class AreaIsland implements AreaContainer {
   }
 
   @Override
-  public List<VisibleAreaSegment> getVisibleBoundarySegements(
+  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
       GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
     return meta.getFacingSegments(geometryFactory, origin, !frontSegments);
   }

@@ -87,7 +87,7 @@ public class AreaTreeInspector extends JPanel {
 
       if (container != null) {
         for (VisibleAreaSegment segment :
-            container.getVisibleBoundarySegements(geometryFactory, point, false)) {
+            container.getVisionBlockingBoundarySegements(geometryFactory, point, false)) {
           var shadow = segment.castShadow(Integer.MAX_VALUE / 2);
           Area area = new Area(shapeWriter.toShape(shadow));
           if (area != null) {
