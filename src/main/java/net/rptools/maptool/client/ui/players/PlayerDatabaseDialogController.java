@@ -15,14 +15,12 @@
 package net.rptools.maptool.client.ui.players;
 
 /** Sample Skeleton for 'PlayerDatabaseDialog.fxml' Controller Class */
-
-
-
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -46,8 +44,7 @@ import net.rptools.maptool.model.player.Players;
 
 public class PlayerDatabaseDialogController implements SwingJavaFXDialogController {
 
-  private final Set<SwingJavaFXDialogEventHandler> eventHandlers =
-      ConcurrentHashMap.newKeySet();
+  private final Set<SwingJavaFXDialogEventHandler> eventHandlers = ConcurrentHashMap.newKeySet();
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -67,25 +64,27 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @FXML // fx:id="addButton"
   private Button addButton; // Value injected by FXMLLoader
 
-  private final PropertyChangeListener changeListener = e -> {
-    Platform.runLater(() -> {
-      switch (e.getPropertyName()) {
-        case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
-          removePlayer((PlayerInfo) e.getOldValue());
-          addPlayer((PlayerInfo) e.getNewValue());
-        }
-        case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
-          addPlayer((PlayerInfo) e.getNewValue());
-        }
-        case Players.PROPERTY_CHANGE_PLAYER_REMOVE -> {
-          removePlayer((PlayerInfo) e.getOldValue());
-        }
-        case Players.PROPERTY_CHANGE_DATABASE_CHANGED -> {
-          addPlayers();
-        }
-      }
-    });
-  };
+  private final PropertyChangeListener changeListener =
+      e -> {
+        Platform.runLater(
+            () -> {
+              switch (e.getPropertyName()) {
+                case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
+                  removePlayer((PlayerInfo) e.getOldValue());
+                  addPlayer((PlayerInfo) e.getNewValue());
+                }
+                case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
+                  addPlayer((PlayerInfo) e.getNewValue());
+                }
+                case Players.PROPERTY_CHANGE_PLAYER_REMOVE -> {
+                  removePlayer((PlayerInfo) e.getOldValue());
+                }
+                case Players.PROPERTY_CHANGE_DATABASE_CHANGED -> {
+                  addPlayers();
+                }
+              }
+            });
+      };
 
   ObservableList<PlayerInfo> playerInfoList = FXCollections.observableArrayList();
 
@@ -138,29 +137,33 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.disabled"));
     disabledCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().blocked()));
     disabledCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(disabledCol));
-    var reasonCol =
-        new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.disabledReason"));
-    reasonCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().blockedReason()));
     var connectedCol =
         new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.connected"));
     connectedCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().connected()));
     connectedCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(connectedCol));
 
     var editCol = new TableColumn<PlayerInfo, Void>();
-    var editCallFactory = new Callback<TableColumn<PlayerInfo, Void>,
-        TableCell<PlayerInfo, Void>>() {
+    var editCellFactory =
+        createButtonCellFactory(
+            I18N.getText("playerDB.dialog.edit"),
+            p -> {
+              System.out.println(" --  " + p);
+            });
+    editCol.setCellFactory(editCellFactory);
 
-      private final Button editButton = new Button("...");
-      @Override
-      public TableCell<PlayerInfo, Void> call(TableColumn<PlayerInfo, Void> param) {
-        return null;
-      }
-    };
-    editCol.setCellFactory(editCallFactory);
+    var deleteCol = new TableColumn<PlayerInfo, Void>();
+    var deleteCellFactory =
+        createButtonCellFactory(
+            I18N.getText("playerDB.dialog.delete"),
+            p -> {
+              new Players().removePlayer(p.name());
+              System.out.println(" --  " + p);
+            });
+    deleteCol.setCellFactory(deleteCellFactory);
 
     playersTable
         .getColumns()
-        .addAll(playerCol, roleCol, authCol, disabledCol, reasonCol, connectedCol);
+        .addAll(playerCol, roleCol, authCol, disabledCol, connectedCol, editCol, deleteCol);
 
     playersTable.setItems(playerInfoList);
     addPlayers();
@@ -177,11 +180,45 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   private void addPlayers() {
     new Players()
         .getDatabasePlayers()
-        .thenAccept(p -> Platform.runLater(() -> {
-          playerInfoList.clear();
-          playerInfoList.addAll(p.stream().filter(
-              PlayerInfo::persistent).collect(Collectors.toList()));
-        }));
+        .thenAccept(
+            p ->
+                Platform.runLater(
+                    () -> {
+                      playerInfoList.clear();
+                      playerInfoList.addAll(
+                          p.stream().filter(PlayerInfo::persistent).collect(Collectors.toList()));
+                    }));
   }
 
+  private Callback<TableColumn<PlayerInfo, Void>, TableCell<PlayerInfo, Void>>
+      createButtonCellFactory(String buttonText, Consumer<PlayerInfo> callback) {
+    return new Callback<TableColumn<PlayerInfo, Void>, TableCell<PlayerInfo, Void>>() {
+      @Override
+      public TableCell<PlayerInfo, Void> call(final TableColumn<PlayerInfo, Void> param) {
+        return new TableCell<PlayerInfo, Void>() {
+
+          private final Button btn = new Button(buttonText);
+
+          {
+            btn.setOnAction(
+                (event) -> {
+                  PlayerInfo pi = getTableView().getItems().get(getIndex());
+                  callback.accept(pi);
+                });
+          }
+
+          @Override
+          public void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+              setGraphic(null);
+            } else {
+              setGraphic(btn);
+            }
+          }
+        };
+      }
+      ;
+    };
+  }
 }

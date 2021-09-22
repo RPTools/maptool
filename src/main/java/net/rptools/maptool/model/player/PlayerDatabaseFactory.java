@@ -39,18 +39,27 @@ public class PlayerDatabaseFactory {
 
   interface DatabaseChangeTypeSupport {
     /**
-     * Adds a property change listener for player database events.
-     * Only one type is valid {@link PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     * Adds a property change listener for player database events. Only one type is valid {@link
+     * PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     *
      * @param listener The property change listener to add.
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     /**
-     * Removes a property change listener for player database events.
-     * Only one type is valid {@link PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     * Removes a property change listener for player database events. Only one type is valid {@link
+     * PlayerDBPropertyChange#PROPERTY_CHANGE_DATABASE_CHANGED}.
+     *
      * @param listener The property change listener to remove.
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * Notifies that the database hase changed.
+     * @param oldDb the old database.
+     * @param newDb the new database.
+     */
+    void databaseChanged(PlayerDatabase oldDb, PlayerDatabase newDb);
   }
 
   private static PlayerDatabase currentPlayerDatabase;
@@ -63,22 +72,24 @@ public class PlayerDatabaseFactory {
   private static final DatabaseChangeTypeSupport databaseChangeTypeSupport =
       new DatabaseChangeTypeSupport() {
 
-    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+        private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-      propertyChangeSupport.addPropertyChangeListener(listener);
-    }
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+          propertyChangeSupport.addPropertyChangeListener(listener);
+        }
 
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-      propertyChangeSupport.removePropertyChangeListener(listener);
-    }
+        @Override
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+          propertyChangeSupport.removePropertyChangeListener(listener);
+        }
 
-    void databaseChanged(PlayerDatabase oldDb, PlayerDatabase newDb) {
-      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED, oldDb, newDb);
-    }
-  };
+        @Override
+        public void databaseChanged(PlayerDatabase oldDb, PlayerDatabase newDb) {
+          propertyChangeSupport.firePropertyChange(
+              PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED, oldDb, newDb);
+        }
+      };
 
   private static final File PASSWORD_FILE =
       AppUtil.getAppHome("config").toPath().resolve("passwords.json").toFile();
@@ -107,7 +118,9 @@ public class PlayerDatabaseFactory {
   public static void setCurrentPlayerDatabase(PlayerDatabaseType playerDatabaseType) {
     try {
       lock.lock();
+      var oldPlayerDatabase = getCurrentPlayerDatabase();
       currentPlayerDatabase = getPlayerDatabase(playerDatabaseType);
+      databaseChangeTypeSupport.databaseChanged(oldPlayerDatabase, currentPlayerDatabase);
     } finally {
       lock.unlock();
     }
@@ -158,5 +171,4 @@ public class PlayerDatabaseFactory {
       throw new IllegalStateException(e);
     }
   }
-
 }

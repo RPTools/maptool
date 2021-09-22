@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model.player;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;

@@ -39,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 public class Players {
 
   /** Return statuses possible when attempting to add a player. */
-  public enum AddPlayerStatus {
+  public enum ChangePlayerStatus {
     OK,
     ERROR,
     PLAYER_EXISTS,
@@ -47,17 +47,17 @@ public class Players {
   }
 
   /**
-   * Property change event name for when a player is added.
-   * Some databases may not support this event, so you will also need to listen to
-   * {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes to players in the database.
+   * Property change event name for when a player is added. Some databases may not support this
+   * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
+   * to players in the database.
    */
   public static final String PROPERTY_CHANGE_PLAYER_ADDED =
       PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED;
 
   /**
-   * Property change event name for when a player is removed.
-   * Some databases may not support this event, so you will also need to listen to
-   * {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes to players in the database.
+   * Property change event name for when a player is removed. Some databases may not support this
+   * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
+   * to players in the database.
    */
   public static final String PROPERTY_CHANGE_PLAYER_REMOVE =
       PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVE;
@@ -66,8 +66,8 @@ public class Players {
   public static final String PROPERTY_CHANGE_PLAYER_CHANGED =
       PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED;
   /**
-   * Property change event name for when the database is changed or there are mas updates.
-   * Some databases may only support this event and not player added/removed/changed
+   * Property change event name for when the database is changed or there are mas updates. Some
+   * databases may only support this event and not player added/removed/changed
    */
   public static final String PROPERTY_CHANGE_DATABASE_CHANGED =
       PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED;
@@ -75,45 +75,42 @@ public class Players {
   /** Instance for logging messages. */
   private static final Logger log = LogManager.getLogger(Players.class);
 
-
   /** instance variable for property change support. */
   private static final PropertyChangeSupport propertyChangeSupport =
       new PropertyChangeSupport(Players.class);
 
-
   private static final PropertyChangeListener databaseChangeListener =
       new PropertyChangeListener() {
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      propertyChangeSupport.firePropertyChange(evt);
-    }
-  };
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          propertyChangeSupport.firePropertyChange(evt);
+        }
+      };
 
   private static final PropertyChangeListener databaseTypeChangeListener =
       new PropertyChangeListener() {
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      PlayerDatabase oldDb = (PlayerDatabase) evt.getOldValue();
-      PlayerDatabase newDb = (PlayerDatabase) evt.getNewValue();
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          PlayerDatabase oldDb = (PlayerDatabase) evt.getOldValue();
+          PlayerDatabase newDb = (PlayerDatabase) evt.getNewValue();
 
-      if (oldDb instanceof PlayerDBPropertyChange playerdb) {
-        playerdb.removePropertyChangeListener(databaseChangeListener);
-      }
+          if (oldDb instanceof PlayerDBPropertyChange playerdb) {
+            playerdb.removePropertyChangeListener(databaseChangeListener);
+          }
 
-      if (newDb instanceof PlayerDBPropertyChange playerdb) {
-        playerdb.addPropertyChangeListener(databaseChangeListener);
-      }
-    }
-  };
-
+          if (newDb instanceof PlayerDBPropertyChange playerdb) {
+            playerdb.addPropertyChangeListener(databaseChangeListener);
+          }
+        }
+      };
 
   static {
-    PlayerDatabaseFactory.getDatabaseChangeTypeSupport().addPropertyChangeListener(databaseTypeChangeListener);
+    PlayerDatabaseFactory.getDatabaseChangeTypeSupport()
+        .addPropertyChangeListener(databaseTypeChangeListener);
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PlayerDBPropertyChange pdb) {
       pdb.addPropertyChangeListener(databaseChangeListener);
-   }
+    }
   }
-
 
   /**
    * Return the information about a specific known player.
@@ -279,19 +276,19 @@ public class Players {
    * @param name The name of the player to add.
    * @param role The role for the player.
    * @param password the password for the player
-   * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
-  public AddPlayerStatus addPlayerWithPassword(String name, Role role, String password) {
+  public ChangePlayerStatus addPlayerWithPassword(String name, Role role, String password) {
     if (!supportsPerPlayerPasswords()) {
       log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
-      return AddPlayerStatus.NOT_SUPPORTED;
+      return ChangePlayerStatus.NOT_SUPPORTED;
     }
 
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
       try {
         playerDb.addPlayerSharedPassword(name, role, password);
-        return AddPlayerStatus.OK;
+        return ChangePlayerStatus.OK;
       } catch (NoSuchAlgorithmException
           | InvalidKeySpecException
           | PasswordDatabaseException
@@ -299,11 +296,11 @@ public class Players {
           | InvalidKeyException e) {
         log.error(e);
         MapTool.showError(I18N.getText("msg.error.playerDB.errorAdding", name), e);
-        return AddPlayerStatus.ERROR;
+        return ChangePlayerStatus.ERROR;
       }
     } else {
       log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
-      return AddPlayerStatus.NOT_SUPPORTED;
+      return ChangePlayerStatus.NOT_SUPPORTED;
     }
   }
 
@@ -313,19 +310,19 @@ public class Players {
    * @param name The name of the player to add.
    * @param role The role for the player.
    * @param publicKeyString the public key string for the player.
-   * @return {@link AddPlayerStatus#OK} if successful, otherwise the reason for the failure.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
-  public AddPlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
+  public ChangePlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
     if (!supportsAsymmetricKeys()) {
       log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
-      return AddPlayerStatus.NOT_SUPPORTED;
+      return ChangePlayerStatus.NOT_SUPPORTED;
     }
 
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
       try {
         playerDb.addPlayerAsymmetricKey(name, role, Set.of(publicKeyString));
-        return AddPlayerStatus.OK;
+        return ChangePlayerStatus.OK;
       } catch (NoSuchAlgorithmException
           | InvalidKeySpecException
           | PasswordDatabaseException
@@ -333,16 +330,29 @@ public class Players {
           | InvalidKeyException e) {
         log.error(e);
         MapTool.showError(I18N.getText("msg.error.playerDB.cantAddPlayerPublicKey", name), e);
-        return AddPlayerStatus.ERROR;
+        return ChangePlayerStatus.ERROR;
       }
     } else {
       log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
-      return AddPlayerStatus.NOT_SUPPORTED;
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+  public ChangePlayerStatus removePlayer(String name) {
+
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      playerDb.deletePlayer(name);
+      return ChangePlayerStatus.OK;
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
     }
   }
 
   /**
    * Adds a property change listener for player database events.
+   *
    * @param listener The property change listener to add.
    */
   public static void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -351,6 +361,7 @@ public class Players {
 
   /**
    * Removes a property change listener for player database events.
+   *
    * @param listener The property change listener to remove.
    */
   public static void removePropertyChangeListener(PropertyChangeListener listener) {
@@ -386,5 +397,4 @@ public class Players {
       }
     }
   }
-
 }

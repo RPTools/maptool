@@ -17,13 +17,11 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 /**
@@ -179,8 +177,7 @@ public interface PlayerDatabase {
 
   /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
-   * this will not return {@code true} for every input but only for those that are actually
-   * known.
+   * this will not return {@code true} for every input but only for those that are actually known.
    *
    * @param name the name of the player to check for.
    * @return {@code true} if the player is registered, {@code false} otherwise.
@@ -189,23 +186,23 @@ public interface PlayerDatabase {
 
   /**
    * Inform the database that the player has signed in.
+   *
    * @param player the player that has signed in.
    */
   void playerSignedIn(Player player);
 
   /**
    * Inform the database that the player has signed out.
+   *
    * @param player the player that has signed out.
    */
   void playerSignedOut(Player player);
 
-
   /**
    * Returns if a player is connected or not.
+   *
    * @param name the player to check.
    * @return if a player is connected or not.
    */
   boolean isPlayerConnected(String name);
-
-
 }

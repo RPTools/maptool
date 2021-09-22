@@ -63,8 +63,8 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PasswordFilePlayerDatabase implements
-    PlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
+public final class PasswordFilePlayerDatabase
+    implements PlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -77,18 +77,14 @@ public final class PasswordFilePlayerDatabase implements
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
+  private final Map<String, PlayerDetails> savedDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
   private final Map<PublicKeyDetails, PlayerDetails> dirtyPublicKeys = new ConcurrentHashMap<>();
 
-  private final Map<String, PlayerDetails> uncommittedPlayerDetails = new HashMap<>();
-  private final Map<PublicKeyDetails, PlayerDetails> uncommittedPublicKeys = new HashMap<>();
-
   private final ReentrantLock passwordFileLock = new ReentrantLock();
-  private final ReentrantLock uncommittedChangesLock = new ReentrantLock();
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
 
   public PasswordFilePlayerDatabase(File passwordFile)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -142,7 +138,8 @@ public final class PasswordFilePlayerDatabase implements
           NoSuchPaddingException, InvalidKeyException {
     transientPlayerDetails.clear();
     readPasswordFile();
-    propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
+    propertyChangeSupport.firePropertyChange(
+        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
@@ -344,15 +341,6 @@ public final class PasswordFilePlayerDatabase implements
     if (pd != null) {
       return pd;
     }
-    try {
-      uncommittedChangesLock.lock();
-      PlayerDetails upd = uncommittedPlayerDetails.get(playerName);
-      if (upd != null) {
-        return upd;
-      }
-    } finally {
-      uncommittedChangesLock.unlock();
-    }
     return playerDetails.get(playerName);
   }
 
@@ -419,12 +407,7 @@ public final class PasswordFilePlayerDatabase implements
     PlayerDetails newDetails =
         new PlayerDetails(
             details.name(), details.role(), details.password(), details.publicKeyDetails(), reason);
-    try {
-      uncommittedChangesLock.lock();
-      uncommittedPlayerDetails.put(player, newDetails);
-    } finally {
-      uncommittedChangesLock.unlock();
-    }
+    playerDetails.put(details.name(), newDetails);
   }
 
   @Override
@@ -452,43 +435,23 @@ public final class PasswordFilePlayerDatabase implements
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
 
-    clearUncommittedPublicKeys(name);
 
     var pd = getPlayerDetails(name);
     boolean persisted = isPersisted(name);
     putUncommittedPlayer(pd.name(), pd.role(), password, Set.of(), pd.disabledReason, persisted);
   }
 
-  /**
-   * Clears any uncommitted public key values for the specified player
-   *
-   * @param name the name of the player.
-   * @throws PasswordDatabaseException if the player does not exist.
-   */
-  private void clearUncommittedPublicKeys(String name) throws PasswordDatabaseException {
-    if (!playerExists(name)) {
-      throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
-    }
-
-    var pd = getPlayerDetails(name);
-
-    // if we already have public keys make sure we remove them from the uncommitted list
-    try {
-      uncommittedChangesLock.lock();
-      pd.publicKeyDetails().forEach(uncommittedPublicKeys::remove);
-    } finally {
-      uncommittedChangesLock.unlock();
-    }
+  @Override
+  public boolean isPersisted(String name) {
+      return playerDetails.containsKey(name);
   }
 
   @Override
-  public boolean isPersisted(String name) {
-    try {
-      uncommittedChangesLock.lock();
-      return playerDetails.containsKey(name) || uncommittedPlayerDetails.containsKey(name);
-    } finally {
-      uncommittedChangesLock.unlock();
-    }
+  public void deletePlayer(String name) {
+    PlayerDetails oldPlayerDetails = this.playerDetails.get(name);
+    this.playerDetails.remove(name);
+    propertyChangeSupport.firePropertyChange(
+        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVE, oldPlayerDetails, null);
   }
 
   @Override
@@ -496,7 +459,6 @@ public final class PasswordFilePlayerDatabase implements
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
 
-    clearUncommittedPublicKeys(name);
     var pd = getPlayerDetails(name);
 
     Set<PublicKeyDetails> publicKeyDetails = createPublicKeyDetails(keys, pd.name());
@@ -504,7 +466,7 @@ public final class PasswordFilePlayerDatabase implements
     var newpd =
         putUncommittedPlayer(
             pd.name(), pd.role(), null, publicKeyDetails, pd.disabledReason(), persisted);
-    publicKeyDetails.forEach(p -> uncommittedPublicKeys.put(p, newpd));
+    publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, newpd));
   }
 
   @Override
@@ -533,14 +495,8 @@ public final class PasswordFilePlayerDatabase implements
   public void commitChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
-    try {
-      uncommittedChangesLock.lock();
-      dirtyPublicKeys.putAll(uncommittedPublicKeys);
-      uncommittedPublicKeys.clear();
-      playerDetails.putAll(uncommittedPlayerDetails);
-    } finally {
-      uncommittedChangesLock.unlock();
-    }
+    savedDetails.clear();
+    savedDetails.putAll(playerDetails);
     dirty.set(true);
     writePasswordFile();
   }
@@ -549,14 +505,12 @@ public final class PasswordFilePlayerDatabase implements
   public void rollbackChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
-    try {
-      uncommittedChangesLock.lock();
-      uncommittedPublicKeys.clear();
-      uncommittedPlayerDetails.clear();
-    } finally {
-      uncommittedChangesLock.unlock();
+    if (savedDetails.size() > 0) {
+      playerDetails.clear();
+      playerDetails.putAll(savedDetails);
     }
-    propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
+    propertyChangeSupport.firePropertyChange(
+        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, this);
   }
 
   @Override
@@ -688,7 +642,7 @@ public final class PasswordFilePlayerDatabase implements
    * @throws InvalidKeyException If there is an error hashing the password.
    * @throws IllegalStateException If there is an error hashing the password.
    */
-  private PlayerDetails putUncommittedPlayer (
+  private PlayerDetails putUncommittedPlayer(
       String name,
       Role role,
       Set<String> publicKeyStrings,
@@ -746,21 +700,17 @@ public final class PasswordFilePlayerDatabase implements
             publicKeyDetails,
             disabledReason);
     if (persisted) {
-      try {
-        uncommittedChangesLock.lock();
         publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
-        uncommittedPlayerDetails.put(name, pd);
-      } finally {
-        uncommittedChangesLock.unlock();
-      }
     } else {
       transientPlayerDetails.put(name, pd);
     }
 
     if (oldPd != null) {
-      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldPd, pd);
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldPd, pd);
     } else {
-      propertyChangeSupport.firePropertyChange(PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, pd);
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, pd);
     }
     return pd;
   }
