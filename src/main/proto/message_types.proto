@@ -25,18 +25,23 @@ message BootPlayerMsg {
 }
 
 message BringTokensToFrontMsg {
-  string zoneGuid = 1;
-  repeated string tokenGuids = 2;
+  string zone_guid = 1;
+  repeated string token_guids = 2;
 }
 
 message ChangeZoneDisplayNameMsg {
-  string zoneGuid = 1;
+  string zone_guid = 1;
   string name = 2;
 }
 
 message ClearAllDrawingsMsg {
-  string zoneGuid = 1;
+  string zone_guid = 1;
   string layer = 2;
+}
+
+message ClearExposedAreaMsg {
+  string zone_guid = 1;
+  bool global_only = 2;
 }
 
 message DrawMsg {

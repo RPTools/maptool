@@ -97,12 +97,23 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getClearAllDrawingsMsg());
           forwardToAllClients(msg);
         }
+        case CLEAR_EXPOSED_AREA_MSG -> {
+          handle(msg.getClearExposedAreaMsg());
+          forwardToClients(id, msg);
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ClearExposedAreaMsg clearExposedAreaMsg) {
+    var zoneGUID = GUID.valueOf(clearExposedAreaMsg.getZoneGuid());
+    var globalOnly = clearExposedAreaMsg.getGlobalOnly();
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.clearExposedArea(globalOnly);
   }
 
   private void handle(ClearAllDrawingsMsg clearAllDrawingsMsg) {
@@ -347,9 +358,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case updateExposedAreaMeta:
           updateExposedAreaMeta(
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
-          break;
-        case clearExposedArea:
-          clearExposedArea(context.getGUID(0), context.getBool(1));
           break;
       }
     } finally {
@@ -880,18 +888,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
-    forwardToClients();
-  }
-
-  /**
-   * Clear server global exposed area. Can clear all token exposed areas. Forward to clients.
-   *
-   * @param zoneGUID the GUID of the zone
-   * @param globalOnly should only the global area be cleared?
-   */
-  private void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.clearExposedArea(globalOnly);
     forwardToClients();
   }
 

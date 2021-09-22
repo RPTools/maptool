@@ -86,12 +86,21 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case BOOT_PLAYER_MSG -> handle(msg.getBootPlayerMsg());
         case CHANGE_ZONE_DISPLAY_NAME_MSG -> handle(msg.getChangeZoneDisplayNameMsg());
         case CLEAR_ALL_DRAWINGS_MSG -> handle(msg.getClearAllDrawingsMsg());
+        case CLEAR_EXPOSED_AREA_MSG -> handle(msg.getClearExposedAreaMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ClearExposedAreaMsg clearExposedAreaMsg) {
+    EventQueue.invokeLater(()-> {
+      var zoneGUID = GUID.valueOf(clearExposedAreaMsg.getZoneGuid());
+      var zone = MapTool.getCampaign().getZone(zoneGUID);
+      zone.clearExposedArea(clearExposedAreaMsg.getGlobalOnly());
+    });
   }
 
   private void handle(ClearAllDrawingsMsg clearAllDrawingsMsg) {
@@ -705,12 +714,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case enforceNotification:
               Boolean enforce = (Boolean) parameters[0];
               MapTool.getFrame().getCommandPanel().disableNotifyButton(enforce);
-              return;
-
-            case clearExposedArea:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.clearExposedArea((boolean) parameters[1]);
               return;
 
             case updateExposedAreaMeta:

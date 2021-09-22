@@ -371,8 +371,11 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param globalOnly should all token exposed areas be cleared?
    */
   public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
-    // System.out.println("in ServerCommandClientImpl");
-    makeServerCall(COMMAND.clearExposedArea, zoneGUID, globalOnly);
+    var msg = ClearExposedAreaMsg.newBuilder()
+        .setZoneGuid(zoneGUID.toString())
+        .setGlobalOnly(globalOnly);
+
+    makeServerCall(Message.newBuilder().setClearExposedAreaMsg(msg).build());
   }
 
   private static void makeServerCall(Message msg) {

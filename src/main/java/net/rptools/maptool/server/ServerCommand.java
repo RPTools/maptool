@@ -38,7 +38,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
-  public enum COMMAND {
+  enum COMMAND {
     // @formatter:off
     setCampaign,
     setCampaignName,
@@ -94,51 +94,50 @@ public interface ServerCommand {
     exposePCArea,
     setBoard,
     updateExposedAreaMeta,
-    clearExposedArea,
     restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and
     // scale a player's view
     // @formatter:on
-  };
+  }
 
-  public void bootPlayer(String player);
+  void bootPlayer(String player);
 
-  public void setZoneHasFoW(GUID zoneGUID, boolean hasFog);
+  void setZoneHasFoW(GUID zoneGUID, boolean hasFog);
 
-  public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
+  void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
+  void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
+  void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
 
-  public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
+  void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 
-  public void restoreZoneView(GUID zoneGUID);
+  void restoreZoneView(GUID zoneGUID);
 
-  public void setCampaign(Campaign campaign);
+  void setCampaign(Campaign campaign);
 
-  public void setCampaignName(String name);
+  void setCampaignName(String name);
 
-  public void getZone(GUID zoneGUID);
+  void getZone(GUID zoneGUID);
 
-  public void putZone(Zone zone);
+  void putZone(Zone zone);
 
-  public void removeZone(GUID zoneGUID);
+  void removeZone(GUID zoneGUID);
 
-  public void setZoneVisibility(GUID zoneGUID, boolean visible);
+  void setZoneVisibility(GUID zoneGUID, boolean visible);
 
-  public void putAsset(Asset asset);
+  void putAsset(Asset asset);
 
-  public void getAsset(MD5Key assetID);
+  void getAsset(MD5Key assetID);
 
-  public void removeAsset(MD5Key assetID);
+  void removeAsset(MD5Key assetID);
 
-  public void editToken(GUID zoneGUID, Token token);
+  void editToken(GUID zoneGUID, Token token);
 
-  public void putToken(GUID zoneGUID, Token token);
+  void putToken(GUID zoneGUID, Token token);
 
   /**
    * Removes a token from a zone.
@@ -146,7 +145,7 @@ public interface ServerCommand {
    * @param zoneGUID the ID of the zone
    * @param tokenGUID the ID of the token
    */
-  public void removeToken(GUID zoneGUID, GUID tokenGUID);
+  void removeToken(GUID zoneGUID, GUID tokenGUID);
 
   /**
    * Removes a list of tokens from a zone.
@@ -154,84 +153,84 @@ public interface ServerCommand {
    * @param zoneGUID the ID of the zone
    * @param tokenGUIDs the list of IDs of the tokens
    */
-  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
+  void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
 
-  public void updateTokenProperty(
+  void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
 
-  public void updateTokenProperty(Token token, Token.Update update, Object... parameters);
+  void updateTokenProperty(Token token, Token.Update update, Object... parameters);
 
-  public void putLabel(GUID zoneGUID, Label label);
+  void putLabel(GUID zoneGUID, Label label);
 
-  public void removeLabel(GUID zoneGUID, GUID labelGUID);
+  void removeLabel(GUID zoneGUID, GUID labelGUID);
 
-  public void draw(GUID zoneGUID, Pen pen, Drawable drawable);
+  void draw(GUID zoneGUID, Pen pen, Drawable drawable);
 
-  public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);
+  void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);
 
-  public void undoDraw(GUID zoneGUID, GUID drawableGUID);
+  void undoDraw(GUID zoneGUID, GUID drawableGUID);
 
-  public void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color);
+  void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color);
 
-  public void message(TextMessage message);
+  void message(TextMessage message);
 
-  public void execFunction(String target, String source, String functionName, List<Object> args);
+  void execFunction(String target, String source, String functionName, List<Object> args);
 
-  public void execLink(String link, String target, String source);
+  void execLink(String link, String target, String source);
 
-  public void showPointer(String player, Pointer pointer);
+  void showPointer(String player, Pointer pointer);
 
-  public void hidePointer(String player);
+  void hidePointer(String player);
 
-  public void movePointer(String player, int x, int y);
+  void movePointer(String player, int x, int y);
 
-  public void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList);
+  void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList);
 
-  public void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y);
+  void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y);
 
-  public void stopTokenMove(GUID zoneGUID, GUID tokenGUID);
+  void stopTokenMove(GUID zoneGUID, GUID tokenGUID);
 
-  public void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp);
+  void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp);
 
-  public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet);
+  void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet);
 
-  public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet);
+  void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet);
 
-  public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer);
+  void clearAllDrawings(GUID zoneGUID, Zone.Layer layer);
 
-  public void enforceZone(GUID zoneGUID);
+  void enforceZone(GUID zoneGUID);
 
-  public void setServerPolicy(ServerPolicy policy);
+  void setServerPolicy(ServerPolicy policy);
 
-  public void renameZone(GUID zoneGUID, String name);
+  void renameZone(GUID zoneGUID, String name);
 
-  public void changeZoneDispName(GUID zoneGUID, String name);
+  void changeZoneDispName(GUID zoneGUID, String name);
 
-  public void heartbeat(String data);
+  void heartbeat(String data);
 
-  public void updateCampaign(CampaignProperties properties);
+  void updateCampaign(CampaignProperties properties);
 
-  public void updateInitiative(InitiativeList list, Boolean ownerPermission);
+  void updateInitiative(InitiativeList list, Boolean ownerPermission);
 
-  public void updateTokenInitiative(
+  void updateTokenInitiative(
       GUID zone, GUID token, Boolean hold, String state, Integer index);
 
-  public void setVisionType(GUID zoneGUID, VisionType visionType);
+  void setVisionType(GUID zoneGUID, VisionType visionType);
 
-  public void updateCampaignMacros(List<MacroButtonProperties> properties);
+  void updateCampaignMacros(List<MacroButtonProperties> properties);
 
-  public void updateGmMacros(List<MacroButtonProperties> properties);
+  void updateGmMacros(List<MacroButtonProperties> properties);
 
-  public void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
+  void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
 
-  public void setLiveTypingLabel(String name, boolean show);
+  void setLiveTypingLabel(String name, boolean show);
 
-  public void enforceNotification(Boolean enforce);
+  void enforceNotification(Boolean enforce);
 
-  public void exposePCArea(GUID zoneGUID);
+  void exposePCArea(GUID zoneGUID);
 
-  public void updateExposedAreaMeta(
+  void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
-  public void clearExposedArea(GUID zoneGUID, boolean globalOnly);
+  void clearExposedArea(GUID zoneGUID, boolean globalOnly);
 }
