@@ -7056,7 +7056,7 @@
                               </at>
                               <at name="name"></at>
                               <at name="width">125</at>
-                              <at name="text">Label.allowURLAccess</at>
+                              <at name="text">Label.allowURIAccess</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -7114,7 +7114,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="name">@allowURLAccess</at>
+                              <at name="name">@allowURIAccess</at>
                               <at name="width">17</at>
                               <at name="height">17</at>
                              </object>
