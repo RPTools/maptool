@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.player;
 
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -59,8 +60,8 @@ public class Players {
    * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
    * to players in the database.
    */
-  public static final String PROPERTY_CHANGE_PLAYER_REMOVE =
-      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVE;
+  public static final String PROPERTY_CHANGE_PLAYER_REMOVED =
+      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED;
 
   /** Property change event name for when a player is changed. */
   public static final String PROPERTY_CHANGE_PLAYER_CHANGED =
@@ -393,7 +394,7 @@ public class Players {
         propertyChangeSupport.firePropertyChange(
             PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
       } else {
-        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_REMOVE, oldInfo, null);
+        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_REMOVED, oldInfo, null);
       }
     }
   }

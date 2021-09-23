@@ -30,7 +30,7 @@ interface PlayerDBPropertyChange {
    * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
    * to players in the database.
    */
-  final String PROPERTY_CHANGE_PLAYER_REMOVE = "player removed";
+  final String PROPERTY_CHANGE_PLAYER_REMOVED = "player removed";
 
   /** Property change event name for when a player is changed. */
   final String PROPERTY_CHANGE_PLAYER_CHANGED = "player changed";

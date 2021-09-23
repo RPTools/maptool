@@ -139,7 +139,7 @@ public final class PasswordFilePlayerDatabase
     transientPlayerDetails.clear();
     readPasswordFile();
     propertyChangeSupport.firePropertyChange(
-        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, this, this);
+        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, this);
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
@@ -448,10 +448,9 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void deletePlayer(String name) {
-    PlayerDetails oldPlayerDetails = this.playerDetails.get(name);
     this.playerDetails.remove(name);
     propertyChangeSupport.firePropertyChange(
-        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVE, oldPlayerDetails, null);
+        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, name, null);
   }
 
   @Override
@@ -707,10 +706,10 @@ public final class PasswordFilePlayerDatabase
 
     if (oldPd != null) {
       propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldPd, pd);
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, name);
     } else {
       propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, pd);
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, name);
     }
     return pd;
   }

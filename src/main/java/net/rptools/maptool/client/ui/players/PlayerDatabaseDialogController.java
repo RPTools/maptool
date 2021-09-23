@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
@@ -34,6 +35,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.util.Callback;
+import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
@@ -70,14 +73,14 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             () -> {
               switch (e.getPropertyName()) {
                 case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
-                  removePlayer((PlayerInfo) e.getOldValue());
-                  addPlayer((PlayerInfo) e.getNewValue());
+                  removePlayer(e.getOldValue().toString());
+                  addPlayer(e.getNewValue().toString());
                 }
                 case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
-                  addPlayer((PlayerInfo) e.getNewValue());
+                  addPlayer(e.getNewValue().toString());
                 }
-                case Players.PROPERTY_CHANGE_PLAYER_REMOVE -> {
-                  removePlayer((PlayerInfo) e.getOldValue());
+                case Players.PROPERTY_CHANGE_PLAYER_REMOVED -> {
+                  removePlayer(e.getOldValue().toString());
                 }
                 case Players.PROPERTY_CHANGE_DATABASE_CHANGED -> {
                   addPlayers();
@@ -134,7 +137,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             new ReadOnlyObjectWrapper<>(
                 p.getValue().authMethod() == AuthMethod.PASSWORD ? passI81n : pubKeyI81n));
     var disabledCol =
-        new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.disabled"));
+        new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.blocked"));
     disabledCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().blocked()));
     disabledCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(disabledCol));
     var connectedCol =
@@ -156,8 +159,12 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         createButtonCellFactory(
             I18N.getText("playerDB.dialog.delete"),
             p -> {
-              new Players().removePlayer(p.name());
-              System.out.println(" --  " + p);
+              String playerName = p.name();
+              SwingUtilities.invokeLater(() -> {
+                if (MapTool.confirm("playerDB.dialog.deleteConfirm", p.name())) {
+                  Platform.runLater(() -> new Players().removePlayer(p.name()));
+                }
+              });
             });
     deleteCol.setCellFactory(deleteCellFactory);
 
@@ -169,12 +176,17 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     addPlayers();
   }
 
-  private void addPlayer(PlayerInfo playerInfo) {
-    playerInfoList.add(playerInfo);
+  private void addPlayer(String name) {
+    try {
+      PlayerInfo playerInfo = new Players().getPlayer(name).get();
+      playerInfoList.add(playerInfo);
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  private void removePlayer(PlayerInfo playerInfo) {
-    playerInfoList.remove(playerInfo);
+  private void removePlayer(String name) {
+    playerInfoList.removeIf(p -> p.name().equals(name));
   }
 
   private void addPlayers() {
