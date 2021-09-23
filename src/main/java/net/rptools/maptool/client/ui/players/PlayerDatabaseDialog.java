@@ -14,17 +14,8 @@
  */
 package net.rptools.maptool.client.ui.players;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.javfx.FXMLLoaderUtil;
 import net.rptools.maptool.client.ui.javfx.SimpleSwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
-import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
-import net.rptools.maptool.language.I18N;
 
 public class PlayerDatabaseDialog {
   /** The path of the FXML file for the dialog. */
