@@ -1,7 +1,22 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.javfx;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javax.swing.SwingUtilities;
@@ -11,10 +26,9 @@ import net.rptools.maptool.language.I18N;
 public class SimpleSwingJavaFXDialog {
 
   private final String fxmlPath;
-  private SwingJavaFXDialogController controller;
+  private final AtomicReference<SwingJavaFXDialogController> controller = new AtomicReference<>();
   private final String title;
   private SwingJavaFXDialog dialog;
-
 
   public SimpleSwingJavaFXDialog(String fxmlPath, String title) {
     this.fxmlPath = fxmlPath;
@@ -40,13 +54,11 @@ public class SimpleSwingJavaFXDialog {
    * @param controller the controller class for the dialog.
    */
   private void showEDT(JFXPanel panel, SwingJavaFXDialogController controller) {
-    this.controller = controller;
+    this.controller.set(controller);
     if (!SwingUtilities.isEventDispatchThread()) {
-      throw new AssertionError(
-          "showEDT() can only be called on the Swing thread.");
+      throw new AssertionError("showEDT() can only be called on the Swing thread.");
     }
-    dialog =
-        new SwingJavaFXDialog(I18N.getText(title), MapTool.getFrame(), panel);
+    dialog = new SwingJavaFXDialog(I18N.getText(title), MapTool.getFrame(), panel);
     Platform.runLater(
         () -> {
           controller.registerEventHandler(this::closeDialog);
@@ -83,14 +95,12 @@ public class SimpleSwingJavaFXDialog {
    */
   private void closeDialogEDT(SwingJavaFXDialogController controller) {
     if (!SwingUtilities.isEventDispatchThread()) {
-      throw new AssertionError(
-          "closeDialogEDT() can only be called on the Swing thread.");
+      throw new AssertionError("closeDialogEDT() can only be called on the Swing thread.");
     }
     dialog.closeDialog();
   }
 
-  public  SwingJavaFXDialogController getController() {
-    return controller;
+  public SwingJavaFXDialogController getController() {
+    return controller.get();
   }
-
 }

@@ -16,20 +16,28 @@ package net.rptools.maptool.client.ui.players;
 
 import net.rptools.maptool.client.ui.javfx.SimpleSwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
+import net.rptools.maptool.model.player.PlayerInfo;
 
-public class PlayerDatabaseDialog {
+public class PlayerDatabaseEditDialog {
   /** The path of the FXML file for the dialog. */
   private static final String FXML_PATH =
-      "/net/rptools/maptool/client/ui/fxml/PlayerDatabaseDialog.fxml";
+      "/net/rptools/maptool/client/ui/fxml/PlayerDatabaseEdit.fxml";
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private final SimpleSwingJavaFXDialog simpleSwingJavaFXDialog;
 
-  public PlayerDatabaseDialog() {
-    simpleSwingJavaFXDialog = new SimpleSwingJavaFXDialog(FXML_PATH, "playerDB.dialog.title");
+  public PlayerDatabaseEditDialog() {
+    simpleSwingJavaFXDialog = new SimpleSwingJavaFXDialog(FXML_PATH, "playerDB.dialog.edit.title");
   }
 
   /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
     simpleSwingJavaFXDialog.show();
+  }
+
+  public void setPlayerInfo(PlayerInfo playerInfo) {
+    if (simpleSwingJavaFXDialog.getController()
+        instanceof PlayerDatabaseEditController controller) {
+      controller.setPlayerInfo(playerInfo);
+    }
   }
 }

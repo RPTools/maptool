@@ -56,6 +56,7 @@ public class PlayerDatabaseFactory {
 
     /**
      * Notifies that the database hase changed.
+     *
      * @param oldDb the old database.
      * @param newDb the new database.
      */

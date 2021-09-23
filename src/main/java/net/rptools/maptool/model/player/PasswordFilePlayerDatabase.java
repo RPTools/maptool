@@ -435,7 +435,6 @@ public final class PasswordFilePlayerDatabase
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
 
-
     var pd = getPlayerDetails(name);
     boolean persisted = isPersisted(name);
     putUncommittedPlayer(pd.name(), pd.role(), password, Set.of(), pd.disabledReason, persisted);
@@ -443,7 +442,7 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public boolean isPersisted(String name) {
-      return playerDetails.containsKey(name);
+    return playerDetails.containsKey(name);
   }
 
   @Override
@@ -699,7 +698,7 @@ public final class PasswordFilePlayerDatabase
             publicKeyDetails,
             disabledReason);
     if (persisted) {
-        publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
+      publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
     } else {
       transientPlayerDetails.put(name, pd);
     }

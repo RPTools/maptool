@@ -136,8 +136,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         p ->
             new ReadOnlyObjectWrapper<>(
                 p.getValue().authMethod() == AuthMethod.PASSWORD ? passI81n : pubKeyI81n));
-    var disabledCol =
-        new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.blocked"));
+    var disabledCol = new TableColumn<PlayerInfo, Boolean>(I18N.getText("playerDB.dialog.blocked"));
     disabledCol.setCellValueFactory(p -> new ReadOnlyBooleanWrapper(p.getValue().blocked()));
     disabledCol.setCellFactory(CheckBoxTableCell.<PlayerInfo>forTableColumn(disabledCol));
     var connectedCol =
@@ -150,6 +149,12 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         createButtonCellFactory(
             I18N.getText("playerDB.dialog.edit"),
             p -> {
+              SwingUtilities.invokeLater(
+                  () -> {
+                    PlayerDatabaseEditDialog dialog = new PlayerDatabaseEditDialog();
+                    dialog.show();
+                    dialog.setPlayerInfo(p);
+                  });
               System.out.println(" --  " + p);
             });
     editCol.setCellFactory(editCellFactory);
@@ -160,11 +165,12 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             I18N.getText("playerDB.dialog.delete"),
             p -> {
               String playerName = p.name();
-              SwingUtilities.invokeLater(() -> {
-                if (MapTool.confirm("playerDB.dialog.deleteConfirm", p.name())) {
-                  Platform.runLater(() -> new Players().removePlayer(p.name()));
-                }
-              });
+              SwingUtilities.invokeLater(
+                  () -> {
+                    if (MapTool.confirm("playerDB.dialog.deleteConfirm", p.name())) {
+                      Platform.runLater(() -> new Players().removePlayer(p.name()));
+                    }
+                  });
             });
     deleteCol.setCellFactory(deleteCellFactory);
 
