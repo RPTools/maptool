@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.players;
 
+import java.util.function.Consumer;
+import javafx.application.Platform;
 import net.rptools.maptool.client.ui.javfx.SimpleSwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.model.player.PlayerInfo;
@@ -22,22 +24,39 @@ public class PlayerDatabaseEditDialog {
   /** The path of the FXML file for the dialog. */
   private static final String FXML_PATH =
       "/net/rptools/maptool/client/ui/fxml/PlayerDatabaseEdit.fxml";
-  /** The {@link SwingJavaFXDialog} used to display the dialog. */
-  private final SimpleSwingJavaFXDialog simpleSwingJavaFXDialog;
 
-  public PlayerDatabaseEditDialog() {
-    simpleSwingJavaFXDialog = new SimpleSwingJavaFXDialog(FXML_PATH, "playerDB.dialog.edit.title");
+  private static final String EDIT_TITLE = "playerDB.dialog.title.edit";
+  private static final String NEW_TITLE = "playerDB.dialog.title.new";
+
+  /** The {@link SwingJavaFXDialog} used to display the dialog. */
+  private final SimpleSwingJavaFXDialog<PlayerDatabaseEditController> simpleSwingJavaFXDialog;
+
+
+
+  private PlayerDatabaseEditDialog(String title,
+      Consumer<PlayerDatabaseEditController> callback) {
+    simpleSwingJavaFXDialog = new SimpleSwingJavaFXDialog<>(FXML_PATH, title, callback);
   }
+
+
+  public static PlayerDatabaseEditDialog getEdtPlayerDialog(Consumer<PlayerDatabaseEditController> callback) {
+    return new PlayerDatabaseEditDialog(EDIT_TITLE, c -> {
+      c.setPlayerNameEditable(false);
+      callback.accept(c);
+    });
+  }
+
+  public static PlayerDatabaseEditDialog getNewPlayerDialog(Consumer<PlayerDatabaseEditController> callback) {
+    return new PlayerDatabaseEditDialog(NEW_TITLE, c -> {
+      c.setPlayerNameEditable(true);
+      callback.accept(c);
+    });
+  }
+
 
   /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
     simpleSwingJavaFXDialog.show();
   }
 
-  public void setPlayerInfo(PlayerInfo playerInfo) {
-    if (simpleSwingJavaFXDialog.getController()
-        instanceof PlayerDatabaseEditController controller) {
-      controller.setPlayerInfo(playerInfo);
-    }
-  }
 }

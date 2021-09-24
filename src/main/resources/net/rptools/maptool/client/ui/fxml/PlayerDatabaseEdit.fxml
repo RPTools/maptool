@@ -50,16 +50,17 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <CheckBox mnemonicParsing="false" text="%playerDB.dialog.blocked" GridPane.rowIndex="1" />
+            <CheckBox fx:id="blockedCheckBox" mnemonicParsing="false" text="%playerDB.dialog.blocked" GridPane.rowIndex="1" />
             <TextField fx:id="playerNameText" GridPane.columnIndex="1" GridPane.columnSpan="3" />
             <TextField fx:id="blockedReasonText" prefHeight="25.0" prefWidth="90.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
             <Label text="%playerDB.dialog.player" />
             <ComboBox fx:id="roleCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" />
             <ComboBox fx:id="authTypeCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-            <TextField fx:id="passwordText" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
             <Label text="%playerDB.dialog.password" GridPane.rowIndex="2" />
             <Button fx:id="generatePasswordButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%playerDB.dialog.passwordGenerate" GridPane.columnIndex="4" GridPane.rowIndex="2" />
             <TextArea fx:id="publicKeyText" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="5" GridPane.rowIndex="4" GridPane.rowSpan="2147483647" />
+            <TextField fx:id="passwordText" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+            <Label fx:id="labelErrors" textFill="#c62828" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="3" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

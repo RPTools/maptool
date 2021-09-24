@@ -17,23 +17,31 @@ package net.rptools.maptool.client.ui.javfx;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import okhttp3.Call;
 
-public class SimpleSwingJavaFXDialog {
+public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
 
   private final String fxmlPath;
-  private final AtomicReference<SwingJavaFXDialogController> controller = new AtomicReference<>();
   private final String title;
   private SwingJavaFXDialog dialog;
+  private final Consumer<T> controllerCallback;
 
-  public SimpleSwingJavaFXDialog(String fxmlPath, String title) {
+  public SimpleSwingJavaFXDialog(String fxmlPath, String title, Consumer<T> callback) {
     this.fxmlPath = fxmlPath;
     this.title = I18N.getText(title);
+    this.controllerCallback = callback;
   }
+
+  public SimpleSwingJavaFXDialog(String fxmlPath, String title) {
+    this(fxmlPath, title, c -> {} /* do nothing if no call back provided */);
+  }
+
 
   /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
@@ -54,7 +62,6 @@ public class SimpleSwingJavaFXDialog {
    * @param controller the controller class for the dialog.
    */
   private void showEDT(JFXPanel panel, SwingJavaFXDialogController controller) {
-    this.controller.set(controller);
     if (!SwingUtilities.isEventDispatchThread()) {
       throw new AssertionError("showEDT() can only be called on the Swing thread.");
     }
@@ -72,6 +79,7 @@ public class SimpleSwingJavaFXDialog {
             e.getWindow().dispose();
           }
         });
+    controllerCallback.accept((T) controller);
     dialog.showDialog();
   }
 
@@ -100,7 +108,7 @@ public class SimpleSwingJavaFXDialog {
     dialog.closeDialog();
   }
 
-  public SwingJavaFXDialogController getController() {
-    return controller.get();
+  public void closeDialog() {
+    dialog.closeDialog();
   }
 }

@@ -151,11 +151,10 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             p -> {
               SwingUtilities.invokeLater(
                   () -> {
-                    PlayerDatabaseEditDialog dialog = new PlayerDatabaseEditDialog();
+                    PlayerDatabaseEditDialog dialog = PlayerDatabaseEditDialog.getEdtPlayerDialog(c ->
+                        c.setPlayerInfo(p));
                     dialog.show();
-                    dialog.setPlayerInfo(p);
                   });
-              System.out.println(" --  " + p);
             });
     editCol.setCellFactory(editCellFactory);
 
@@ -180,6 +179,14 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
 
     playersTable.setItems(playerInfoList);
     addPlayers();
+
+
+    addButton.setOnAction(a -> {
+      SwingUtilities.invokeLater(() -> {
+        PlayerDatabaseEditDialog.getNewPlayerDialog(c -> {}).show();
+      });
+    });
+
   }
 
   private void addPlayer(String name) {
