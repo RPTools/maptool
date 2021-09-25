@@ -64,7 +64,7 @@ public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
     if (!SwingUtilities.isEventDispatchThread()) {
       throw new AssertionError("showEDT() can only be called on the Swing thread.");
     }
-    dialog = new SwingJavaFXDialog(I18N.getText(title), MapTool.getFrame(), panel);
+    dialog = new SwingJavaFXDialog(I18N.getText(title), MapTool.getFrame(), panel, controller);
     Platform.runLater(
         () -> {
           controller.registerEventHandler(this::closeDialog);

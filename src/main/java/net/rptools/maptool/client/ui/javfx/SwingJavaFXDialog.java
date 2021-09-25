@@ -47,6 +47,11 @@ public class SwingJavaFXDialog extends JDialog {
   /** Keeps track of if the dialog has already positioned itself. */
   private boolean hasPositionedItself;
 
+
+  /** The controller for the JFX Panel. */
+  private final SwingJavaFXDialogController controller;
+
+
   /**
    * Creates a new modal {@code SwingJavaFXDialog}.
    *
@@ -57,7 +62,22 @@ public class SwingJavaFXDialog extends JDialog {
    * @note This constructor must only be used on the Swing EDT thread.
    */
   public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel) {
-    this(title, parent, panel, true);
+    this(title, parent, panel, true, null);
+  }
+
+
+  /**
+   * Creates a new modal {@code SwingJavaFXDialog}.
+   *
+   * @param title The title of the dialog.
+   * @param parent The swing {@link Frame} that is the parent.
+   * @param panel The JavaFX content to display.
+   * @param jfxController the controller for the javaFX UI.
+   * @throws IllegalStateException if not run on the Swing EDT thread.
+   * @note This constructor must only be used on the Swing EDT thread.
+   */
+  public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, SwingJavaFXDialogController jfxController ) {
+    this(title, parent, panel, true, jfxController);
   }
 
   /**
@@ -71,11 +91,30 @@ public class SwingJavaFXDialog extends JDialog {
    * @note This constructor must only be used on the Swing EDT thread.
    */
   public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, boolean modal) {
+    this(title, parent, panel, modal, null);
+  }
+
+
+  /**
+   * Creates a new {@code SwingJavaFXDialog}.
+   *
+   * @param title The title of the dialog.
+   * @param parent The swing {@link Frame} that is the parent.
+   * @param panel The JavaFX content to display.
+   * @param modal if {@code true} to create a modal dialog.
+   * @param jfxController the controller for the javaFX UI.
+   * @throws IllegalStateException if not run on the Swing EDT threadO.
+   * @note This constructor must only be used on the Swing EDT thread.
+   */
+  public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, boolean modal,
+      SwingJavaFXDialogController jfxController ) {
     super(parent, title, modal);
 
     if (!SwingUtilities.isEventDispatchThread()) {
       throw new IllegalStateException("SwingJavaFXDialog must be created on the Swing EDT thread.");
     }
+
+    controller = jfxController;
 
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -111,41 +150,6 @@ public class SwingJavaFXDialog extends JDialog {
         });
   }
 
-  public SwingJavaFXDialog(String title, Frame parent, String fxmlPath, boolean modal) {
-    super(parent, title, modal);
-
-    if (!SwingUtilities.isEventDispatchThread()) {
-      throw new IllegalStateException("SwingJavaFXDialog must be created on the Swing EDT thread.");
-    }
-
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
-    setLayout(new GridLayout());
-
-    JFXPanel panel = new JFXPanel();
-    add(panel);
-    addWindowListener(
-        new WindowAdapter() {
-          @Override
-          public void windowClosing(WindowEvent e) {
-            closeDialog();
-          }
-        });
-    // ESCAPE cancels the window without committing
-    panel
-        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-    panel
-        .getActionMap()
-        .put(
-            "cancel",
-            new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
-                closeDialog();
-              }
-            });
-  }
-
   /**
    * Closes the dialog and disposes of resources.
    *
@@ -165,6 +169,9 @@ public class SwingJavaFXDialog extends JDialog {
    * @note This method must be run from the Swing EDT thread.
    */
   private void closeDialogEDT() {
+    if (controller != null) {
+      controller.close();
+    }
     dispose();
   }
 
