@@ -138,8 +138,9 @@ public final class PasswordFilePlayerDatabase
           NoSuchPaddingException, InvalidKeyException {
     transientPlayerDetails.clear();
     readPasswordFile();
+    savedDetails.putAll(playerDetails);
     propertyChangeSupport.firePropertyChange(
-        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, this);
+        PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED, null, this);
   }
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
@@ -508,7 +509,7 @@ public final class PasswordFilePlayerDatabase
       playerDetails.putAll(savedDetails);
     }
     propertyChangeSupport.firePropertyChange(
-        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, this);
+        PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED, null, this);
   }
 
   @Override

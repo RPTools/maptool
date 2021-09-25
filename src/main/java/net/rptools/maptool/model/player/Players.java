@@ -368,6 +368,44 @@ public class Players {
     propertyChangeSupport.removePropertyChangeListener(listener);
   }
 
+
+  /**
+   * Commits the pending changes writing them out to the persistent storage.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException if there is an error hashing the password.
+   */
+  public void commitChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+    if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
+      db.commitChanges();
+    }
+  }
+
+  /**
+   * Rolls back any pending changes that haven't been written to the file.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException i
+   */
+  public void rollbackChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+    if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
+      db.rollbackChanges();
+    }
+  }
+
+  /**
+   * Notify that a player has signed in.
+   *
+   * @param player the player that has signed in.
+   */
   public void playerSignedIn(Player player) {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     var oldInfo = getPlayerInfo(player.getName());
@@ -383,6 +421,10 @@ public class Players {
     }
   }
 
+  /**
+   * Notify that a player has signed out.
+   * @param player the player that has signed out.
+   */
   public void playerSignedOut(Player player) {
     PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     var oldInfo = getPlayerInfo(player.getName());

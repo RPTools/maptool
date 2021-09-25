@@ -193,6 +193,11 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
 
   }
 
+  @Override
+  public void close() {
+    // Nothing to do
+  }
+
   private void validate() {
     validationErrors.clear();
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {

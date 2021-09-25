@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui.javfx;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -108,6 +107,9 @@ public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
     dialog.closeDialog();
   }
 
+  /**
+   * Closes the dialog.
+   */
   public void closeDialog() {
     dialog.closeDialog();
   }

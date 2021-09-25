@@ -133,10 +133,28 @@ public interface PersistedPlayerDatabase {
 
   void deletePlayer(String name);
 
+  /**
+   * Commits the pending changes writing them out to the persistent storage.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException if there is an error hashing the password.
+   */
   void commitChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException;
 
+  /**
+   * Rolls back any pending changes that haven't been written to the file.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException i
+   */
   void rollbackChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException;

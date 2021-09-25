@@ -17,6 +17,9 @@ package net.rptools.maptool.client.ui.players;
 /** Sample Skeleton for 'PlayerDatabaseDialog.fxml' Controller Class */
 import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,11 +38,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.util.Callback;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.model.player.PlayerInfo;
@@ -73,7 +78,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             () -> {
               switch (e.getPropertyName()) {
                 case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
-                  removePlayer(e.getOldValue().toString());
+                  removePlayer(e.getNewValue().toString());
                   addPlayer(e.getNewValue().toString());
                 }
                 case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
@@ -111,7 +116,6 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @Override
   public void deregisterEventHandler(SwingJavaFXDialogEventHandler handler) {
     eventHandlers.remove(handler);
-    Players.removePropertyChangeListener(changeListener);
   }
 
   @Override
@@ -187,6 +191,21 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
       });
     });
 
+    cancelButton.setOnAction(a -> {
+      eventHandlers.forEach(h -> h.close(this));
+      close();
+    });
+
+  }
+
+  @Override
+  public void close() {
+    try {
+      new Players().rollbackChanges();
+    } catch (NoSuchPaddingException | NoSuchAlgorithmException  | InvalidKeySpecException | PasswordDatabaseException | InvalidKeyException e) {
+      MapTool.showError("playerDB.dialog.error.undoingChanges", e);
+    };
+    Players.removePropertyChangeListener(changeListener);
   }
 
   private void addPlayer(String name) {
