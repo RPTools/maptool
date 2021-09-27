@@ -176,6 +176,14 @@ public interface PlayerDatabase {
       throws ExecutionException, InterruptedException;
 
   /**
+   * Returns the {@link String} encoding of the public keys for a player.
+   *
+   * @param name The name of the player to return the public keys of.
+   * @return the {@link String} encoding of the public keys for a player.
+   */
+  Set<String> getEncodedPublicKeys(String name);
+
+  /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
    * this will not return {@code true} for every input but only for those that are actually known.
    *

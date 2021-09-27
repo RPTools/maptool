@@ -20,6 +20,7 @@ import java.beans.PropertyChangeSupport;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +32,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
+import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -210,7 +212,10 @@ public class Players {
         persisted = persistedPlayerDatabase.isPersisted(name);
       }
 
-      return new PlayerInfo(name, role, blocked, blockedReason, connected, authMethod, persisted);
+      Set<String> pkeys = playerDatabase.getEncodedPublicKeys(name);
+
+      return new PlayerInfo(
+          name, role, blocked, blockedReason, connected, authMethod, pkeys, persisted);
     } catch (Exception e) {
       if (e instanceof CompletionException ce) {
         throw ce;
@@ -313,6 +318,7 @@ public class Players {
    * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
   public ChangePlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
+    var pkeys = new HashSet<>(Arrays.asList(CipherUtil.splitPublicKeys(publicKeyString)));
     if (!supportsAsymmetricKeys()) {
       log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
       return ChangePlayerStatus.NOT_SUPPORTED;
@@ -321,7 +327,7 @@ public class Players {
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
       try {
-        playerDb.addPlayerAsymmetricKey(name, role, Set.of(publicKeyString));
+        playerDb.addPlayerAsymmetricKey(name, role, pkeys);
         return ChangePlayerStatus.OK;
       } catch (NoSuchAlgorithmException
           | InvalidKeySpecException
@@ -368,7 +374,6 @@ public class Players {
     propertyChangeSupport.removePropertyChangeListener(listener);
   }
 
-
   /**
    * Commits the pending changes writing them out to the persistent storage.
    *
@@ -379,7 +384,8 @@ public class Players {
    * @throws InvalidKeyException if there is an error hashing the password.
    */
   public void commitChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.commitChanges();
     }
@@ -395,7 +401,8 @@ public class Players {
    * @throws InvalidKeyException i
    */
   public void rollbackChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.rollbackChanges();
     }
@@ -423,6 +430,7 @@ public class Players {
 
   /**
    * Notify that a player has signed out.
+   *
    * @param player the player that has signed out.
    */
   public void playerSignedOut(Player player) {

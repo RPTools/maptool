@@ -47,10 +47,8 @@ public class SwingJavaFXDialog extends JDialog {
   /** Keeps track of if the dialog has already positioned itself. */
   private boolean hasPositionedItself;
 
-
   /** The controller for the JFX Panel. */
   private final SwingJavaFXDialogController controller;
-
 
   /**
    * Creates a new modal {@code SwingJavaFXDialog}.
@@ -65,7 +63,6 @@ public class SwingJavaFXDialog extends JDialog {
     this(title, parent, panel, true, null);
   }
 
-
   /**
    * Creates a new modal {@code SwingJavaFXDialog}.
    *
@@ -76,7 +73,8 @@ public class SwingJavaFXDialog extends JDialog {
    * @throws IllegalStateException if not run on the Swing EDT thread.
    * @note This constructor must only be used on the Swing EDT thread.
    */
-  public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, SwingJavaFXDialogController jfxController ) {
+  public SwingJavaFXDialog(
+      String title, Frame parent, JFXPanel panel, SwingJavaFXDialogController jfxController) {
     this(title, parent, panel, true, jfxController);
   }
 
@@ -94,7 +92,6 @@ public class SwingJavaFXDialog extends JDialog {
     this(title, parent, panel, modal, null);
   }
 
-
   /**
    * Creates a new {@code SwingJavaFXDialog}.
    *
@@ -106,8 +103,12 @@ public class SwingJavaFXDialog extends JDialog {
    * @throws IllegalStateException if not run on the Swing EDT threadO.
    * @note This constructor must only be used on the Swing EDT thread.
    */
-  public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, boolean modal,
-      SwingJavaFXDialogController jfxController ) {
+  public SwingJavaFXDialog(
+      String title,
+      Frame parent,
+      JFXPanel panel,
+      boolean modal,
+      SwingJavaFXDialogController jfxController) {
     super(parent, title, modal);
 
     if (!SwingUtilities.isEventDispatchThread()) {

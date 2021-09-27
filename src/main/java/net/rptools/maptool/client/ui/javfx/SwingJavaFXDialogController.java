@@ -38,9 +38,9 @@ public interface SwingJavaFXDialogController {
   void init();
 
   /**
-   * This method gets called if the dialog is closed by code outside the dialog.
-   * If the dialog requests to be closed via the event handlers (e.g. in a cancel button you
-   * implement) this method will not be called.
+   * This method gets called if the dialog is closed by code outside the dialog. If the dialog
+   * requests to be closed via the event handlers (e.g. in a cancel button you implement) this
+   * method will not be called.
    */
   void close();
 }

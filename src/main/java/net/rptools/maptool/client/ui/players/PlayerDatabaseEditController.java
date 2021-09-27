@@ -14,12 +14,15 @@
  */
 package net.rptools.maptool.client.ui.players;
 
-
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.EnumSet;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -31,13 +34,16 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.model.player.PlayerInfo;
+import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.util.PasswordGenerator;
+import net.rptools.maptool.util.cipher.CipherUtil;
 
 public class PlayerDatabaseEditController implements SwingJavaFXDialogController {
 
@@ -54,7 +60,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
 
   private String blockedReason = "";
 
-  private String playerName = "" ;
+  private String playerName = "";
 
   private String password = I18N.getText("playerDB.dialog.encodedPassword");
 
@@ -98,7 +104,8 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     NAME_MISSING("playerDB.dialog.error.missingName"),
     PASSWORD_MISSING("playerDB.dialog.error.passwordMissing"),
     PASSWORD_TOO_SHORT("playerDB.dialog.error.passwordTooShort"),
-    INVALID_PUBLIC_KEY("playerDB.dialog.error.invalidPublicKey");
+    INVALID_PUBLIC_KEY("playerDB.dialog.error.invalidPublicKey"),
+    PLAYER_EXISTS("playerDB.dialog.error.playerExists");
 
     private final String i81nKey;
 
@@ -124,7 +131,8 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
         : "fx:id=\"cancelButton\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
     assert playerNameText != null
         : "fx:id=\"playerNameText\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
-    assert blockedCheckBox != null : "fx:id=\"blockedCheckBoc\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
+    assert blockedCheckBox != null
+        : "fx:id=\"blockedCheckBoc\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
     assert blockedReasonText != null
         : "fx:id=\"blockedReasonText\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
     assert roleCombo != null
@@ -137,8 +145,9 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
         : "fx:id=\"generatePasswordButton\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
     assert publicKeyText != null
         : "fx:id=\"publicKeyText\" was not injected: check your FXML file 'PlayerDatabaseEdit.fxml'.";
-    assert labelErrors != null : "fx:id=\"labelErrors\" was not injected: check your FXML "
-        + "file 'PlayerDatabaseEdit.fxml'.";
+    assert labelErrors != null
+        : "fx:id=\"labelErrors\" was not injected: check your FXML "
+            + "file 'PlayerDatabaseEdit.fxml'.";
   }
 
   @Override
@@ -158,53 +167,65 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     roleCombo.setItems(roles);
     roleCombo.getSelectionModel().select(PLAYER_ROLE_NAME);
 
-
     ObservableList<String> authType =
         FXCollections.observableArrayList(AUTH_PUB_KEY_NAME, AUTH_PASSWORD_NAME);
 
     authTypeCombo.setItems(authType);
     authTypeCombo.getSelectionModel().select(AUTH_PUB_KEY_NAME);
 
-    authTypeCombo.setOnAction(a -> { enableDisableFields(); });
+    authTypeCombo.setOnAction(
+        a -> {
+          enableDisableFields();
+        });
 
-    blockedCheckBox.setOnAction(a -> { enableDisableFields(); });
+    blockedCheckBox.setOnAction(
+        a -> {
+          enableDisableFields();
+        });
 
-    generatePasswordButton.setOnAction(a -> { passwordText.setText(new PasswordGenerator().getPassword()); });
+    generatePasswordButton.setOnAction(
+        a -> {
+          passwordText.setText(new PasswordGenerator().getPassword());
+        });
 
-    playerNameText.textProperty().addListener(l -> {
-      playerName = passwordText.getText();
-      validate();
-    });
-    publicKeyText.textProperty().addListener(l -> {
-      publicKeyString = publicKeyText.getText();
-      validate();
-    });
-    passwordText.textProperty().addListener(l -> {
-      password = passwordText.getText();
-      validate();
-    });
+    playerNameText
+        .textProperty()
+        .addListener(
+            l -> {
+              playerName = passwordText.getText();
+              validatePlayerName();
+            });
+
+    publicKeyText
+        .textProperty()
+        .addListener(
+            l -> {
+              publicKeyString = publicKeyText.getText();
+              validatePublicKey();
+            });
+
+    passwordText
+        .textProperty()
+        .addListener(
+            l -> {
+              password = passwordText.getText();
+              validatePassword();
+            });
 
     enableDisableFields();
     playerNameText.setText("");
 
-
-    cancelButton.setOnAction(a -> {eventHandlers.forEach(h -> h.close(this));});
-
-
+    cancelButton.setOnAction(
+        a -> {
+          eventHandlers.forEach(h -> h.close(this));
+        });
+    okButton.setOnAction(h -> updateDatabase());
   }
 
-  @Override
-  public void close() {
-    // Nothing to do
-  }
-
-  private void validate() {
-    validationErrors.clear();
-    if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
-      if (publicKeyText.getText().length() == 0) {
-        validationErrors.add(ValidationErrors.INVALID_PUBLIC_KEY);
-      }
-    } else {
+  private void validatePassword() {
+    validationErrors.remove(ValidationErrors.PASSWORD_MISSING);
+    validationErrors.remove(ValidationErrors.PASSWORD_TOO_SHORT);
+    if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PASSWORD_NAME)) {
       int passLen = passwordText.getText().length();
       if (passLen == 0) {
         validationErrors.add(ValidationErrors.PASSWORD_MISSING);
@@ -212,34 +233,88 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
         validationErrors.add(ValidationErrors.PASSWORD_TOO_SHORT);
       }
     }
+    displayValidationErrors();
+  }
+
+  private void validatePublicKey() {
+    validationErrors.remove(ValidationErrors.INVALID_PUBLIC_KEY);
+    if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
+      if (publicKeyText.getText().length() == 0) {
+        validationErrors.add(ValidationErrors.INVALID_PUBLIC_KEY);
+      } else {
+        boolean isValidPk = false;
+        // If this player has a public key wee need to make sure its valid
+        for (String pk : CipherUtil.splitPublicKeys(publicKeyString)) {
+          try {
+            CipherUtil.fromPublicKeyString(pk);
+            isValidPk = true;
+          } catch (NoSuchAlgorithmException
+              | InvalidKeySpecException
+              | NoSuchPaddingException
+              | InvalidKeyException e) {
+            isValidPk = false;
+            break;
+          }
+        }
+        if (!isValidPk) {
+          validationErrors.add(ValidationErrors.INVALID_PUBLIC_KEY);
+        }
+      }
+    }
+    displayValidationErrors();
+  }
+
+  private void updateDatabase() {
+    if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
+      Players players = new Players();
+      Role role = roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME) ? Role.GM :
+          Role.PLAYER;
+      players.addPlayerWithPublicKey(playerName, role, publicKeyString);
+    }
+  }
+
+  @Override
+  public void close() {
+    // Nothing to do
+  }
+
+  private void validatePlayerName() {
+    validationErrors.remove(ValidationErrors.NAME_MISSING);
+    validationErrors.remove(ValidationErrors.PLAYER_EXISTS);
     if (playerNameText.getText().length() == 0) {
       validationErrors.add(ValidationErrors.NAME_MISSING);
+    } else if (playerNameText.isEditable()) {
+      try {
+        PlayerInfo playerInfo = new Players().getPlayer(playerNameText.getText()).get();
+        if (playerInfo != null) {
+          validationErrors.add(ValidationErrors.PLAYER_EXISTS);
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        // Do nothing.
+      }
     }
     displayValidationErrors();
   }
 
   private void displayValidationErrors() {
-    String errorText = validationErrors.stream().map(ValidationErrors::getDescription)
-        .collect(Collectors.joining(", "));
+    String errorText =
+        validationErrors.stream()
+            .map(ValidationErrors::getDescription)
+            .collect(Collectors.joining(", "));
     labelErrors.setText(errorText);
-    if (validationErrors.size() > 0) {
-      okButton.setDisable(true);
-    } else {
-      okButton.setDisable(false);
-    }
+    okButton.setDisable(validationErrors.size() > 0);
   }
 
   private void setPlayerInfoJFX(PlayerInfo playerInfo) {
     playerNameText.setText(playerInfo.name());
     blockedReasonText.setText(playerInfo.blockedReason());
-    roleCombo.setValue(playerInfo.role() == Role.GM ? GM_ROLE_NAME : PLAYER_ROLE_NAME);
     if (playerInfo.authMethod() == AuthMethod.PASSWORD) {
       authTypeCombo.setValue(AUTH_PASSWORD_NAME);
       passwordText.setText(password);
     } else {
       authTypeCombo.setValue(AUTH_PUB_KEY_NAME);
       password = "";
-      publicKeyString = "TODO: CDW Need to put public key here.";
+      publicKeyString = String.join("\n", playerInfo.publicKeys());
     }
     blockedReason = playerInfo.blockedReason();
     enableDisableFields();
@@ -256,6 +331,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
       String savedPassword = password;
       passwordText.setText("");
       password = savedPassword;
+      validatePublicKey();
     } else {
       passwordText.setDisable(false);
       generatePasswordButton.setDisable(false);
@@ -265,6 +341,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
       publicKeyText.setText("");
       publicKeyString = savedPublicKey;
       passwordText.setText(password);
+      validatePassword();
     }
 
     if (blockedCheckBox.isSelected()) {
@@ -276,7 +353,6 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
       blockedReasonText.setEditable(false);
       blockedReasonText.setDisable(true);
     }
-    validate();
   }
 
   public void setPlayerInfo(PlayerInfo playerInfo) {
@@ -287,7 +363,8 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     }
   }
 
-  public void setPlayerNameEditable(boolean editable) {
+  public void setNewPlayerMode(boolean editable) {
     playerNameText.setEditable(editable);
+    password = "";
   }
 }

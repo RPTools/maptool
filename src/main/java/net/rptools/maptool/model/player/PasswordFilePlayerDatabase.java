@@ -558,6 +558,17 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    if (playerDetails.containsKey(name)) {
+      return playerDetails.get(name).publicKeyDetails().stream()
+          .map(PublicKeyDetails::keyString)
+          .collect(Collectors.toSet());
+    } else {
+      return Set.of();
+    }
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return playerExists(name);

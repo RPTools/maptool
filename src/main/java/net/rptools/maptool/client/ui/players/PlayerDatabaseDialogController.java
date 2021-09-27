@@ -155,8 +155,8 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
             p -> {
               SwingUtilities.invokeLater(
                   () -> {
-                    PlayerDatabaseEditDialog dialog = PlayerDatabaseEditDialog.getEdtPlayerDialog(c ->
-                        c.setPlayerInfo(p));
+                    PlayerDatabaseEditDialog dialog =
+                        PlayerDatabaseEditDialog.getEdtPlayerDialog(c -> c.setPlayerInfo(p));
                     dialog.show();
                   });
             });
@@ -184,27 +184,33 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     playersTable.setItems(playerInfoList);
     addPlayers();
 
+    addButton.setOnAction(
+        a -> {
+          SwingUtilities.invokeLater(
+              () -> {
+                PlayerDatabaseEditDialog.getNewPlayerDialog(c -> {}).show();
+              });
+        });
 
-    addButton.setOnAction(a -> {
-      SwingUtilities.invokeLater(() -> {
-        PlayerDatabaseEditDialog.getNewPlayerDialog(c -> {}).show();
-      });
-    });
-
-    cancelButton.setOnAction(a -> {
-      eventHandlers.forEach(h -> h.close(this));
-      close();
-    });
-
+    cancelButton.setOnAction(
+        a -> {
+          eventHandlers.forEach(h -> h.close(this));
+          close();
+        });
   }
 
   @Override
   public void close() {
     try {
       new Players().rollbackChanges();
-    } catch (NoSuchPaddingException | NoSuchAlgorithmException  | InvalidKeySpecException | PasswordDatabaseException | InvalidKeyException e) {
+    } catch (NoSuchPaddingException
+        | NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | PasswordDatabaseException
+        | InvalidKeyException e) {
       MapTool.showError("playerDB.dialog.error.undoingChanges", e);
-    };
+    }
+    ;
     Players.removePropertyChangeListener(changeListener);
   }
 

@@ -22,7 +22,6 @@ import javafx.embed.swing.JFXPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import okhttp3.Call;
 
 public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
 
@@ -40,7 +39,6 @@ public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
   public SimpleSwingJavaFXDialog(String fxmlPath, String title) {
     this(fxmlPath, title, c -> {} /* do nothing if no call back provided */);
   }
-
 
   /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
@@ -107,9 +105,7 @@ public class SimpleSwingJavaFXDialog<T extends SwingJavaFXDialogController> {
     dialog.closeDialog();
   }
 
-  /**
-   * Closes the dialog.
-   */
+  /** Closes the dialog. */
   public void closeDialog() {
     dialog.closeDialog();
   }

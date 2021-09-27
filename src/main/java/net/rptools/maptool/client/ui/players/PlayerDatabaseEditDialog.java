@@ -15,10 +15,8 @@
 package net.rptools.maptool.client.ui.players;
 
 import java.util.function.Consumer;
-import javafx.application.Platform;
 import net.rptools.maptool.client.ui.javfx.SimpleSwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
-import net.rptools.maptool.model.player.PlayerInfo;
 
 public class PlayerDatabaseEditDialog {
   /** The path of the FXML file for the dialog. */
@@ -31,32 +29,32 @@ public class PlayerDatabaseEditDialog {
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private final SimpleSwingJavaFXDialog<PlayerDatabaseEditController> simpleSwingJavaFXDialog;
 
-
-
-  private PlayerDatabaseEditDialog(String title,
-      Consumer<PlayerDatabaseEditController> callback) {
+  private PlayerDatabaseEditDialog(String title, Consumer<PlayerDatabaseEditController> callback) {
     simpleSwingJavaFXDialog = new SimpleSwingJavaFXDialog<>(FXML_PATH, title, callback);
   }
 
-
-  public static PlayerDatabaseEditDialog getEdtPlayerDialog(Consumer<PlayerDatabaseEditController> callback) {
-    return new PlayerDatabaseEditDialog(EDIT_TITLE, c -> {
-      c.setPlayerNameEditable(false);
-      callback.accept(c);
-    });
+  public static PlayerDatabaseEditDialog getEdtPlayerDialog(
+      Consumer<PlayerDatabaseEditController> callback) {
+    return new PlayerDatabaseEditDialog(
+        EDIT_TITLE,
+        c -> {
+          c.setNewPlayerMode(false);
+          callback.accept(c);
+        });
   }
 
-  public static PlayerDatabaseEditDialog getNewPlayerDialog(Consumer<PlayerDatabaseEditController> callback) {
-    return new PlayerDatabaseEditDialog(NEW_TITLE, c -> {
-      c.setPlayerNameEditable(true);
-      callback.accept(c);
-    });
+  public static PlayerDatabaseEditDialog getNewPlayerDialog(
+      Consumer<PlayerDatabaseEditController> callback) {
+    return new PlayerDatabaseEditDialog(
+        NEW_TITLE,
+        c -> {
+          c.setNewPlayerMode(true);
+          callback.accept(c);
+        });
   }
-
 
   /** Shows the dialog and its contents. This method must be called on the Swing Event thread. */
   public void show() {
     simpleSwingJavaFXDialog.show();
   }
-
 }

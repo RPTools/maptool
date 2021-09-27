@@ -149,6 +149,11 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    return Set.of();
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return localPlayer != null

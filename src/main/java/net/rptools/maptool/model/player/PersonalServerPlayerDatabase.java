@@ -89,6 +89,11 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    return Set.of();
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return player != null && player.getName() != null && player.getName().equals(name);
