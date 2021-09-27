@@ -31,9 +31,15 @@ public class DrawableColorPaint extends DrawablePaint implements Serializable {
     this.color = color.getRGB();
   }
 
+  public DrawableColorPaint(int color) {
+    this.color = color;
+  }
+
   public int getColor() {
     return color;
   }
+
+  public void setColor(int value) { color = value; }
 
   @Override
   public Paint getPaint(ImageObserver... observers) {

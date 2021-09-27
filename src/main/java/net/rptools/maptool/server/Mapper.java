@@ -17,7 +17,10 @@ package net.rptools.maptool.server;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.server.proto.ServerPolicyDto;
 import net.rptools.maptool.server.proto.WalkerMetricDto;
 import net.rptools.maptool.server.proto.drawing.*;
@@ -226,5 +229,120 @@ public class Mapper {
     }
 
     return builder.build();
+  }
+
+  public static DrawablePaint map(DrawablePaintDto dto) {
+    switch(dto.getPaintTypeCase()) {
+      case COLOR_PAINT -> {
+        var paint = new DrawableColorPaint(dto.getColorPaint().getColor());
+        return paint;
+      }
+      case TEXTURE_PAINT -> {
+        var texturePaintDto = dto.getTexturePaint();
+        return new DrawableTexturePaint(new MD5Key(texturePaintDto.getAssetId()), texturePaintDto.getScale());
+      }
+      default -> {
+        log.warn("unknown DrawablePaintDto type: " + dto.getPaintTypeCase());
+        return null;
+      }
+    }
+  }
+
+  public static DrawablePaintDto map(DrawablePaint paint) {
+    var dto = DrawablePaintDto.newBuilder();
+    if(paint instanceof DrawableColorPaint colorPaint) {
+      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(colorPaint.getColor())).build();
+    } else if (paint instanceof  DrawableTexturePaint texturePaint){
+      var textureDto = DrawableTexturePaintDto.newBuilder()
+          .setAssetId(texturePaint.getAssetId().toString())
+          .setScale(texturePaint.getScale());
+      return dto.setTexturePaint(textureDto).build();
+    }
+    log.warn("unexpected type " + paint.getClass().getName());
+    return null;
+  }
+
+  public static Pen map(PenDto penDto) {
+    var pen = new Pen();
+    pen.setEraser(penDto.getEraser());
+    pen.setForegroundMode(penDto.getForegroundModeValue());
+    pen.setBackgroundMode(penDto.getBackgroundModeValue());
+    pen.setThickness(penDto.getThickness());
+    pen.setOpacity(penDto.getOpacity());
+    pen.setSquareCap(penDto.getSquareCap());
+    pen.setPaint(map(penDto.getForegroundColor()));
+    pen.setBackgroundPaint(map(penDto.getBackgroundColor()));
+    return pen;
+  }
+
+  public static PenDto map(Pen pen) {
+    return PenDto.newBuilder()
+        .setEraser(pen.isEraser())
+        .setForegroundMode(PenDto.mode.forNumber(pen.getForegroundMode()))
+        .setBackgroundMode(PenDto.mode.forNumber(pen.getBackgroundMode()))
+        .setThickness(pen.getThickness())
+        .setOpacity(pen.getOpacity())
+        .setSquareCap(pen.getSquareCap())
+        .setForegroundColor(map(pen.getPaint()))
+        .setBackgroundColor(map(pen.getBackgroundPaint()))
+        .build();
+  }
+
+  public static Drawable map(DrawableDto dto) {
+    switch (dto.getDrawableTypeCase()) {
+      case SHAPE_DRAWABLE -> {
+        return null;
+      }
+      case RECTANGLE_DRAWABLE -> {
+        return null;
+      }
+      case OVAL_DRAWABLE -> {
+        return null;
+      }
+      case CROSS_DRAWABLE -> {
+        return null;
+      }
+      case DRAWN_LABEL -> {
+        return null;
+      }
+      case LINE_SEGMENT -> {
+        return null;
+      }
+      case DRAWABLES_GROUP -> {
+        return null;
+      }
+      case RADIUS_CELL_TEMPLATE -> {
+        return null;
+      }
+      case LINE_CELL_TEMPLATE -> {
+        return null;
+      }
+      case RADIUS_TEMPLATE -> {
+        return null;
+      }
+      case BURST_TEMPLATE -> {
+        return null;
+      }
+      case CONE_TEMPLATE -> {
+        return null;
+      }
+      case BLAST_TEMPLATE -> {
+        return null;
+      }
+      case LINE_TEMPLATE -> {
+        return null;
+      }
+      case WALL_TEMPLATE -> {
+        return null;
+      }
+      default -> {
+        log.warn("unknown DrawableDto type: " + dto.getDrawableTypeCase());
+        return null;
+      }
+    }
+  }
+
+  public static DrawableDto map(Drawable drawable) {
+    return null;
   }
 }

@@ -87,12 +87,25 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case CHANGE_ZONE_DISPLAY_NAME_MSG -> handle(msg.getChangeZoneDisplayNameMsg());
         case CLEAR_ALL_DRAWINGS_MSG -> handle(msg.getClearAllDrawingsMsg());
         case CLEAR_EXPOSED_AREA_MSG -> handle(msg.getClearExposedAreaMsg());
+        case DRAW_MSG -> handle(msg.getDrawMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(DrawMsg drawMsg) {
+    EventQueue.invokeLater(() -> {
+      var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
+      Pen pen = Mapper.map(drawMsg.getPen());
+      Drawable drawable = Mapper.map(drawMsg.getDrawable());
+
+      var zone = MapTool.getCampaign().getZone(zoneGuid);
+      zone.addDrawable(new DrawnElement(drawable, pen));
+      MapTool.getFrame().refresh();
+    });
   }
 
   private void handle(ClearExposedAreaMsg clearExposedAreaMsg) {
@@ -374,16 +387,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case restoreZoneView:
               zoneGUID = (GUID) parameters[0];
               MapTool.getFrame().getZoneRenderer(zoneGUID).restoreView();
-              return;
-
-            case draw:
-              zoneGUID = (GUID) parameters[0];
-              Pen pen = (Pen) parameters[1];
-              Drawable drawable = (Drawable) parameters[2];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addDrawable(new DrawnElement(drawable, pen));
-              MapTool.getFrame().refresh();
               return;
 
             case updateDrawing:

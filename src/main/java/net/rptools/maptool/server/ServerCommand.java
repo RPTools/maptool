@@ -53,7 +53,6 @@ public interface ServerCommand {
     removeToken,
     removeTokens,
     updateTokenProperty,
-    draw,
     updateDrawing,
     setZoneGridSize,
     message,

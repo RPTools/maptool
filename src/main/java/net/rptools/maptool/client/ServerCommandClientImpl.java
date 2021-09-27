@@ -207,7 +207,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
-    makeServerCall(COMMAND.draw, zoneGUID, pen, drawable);
+    var msg = DrawMsg.newBuilder()
+        .setZoneGuid(zoneGUID.toString())
+        .setPen(Mapper.map(pen))
+        .setDrawable(Mapper.map(drawable));
+
+    makeServerCall(Message.newBuilder().setDrawMsg(msg).build());
   }
 
   public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {

@@ -101,12 +101,24 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getClearExposedAreaMsg());
           forwardToClients(id, msg);
         }
+        case DRAW_MSG -> {
+          forwardToAllClients(msg);
+          handle(msg.getDrawMsg());
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(DrawMsg drawMsg) {
+    var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
+    var pen = Mapper.map(drawMsg.getPen());
+    var drawable = Mapper.map(drawMsg.getDrawable());
+    Zone zone = server.getCampaign().getZone(zoneGuid);
+    zone.addDrawable(new DrawnElement(drawable, pen));
   }
 
   private void handle(ClearExposedAreaMsg clearExposedAreaMsg) {
@@ -166,9 +178,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       RPCContext context = new RPCContext(id, method, parameters);
       RPCContext.setCurrent(context);
       switch (cmd) {
-        case draw:
-          draw(context.getGUID(0), (Pen) context.get(1), (Drawable) context.get(2));
-          break;
         case updateDrawing:
           updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
           break;
@@ -370,7 +379,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void forwardToAllClients(Message message) {
-    server.getConnection().broadcastMessage(new String[] {}, message.toByteArray());
+    server.getConnection().broadcastMessage(message.toByteArray());
   }
 
   /** Send the current call to all other clients except for the sender */
@@ -473,14 +482,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       }
       zone.sortZOrder(); // update new ZOrder on server zone
     }
-  }
-
-  public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
-    server
-        .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.draw.name(), RPCContext.getCurrent().parameters);
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addDrawable(new DrawnElement(drawable, pen));
   }
 
   private void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
