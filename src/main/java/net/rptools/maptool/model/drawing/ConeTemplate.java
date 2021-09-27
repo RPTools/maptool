@@ -18,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
@@ -30,6 +31,12 @@ import net.rptools.maptool.model.ZonePoint;
  *     azhrei_fje $
  */
 public class ConeTemplate extends RadiusTemplate {
+
+  public ConeTemplate() {}
+
+  public ConeTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables

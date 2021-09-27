@@ -21,6 +21,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
@@ -40,6 +41,14 @@ public class BlastTemplate extends ConeTemplate {
 
   private int offsetX;
   private int offsetY;
+
+  public BlastTemplate() {}
+
+  public BlastTemplate(GUID id, int offsetX, int offsetY) {
+    super(id);
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods

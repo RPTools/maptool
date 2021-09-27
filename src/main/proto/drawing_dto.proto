@@ -11,6 +11,11 @@ option java_outer_classname = "DrawingDtoProtos";
  * protobuf classes end with "Dto" or "Msg".
  */
 
+message DrawnElementDto {
+  DrawableDto drawable = 1;
+  PenDto pen = 2;
+}
+
 message PenDto {
   enum mode {
     MODE_SOLID = 0;
@@ -41,88 +46,121 @@ message DrawableDto {
     BurstTemplateDto burst_template = 11;
     ConeTemplateDto cone_template = 12;
     BlastTemplateDto blast_template = 13;
-    LineCellTemplateDto line_template = 14;
+    LineTemplateDto line_template = 14;
     WallTemplateDto wall_template = 15;
   }
 }
 
 message WallTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
-  bool mouse_slope_greater = 4;
-  string quadrant = 5;
-  IntPointDto path_vertex = 6;
-  bool double_wide = 7;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
+  bool double_wide = 10;
 }
 
 message LineTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
-  bool mouse_slope_greater = 4;
-  string quadrant = 5;
-  IntPointDto path_vertex = 6;
-  bool double_wide = 7;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
+  bool double_wide = 10;
 }
 
 message BlastTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
-  string direction = 4;
-  int32 offset_x = 5;
-  int32 offset_y = 6;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
+  int32 offset_x = 8;
+  int32 offset_y = 9;
 }
 
 message ConeTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
-  string direction = 4;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
 }
 
 message BurstTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message RadiusTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message LineCellTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
-  bool mouse_slope_greater = 4;
-  string quadrant = 5;
-  IntPointDto path_vertex = 6;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
 }
 
 message RadiusCellTemplateDto {
-  string zoneId = 1;
-  IntPointDto vertex = 2;
-  int32 radius = 3;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message DrawablesGroupDto {
-  repeated DrawableDto drawables = 1;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  repeated DrawnElementDto drawn_elements = 4;
 }
 
 message LineSegmentDrawableDto {
-  repeated IntPointDto points = 1;
-  float width = 2;
-  bool square_cap = 3;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  repeated IntPointDto points = 4;
+  float width = 5;
+  bool square_cap = 6;
 }
 
 message DrawnLabelDto {
-  RectangleDto bounds = 1;
-  string text = 2;
-  string font = 3;
+  string id = 1;
+  string layer = 2;
+  string name = 3;
+  RectangleDto bounds = 4;
+  string text = 5;
+  string font = 6;
 }
 
 message RectangleDrawableDto {

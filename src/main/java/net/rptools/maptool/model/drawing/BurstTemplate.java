@@ -21,6 +21,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
@@ -38,6 +39,12 @@ public class BurstTemplate extends RadiusTemplate {
 
   /** Renderer for the blast. The {@link Shape} is just a rectangle. */
   private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
+
+  public BurstTemplate() {}
+
+  public BurstTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods

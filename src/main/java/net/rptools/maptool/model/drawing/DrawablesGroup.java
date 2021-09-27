@@ -18,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
+import net.rptools.maptool.model.GUID;
 
 /**
  * @author Jagged
@@ -27,6 +28,11 @@ public class DrawablesGroup extends AbstractDrawing {
   private List<DrawnElement> drawableList;
 
   public DrawablesGroup(List<DrawnElement> drawableList) {
+    this.drawableList = drawableList;
+  }
+
+  public DrawablesGroup(GUID id, List<DrawnElement> drawableList) {
+    super(id);
     this.drawableList = drawableList;
   }
 

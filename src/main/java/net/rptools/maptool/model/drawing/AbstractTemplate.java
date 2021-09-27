@@ -45,6 +45,12 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   /** The id of the zone where this drawable is painted. */
   private GUID zoneId;
 
+  protected AbstractTemplate() {}
+
+  protected AbstractTemplate(GUID id) {
+    super(id);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Class Variables
    *-------------------------------------------------------------------------------------------*/

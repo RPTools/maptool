@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.maptool.model.GUID;
 
 /** @author drice */
 public class LineSegment extends AbstractDrawing {
@@ -33,6 +34,12 @@ public class LineSegment extends AbstractDrawing {
   private transient Area area;
 
   public LineSegment(float width, boolean squareCap) {
+    this.width = width;
+    this.squareCap = squareCap;
+  }
+
+  public LineSegment(GUID id, float width, boolean squareCap) {
+    super(id);
     this.width = width;
     this.squareCap = squareCap;
   }

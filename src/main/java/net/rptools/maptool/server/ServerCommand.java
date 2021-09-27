@@ -154,8 +154,7 @@ public interface ServerCommand {
    */
   void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
 
-  void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
+  void updateTokenProperty(GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
 
   void updateTokenProperty(Token token, Token.Update update, Object... parameters);
 
@@ -211,8 +210,7 @@ public interface ServerCommand {
 
   void updateInitiative(InitiativeList list, Boolean ownerPermission);
 
-  void updateTokenInitiative(
-      GUID zone, GUID token, Boolean hold, String state, Integer index);
+  void updateTokenInitiative(GUID zone, GUID token, Boolean hold, String state, Integer index);
 
   void setVisionType(GUID zoneGUID, VisionType visionType);
 
@@ -228,8 +226,7 @@ public interface ServerCommand {
 
   void exposePCArea(GUID zoneGUID);
 
-  void updateExposedAreaMeta(
-      GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
+  void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
   void clearExposedArea(GUID zoneGUID, boolean globalOnly);
 }

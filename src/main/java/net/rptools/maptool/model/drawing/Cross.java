@@ -18,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
+import net.rptools.maptool.model.GUID;
 
 /** An Cross */
 public class Cross extends AbstractDrawing {
@@ -26,7 +27,12 @@ public class Cross extends AbstractDrawing {
   private transient java.awt.Rectangle bounds;
 
   public Cross(int startX, int startY, int endX, int endY) {
+    startPoint = new Point(startX, startY);
+    endPoint = new Point(endX, endY);
+  }
 
+  public Cross(GUID id, int startX, int startY, int endX, int endY) {
+    super(id);
     startPoint = new Point(startX, startY);
     endPoint = new Point(endX, endY);
   }

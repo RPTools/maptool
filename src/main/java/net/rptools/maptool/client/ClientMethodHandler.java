@@ -97,34 +97,37 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   }
 
   private void handle(DrawMsg drawMsg) {
-    EventQueue.invokeLater(() -> {
-      var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
-      Pen pen = Mapper.map(drawMsg.getPen());
-      Drawable drawable = Mapper.map(drawMsg.getDrawable());
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
+          Pen pen = Mapper.map(drawMsg.getPen());
+          Drawable drawable = Mapper.map(drawMsg.getDrawable());
 
-      var zone = MapTool.getCampaign().getZone(zoneGuid);
-      zone.addDrawable(new DrawnElement(drawable, pen));
-      MapTool.getFrame().refresh();
-    });
+          var zone = MapTool.getCampaign().getZone(zoneGuid);
+          zone.addDrawable(new DrawnElement(drawable, pen));
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(ClearExposedAreaMsg clearExposedAreaMsg) {
-    EventQueue.invokeLater(()-> {
-      var zoneGUID = GUID.valueOf(clearExposedAreaMsg.getZoneGuid());
-      var zone = MapTool.getCampaign().getZone(zoneGUID);
-      zone.clearExposedArea(clearExposedAreaMsg.getGlobalOnly());
-    });
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(clearExposedAreaMsg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.clearExposedArea(clearExposedAreaMsg.getGlobalOnly());
+        });
   }
 
   private void handle(ClearAllDrawingsMsg clearAllDrawingsMsg) {
-    EventQueue.invokeLater(()-> {
-        var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
-        var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
+          var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
 
-        var zone = MapTool.getCampaign().getZone(zoneGUID);
-        zone.clearDrawables(zone.getDrawnElements(layer));
-        MapTool.getFrame().refresh();
-    });
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.clearDrawables(zone.getDrawnElements(layer));
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(ChangeZoneDisplayNameMsg changeZoneDisplayNameMsg) {

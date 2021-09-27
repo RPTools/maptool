@@ -20,6 +20,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
@@ -31,6 +32,13 @@ import net.rptools.maptool.model.ZonePoint;
  *     azhrei_fje $
  */
 public class RadiusTemplate extends AbstractTemplate {
+
+  public RadiusTemplate() {}
+
+  public RadiusTemplate(GUID id) {
+    super(id);
+  }
+
   /**
    * Paint the border at a specific radius.
    *

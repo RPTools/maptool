@@ -18,11 +18,18 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import net.rptools.maptool.model.GUID;
 
 /** An rectangle */
 public class ShapeDrawable extends AbstractDrawing {
   private final Shape shape;
   private final boolean useAntiAliasing;
+
+  public ShapeDrawable(GUID id, Shape shape, boolean useAntiAliasing) {
+    super(id);
+    this.shape = shape;
+    this.useAntiAliasing = useAntiAliasing;
+  }
 
   public ShapeDrawable(Shape shape, boolean useAntiAliasing) {
     this.shape = shape;
@@ -31,6 +38,10 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public ShapeDrawable(Shape shape) {
     this(shape, true);
+  }
+
+  public boolean getUseAntiAliasing() {
+    return useAntiAliasing;
   }
 
   /*

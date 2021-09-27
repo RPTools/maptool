@@ -16,6 +16,7 @@ package net.rptools.maptool.model.drawing;
 
 import java.util.List;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
@@ -28,6 +29,11 @@ public class WallTemplate extends LineTemplate {
    * Set the path vertex, it isn't needed by the wall template but the superclass needs it to paint.
    */
   public WallTemplate() {
+    setPathVertex(new ZonePoint(0, 0));
+  }
+
+  public WallTemplate(GUID id) {
+    super(id);
     setPathVertex(new ZonePoint(0, 0));
   }
 

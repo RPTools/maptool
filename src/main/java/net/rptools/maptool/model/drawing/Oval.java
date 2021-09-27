@@ -17,6 +17,7 @@ package net.rptools.maptool.model.drawing;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import net.rptools.maptool.model.GUID;
 
 /** An oval. */
 public class Oval extends Rectangle {
@@ -28,6 +29,10 @@ public class Oval extends Rectangle {
    */
   public Oval(int x, int y, int width, int height) {
     super(x, y, width, height);
+  }
+
+  public Oval(GUID id, int x, int y, int width, int height) {
+    super(id, x, y, width, height);
   }
 
   @Override

@@ -18,12 +18,19 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
+import net.rptools.maptool.model.GUID;
 
 /** An rectangle */
 public class Rectangle extends AbstractDrawing {
   protected Point startPoint;
   protected Point endPoint;
   private transient java.awt.Rectangle bounds;
+
+  public Rectangle(GUID id, int startX, int startY, int endX, int endY) {
+    super(id);
+    startPoint = new Point(startX, startY);
+    endPoint = new Point(endX, endY);
+  }
 
   public Rectangle(int startX, int startY, int endX, int endY) {
     startPoint = new Point(startX, startY);

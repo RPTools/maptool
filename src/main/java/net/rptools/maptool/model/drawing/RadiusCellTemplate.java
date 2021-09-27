@@ -37,6 +37,12 @@ public class RadiusCellTemplate extends AbstractTemplate {
   /** Renderer for the blast. The {@link Shape} is just a rectangle. */
   private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
 
+  public RadiusCellTemplate() {}
+
+  public RadiusCellTemplate(GUID id) {
+    super(id);
+  }
+
   /**
    * Paint the border at a specific radius.
    *

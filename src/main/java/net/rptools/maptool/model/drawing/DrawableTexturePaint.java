@@ -86,7 +86,9 @@ public class DrawableTexturePaint extends DrawablePaint implements Serializable 
     return asset;
   }
 
-  public double getScale() { return scale; }
+  public double getScale() {
+    return scale;
+  }
 
   public MD5Key getAssetId() {
     return assetId;

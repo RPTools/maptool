@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
@@ -55,6 +56,12 @@ public class LineCellTemplate extends AbstractTemplate {
 
   /** Flag used to determine mouse position relative to vertex position */
   private boolean mouseSlopeGreater;
+
+  public LineCellTemplate() {}
+
+  public LineCellTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods

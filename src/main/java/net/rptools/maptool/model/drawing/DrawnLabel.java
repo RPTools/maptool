@@ -21,6 +21,7 @@ import java.awt.geom.Area;
 import javax.swing.CellRendererPane;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
+import net.rptools.maptool.model.GUID;
 
 /**
  * @author jgorrell
@@ -56,6 +57,21 @@ public class DrawnLabel extends AbstractDrawing {
     text = theText;
     bounds = theBounds;
     font = aFont;
+  }
+
+  public DrawnLabel(GUID id, String theText, Rectangle theBounds, String aFont) {
+    super(id);
+    text = theText;
+    bounds = theBounds;
+    font = aFont;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public String getFont() {
+    return font;
   }
 
   /**

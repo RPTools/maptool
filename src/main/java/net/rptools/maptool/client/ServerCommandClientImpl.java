@@ -114,9 +114,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void changeZoneDispName(GUID zoneGUID, String name) {
-    var msg = ChangeZoneDisplayNameMsg.newBuilder()
-        .setName(name)
-        .setZoneGuid(zoneGUID.toString());
+    var msg = ChangeZoneDisplayNameMsg.newBuilder().setName(name).setZoneGuid(zoneGUID.toString());
 
     makeServerCall(Message.newBuilder().setChangeZoneDisplayNameMsg(msg).build());
   }
@@ -207,10 +205,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
-    var msg = DrawMsg.newBuilder()
-        .setZoneGuid(zoneGUID.toString())
-        .setPen(Mapper.map(pen))
-        .setDrawable(Mapper.map(drawable));
+    var msg =
+        DrawMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setPen(Mapper.map(pen))
+            .setDrawable(Mapper.map(drawable));
 
     makeServerCall(Message.newBuilder().setDrawMsg(msg).build());
   }
@@ -220,9 +219,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
-    var msg = ClearAllDrawingsMsg.newBuilder()
-        .setZoneGuid(zoneGUID.toString())
-        .setLayer(layer.name());
+    var msg =
+        ClearAllDrawingsMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setLayer(layer.name());
 
     makeServerCall(Message.newBuilder().setClearAllDrawingsMsg(msg).build());
   }
@@ -298,10 +296,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    var msg = AddTopologyMsg.newBuilder()
-        .setZoneGuid(zoneGUID.toString())
-        .setMode(TopologyModeDto.valueOf(topologyMode.name()))
-        .setArea(Mapper.map(area));
+    var msg =
+        AddTopologyMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setMode(TopologyModeDto.valueOf(topologyMode.name()))
+            .setArea(Mapper.map(area));
 
     makeServerCall(Message.newBuilder().setAddTopologyMsg(msg).build());
   }
@@ -333,8 +332,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenList) {
-    var msg= BringTokensToFrontMsg.newBuilder()
-        .setZoneGuid(zoneGUID.toString());
+    var msg = BringTokensToFrontMsg.newBuilder().setZoneGuid(zoneGUID.toString());
     tokenList.stream().forEach(guid -> msg.addTokenGuids(guid.toString()));
 
     makeServerCall(Message.newBuilder().setBringTokensToFrontMsg(msg).build());
@@ -376,9 +374,8 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param globalOnly should all token exposed areas be cleared?
    */
   public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
-    var msg = ClearExposedAreaMsg.newBuilder()
-        .setZoneGuid(zoneGUID.toString())
-        .setGlobalOnly(globalOnly);
+    var msg =
+        ClearExposedAreaMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setGlobalOnly(globalOnly);
 
     makeServerCall(Message.newBuilder().setClearExposedAreaMsg(msg).build());
   }

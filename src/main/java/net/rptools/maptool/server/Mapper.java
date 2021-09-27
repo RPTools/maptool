@@ -14,13 +14,18 @@
  */
 package net.rptools.maptool.server;
 
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
-
+import java.util.ArrayList;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.*;
+import net.rptools.maptool.model.drawing.Rectangle;
 import net.rptools.maptool.server.proto.ServerPolicyDto;
 import net.rptools.maptool.server.proto.WalkerMetricDto;
 import net.rptools.maptool.server.proto.drawing.*;
@@ -232,14 +237,15 @@ public class Mapper {
   }
 
   public static DrawablePaint map(DrawablePaintDto dto) {
-    switch(dto.getPaintTypeCase()) {
+    switch (dto.getPaintTypeCase()) {
       case COLOR_PAINT -> {
         var paint = new DrawableColorPaint(dto.getColorPaint().getColor());
         return paint;
       }
       case TEXTURE_PAINT -> {
         var texturePaintDto = dto.getTexturePaint();
-        return new DrawableTexturePaint(new MD5Key(texturePaintDto.getAssetId()), texturePaintDto.getScale());
+        return new DrawableTexturePaint(
+            new MD5Key(texturePaintDto.getAssetId()), texturePaintDto.getScale());
       }
       default -> {
         log.warn("unknown DrawablePaintDto type: " + dto.getPaintTypeCase());
@@ -250,12 +256,14 @@ public class Mapper {
 
   public static DrawablePaintDto map(DrawablePaint paint) {
     var dto = DrawablePaintDto.newBuilder();
-    if(paint instanceof DrawableColorPaint colorPaint) {
-      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(colorPaint.getColor())).build();
-    } else if (paint instanceof  DrawableTexturePaint texturePaint){
-      var textureDto = DrawableTexturePaintDto.newBuilder()
-          .setAssetId(texturePaint.getAssetId().toString())
-          .setScale(texturePaint.getScale());
+    if (paint instanceof DrawableColorPaint colorPaint) {
+      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(colorPaint.getColor()))
+          .build();
+    } else if (paint instanceof DrawableTexturePaint texturePaint) {
+      var textureDto =
+          DrawableTexturePaintDto.newBuilder()
+              .setAssetId(texturePaint.getAssetId().toString())
+              .setScale(texturePaint.getScale());
       return dto.setTexturePaint(textureDto).build();
     }
     log.warn("unexpected type " + paint.getClass().getName());
@@ -288,61 +296,401 @@ public class Mapper {
         .build();
   }
 
-  public static Drawable map(DrawableDto dto) {
-    switch (dto.getDrawableTypeCase()) {
+  public static Drawable map(DrawableDto drawableDto) {
+    switch (drawableDto.getDrawableTypeCase()) {
       case SHAPE_DRAWABLE -> {
-        return null;
+        var dto = drawableDto.getShapeDrawable();
+        var shape = map(dto.getShape());
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new ShapeDrawable(id, shape, dto.getUseAntiAliasing());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case RECTANGLE_DRAWABLE -> {
-        return null;
+        var dto = drawableDto.getRectangleDrawable();
+        var id = GUID.valueOf(dto.getId());
+        var startPoint = dto.getStartPoint();
+        var endPoint = dto.getEndPoint();
+        var drawable =
+            new Rectangle(
+                id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case OVAL_DRAWABLE -> {
-        return null;
+        var dto = drawableDto.getOvalDrawable();
+        var id = GUID.valueOf(dto.getId());
+        var startPoint = dto.getStartPoint();
+        var endPoint = dto.getEndPoint();
+        var drawable =
+            new Oval(id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case CROSS_DRAWABLE -> {
-        return null;
+        var dto = drawableDto.getCrossDrawable();
+        var id = GUID.valueOf(dto.getId());
+        var startPoint = dto.getStartPoint();
+        var endPoint = dto.getEndPoint();
+        var drawable =
+            new Cross(id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case DRAWN_LABEL -> {
-        return null;
+        var dto = drawableDto.getDrawnLabel();
+        var id = GUID.valueOf(dto.getId());
+        var bounds = dto.getBounds();
+        var drawable = new DrawnLabel(id, dto.getText(), map(dto.getBounds()), dto.getFont());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case LINE_SEGMENT -> {
-        return null;
+        var dto = drawableDto.getLineSegment();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new LineSegment(id, dto.getWidth(), dto.getSquareCap());
+        var points = drawable.getPoints();
+        var pointDtos = dto.getPointsList();
+        pointDtos.forEach(p -> points.add(map(p)));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case DRAWABLES_GROUP -> {
-        return null;
+        var dto = drawableDto.getDrawablesGroup();
+        var id = GUID.valueOf(dto.getId());
+        var elements = new ArrayList<DrawnElement>();
+        var elementDtos = dto.getDrawnElementsList();
+        elementDtos.forEach(e -> elements.add(map(e)));
+        var drawable = new DrawablesGroup(id, elements);
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case RADIUS_CELL_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getRadiusCellTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new RadiusCellTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case LINE_CELL_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getLineCellTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new LineCellTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+        drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
+        var pathVertex = dto.getPathVertex();
+        drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case RADIUS_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getRadiusTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new RadiusTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case BURST_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getBurstTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new BurstTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case CONE_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getConeTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new ConeTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case BLAST_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getBlastTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new BlastTemplate(id, dto.getOffsetX(), dto.getOffsetY());
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case LINE_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getLineTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new LineTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+        drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
+        var pathVertex = dto.getPathVertex();
+        drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+        drawable.setDoubleWide(dto.getDoubleWide());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       case WALL_TEMPLATE -> {
-        return null;
+        var dto = drawableDto.getWallTemplate();
+        var id = GUID.valueOf(dto.getId());
+        var drawable = new WallTemplate(id);
+        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
+        drawable.setRadius(dto.getRadius());
+        var vertex = dto.getVertex();
+        drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+        drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+        drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
+        var pathVertex = dto.getPathVertex();
+        drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+        drawable.setDoubleWide(dto.getDoubleWide());
+        drawable.setName(dto.getName());
+        drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+        return drawable;
       }
       default -> {
-        log.warn("unknown DrawableDto type: " + dto.getDrawableTypeCase());
+        log.warn("unknown DrawableDto type: " + drawableDto.getDrawableTypeCase());
         return null;
       }
     }
   }
 
-  public static DrawableDto map(Drawable drawable) {
+  public static DrawableDto map(Drawable drawableToMap) {
+    var drawableDto = DrawableDto.newBuilder();
+
+    if (drawableToMap instanceof ShapeDrawable drawable) {
+      var shape = map(drawable.getShape());
+      var dto =
+          ShapeDrawableDto.newBuilder()
+              .setId(drawable.getId().toString())
+              .setName(drawable.getName())
+              .setLayer(drawable.getLayer().name())
+              .setShape(shape)
+              .setUseAntiAliasing(drawable.getUseAntiAliasing());
+      return drawableDto.setShapeDrawable(dto).build();
+    } else if (drawableToMap instanceof Rectangle drawable) {
+      var dto =
+          RectangleDrawableDto.newBuilder()
+              .setId(drawable.getId().toString())
+              .setName(drawable.getName())
+              .setLayer(drawable.getLayer().name())
+              .setStartPoint(map(drawable.getStartPoint()))
+              .setEndPoint(map(drawable.getEndPoint()));
+      return drawableDto.setRectangleDrawable(dto).build();
+    } else if (drawableToMap instanceof Oval drawable) {
+      var dto =
+          OvalDrawableDto.newBuilder()
+              .setId(drawable.getId().toString())
+              .setName(drawable.getName())
+              .setLayer(drawable.getLayer().name())
+              .setStartPoint(map(drawable.getStartPoint()))
+              .setEndPoint(map(drawable.getEndPoint()));
+      return drawableDto.setOvalDrawable(dto).build();
+    } else if (drawableToMap instanceof Cross drawable) {
+      var dto =
+          CrossDrawableDto.newBuilder()
+              .setId(drawable.getId().toString())
+              .setName(drawable.getName())
+              .setLayer(drawable.getLayer().name())
+              .setStartPoint(map(drawable.getStartPoint()))
+              .setEndPoint(map(drawable.getEndPoint()));
+      return drawableDto.setCrossDrawable(dto).build();
+    } else if (drawableToMap instanceof DrawnLabel drawable) {
+      var dto = DrawnLabelDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setBounds(map(drawable.getBounds()))
+          .setText(drawable.getText())
+          .setFont(drawable.getFont());
+      return drawableDto.setDrawnLabel(dto).build();
+    } else if (drawableToMap instanceof LineSegment drawable) {
+      var dto = LineSegmentDrawableDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setWidth(drawable.getWidth())
+          .setSquareCap(drawable.isSquareCap());
+      drawable.getPoints().forEach(p -> dto.addPoints(map(p)));
+      return drawableDto.setLineSegment(dto).build();
+    } else if (drawableToMap instanceof DrawablesGroup drawable) {
+      var dto = DrawablesGroupDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name());
+      drawable.getDrawableList().forEach(d -> dto.addDrawnElements(map(d)));
+      return drawableDto.setDrawablesGroup(dto).build();
+    } else if (drawableToMap instanceof RadiusCellTemplate drawable) {
+      var dto = RadiusCellTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()));
+      return drawableDto.setRadiusCellTemplate(dto).build();
+    } else if (drawableToMap instanceof LineCellTemplate drawable) {
+      var dto = LineCellTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()))
+          .setQuadrant(drawable.getQuadrant().name())
+          .setMouseSlopeGreater(drawable.isMouseSlopeGreater())
+          .setPathVertex(map(drawable.getPathVertex()));
+      return drawableDto.setLineCellTemplate(dto).build();
+    } else if (drawableToMap instanceof RadiusTemplate drawable) {
+      var dto = RadiusTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()));
+      return drawableDto.setRadiusTemplate(dto).build();
+    } else if (drawableToMap instanceof BurstTemplate drawable) {
+      var dto = BurstTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()));
+      return drawableDto.setBurstTemplate(dto).build();
+    } else if (drawableToMap instanceof ConeTemplate drawable) {
+      var dto = ConeTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()))
+          .setDirection(drawable.getDirection().name());
+      return drawableDto.setConeTemplate(dto).build();
+    } else if (drawableToMap instanceof BlastTemplate drawable) {
+      var dto = BlastTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()))
+          .setDirection(drawable.getDirection().name());
+      return drawableDto.setBlastTemplate(dto).build();
+    } else if (drawableToMap instanceof LineTemplate drawable) {
+      var dto = LineTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()))
+          .setQuadrant(drawable.getQuadrant().name())
+          .setMouseSlopeGreater(drawable.isMouseSlopeGreater())
+          .setPathVertex(map(drawable.getPathVertex()))
+          .setDoubleWide(drawable.isDoubleWide());
+      return drawableDto.setLineTemplate(dto).build();
+    } else if (drawableToMap instanceof WallTemplate drawable) {
+      var dto = WallTemplateDto.newBuilder();
+      dto.setId(drawable.getId().toString())
+          .setName(drawable.getName())
+          .setLayer(drawable.getLayer().name())
+          .setZoneId(drawable.getZoneId().toString())
+          .setRadius(drawable.getRadius())
+          .setVertex(map(drawable.getVertex()))
+          .setQuadrant(drawable.getQuadrant().name())
+          .setMouseSlopeGreater(drawable.isMouseSlopeGreater())
+          .setPathVertex(map(drawable.getPathVertex()))
+          .setDoubleWide(drawable.isDoubleWide());
+      return drawableDto.setWallTemplate(dto).build();
+    } else {
+      log.warn("mapping not implemented for Drawable type: " + drawableToMap.getClass());
+      return null;
+    }
+  }
+
+  private static IntPointDto map(ZonePoint point) {
+    return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
+  }
+
+  private static Point map(IntPointDto dto) {
+    var point = new Point();
+    point.x = dto.getX();
+    point.y = dto.getY();
+    return point;
+  }
+
+  private static IntPointDto map(Point point) {
+    return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
+  }
+
+  private static java.awt.Rectangle map(RectangleDto dto) {
+    return new java.awt.Rectangle(dto.getX(), dto.getY(), dto.getWidth(), dto.getHeight());
+  }
+
+  private static RectangleDto map(java.awt.Rectangle rect) {
+    return RectangleDto.newBuilder()
+        .setX(rect.x)
+        .setY(rect.y)
+        .setWidth(rect.width)
+        .setHeight(rect.height)
+        .build();
+  }
+
+  private static DrawnElement map(DrawnElementDto dto) {
+    return new DrawnElement(map(dto.getDrawable()), map(dto.getPen()));
+  }
+
+  private static DrawnElementDto map(DrawnElement element) {
+    return DrawnElementDto.newBuilder()
+        .setDrawable(map(element.getDrawable()))
+        .setPen(map(element.getPen()))
+        .build();
+  }
+
+  private static Shape map(ShapeDto shape) {
+    return null;
+  }
+
+  private static ShapeDto map(Shape shape) {
     return null;
   }
 }
