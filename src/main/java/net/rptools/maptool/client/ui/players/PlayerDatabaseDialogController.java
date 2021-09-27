@@ -63,9 +63,6 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   @FXML // fx:id="playersTable"
   private TableView<PlayerInfo> playersTable; // Value injected by FXMLLoader
 
-  @FXML // fx:id="cancelButton"
-  private Button cancelButton; // Value injected by FXMLLoader
-
   @FXML // fx:id="saveChangesButton"
   private Button saveChangesButton; // Value injected by FXMLLoader
 
@@ -100,8 +97,6 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
   void initialize() {
     assert playersTable != null
         : "fx:id=\"playersTable\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
-    assert cancelButton != null
-        : "fx:id=\"cancelButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
     assert saveChangesButton != null
         : "fx:id=\"saveChangesButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
     assert addButton != null
@@ -192,17 +187,13 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
               });
         });
 
-    cancelButton.setOnAction(
-        a -> {
-          eventHandlers.forEach(h -> h.close(this));
-          close();
-        });
+    saveChangesButton.setOnAction(a -> close());
   }
 
   @Override
   public void close() {
     try {
-      new Players().rollbackChanges();
+      new Players().commitChanges();
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
         | InvalidKeySpecException

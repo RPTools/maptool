@@ -267,8 +267,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   private void updateDatabase() {
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
       Players players = new Players();
-      Role role = roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME) ? Role.GM :
-          Role.PLAYER;
+      Role role =
+          roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME)
+              ? Role.GM
+              : Role.PLAYER;
       players.addPlayerWithPublicKey(playerName, role, publicKeyString);
     }
   }
@@ -363,8 +365,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     }
   }
 
-  public void setNewPlayerMode(boolean editable) {
-    playerNameText.setEditable(editable);
-    password = "";
+  public void setNewPlayerMode(boolean newPlayerMode) {
+    playerNameText.setEditable(newPlayerMode);
+    if (newPlayerMode) {
+      password = "";
+    }
   }
 }
