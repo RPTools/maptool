@@ -16,6 +16,7 @@ package net.rptools.maptool.server;
 
 import java.awt.*;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
@@ -686,11 +687,62 @@ public class Mapper {
         .build();
   }
 
-  private static Shape map(ShapeDto shape) {
-    return null;
+  private static Shape map(ShapeDto shapeDto) {
+    switch(shapeDto.getShapeTypeCase()) {
+      case RECTANGLE -> {
+        var dto = shapeDto.getRectangle();
+        return new java.awt.Rectangle(dto.getX(), dto.getY(), dto.getWidth(), dto.getHeight());
+      }
+      case AREA -> {
+        return map(shapeDto.getArea());
+      }
+      case POLYGON -> {
+        var dto = shapeDto.getPolygon();
+        var polygon = new Polygon();
+        dto.getPointsList().forEach(p -> polygon.addPoint(p.getX(), p.getY()));
+        return polygon;
+      }
+      case ELLIPSE -> {
+        var dto = shapeDto.getEllipse();
+        return new Ellipse2D.Float(dto.getX(), dto.getY(), dto.getWidth(), dto.getHeight());
+      }
+      default -> {
+        log.warn("unknown ShapeDto type: " + shapeDto.getShapeTypeCase());
+        return null;
+      }
+    }
   }
 
   private static ShapeDto map(Shape shape) {
-    return null;
+    var shapeDto = ShapeDto.newBuilder();
+    if(shape instanceof java.awt.Rectangle rect) {
+      var dto = RectangleDto.newBuilder()
+          .setX(rect.x)
+          .setY(rect.y)
+          .setWidth(rect.width)
+          .setHeight(rect.height);
+      return shapeDto.setRectangle(dto).build();
+    } else if (shape instanceof Area area) {
+      return shapeDto.setArea(map(area)).build();
+    } else if (shape instanceof Polygon polygon) {
+      var dto = PolygonDto.newBuilder();
+      for (int i = 0; i < polygon.npoints; i++) {
+        var pointDto = IntPointDto.newBuilder();
+        pointDto.setX(polygon.xpoints[i]);
+        pointDto.setY(polygon.ypoints[i]);
+        dto.addPoints(pointDto);
+      }
+      return shapeDto.setPolygon(dto).build();
+    } else if(shape instanceof Ellipse2D.Float ellipse) {
+        var dto = EllipseDto.newBuilder()
+            .setX(ellipse.x)
+            .setY(ellipse.y)
+            .setWidth(ellipse.width)
+            .setHeight(ellipse.height);
+        return shapeDto.setEllipse(dto).build();
+    } else {
+      log.warn("mapping not implemented for Shape type: " + shape.getClass());
+      return null;
+    }
   }
 }
