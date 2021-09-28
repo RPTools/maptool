@@ -300,7 +300,7 @@ public class Players {
           | NoSuchPaddingException
           | InvalidKeyException e) {
         log.error(e);
-        MapTool.showError(I18N.getText("msg.error.playerDB.errorAdding", name), e);
+        MapTool.showError(I18N.getText("msg.error.playerDB.errorAddingPlayer", name), e);
         return ChangePlayerStatus.ERROR;
       }
     } else {
@@ -318,11 +318,11 @@ public class Players {
    * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
    */
   public ChangePlayerStatus addPlayerWithPublicKey(String name, Role role, String publicKeyString) {
-    var pkeys = new HashSet<>(Arrays.asList(CipherUtil.splitPublicKeys(publicKeyString)));
     if (!supportsAsymmetricKeys()) {
-      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      log.error(I18N.getText("msg.error.playerDB.cantAddPlayerPublicKey", name));
       return ChangePlayerStatus.NOT_SUPPORTED;
     }
+    var pkeys = new HashSet<>(Arrays.asList(CipherUtil.splitPublicKeys(publicKeyString)));
 
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
@@ -335,7 +335,7 @@ public class Players {
           | NoSuchPaddingException
           | InvalidKeyException e) {
         log.error(e);
-        MapTool.showError(I18N.getText("msg.error.playerDB.cantAddPlayerPublicKey", name), e);
+        MapTool.showError(I18N.getText("msg.error.playerDB.errorAddingPlayer", name), e);
         return ChangePlayerStatus.ERROR;
       }
     } else {
@@ -344,14 +344,135 @@ public class Players {
     }
   }
 
-  public ChangePlayerStatus removePlayer(String name) {
+  /**
+   * Sets the public keys for the specified player.
+   *
+   * @param name the name of the player.
+   * @param publicKeyString the public keys for the player.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus setPublicKeys(String name, String publicKeyString) {
+    if (!supportsAsymmetricKeys()) {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+    var pkeys = new HashSet<>(Arrays.asList(CipherUtil.splitPublicKeys(publicKeyString)));
 
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      try {
+        playerDb.setAsymmetricKeys(name, pkeys);
+      } catch (NoSuchPaddingException
+          | NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | PasswordDatabaseException
+          | InvalidKeyException e) {
+        MapTool.showError(I18N.getText("msg.error.playerDB.errorUpdatingPlayer", name), e);
+        return ChangePlayerStatus.ERROR;
+      }
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+    return ChangePlayerStatus.OK;
+  }
+
+  /**
+   * Sets the password for the specified player.
+   *
+   * @param name the name of the player to change the password for.
+   * @param password the password for the player.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus setPassword(String name, String password) {
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      try {
+        playerDb.setSharedPassword(name, password);
+        return ChangePlayerStatus.OK;
+      } catch (NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | PasswordDatabaseException
+          | NoSuchPaddingException
+          | InvalidKeyException e) {
+        log.error(e);
+        MapTool.showError(I18N.getText("msg.error.playerDB.errorUpdatingPlayer", name), e);
+        return ChangePlayerStatus.ERROR;
+      }
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+  /**
+   * Sets the role for a player in the database. This will not change the role of a currently logged
+   * in player, they will have to log out and log back in for it to take effect.
+   *
+   * @param name the name of the player.
+   * @param role the role for the player.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus setRole(String name, Role role) {
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      playerDb.setRole(name, role);
+      return ChangePlayerStatus.OK;
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+  /**
+   * Blocks a player and sets the reason they are blocked. This will not remove a player from the
+   * game, it will only stop them from logging in.
+   *
+   * @param name the name of the player to block.
+   * @param reason the reason for the block.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus blockPlayer(String name, String reason) {
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      playerDb.blockPlayer(name, reason);
+      return ChangePlayerStatus.OK;
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+  /**
+   * Removes a block from a player.
+   *
+   * @param name the name of the player to unblock.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus unblockPlayer(String name) {
+    var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
+      playerDb.unblockPlayer(name);
+      return ChangePlayerStatus.OK;
+    } else {
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
+      return ChangePlayerStatus.NOT_SUPPORTED;
+    }
+  }
+
+  /**
+   * Removes the specified player from the database.
+   *
+   * @param name the name of the player to remove.
+   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
+   */
+  public ChangePlayerStatus removePlayer(String name) {
     var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
     if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
       playerDb.deletePlayer(name);
       return ChangePlayerStatus.OK;
     } else {
-      log.error(I18N.getText("msg.error.playerDB.cantAddPlayer", name));
+      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
       return ChangePlayerStatus.NOT_SUPPORTED;
     }
   }

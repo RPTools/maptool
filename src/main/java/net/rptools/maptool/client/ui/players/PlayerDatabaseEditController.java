@@ -45,24 +45,41 @@ import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
+/** Controller for the dialog used to edit player details in the database. */
 public class PlayerDatabaseEditController implements SwingJavaFXDialogController {
 
+  /** Minimum acceptable password length. */
   private static final int MIN_PASSWORD_LENGTH = 8;
+
+  /** Event handlers to listen to close requests. */
   private final Set<SwingJavaFXDialogEventHandler> eventHandlers = ConcurrentHashMap.newKeySet();
 
+  /** The localised name for GMs. */
   private final String GM_ROLE_NAME = I18N.getText("userTerm.GM");
+
+  /** The localised name for Players. */
   private final String PLAYER_ROLE_NAME = I18N.getText("userTerm.Player");
 
+  /** The localised name for public key. */
   private final String AUTH_PUB_KEY_NAME = I18N.getText("playerDB.dialog.publicKey");
+
+  /** The localised name for password. */
   private final String AUTH_PASSWORD_NAME = I18N.getText("playerDB.dialog.password");
 
+  /** public key entered. */
   private String publicKeyString = "";
 
+  /** The reason entered for the player block. */
   private String blockedReason = "";
 
+  /** the name entered for the player */
   private String playerName = "";
 
+  /** The localised nae for encoded password. */
   private String password = I18N.getText("playerDB.dialog.encodedPassword");
+
+  /** is the dialog in new player mode. */
+  private boolean newPlayerMode = false;
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -100,24 +117,38 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   @FXML // fx:id="publicKeyText"
   private TextArea publicKeyText; // Value injected by FXMLLoader
 
+  /** Different validation errors that can occur. */
   private enum ValidationErrors {
     NAME_MISSING("playerDB.dialog.error.missingName"),
     PASSWORD_MISSING("playerDB.dialog.error.passwordMissing"),
     PASSWORD_TOO_SHORT("playerDB.dialog.error.passwordTooShort"),
     INVALID_PUBLIC_KEY("playerDB.dialog.error.invalidPublicKey"),
+    BLOCKED_REASON_EMPTY("playerDB.dialog.error.emptyBlockReason"),
     PLAYER_EXISTS("playerDB.dialog.error.playerExists");
 
+    /** the key for the localised version of the error message. */
     private final String i81nKey;
 
+    /**
+     * Creates a new {@code ValidationErrors} enum value.
+     *
+     * @param i81nKey the key for the localised string.
+     */
     ValidationErrors(String i81nKey) {
       this.i81nKey = i81nKey;
     }
 
+    /**
+     * Returns the localised validation error string.
+     *
+     * @return the localised validation error string.
+     */
     private String getDescription() {
       return I18N.getText(i81nKey);
     }
   }
 
+  /** Current dialog validation errors. */
   private final Set<ValidationErrors> validationErrors = EnumSet.noneOf(ValidationErrors.class);
 
   @FXML // fx:id="labelErrors"
@@ -181,6 +212,8 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     blockedCheckBox.setOnAction(
         a -> {
           enableDisableFields();
+          validateBlockedReason();
+          ;
         });
 
     generatePasswordButton.setOnAction(
@@ -212,6 +245,14 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
               validatePassword();
             });
 
+    blockedReasonText
+        .textProperty()
+        .addListener(
+            l -> {
+              blockedReason = blockedReasonText.getText();
+              validateBlockedReason();
+            });
+
     enableDisableFields();
     playerNameText.setText("");
 
@@ -219,6 +260,16 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     okButton.setOnAction(h -> updateDatabase());
   }
 
+  /** Validates the blocked reason text field. */
+  private void validateBlockedReason() {
+    validationErrors.remove(ValidationErrors.BLOCKED_REASON_EMPTY);
+    if (blockedCheckBox.isSelected()) {
+      if (validationErrors.add(ValidationErrors.BLOCKED_REASON_EMPTY))
+        ;
+    }
+  }
+
+  /** This method validates the password field. */
   private void validatePassword() {
     validationErrors.remove(ValidationErrors.PASSWORD_MISSING);
     validationErrors.remove(ValidationErrors.PASSWORD_TOO_SHORT);
@@ -233,6 +284,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     displayValidationErrors();
   }
 
+  /** This method validates the public key text areas. */
   private void validatePublicKey() {
     validationErrors.remove(ValidationErrors.INVALID_PUBLIC_KEY);
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
@@ -261,6 +313,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     displayValidationErrors();
   }
 
+  /** Updates the values in the database based on the form values. */
   private void updateDatabase() {
     Players players = new Players();
     Role role =
@@ -268,13 +321,22 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
             ? Role.GM
             : Role.PLAYER;
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
-      players.addPlayerWithPublicKey(playerName, role, publicKeyString);
+      if (newPlayerMode) {
+        players.addPlayerWithPublicKey(playerName, role, publicKeyString);
+      } else {
+        players.setRole(playerName, role);
+        players.setPublicKeys(playerName, publicKeyString);
+      }
+      if (blockedCheckBox.isSelected()) {
+        players.blockPlayer(playerName, blockedReason);
+      }
     } else {
       players.addPlayerWithPassword(playerName, role, password);
     }
     performClose();
   }
 
+  /** Perform the actions required to close the form. */
   private void performClose() {
     eventHandlers.forEach(h -> h.close(this));
   }
@@ -284,6 +346,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     // Nothing to do
   }
 
+  /** Validates the player name field. */
   private void validatePlayerName() {
     validationErrors.remove(ValidationErrors.NAME_MISSING);
     validationErrors.remove(ValidationErrors.PLAYER_EXISTS);
@@ -302,6 +365,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     displayValidationErrors();
   }
 
+  /** Displays any validation errors. */
   private void displayValidationErrors() {
     String errorText =
         validationErrors.stream()
@@ -311,6 +375,12 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     okButton.setDisable(validationErrors.size() > 0);
   }
 
+  /**
+   * Sets the fields on the dialog from the player information. This method must be called from the
+   * JavaFX thread.
+   *
+   * @param playerInfo the player information used to set the dialog fields.
+   */
   private void setPlayerInfoJFX(PlayerInfo playerInfo) {
     playerNameText.setText(playerInfo.name());
     blockedReasonText.setText(playerInfo.blockedReason());
@@ -326,6 +396,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     enableDisableFields();
   }
 
+  /**
+   * Enables and disables the fields on the dialog based on combo box values. This must be called
+   * from the JavaFX thread.
+   */
   private void enableDisableFields() {
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
       publicKeyText.setDisable(false);
@@ -361,6 +435,12 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     }
   }
 
+  /**
+   * Sets the dialog fields based on the player info. It is safe to call this method from any
+   * thread.
+   *
+   * @param playerInfo the player information to set the dialog fields to.
+   */
   public void setPlayerInfo(PlayerInfo playerInfo) {
     if (Platform.isFxApplicationThread()) {
       setPlayerInfoJFX(playerInfo);
@@ -369,7 +449,15 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     }
   }
 
-  public void setNewPlayerMode(boolean newPlayerMode) {
+  /**
+   * Sets the mode of the dialog, new player or edit player. This must be called from the JavaFX
+   * thread.
+   *
+   * @param newPlayer {@code true} if dialog is to be displayed in new player mode, {@code false} if
+   *     the dualog is to displayed in edit player mode.
+   */
+  public void setNewPlayerMode(boolean newPlayer) {
+    newPlayerMode = newPlayer;
     playerNameText.setEditable(newPlayerMode);
     if (newPlayerMode) {
       password = "";

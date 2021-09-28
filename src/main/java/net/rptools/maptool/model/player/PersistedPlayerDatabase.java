@@ -131,7 +131,35 @@ public interface PersistedPlayerDatabase {
    */
   boolean isPersisted(String name);
 
+  /**
+   * Deletes a player from the database.
+   *
+   * @param name the name of the player to delete.
+   */
   void deletePlayer(String name);
+
+  /**
+   * Sets the status of the player to blocked.
+   *
+   * @param name the name of the player to block.
+   * @param reason the reason that the player is blocked.
+   */
+  void blockPlayer(String name, String reason);
+
+  /**
+   * Removes the blocked status from the player.
+   *
+   * @param name the name of the player to removed te blocked status from.
+   */
+  void unblockPlayer(String name);
+
+  /**
+   * Sets the role for the player.
+   *
+   * @param name the name of the player to set the role for.
+   * @param role the role to set.
+   */
+  void setRole(String name, Role role);
 
   /**
    * Commits the pending changes writing them out to the persistent storage.
