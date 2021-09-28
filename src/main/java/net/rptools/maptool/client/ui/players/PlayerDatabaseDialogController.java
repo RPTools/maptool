@@ -187,7 +187,12 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
               });
         });
 
-    saveChangesButton.setOnAction(a -> close());
+    saveChangesButton.setOnAction(a -> performClose());
+  }
+
+  private void performClose() {
+    eventHandlers.forEach(e -> e.close(this));
+    close();
   }
 
   @Override

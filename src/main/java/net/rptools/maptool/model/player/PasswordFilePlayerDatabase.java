@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -305,10 +306,18 @@ public final class PasswordFilePlayerDatabase
 
       // Backup they key file and overwrite
       for (String filename : dirtyFiles) {
-        Path pkFile = passwordFile.getParentFile().toPath().resolve(filename);
-        Path pkFileBackup =
-            passwordFile.getParentFile().toPath().resolve("backup").resolve(filename);
-        Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
+        Path pkFile =
+            passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR).resolve(filename);
+        if (pkFile.toFile().exists()) {
+          Path pkFileBackup =
+              passwordFile
+                  .getParentFile()
+                  .toPath()
+                  .resolve(PUBLIC_KEY_DIR)
+                  .resolve("backup")
+                  .resolve(filename);
+          Files.copy(pkFile, pkFileBackup, REPLACE_EXISTING);
+        }
 
         Set<PublicKeyDetails> keysInFile =
             publicKeyDetails.stream()
@@ -494,9 +503,11 @@ public final class PasswordFilePlayerDatabase
   public void commitChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
-    savedDetails.clear();
-    savedDetails.putAll(playerDetails);
-    dirty.set(true);
+    if (savedDetails.size() > 0) {
+      savedDetails.clear();
+      savedDetails.putAll(playerDetails);
+      dirty.set(true);
+    }
     writePasswordFile();
   }
 
@@ -711,6 +722,7 @@ public final class PasswordFilePlayerDatabase
             disabledReason);
     if (persisted) {
       publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
+      playerDetails.put(name, pd);
     } else {
       transientPlayerDetails.put(name, pd);
     }
@@ -748,7 +760,10 @@ public final class PasswordFilePlayerDatabase
    * @return a file safe filename based on the player name
    */
   private String derivePublicKeyFilename(String name) {
-    return name.replaceAll("[^A-Za-z0-9_\\-]", "").substring(0, 127);
+    String sanitised = name.replaceAll("[^A-Za-z0-9_\\-]", "");
+    sanitised = sanitised.length() > 110 ? sanitised.substring(0, 127) : sanitised;
+    Random random = new Random();
+    return sanitised + "_" + random.nextInt(10000) + ".key";
   }
 
   /**

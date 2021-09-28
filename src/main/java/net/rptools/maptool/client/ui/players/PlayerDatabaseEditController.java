@@ -192,7 +192,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
         .textProperty()
         .addListener(
             l -> {
-              playerName = passwordText.getText();
+              playerName = playerNameText.getText();
               validatePlayerName();
             });
 
@@ -215,10 +215,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     enableDisableFields();
     playerNameText.setText("");
 
-    cancelButton.setOnAction(
-        a -> {
-          eventHandlers.forEach(h -> h.close(this));
-        });
+    cancelButton.setOnAction(a -> performClose());
     okButton.setOnAction(h -> updateDatabase());
   }
 
@@ -265,14 +262,21 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   }
 
   private void updateDatabase() {
+    Players players = new Players();
+    Role role =
+        roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME)
+            ? Role.GM
+            : Role.PLAYER;
     if (authTypeCombo.getSelectionModel().getSelectedItem().equals(AUTH_PUB_KEY_NAME)) {
-      Players players = new Players();
-      Role role =
-          roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME)
-              ? Role.GM
-              : Role.PLAYER;
       players.addPlayerWithPublicKey(playerName, role, publicKeyString);
+    } else {
+      players.addPlayerWithPassword(playerName, role, password);
     }
+    performClose();
+  }
+
+  private void performClose() {
+    eventHandlers.forEach(h -> h.close(this));
   }
 
   @Override
