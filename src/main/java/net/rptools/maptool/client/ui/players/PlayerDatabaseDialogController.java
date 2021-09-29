@@ -77,12 +77,15 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
                 case Players.PROPERTY_CHANGE_PLAYER_CHANGED -> {
                   removePlayer(e.getNewValue().toString());
                   addPlayer(e.getNewValue().toString());
+                  playersTable.sort();
                 }
                 case Players.PROPERTY_CHANGE_PLAYER_ADDED -> {
                   addPlayer(e.getNewValue().toString());
+                  playersTable.sort();
                 }
                 case Players.PROPERTY_CHANGE_PLAYER_REMOVED -> {
                   removePlayer(e.getOldValue().toString());
+                  playersTable.sort();
                 }
                 case Players.PROPERTY_CHANGE_DATABASE_CHANGED -> {
                   addPlayers();
@@ -127,6 +130,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     playersTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     var playerCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.player"));
     playerCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().name()));
+
     var roleCol = new TableColumn<PlayerInfo, String>(I18N.getText("playerDB.dialog.role"));
     roleCol.setCellValueFactory(
         p -> new ReadOnlyObjectWrapper<>(p.getValue().role() == Role.GM ? gmI81n : playerI81n));
@@ -176,7 +180,11 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         .getColumns()
         .addAll(playerCol, roleCol, authCol, disabledCol, connectedCol, editCol, deleteCol);
 
+    playerCol.setComparator(String.CASE_INSENSITIVE_ORDER);
+
     playersTable.setItems(playerInfoList);
+    playersTable.getSortOrder().add(playerCol);
+    playersTable.sort();
     addPlayers();
 
     addButton.setOnAction(
@@ -233,6 +241,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
                       playerInfoList.clear();
                       playerInfoList.addAll(
                           p.stream().filter(PlayerInfo::persistent).collect(Collectors.toList()));
+                      playersTable.sort();
                     }));
   }
 

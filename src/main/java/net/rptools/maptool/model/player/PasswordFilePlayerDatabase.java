@@ -207,13 +207,13 @@ public final class PasswordFilePlayerDatabase
             }
           }
 
-          String disabledReason = "";
-          if (passwordEntry.has("disabled")) {
-            disabledReason = passwordEntry.get("disabled").getAsString();
+          String blockedReason = "";
+          if (passwordEntry.has("blocked")) {
+            blockedReason = passwordEntry.get("blocked").getAsString();
           }
 
           players.put(
-              name, new PlayerDetails(name, role, passwordKey, publicKeyDetails, disabledReason));
+              name, new PlayerDetails(name, role, passwordKey, publicKeyDetails, blockedReason));
         }
         return players;
       } catch (IOException ioe) {
@@ -263,6 +263,10 @@ public final class PasswordFilePlayerDatabase
           }
           pwObject.addProperty("role", v.role().toString());
           passwords.add(pwObject);
+
+          if (v.blockedReason() != null && !v.blockedReason.isEmpty()) {
+            pwObject.addProperty("blocked", v.blockedReason());
+          }
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -323,7 +327,7 @@ public final class PasswordFilePlayerDatabase
                 .filter(pkd -> pkd.filename().equals(filename))
                 .collect(Collectors.toSet());
 
-        keysInFile.forEach(k -> dirtyPublicKeys.remove(k));
+        keysInFile.forEach(dirtyPublicKeys::remove);
 
         String fileKeys =
             publicKeyDetails.stream()
@@ -447,7 +451,7 @@ public final class PasswordFilePlayerDatabase
     var pd = getPlayerDetails(name);
     boolean persisted = isPersisted(name);
     putUncommittedPlayerHashPassword(
-        pd.name(), pd.role(), password, Set.of(), pd.disabledReason, persisted);
+        pd.name(), pd.role(), password, Set.of(), pd.blockedReason, persisted);
   }
 
   @Override
@@ -465,7 +469,7 @@ public final class PasswordFilePlayerDatabase
   @Override
   public void blockPlayer(String name, String reason) {
     var pd = getPlayerDetails(name);
-    if (pd.disabledReason().equals(reason)) {
+    if (pd.blockedReason().equals(reason)) {
       return; // Noting to do here
     }
     boolean persisted = isPersisted(name);
@@ -476,7 +480,7 @@ public final class PasswordFilePlayerDatabase
   @Override
   public void unblockPlayer(String name) {
     var pd = getPlayerDetails(name);
-    if (pd.disabledReason() == null || pd.disabledReason().isEmpty()) {
+    if (pd.blockedReason() == null || pd.blockedReason().isEmpty()) {
       return; // Noting to do here
     }
     boolean persisted = isPersisted(name);
@@ -491,7 +495,7 @@ public final class PasswordFilePlayerDatabase
     }
     boolean persisted = isPersisted(name);
     putUncommittedPlayer(
-        pd.name(), role, pd.password(), pd.publicKeyDetails(), pd.disabledReason(), persisted);
+        pd.name(), role, pd.password(), pd.publicKeyDetails(), pd.blockedReason(), persisted);
   }
 
   @Override
@@ -505,7 +509,7 @@ public final class PasswordFilePlayerDatabase
     boolean persisted = isPersisted(name);
     var newpd =
         putUncommittedPlayer(
-            pd.name(), pd.role(), null, publicKeyDetails, pd.disabledReason(), persisted);
+            pd.name(), pd.role(), null, publicKeyDetails, pd.blockedReason(), persisted);
     publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, newpd));
   }
 
@@ -525,8 +529,7 @@ public final class PasswordFilePlayerDatabase
     pKeys.addAll(newKeys);
 
     boolean persisted = isPersisted(name);
-    var newpd =
-        putUncommittedPlayer(name, pd.role(), null, newKeys, pd.disabledReason(), persisted);
+    var newpd = putUncommittedPlayer(name, pd.role(), null, newKeys, pd.blockedReason(), persisted);
 
     newKeys.forEach(p -> dirtyPublicKeys.put(p, newpd));
   }
@@ -566,7 +569,7 @@ public final class PasswordFilePlayerDatabase
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
     }
-    return details.disabledReason();
+    return details.blockedReason();
   }
 
   @Override
@@ -661,7 +664,7 @@ public final class PasswordFilePlayerDatabase
    * @param name The name of the player to add.
    * @param role The role of the player to add.
    * @param password The password for the player.
-   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
+   * @param blockedReason The reason player was blocked, null or empty string if not diabled.
    * @param persisted should the player entry be persisted or not.
    * @return the newly added {@link PlayerDetails}
    * @throws PasswordDatabaseException if there is a problem added the player
@@ -672,11 +675,11 @@ public final class PasswordFilePlayerDatabase
    * @throws IllegalStateException If there is an error hashing the password.
    */
   private PlayerDetails putUncommittedPlayer(
-      String name, Role role, String password, String disabledReason, boolean persisted)
+      String name, Role role, String password, String blockedReason, boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
           NoSuchPaddingException, InvalidKeyException {
     return putUncommittedPlayerHashPassword(
-        name, role, password, Set.of(), disabledReason, persisted);
+        name, role, password, Set.of(), blockedReason, persisted);
   }
 
   /**
@@ -686,7 +689,7 @@ public final class PasswordFilePlayerDatabase
    * @param name The name of the player to add.
    * @param role The role of the player to add.
    * @param publicKeyStrings The public key Strings
-   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
+   * @param blockedReason The reason player was blocked, null or empty string if not diabled.
    * @param persisted should the player entry be persisted or not.
    * @return the newly added {@link PlayerDetails}
    * @throws PasswordDatabaseException if there is a problem added the player
@@ -697,20 +700,11 @@ public final class PasswordFilePlayerDatabase
    * @throws IllegalStateException If there is an error hashing the password.
    */
   private PlayerDetails putUncommittedPlayer(
-      String name,
-      Role role,
-      Set<String> publicKeyStrings,
-      String disabledReason,
-      boolean persisted)
+      String name, Role role, Set<String> publicKeyStrings, String blockedReason, boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
           NoSuchPaddingException, InvalidKeyException {
     return putUncommittedPlayer(
-        name,
-        role,
-        null,
-        createPublicKeyDetails(publicKeyStrings, name),
-        disabledReason,
-        persisted);
+        name, role, null, createPublicKeyDetails(publicKeyStrings, name), blockedReason, persisted);
   }
   /**
    * Adds a player to the database with the specified password or public keys. The {@link
@@ -720,7 +714,7 @@ public final class PasswordFilePlayerDatabase
    * @param role The role of the player to add.
    * @param password The password for the player.
    * @param publicKeyDetails The public keys
-   * @param disabledReason The reason player was disabled, null or empty string if not disabled.
+   * @param blockedReason The reason player was blocked, null or empty string if not blocked.
    * @param persisted should the player entry be persisted or not.
    * @return the newly added {@link PlayerDetails}
    */
@@ -729,12 +723,12 @@ public final class PasswordFilePlayerDatabase
       Role role,
       CipherUtil.Key password,
       Set<PublicKeyDetails> publicKeyDetails,
-      String disabledReason,
+      String blockedReason,
       boolean persisted) {
-    disabledReason = Objects.requireNonNullElse(disabledReason, "");
+    blockedReason = Objects.requireNonNullElse(blockedReason, "");
 
     var oldPd = getPlayerDetails(name);
-    var pd = new PlayerDetails(name, role, password, publicKeyDetails, disabledReason);
+    var pd = new PlayerDetails(name, role, password, publicKeyDetails, blockedReason);
     if (persisted) {
       publicKeyDetails.forEach(p -> dirtyPublicKeys.put(p, pd));
       playerDetails.put(name, pd);
@@ -761,7 +755,7 @@ public final class PasswordFilePlayerDatabase
    * @param role The role of the player to add.
    * @param password The password for the player.
    * @param publicKeyDetails The public keys
-   * @param disabledReason The reason player was disabled, null or empty string if not diabled.
+   * @param blockedReason The reason player was blocked, null or empty string if not diabled.
    * @param persisted should the player entry be persisted or not.
    * @return the newly added {@link PlayerDetails}
    * @throws PasswordDatabaseException if there is a problem added the player
@@ -776,7 +770,7 @@ public final class PasswordFilePlayerDatabase
       Role role,
       String password,
       Set<PublicKeyDetails> publicKeyDetails,
-      String disabledReason,
+      String blockedReason,
       boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
           NoSuchPaddingException, InvalidKeyException {
@@ -788,7 +782,7 @@ public final class PasswordFilePlayerDatabase
             ? CipherUtil.fromSharedKeyNewSalt(password).getKey()
             : null,
         publicKeyDetails,
-        disabledReason,
+        blockedReason,
         persisted);
   }
 
@@ -869,7 +863,7 @@ public final class PasswordFilePlayerDatabase
       Role role,
       CipherUtil.Key password,
       Set<PublicKeyDetails> publicKeyDetails,
-      String disabledReason) {}
+      String blockedReason) {}
 
   /** Record containing the public key information */
   private static record PublicKeyDetails(

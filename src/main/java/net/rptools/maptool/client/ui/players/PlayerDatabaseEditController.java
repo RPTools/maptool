@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -263,10 +264,10 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
   /** Validates the blocked reason text field. */
   private void validateBlockedReason() {
     validationErrors.remove(ValidationErrors.BLOCKED_REASON_EMPTY);
-    if (blockedCheckBox.isSelected()) {
-      if (validationErrors.add(ValidationErrors.BLOCKED_REASON_EMPTY))
-        ;
+    if (blockedCheckBox.isSelected() && blockedReasonText.getText().isEmpty()) {
+      validationErrors.add(ValidationErrors.BLOCKED_REASON_EMPTY);
     }
+    displayValidationErrors();
   }
 
   /** This method validates the password field. */
@@ -327,12 +328,21 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
         players.setRole(playerName, role);
         players.setPublicKeys(playerName, publicKeyString);
       }
-      if (blockedCheckBox.isSelected()) {
-        players.blockPlayer(playerName, blockedReason);
-      }
     } else {
-      players.addPlayerWithPassword(playerName, role, password);
+      if (newPlayerMode) {
+        players.addPlayerWithPassword(playerName, role, password);
+      } else {
+        players.setRole(playerName, role);
+        players.setPassword(playerName, password);
+      }
     }
+
+    if (blockedCheckBox.isSelected()) {
+      players.blockPlayer(playerName, blockedReason);
+    } else {
+      players.unblockPlayer(playerName);
+    }
+
     performClose();
   }
 
@@ -392,7 +402,17 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
       password = "";
       publicKeyString = String.join("\n", playerInfo.publicKeys());
     }
-    blockedReason = playerInfo.blockedReason();
+    blockedReason = Objects.requireNonNullElse(playerInfo.blockedReason(), "");
+
+    blockedCheckBox.setSelected(!blockedReason.isEmpty());
+    blockedReasonText.setText(blockedReason);
+
+    if (playerInfo.role() == Role.GM) {
+      roleCombo.setValue(GM_ROLE_NAME);
+    } else {
+      roleCombo.setValue(PLAYER_ROLE_NAME);
+    }
+
     enableDisableFields();
   }
 
@@ -427,11 +447,9 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
     if (blockedCheckBox.isSelected()) {
       blockedReasonText.setText(blockedReason);
       blockedReasonText.setEditable(true);
-      blockedReasonText.setDisable(false);
     } else {
       blockedReasonText.setText("");
       blockedReasonText.setEditable(false);
-      blockedReasonText.setDisable(true);
     }
   }
 

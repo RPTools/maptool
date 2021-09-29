@@ -13,7 +13,7 @@
       <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="addButton" mnemonicParsing="false" text="%playerDB.dialog.add" />
-            <Button fx:id="saveChangesButton" mnemonicParsing="false" text="%playerDB.dialog.saveChanges" />
+            <Button fx:id="saveChangesButton" mnemonicParsing="false" text="%dialog.button.ok" />
          </children>
       </HBox>
    </bottom>
