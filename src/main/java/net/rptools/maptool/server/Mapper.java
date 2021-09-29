@@ -688,7 +688,7 @@ public class Mapper {
   }
 
   private static Shape map(ShapeDto shapeDto) {
-    switch(shapeDto.getShapeTypeCase()) {
+    switch (shapeDto.getShapeTypeCase()) {
       case RECTANGLE -> {
         var dto = shapeDto.getRectangle();
         return new java.awt.Rectangle(dto.getX(), dto.getY(), dto.getWidth(), dto.getHeight());
@@ -715,12 +715,13 @@ public class Mapper {
 
   private static ShapeDto map(Shape shape) {
     var shapeDto = ShapeDto.newBuilder();
-    if(shape instanceof java.awt.Rectangle rect) {
-      var dto = RectangleDto.newBuilder()
-          .setX(rect.x)
-          .setY(rect.y)
-          .setWidth(rect.width)
-          .setHeight(rect.height);
+    if (shape instanceof java.awt.Rectangle rect) {
+      var dto =
+          RectangleDto.newBuilder()
+              .setX(rect.x)
+              .setY(rect.y)
+              .setWidth(rect.width)
+              .setHeight(rect.height);
       return shapeDto.setRectangle(dto).build();
     } else if (shape instanceof Area area) {
       return shapeDto.setArea(map(area)).build();
@@ -733,13 +734,14 @@ public class Mapper {
         dto.addPoints(pointDto);
       }
       return shapeDto.setPolygon(dto).build();
-    } else if(shape instanceof Ellipse2D.Float ellipse) {
-        var dto = EllipseDto.newBuilder()
-            .setX(ellipse.x)
-            .setY(ellipse.y)
-            .setWidth(ellipse.width)
-            .setHeight(ellipse.height);
-        return shapeDto.setEllipse(dto).build();
+    } else if (shape instanceof Ellipse2D.Float ellipse) {
+      var dto =
+          EllipseDto.newBuilder()
+              .setX(ellipse.x)
+              .setY(ellipse.y)
+              .setWidth(ellipse.width)
+              .setHeight(ellipse.height);
+      return shapeDto.setEllipse(dto).build();
     } else {
       log.warn("mapping not implemented for Shape type: " + shape.getClass());
       return null;
