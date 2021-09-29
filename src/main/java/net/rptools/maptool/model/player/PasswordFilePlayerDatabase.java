@@ -79,6 +79,7 @@ public final class PasswordFilePlayerDatabase
 
   private final Map<String, PlayerDetails> playerDetails = new ConcurrentHashMap<>();
   private final Map<String, PlayerDetails> savedDetails = new ConcurrentHashMap<>();
+  private final Set<String> removedPubKeyFiles = ConcurrentHashMap.newKeySet();
   private final Map<String, PlayerDetails> transientPlayerDetails = new ConcurrentHashMap<>();
   private final AtomicBoolean dirty = new AtomicBoolean(false);
   private final Map<PublicKeyDetails, PlayerDetails> dirtyPublicKeys = new ConcurrentHashMap<>();
@@ -449,6 +450,7 @@ public final class PasswordFilePlayerDatabase
           PasswordDatabaseException, InvalidKeyException {
 
     var pd = getPlayerDetails(name);
+    pd.publicKeyDetails().forEach(pk -> removedPubKeyFiles.add(pk.filename()));
     boolean persisted = isPersisted(name);
     putUncommittedPlayerHashPassword(
         pd.name(), pd.role(), password, Set.of(), pd.blockedReason, persisted);
@@ -461,9 +463,15 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void deletePlayer(String name) {
-    this.playerDetails.remove(name);
-    propertyChangeSupport.firePropertyChange(
-        PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, name, null);
+    if (playerDetails.containsKey(name)) {
+      playerDetails
+          .get(name)
+          .publicKeyDetails()
+          .forEach(pk -> removedPubKeyFiles.add(pk.filename()));
+      playerDetails.remove(name);
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, name, null);
+    }
   }
 
   @Override
@@ -539,11 +547,42 @@ public final class PasswordFilePlayerDatabase
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException {
     if (savedDetails.size() > 0) {
+      removeOldPublicKeys();
       savedDetails.clear();
       savedDetails.putAll(playerDetails);
       dirty.set(true);
     }
     writePasswordFile();
+  }
+
+  /** Removes old public key files for players that have been removed. */
+  private void removeOldPublicKeys() {
+    for (String filename : removedPubKeyFiles) {
+      Path pkFile = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR).resolve(filename);
+      Path pkFileBackup =
+          passwordFile
+              .getParentFile()
+              .toPath()
+              .resolve(PUBLIC_KEY_DIR)
+              .resolve("backup")
+              .resolve(filename);
+      try {
+        if (Files.exists(pkFile)) {
+          Files.delete(pkFile);
+        }
+      } catch (IOException e) {
+        log.error(e);
+      }
+
+      try {
+        if (Files.exists(pkFileBackup)) {
+          Files.delete(pkFileBackup);
+        }
+      } catch (IOException e) {
+        log.error(e);
+      }
+    }
+    removedPubKeyFiles.clear();
   }
 
   @Override
@@ -559,12 +598,12 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public boolean isDisabled(Player player) {
-    return getDisabledReason(player).length() > 0;
+  public boolean isBlocked(Player player) {
+    return getBlockedReason(player).length() > 0;
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public String getBlockedReason(Player player) {
     PlayerDetails details = getPlayerDetails(player.getName());
     if (details == null) {
       throw new IllegalArgumentException(I18N.getText("msg.error.playerNotInDatabase"));
@@ -804,9 +843,9 @@ public final class PasswordFilePlayerDatabase
           InvalidKeyException {
     Set<PublicKeyDetails> pkDetails = new HashSet<>();
 
+    String pkFilename = derivePublicKeyFilename(playerName);
     for (String pk : publicKeyStrings) {
       MD5Key md5Key = CipherUtil.publicKeyMD5(pk);
-      String pkFilename = derivePublicKeyFilename(playerName);
       pkDetails.add(
           new PublicKeyDetails(pk, md5Key, CipherUtil.fromPublicKeyString(pk), pkFilename));
     }
@@ -821,6 +860,10 @@ public final class PasswordFilePlayerDatabase
    * @return a file safe filename based on the player name
    */
   private String derivePublicKeyFilename(String name) {
+    if (playerDetails.containsKey(name) && playerDetails.get(name).publicKeyDetails().size() > 0) {
+      return playerDetails.get(name).publicKeyDetails().stream().findFirst().get().filename();
+    }
+
     String sanitised = name.replaceAll("[^A-Za-z0-9_\\-]", "");
     sanitised = sanitised.length() > 110 ? sanitised.substring(0, 127) : sanitised;
     Random random = new Random();

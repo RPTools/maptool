@@ -199,7 +199,7 @@ public class Players {
       String blockedReason = "";
       boolean blocked = false;
       if (supportsBlocking) {
-        blockedReason = playerDatabase.getDisabledReason(player);
+        blockedReason = playerDatabase.getBlockedReason(player);
         if (blockedReason.length() > 0) {
           blocked = true;
         }

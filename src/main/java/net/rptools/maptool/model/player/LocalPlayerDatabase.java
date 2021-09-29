@@ -119,12 +119,12 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean isDisabled(Player player) {
+  public boolean isBlocked(Player player) {
     return false;
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public String getBlockedReason(Player player) {
     return "";
   }
 

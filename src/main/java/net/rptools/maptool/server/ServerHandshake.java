@@ -41,6 +41,7 @@ import net.rptools.maptool.server.proto.ConnectionSuccessfulMsg;
 import net.rptools.maptool.server.proto.HandshakeMsg;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
 import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
+import net.rptools.maptool.server.proto.PlayerBlockedMsg;
 import net.rptools.maptool.server.proto.RoleDto;
 import net.rptools.maptool.server.proto.UseAuthTypeMsg;
 import net.rptools.maptool.util.PasswordGenerator;
@@ -133,8 +134,10 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private void sendErrorResponseAndNotify(HandshakeResponseCodeMsg errorCode) {
     var msg = HandshakeMsg.newBuilder().setHandshakeResponseCodeMsg(errorCode).build();
     sendMessage(msg);
-    currentState = State.Error;
-    notifyObservers();
+    currentState = State.PlayerBlocked;
+    // Do not notify users as it will disconnect and client won't get message instead wait
+    // for client to disconnect after getting this message, if they don't then it will fail
+    // with invalid handshake.
   }
 
   private void sendMessage(HandshakeMsg message) {
@@ -166,6 +169,10 @@ public class ServerHandshake implements Handshake, MessageHandler {
       }
 
       switch (currentState) {
+        case PlayerBlocked:
+          errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
+          sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
+          break;
         case AwaitingClientInit:
           if (msgType == HandshakeMsg.MessageTypeCase.CLIENT_INIT_MSG) {
             handle(handshakeMsg.getClientInitMsg());
@@ -272,6 +279,15 @@ public class ServerHandshake implements Handshake, MessageHandler {
       // Unknown player is sent to client as invalid password intentionally.
       errorMessage = I18N.getText("Handshake.msg.unknownPlayer", clientInitMsg.getPlayerName());
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
+      return;
+    }
+
+    if (playerDatabase.isBlocked(player)) {
+      var blockedMsg =
+          PlayerBlockedMsg.newBuilder().setReason(playerDatabase.getBlockedReason(player)).build();
+      var msg = HandshakeMsg.newBuilder().setPlayerBlockedMsg(blockedMsg).build();
+      sendMessage(msg);
+      currentState = State.Error;
       return;
     }
 
@@ -416,6 +432,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
     Error,
     Success,
     AwaitingClientInit,
-    AwaitingClientAuth
+    AwaitingClientAuth,
+    PlayerBlocked
   }
 }

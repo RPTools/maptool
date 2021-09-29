@@ -115,7 +115,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public String getBlockedReason(Player player) {
     return "";
   }
 
@@ -130,7 +130,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean isDisabled(Player player) {
+  public boolean isBlocked(Player player) {
     return false;
   }
 

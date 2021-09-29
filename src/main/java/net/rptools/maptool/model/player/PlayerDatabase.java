@@ -118,7 +118,7 @@ public interface PlayerDatabase {
    * @param player {@code true} the player to check if they have been disabled.
    * @return {@code true} if the player has been disabled.
    */
-  boolean isDisabled(Player player);
+  boolean isBlocked(Player player);
 
   /**
    * Returns the reason tha the player has been disabled, if the player has not been disabled then
@@ -127,7 +127,7 @@ public interface PlayerDatabase {
    * @param player the player to get the disabled reason for.
    * @return the reason that the player has been disabled, or empty string if they have not.
    */
-  String getDisabledReason(Player player);
+  String getBlockedReason(Player player);
 
   /**
    * Returns the known players. For many player databases this will be the players that are
