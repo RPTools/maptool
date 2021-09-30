@@ -193,7 +193,7 @@ class LibraryToken implements Library {
   private String getMacroText(String name) {
     var token = findLibrary(id);
 
-    var prop = token.getMacro(name, true);
+    var prop = token.getMacro(name, false);
     if (prop == null) {
       return null;
     } else {
