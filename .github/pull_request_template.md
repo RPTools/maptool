@@ -1,7 +1,7 @@
-### Requirements for Contributing a Bug Fix or Ehancment
+### Requirements for Contributing a Bug Fix or Enhancement
 * Fill out the template below. Any pull request that does not include enough information to be reviewed in timely manner will result in a request for you to update the pull request 
   and possibly closure of the pull request if it is not provided after this request.
-* After you create the pull request, asll status checks must pass before a maintainer will review your contribution. 
+* After you create the pull request, all status checks must pass before a maintainer will review your contribution. 
 
 
 ### Identify the Bug or Feature request
@@ -10,7 +10,7 @@ Link to the issue describing the bug of feature request.
 
 If there is not yet an issue for the bug of feature request, please open a new issue before submitting the pull request.
 
-You can link a pull reques to an issue with one of
+You can link a pull request to an issue with one of
 fixes #<issue no>
 closes #<issue no>
 resolves #<issue no>
