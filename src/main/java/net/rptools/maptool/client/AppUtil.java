@@ -18,15 +18,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
@@ -50,6 +51,8 @@ public class AppUtil {
   private static final String CLIENT_ID_FILE = "client-id";
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
+  public static final ScheduledExecutorService fileCheckExecutor =
+      new ScheduledThreadPoolExecutor(1);
 
   private static Logger log;
 
@@ -352,7 +355,21 @@ public class AppUtil {
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
-      return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+      final var visitor =
+          new SimpleFileVisitor<Path>() {
+            public long totalSize = 0;
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+              if (!attrs.isSymbolicLink()) {
+                totalSize += attrs.size();
+              }
+              return FileVisitResult.CONTINUE;
+            }
+          };
+      Files.walkFileTree(directory.toPath(), visitor);
+
+      return FileUtils.byteCountToDisplaySize(visitor.totalSize) + " ";
     } catch (Exception e) {
       e.printStackTrace();
     }

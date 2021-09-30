@@ -90,18 +90,18 @@ public class Token extends BaseModel implements Cloneable {
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
       new Gson().getAdapter(JsonObject.class);
 
-  public boolean getAllowURLAccess() {
-    if (allowURLAccess && !isLibToken()) {
-      allowURLAccess = false;
+  public boolean getAllowURIAccess() {
+    if (allowURIAccess && !isLibToken()) {
+      allowURIAccess = false;
     }
-    return allowURLAccess;
+    return allowURIAccess;
   }
 
-  public void setAllowURLAccess(boolean allowURLAccess) {
+  public void setAllowURIAccess(boolean allowURIAccess) {
     if (isLibToken()) {
-      this.allowURLAccess = allowURLAccess;
+      this.allowURIAccess = allowURIAccess;
     } else {
-      this.allowURLAccess = false;
+      this.allowURIAccess = false;
     }
   }
 
@@ -360,7 +360,7 @@ public class Token extends BaseModel implements Cloneable {
 
   private HeroLabData heroLabData;
 
-  private boolean allowURLAccess = false;
+  private boolean allowURIAccess = false;
 
   /**
    * Constructor from another token, with the option to keep the token id

@@ -112,8 +112,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "getTokenLayoutProps",
         "setTokenLayoutProps",
         "setTokenSnapToGrid",
-        "getAllowsURLAccess",
-        "setAllowsURLAccess");
+        "getAllowsURIAccess",
+        "setAllowsURIAccess");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -926,22 +926,22 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * getAllowsURLAccess(token: currentToken(), mapName = current map)
      */
-    if (functionName.equalsIgnoreCase("getAllowsURLAccess")) {
+    if (functionName.equalsIgnoreCase("getAllowsURIAccess")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       FunctionUtil.blockUntrustedMacro(functionName);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      return token.getAllowURLAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
+      return token.getAllowURIAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
      * setAllowsURLAccess(token: currentToken(), mapName = current map)
      */
-    if (functionName.equalsIgnoreCase("setAllowsURLAccess")) {
+    if (functionName.equalsIgnoreCase("setAllowsURIAccess")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       FunctionUtil.blockUntrustedMacro(functionName);
-      BigDecimal allowURLAccess = getBigDecimalFromParam(functionName, parameters, 0);
+      BigDecimal allowURIAccess = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      token.setAllowURLAccess(!allowURLAccess.equals(BigDecimal.ZERO));
+      token.setAllowURIAccess(!allowURIAccess.equals(BigDecimal.ZERO));
       return "";
     }
 

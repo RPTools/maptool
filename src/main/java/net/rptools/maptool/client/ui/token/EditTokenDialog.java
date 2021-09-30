@@ -338,7 +338,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     setLibTokenPaneEnabled(token.isLibToken());
 
-    getAllowURLAccess().setSelected(token.getAllowURLAccess());
+    getAllowURLAccess().setSelected(token.getAllowURIAccess());
 
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();
@@ -1040,7 +1040,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   public JCheckBox getAllowURLAccess() {
-    return (JCheckBox) getComponent("@allowURLAccess");
+    return (JCheckBox) getComponent("@allowURIAccess");
   }
 
   public void initSpeechPanel() {
