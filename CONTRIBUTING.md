@@ -37,42 +37,42 @@ Bugs are tracked as [GitHub Issues](https://guides.github.com/features/issues/).
 Explain the problem and include additional details to help maintainers reproduce the problem.
 * **Use a clear descriptive title** for the issue to identify the problem.
 * **Describe the exact steps which reproduce the problem** in as much detail as possible. This will help us find and fix the problem faster.
-* **Explain which behaviour you exepcted to see and why**
+* **Explain which behavior you expected to see and why**
 * **Include screenshots and animated GIFs** (where relevant) which show you following the steps and the error that occurred.
-* **If a problem wasn't triggerd by a specific action**, decribe what you were doing before the problem happened.
+* **If a problem wasn't triggered by a specific action**, describe what you were doing before the problem happened.
 * **Provide the details of the Operating System and MapTool version** you are running. 
 
-Provide more contect by answering these questions:
+Provide more context by answering these questions:
 * **Did the problem start happening recently**, for example after upgrading to a new version, or was this always a problem?
 * **Can you reliably reproduce the issue?** If not, provide details about how often the problem happens and under which conditions it normally happens.
 * **If the problem is related to assets (for example images)** does the problem happen with all assets of this type or only certain ones?
 
 
 ### Suggesting Enhancements
-This section guids you trhough submitting an enhancment suggestion/feature request for MapTool, including completely new features and minor improvements
+This section guides you through submitting an enhancement suggestion/feature request for MapTool, including completely new features and minor improvements
 to existing functionality.
-#### Before Suggesting an Enhancment.
+#### Before Suggesting an Enhancement.
 * **Perform a [cursory search][feature-issue]** to see if the problem has already been reported.
 
 
-### How Do I Submit an Ehancement Suggestion?
+### How Do I Submit an Enhancement Suggestion?
 
-Feature requests are tracked as [GitHub Issues](https://guides.github.com/features/issues/). To create a Bug Report use the [Feature Request Issue Template](https://github.com/RPTools/maptool/issues/new?assignees=&labels=feature&template=feature_request.md&title=).
+Feature requests are tracked as [GitHub Issues](https://guides.github.com/features/issues/). To create a Feature Request use the [Feature Request Issue Template](https://github.com/RPTools/maptool/issues/new?assignees=&labels=feature&template=feature_request.md&title=).
 
 Explain your request 
 * **Use a clear and descriptive title** for the issue to identify the suggestion.
-* **Provide a step-by-step description of the ehancement** in as much detail as possible.
-* **Provide specifc examples to demosntate**
-* **Describe thge current behaviour** and **explain which behaviour you exepcted to see instead** and why.
-* **Include screenshots and animated GIFs** which help to demonstate the steps or point out how things could work.
-* **Explain why this enhacment would be useful** to other MapTool users.
+* **Provide a step-by-step description of the enhancement** in as much detail as possible.
+* **Provide specific examples to demonstrate**
+* **Describe the current behavior** and **explain which behavior you expected to see instead** and why.
+* **Include screenshots and animated GIFs** which help to demonstrate the steps or point out how things could work.
+* **Explain why this enhancement would be useful** to other MapTool users.
 * **Specify which version of MapTool you are using.**
 
 
 ### Your First Code Contribution
 Unsure where to begin contributing code to MapTool? You can start by looking through these `a good first issue` and `up for grabs` issues.
 * [Good First Issues][good-first-issue] - issues which should be good for people who are not yet familiar with MapTool code base.
-* [Up For Graps Issues][up-for-grabs] - issues which require a little but not much familiarity with the MapTool code base and dont require extensive modifications.
+* [Up For Grabs Issues][up-for-grabs] - issues which require a little but not much familiarity with the MapTool code base and don't require extensive modifications.
 
 ### Local Development
 MapTool can be developed locally, for instructions on how to do this see [Contributor Setup Instructions For MapTool][contributor-setup-for-maptool]
@@ -81,9 +81,9 @@ MapTool can be developed locally, for instructions on how to do this see [Contri
 ### Pull Requests
 
 Please follow these steps to have your contribution considered by the maintainers:
-1. Fill out the relevent details in the pull request template.
+1. Fill out the relevant details in the pull request template.
 2. Follow the [styleguides](#styleguides)
-3. After you sumit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing
+3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing
 <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you.</details>
 
 While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
@@ -92,13 +92,13 @@ While the prerequisites above must be satisfied prior to having your pull reques
 
 ## Styleguides
 ### Coding Styleguids
-Please follow the [Coding Styleguides][coding-style-guides] to ensure that the codebase is consistant which makes it easier to read and maintain for everyone.
+Please follow the [Coding Styleguides][coding-style-guides] to ensure that the codebase is consistent which makes it easier to read and maintain for everyone.
 
 
 ## Asking Questions
 If you have questions not answered in these guidelines, need further help getting started, or need help working on an issue then you can 
 * [Ask on the RPTools Discord Sever](https://discord.gg/gevEtpC)
-* [Sumbit a GitHib Issue as a question](https://github.com/RPTools/maptool/issues/new?assignees=&labels=question&template=submit-a-question.md&title=)
+* [Submit a GitHib Issue as a question](https://github.com/RPTools/maptool/issues/new?assignees=&labels=question&template=submit-a-question.md&title=)
 
 
 [bug-issue]:https://github.com/RPTools/maptool/labels/bug
