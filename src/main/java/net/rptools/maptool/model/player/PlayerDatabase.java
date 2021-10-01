@@ -17,13 +17,11 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 /**
@@ -120,7 +118,7 @@ public interface PlayerDatabase {
    * @param player {@code true} the player to check if they have been disabled.
    * @return {@code true} if the player has been disabled.
    */
-  boolean isDisabled(Player player);
+  boolean isBlocked(Player player);
 
   /**
    * Returns the reason tha the player has been disabled, if the player has not been disabled then
@@ -129,7 +127,7 @@ public interface PlayerDatabase {
    * @param player the player to get the disabled reason for.
    * @return the reason that the player has been disabled, or empty string if they have not.
    */
-  String getDisabledReason(Player player);
+  String getBlockedReason(Player player);
 
   /**
    * Returns the known players. For many player databases this will be the players that are
@@ -146,9 +144,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are currently connected.
    */
-  default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
-    return new HashSet<>(MapTool.getPlayerSetThreadSafe());
-  }
+  Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException;
 
   /**
    * Returns if this player database records information about only currently connected players.
@@ -180,11 +176,41 @@ public interface PlayerDatabase {
       throws ExecutionException, InterruptedException;
 
   /**
+   * Returns the {@link String} encoding of the public keys for a player.
+   *
+   * @param name The name of the player to return the public keys of.
+   * @return the {@link String} encoding of the public keys for a player.
+   */
+  Set<String> getEncodedPublicKeys(String name);
+
+  /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
-   * this will not return {@code true} for every input but only for those that are logged on.
+   * this will not return {@code true} for every input but only for those that are actually known.
    *
    * @param name the name of the player to check for.
    * @return {@code true} if the player is registered, {@code false} otherwise.
    */
   boolean isPlayerRegistered(String name) throws InterruptedException, InvocationTargetException;
+
+  /**
+   * Inform the database that the player has signed in.
+   *
+   * @param player the player that has signed in.
+   */
+  void playerSignedIn(Player player);
+
+  /**
+   * Inform the database that the player has signed out.
+   *
+   * @param player the player that has signed out.
+   */
+  void playerSignedOut(Player player);
+
+  /**
+   * Returns if a player is connected or not.
+   *
+   * @param name the player to check.
+   * @return if a player is connected or not.
+   */
+  boolean isPlayerConnected(String name);
 }

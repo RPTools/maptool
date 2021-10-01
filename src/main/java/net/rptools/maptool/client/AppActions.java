@@ -93,6 +93,7 @@ import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
+import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -119,6 +120,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
+import net.rptools.maptool.model.player.PersistedPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -2407,9 +2409,14 @@ public class AppActions {
                           dialog.getPort(),
                           prefs.getServerName(),
                           dialog.getServer());
+
+                  String password =
+                      prefs.getUsePublicKey()
+                          ? new PasswordGenerator().getPassword()
+                          : prefs.getPassword();
                   MapTool.createConnection(
                       config,
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()),
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
                       () -> {
                         MapTool.getFrame().hideGlassPane();
                         MapTool.getFrame()
@@ -2482,6 +2489,24 @@ public class AppActions {
       MapTool.showError("msg.error.failedStartPersonalServer", e);
     }
   }
+
+  public static final Action PLAYER_DATABASE =
+      new DefaultClientAction() {
+        {
+          init("action.playerDatabase");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return PlayerDatabaseFactory.getCurrentPlayerDatabase()
+              instanceof PersistedPlayerDatabase;
+        }
+
+        @Override
+        protected void executeAction() {
+          new PlayerDatabaseDialog().show();
+        }
+      };
 
   public static final Action LOAD_CAMPAIGN =
       new DefaultClientAction() {
