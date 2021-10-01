@@ -2409,9 +2409,12 @@ public class AppActions {
                           dialog.getPort(),
                           prefs.getServerName(),
                           dialog.getServer());
+
+                  String password = prefs.getUsePublicKey() ?
+                      new PasswordGenerator().getPassword() : prefs.getPassword();
                   MapTool.createConnection(
                       config,
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()),
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
                       () -> {
                         MapTool.getFrame().hideGlassPane();
                         MapTool.getFrame()
