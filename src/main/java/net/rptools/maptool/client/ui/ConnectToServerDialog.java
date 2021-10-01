@@ -88,10 +88,12 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
             I18N.getText("ConnectToServerDialog.msg.title"), MapTool.getFrame(), this);
     bind(new ConnectToServerDialogPreferences());
     getRootPane().setDefaultButton(getOKButton());
-    getUsePublicKeyCheckBox().addItemListener(l -> {
-      boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
-      getPasswordTextField().setEnabled(!usePublicKey);
-    });
+    getUsePublicKeyCheckBox()
+        .addItemListener(
+            l -> {
+              boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
+              getPasswordTextField().setEnabled(!usePublicKey);
+            });
 
     boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
     getPasswordTextField().setEnabled(!usePublicKey);
@@ -259,7 +261,9 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return (JTabbedPane) getComponent("tabPane");
   }
 
-  public JCheckBox getUsePublicKeyCheckBox() {return (JCheckBox) getComponent("@usePublicKey"); }
+  public JCheckBox getUsePublicKeyCheckBox() {
+    return (JCheckBox) getComponent("@usePublicKey");
+  }
 
   private void handleOK() {
     String username = getUsernameTextField().getText().trim();

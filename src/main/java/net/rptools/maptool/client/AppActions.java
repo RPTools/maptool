@@ -2410,8 +2410,10 @@ public class AppActions {
                           prefs.getServerName(),
                           dialog.getServer());
 
-                  String password = prefs.getUsePublicKey() ?
-                      new PasswordGenerator().getPassword() : prefs.getPassword();
+                  String password =
+                      prefs.getUsePublicKey()
+                          ? new PasswordGenerator().getPassword()
+                          : prefs.getPassword();
                   MapTool.createConnection(
                       config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
