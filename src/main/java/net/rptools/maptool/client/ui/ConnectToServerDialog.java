@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JTabbedPane;
@@ -87,6 +88,15 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
             I18N.getText("ConnectToServerDialog.msg.title"), MapTool.getFrame(), this);
     bind(new ConnectToServerDialogPreferences());
     getRootPane().setDefaultButton(getOKButton());
+    getUsePublicKeyCheckBox()
+        .addItemListener(
+            l -> {
+              boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
+              getPasswordTextField().setEnabled(!usePublicKey);
+            });
+
+    boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
+    getPasswordTextField().setEnabled(!usePublicKey);
     dialog.showDialog();
   }
 
@@ -251,13 +261,17 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return (JTabbedPane) getComponent("tabPane");
   }
 
+  public JCheckBox getUsePublicKeyCheckBox() {
+    return (JCheckBox) getComponent("@usePublicKey");
+  }
+
   private void handleOK() {
     String username = getUsernameTextField().getText().trim();
     if (username.length() == 0) {
       MapTool.showError("ServerDialog.error.username"); // $NON-NLS-1$
       return;
     }
-    if (getPasswordTextField().getText().length() == 0) {
+    if (!getUsePublicKeyCheckBox().isSelected() && getPasswordTextField().getText().length() == 0) {
       MapTool.showError("ServerDialog.error.noConnectPassword"); // $NON-NLS-1$
       return;
     }

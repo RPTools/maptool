@@ -25,6 +25,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -475,7 +476,7 @@ public class CipherUtil {
     for (String line : concatKeys.split("\n")) {
       String strippedLine = line.replaceAll("\\s", "");
       if (strippedLine.length() > 0 && !strippedLine.startsWith("#")) {
-        sb.append(line);
+        sb.append(line).append("\n");
         if (line.equals(PUBLIC_KEY_LAST_LINE)) {
           publicKeys.add(sb.toString());
           sb.setLength(0);
@@ -485,7 +486,7 @@ public class CipherUtil {
     return publicKeys.toArray(new String[0]);
   }
 
-  public static String concatenatePublicKeys(List<String> keys) {
+  public static String concatenatePublicKeys(Collection<String> keys) {
     return String.join("\n\n", keys);
   }
 
