@@ -53,7 +53,11 @@ class LibraryToken implements Library {
    * @return if the library at the path is handled by the LibraryToken class.
    */
   static boolean handles(URL path) {
-    return path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL);
+    if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
+      return !new LibraryManager().usesReservedPrefix(path.getHost());
+    } else {
+      return false;
+    }
   }
 
   /**
