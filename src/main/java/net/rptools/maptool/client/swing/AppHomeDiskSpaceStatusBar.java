@@ -17,16 +17,13 @@ package net.rptools.maptool.client.swing;
 import java.awt.event.MouseAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.language.I18N;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +32,6 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static final Logger LOGGER = LogManager.getLogger(AppHomeDiskSpaceStatusBar.class);
   private static final File CACHE_DIR = AppUtil.getAppHome();
   private static final long POLLING_INTERVAL = 60000;
-  private static long lastChecked = 0;
   private static Icon diskSpaceIcon;
 
   static {
@@ -62,30 +58,8 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
           }
         });
 
-    try {
-      FileAlterationObserver observer = new FileAlterationObserver(CACHE_DIR);
-      FileAlterationMonitor monitor = new FileAlterationMonitor(POLLING_INTERVAL);
-      FileAlterationListener listener =
-          new FileAlterationListenerAdaptor() {
-            // Is triggered when a file is created in the monitored folder
-            @Override
-            public void onFileCreate(File file) {
-              update();
-            }
-
-            // Is triggered when a file is deleted from the monitored folder
-            @Override
-            public void onFileDelete(File file) {
-              update();
-            }
-          };
-
-      observer.addListener(listener);
-      monitor.addObserver(observer);
-      monitor.start();
-    } catch (Exception e) {
-      LOGGER.error("Unable to register file change listener for " + CACHE_DIR.getAbsolutePath());
-    }
+    AppUtil.fileCheckExecutor.scheduleWithFixedDelay(
+        this::update, POLLING_INTERVAL, POLLING_INTERVAL, TimeUnit.MILLISECONDS);
   }
 
   public void clear() {
@@ -93,12 +67,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   }
 
   public void update() {
-    // Only update once per polling interval as event will fire for every file created/deleted since
-    // last interval
-    if (System.currentTimeMillis() - lastChecked >= POLLING_INTERVAL) {
-      setText(AppUtil.getFreeDiskSpace(CACHE_DIR));
-      lastChecked = System.currentTimeMillis();
-      LOGGER.debug("AppHomeDiskSpaceStatusBar updated...");
-    }
+    setText(AppUtil.getFreeDiskSpace(CACHE_DIR));
+    LOGGER.debug("AppHomeDiskSpaceStatusBar updated...");
   }
 }

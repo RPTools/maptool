@@ -62,6 +62,7 @@ import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
 import net.rptools.maptool.client.swing.SplashScreen;
@@ -999,6 +1000,7 @@ public class MapTool {
     MapTool.getFrame().getGmPanel().reset();
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    JSScriptEngine.resetContexts();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 

@@ -15,8 +15,12 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.*;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -24,13 +28,16 @@ import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.*;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
-import net.rptools.parser.function.AbstractFunction;
+import net.rptools.parser.function.*;
 import org.graalvm.polyglot.*;
 
 public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSpecialVariables {
+  private static final String NOT_ENOUGH_PARAM =
+      "Function '%s' requires at least %d parameters; %d were provided.";
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
   private static final MacroJavaScriptBridge instance = new MacroJavaScriptBridge();
@@ -40,7 +47,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   private Stack<List<Object>> callingArgsStack = new Stack<>();
 
   private MacroJavaScriptBridge() {
-    super(1, UNLIMITED_PARAMETERS, "js.eval", "js.evala");
+    super(
+        1,
+        UNLIMITED_PARAMETERS,
+        "js.eval",
+        "js.evalNS",
+        "js.evalURI",
+        "js.removeNS",
+        "js.createNS");
   }
 
   public static MacroJavaScriptBridge getInstance() {
@@ -52,54 +66,91 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     variableResolver = (MapToolVariableResolver) resolver;
-    if ("js.eval".equals(functionName)) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-      }
-      String script = args.get(0).toString();
-      List<Object> scriptArgs = new ArrayList<>();
+    String contextName = null;
 
-      if (args.size() > 1) {
-        for (int i = 1; i < args.size(); i++) {
-          scriptArgs.add(args.get(i));
-        }
+    if ("js.evalNS".equals(functionName) || "js.evalURI".equals(functionName)) {
+      if (args.size() < 2) {
+        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
       }
+      contextName = (String) args.remove(0);
+    }
 
-      callingArgsStack.push(scriptArgs);
+    if ("js.removeNS".equals(functionName)) {
+      contextName = (String) args.remove(0);
+      JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
+      return "removed";
+    }
+    if ("js.createNS".equals(functionName)) {
+      contextName = (String) args.remove(0);
+      boolean makeTrusted = MapTool.getParser().isMacroTrusted();
+      if (args.size() > 0) {
+        makeTrusted = ((int) args.remove(0)) > 0;
+      }
+      JSScriptEngine.registerContext(
+          contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
+      return "created";
+    }
+
+    String script;
+    if ("js.evalURI".equals(functionName)) {
+      URL url;
       try {
-        return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
-      } catch (PolyglotException e) {
-        Throwable je = e.asHostException();
-        ParserException pe = (ParserException) je;
-        if (pe != null) {
-          throw pe;
-        }
-        throw new ParserException(je);
-      } catch (ScriptException e) {
+        url = new URL(args.get(0).toString());
+      } catch (MalformedURLException e) {
         throw new ParserException(e);
-      } finally {
-        callingArgsStack.pop();
+      }
+      Optional<Library> library;
+      try {
+        library = new LibraryManager().getLibrary(url).get();
+        if (library.isPresent()) {
+          script = library.get().readAsString(url).get();
+        } else {
+          throw new ParserException(I18N.getText("libUIr.invalidLibToken", args.get(0).toString()));
+        }
+      } catch (ExecutionException | InterruptedException | IOException e) {
+        throw new ParserException(e);
+      }
+
+    } else {
+      script = args.get(0).toString();
+    }
+    List<Object> scriptArgs = new ArrayList<>();
+
+    if (args.size() > 1) {
+      for (int i = 1; i < args.size(); i++) {
+        scriptArgs.add(args.get(i));
       }
     }
 
-    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+    callingArgsStack.push(scriptArgs);
+    try {
+      return JavaScriptToMTScriptType(
+          JSScriptEngine.getJSScriptEngine().evalScript(contextName, script));
+    } catch (PolyglotException e) {
+      Throwable je = e.asHostException();
+      ParserException pe = (ParserException) je;
+      if (pe != null) {
+        throw pe;
+      }
+      throw new ParserException(je);
+    } catch (ScriptException e) {
+      throw new ParserException(e);
+    } finally {
+      callingArgsStack.pop();
+    }
   }
 
   public Object HostObjectToMTScriptType(Object obj, ArrayList seen) {
-
-    if (obj instanceof MapToolJSAPIInterface) {
-      MapToolJSAPIInterface maptoolWrapper = (MapToolJSAPIInterface) obj;
+    if (obj instanceof MapToolJSAPIInterface maptoolWrapper) {
       return maptoolWrapper.serializeToString();
     }
     if (obj.getClass().isArray()) {
       obj = Arrays.asList(obj);
     }
-    if (obj instanceof List) {
-      List list = (List) obj;
+    if (obj instanceof List list) {
       ArrayList outList = new ArrayList();
       for (Object li : list) {
-        if (li instanceof Value) {
-          Value val = (Value) li;
+        if (li instanceof Value val) {
           outList.add(ValueToMTScriptType(val, seen));
         } else {
           outList.add(HostObjectToMTScriptType(li, seen));
@@ -118,8 +169,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         } else {
           key = HostObjectToMTScriptType(key, seen);
         }
-        if (value instanceof Value) {
-          Value val = (Value) value;
+        if (value instanceof Value val) {
           value = ValueToMTScriptType(val, seen);
         } else {
           value = HostObjectToMTScriptType(value, seen);
