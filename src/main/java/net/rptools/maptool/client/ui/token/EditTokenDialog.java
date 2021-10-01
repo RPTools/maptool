@@ -102,6 +102,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.model.framework.LibraryConstants;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
@@ -139,6 +140,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
+  private final LibraryConstants libraryConstants = new LibraryConstants();
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
@@ -204,7 +206,32 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getTokenVblPanel().reset(token);
 
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    setLibTokenPaneEnabled(token.isLibToken());
+    validateLibTokenURIAccess(getNameField().getName());
     dialog.showDialog();
+  }
+
+  private void validateLibTokenURIAccess(String name) {
+    if (!name.toLowerCase().startsWith("lib:")) {
+      getLibTokenURIErrorLabel()
+          .setText(I18N.getText("EditTokenDialog.libTokenURI.error.notLibToken", name));
+      getAllowURLAccess().setEnabled(false);
+      return;
+    } else {
+      if (libraryConstants.usesReservedPrefix(name.substring(4))) {
+        getLibTokenURIErrorLabel()
+            .setText(
+                I18N.getText(
+                    "EditTokenDialog.libTokenURI.error.reserved",
+                    libraryConstants.getReservedPrefix(name.substring(4))));
+        getAllowURLAccess().setEnabled(false);
+        return;
+      }
+    }
+
+    getAllowURLAccess().setEnabled(true);
+    getLibTokenURIErrorLabel().setText(" ");
   }
 
   @Override
@@ -464,7 +491,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         .addDocumentListener(
             new DocumentListener() {
               private void checkName() {
-                setLibTokenPaneEnabled(Token.isValidLibTokenName(getNameField().getText()));
+                String name = getNameField().getText();
+                setLibTokenPaneEnabled(Token.isValidLibTokenName(name));
+                validateLibTokenURIAccess(name);
               }
 
               @Override
@@ -614,6 +643,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public JList<TerrainModifierOperation> getTerrainModifiersIgnoredList() {
     return (JList<TerrainModifierOperation>) getComponent("terrainModifiersIgnored");
+  }
+
+  public JLabel getLibTokenURIErrorLabel() {
+    return (JLabel) getComponent("Label.LibURIError");
   }
 
   public void initOKButton() {
@@ -786,6 +819,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     token.setHeroLabData(heroLabData);
 
+    // URI Access
+    token.setAllowURIAccess(getAllowURLAccess().isEnabled() && getAllowURLAccess().isSelected());
     // OTHER
     tokenSaved = true;
 
