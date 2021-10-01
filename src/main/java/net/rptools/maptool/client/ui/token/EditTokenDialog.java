@@ -102,7 +102,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.framework.LibraryConstants;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
@@ -140,7 +140,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
-  private final LibraryConstants libraryConstants = new LibraryConstants();
+  private final LibraryManager libraryManager = new LibraryManager();
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
@@ -219,12 +219,18 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getAllowURLAccess().setEnabled(false);
       return;
     } else {
-      if (libraryConstants.usesReservedPrefix(name.substring(4))) {
+      if (libraryManager.usesReservedPrefix(name.substring(4))) {
         getLibTokenURIErrorLabel()
             .setText(
                 I18N.getText(
-                    "EditTokenDialog.libTokenURI.error.reserved",
-                    libraryConstants.getReservedPrefix(name.substring(4))));
+                    "macro.setAllowsURIAccess.reservedPrefix",
+                    libraryManager.getReservedPrefix(name.substring(4))));
+        getAllowURLAccess().setEnabled(false);
+        return;
+      } else if (libraryManager.usesReservedName(name.substring(4))) {
+        getLibTokenURIErrorLabel()
+            .setText(I18N.getText("EditTokenDialog.libTokenURI.error.reserved", name));
+
         getAllowURLAccess().setEnabled(false);
         return;
       }

@@ -16,10 +16,63 @@ package net.rptools.maptool.model.framework;
 
 import java.net.URL;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /** Class to manage the framework libraries. */
 public class LibraryManager {
+
+  /** The reserved library name prefixes. */
+  private static final Set<String> RESERVED_PREFIXES =
+      Set.of(
+          "rptools.",
+          "maptool.",
+          "maptools.",
+          "tokentool.",
+          "net.rptools.",
+          "internal.",
+          "_",
+          "builtin.",
+          "standard.",
+          ".");
+
+  /** The reserved library names. */
+  private static final Set<String> RESERVED_NAMES =
+      Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
+
+  /**
+   * Checks to see if this library name used a reserved prefix.
+   *
+   * @param name the name of the library
+   * @return {@code true} if the name starts with a reserved prefix.
+   */
+  public boolean usesReservedPrefix(String name) {
+    String lowerName = name.toLowerCase();
+    return RESERVED_PREFIXES.stream().anyMatch(lowerName::startsWith);
+  }
+
+  /**
+   * Checks to see if this library name is reserved.
+   *
+   * @param name the name of the library
+   * @return {@code true} if the name is reserved.
+   */
+  public boolean usesReservedName(String name) {
+    String lowerName = name.toLowerCase();
+    return RESERVED_NAMES.stream().anyMatch(lowerName::equals);
+  }
+
+  /**
+   * Returns the reserved prefix this library name starts with.
+   *
+   * @param name the name of the library.
+   * @return the reserved prefix this library starts with or {@code null} if it does not start with
+   *     a reserved prefix.
+   */
+  public String getReservedPrefix(String name) {
+    String lowerName = name.toLowerCase();
+    return RESERVED_PREFIXES.stream().filter(lowerName::startsWith).findFirst().orElse("");
+  }
 
   /**
    * Returns the {@link Library} for the specified path (e.g. lib://macro/mymacro).

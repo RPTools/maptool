@@ -37,6 +37,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -941,6 +942,20 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.blockUntrustedMacro(functionName);
       BigDecimal allowURIAccess = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      if (!Token.isValidLibTokenName(token.getName())) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.notLibToken", token.getName()));
+      }
+      var libraryManager = new LibraryManager();
+      String name = token.getName().substring(4);
+      if (libraryManager.usesReservedPrefix(name)) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.setAllowsURIAccess.reservedPrefix", libraryManager.getReservedPrefix(name)));
+      } else if (libraryManager.usesReservedName(name)) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.reserved", token.getName()));
+      }
       token.setAllowURIAccess(!allowURIAccess.equals(BigDecimal.ZERO));
       return "";
     }
