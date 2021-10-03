@@ -218,7 +218,7 @@ public final class PasswordFilePlayerDatabase
         }
         return players;
       } catch (IOException ioe) {
-        throw new PasswordDatabaseException("msg.err.passFile.errorReadingFile", ioe);
+        throw new PasswordDatabaseException("msg.error.passFile.errorReadingFile", ioe);
       }
     } finally {
       passwordFileLock.unlock();
@@ -233,7 +233,9 @@ public final class PasswordFilePlayerDatabase
       if (dirty.compareAndSet(true, false)) {
 
         try {
-          Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(), REPLACE_EXISTING);
+          if (passwordFile.exists()) {
+            Files.copy(passwordFile.toPath(), backupPasswordFile.toPath(), REPLACE_EXISTING);
+          }
         } catch (IOException ioe) {
           String msg = I18N.getText("msg.err.passFile.errorCopyingBackup");
           log.error(msg, ioe);
@@ -293,6 +295,16 @@ public final class PasswordFilePlayerDatabase
   private void writePublicKeys(PlayerDetails playerDetails) throws IOException {
     try {
       passwordFileLock.lock();
+      File keyDir = passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR).toFile();
+      if (!keyDir.exists()) {
+        keyDir.mkdirs();
+      }
+      File keyBackupDir =
+          passwordFile.getParentFile().toPath().resolve(PUBLIC_KEY_DIR).resolve("backup").toFile();
+      if (!keyBackupDir.exists()) {
+        keyBackupDir.mkdirs();
+      }
+
       Set<PublicKeyDetails> publicKeyDetails = playerDetails.publicKeyDetails();
 
       // First get all the public keys files with a public key marked dirty
@@ -550,8 +562,8 @@ public final class PasswordFilePlayerDatabase
       removeOldPublicKeys();
       savedDetails.clear();
       savedDetails.putAll(playerDetails);
-      dirty.set(true);
     }
+    dirty.set(true);
     writePasswordFile();
   }
 

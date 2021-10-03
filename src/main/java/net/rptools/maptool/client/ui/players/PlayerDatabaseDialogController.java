@@ -212,7 +212,7 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         | InvalidKeySpecException
         | PasswordDatabaseException
         | InvalidKeyException e) {
-      MapTool.showError("playerDB.dialog.error.undoingChanges", e);
+      MapTool.showError("playerDB.dialog.error.savingChanges", e);
     }
     ;
     Players.removePropertyChangeListener(changeListener);
