@@ -105,7 +105,8 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
         if (library.isPresent()) {
           script = library.get().readAsString(url).get();
         } else {
-          throw new ParserException(I18N.getText("libUIr.invalidLibToken", args.get(0).toString()));
+          throw new ParserException(
+              I18N.getText("macro.function.jsevalURI.invalidURI", args.get(0).toString()));
         }
       } catch (ExecutionException | InterruptedException | IOException e) {
         throw new ParserException(e);
