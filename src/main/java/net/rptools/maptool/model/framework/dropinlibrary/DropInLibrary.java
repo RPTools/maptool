@@ -1,10 +1,10 @@
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.framework.dropinlibrary;
 
 import java.util.Objects;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.proto.LibraryBundleDto;
+import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
-public class LibraryBundle {
+public class DropInLibrary {
 
   private final String name;
   private final String version;
@@ -14,7 +14,7 @@ public class LibraryBundle {
   private final String license;
 
 
-  private LibraryBundle(LibraryBundleDto dto) {
+  private DropInLibrary(DropInLibraryDto dto) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version = Objects.requireNonNull(dto.getVersion(), I18N.getText("library.error.emptyVersion",
@@ -26,8 +26,8 @@ public class LibraryBundle {
   }
 
 
-  public static LibraryBundle fromDto(LibraryBundleDto dto) {
-    return new LibraryBundle(dto);
+  public static DropInLibrary fromDto(DropInLibraryDto dto) {
+    return new DropInLibrary(dto);
   }
 
   public String getName() {

@@ -117,6 +117,7 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
@@ -2847,8 +2848,6 @@ public class AppActions {
           if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             try {
               File mapFile = chooser.getSelectedFile();
-              // Jamz: Bug fix, would not add extension if map name had a . in it...
-              // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               if (mapFile.exists()) {
                 if (!MapTool.confirm("msg.confirm.fileExists")) {
@@ -3232,6 +3231,37 @@ public class AppActions {
               });
         }
       };
+
+
+  public static final Action IMPORT_DROP_IN_LIBRARY =
+      new DefaultClientAction() {
+        {
+          init("action.importLibrary");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.isHostingServer()
+              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+        }
+
+        @Override
+        protected void executeAction() {
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(DropInLibraryImporter.getDropInLibraryFileFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File libFile = chooser.getSelectedFile();
+            try {
+              var dropInLibraryImporter = new DropInLibraryImporter().importFromFile(libFile);
+            } catch (IOException ioException) {
+              MapTool.showError("library.import.ioError", ioException);
+            }
+          }
+        }
+    };
 
   public static final Action EXIT =
       new DefaultClientAction() {

@@ -7,7 +7,7 @@ option java_package = "net.rptools.maptool.model.framework.proto";
 option java_outer_classname = "LibraryProtos";
 
 
-message LibraryBundleDto {
+message DropInLibraryDto {
   string name = 17;
   string version = 18;
   string website = 19;
