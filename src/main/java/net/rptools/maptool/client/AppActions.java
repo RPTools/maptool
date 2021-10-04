@@ -3232,7 +3232,6 @@ public class AppActions {
         }
       };
 
-
   public static final Action IMPORT_DROP_IN_LIBRARY =
       new DefaultClientAction() {
         {
@@ -3261,7 +3260,7 @@ public class AppActions {
             }
           }
         }
-    };
+      };
 
   public static final Action EXIT =
       new DefaultClientAction() {
