@@ -2373,7 +2373,9 @@ public class AppActions {
 
           final ConnectToServerDialog dialog = new ConnectToServerDialog();
           dialog.showDialog();
-          if (!dialog.accepted()) return;
+          if (!dialog.accepted()) {
+            return;
+          }
 
           ServerDisconnectHandler.disconnectExpected = true;
           LOAD_MAP.setSeenWarning(false);
@@ -3265,23 +3267,6 @@ public class AppActions {
         protected void executeAction() {
           MapTool.getFrame()
               .setPaintDrawingMeasurement(!MapTool.getFrame().isPaintDrawingMeasurement());
-        }
-      };
-
-  public static final Action TOGGLE_WEBRTC =
-      new AdminClientAction() {
-        {
-          init("action.toggleUseWebRTC");
-        }
-
-        @Override
-        public boolean isSelected() {
-          return AppState.useWebRTC();
-        }
-
-        @Override
-        protected void executeAction() {
-          AppState.setUseWebRTC(!AppState.useWebRTC());
         }
       };
 

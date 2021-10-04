@@ -33,11 +33,14 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.MapToolRegistry.SeverConnectionDetails;
@@ -65,7 +68,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   /** This is the default constructor */
   public ConnectToServerDialog() {
     super("net/rptools/maptool/client/ui/forms/connectToServerDialog.xml");
-    setPreferredSize(new Dimension(400, 400));
+    setPreferredSize(new Dimension(600, 500));
     panelInit();
   }
 
@@ -97,6 +100,30 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
     boolean usePublicKey = getUsePublicKeyCheckBox().isSelected();
     getPasswordTextField().setEnabled(!usePublicKey);
+    getServerNameTextField()
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              private void checkName() {
+                getUseWebRTCCheckBox().setEnabled(getServerNameTextField().getText().length() > 0);
+              }
+
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                checkName();
+              }
+            });
+    getUseWebRTCCheckBox().setEnabled(getServerNameTextField().getText().length() > 0);
     dialog.showDialog();
   }
 
@@ -237,6 +264,10 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     getRefreshButton().addActionListener(e -> updateRemoteServerList());
   }
 
+  public JCheckBox getUseWebRTCCheckBox() {
+    return (JCheckBox) getComponent("@useWebRTC");
+  }
+
   public JTextField getUsernameTextField() {
     return (JTextField) getComponent("@username");
   }
@@ -349,7 +380,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     try {
       InetAddress server = InetAddress.getByName(hostname);
       InetAddress extAddress = InetAddress.getByName(externalAddress);
-      if (extAddress != null && extAddress.equals(server)) {
+      if (extAddress != null && extAddress.equals(server) && !getUseWebRTCCheckBox().isSelected()) {
         boolean yes =
             MapTool.confirm(
                 "ConnectToServerDialog.warning.doNotUseExternalAddress",
@@ -362,6 +393,8 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     }
     if (commit()) {
       accepted = true;
+      JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
+      AppState.setUseWebRTC(useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
       dialog.closeDialog();
     }
   }
