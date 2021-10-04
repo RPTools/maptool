@@ -15,9 +15,12 @@
 package net.rptools.maptool.model.framework;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
 
 /** Class to manage the framework libraries. */
 public class LibraryManager {
@@ -39,6 +42,9 @@ public class LibraryManager {
   /** The reserved library names. */
   private static final Set<String> RESERVED_NAMES =
       Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
+
+  /** Drop in libraries */
+  private static final Map<String, DropInLibrary> dropInLibraries = new ConcurrentHashMap<>();
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -101,4 +107,6 @@ public class LibraryManager {
       return CompletableFuture.completedFuture(Boolean.FALSE);
     }
   }
+
+  public void addDropInLibrary(DropInLibrary library) {}
 }

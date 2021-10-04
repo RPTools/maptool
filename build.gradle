@@ -28,6 +28,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'

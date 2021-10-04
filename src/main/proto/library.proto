@@ -11,7 +11,7 @@ message DropInLibraryDto {
   string name = 17;
   string version = 18;
   string website = 19;
-  string git_url = 20;
-  string authors = 21;
+  string github_url = 20;
+  repeated string authors = 21;
   string license = 22;
 }

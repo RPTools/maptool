@@ -20,7 +20,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -37,7 +39,11 @@ class LibraryToken implements Library {
   private static final String LIBRARY_PROTOCOL = "lib";
 
   /** The name of the property that holds the library version. */
-  private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
+  private static final String LIB_VERSION_PROPERTY_NAME   = "libversion";
+  private static final String LIB_AUTHORS_PROPERTY_NAME   = "libauthors";
+  private static final String LIB_WEBSITE_PROPERTY_NAME   = "libwebsite";
+  private static final String LIB_GITHUBURL_PROPERTY_NAME = "libgithuburl";
+  private static final String LIB_LICENSE_PROPERTY_NAME   = "liblicense";
 
   /** The version number to return if the lin:token version is unknown. */
   private static final String LIB_VERSION_UNKNOWN = "unknown";
@@ -89,10 +95,11 @@ class LibraryToken implements Library {
     return new ThreadExecutionHelper<String>()
         .runOnSwingThread(
             () -> {
-              String version = findLibrary(id).getProperty(LIB_VERSION_PROPERTY_NAME).toString();
-              return version != null && version.length() > 0 ? version : LIB_VERSION_UNKNOWN;
+              String version = getProperty(LIB_VERSION_PROPERTY_NAME, LIB_VERSION_UNKNOWN);
+              return version.isEmpty() ? LIB_VERSION_UNKNOWN : version;
             });
   }
+
 
   @Override
   public CompletableFuture<Boolean> locationExists(URL location) throws IOException {
@@ -148,6 +155,32 @@ class LibraryToken implements Library {
 
               return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
             });
+  }
+
+  @Override
+  public CompletableFuture<String> getWebSite() {
+    return new ThreadExecutionHelper<String>()
+            .runOnSwingThread(() -> getProperty(LIB_VERSION_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getGitHubUrl() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_GITHUBURL_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String[]> getAuthors() {
+    return new ThreadExecutionHelper<String[]>()
+        .runOnSwingThread(() -> {
+          return Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(",")).map(String::trim).toArray(String[]::new);
+        });
+  }
+
+  @Override
+  public CompletableFuture<String> getLicense() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_LICENSE_PROPERTY_NAME, ""));
   }
 
   /**
@@ -216,6 +249,19 @@ class LibraryToken implements Library {
     var token = findLibrary(id);
 
     return token.getProperty(name).toString();
+  }
+
+  /**
+   *
+   * Returns the property value for the specified name, Will return null if the property does not
+   * exist.
+   *
+   * @param name the name of the property.
+   * @param defaultValue the default value to return if the property is null.
+   * @return the property value for the specified name.
+   */
+  private String getProperty(String name, String defaultValue) {
+    return Objects.requireNonNullElse(getProperty(name), defaultValue);
   }
 
   /** Enumeration for location types. */

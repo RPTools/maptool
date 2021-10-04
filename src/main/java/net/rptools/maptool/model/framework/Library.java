@@ -55,4 +55,12 @@ public interface Library {
    * @throws IOException if there is an io error reading the location.
    */
   CompletableFuture<InputStream> read(URL location) throws IOException;
+
+  CompletableFuture<String> getWebSite();
+
+  CompletableFuture<String> getGitHubUrl();
+
+  CompletableFuture<String[]> getAuthors();
+
+  CompletableFuture<String> getLicense();
 }

@@ -14,16 +14,22 @@
  */
 package net.rptools.maptool.model.framework.dropinlibrary;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
-public class DropInLibrary {
+public class DropInLibrary implements Library {
 
   private final String name;
   private final String version;
   private final String website;
-  private final String authors;
-  private final String gitUrl;
+  private final String[] authors;
+  private final String gitHubUrl;
   private final String license;
 
   private DropInLibrary(DropInLibraryDto dto) {
@@ -32,8 +38,8 @@ public class DropInLibrary {
     version =
         Objects.requireNonNull(dto.getVersion(), I18N.getText("library.error.emptyVersion", name));
     website = Objects.requireNonNullElse(dto.getWebsite(), "");
-    authors = Objects.requireNonNullElse(dto.getAuthors(), "");
-    gitUrl = dto.getGitUrl();
+    authors = dto.getAuthorsList().toArray(String[]::new);
+    gitHubUrl = dto.getGithubUrl();
     license = dto.getLicense();
   }
 
@@ -45,23 +51,43 @@ public class DropInLibrary {
     return name;
   }
 
-  public String getVersion() {
-    return version;
+  @Override
+  public CompletableFuture<String> getVersion() {
+    return CompletableFuture.completedFuture(version);
   }
 
-  public String getWebsite() {
-    return website;
+  @Override
+  public CompletableFuture<Boolean> locationExists(URL location) throws IOException {
+    return null;
   }
 
-  public String getAuthors() {
-    return authors;
+  @Override
+  public CompletableFuture<String> readAsString(URL location) throws IOException {
+    return null;
   }
 
-  public String getGitUrl() {
-    return gitUrl;
+  @Override
+  public CompletableFuture<InputStream> read(URL location) throws IOException {
+    return null;
   }
 
-  public String getLicense() {
-    return license;
+  @Override
+  public CompletableFuture<String> getWebSite() {
+    return CompletableFuture.completedFuture(website);
+  }
+
+  @Override
+  public CompletableFuture<String[]> getAuthors() {
+    return CompletableFuture.completedFuture(authors);
+  }
+
+  @Override
+  public CompletableFuture<String> getGitHubUrl() {
+    return CompletableFuture.completedFuture(gitHubUrl);
+  }
+
+  @Override
+  public CompletableFuture<String> getLicense() {
+    return CompletableFuture.completedFuture(license);
   }
 }
