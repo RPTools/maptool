@@ -20,7 +20,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 public class DropInLibraryImporter {
 

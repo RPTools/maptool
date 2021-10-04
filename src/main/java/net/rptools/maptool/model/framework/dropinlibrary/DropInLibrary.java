@@ -16,7 +16,6 @@ package net.rptools.maptool.model.framework.dropinlibrary;
 
 import java.util.Objects;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 public class DropInLibrary {
 
