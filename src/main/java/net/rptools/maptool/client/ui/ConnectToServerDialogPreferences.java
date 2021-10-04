@@ -32,6 +32,7 @@ public class ConnectToServerDialogPreferences {
   private static final String KEY_TAB = "tab";
   private static final String KEY_SERVER_NAME = "serverName";
   private static final String USE_PUBLIC_KEY = "usePublicKey";
+  private static final String USE_WEB_RTC = "useWebRTC";
 
   public String getUsername() {
     return prefs.get(KEY_USERNAME, "");
@@ -95,5 +96,13 @@ public class ConnectToServerDialogPreferences {
 
   public void setUsePublicKey(boolean usePublicKey) {
     prefs.putBoolean(USE_PUBLIC_KEY, usePublicKey);
+  }
+
+  public boolean getUseWebRTC() {
+    return prefs.getBoolean(USE_WEB_RTC, false);
+  }
+
+  public void setUseWebRTC(boolean useWebRTC) {
+    prefs.putBoolean(USE_WEB_RTC, useWebRTC);
   }
 }
