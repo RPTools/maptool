@@ -130,6 +130,11 @@ public class ClientHandshake implements Handshake, MessageHandler {
         case AwaitingUseAuthType:
           if (msgType == MessageTypeCase.USE_AUTH_TYPE_MSG) {
             handle(handshakeMsg.getUseAuthTypeMsg());
+          } else if (msgType == MessageTypeCase.PLAYER_BLOCKED_MSG) {
+            errorMessage =
+                I18N.getText(
+                    "Handshake.msg.playerBlocked", handshakeMsg.getPlayerBlockedMsg().getReason());
+            notifyObservers();
           } else {
             errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
             currentState = State.Error;

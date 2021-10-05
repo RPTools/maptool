@@ -53,7 +53,11 @@ class LibraryToken implements Library {
    * @return if the library at the path is handled by the LibraryToken class.
    */
   static boolean handles(URL path) {
-    return path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL);
+    if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
+      return !new LibraryManager().usesReservedPrefix(path.getHost());
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -157,7 +161,7 @@ class LibraryToken implements Library {
     for (var zone : MapTool.getCampaign().getZones()) {
       List<Token> tokensFiltered =
           zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream()
-              .filter(Token::getAllowURLAccess)
+              .filter(Token::getAllowURIAccess)
               .collect(Collectors.toList());
       if (tokensFiltered.size() > 0) {
         return new LibraryToken(tokensFiltered.get(0).getId());
@@ -193,7 +197,7 @@ class LibraryToken implements Library {
   private String getMacroText(String name) {
     var token = findLibrary(id);
 
-    var prop = token.getMacro(name, true);
+    var prop = token.getMacro(name, false);
     if (prop == null) {
       return null;
     } else {

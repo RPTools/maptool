@@ -17,6 +17,7 @@ package net.rptools.maptool.client.script.javascript.api;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.*;
 
@@ -54,6 +55,10 @@ public class JSAPIMapTool implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public JSAPIToken getTokenByID(String uuid) {
-    return new JSAPIToken(uuid);
+    JSAPIToken token = new JSAPIToken(uuid);
+    if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
+      return token;
+    }
+    return null;
   }
 }

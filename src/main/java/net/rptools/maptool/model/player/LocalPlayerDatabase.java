@@ -17,7 +17,9 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.player.Player.Role;
@@ -30,6 +32,7 @@ import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 public class LocalPlayerDatabase implements PlayerDatabase {
 
   private LocalPlayer localPlayer;
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   LocalPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
     localPlayer = new LocalPlayer("None", Role.GM, ServerConfig.getPersonalServerGMPassword());
@@ -116,13 +119,18 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean isDisabled(Player player) {
+  public boolean isBlocked(Player player) {
     return false;
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public String getBlockedReason(Player player) {
     return "";
+  }
+
+  @Override
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return new HashSet<>(loggedInPlayers.getPlayers());
   }
 
   @Override
@@ -141,10 +149,30 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    return Set.of();
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return localPlayer != null
         && localPlayer.getName() != null
         && localPlayer.getName().equals(name);
+  }
+
+  @Override
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
+  }
+
+  @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
   }
 }

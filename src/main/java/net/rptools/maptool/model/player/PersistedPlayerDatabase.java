@@ -28,7 +28,7 @@ public interface PersistedPlayerDatabase {
    * Disables the specified player. This will not boot the player from the server.
    *
    * @param player The name of the player to disable.
-   * @param reason The reason that the player is disabled, this can be a key in i18n properties.
+   * @param reason The reason that the player is blocked, this can be a key in i18n properties.
    * @throws PasswordDatabaseException If the password database does not support disabling players.
    */
   void disablePlayer(String player, String reason) throws PasswordDatabaseException;
@@ -119,6 +119,71 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void addAsymmetricKeys(String name, Set<String> keys)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException;
+
+  /**
+   * Returns if the specified player is persisted or not. Persisted players include those that are
+   * not yet committed but will be persisted when committed.
+   *
+   * @param name the name of the player to check.
+   * @return if the player is/will be persisted.
+   */
+  boolean isPersisted(String name);
+
+  /**
+   * Deletes a player from the database.
+   *
+   * @param name the name of the player to delete.
+   */
+  void deletePlayer(String name);
+
+  /**
+   * Sets the status of the player to blocked.
+   *
+   * @param name the name of the player to block.
+   * @param reason the reason that the player is blocked.
+   */
+  void blockPlayer(String name, String reason);
+
+  /**
+   * Removes the blocked status from the player.
+   *
+   * @param name the name of the player to removed te blocked status from.
+   */
+  void unblockPlayer(String name);
+
+  /**
+   * Sets the role for the player.
+   *
+   * @param name the name of the player to set the role for.
+   * @param role the role to set.
+   */
+  void setRole(String name, Role role);
+
+  /**
+   * Commits the pending changes writing them out to the persistent storage.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException if there is an error hashing the password.
+   */
+  void commitChanges()
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          PasswordDatabaseException, InvalidKeyException;
+
+  /**
+   * Rolls back any pending changes that haven't been written to the file.
+   *
+   * @throws NoSuchPaddingException if there is an error hashing the password.
+   * @throws NoSuchAlgorithmException if there is an error hashing the password.
+   * @throws InvalidKeySpecException if there is an error hashing the password.
+   * @throws PasswordDatabaseException if there is an error adding the player to the file.
+   * @throws InvalidKeyException i
+   */
+  void rollbackChanges()
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
           PasswordDatabaseException, InvalidKeyException;
 }

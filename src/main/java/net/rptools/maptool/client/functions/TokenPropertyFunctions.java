@@ -37,6 +37,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -112,8 +113,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "getTokenLayoutProps",
         "setTokenLayoutProps",
         "setTokenSnapToGrid",
-        "getAllowsURLAccess",
-        "setAllowsURLAccess");
+        "getAllowsURIAccess",
+        "setAllowsURIAccess");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -926,22 +927,36 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * getAllowsURLAccess(token: currentToken(), mapName = current map)
      */
-    if (functionName.equalsIgnoreCase("getAllowsURLAccess")) {
+    if (functionName.equalsIgnoreCase("getAllowsURIAccess")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       FunctionUtil.blockUntrustedMacro(functionName);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      return token.getAllowURLAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
+      return token.getAllowURIAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
      * setAllowsURLAccess(token: currentToken(), mapName = current map)
      */
-    if (functionName.equalsIgnoreCase("setAllowsURLAccess")) {
+    if (functionName.equalsIgnoreCase("setAllowsURIAccess")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       FunctionUtil.blockUntrustedMacro(functionName);
-      BigDecimal allowURLAccess = getBigDecimalFromParam(functionName, parameters, 0);
+      BigDecimal allowURIAccess = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      token.setAllowURLAccess(!allowURLAccess.equals(BigDecimal.ZERO));
+      if (!Token.isValidLibTokenName(token.getName())) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.notLibToken", token.getName()));
+      }
+      var libraryManager = new LibraryManager();
+      String name = token.getName().substring(4);
+      if (libraryManager.usesReservedPrefix(name)) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.setAllowsURIAccess.reservedPrefix", libraryManager.getReservedPrefix(name)));
+      } else if (libraryManager.usesReservedName(name)) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.reserved", token.getName()));
+      }
+      token.setAllowURIAccess(!allowURIAccess.equals(BigDecimal.ZERO));
       return "";
     }
 
