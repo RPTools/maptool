@@ -6,6 +6,8 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto.drawing";
 option java_outer_classname = "DrawingDtoProtos";
 
+import "google/protobuf/wrappers.proto";
+
 /*
  * For easier differentiation between protobuf classes and "normal" classes
  * protobuf classes end with "Dto" or "Msg".
@@ -54,20 +56,20 @@ message DrawableDto {
 message WallTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
   bool mouse_slope_greater = 7;
-  string quadrant = 8;
-  IntPointDto path_vertex = 9;
-  bool double_wide = 10;
+  IntPointDto path_vertex = 8;
+  bool double_wide = 9;
+  repeated IntPointDto points = 10;
 }
 
 message LineTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -80,7 +82,7 @@ message LineTemplateDto {
 message BlastTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -92,7 +94,7 @@ message BlastTemplateDto {
 message ConeTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -102,7 +104,7 @@ message ConeTemplateDto {
 message BurstTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -111,7 +113,7 @@ message BurstTemplateDto {
 message RadiusTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -120,7 +122,7 @@ message RadiusTemplateDto {
 message LineCellTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -132,7 +134,7 @@ message LineCellTemplateDto {
 message RadiusCellTemplateDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
@@ -141,14 +143,14 @@ message RadiusCellTemplateDto {
 message DrawablesGroupDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   repeated DrawnElementDto drawn_elements = 4;
 }
 
 message LineSegmentDrawableDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   repeated IntPointDto points = 4;
   float width = 5;
   bool square_cap = 6;
@@ -157,7 +159,7 @@ message LineSegmentDrawableDto {
 message DrawnLabelDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   RectangleDto bounds = 4;
   string text = 5;
   string font = 6;
@@ -166,7 +168,7 @@ message DrawnLabelDto {
 message RectangleDrawableDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   IntPointDto start_point = 4;
   IntPointDto end_point = 5;
 }
@@ -174,7 +176,7 @@ message RectangleDrawableDto {
 message OvalDrawableDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   IntPointDto start_point = 4;
   IntPointDto end_point = 5;
 }
@@ -182,7 +184,7 @@ message OvalDrawableDto {
 message CrossDrawableDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   IntPointDto start_point = 4;
   IntPointDto end_point = 5;
 }
@@ -191,7 +193,7 @@ message CrossDrawableDto {
 message ShapeDrawableDto {
   string id = 1;
   string layer = 2;
-  string name = 3;
+  google.protobuf.StringValue name = 3;
   ShapeDto shape = 4;
   bool use_anti_aliasing = 5;
 }

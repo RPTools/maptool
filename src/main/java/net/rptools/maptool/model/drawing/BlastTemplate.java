@@ -166,4 +166,7 @@ public class BlastTemplate extends ConeTemplate {
   public Area getArea() {
     return renderer.getArea();
   }
+
+  public int getOffsetX() { return offsetX; }
+  public int getOffsetY() { return offsetY; }
 }
