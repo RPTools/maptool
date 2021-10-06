@@ -18,6 +18,7 @@ import com.google.protobuf.util.JsonFormat;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.swing.filechooser.FileFilter;
@@ -53,7 +54,7 @@ public class DropInLibraryImporter {
       }
       var builder = DropInLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
-      return DropInLibrary.fromDto(builder.build());
+      return DropInLibrary.fromDto(builder.build(), Map.of());
     }
   }
 }

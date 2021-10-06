@@ -56,11 +56,59 @@ public interface Library {
    */
   CompletableFuture<InputStream> read(URL location) throws IOException;
 
-  CompletableFuture<String> getWebSite();
+  /**
+   * Returns the Website for the library.
+   *
+   * @return the Website for the library.
+   */
+  CompletableFuture<String> getWebsite();
 
+  /**
+   * Returns the GitHub URL for the library.
+   *
+   * @return the GitHub URL for the library.
+   */
   CompletableFuture<String> getGitHubUrl();
 
+  /**
+   * Returns the Authors of the library.
+   *
+   * @return the Authors of the library.
+   */
   CompletableFuture<String[]> getAuthors();
 
+  /**
+   * Returns the license of the library.
+   *
+   * @return the license of the library.
+   */
   CompletableFuture<String> getLicense();
+
+  /**
+   * Returns the namespace for the library.
+   *
+   * @return the namespace for the library.
+   */
+  CompletableFuture<String> getNamespace();
+
+  /**
+   * Returns the name of the library.
+   *
+   * @return the name of the library.
+   */
+  CompletableFuture<String> getName();
+
+  /**
+   * Returns the description of the library.
+   *
+   * @return the description of the library.
+   */
+  CompletableFuture<String> getDescription();
+
+  /**
+   * Returns the short description of the library.
+   *
+   * @return the short description of the library.
+   */
+  CompletableFuture<String> getShortDescription();
 }

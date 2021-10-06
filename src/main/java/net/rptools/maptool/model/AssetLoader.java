@@ -311,7 +311,7 @@ public class AssetLoader {
           }
           // System.out.println("Got " + id + " from " + repo);
           ref = FileUtil.getNameWithoutExtension(ref);
-          AssetManager.putAsset(new Asset(ref, data));
+          AssetManager.putAsset(Asset.createUnknownAssetType(ref, data));
 
           completeRequest(id);
           return;

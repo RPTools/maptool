@@ -39,11 +39,14 @@ class LibraryToken implements Library {
   private static final String LIBRARY_PROTOCOL = "lib";
 
   /** The name of the property that holds the library version. */
-  private static final String LIB_VERSION_PROPERTY_NAME   = "libversion";
-  private static final String LIB_AUTHORS_PROPERTY_NAME   = "libauthors";
-  private static final String LIB_WEBSITE_PROPERTY_NAME   = "libwebsite";
+  private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
+
+  private static final String LIB_AUTHORS_PROPERTY_NAME = "libauthors";
+  private static final String LIB_WEBSITE_PROPERTY_NAME = "libwebsite";
   private static final String LIB_GITHUBURL_PROPERTY_NAME = "libgithuburl";
-  private static final String LIB_LICENSE_PROPERTY_NAME   = "liblicense";
+  private static final String LIB_LICENSE_PROPERTY_NAME = "liblicense";
+  private static final String LIB_DESCRIPTION_PROPERTY_NAME = "libdescription";
+  private static final String LIB_SHORT_DESCRIPTION_PROPERTY_NAME = "libshortdescription";
 
   /** The version number to return if the lin:token version is unknown. */
   private static final String LIB_VERSION_UNKNOWN = "unknown";
@@ -99,7 +102,6 @@ class LibraryToken implements Library {
               return version.isEmpty() ? LIB_VERSION_UNKNOWN : version;
             });
   }
-
 
   @Override
   public CompletableFuture<Boolean> locationExists(URL location) throws IOException {
@@ -158,9 +160,9 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public CompletableFuture<String> getWebSite() {
+  public CompletableFuture<String> getWebsite() {
     return new ThreadExecutionHelper<String>()
-            .runOnSwingThread(() -> getProperty(LIB_VERSION_PROPERTY_NAME, ""));
+        .runOnSwingThread(() -> getProperty(LIB_WEBSITE_PROPERTY_NAME, ""));
   }
 
   @Override
@@ -172,15 +174,41 @@ class LibraryToken implements Library {
   @Override
   public CompletableFuture<String[]> getAuthors() {
     return new ThreadExecutionHelper<String[]>()
-        .runOnSwingThread(() -> {
-          return Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(",")).map(String::trim).toArray(String[]::new);
-        });
+        .runOnSwingThread(
+            () -> {
+              return Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+                  .map(String::trim)
+                  .toArray(String[]::new);
+            });
   }
 
   @Override
   public CompletableFuture<String> getLicense() {
     return new ThreadExecutionHelper<String>()
         .runOnSwingThread(() -> getProperty(LIB_LICENSE_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getNamespace() {
+    // For LibTokens the namespace is just the name
+    return getName();
+  }
+
+  @Override
+  public CompletableFuture<String> getName() {
+    return new ThreadExecutionHelper<String>().runOnSwingThread(() -> findLibrary(id).getName());
+  }
+
+  @Override
+  public CompletableFuture<String> getDescription() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_DESCRIPTION_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getShortDescription() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, ""));
   }
 
   /**
@@ -252,7 +280,6 @@ class LibraryToken implements Library {
   }
 
   /**
-   *
    * Returns the property value for the specified name, Will return null if the property does not
    * exist.
    *

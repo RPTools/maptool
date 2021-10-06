@@ -17,8 +17,11 @@ package net.rptools.maptool.model.framework.dropinlibrary;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
@@ -31,8 +34,17 @@ public class DropInLibrary implements Library {
   private final String[] authors;
   private final String gitHubUrl;
   private final String license;
+  private final String namespace;
+  private final String description;
+  private final String shortDescription;
+  private final Map<String, MD5Key> uriAssetMap;
 
-  private DropInLibrary(DropInLibraryDto dto) {
+  /**
+   * Class used to represent Drop In Libraries.
+   *
+   * @param dto The Drop In Libraries Data Transfer Object.
+   */
+  private DropInLibrary(DropInLibraryDto dto, Map<String, MD5Key> uriAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -41,14 +53,24 @@ public class DropInLibrary implements Library {
     authors = dto.getAuthorsList().toArray(String[]::new);
     gitHubUrl = dto.getGithubUrl();
     license = dto.getLicense();
+    namespace = dto.getNamespace();
+    description = dto.getDescription();
+    shortDescription = dto.getShortDescription();
+    this.uriAssetMap = new HashMap<>(uriAssetMap);
   }
 
-  public static DropInLibrary fromDto(DropInLibraryDto dto) {
-    return new DropInLibrary(dto);
+  public static DropInLibrary fromDto(DropInLibraryDto dto, Map<String, MD5Key> uriAssetMap) {
+    return new DropInLibrary(dto, uriAssetMap);
   }
 
-  public String getName() {
-    return name;
+  @Override
+  public CompletableFuture<String> getDescription() {
+    return CompletableFuture.completedFuture(description);
+  }
+
+  @Override
+  public CompletableFuture<String> getShortDescription() {
+    return CompletableFuture.completedFuture(shortDescription);
   }
 
   @Override
@@ -72,7 +94,7 @@ public class DropInLibrary implements Library {
   }
 
   @Override
-  public CompletableFuture<String> getWebSite() {
+  public CompletableFuture<String> getWebsite() {
     return CompletableFuture.completedFuture(website);
   }
 
@@ -89,5 +111,15 @@ public class DropInLibrary implements Library {
   @Override
   public CompletableFuture<String> getLicense() {
     return CompletableFuture.completedFuture(license);
+  }
+
+  @Override
+  public CompletableFuture<String> getNamespace() {
+    return CompletableFuture.completedFuture(namespace);
+  }
+
+  @Override
+  public CompletableFuture<String> getName() {
+    return CompletableFuture.completedFuture(name);
   }
 }

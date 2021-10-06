@@ -88,14 +88,14 @@ public class HeroLabData {
 
     try {
       DEFAULT_HERO_LAB_TOKEN_ASSET =
-          new Asset(
+          Asset.createImageAsset(
               "DEFAULT_HERO_LAB_TOKEN",
               ImageIO.read(
                   HeroLabData.class
                       .getClassLoader()
                       .getResource("net/rptools/maptool/client/image/hero-lab-token.png")));
       DEFAULT_HERO_LAB_PORTRAIT_ASSET =
-          new Asset(
+          Asset.createImageAsset(
               "DEFAULT_HERO_LAB_PORTRAIT",
               ImageIO.read(
                   HeroLabData.class
@@ -112,8 +112,8 @@ public class HeroLabData {
     if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_PORTRAIT_ASSET))
       AssetManager.putAsset(DEFAULT_HERO_LAB_PORTRAIT_ASSET);
 
-    heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getId());
-    heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
+    heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getMD5Key());
+    heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
   }
 
   /**
@@ -200,7 +200,7 @@ public class HeroLabData {
     }
 
     try {
-      ByteArrayInputStream byteIn = new ByteArrayInputStream(statBlockAsset.getImage());
+      ByteArrayInputStream byteIn = new ByteArrayInputStream(statBlockAsset.getData());
       ObjectInputStream in = new ObjectInputStream(byteIn);
       statBlocks = (HashMap<String, HashMap<String, String>>) in.readObject();
       byteIn.close();
@@ -227,9 +227,9 @@ public class HeroLabData {
         out.writeObject(statBlocks);
 
         String assetName = getPortfolioFile() + "/" + heroLabIndex + "/" + name;
-        Asset statBlockAsset = new Asset(assetName, byteOut.toByteArray());
+        Asset statBlockAsset = Asset.createAsset(assetName, byteOut.toByteArray());
         AssetManager.putAsset(statBlockAsset);
-        heroLabStatblockAssetID = statBlockAsset.getId();
+        heroLabStatblockAssetID = statBlockAsset.getMD5Key();
 
         out.close();
         byteOut.close();
@@ -415,7 +415,7 @@ public class HeroLabData {
 
   public MD5Key getTokenImage() {
     if (!heroImageAssets.containsKey(DefaultAssetKey.TOKEN_KEY))
-      heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getId());
+      heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getMD5Key());
 
     return heroImageAssets.get(DefaultAssetKey.TOKEN_KEY);
   }
@@ -426,7 +426,8 @@ public class HeroLabData {
 
   public MD5Key getPortraitImage() {
     if (!heroImageAssets.containsKey(DefaultAssetKey.PORTRAIT_KEY))
-      heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
+      heroImageAssets.put(
+          DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
 
     return heroImageAssets.get(DefaultAssetKey.PORTRAIT_KEY);
   }
@@ -481,9 +482,9 @@ public class HeroLabData {
       e.printStackTrace();
     }
 
-    Asset imageAsset = new Asset(imageName, baos.toByteArray());
+    Asset imageAsset = Asset.createImageAsset(imageName, baos.toByteArray());
     AssetManager.putAsset(imageAsset);
-    this.heroImageAssets.put(Integer.toString(heroImageAssets.size()), imageAsset.getId());
+    this.heroImageAssets.put(Integer.toString(heroImageAssets.size()), imageAsset.getMD5Key());
   }
 
   public void clearImages() {
@@ -491,8 +492,8 @@ public class HeroLabData {
   }
 
   public void setDefaultImages() {
-    heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getId());
-    heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
+    heroImageAssets.put(DefaultAssetKey.TOKEN_KEY, DEFAULT_HERO_LAB_TOKEN_ASSET.getMD5Key());
+    heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
   }
 
   @Override

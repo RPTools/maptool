@@ -54,7 +54,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
       String id = url.getHost();
       if (url.getQuery() == null) {
         var asset = AssetManager.getAssetAndWait(new MD5Key(id));
-        var stream = new ByteArrayInputStream(asset.getImage());
+        var stream = new ByteArrayInputStream(asset.getData());
         return stream;
       }
 

@@ -36,8 +36,8 @@ public class AssetTransferHandler implements ConsumerListener {
       MapTool.showError("Error loading composed asset file: " + id);
       return;
     }
-    Asset asset = new Asset(name, assetData);
-    if (!asset.getId().equals(id)) {
+    Asset asset = Asset.createUnknownAssetType(name, assetData);
+    if (!asset.getMD5Key().equals(id)) {
       MapTool.showError("Received an invalid image: " + id);
       return;
     }
