@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -159,23 +160,32 @@ class LibraryToken implements Library {
    */
   private static Library findLibrary(URL path) {
     String name = "lib:" + path.getHost();
-    for (var zone : MapTool.getCampaign().getZones()) {
-      List<Token> tokensFiltered =
-          zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream()
-              .filter(Token::getAllowURIAccess)
-              .toList();
-      if (tokensFiltered.size() > 0) {
-        return new LibraryToken(tokensFiltered.get(0).getId());
-      } else { // Check to see if URI access is not allowed and throw error
-        List<Token> tokens =
-            zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream().toList();
-        if (tokens.size() > 0) {
-          throw new LibraryNotValidException(
-              Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
-        }
+    List<Token> tokenList = getTokensWithName(name);
+    if (tokenList.size() > 0) {
+      Optional<Token> token = tokenList.stream().filter(Token::getAllowURIAccess).findFirst();
+      if (token.isPresent()) {
+        return new LibraryToken(token.get().getId());
+      } else { // There are some tokens but none with "Allow URI Access"
+        throw new LibraryNotValidException(
+            Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
       }
     }
     return null;
+  }
+
+  /**
+   * Returns a list of all tokens that match the specified name (case-insensitive)
+   *
+   * @param name the name to match.
+   * @return list of tokens.
+   */
+  private static List<Token> getTokensWithName(String name) {
+    List<Token> tokenList = new ArrayList<Token>();
+    for (var zone : MapTool.getCampaign().getZones()) {
+      tokenList.addAll(zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())));
+    }
+
+    return tokenList;
   }
 
   /**

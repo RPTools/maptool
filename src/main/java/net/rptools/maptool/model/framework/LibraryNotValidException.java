@@ -16,7 +16,12 @@ package net.rptools.maptool.model.framework;
 
 /**
  * Exception that is thrown if the library is not valid Some of the reasons that a library may not
- * be valid are * It has been removed. * It does not have the permission required
+ * be valid are:
+ *
+ * <ul>
+ *   <li>It has been removed.
+ *   <li>It does not have the permission required.
+ * </ul>
  */
 public class LibraryNotValidException extends RuntimeException {
   public enum Reason {
