@@ -46,10 +46,11 @@ Feature release using OpenJDK 16.
 - [#2955][i2955] Placing a grid aura on a token on a gridless map would cause repeating exceptions. Fixed.
 - [#2916][i2916] Connect to Server dialog lacked a checkbox to specify using a public key to login. Fixed.
 - [#2888][i2888] Speech bubbles didn't adapt to long nong names. Fixed.
+- [#2887][i2887] Startup time for MapTool with a large asset cache could take several minutes. Fixed.
 - [#2875][i2875] Restful functions passed variables or JSON for headers would throw errors. Fixed.
 - [#2861][i2861] Bug causing an NPE with translated Bar locations. Fixed. 
 - [#2775][i2775] `setMapDisplayName()` no longer allows setting duplicate names. 
-- [#2887][i2887] Startup time for MapTool with a large asset cache could take several minutes. Fixed.
+- [#2741][i2741] Missing symbols under Linux/MacOS caused `<select>` with `multiple` to fail. Fixed.
 - [#446][i446] Macro hotkeys not working when macro panels are hidden or floating. Fixed with caveat that they still won't work if a `Dialog`, `Dialog5` or `Frame5` are open and have focus.
 
 ## Other
@@ -86,6 +87,7 @@ Feature release using OpenJDK 16.
 [i2801]: https://github.com/RPTools/maptool/issues/2801
 [i2775]: https://github.com/RPTools/maptool/issues/2775
 [i2774]: https://github.com/RPTools/maptool/issues/2774
+[i2741]: https://github.com/RPTools/maptool/issues/2741
 [i2519]: https://github.com/RPTools/maptool/issues/2519
 [i2155]: https://github.com/RPTools/maptool/issues/2155
 [i446]: https://github.com/RPTools/maptool/issues/446
