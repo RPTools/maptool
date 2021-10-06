@@ -61,7 +61,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     FunctionUtil.blockUntrustedMacro(functionName);
     int psize = parameters.size();
 
-    if (functionName.equals(COPY_FUNC)) {
+    if (functionName.equalsIgnoreCase(COPY_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
@@ -73,7 +73,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
 
-    if (functionName.equals(REMOVE_FUNC)) {
+    if (functionName.equalsIgnoreCase(REMOVE_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
 

@@ -128,7 +128,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String type = getPropertyType(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getPropertyType")) {
+    if (functionName.equalsIgnoreCase("getPropertyType")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getPropertyType();
@@ -137,7 +137,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setPropertyType(String propTypeName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setPropertyType")) {
+    if (functionName.equalsIgnoreCase("setPropertyType")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       MapTool.serverCommand()
@@ -148,18 +148,18 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String names = getPropertyNames(String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getPropertyNames") || functionName.equals("getPropertyNamesRaw")) {
+    if (functionName.equalsIgnoreCase("getPropertyNames") || functionName.equalsIgnoreCase("getPropertyNamesRaw")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       String pattern = ".*";
-      return getPropertyNames(token, delim, pattern, functionName.equals("getPropertyNamesRaw"));
+      return getPropertyNames(token, delim, pattern, functionName.equalsIgnoreCase("getPropertyNamesRaw"));
     }
 
     /*
      * String names = getMatchingProperties(String pattern, String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getMatchingProperties")) {
+    if (functionName.equalsIgnoreCase("getMatchingProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       String pattern = parameters.get(0).toString();
@@ -170,7 +170,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String names = getAllPropertyNames(String propType: "", String delim: ",")
      */
-    if (functionName.equals("getAllPropertyNames")) {
+    if (functionName.equalsIgnoreCase("getAllPropertyNames")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       if (parameters.size() < 1) {
         return getAllPropertyNames(null, ",");
@@ -184,7 +184,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = hasProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("hasProperty")) {
+    if (functionName.equalsIgnoreCase("hasProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return hasProperty(token, parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -193,7 +193,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isNPC(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isNPC")) {
+    if (functionName.equalsIgnoreCase("isNPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getType() == Token.Type.NPC ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -202,7 +202,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isPC(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isPC")) {
+    if (functionName.equalsIgnoreCase("isPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getType() == Token.Type.PC ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -211,7 +211,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setPC(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setPC")) {
+    if (functionName.equalsIgnoreCase("setPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPC);
@@ -221,7 +221,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setNPC(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setNPC")) {
+    if (functionName.equalsIgnoreCase("setNPC")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setNPC);
@@ -231,7 +231,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String layer = getLayer(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getLayer")) {
+    if (functionName.equalsIgnoreCase("getLayer")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getLayer().name();
@@ -240,7 +240,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String layer = setLayer(String layer, String tokenId: currentToken(), boolean forceShape: true, string mapName: current map)
      */
-    if (functionName.equals("setLayer")) {
+    if (functionName.equalsIgnoreCase("setLayer")) {
       boolean forceShape = true;
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       if (parameters.size() > 2) {
@@ -254,7 +254,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String size = getSize(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getSize")) {
+    if (functionName.equalsIgnoreCase("getSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return getSize(token);
@@ -263,14 +263,14 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String size = setSize(String size, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setSize")) {
+    if (functionName.equalsIgnoreCase("setSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
 
       return setSize(token, parameters.get(0).toString());
     }
 
-    if (functionName.equals("resetSize")) {
+    if (functionName.equalsIgnoreCase("resetSize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       resetSize(token);
@@ -281,7 +281,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String owners = getOwners(String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getOwners")) {
+    if (functionName.equalsIgnoreCase("getOwners")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getOwners(token, parameters.size() > 0 ? parameters.get(0).toString() : ",");
@@ -290,7 +290,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isOwnedByAll(String tokenId: currentToken())
      */
-    if (functionName.equals("isOwnedByAll")) {
+    if (functionName.equalsIgnoreCase("isOwnedByAll")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -299,7 +299,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isOwner(String player: self, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isOwner")) {
+    if (functionName.equalsIgnoreCase("isOwner")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       if (parameters.size() > 0) {
@@ -323,7 +323,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setProperty(String propName, String value, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setProperty")) {
+    if (functionName.equalsIgnoreCase("setProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
       String property = parameters.get(0).toString();
       String value = parameters.get(1).toString();
@@ -336,7 +336,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * {String|Number} value = getRawProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getRawProperty")) {
+    if (functionName.equalsIgnoreCase("getRawProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Object val = token.getProperty(parameters.get(0).toString());
@@ -359,7 +359,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * {String|Number} value = getProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getProperty")) {
+    if (functionName.equalsIgnoreCase("getProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Object val = token.getEvaluatedProperty(parameters.get(0).toString());
@@ -379,7 +379,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isPropertyEmpty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isPropertyEmpty")) {
+    if (functionName.equalsIgnoreCase("isPropertyEmpty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return token.getProperty(parameters.get(0).toString()) == null
@@ -392,7 +392,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Number zeroOne = getPropertyDefault(String propName, String propType: currentToken().getPropertyType())
      */
-    if (functionName.equals("getPropertyDefault")) {
+    if (functionName.equalsIgnoreCase("getPropertyDefault")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String name = parameters.get(0).toString();
 
@@ -433,7 +433,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String notes = getGMNotes(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getGMNotes")) {
+    if (functionName.equalsIgnoreCase("getGMNotes")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       String notes = token.getGMNotes();
@@ -443,7 +443,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String notes = setGMNotes(String notes, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setGMNotes")) {
+    if (functionName.equalsIgnoreCase("setGMNotes")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String gmNotes = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -454,7 +454,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String notes = getNotes(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getNotes")) {
+    if (functionName.equalsIgnoreCase("getNotes")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       String notes = token.getNotes();
@@ -464,7 +464,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String notes = setNotes(String notes, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setNotes")) {
+    if (functionName.equalsIgnoreCase("setNotes")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String notes = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -475,7 +475,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = bringToFront(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("bringToFront")) {
+    if (functionName.equalsIgnoreCase("bringToFront")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       Zone zone = token.getZoneRenderer().getZone();
@@ -487,7 +487,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = sendToBack(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("sendToBack")) {
+    if (functionName.equalsIgnoreCase("sendToBack")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       Zone zone = token.getZoneRenderer().getZone();
@@ -499,7 +499,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String value = getLibProperty(String propName, String tokenId: macroSource)
      */
-    if (functionName.equals("getLibProperty")) {
+    if (functionName.equalsIgnoreCase("getLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String location;
       if (parameters.size() > 1) {
@@ -522,7 +522,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setLibProperty(String propName, String value, String tokenId: macroSource)
      */
-    if (functionName.equals("setLibProperty")) {
+    if (functionName.equalsIgnoreCase("setLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       String property = parameters.get(0).toString();
       String value = parameters.get(1).toString();
@@ -541,7 +541,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String names = getLibPropertyNames(String tokenId: {macroSource | "*" | "this"}, String delim: ",")
      */
-    if (functionName.equals("getLibPropertyNames")) {
+    if (functionName.equalsIgnoreCase("getLibPropertyNames")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       String location;
       if (parameters.size() > 0) {
@@ -564,7 +564,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String names = getMatchingLibProperties(String pattern, String tokenId: {macroSource | "*" | "this"}, String delim: ",")
      */
-    if (functionName.equals("getMatchingLibProperties")) {
+    if (functionName.equalsIgnoreCase("getMatchingLibProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String location;
       String pattern = parameters.get(0).toString();
@@ -588,7 +588,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number facing = getTokenFacing(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getTokenFacing")) {
+    if (functionName.equalsIgnoreCase("getTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       if (token.getFacing() == null) {
@@ -600,7 +600,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number degrees = getTokenRotation(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("getTokenRotation")) {
+    if (functionName.equalsIgnoreCase("getTokenRotation")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
@@ -610,7 +610,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setTokenFacing(Number facing, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setTokenFacing")) {
+    if (functionName.equalsIgnoreCase("setTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -621,7 +621,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = removeTokenFacing(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("removeTokenFacing")) {
+    if (functionName.equalsIgnoreCase("removeTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, (Integer) null);
@@ -631,7 +631,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isSnapToGrid(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isSnapToGrid")) {
+    if (functionName.equalsIgnoreCase("isSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -640,7 +640,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isFlippedX(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isFlippedX")) {
+    if (functionName.equalsIgnoreCase("isFlippedX")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -649,7 +649,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isFlippedY(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isFlippedY")) {
+    if (functionName.equalsIgnoreCase("isFlippedY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -658,7 +658,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * Number zeroOne = isFlippedIso(String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("isFlippedIso")) {
+    if (functionName.equalsIgnoreCase("isFlippedIso")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -667,7 +667,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setOwner")) {
+    if (functionName.equalsIgnoreCase("setOwner")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       boolean trusted = MapTool.getParser().isMacroTrusted();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -703,7 +703,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = setOwnedByAll(0|1, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("setOwnedByAll")) {
+    if (functionName.equalsIgnoreCase("setOwnedByAll")) {
       // If not trusted, do nothing and return -1 result
       if (!MapTool.getParser().isMacroTrusted()) return -1;
 
@@ -724,7 +724,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * See Token.TokenShape for return values. Currently "TOP_DOWN", "CIRCLE", "SQUARE", and "FIGURE".
      */
-    if (functionName.equals("getTokenShape")) {
+    if (functionName.equalsIgnoreCase("getTokenShape")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getShape().name();
@@ -735,7 +735,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * See Token.TokenShape for shape values. Currently "top down", "top_down", "circle", "square", and "figure".
      */
-    if (functionName.equals("setTokenShape")) {
+    if (functionName.equalsIgnoreCase("setTokenShape")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -753,12 +753,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equals("getTokenNativeWidth") || functionName.equals("getTokenNativeHeight")) {
+    if (functionName.equalsIgnoreCase("getTokenNativeWidth") || functionName.equalsIgnoreCase("getTokenNativeHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
-      if (functionName.equals("getTokenNativeWidth")) {
+      if (functionName.equalsIgnoreCase("getTokenNativeWidth")) {
         return BigDecimal.valueOf(token.getWidth());
       } else { // it wasn't 'getTokenWidth' which means functionName equals 'getTokenHeight'
         return BigDecimal.valueOf(token.getHeight());
@@ -772,7 +772,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equals("getTokenWidth") || functionName.equals("getTokenHeight")) {
+    if (functionName.equalsIgnoreCase("getTokenWidth") || functionName.equalsIgnoreCase("getTokenHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
@@ -782,7 +782,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       // Get the pixel width or height of a given token
       Rectangle tokenBounds = token.getBounds(zone);
 
-      if (functionName.equals("getTokenWidth")) {
+      if (functionName.equalsIgnoreCase("getTokenWidth")) {
         return BigDecimal.valueOf(tokenBounds.width);
       } else { // it wasn't 'getTokenWidth' which means functionName equals 'getTokenHeight'
         return BigDecimal.valueOf(tokenBounds.height);
@@ -796,7 +796,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Sets the width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equals("setTokenWidth") || functionName.equals("setTokenHeight")) {
+    if (functionName.equalsIgnoreCase("setTokenWidth") || functionName.equalsIgnoreCase("setTokenHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       ZoneRenderer zoneR = token.getZoneRenderer();
@@ -809,7 +809,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       double oldHeight = tokenBounds.height;
       double newScaleX;
       double newScaleY;
-      if (functionName.equals("setTokenWidth")) {
+      if (functionName.equalsIgnoreCase("setTokenWidth")) {
         newScaleX = magnitude / token.getWidth();
         newScaleY = oldHeight / token.getHeight();
       } else { // it wasn't 'setTokenWidth' which means functionName equals 'setTokenHeight'
@@ -826,7 +826,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Sets whether the token should snap to the grid or not
      */
-    if (functionName.equals("setTokenSnapToGrid")) {
+    if (functionName.equalsIgnoreCase("setTokenSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Boolean toGrid = FunctionUtil.getBooleanValue(parameters.get(0));
@@ -839,7 +839,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Toggles Flipped X setting
      */
-    if (functionName.equals("flipTokenX")) {
+    if (functionName.equalsIgnoreCase("flipTokenX")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
@@ -851,7 +851,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Toggles Flipped Y setting
      */
-    if (functionName.equals("flipTokenY")) {
+    if (functionName.equalsIgnoreCase("flipTokenY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
@@ -863,7 +863,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Toggles Flipped Iso setting
      */
-    if (functionName.equals("flipTokenIso")) {
+    if (functionName.equalsIgnoreCase("flipTokenIso")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipIso);

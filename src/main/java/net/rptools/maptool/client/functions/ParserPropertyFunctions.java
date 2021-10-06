@@ -76,13 +76,13 @@ public class ParserPropertyFunctions extends AbstractFunction {
 
     int returnVal = 0;
 
-    if (functionName.equals("getMaxRecursionDepth")) {
+    if (functionName.equalsIgnoreCase("getMaxRecursionDepth")) {
       returnVal = mtlParser.getMaxRecursionDepth();
     } else if (functionName.equalsIgnoreCase("getMaxLoopIterations")) {
       returnVal = mtlParser.getMaxLoopIterations();
-    } else if (functionName.equals("getRecursionDepth")) {
+    } else if (functionName.equalsIgnoreCase("getRecursionDepth")) {
       returnVal = mtlParser.getRecursionDepth();
-    } else if (functionName.equals("getMacroContext")) {
+    } else if (functionName.equalsIgnoreCase("getMacroContext")) {
       JsonObject mco = new JsonObject();
       MapToolMacroContext mc = mtlParser.getContext();
       mco.addProperty("stackSize", mtlParser.getContextStackSize());
@@ -93,10 +93,10 @@ public class ParserPropertyFunctions extends AbstractFunction {
         mco.addProperty("buttonIndex", mc.getMacroButtonIndex());
       }
       return mco;
-    } else if (functionName.equals("setMaxRecursionDepth")) {
+    } else if (functionName.equalsIgnoreCase("setMaxRecursionDepth")) {
       mtlParser.setMaxRecursionDepth(argVal);
       returnVal = mtlParser.getMaxRecursionDepth();
-    } else if (functionName.equals("setMaxLoopIterations")) {
+    } else if (functionName.equalsIgnoreCase("setMaxLoopIterations")) {
       mtlParser.setMaxLoopIterations(argVal);
       returnVal = mtlParser.getMaxLoopIterations();
     } else {

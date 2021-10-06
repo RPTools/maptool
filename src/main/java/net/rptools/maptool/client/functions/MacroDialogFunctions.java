@@ -73,13 +73,13 @@ public class MacroDialogFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("isDialogVisible")) {
+    if (functionName.equalsIgnoreCase("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
-    if (functionName.equals("isFrameVisible")) {
+    if (functionName.equalsIgnoreCase("isFrameVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(true, parameters.get(0).toString())
           ? BigDecimal.ONE
@@ -90,34 +90,34 @@ public class MacroDialogFunctions extends AbstractFunction {
       String name = parameters.get(0).toString();
       return isOverlayRegistered(name) ? BigDecimal.ONE : BigDecimal.ZERO;
     }
-    if (functionName.equals("closeDialog")) {
+    if (functionName.equalsIgnoreCase("closeDialog")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(false, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeFrame")) {
+    if (functionName.equalsIgnoreCase("closeFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(true, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeOverlay")) {
+    if (functionName.equalsIgnoreCase("closeOverlay")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       String name = parameters.get(0).toString();
       removeOverlay(name);
       return "";
     }
-    if (functionName.equals("resetFrame")) {
+    if (functionName.equalsIgnoreCase("resetFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrame.center(parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("getFrameProperties")) {
+    if (functionName.equalsIgnoreCase("getFrameProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLFrame.getFrameProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
       else return "";
     }
-    if (functionName.equals("getDialogProperties")) {
+    if (functionName.equalsIgnoreCase("getDialogProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLDialog.getDialogProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
