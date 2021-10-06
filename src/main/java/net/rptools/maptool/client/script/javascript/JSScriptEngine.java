@@ -167,7 +167,7 @@ public class JSScriptEngine {
         .append(script)
         .append("})();");
     Context c = makeContext();
-    JSContext jc = new JSContext(false, c, "<anonymous>");
+    JSContext jc = new JSContext(MapTool.getParser().isMacroTrusted(), c, "<anonymous>");
     contextStack.push(jc);
     try {
       return makeContext().eval("js", wrapped.toString());
