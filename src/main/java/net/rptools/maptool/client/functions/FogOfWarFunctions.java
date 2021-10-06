@@ -64,7 +64,10 @@ public class FogOfWarFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    int maxParamSize = functionName.equalsIgnoreCase("exposeFOW") || functionName.equalsIgnoreCase("exposeFoW") ? 3 : 1;
+    int maxParamSize =
+        functionName.equalsIgnoreCase("exposeFOW") || functionName.equalsIgnoreCase("exposeFoW")
+            ? 3
+            : 1;
 
     if (parameters.size() > maxParamSize) {
       throw new ParserException(
@@ -123,7 +126,8 @@ public class FogOfWarFunctions extends AbstractFunction {
     /*
      * String empty = restoreFOW(optional String mapName)
      */
-    if (functionName.equalsIgnoreCase("restoreFOW") || functionName.equalsIgnoreCase("restoreFoW")) {
+    if (functionName.equalsIgnoreCase("restoreFOW")
+        || functionName.equalsIgnoreCase("restoreFoW")) {
       FogUtil.restoreFoW(zoneRenderer);
       return "<!---->";
     }

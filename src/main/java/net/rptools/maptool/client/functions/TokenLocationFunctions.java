@@ -93,7 +93,8 @@ public class TokenLocationFunctions extends AbstractFunction {
               : true;
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       TokenLocation location = getTokenLocation(useDistancePerCell, token);
-      return BigDecimal.valueOf(functionName.equalsIgnoreCase("getTokenX") ? location.x : location.y);
+      return BigDecimal.valueOf(
+          functionName.equalsIgnoreCase("getTokenX") ? location.x : location.y);
     }
     if (functionName.equalsIgnoreCase("getTokenDrawOrder")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);

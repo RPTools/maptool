@@ -281,10 +281,12 @@ public class MathFunctions extends AbstractFunction {
       List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
       return BigDecimal.valueOf(
           Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
-    } else if ("math.cbrt".equalsIgnoreCase(functionName) || "math.cuberoot".equalsIgnoreCase(functionName)) {
+    } else if ("math.cbrt".equalsIgnoreCase(functionName)
+        || "math.cuberoot".equalsIgnoreCase(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
       return BigDecimal.valueOf(Math.cbrt(nparam.get(0).doubleValue()));
-    } else if ("math.hypot".equalsIgnoreCase(functionName) || "math.hypotenuse".equalsIgnoreCase(functionName)) {
+    } else if ("math.hypot".equalsIgnoreCase(functionName)
+        || "math.hypotenuse".equalsIgnoreCase(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
       return BigDecimal.valueOf(
           Math.hypot(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
@@ -336,7 +338,8 @@ public class MathFunctions extends AbstractFunction {
             I18N.getText("macro.function.general.wrongNumParam", functionName, 0, param.size()));
       }
       return BigDecimal.valueOf(Math.random());
-    } else if ("math.sqrt".equalsIgnoreCase(functionName) || "math.squareroot".equalsIgnoreCase(functionName)) {
+    } else if ("math.sqrt".equalsIgnoreCase(functionName)
+        || "math.squareroot".equalsIgnoreCase(functionName)) {
       List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
       return BigDecimal.valueOf(Math.sqrt(nparam.get(0).doubleValue()));
     } else if ("math.toRadians".equalsIgnoreCase(functionName)) {

@@ -148,12 +148,14 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String names = getPropertyNames(String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equalsIgnoreCase("getPropertyNames") || functionName.equalsIgnoreCase("getPropertyNamesRaw")) {
+    if (functionName.equalsIgnoreCase("getPropertyNames")
+        || functionName.equalsIgnoreCase("getPropertyNamesRaw")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       String pattern = ".*";
-      return getPropertyNames(token, delim, pattern, functionName.equalsIgnoreCase("getPropertyNamesRaw"));
+      return getPropertyNames(
+          token, delim, pattern, functionName.equalsIgnoreCase("getPropertyNamesRaw"));
     }
 
     /*
@@ -753,7 +755,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equalsIgnoreCase("getTokenNativeWidth") || functionName.equalsIgnoreCase("getTokenNativeHeight")) {
+    if (functionName.equalsIgnoreCase("getTokenNativeWidth")
+        || functionName.equalsIgnoreCase("getTokenNativeHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
@@ -772,7 +775,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equalsIgnoreCase("getTokenWidth") || functionName.equalsIgnoreCase("getTokenHeight")) {
+    if (functionName.equalsIgnoreCase("getTokenWidth")
+        || functionName.equalsIgnoreCase("getTokenHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
@@ -796,7 +800,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Sets the width/height for a given token. Useful for free size tokens.
      */
-    if (functionName.equalsIgnoreCase("setTokenWidth") || functionName.equalsIgnoreCase("setTokenHeight")) {
+    if (functionName.equalsIgnoreCase("setTokenWidth")
+        || functionName.equalsIgnoreCase("setTokenHeight")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       ZoneRenderer zoneR = token.getZoneRenderer();
