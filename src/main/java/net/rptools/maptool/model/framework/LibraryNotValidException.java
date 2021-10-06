@@ -14,5 +14,24 @@
  */
 package net.rptools.maptool.model.framework;
 
-/** Exception that is thrown if the library is no longer valid (it has been removed for example). */
-public class LibraryNotValidException extends RuntimeException {}
+/**
+ * Exception that is thrown if the library is not valid Some of the reasons that a library may not
+ * be valid are * It has been removed. * It does not have the permission required
+ */
+public class LibraryNotValidException extends RuntimeException {
+  public enum Reason {
+    MISSING_LIBRARY,
+    MISSING_PERMISSIONS
+  };
+
+  private final Reason reason;
+
+  LibraryNotValidException(Reason reason, String message) {
+    super(message);
+    this.reason = reason;
+  }
+
+  public Reason getReason() {
+    return reason;
+  }
+}

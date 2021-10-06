@@ -23,11 +23,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -162,9 +163,16 @@ class LibraryToken implements Library {
       List<Token> tokensFiltered =
           zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream()
               .filter(Token::getAllowURIAccess)
-              .collect(Collectors.toList());
+              .toList();
       if (tokensFiltered.size() > 0) {
         return new LibraryToken(tokensFiltered.get(0).getId());
+      } else { // Check to see if URI access is not allowed and throw error
+        List<Token> tokens =
+            zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())).stream().toList();
+        if (tokens.size() > 0) {
+          throw new LibraryNotValidException(
+              Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
+        }
       }
     }
     return null;
@@ -184,7 +192,8 @@ class LibraryToken implements Library {
       }
     }
 
-    throw new LibraryNotValidException();
+    throw new LibraryNotValidException(
+        Reason.MISSING_LIBRARY, I18N.getText("library.error.libtoken.missing"));
   }
 
   /**
