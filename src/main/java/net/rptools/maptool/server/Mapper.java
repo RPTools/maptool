@@ -23,13 +23,11 @@ import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.drawing.Rectangle;
 import net.rptools.maptool.server.proto.ServerPolicyDto;
+import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.server.proto.WalkerMetricDto;
 import net.rptools.maptool.server.proto.drawing.*;
 import org.apache.logging.log4j.LogManager;
@@ -486,7 +484,7 @@ public class Mapper {
         drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
 
         var cellpoints = new ArrayList<CellPoint>();
-        for(var point: dto.getPointsList())
+        for (var point : dto.getPointsList())
           cellpoints.add(new CellPoint(point.getX(), point.getY()));
         drawable.setPath(cellpoints);
 
@@ -662,8 +660,7 @@ public class Mapper {
 
       if (drawable.getName() != null) dto.setName(StringValue.of(drawable.getName()));
 
-      for(var point: drawable.getPath())
-        dto.addPoints(map(point));
+      for (var point : drawable.getPath()) dto.addPoints(map(point));
 
       return drawableDto.setWallTemplate(dto).build();
     } else if (drawableToMap instanceof LineTemplate drawable) {
@@ -688,8 +685,7 @@ public class Mapper {
   }
 
   private static IntPointDto map(CellPoint point) {
-    return IntPointDto.newBuilder()
-        .setX(point.x).setY(point.y).build();
+    return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
   }
 
   private static IntPointDto map(ZonePoint point) {
@@ -790,5 +786,13 @@ public class Mapper {
       log.warn("mapping not implemented for Shape type: " + shape.getClass());
       return null;
     }
+  }
+
+  public static Token map(TokenDto token) {
+    return null;
+  }
+
+  public static TokenDto map(Token token) {
+    return null;
   }
 }

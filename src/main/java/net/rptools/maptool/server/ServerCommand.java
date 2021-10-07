@@ -48,8 +48,6 @@ public interface ServerCommand {
     putAsset,
     getAsset,
     removeAsset,
-    putToken,
-    editToken,
     removeToken,
     removeTokens,
     updateTokenProperty,

@@ -80,29 +80,37 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> {
           handle(msg.getAddTopologyMsg());
-          forwardToClients(id, msg);
+          sendToClients(id, msg);
         }
         case BRING_TOKENS_TO_FRONT_MSG -> {
           handle(msg.getBringTokensToFrontMsg());
         }
         case BOOT_PLAYER_MSG -> {
           handle(msg.getBootPlayerMsg());
-          forwardToClients(id, msg);
+          sendToClients(id, msg);
         }
         case CHANGE_ZONE_DISPLAY_NAME_MSG -> {
           handle(msg.getChangeZoneDisplayNameMsg(), msg);
         }
         case CLEAR_ALL_DRAWINGS_MSG -> {
           handle(msg.getClearAllDrawingsMsg());
-          forwardToAllClients(msg);
+          sendToAllClients(msg);
         }
         case CLEAR_EXPOSED_AREA_MSG -> {
           handle(msg.getClearExposedAreaMsg());
-          forwardToClients(id, msg);
+          sendToClients(id, msg);
         }
         case DRAW_MSG -> {
-          forwardToAllClients(msg);
+          sendToAllClients(msg);
           handle(msg.getDrawMsg());
+        }
+        case EDIT_TOKEN_MSG -> {
+          handle(msg.getEditTokenMsg());
+          sendToClients(id, msg);
+        }
+        case PUT_TOKEN_MSG -> {
+          handle(msg.getPutTokenMsg());
+          sendToClients(id, msg);
         }
         default -> log.warn(msgType + "not handled.");
       }
@@ -110,6 +118,18 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(PutTokenMsg putTokenMsg) {
+    var zoneGUID = GUID.valueOf(putTokenMsg.getZoneGuid());
+    var token = Mapper.map(putTokenMsg.getToken());
+    putToken(zoneGUID, token);
+  }
+
+  private void handle(EditTokenMsg editTokenMsg) {
+    var zoneGUID = GUID.valueOf(editTokenMsg.getZoneGuid());
+    var token = Mapper.map(editTokenMsg.getToken());
+    putToken(zoneGUID, token);
   }
 
   private void handle(DrawMsg drawMsg) {
@@ -142,7 +162,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     if (zone != null) {
       zone.setPlayerAlias(name);
-      forwardToAllClients(msg);
+      sendToAllClients(msg);
     }
   }
 
@@ -239,12 +259,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case putToken:
-          putToken(context.getGUID(0), (Token) context.get(1));
-          break;
-        case editToken:
-          editToken(context.getGUID(0), (Token) context.get(1));
           break;
         case putZone:
           putZone((Zone) context.get(0));
@@ -373,11 +387,11 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void forwardToClients(String id, Message message) {
-    server.getConnection().broadcastMessage(new String[] {id}, message.toByteArray());
+  private void sendToClients(String excludedId, Message message) {
+    server.getConnection().broadcastMessage(new String[] {excludedId}, message.toByteArray());
   }
 
-  private void forwardToAllClients(Message message) {
+  private void sendToAllClients(Message message) {
     server.getConnection().broadcastMessage(message.toByteArray());
   }
 
@@ -477,7 +491,9 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       }
       // Broadcast
       for (Token token : tokenList) {
-        broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
+        var putTokenMsg =
+            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+        sendToAllClients(Message.newBuilder().setPutTokenMsg(putTokenMsg).build());
       }
       zone.sortZOrder(); // update new ZOrder on server zone
     }
@@ -640,10 +656,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToClients();
   }
 
-  private void editToken(GUID zoneGUID, Token token) {
-    putToken(zoneGUID, token);
-  }
-
   private void putToken(GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -665,7 +677,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       broadcastToClient(
           RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
-    forwardToClients();
   }
 
   private void putZone(Zone zone) {
@@ -743,7 +754,9 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       }
       // Broadcast
       for (Token token : tokenList) {
-        broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
+        var putTokenMsg =
+            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+        sendToAllClients(Message.newBuilder().setPutTokenMsg(putTokenMsg).build());
       }
       zone.sortZOrder(); // update new ZOrder on server zone
     }

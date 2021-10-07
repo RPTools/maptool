@@ -141,7 +141,9 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void editToken(GUID zoneGUID, Token token) {
     MapTool.getCampaign().getZone(zoneGUID).editToken(token);
-    makeServerCall(COMMAND.editToken, zoneGUID, token);
+    var msg =
+        EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+    makeServerCall(Message.newBuilder().setEditTokenMsg(msg).build());
   }
 
   public void putToken(GUID zoneGUID, Token token) {
@@ -149,7 +151,8 @@ public class ServerCommandClientImpl implements ServerCommand {
     // after changing the token. But they don't tell the zone about it so classes
     // waiting for the zone change event don't get it.
     MapTool.getCampaign().getZone(zoneGUID).putToken(token);
-    makeServerCall(COMMAND.putToken, zoneGUID, token);
+    var msg = PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+    makeServerCall(Message.newBuilder().setPutTokenMsg(msg).build());
   }
 
   @Override

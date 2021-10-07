@@ -26,8 +26,6 @@ public class ClientCommand {
     putAsset,
     getAsset,
     removeAsset,
-    putToken,
-    editToken,
     updateTokenProperty,
     removeToken,
     removeTokens,

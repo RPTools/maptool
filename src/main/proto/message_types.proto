@@ -45,9 +45,17 @@ message ClearExposedAreaMsg {
 }
 
 message DrawMsg {
-  string zoneGuid = 1;
+  string zone_guid = 1;
   PenDto pen = 2;
   DrawableDto drawable = 3;
 }
 
+message EditTokenMsg {
+  string zone_guid = 1;
+  TokenDto token = 2;
+}
 
+message PutTokenMsg {
+  string zone_guid = 1;
+  TokenDto token = 2;
+}

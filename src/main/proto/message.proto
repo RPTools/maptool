@@ -22,5 +22,7 @@ message Message {
     ClearAllDrawingsMsg clear_all_drawings_msg = 5;
     ClearExposedAreaMsg clear_exposed_area_msg = 6;
     DrawMsg draw_msg = 7;
+    EditTokenMsg edit_token_msg = 8;
+    PutTokenMsg put_token_msg = 23;
   }
 }

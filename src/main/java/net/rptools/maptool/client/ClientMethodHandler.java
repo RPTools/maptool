@@ -88,12 +88,36 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case CLEAR_ALL_DRAWINGS_MSG -> handle(msg.getClearAllDrawingsMsg());
         case CLEAR_EXPOSED_AREA_MSG -> handle(msg.getClearExposedAreaMsg());
         case DRAW_MSG -> handle(msg.getDrawMsg());
+        case EDIT_TOKEN_MSG -> handle(msg.getEditTokenMsg());
+        case PUT_TOKEN_MSG -> handle(msg.getPutTokenMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(PutTokenMsg putTokenMsg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(putTokenMsg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var token = Mapper.map(putTokenMsg.getToken());
+          zone.putToken(token);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(EditTokenMsg editTokenMsg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(editTokenMsg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var token = Mapper.map(editTokenMsg.getToken());
+          zone.editToken(token);
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(DrawMsg drawMsg) {
@@ -306,22 +330,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               MapTool.getCampaign().removeZone(zoneGUID);
               MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
-              return;
-
-            case editToken:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              token = (Token) parameters[1];
-              zone.editToken(token);
-              MapTool.getFrame().refresh();
-              return;
-
-            case putToken:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              token = (Token) parameters[1];
-              zone.putToken(token);
-              MapTool.getFrame().refresh();
               return;
 
             case putLabel:
