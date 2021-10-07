@@ -18,8 +18,10 @@ import java.util.Iterator;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
 
 public class JSAPIToken implements MapToolJSAPIInterface {
@@ -132,13 +134,23 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public int getX() {
-    return this.token.getX();
+  public int getX() throws ParserException {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      return this.token.getX();
+    }
+    throw new ParserException(I18N.getText("macro.function.initiative.gmOrOwner", "getX"));
   }
 
   @HostAccess.Export
-  public int getY() {
-    return this.token.getY();
+  public int getY() throws ParserException {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      return this.token.getY();
+    }
+    throw new ParserException(I18N.getText("macro.function.initiative.gmOrOwner", "getY"));
   }
 
   @HostAccess.Export
@@ -147,6 +159,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setX(x);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, x, token.getY());
     }
   }
 
@@ -156,6 +169,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setY(y);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, token.getX(), y);
     }
   }
 

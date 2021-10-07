@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
-import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
@@ -33,32 +29,4 @@ public class JSAPIMapTool implements MapToolJSAPIInterface {
   @HostAccess.Export public final JSAPIChat chat = new JSAPIChat();
 
   @HostAccess.Export public final JSAPITokens tokens = new JSAPITokens();
-
-  @HostAccess.Export
-  public List<JSAPIToken> getSelectedTokens() {
-    List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
-    List<JSAPIToken> out_tokens = new ArrayList<JSAPIToken>();
-    for (Token token : tokens) {
-      out_tokens.add(new JSAPIToken(token));
-    }
-    return out_tokens;
-  }
-
-  @HostAccess.Export
-  public JSAPIToken getSelected() {
-    List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
-    if (tokens.size() > 0) {
-      return new JSAPIToken(tokens.get(0));
-    }
-    return null;
-  }
-
-  @HostAccess.Export
-  public JSAPIToken getTokenByID(String uuid) {
-    JSAPIToken token = new JSAPIToken(uuid);
-    if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
-      return token;
-    }
-    return null;
-  }
 }
