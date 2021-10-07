@@ -20,7 +20,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -134,7 +137,16 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
         });
 
     getRootPane().setDefaultButton(getOKButton());
+    getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
     dialog.showDialog();
+  }
+
+  public JCheckBox getUseWebRTCCheckBox() {
+    return (JCheckBox) getComponent("@useWebRTC");
+  }
+
+  public JTextField getRPToolsAlias() {
+    return (JTextField) getComponent("@RPToolsName");
   }
 
   public JButton getGenerateGMPasswordButton() {
@@ -221,8 +233,34 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
                 prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
+                AppState.setUseWebRTC(
+                    useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
                 accepted = true;
                 dialog.closeDialog();
+              }
+            });
+    getRPToolsAlias()
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              private void checkName() {
+                getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
+              }
+
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                checkName();
               }
             });
   }

@@ -29,8 +29,11 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.proto.AuthTypeEnum;
 import net.rptools.maptool.server.proto.ClientAuthMsg;
 import net.rptools.maptool.server.proto.ClientInitMsg;
@@ -206,6 +209,11 @@ public class ClientHandshake implements Handshake, MessageHandler {
     var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
+    if (!MapTool.isHostingServer()) {
+      PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
+      var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
+      playerDb.setLocalPlayer(player);
+    }
     currentState = State.Success;
     notifyObservers();
   }

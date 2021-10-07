@@ -92,6 +92,7 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
     return UserDefinedMacroFunctions.getInstance().getAliases();
   }
 
+  @HostAccess.Export
   public String clientId() {
     return MapTool.getClientId();
   }
