@@ -4,10 +4,17 @@ Feature release using OpenJDK 16.
 
 ## Highlights
 
-- User database with encrypted passwords and public key support for logging in to MapTool servers.
+- User database with encrypted passwords and public key support for logging in to MapTool servers plus macro functions for accessing database.
 - WebRTC supported for connecting to servers without using port-forwarding.
+- More support for JavaScript through GraalVM-JS.
+- Access HTML/CSS/JS content on lib:tokens via URI from dialogs/frames/overlays plus new macro functions to open dialogs/frames/overlays using URIs.
+- GIF anim support in dialogs, frame5 and overlays.
+- More performance improvements for Fog of War handling.
+- New macro functions, bug fixes and localization translations.
 
 ## Enhancements & Features
+- [#3010][i3010] Attempting to access lib:token content via URI will produce an error message if the lib:token doesn't have URI access enabled.
+- [#3006][i3006] WebRTC support added. Checkbox added to Start Server dialog. Can only be used when connecting through RPTools.net server list.
 - [#2994][i2994] Reserved namespaces added to avoid future conflicts: 
   - `.`, `_`, `builtin`, `builtin.`, `internal`, `internal.`, `maptool`, `maptool.`, `maptools`, `maptools.`, `net.rptools.`, `rptools`, `rptools.`, `standard`, `standard.`, `tokentool.`
 
@@ -20,8 +27,8 @@ Feature release using OpenJDK 16.
 - [#2963][i2963] Support for accessing CSS/JS/HTML from Lib:Tokens via URI in Dialog/Frame/Overlays added.
   - `lib://<tokename>/macro/<macro name>`
   - `lib://<tokename>/property/<property name>`
-- [#2961][i2960] Support JavaScript UDFs via `MTScript.createFunction(funcName, jsFunction)`.
-- [#2960][i2960] New macro support for multiple Graalvm JavaScript Scopes.
+- [#2961][i2961] Support JavaScript UDFs via `MTScript.createFunction(funcName, jsFunction)`.
+- [#2960][i2960] New macro support for multiple Graalvm JavaScript scopes (namespaces).
 - [#2943][i2943] Experimental WebRTC supported for connecting to servers without port-forwarding.
 - [#2919][i2919] Loading GIF anims from tokens or tables into Frame5 windows and Overlays now working. Only first frame loads with old Frame() windows.
 - [#2915][i2915] Public/private key support for player login.
@@ -40,6 +47,8 @@ Feature release using OpenJDK 16.
 - [#2155][i2155] More performance improvements. Moving a token across a large map with very complex VBL and then Exposing Last Path results in a 2x+ performance improvement. 
 
 ## Bug Fixes
+- [#3017][i3017] Various bugs in player database macro functions fixed.
+- [#3011][i3011] Calling functions `js.eval()`, `js.evalNS()`, are `js.evalURI()` were case sensitive. Fixed. 
 - [#3001][i3001] Missing I18n tag used in error when missing lib:token is used in URI. Fixed.  
 - [#2986][i2986] URI access denied for players if containing token is unowned. Fixed.
 - [#2970][i2970] Adding a hex-shaped light definition to campaign properties would cause an exception when reopening the campaign properties. Fixed.
@@ -55,11 +64,13 @@ Feature release using OpenJDK 16.
 
 ## Other
 - [#2931][i2931] Updated spotless plugin for support of Java 16 features. 
-- [#2955][i2955]
-- [#][i]
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3017]: https://github.com/RPTools/maptool/issues/3017
+[i3011]: https://github.com/RPTools/maptool/issues/3011
+[i3010]: https://github.com/RPTools/maptool/issues/3010
+[i3006]: https://github.com/RPTools/maptool/issues/3006
 [i3001]: https://github.com/RPTools/maptool/issues/3001
 [i2994]: https://github.com/RPTools/maptool/issues/2994
 [i2986]: https://github.com/RPTools/maptool/issues/2986
