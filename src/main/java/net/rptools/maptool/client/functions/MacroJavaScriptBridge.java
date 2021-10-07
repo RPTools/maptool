@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
@@ -68,19 +69,19 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     variableResolver = (MapToolVariableResolver) resolver;
     String contextName = null;
 
-    if ("js.evalNS".equals(functionName) || "js.evalURI".equals(functionName)) {
+    if ("js.evalNS".equalsIgnoreCase(functionName) || "js.evalURI".equalsIgnoreCase(functionName)) {
       if (args.size() < 2) {
         throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
       }
       contextName = (String) args.remove(0);
     }
 
-    if ("js.removeNS".equals(functionName)) {
+    if ("js.removeNS".equalsIgnoreCase(functionName)) {
       contextName = (String) args.remove(0);
       JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
       return "removed";
     }
-    if ("js.createNS".equals(functionName)) {
+    if ("js.createNS".equalsIgnoreCase(functionName)) {
       contextName = (String) args.remove(0);
       boolean makeTrusted = MapTool.getParser().isMacroTrusted();
       if (args.size() > 0) {
@@ -92,7 +93,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     }
 
     String script;
-    if ("js.evalURI".equals(functionName)) {
+    if ("js.evalURI".equalsIgnoreCase(functionName)) {
       URL url;
       try {
         url = new URL(args.get(0).toString());
@@ -108,7 +109,12 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
           throw new ParserException(
               I18N.getText("macro.function.jsevalURI.invalidURI", args.get(0).toString()));
         }
-      } catch (ExecutionException | InterruptedException | IOException e) {
+      } catch (ExecutionException | InterruptedException | IOException | CompletionException e) {
+        if (e.getCause() instanceof LibraryNotValidException lnve) {
+          throw new ParserException(lnve.getMessage());
+        } else if (e.getCause() != null) {
+          throw new ParserException(e.getCause());
+        }
         throw new ParserException(e);
       }
 
