@@ -53,21 +53,23 @@ public class PlayerFunctions extends AbstractFunction {
         case "player.getName" -> players.getPlayer().get().name();
         case "player.getInfo" -> {
           if (parameters.size() > 0) {
-            FunctionUtil.blockUntrustedMacro("player.getName");
-            yield players
-                .getPlayer(parameters.get(0).toString())
-                .thenApply(this::playerAsJson)
-                .get();
+            FunctionUtil.blockUntrustedMacro(functionName);
+            var pinfo = players.getPlayer(parameters.get(0).toString()).get();
+            if (pinfo == null) {
+              throw new ParserException(
+                  I18N.getText("msg.error.playerDB.noSuchPlayer", parameters.get(0)));
+            }
+            yield playerAsJson(pinfo);
           } else {
             yield players.getPlayer().thenApply(this::playerAsJson).get();
           }
         }
         case "player.getConnectedPlayers" -> {
-          FunctionUtil.blockUntrustedMacro("player.getName");
+          FunctionUtil.blockUntrustedMacro(functionName);
           yield players.getConnectedPlayers().thenApply(this::playersAsJson).get();
         }
         case "player.getPlayers" -> {
-          FunctionUtil.blockUntrustedMacro("player.getName");
+          FunctionUtil.blockUntrustedMacro(functionName);
           yield players.getDatabasePlayers().thenApply(this::playersAsJson).get();
         }
         default -> throw new ParserException(
