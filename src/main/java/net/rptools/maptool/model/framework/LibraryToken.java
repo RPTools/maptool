@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,11 +43,22 @@ class LibraryToken implements Library {
   /** The name of the property that holds the library version. */
   private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
 
+  /** The name of the property for the authors. */
   private static final String LIB_AUTHORS_PROPERTY_NAME = "libauthors";
+
+  /** The name of the property for the website. */
   private static final String LIB_WEBSITE_PROPERTY_NAME = "libwebsite";
+
+  /** The name of the property for the github url. */
   private static final String LIB_GITHUBURL_PROPERTY_NAME = "libgithuburl";
+
+  /** The name of the property for the license information. */
   private static final String LIB_LICENSE_PROPERTY_NAME = "liblicense";
+
+  /** The name of the property for the description of the l;ibrary. */
   private static final String LIB_DESCRIPTION_PROPERTY_NAME = "libdescription";
+
+  /** The name of the property for the short description of the l;ibrary. */
   private static final String LIB_SHORT_DESCRIPTION_PROPERTY_NAME = "libshortdescription";
 
   /** The version number to return if the lin:token version is unknown. */
@@ -69,6 +80,28 @@ class LibraryToken implements Library {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Returns a list of the library tokens.
+   *
+   * @return list of library tokens
+   */
+  static CompletableFuture<List<Library>> getLibraries() {
+    return new ThreadExecutionHelper<List<Library>>()
+        .runOnSwingThread(
+            () -> {
+              List<Library> tokenList = new ArrayList<>();
+              for (var zone : MapTool.getCampaign().getZones()) {
+                tokenList.addAll(
+                    zone
+                        .getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"))
+                        .stream()
+                        .map(t -> new LibraryToken(t.getId()))
+                        .toList());
+              }
+              return tokenList;
+            });
   }
 
   /**
@@ -177,11 +210,10 @@ class LibraryToken implements Library {
   public CompletableFuture<String[]> getAuthors() {
     return new ThreadExecutionHelper<String[]>()
         .runOnSwingThread(
-            () -> {
-              return Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
-                  .map(String::trim)
-                  .toArray(String[]::new);
-            });
+            () ->
+                Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+                    .map(String::trim)
+                    .toArray(String[]::new));
   }
 
   @Override
@@ -211,6 +243,36 @@ class LibraryToken implements Library {
   public CompletableFuture<String> getShortDescription() {
     return new ThreadExecutionHelper<String>()
         .runOnSwingThread(() -> getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<Boolean> allowsUriAccess() {
+    return new ThreadExecutionHelper<Boolean>()
+        .runOnSwingThread((() -> findLibrary(id).getAllowURIAccess()));
+  }
+
+  @Override
+  public CompletableFuture<LibraryInfo> getLibraryInfo() {
+    return new ThreadExecutionHelper<LibraryInfo>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              var authors =
+                  Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+                      .map(String::trim)
+                      .toArray(String[]::new);
+              return new LibraryInfo(
+                  library.getName(),
+                  library.getName(),
+                  getProperty(LIB_VERSION_PROPERTY_NAME),
+                  getProperty(LIB_WEBSITE_PROPERTY_NAME),
+                  getProperty(LIB_GITHUBURL_PROPERTY_NAME),
+                  authors,
+                  getProperty(LIB_LICENSE_PROPERTY_NAME),
+                  getProperty(LIB_DESCRIPTION_PROPERTY_NAME),
+                  getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME),
+                  library.getAllowURIAccess());
+            });
   }
 
   /**

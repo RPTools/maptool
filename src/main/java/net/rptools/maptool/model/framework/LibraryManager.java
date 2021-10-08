@@ -15,15 +15,29 @@
 package net.rptools.maptool.model.framework;
 
 import java.net.URL;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class to manage the framework libraries. */
 public class LibraryManager {
+
+  /** Library types */
+  public enum LibraryType {
+    TOKEN,
+    DROP_IN
+  }
+
+  /** Class for logging messages. */
+  private static final Logger log = LogManager.getLogger(AppActions.class);
 
   /** The reserved library name prefixes. */
   private static final Set<String> RESERVED_PREFIXES =
@@ -44,7 +58,7 @@ public class LibraryManager {
       Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
 
   /** Drop in libraries */
-  private static final Map<String, DropInLibrary> dropInLibraries = new ConcurrentHashMap<>();
+  private static final DropInLibraryManager dropInLibraryManager = new DropInLibraryManager();
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -108,5 +122,50 @@ public class LibraryManager {
     }
   }
 
-  public void addDropInLibrary(DropInLibrary library) {}
+  /**
+   * Checks if the current namespace has a drop in library registered.
+   *
+   * @param namespace the namespace to check.
+   * @return {@code true} if a drop in library has been registered for this namespace.
+   */
+  public boolean dropInLibraryExists(String namespace) {
+    return dropInLibraryManager.namespaceRegistered(namespace);
+  }
+
+  /**
+   * Register a drop in library.
+   *
+   * @param dropInLib
+   */
+  public boolean registerDropInLibrary(DropInLibrary dropInLib) {
+    try {
+      dropInLibraryManager.registerLibrary(dropInLib);
+    } catch (ExecutionException | InterruptedException | IllegalStateException e) {
+      log.error("Error registering drop in library", e);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Deregister the drop in library associated with the specified namespace.
+   *
+   * @param namespace the namespace to deregister.
+   */
+  public void deregisterDropInLibrary(String namespace) {
+    dropInLibraryManager.deregisterLibrary(namespace);
+  }
+
+  public List<LibraryInfo> getLibraries(LibraryType libraryType)
+      throws ExecutionException, InterruptedException {
+    List<Library> libraries =
+        switch (libraryType) {
+          case TOKEN -> LibraryToken.getLibraries().get();
+          case DROP_IN -> dropInLibraryManager.getLibraries();
+        };
+
+    var libInfo = new ArrayList<LibraryInfo>();
+    libraries.forEach(l -> l.getLibraryInfo().thenAccept(libInfo::add));
+    return libInfo;
+  }
 }

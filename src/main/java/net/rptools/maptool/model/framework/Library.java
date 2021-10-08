@@ -111,4 +111,20 @@ public interface Library {
    * @return the short description of the library.
    */
   CompletableFuture<String> getShortDescription();
+
+  /**
+   * Returns if this library allows lib:// URI access or not.
+   *
+   * @return {@code true} if URI access is allowed.
+   */
+  CompletableFuture<Boolean> allowsUriAccess();
+
+  /**
+   * Returns a {@link LibraryInfo} record representing this library, in a lot of cases where you
+   * need to deal with several bits of information about the library this is going to be more
+   * convenient than calling several methods that all return completable futures.
+   *
+   * @return information about the library.
+   */
+  CompletableFuture<LibraryInfo> getLibraryInfo();
 }

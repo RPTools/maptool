@@ -117,6 +117,7 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
@@ -3260,8 +3261,18 @@ public class AppActions {
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File libFile = chooser.getSelectedFile();
             try {
-              var dropInLibraryImporter = new DropInLibraryImporter().importFromFile(libFile);
-            } catch (IOException ioException) {
+              var dropInLibrary = new DropInLibraryImporter().importFromFile(libFile);
+              var libraryManager = new LibraryManager();
+              String namespace = dropInLibrary.getNamespace().get();
+              if (libraryManager.dropInLibraryExists(dropInLibrary.getNamespace().get())) {
+                if (!MapTool.confirm(
+                    I18N.getText("library.error.dropInLibraryExists", namespace))) {
+                  return;
+                }
+                libraryManager.deregisterDropInLibrary(namespace);
+              }
+              libraryManager.registerDropInLibrary(dropInLibrary);
+            } catch (IOException | InterruptedException | ExecutionException ioException) {
               MapTool.showError("library.import.ioError", ioException);
             }
           }

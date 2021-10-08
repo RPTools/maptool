@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 public class DropInLibrary implements Library {
@@ -38,6 +39,7 @@ public class DropInLibrary implements Library {
   private final String description;
   private final String shortDescription;
   private final Map<String, MD5Key> uriAssetMap;
+  private final boolean allowsUriAccess;
 
   /**
    * Class used to represent Drop In Libraries.
@@ -57,6 +59,7 @@ public class DropInLibrary implements Library {
     description = dto.getDescription();
     shortDescription = dto.getShortDescription();
     this.uriAssetMap = new HashMap<>(uriAssetMap);
+    allowsUriAccess = dto.getAllowsUriAccess();
   }
 
   public static DropInLibrary fromDto(DropInLibraryDto dto, Map<String, MD5Key> uriAssetMap) {
@@ -71,6 +74,32 @@ public class DropInLibrary implements Library {
   @Override
   public CompletableFuture<String> getShortDescription() {
     return CompletableFuture.completedFuture(shortDescription);
+  }
+
+  @Override
+  public CompletableFuture<Boolean> allowsUriAccess() {
+    return CompletableFuture.completedFuture(allowsUriAccess);
+  }
+
+  /**
+   * Returns a list of the library tokens.
+   *
+   * @return list of library tokens
+   */
+  @Override
+  public CompletableFuture<LibraryInfo> getLibraryInfo() {
+    return CompletableFuture.completedFuture(
+        new LibraryInfo(
+            name,
+            namespace,
+            version,
+            website,
+            gitHubUrl,
+            authors,
+            license,
+            description,
+            shortDescription,
+            allowsUriAccess));
   }
 
   @Override
