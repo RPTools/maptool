@@ -451,6 +451,9 @@ dependencies {
 
     // HTTP End Point
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+
+    // HTML Parsing
+    implementation 'org.jsoup:jsoup:1.14.3'
 }
 
 
