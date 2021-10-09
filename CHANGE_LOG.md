@@ -64,10 +64,12 @@ Feature release using OpenJDK 16.
 - [#446][i446] Macro hotkeys not working when macro panels are hidden or floating. Fixed with caveat that they still won't work if a `Dialog`, `Dialog5` or `Frame5` are open and have focus.
 
 ## Other
+- [#3025][i3025] Turn off warning from polyglot about JavaScript running in interpreted mode only.
 - [#2931][i2931] Updated spotless plugin for support of Java 16 features. 
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3025]: https://github.com/RPTools/maptool/issues/3025
 [i3023]: https://github.com/RPTools/maptool/issues/3023
 [i3017]: https://github.com/RPTools/maptool/issues/3017
 [i3011]: https://github.com/RPTools/maptool/issues/3011
