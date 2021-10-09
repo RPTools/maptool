@@ -633,7 +633,7 @@ public class PersistenceUtil {
         if (fixRequired) {
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset =
-                Asset.createDataAssetType(
+                Asset.createAssetDetectType(
                     key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.

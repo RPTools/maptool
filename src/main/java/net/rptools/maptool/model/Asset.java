@@ -119,6 +119,37 @@ public final class Asset {
     public String getDefaultExtension() {
       return defaultExtension;
     }
+
+    /**
+     * Gets the {@code Type} based on the {@link MediaType}.
+     *
+     * @param mediaType the {@link MediaType} to get the {@code Type} for.
+     * @return the {@code Type}.
+     */
+    public static Type fromMediaType(MediaType mediaType) {
+      String contentType = mediaType.getType();
+
+      String subType = mediaType.getSubtype();
+      return switch (contentType) {
+        case "audio" -> Type.AUDIO;
+        case "image" -> Type.IMAGE;
+        case "text" -> switch (subType) {
+          case "html" -> Type.HTML;
+          case "markdown", "x-web-markdown" -> Type.MARKDOWN;
+          case "javascript" -> Type.JAVASCRIPT;
+          case "css" -> Type.CSS;
+          default -> Type.TEXT;
+        };
+        case "application" -> switch (subType) {
+          case "pdf" -> Type.PDF;
+          case "json" -> Type.JSON;
+          case "javascript" -> Type.JAVASCRIPT;
+          case "xml" -> Type.XML;
+          default -> Type.INVALID;
+        };
+        default -> Type.INVALID;
+      };
+    }
   }
 
   /** Extension to use for generic binary data. */
@@ -303,33 +334,8 @@ public final class Asset {
    */
   public static Asset createAssetDetectType(String name, byte[] data) throws IOException {
     MediaType mediaType = getMediaType(name, data);
-    var factory = fromMediaType(mediaType).getFactory();
+    var factory = Type.fromMediaType(mediaType).getFactory();
     return factory.apply(name, data);
-  }
-
-  public static Type fromMediaType(MediaType mediaType) {
-    String contentType = mediaType.getType();
-
-    String subType = mediaType.getSubtype();
-    return switch (contentType) {
-      case "audio" -> Type.AUDIO;
-      case "image" -> Type.IMAGE;
-      case "text" -> switch (subType) {
-        case "html" -> Type.HTML;
-        case "markdown", "x-web-markdown" -> Type.MARKDOWN;
-        case "javascript" -> Type.JAVASCRIPT;
-        case "css" -> Type.CSS;
-        default -> Type.TEXT;
-      };
-      case "application" -> switch (subType) {
-        case "pdf" -> Type.PDF;
-        case "json" -> Type.JSON;
-        case "javascript" -> Type.JAVASCRIPT;
-        case "xml" -> Type.XML;
-        default -> Type.INVALID;
-      };
-      default -> Type.INVALID;
-    };
   }
 
   /**

@@ -496,7 +496,7 @@ public class AssetManager {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
       Asset temp =
-          Asset.createDataAssetType(
+          Asset.createAssetDetectType(
               FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
       return temp;
     } finally {
