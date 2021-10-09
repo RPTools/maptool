@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
@@ -30,6 +31,12 @@ import javax.imageio.stream.ImageInputStream;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 
 /** Asset used in the campaign. */
 public final class Asset {
@@ -39,10 +46,30 @@ public final class Asset {
 
     /** The {@code Asset} is an image. */
     IMAGE(false, "", Asset::createImageAsset), // extension is determined from format.
-    /** The {@code Asset} is a HTML string. */
+    /** The {@code Asset} is an audio file. */
+    AUDIO(false, "", Asset::createAudioAsset), // extension is determined from format.
+    /** The {@code Asset} is an HTML string. */
     HTML(true, "html", Asset::createHTMLAsset),
     /** The {@code Asset} is some generic data. */
-    DATA(false, "data", Asset::createUnknownAssetType);
+    DATA(false, "data", Asset::createUnknownAssetType),
+    /** The {@code Asset} is a Markdown file. */
+    MARKDOWN(true, "md", Asset::createMarkdownAsset),
+    /** The {@code Asset} is a JavaScript file. */
+    JAVASCRIPT(true, "js", Asset::createJavaScriptAsset),
+    /** The {@code Asset} is a css file. */
+    CSS(true, "css", Asset::createCSSAsset),
+    /** The {@code Asset} is a Generic Text file. */
+    TEXT(true, "", Asset::createTextAsset),
+    /** The {@code Asset} is a JSON file. */
+    JSON(true, "json", Asset::createJsonAsset),
+    /** The {@code Asset} is an XML file. */
+    XML(true, "xml", Asset::createXMLAsset),
+    /** The {@code Asset} is a PDF file. */
+    PDF(false, "pdf", Asset::createPDFAsset),
+    /** The {@code Asset} is not a supported type. */
+    INVALID(false, "", Asset::createInvalidAssetType);
+
+
 
     /** Does it make sense to use this {@code Asset} as a {@link String}. */
     private final boolean stringType;
@@ -127,7 +154,19 @@ public final class Asset {
    * @return an {@code Asset} that represents the image.
    */
   public static Asset createImageAsset(String name, byte[] image) {
-    return new Asset(null, name, image != null ? image : new byte[] {}, true);
+    return new Asset(null, name, image != null ? image : new byte[] {}, Type.IMAGE,
+        Type.IMAGE.getDefaultExtension());
+  }
+
+
+  /**
+   * Create an {@code Asset} for an audio file.
+   * @param name The name of the {@code Asset}.
+   * @param audio The audio.
+   * @return the {@code Asset} that represents the audio.
+   */
+  public static Asset createAudioAsset(String name, byte[] audio) {
+    return new Asset(null, name, audio, Type.AUDIO, Type.AUDIO.getDefaultExtension());
   }
 
   /**
@@ -141,6 +180,41 @@ public final class Asset {
     return new Asset(name, image);
   }
 
+
+  public static Asset createPDFAsset(String name, byte[] pdf) {
+    return new Asset(null, name, pdf, Type.PDF, Type.PDF.getDefaultExtension());
+  }
+
+  public static Asset createMarkdownAsset(String name, byte[] markdown) {
+    return new Asset(null, name, markdown, Type.MARKDOWN, Type.MARKDOWN.getDefaultExtension());
+  }
+
+  public static Asset createJavaScriptAsset(String name, byte[] javascript) {
+    return new Asset(null, name, javascript, Type.JAVASCRIPT,
+        Type.JAVASCRIPT.getDefaultExtension());
+  }
+
+  public static Asset createCSSAsset(String name, byte[] css) {
+    return new Asset(null, name, css, Type.CSS, Type.CSS.getDefaultExtension());
+  }
+
+  public static Asset createTextAsset(String name, byte[] text) {
+    return new Asset(null, name, text, Type.TEXT, Type.TEXT.getDefaultExtension());
+  }
+
+  public static Asset createJsonAsset(String name, byte[] json) {
+    return new Asset(null, name, json, Type.JSON, Type.JSON.getDefaultExtension());
+  }
+
+  public static Asset createXMLAsset(String name, byte[] xml) {
+    return new Asset(null, name, xml, Type.XML, Type.XML.getDefaultExtension());
+  }
+
+  public static Asset createInvalidAssetType(String name, byte[] data) {
+    return createBrokenImageAsset(new MD5Key(data));
+  }
+
+
   /**
    * Create an {@code Asset} for representing a broken image.
    *
@@ -148,7 +222,7 @@ public final class Asset {
    * @return an {@code Asset} that represents a broken image.
    */
   public static Asset createBrokenImageAsset(MD5Key md5Key) {
-    return new Asset(md5Key, BROKEN_IMAGE_NAME, new byte[] {}, true);
+    return new Asset(md5Key, BROKEN_IMAGE_NAME, new byte[] {}, Type.IMAGE, ".png");
   }
 
   /**
@@ -163,6 +237,38 @@ public final class Asset {
     return createImageAsset(name, data);
   }
 
+  public static Asset createAssetDetectType(String name, byte[] data) throws IOException {
+    MediaType mediaType = getMediaType(name, data);
+
+  }
+
+
+
+  public static Type fromMediaType(MediaType mediaType) {
+    String contentType = mediaType.getType();
+
+    String subType = mediaType.getSubtype();
+    return switch (contentType) {
+      case "audio" -> Type.AUDIO;
+      case "image" -> Type.IMAGE;
+      case "text" -> switch (subType) {
+        case "html" -> Type.HTML;
+        case "markdown", "x-web-markdown" -> Type.MARKDOWN;
+        case "javascript" -> Type.JAVASCRIPT;
+        case "css" -> Type.CSS;
+        default -> Type.TEXT;
+      };
+      case "application" -> switch (subType) {
+        case "pdf" -> Type.PDF;
+        case "json" -> Type.JSON;
+        case "javascript" -> Type.JAVASCRIPT;
+        case "xml" -> Type.XML;
+        default -> Type.INVALID;
+      };
+      default -> Type.INVALID;
+    };
+  }
+
   /**
    * Creates a HTML {@code Asset}.
    *
@@ -171,7 +277,7 @@ public final class Asset {
    * @return the HTML {@code Asset}.
    */
   public static Asset createHTMLAsset(String name, byte[] data) {
-    return new Asset(null, name, data, "html", Type.HTML);
+    return new Asset(null, name, data, Type.HTML, Type.HTML.defaultExtension);
   }
 
   /**
@@ -188,25 +294,15 @@ public final class Asset {
   }
 
   /**
-   * Creates a generic {@code Asset}.
-   *
-   * @param name The name of the {@code Asset}.
-   * @param data The data that the {@code Asset} represents.
-   * @return an {@code Asset} that represents the data.
-   */
-  public static Asset createAsset(String name, byte[] data) {
-    return new Asset(null, name, data != null ? data : new byte[] {}, false);
-  }
-
-  /**
    * Creates a new {@code Asset}.
    *
    * @param key the MD5 sum for the {@code Asset}, if {@code null} a new one will be calculated.
    * @param name The name of the {@code Asset}.
    * @param data The data for the {@code Asset}.
-   * @param isImage {@code true} if the data for this {@code Asset} is an image.
+   * @param type The type of the {@code Asset}.
+   * @param extension the extension for the {@code Asset}.
    */
-  private Asset(MD5Key key, String name, byte[] data, boolean isImage) {
+  private Asset(MD5Key key, String name, byte[] data, Type type, String extension) {
     assert data != null;
     this.data = Arrays.copyOf(data, data.length);
     this.name = name;
@@ -216,16 +312,17 @@ public final class Asset {
       this.md5Key = new MD5Key(this.data);
     }
 
-    if (isImage) {
-      extension = determineImageExtension();
+
+    if (type == Type.IMAGE && (extension == null || extension.isEmpty())) {
+      this.extension = determineImageExtension();
     } else {
-      extension = DATA_EXTENSION;
+      this.extension = extension;
     }
 
-    if (extension.equals(DATA_EXTENSION)) {
-      type = Type.DATA;
+    if (extension == null || extension.isEmpty() || extension.equals(DATA_EXTENSION)) {
+      this.type = Type.DATA;
     } else {
-      type = Type.IMAGE;
+      this.type = type;
     }
 
     if (type.isStringType()) {
@@ -247,7 +344,7 @@ public final class Asset {
     try {
       imageData = ImageUtil.imageToBytes(image);
     } catch (IOException e) {
-      // TODO CDW: throw new AssertionError(e); // Shouldn't happen
+      throw new AssertionError(e); // Shouldn't happen
     }
 
     if (imageData != null) {
@@ -437,5 +534,56 @@ public final class Asset {
     byte[] dataVal;
     dataVal = Objects.requireNonNullElseGet(this.data, () -> new byte[0]);
     return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type);
+  }
+
+  private static MediaType getMediaType(String filename, TikaInputStream tis) throws IOException {
+    Metadata metadata = new Metadata();
+    metadata.set(Metadata.RESOURCE_NAME_KEY, filename);
+    try {
+      TikaConfig tika = new TikaConfig();
+      MediaType mediaType = tika.getDetector().detect(tis, metadata);
+
+      /* Workaround for Tika seeing Javascript files as Matlab scripts */
+      if ("text/x-matlab".equals(mediaType.toString())) {
+        String ext = FilenameUtils.getExtension(filename);
+        if("js".equals(ext) || "javascript".equals(ext))
+          mediaType = new MediaType("text","javascript");
+      }
+      return mediaType;
+
+    } catch (TikaException e) {
+      throw new IOException(e);
+    }
+  }
+
+  public static MediaType getMediaType(String filename, byte[] bytes) throws IOException {
+    return getMediaType(filename, TikaInputStream.get(bytes));
+  }
+
+  public static MediaType getMediaType(String filename, InputStream  is) throws IOException {
+    return getMediaType(filename, TikaInputStream.get(is));
+  }
+
+  public static MediaType getMediaType(URL url) throws IOException {
+    return getMediaType(url.getFile(), TikaInputStream.get(url));
+  }
+
+  public boolean checkValidType(MediaType mediaType) {
+    String contentType = mediaType.getType();
+
+    String subType = mediaType.getSubtype();
+    return switch(contentType) {
+      case "audio", "image" -> true;
+      case "text" -> switch(subType) {
+        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
+        default -> false;
+      };
+      case "application" -> switch(subType) {
+        case "pdf", "json", "javascript", "xml" -> true;
+        default -> false;
+      };
+      default -> false;
+    };
+
   }
 }

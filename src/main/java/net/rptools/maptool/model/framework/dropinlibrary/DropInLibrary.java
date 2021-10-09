@@ -38,15 +38,16 @@ public class DropInLibrary implements Library {
   private final String namespace;
   private final String description;
   private final String shortDescription;
-  private final Map<String, MD5Key> uriAssetMap;
+  private final Map<String, MD5Key> pathAssetMap;
   private final boolean allowsUriAccess;
 
   /**
    * Class used to represent Drop In Libraries.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
+   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s.
    */
-  private DropInLibrary(DropInLibraryDto dto, Map<String, MD5Key> uriAssetMap) {
+  private DropInLibrary(DropInLibraryDto dto, Map<String, MD5Key> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -58,12 +59,12 @@ public class DropInLibrary implements Library {
     namespace = dto.getNamespace();
     description = dto.getDescription();
     shortDescription = dto.getShortDescription();
-    this.uriAssetMap = new HashMap<>(uriAssetMap);
+    this.pathAssetMap = new HashMap<>(pathAssetMap);
     allowsUriAccess = dto.getAllowsUriAccess();
   }
 
-  public static DropInLibrary fromDto(DropInLibraryDto dto, Map<String, MD5Key> uriAssetMap) {
-    return new DropInLibrary(dto, uriAssetMap);
+  public static DropInLibrary fromDto(DropInLibraryDto dto, Map<String, MD5Key> pathAssetMap) {
+    return new DropInLibrary(dto, pathAssetMap);
   }
 
   @Override

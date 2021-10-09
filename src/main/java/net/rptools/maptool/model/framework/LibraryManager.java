@@ -30,11 +30,6 @@ import org.apache.logging.log4j.Logger;
 /** Class to manage the framework libraries. */
 public class LibraryManager {
 
-  /** Library types */
-  public enum LibraryType {
-    TOKEN,
-    DROP_IN
-  }
 
   /** Class for logging messages. */
   private static final Logger log = LogManager.getLogger(AppActions.class);
@@ -156,6 +151,13 @@ public class LibraryManager {
     dropInLibraryManager.deregisterLibrary(namespace);
   }
 
+  /**
+   * Returns a list of information about the registered libraries.
+   * @param libraryType the type of library to get the information about.
+   * @return list of information about the registered libraries.
+   * @throws ExecutionException if an error occurs while extracting information about the library.
+   * @throws InterruptedException if an error occurs while extracting information about the library.
+   */
   public List<LibraryInfo> getLibraries(LibraryType libraryType)
       throws ExecutionException, InterruptedException {
     List<Library> libraries =
@@ -167,5 +169,25 @@ public class LibraryManager {
     var libInfo = new ArrayList<LibraryInfo>();
     libraries.forEach(l -> l.getLibraryInfo().thenAccept(libInfo::add));
     return libInfo;
+  }
+
+  /**
+   * Returns the information about the library with the specified namespace.
+   * @param namespace the namespace of the library to get the information about.
+   * @return the information for the library.
+   * @throws ExecutionException if an error occurs while extracting information about the library.
+   * @throws InterruptedException if an error occurs while extracting information about the library.
+   */
+  public Optional<LibraryInfo> getLibraryInfo(String namespace)
+      throws ExecutionException, InterruptedException {
+    var lib = dropInLibraryManager.getLibrary(namespace);
+    if (lib == null) {
+      lib = LibraryToken.getLibrary(namespace).get();
+    }
+
+    if (lib == null) {
+      return Optional.empty();
+    }
+    return Optional.of(lib.getLibraryInfo().get());
   }
 }

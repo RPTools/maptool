@@ -14,21 +14,26 @@
  */
 package net.rptools.maptool.model.framework.dropinlibrary;
 
+import com.google.common.net.MediaType;
 import com.google.protobuf.util.JsonFormat;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.swing.filechooser.FileFilter;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 public class DropInLibraryImporter {
 
   public static final String DROP_IN_LIBRARY_EXTENSION = ".mtlib";
   private static final String LIBRARY_INFO_FILE = "library.json";
+  private static final String LIBRARY_DIRECTORY = "library/";
 
   public static FileFilter getDropInLibraryFileFilter() {
     return new FileFilter() {
@@ -54,7 +59,18 @@ public class DropInLibraryImporter {
       }
       var builder = DropInLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
-      return DropInLibrary.fromDto(builder.build(), Map.of());
+      var pathAssetMap = transferAssets(zip);
+      return DropInLibrary.fromDto(builder.build(), pathAssetMap);
+    }
+  }
+
+  private Map<String, MD5Key> transferAssets(ZipFile zip) throws IOException {
+    var entries =
+        zip.stream().filter(e -> !e.isDirectory()).filter(e -> e.getName().startsWith(LIBRARY_DIRECTORY)).toList();
+    for (var entry : entries) {
+      InputStream inputStream = zip.getInputStream(entry);
+      MediaType mediaType = MediaType.
+      Asset.createUnknownAssetType()
     }
   }
 }

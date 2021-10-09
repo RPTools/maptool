@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.LibraryInfo;
 
 /** Class for managing {@link DropInLibrary} objects. */
 public class DropInLibraryManager {
@@ -69,5 +70,16 @@ public class DropInLibraryManager {
    */
   public List<Library> getLibraries() {
     return new ArrayList<>(namespaceLibraryMap.values());
+  }
+
+
+  /**
+   * Returns the library with the specified namespace. If no library exists for this namespace
+   * then null is returned.
+   * @param namespace the namespace of the library.
+   * @return the library for the namespace.
+   */
+  public Library getLibrary(String namespace) {
+    return namespaceLibraryMap.getOrDefault(namespace, null);
   }
 }

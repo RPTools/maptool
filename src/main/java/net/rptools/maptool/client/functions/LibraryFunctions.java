@@ -17,11 +17,13 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.framework.LibraryManager.LibraryType;
+import net.rptools.maptool.model.framework.LibraryType;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -32,7 +34,8 @@ public class LibraryFunctions extends AbstractFunction {
 
   /** Creates a new {@code PlayerFunctions} object. */
   public LibraryFunctions() {
-    super(0, 0, "library.listDropInLibraries");
+    super(0, 1, "library.listDropInLibraries", "library.getInfo",
+        "library.listTokenLibraries");
   }
 
   @Override
@@ -44,13 +47,27 @@ public class LibraryFunctions extends AbstractFunction {
     try {
       var libraryManager = new LibraryManager();
 
-      return switch (fName) {
-        case "libraryListDropInLibraries" -> {
-          yield libraryManager.getLibraries(LibraryType.DROP_IN);
+      switch (fName) {
+        case "library.listdropinlibraries" -> {
+          FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+          return librariesAsJson(libraryManager.getLibraries(LibraryType.DROP_IN));
         }
-        default -> throw new ParserException(
-            I18N.getText("macro.function.general.unknownFunction", functionName));
-      };
+        case "library.getinfo" -> {
+          FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+          String namespace = parameters.get(0).toString();
+          Optional<LibraryInfo> libraryInfo = libraryManager.getLibraryInfo(namespace);
+          if (libraryInfo.isPresent())  {
+            return libraryAsJson(libraryInfo.get());
+          } else {
+            return "";
+          }
+        }
+        case "library.listtokenlibraries" -> {
+          FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+          return librariesAsJson(libraryManager.getLibraries(LibraryType.TOKEN));
+        }
+        default -> throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+      }
     } catch (InterruptedException | ExecutionException e) {
       throw new ParserException(e);
     }
