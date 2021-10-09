@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.model.framework;
 
-/**
- * Record that contains the information about a library.
- */
+/** Record that contains the information about a library. */
 public record LibraryInfo(
     String name,
     String namespace,

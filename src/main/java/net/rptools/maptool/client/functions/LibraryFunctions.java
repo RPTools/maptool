@@ -34,8 +34,7 @@ public class LibraryFunctions extends AbstractFunction {
 
   /** Creates a new {@code PlayerFunctions} object. */
   public LibraryFunctions() {
-    super(0, 1, "library.listDropInLibraries", "library.getInfo",
-        "library.listTokenLibraries");
+    super(0, 1, "library.listDropInLibraries", "library.getInfo", "library.listTokenLibraries");
   }
 
   @Override
@@ -56,7 +55,7 @@ public class LibraryFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           String namespace = parameters.get(0).toString();
           Optional<LibraryInfo> libraryInfo = libraryManager.getLibraryInfo(namespace);
-          if (libraryInfo.isPresent())  {
+          if (libraryInfo.isPresent()) {
             return libraryAsJson(libraryInfo.get());
           } else {
             return "";
@@ -66,7 +65,8 @@ public class LibraryFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
           return librariesAsJson(libraryManager.getLibraries(LibraryType.TOKEN));
         }
-        default -> throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+        default -> throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
       }
     } catch (InterruptedException | ExecutionException e) {
       throw new ParserException(e);

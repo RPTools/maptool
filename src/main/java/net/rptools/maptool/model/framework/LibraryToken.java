@@ -106,20 +106,21 @@ class LibraryToken implements Library {
 
   /**
    * Returns the library for a given namespace.
+   *
    * @param namespace the namespace to return the library for.
    * @return the library for the namespace.
    */
   static CompletableFuture<Library> getLibrary(String namespace) {
-    return new ThreadExecutionHelper<Library>().runOnSwingThread(
-        () -> {
-          var tokenList = getTokensWithName(namespace);
-          if (tokenList.isEmpty()) {
-            return null;
-          } else {
-            return new LibraryToken(tokenList.get(0).getId());
-          }
-        }
-    );
+    return new ThreadExecutionHelper<Library>()
+        .runOnSwingThread(
+            () -> {
+              var tokenList = getTokensWithName(namespace);
+              if (tokenList.isEmpty()) {
+                return null;
+              } else {
+                return new LibraryToken(tokenList.get(0).getId());
+              }
+            });
   }
 
   /**

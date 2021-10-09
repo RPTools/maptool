@@ -633,7 +633,7 @@ public class PersistenceUtil {
         if (fixRequired) {
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset =
-                Asset.createUnknownAssetType(
+                Asset.createDataAssetType(
                     key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
@@ -666,7 +666,7 @@ public class PersistenceUtil {
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset.setData(IOUtils.toByteArray(is), false);
+            asset = asset.setData(IOUtils.toByteArray(is), false);
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
             continue;

@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model.framework.dropinlibrary;
 
-import com.google.common.net.MediaType;
 import com.google.protobuf.util.JsonFormat;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +25,6 @@ import java.util.zip.ZipFile;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 public class DropInLibraryImporter {
@@ -66,11 +64,15 @@ public class DropInLibraryImporter {
 
   private Map<String, MD5Key> transferAssets(ZipFile zip) throws IOException {
     var entries =
-        zip.stream().filter(e -> !e.isDirectory()).filter(e -> e.getName().startsWith(LIBRARY_DIRECTORY)).toList();
+        zip.stream()
+            .filter(e -> !e.isDirectory())
+            .filter(e -> e.getName().startsWith(LIBRARY_DIRECTORY))
+            .toList();
     for (var entry : entries) {
       InputStream inputStream = zip.getInputStream(entry);
-      MediaType mediaType = MediaType.
-      Asset.createUnknownAssetType()
+      // MediaType mediaType = MediaType.
+      // Asset.createUnknownAssetType()
     }
+    return null;
   }
 }

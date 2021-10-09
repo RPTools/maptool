@@ -227,7 +227,7 @@ public class HeroLabData {
         out.writeObject(statBlocks);
 
         String assetName = getPortfolioFile() + "/" + heroLabIndex + "/" + name;
-        Asset statBlockAsset = Asset.createAsset(assetName, byteOut.toByteArray());
+        Asset statBlockAsset = Asset.createAssetDetectType(assetName, byteOut.toByteArray());
         AssetManager.putAsset(statBlockAsset);
         heroLabStatblockAssetID = statBlockAsset.getMD5Key();
 

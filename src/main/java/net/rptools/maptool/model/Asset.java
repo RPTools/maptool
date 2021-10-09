@@ -51,7 +51,7 @@ public final class Asset {
     /** The {@code Asset} is an HTML string. */
     HTML(true, "html", Asset::createHTMLAsset),
     /** The {@code Asset} is some generic data. */
-    DATA(false, "data", Asset::createUnknownAssetType),
+    DATA(false, "data", Asset::createDataAssetType),
     /** The {@code Asset} is a Markdown file. */
     MARKDOWN(true, "md", Asset::createMarkdownAsset),
     /** The {@code Asset} is a JavaScript file. */
@@ -68,8 +68,6 @@ public final class Asset {
     PDF(false, "pdf", Asset::createPDFAsset),
     /** The {@code Asset} is not a supported type. */
     INVALID(false, "", Asset::createInvalidAssetType);
-
-
 
     /** Does it make sense to use this {@code Asset} as a {@link String}. */
     private final boolean stringType;
@@ -154,13 +152,17 @@ public final class Asset {
    * @return an {@code Asset} that represents the image.
    */
   public static Asset createImageAsset(String name, byte[] image) {
-    return new Asset(null, name, image != null ? image : new byte[] {}, Type.IMAGE,
+    return new Asset(
+        null,
+        name,
+        image != null ? image : new byte[] {},
+        Type.IMAGE,
         Type.IMAGE.getDefaultExtension());
   }
 
-
   /**
    * Create an {@code Asset} for an audio file.
+   *
    * @param name The name of the {@code Asset}.
    * @param audio The audio.
    * @return the {@code Asset} that represents the audio.
@@ -180,40 +182,95 @@ public final class Asset {
     return new Asset(name, image);
   }
 
-
+  /**
+   * Create an {@code Asset} for a PDF.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param pdf The pdf that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the pdf.
+   */
   public static Asset createPDFAsset(String name, byte[] pdf) {
     return new Asset(null, name, pdf, Type.PDF, Type.PDF.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for markdown.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param markdown The markdown that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the markdown.
+   */
   public static Asset createMarkdownAsset(String name, byte[] markdown) {
     return new Asset(null, name, markdown, Type.MARKDOWN, Type.MARKDOWN.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for JavaScript.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param javascript The JavaScript that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the JavaScript.
+   */
   public static Asset createJavaScriptAsset(String name, byte[] javascript) {
-    return new Asset(null, name, javascript, Type.JAVASCRIPT,
-        Type.JAVASCRIPT.getDefaultExtension());
+    return new Asset(
+        null, name, javascript, Type.JAVASCRIPT, Type.JAVASCRIPT.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for CSS.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param css The css that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the css.
+   */
   public static Asset createCSSAsset(String name, byte[] css) {
     return new Asset(null, name, css, Type.CSS, Type.CSS.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for general text.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param text The text that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the text.
+   */
   public static Asset createTextAsset(String name, byte[] text) {
     return new Asset(null, name, text, Type.TEXT, Type.TEXT.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for JSON.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param json The json that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the json.
+   */
   public static Asset createJsonAsset(String name, byte[] json) {
     return new Asset(null, name, json, Type.JSON, Type.JSON.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for XML.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param xml The xml that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the xml.
+   */
   public static Asset createXMLAsset(String name, byte[] xml) {
     return new Asset(null, name, xml, Type.XML, Type.XML.getDefaultExtension());
   }
 
+  /**
+   * Create an {@code Asset} for an invalid type. The asset wont actually be created and saved only
+   * a "broken image" for it.
+   *
+   * @param name The name of the {@code Asset}.
+   * @param data The data that the {@code Asset} represents.
+   * @return an {@code Asset} that represents the data.
+   */
   public static Asset createInvalidAssetType(String name, byte[] data) {
     return createBrokenImageAsset(new MD5Key(data));
   }
-
 
   /**
    * Create an {@code Asset} for representing a broken image.
@@ -226,23 +283,29 @@ public final class Asset {
   }
 
   /**
-   * Creates an {@code Asset} of something that may or may not be an image. It will first try to
-   * treat the data as an image, and fall back to a generic type if it can not.
+   * Creates an {@code Asset} of some unknown data.
    *
    * @param name The name of the {@code Asset}.
    * @param data The data that the {@code Asset} represents.
    * @return an {@code Asset} that represents the data.
    */
-  public static Asset createUnknownAssetType(String name, byte[] data) {
-    return createImageAsset(name, data);
+  public static Asset createDataAssetType(String name, byte[] data) {
+    return new Asset(null, name, data, Type.DATA, Type.DATA.getDefaultExtension());
   }
 
+  /**
+   * Creates an Asset detecting the type.
+   *
+   * @param name the name of the asset.
+   * @param data the data for the asset.
+   * @return the newly created asset.
+   * @throws IOException if there is an error.
+   */
   public static Asset createAssetDetectType(String name, byte[] data) throws IOException {
     MediaType mediaType = getMediaType(name, data);
-
+    var factory = fromMediaType(mediaType).getFactory();
+    return factory.apply(name, data);
   }
-
-
 
   public static Type fromMediaType(MediaType mediaType) {
     String contentType = mediaType.getType();
@@ -311,7 +374,6 @@ public final class Asset {
     } else {
       this.md5Key = new MD5Key(this.data);
     }
-
 
     if (type == Type.IMAGE && (extension == null || extension.isEmpty())) {
       this.extension = determineImageExtension();
@@ -421,7 +483,7 @@ public final class Asset {
    * @return the new {@code Asset}.
    */
   public Asset setData(byte[] data, boolean recalcMd5) {
-    return new Asset(recalcMd5 ? null : this.md5Key, this.name, data, true);
+    return new Asset(recalcMd5 ? null : this.md5Key, this.name, data, type, extension);
   }
 
   /**
@@ -546,8 +608,8 @@ public final class Asset {
       /* Workaround for Tika seeing Javascript files as Matlab scripts */
       if ("text/x-matlab".equals(mediaType.toString())) {
         String ext = FilenameUtils.getExtension(filename);
-        if("js".equals(ext) || "javascript".equals(ext))
-          mediaType = new MediaType("text","javascript");
+        if ("js".equals(ext) || "javascript".equals(ext))
+          mediaType = new MediaType("text", "javascript");
       }
       return mediaType;
 
@@ -560,7 +622,7 @@ public final class Asset {
     return getMediaType(filename, TikaInputStream.get(bytes));
   }
 
-  public static MediaType getMediaType(String filename, InputStream  is) throws IOException {
+  public static MediaType getMediaType(String filename, InputStream is) throws IOException {
     return getMediaType(filename, TikaInputStream.get(is));
   }
 
@@ -572,18 +634,17 @@ public final class Asset {
     String contentType = mediaType.getType();
 
     String subType = mediaType.getSubtype();
-    return switch(contentType) {
+    return switch (contentType) {
       case "audio", "image" -> true;
-      case "text" -> switch(subType) {
+      case "text" -> switch (subType) {
         case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
         default -> false;
       };
-      case "application" -> switch(subType) {
+      case "application" -> switch (subType) {
         case "pdf", "json", "javascript", "xml" -> true;
         default -> false;
       };
       default -> false;
     };
-
   }
 }

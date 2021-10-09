@@ -334,7 +334,7 @@ public class AssetManager {
           String name = FileUtil.getNameWithoutExtension(imageFile);
           byte[] data = FileUtils.readFileToByteArray(imageFile);
 
-          asset = Asset.createUnknownAssetType(name, data);
+          asset = Asset.createAssetDetectType(name, data);
 
           // Just to be sure the image didn't change
           if (!asset.getMD5Key().equals(assetId)) {
@@ -453,7 +453,7 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      Asset asset = Asset.createUnknownAssetType(props.getProperty(NAME), data);
+      Asset asset = Asset.createAssetDetectType(props.getProperty(NAME), data);
 
       if (!asset.getMD5Key().equals(id)) {
         log.error("MD5 for asset " + asset.getName() + " corrupted; purging corrupted file");
@@ -478,7 +478,7 @@ public class AssetManager {
    * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(File file) throws IOException {
-    return Asset.createUnknownAssetType(
+    return Asset.createAssetDetectType(
         FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
   }
 
@@ -496,7 +496,7 @@ public class AssetManager {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
       Asset temp =
-          Asset.createUnknownAssetType(
+          Asset.createDataAssetType(
               FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
       return temp;
     } finally {

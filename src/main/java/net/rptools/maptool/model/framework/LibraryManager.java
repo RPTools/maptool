@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 /** Class to manage the framework libraries. */
 public class LibraryManager {
 
-
   /** Class for logging messages. */
   private static final Logger log = LogManager.getLogger(AppActions.class);
 
@@ -153,6 +152,7 @@ public class LibraryManager {
 
   /**
    * Returns a list of information about the registered libraries.
+   *
    * @param libraryType the type of library to get the information about.
    * @return list of information about the registered libraries.
    * @throws ExecutionException if an error occurs while extracting information about the library.
@@ -173,6 +173,7 @@ public class LibraryManager {
 
   /**
    * Returns the information about the library with the specified namespace.
+   *
    * @param namespace the namespace of the library to get the information about.
    * @return the information for the library.
    * @throws ExecutionException if an error occurs while extracting information about the library.
