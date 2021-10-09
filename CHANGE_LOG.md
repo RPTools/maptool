@@ -47,6 +47,7 @@ Feature release using OpenJDK 16.
 - [#2155][i2155] More performance improvements. Moving a token across a large map with very complex VBL and then Exposing Last Path results in a 2x+ performance improvement. 
 
 ## Bug Fixes
+- [#3023][i3023] Frames/Dialogs/Overlays could not resolve relative URLs. Fixed.
 - [#3017][i3017] Various bugs in player database macro functions fixed.
 - [#3011][i3011] Calling functions `js.eval()`, `js.evalNS()`, are `js.evalURI()` were case sensitive. Fixed. 
 - [#3001][i3001] Missing I18n tag used in error when missing lib:token is used in URI. Fixed.  
@@ -67,6 +68,7 @@ Feature release using OpenJDK 16.
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3023]: https://github.com/RPTools/maptool/issues/3023
 [i3017]: https://github.com/RPTools/maptool/issues/3017
 [i3011]: https://github.com/RPTools/maptool/issues/3011
 [i3010]: https://github.com/RPTools/maptool/issues/3010
