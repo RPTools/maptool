@@ -82,6 +82,9 @@ public class AssetManager {
   /** Property string associated with asset name */
   public static final String NAME = "name";
 
+  /** Property string associated with asset type. */
+  public static final String TYPE = "type";
+
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
 
@@ -453,7 +456,16 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      Asset asset = Asset.createAssetDetectType(props.getProperty(NAME), data);
+      String name = props.getProperty(NAME);
+      String type = props.getProperty(TYPE);
+
+      Asset asset;
+
+      if (type != null) {
+        asset = Asset.Type.valueOf(type).getFactory().apply(name, data);
+      } else {
+        asset = Asset.createAssetDetectType(props.getProperty(NAME), data);
+      }
 
       if (!asset.getMD5Key().equals(id)) {
         log.error("MD5 for asset " + asset.getName() + " corrupted; purging corrupted file");
@@ -561,6 +573,7 @@ public class AssetManager {
       Properties props = new Properties();
       try (OutputStream out = new FileOutputStream(infoFile)) {
         props.put(NAME, asset.getName() != null ? asset.getName() : "");
+        props.put(TYPE, asset.getType().name());
         props.store(out, "Asset Info");
       } catch (IOException ioe) {
         log.error("Could not persist asset while writing image properties", ioe);
