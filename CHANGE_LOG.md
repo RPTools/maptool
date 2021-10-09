@@ -47,6 +47,7 @@ Feature release using OpenJDK 16.
 - [#2155][i2155] More performance improvements. Moving a token across a large map with very complex VBL and then Exposing Last Path results in a 2x+ performance improvement. 
 
 ## Bug Fixes
+- [#3023][i3023] Frames/Dialogs/Overlays could not resolve relative URLs. Fixed.
 - [#3017][i3017] Various bugs in player database macro functions fixed.
 - [#3011][i3011] Calling functions `js.eval()`, `js.evalNS()`, are `js.evalURI()` were case sensitive. Fixed. 
 - [#3001][i3001] Missing I18n tag used in error when missing lib:token is used in URI. Fixed.  
@@ -63,10 +64,13 @@ Feature release using OpenJDK 16.
 - [#446][i446] Macro hotkeys not working when macro panels are hidden or floating. Fixed with caveat that they still won't work if a `Dialog`, `Dialog5` or `Frame5` are open and have focus.
 
 ## Other
+- [#3025][i3025] Turn off warning from polyglot about JavaScript running in interpreted mode only.
 - [#2931][i2931] Updated spotless plugin for support of Java 16 features. 
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3025]: https://github.com/RPTools/maptool/issues/3025
+[i3023]: https://github.com/RPTools/maptool/issues/3023
 [i3017]: https://github.com/RPTools/maptool/issues/3017
 [i3011]: https://github.com/RPTools/maptool/issues/3011
 [i3010]: https://github.com/RPTools/maptool/issues/3010
