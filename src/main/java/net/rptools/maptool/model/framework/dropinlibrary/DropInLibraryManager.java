@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.framework.dropinlibrary;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +24,27 @@ import net.rptools.maptool.model.framework.Library;
 
 /** Class for managing {@link DropInLibrary} objects. */
 public class DropInLibraryManager {
+
+  /** "Protocol" for drop in libraries. */
+  private static final String LIBRARY_PROTOCOL = "lib";
+
   /** The drop in libraries that are registered. */
   private final Map<String, DropInLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
+
+  /**
+   * Is there a drop in library that would handle this path. This just checks the protocol and
+   * namespace, it won't check that the full path actually exists.
+   *
+   * @param path the path for the library (can be full path or just part of path).
+   * @return if the library at the path is handled by a drop in library.
+   */
+  public boolean handles(URL path) {
+    if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
+      return namespaceRegistered(path.getHost());
+    } else {
+      return false;
+    }
+  }
 
   /**
    * Checks to see if this namespace is already registered.
@@ -33,7 +53,7 @@ public class DropInLibraryManager {
    * @return {@code true} if the namespace is registered.
    */
   public boolean namespaceRegistered(String namespace) {
-    return namespaceLibraryMap.containsKey(namespace);
+    return namespaceLibraryMap.containsKey(namespace.toLowerCase());
   }
 
   /**
@@ -46,7 +66,7 @@ public class DropInLibraryManager {
    */
   public void registerLibrary(DropInLibrary library)
       throws ExecutionException, InterruptedException {
-    String namespace = library.getNamespace().get();
+    String namespace = library.getNamespace().get().toLowerCase();
     var registeredLib = namespaceLibraryMap.computeIfAbsent(namespace, k -> library);
     if (registeredLib != library) {
       throw new IllegalStateException("Library is already registered");
@@ -59,7 +79,7 @@ public class DropInLibraryManager {
    * @param namespace the namespace of the library to deregister.
    */
   public void deregisterLibrary(String namespace) {
-    namespaceLibraryMap.remove(namespace);
+    namespaceLibraryMap.remove(namespace.toLowerCase());
   }
 
   /**
@@ -79,6 +99,20 @@ public class DropInLibraryManager {
    * @return the library for the namespace.
    */
   public Library getLibrary(String namespace) {
-    return namespaceLibraryMap.getOrDefault(namespace, null);
+    return namespaceLibraryMap.getOrDefault(namespace.toLowerCase(), null);
+  }
+
+  /**
+   * Returns the {@link Library} that will handle the lib:// uri that is passed in.
+   *
+   * @param path the path of the drop in library.
+   * @return the {@link Library} representing the lib:// uri .
+   */
+  public Library getLibrary(URL path) {
+    if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
+      return getLibrary(path.getHost());
+    } else {
+      return null;
+    }
   }
 }

@@ -33,9 +33,7 @@ import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
 
-/**
- * Class for importing Drop In Libraries.
- */
+/** Class for importing Drop In Libraries. */
 public class DropInLibraryImporter {
 
   /** The file extension for drop in library files. */
@@ -47,6 +45,7 @@ public class DropInLibraryImporter {
 
   /**
    * Returns the {@link FileFilter} for drop in library files.
+   *
    * @return the {@link FileFilter} for drop in library files.
    */
   public static FileFilter getDropInLibraryFileFilter() {
@@ -66,9 +65,9 @@ public class DropInLibraryImporter {
 
   /**
    * Imports the drop in library from the specified file.
+   *
    * @param file the file to use for import.
    * @return
-   *
    * @throws IOException
    */
   public DropInLibrary importFromFile(File file) throws IOException {
@@ -76,17 +75,17 @@ public class DropInLibraryImporter {
     try (var zip = new ZipFile(file)) {
       ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
       if (entry == null) {
-        throw new IOException("library.json file not found.");
+        throw new IOException(I18N.getText("library.error.dropin.noConfigFile", file.getPath()));
       }
       var builder = DropInLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
       var pathAssetMap = transferAssets(builder.getNamespace(), zip);
-      //return DropInLibrary.fromDto(builder.build(), pathAssetMap);
-      return DropInLibrary.fromDto(builder.build(), Map.of());
+      return DropInLibrary.fromDto(builder.build(), pathAssetMap);
     }
   }
 
-  private Map<String, Pair<MD5Key, Type>> transferAssets(String namespace, ZipFile zip) throws IOException {
+  private Map<String, Pair<MD5Key, Type>> transferAssets(String namespace, ZipFile zip)
+      throws IOException {
     var pathAssetMap = new HashMap<String, Pair<MD5Key, Type>>();
     var entries =
         zip.stream()
@@ -94,16 +93,16 @@ public class DropInLibraryImporter {
             .filter(e -> e.getName().startsWith(CONTENT_DIRECTORY))
             .toList();
     for (var entry : entries) {
+      String path = entry.getName().substring(CONTENT_DIRECTORY.length());
       try (InputStream inputStream = zip.getInputStream(entry)) {
         byte[] bytes = inputStream.readAllBytes();
         MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
         Asset asset =
-            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + entry.getName(),
-            bytes);
+            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
         if (!AssetManager.hasAsset(asset)) {
           AssetManager.putAsset(asset);
         }
-        pathAssetMap.put(entry.getName(), Pair.with(asset.getMD5Key(), asset.getType()));
+        pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
     }
     return pathAssetMap;

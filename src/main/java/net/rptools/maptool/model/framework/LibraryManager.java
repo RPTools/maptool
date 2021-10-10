@@ -95,7 +95,10 @@ public class LibraryManager {
    * @return the library.
    */
   public CompletableFuture<Optional<Library>> getLibrary(URL path) {
-    if (LibraryToken.handles(path)) {
+    if (dropInLibraryManager.handles(path)) {
+      return CompletableFuture.completedFuture(
+          Optional.ofNullable(dropInLibraryManager.getLibrary(path)));
+    } else if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path);
     } else {
       return CompletableFuture.completedFuture(Optional.empty());

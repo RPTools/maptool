@@ -375,22 +375,16 @@ public final class Asset {
     assert data != null;
     this.data = Arrays.copyOf(data, data.length);
     this.name = name;
-    if (key != null) {
-      md5Key = key;
-    } else {
-      this.md5Key = new MD5Key(this.data);
-    }
+    this.type = type;
 
-    if (type == Type.IMAGE && (extension == null || extension.isEmpty())) {
+    md5Key = Objects.requireNonNullElseGet(key, () -> new MD5Key(this.data));
+
+    if (type == Type.DATA) {
+      this.extension = DATA_EXTENSION;
+    } else if (extension == null || extension.isEmpty()) {
       this.extension = determineImageExtension();
     } else {
       this.extension = extension;
-    }
-
-    if (extension == null || extension.isEmpty() || extension.equals(DATA_EXTENSION)) {
-      this.type = Type.DATA;
-    } else {
-      this.type = type;
     }
 
     if (type.isStringType()) {
@@ -493,9 +487,7 @@ public final class Asset {
   }
 
   /**
-   * Attempts to determine the extension for the image represented by the {@code Asset}. If it is
-   * unable to be determined then the extension type for generic data {@link #DATA_EXTENSION} is
-   * returned.
+   * Attempts to determine the extension for the data passed in.
    *
    * @return the extension type for the image.
    */
@@ -624,33 +616,38 @@ public final class Asset {
     }
   }
 
+  /**
+   * Detects and returns the {@link MediaType} for a byte array.
+   *
+   * @param filename the name of the file that the bytes were read from.
+   * @param bytes the bytes to determine the {@link MediaType} of.
+   * @return the detected {@link MediaType}.
+   * @throws IOException when an error occurs.
+   */
   public static MediaType getMediaType(String filename, byte[] bytes) throws IOException {
     return getMediaType(filename, TikaInputStream.get(bytes));
   }
 
+  /**
+   * Detects and returns the {@link MediaType} for an {@link InputStream}.
+   *
+   * @param filename the name of the file that corresponds to the {@link InputStream}.
+   * @param is the {@link InputStream} to determine the {@link MediaType} of.
+   * @return the detected {@link MediaType}.
+   * @throws IOException when an error occurs.
+   */
   public static MediaType getMediaType(String filename, InputStream is) throws IOException {
     return getMediaType(filename, TikaInputStream.get(is));
   }
 
+  /**
+   * Detects and returns the {@link MediaType} for a {@link URL}.
+   *
+   * @param url the {@link URL} to determine the {@link MediaType} of.
+   * @return the detected {@link MediaType}.
+   * @throws IOException when an error occurs.
+   */
   public static MediaType getMediaType(URL url) throws IOException {
     return getMediaType(url.getFile(), TikaInputStream.get(url));
-  }
-
-  public boolean checkValidType(MediaType mediaType) {
-    String contentType = mediaType.getType();
-
-    String subType = mediaType.getSubtype();
-    return switch (contentType) {
-      case "audio", "image" -> true;
-      case "text" -> switch (subType) {
-        case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
-        default -> false;
-      };
-      case "application" -> switch (subType) {
-        case "pdf", "json", "javascript", "xml" -> true;
-        default -> false;
-      };
-      default -> false;
-    };
   }
 }
