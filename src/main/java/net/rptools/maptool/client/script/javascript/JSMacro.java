@@ -13,7 +13,7 @@
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.script.javascript;
-
+import org.graalvm.polyglot.*;
 import java.util.*;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.*;
@@ -56,6 +56,9 @@ public class JSMacro extends AbstractFunction {
     JSAPIRegisteredMacro macro = macros.get(functionName);
     Object ret = JSScriptEngine.getJSScriptEngine().applyFunction(macro, aargs);
     if (ret != null) {
+      if (ret instanceof Value val) {
+	return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());
+      }
       return MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
     }
     return "";

@@ -148,6 +148,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   }
 
   public Object HostObjectToMTScriptType(Object obj, ArrayList seen) {
+    if (obj instanceof Integer i) {
+      return BigDecimal.valueOf(i);
+    }
+
+    if (obj instanceof Double d) {
+      return BigDecimal.valueOf(d);
+    }
+    
     if (obj instanceof MapToolJSAPIInterface maptoolWrapper) {
       return maptoolWrapper.serializeToString();
     }
