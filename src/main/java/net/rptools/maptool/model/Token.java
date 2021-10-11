@@ -1074,6 +1074,13 @@ public class Token extends BaseModel implements Cloneable {
         : new LinkedList<AttachedLightSource>();
   }
 
+  public List<AttachedLightSource> getLightSourcesModifiable() {
+    if(lightSourceList == null)
+      lightSourceList = new LinkedList<>();
+
+    return lightSourceList;
+  }
+
   public synchronized void addOwner(String playerId) {
     ownerType = OWNER_TYPE_LIST;
     if (ownerList == null) {
@@ -1110,6 +1117,10 @@ public class Token extends BaseModel implements Cloneable {
   /** @return the set of owner names of the token. */
   public Set<String> getOwners() {
     return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
+  }
+
+  public void setOwnerType(int ownerType) {
+    this.ownerType = ownerType;
   }
 
   public boolean isOwnedByAll() {
@@ -1323,9 +1334,7 @@ public class Token extends BaseModel implements Cloneable {
     return lastY;
   }
 
-  public int getLastX() {
-    return lastX;
-  }
+  public int getLastX() { return lastX; }
 
   public Path<? extends AbstractPoint> getLastPath() {
     return lastPath;
@@ -1711,7 +1720,7 @@ public class Token extends BaseModel implements Cloneable {
     return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
   }
 
-  private Map<Class<? extends Grid>, GUID> getSizeMap() {
+  public Map<Class<? extends Grid>, GUID> getSizeMap() {
     if (sizeMap == null) {
       sizeMap = new HashMap<Class<? extends Grid>, GUID>();
     }

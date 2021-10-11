@@ -20,15 +20,16 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.drawing.Rectangle;
-import net.rptools.maptool.server.proto.ServerPolicyDto;
-import net.rptools.maptool.server.proto.TokenDto;
-import net.rptools.maptool.server.proto.WalkerMetricDto;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -788,11 +789,154 @@ public class Mapper {
     }
   }
 
-  public static Token map(TokenDto token) {
-    return null;
+  public static Token map(TokenDto dto) {
+    var token = new Token();
+    token.setId(GUID.valueOf(dto.getId()));
+    token.setBeingImpersonated(dto.getBeingImpersonated());
+    token.setExposedAreaGUID(GUID.valueOf(dto.getExposedAreaGuid()));
+
+    var assetMap = dto.getImageAssetMapMap();
+    for(var key: assetMap.keySet())
+      token.setImageAsset(key, new MD5Key(assetMap.get(key)));
+
+    token.setImageAsset(dto.getCurrentImageAsset());
+    token.setX(dto.getLastX());
+    token.setX(dto.getX());
+    token.setY(dto.getLastY());
+    token.setY(dto.getY());
+    token.setZOrder(dto.getZ());
+    token.setAnchor(dto.getAnchorX(), dto.getAnchorY());
+    token.setSizeScale(dto.getSizeScale());
+    token.setLastPath(map(dto.getLastPath()));
+    token.setSnapToScale(dto.getSnapToScale());
+    token.setFlippedIso(false);
+    token.setWidth(dto.getWidth());
+    token.setHeight(dto.getHeight());
+    token.setFlippedIso(true);
+    token.setWidth(dto.getIsoWidth());
+    token.setHeight(dto.getIsoHeight());
+    token.setScaleX(dto.getScaleX());
+    token.setScaleY(dto.getScaleY());
+
+    var tokenSizeMap = token.getSizeMap();
+    var dtoSizeMap = dto.getSizeMapMap();
+    for(var key: dtoSizeMap.keySet()) {
+      switch (key) {
+        case 0 -> {
+          tokenSizeMap.put(SquareGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 1 -> {
+          tokenSizeMap.put(GridlessGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 2 -> {
+          tokenSizeMap.put(HexGridVertical.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 3 -> {
+          tokenSizeMap.put(HexGridHorizontal.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 4 -> {
+          tokenSizeMap.put(IsometricGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        default -> {
+          log.warn("unknown grid in tokensizemap: " + key);
+        }
+      }
+    }
+    token.setSnapToGrid(dto.getSnapToGrid());
+    token.setVisible(dto.getIsVisible());
+    token.setVisibleOnlyToOwner(dto.getVisibleOnlyToOwner());
+    token.setColorSensitivity(dto.getVblColorSensitivity());
+    token.setAlwaysVisibleTolerance(dto.getAlwaysVisibleTolerance());
+    token.setIsAlwaysVisible(dto.getIsAlwaysVisible());
+    token.setVBL(map(dto.getVbl()));
+    token.setName(dto.getName());
+    dto.getOwnerListList().forEach(owner -> token.addOwner(owner));
+    token.setOwnerType(dto.getOwnerType());
+    token.setShape(Token.TokenShape.valueOf(dto.getTokenShape()));
+    token.setType(Token.Type.valueOf(dto.getTokenShape()));
+    token.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    token.setPropertyType(dto.getPropertyType());
+    token.setFacing(dto.getFacing());
+    token.setHaloColor(new Color(dto.getHaloColor(), true));
+    token.setVisionOverlayColor(new Color(dto.getVisionOverlayColor(), true));
+    token.setTokenOpacity(dto.getTokenOpacity());
+    token.setSpeechName(dto.getSpeechname());
+    token.setTerrainModifier(dto.getTerrainModifier());
+    token.setTerrainModifierOperation(Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name()));
+
+    var ignoredSet = new HashSet<Token.TerrainModifierOperation>();
+    for(var value: dto.getTerrainModifiersIgnoredList())
+      ignoredSet.add(Token.TerrainModifierOperation.valueOf(value.name()));
+    token.setTerrainModifiersIgnored(ignoredSet);
+
+    token.setFlippedX(dto.getIsFlippedX());
+    token.setFlippedY(dto.getIsFlippedY());
+    token.setFlippedIso(dto.getIsFlippedIso());
+    token.setCharsheetImage(new MD5Key(dto.getCharsheetImage()));
+    token.setPortraitImage(new MD5Key(dto.getPortraitImage()));
+
+    var lightSources = token.getLightSourcesModifiable();
+    for(var light: dto.getLightSourcesList())
+      lightSources.add(map(light));
+
+    token.setSightType(dto.getSightType());
+    token.setHasSight(dto.getHasSight());
+    token.setHasImageTable(dto.getHasImageTable());
+    token.setImageTableName(dto.getImageTableName());
+    token.setLabel(dto.getLabel());
+    token.setNotes(dto.getNotes());
+    token.setGMNotes(dto.getGmNotes());
+    token.setGMName(dto.getGmName());
+
+    var dtoStateMap = dto.getStateMap();
+    for(var key: dtoStateMap.keySet()) {
+      var stateDto = dtoStateMap.get(key);
+      switch (stateDto.getStateTypeCase()) {
+        case BOOL_VALUE -> {
+          var value = stateDto.getBoolValue();
+          token.setState(key, value ? Boolean.TRUE : null);
+        }
+        case DOUBLE_VALUE -> {
+          token.setState(key, new BigDecimal(stateDto.getDoubleValue()));
+        }
+        default -> {
+          log.warn("unknown state type:" + stateDto.getStateTypeCase());
+        }
+      }
+    }
+
+    var dtoProperties = dto.getPropertiesMap();
+    for(var key: dtoProperties.keySet())
+      token.setProperty(key, dtoProperties.get(key));
+
+    var dtoMacros =  dto.getMacroPropertiesMap();
+    var tokenMacros = token.getMacroPropertiesMap(false);
+    for(var key: dtoMacros.keySet())
+      tokenMacros.put(key, map(dtoMacros.get(key)));
+
+    token.setSpeechMap(dto.getSpeechMap());
+    token.setHeroLabData(map(dto.getHeroLabData()));
+    token.setAllowURIAccess(dto.getAllowUriAccess());
+    return token;
   }
 
   public static TokenDto map(Token token) {
+    return null;
+  }
+
+  private static HeroLabData map(HeroLabDataDto heroLabData) {
+    return null;
+  }
+
+  private static MacroButtonProperties map(MacroButtonPropertiesDto macroButtonPropertiesDto) {
+    return null;
+  }
+
+  private static AttachedLightSource map(AttachedLightSourceDto light) {
+    return null;
+  }
+
+  private static Path<? extends AbstractPoint> map(PathDto lastPath) {
     return null;
   }
 }
