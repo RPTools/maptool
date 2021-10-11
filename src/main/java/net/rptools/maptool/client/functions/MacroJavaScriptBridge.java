@@ -155,7 +155,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     if (obj instanceof Double d) {
       return BigDecimal.valueOf(d);
     }
-    
+
     if (obj instanceof MapToolJSAPIInterface maptoolWrapper) {
       return maptoolWrapper.serializeToString();
     }
