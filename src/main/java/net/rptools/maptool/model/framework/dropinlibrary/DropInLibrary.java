@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,8 +38,13 @@ import org.javatuples.Pair;
 /** Class that implements drop in libraries. */
 public class DropInLibrary implements Library {
 
+  private static final String URL_PUBLIC_DIR = "public/";
+
+  private static final String MTSCRIPT_PUBLIC_DIR = "mtscript/public/";
+
   /** The name of the drop in library. */
   private final String name;
+
   /** The version of the drop in library. */
   private final String version;
 
@@ -63,11 +69,17 @@ public class DropInLibrary implements Library {
   /** The short description for the drop in library. */
   private final String shortDescription;
 
+  /** if the drop in library allows URI access or not. */
+  private final boolean allowsUriAccess;
+
   /** The mapping between paths and asset information. */
   private final Map<String, Pair<MD5Key, Type>> pathAssetMap;
 
-  /** if the drop in library allows URI access or not. */
-  private final boolean allowsUriAccess;
+  /** The mapping between url paths and asset information. */
+  private final Map<String, Pair<MD5Key, Type>> urlPathAssetMap;
+
+  /** The mapping between MTScript function paths and asset information. */
+  private final Map<String, Pair<MD5Key, Type>> mtsFunctionAssetMap;
 
   /**
    * Class used to represent Drop In Libraries.
@@ -87,8 +99,23 @@ public class DropInLibrary implements Library {
     namespace = dto.getNamespace();
     description = dto.getDescription();
     shortDescription = dto.getShortDescription();
-    this.pathAssetMap = new HashMap<>(pathAssetMap);
+    this.pathAssetMap = Map.copyOf(pathAssetMap);
     allowsUriAccess = dto.getAllowsUriAccess();
+
+    var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
+    var mtsMap = new HashMap<String, Pair<MD5Key, Type>>();
+
+    for (var entry : this.pathAssetMap.entrySet()) {
+      String path = entry.getKey();
+      if (path.startsWith(URL_PUBLIC_DIR)) {
+        urlsMap.put(path.substring(URL_PUBLIC_DIR.length()), entry.getValue());
+      } else if (path.startsWith(MTSCRIPT_PUBLIC_DIR)) {
+        mtsMap.put(path.substring(MTSCRIPT_PUBLIC_DIR.length()), entry.getValue());
+      }
+    }
+
+    urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
+    mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
   }
 
   public static DropInLibrary fromDto(
@@ -146,8 +173,7 @@ public class DropInLibrary implements Library {
    *     null is returned.
    */
   private Pair<MD5Key, Asset.Type> getURILocation(URL location) {
-    String path = "public" + location.getPath();
-    return pathAssetMap.get(path);
+    return urlPathAssetMap.get(location.getPath().replaceFirst("^/", ""));
   }
 
   @Override
