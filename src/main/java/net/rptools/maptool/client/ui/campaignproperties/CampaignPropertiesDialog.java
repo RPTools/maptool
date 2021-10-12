@@ -344,7 +344,7 @@ public class CampaignPropertiesDialog extends JDialog {
         boolean lastGM = false;
         boolean lastOwner = false;
         for (Light light : lightSource.getLightList()) {
-          String shape = null;
+          String shape;
           // TODO: This HAS to change, the lights need to be auto describing, this hard wiring sucks
           if (lightSource.getType() == LightSource.Type.AURA) {
             // Currently these are mutually exclusive but perhaps not in the future?
@@ -355,9 +355,13 @@ public class CampaignPropertiesDialog extends JDialog {
           }
           if (light.getShape() != null) {
             switch (light.getShape()) {
+              default:
+                throw new RuntimeException(
+                    "Unrecognized shape: " + light.getShape().toString().toLowerCase());
               case SQUARE:
               case GRID:
               case CIRCLE:
+              case HEX:
                 // TODO: Make this a preference
                 shape = light.getShape().toString().toLowerCase();
                 break;

@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.htmlframe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.sun.webkit.dom.HTMLSelectElementImpl;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
@@ -162,7 +163,7 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_BLOCK_EXT =
       "<meta http-equiv=\"Content-Security-Policy\" "
           + "content=\" "
-          + " default-src asset: "
+          + " default-src asset: lib: "
           + " https://code.jquery.com " // JQuery CDN
           + " https://cdn.jsdelivr.net " // JSDelivr CDN
           + " https://stackpath.bootstrapcdn.com " // Bootstrap CDN
@@ -477,6 +478,26 @@ public class HTMLWebViewManager {
   }
 
   /**
+   * Checks the passed in href string to see if it is one that the WebView component should handle
+   * or not.
+   *
+   * @param href the href tag to check.
+   * @return {@code true} if the WebView should handle it/
+   */
+  private boolean webViewHandledHref(String href) {
+    String href2 = href.toLowerCase();
+    if (href.startsWith("lib://")) {
+      return true;
+    } else if (href.startsWith("./")) {
+      return true;
+    } else if (href.startsWith("../")) {
+      return true;
+    } else {
+      return href.startsWith("/");
+    }
+  }
+
+  /**
    * Handles the href events. MacroLinks are executed, external links open the browsers, and anchor
    * links scroll the browser to the link.
    *
@@ -490,17 +511,19 @@ public class HTMLWebViewManager {
     final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
     if (href != null && !href.equals("")) {
       String href2 = href.trim().toLowerCase();
-      if (href2.startsWith("macro")) {
-        // ran as macroLink;
-        SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
-      } else if (href2.startsWith("#")) {
-        // Java bug JDK-8199014 workaround
-        webEngine.executeScript(String.format(SCRIPT_ANCHOR, href.substring(1)));
-      } else if (!href2.startsWith("javascript")) {
-        // non-macrolink, non-anchor link, non-javascript code
-        MapTool.showDocument(href); // show in usual browser
+      if (!webViewHandledHref(href2)) {
+        if (href2.startsWith("macro")) {
+          // ran as macroLink;
+          SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
+        } else if (href2.startsWith("#")) {
+          // Java bug JDK-8199014 workaround
+          webEngine.executeScript(String.format(SCRIPT_ANCHOR, href.substring(1)));
+        } else if (!href2.startsWith("javascript")) {
+          // non-macrolink, non-anchor link, non-javascript code
+          MapTool.showDocument(href); // show in usual browser
+        }
+        event.preventDefault(); // don't change webview
       }
-      event.preventDefault(); // don't change webview
     }
   }
 
@@ -615,13 +638,18 @@ public class HTMLWebViewManager {
         if (element.getMultiple()) {
           // If multiple selection enabled, returns a JSON array of selected values
           JsonArray selected = new JsonArray();
-          HTMLCollection options = element.getOptions();
-          for (int o = 0; o < options.getLength(); o++) {
-            HTMLOptionElement option = (HTMLOptionElement) options.item(o);
-            if (option.getSelected()) {
+          // We avoid iterating over the result of `element.getOptions()` in order to workaround a
+          // missing symbol for `HTMLOptionsCollectionImpl::itemImpl()` on linux. Ideally we would
+          // go back to using `element.getOptions()` in the future so we don't keep a dependency on
+          // `HTMLSelectElementImpl`.
+          for (int o = 0; o < element.getLength(); o++) {
+            var node = ((HTMLSelectElementImpl) element).item(o);
+            // instanceof check always seems to be true, but we'll keep it to be safe.
+            if (node instanceof HTMLOptionElement option && option.getSelected()) {
               selected.add(option.getValue());
             }
           }
+
           value = selected.toString();
         } else {
           value = element.getValue();

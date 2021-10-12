@@ -37,6 +37,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -89,6 +90,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "getMatchingProperties",
         "getMatchingLibProperties",
         "isSnapToGrid",
+        "isFlippedX",
+        "isFlippedY",
+        "isFlippedIso",
+        "flipTokenX",
+        "flipTokenY",
+        "flipTokenIso",
         "setOwner",
         "setOwnedByAll",
         "getTokenNativeWidth",
@@ -105,7 +112,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setNotes",
         "getTokenLayoutProps",
         "setTokenLayoutProps",
-        "setTokenSnapToGrid");
+        "setTokenSnapToGrid",
+        "getAllowsURIAccess",
+        "setAllowsURIAccess");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -629,6 +638,33 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
+     * Number zeroOne = isFlippedX(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedX")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Number zeroOne = isFlippedY(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Number zeroOne = isFlippedIso(String tokenId: currentToken(), string mapName: current map)
+     */
+    if (functionName.equals("isFlippedIso")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.isFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
      * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setOwner")) {
@@ -799,6 +835,42 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
+     * Boolean flippedX   = flipTokenX(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped X setting
+     */
+    if (functionName.equals("flipTokenX")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+      return token.isFlippedX() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Boolean flippedY   = flipTokenY(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped Y setting
+     */
+    if (functionName.equals("flipTokenY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+      return token.isFlippedY() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * Boolean flippedIso   = flipTokenIso(String tokenId: currentToken(), string mapName: current map)
+     *
+     * Toggles Flipped Iso setting
+     */
+    if (functionName.equals("flipTokenIso")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipIso);
+      return token.isFlippedIso() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
      * String/JsonObject = getTokenLayoutProps(String delim: ',', String tokenId: currentToken(), String mapName: current map)
      */
     if (functionName.equalsIgnoreCase("getTokenLayoutProps")) {
@@ -849,6 +921,42 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       MapTool.serverCommand()
           .updateTokenProperty(token, Token.Update.setLayout, scale, xOffset, yOffset);
+      return "";
+    }
+
+    /*
+     * getAllowsURLAccess(token: currentToken(), mapName = current map)
+     */
+    if (functionName.equalsIgnoreCase("getAllowsURIAccess")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return token.getAllowURIAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+
+    /*
+     * setAllowsURLAccess(token: currentToken(), mapName = current map)
+     */
+    if (functionName.equalsIgnoreCase("setAllowsURIAccess")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      BigDecimal allowURIAccess = getBigDecimalFromParam(functionName, parameters, 0);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      if (!Token.isValidLibTokenName(token.getName())) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.notLibToken", token.getName()));
+      }
+      var libraryManager = new LibraryManager();
+      String name = token.getName().substring(4);
+      if (libraryManager.usesReservedPrefix(name)) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.setAllowsURIAccess.reservedPrefix", libraryManager.getReservedPrefix(name)));
+      } else if (libraryManager.usesReservedName(name)) {
+        throw new ParserException(
+            I18N.getText("macro.setAllowsURIAccess.reserved", token.getName()));
+      }
+      token.setAllowURIAccess(!allowURIAccess.equals(BigDecimal.ZERO));
       return "";
     }
 

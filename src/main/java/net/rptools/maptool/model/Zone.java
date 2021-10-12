@@ -38,6 +38,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -322,8 +323,16 @@ public class Zone extends BaseModel {
     this.name = name;
   }
 
-  public void setPlayerAlias(String playerAlias) {
+  public boolean setPlayerAlias(String playerAlias) {
+    List<ZoneRenderer> rendererList =
+        new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
+    for (ZoneRenderer z : rendererList) {
+      if (z.getZone().getPlayerAlias().equals(playerAlias)) {
+        return false;
+      }
+    }
     this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
+    return true;
   }
 
   public MD5Key getMapAssetId() {

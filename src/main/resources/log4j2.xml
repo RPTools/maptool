@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO" packages="net.rptools.maptool.client.ui.logger">
-    <Properties>
-        <Property name="log-path">log</Property>
-    </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level - %msg%n"/>
         </Console>
         <RollingFile
                 name="LogFile"
-                fileName="${sys:user.home}/.maptool-rptools/logs/maptool.log"
-                filePattern="${sys:user.home}/.maptool-rptools/logs/archive/maptool_%d{yyyy-MM-dd_HH-mm-ss}.log.zip"
+                fileName="${sys:MAPTOOL_LOGDIR}/maptool.log"
+                filePattern="${sys:MAPTOOL_LOGDIR}/archive/maptool_%d{yyyy-MM-dd_HH-mm-ss}.log.zip"
                 ignoreExceptions="false">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
             <Policies>
@@ -18,7 +15,7 @@
                 <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="10">
-                <Delete basePath="${sys:user.home}/.maptool-rptools/logs/archive">
+                <Delete basePath="${sys:MAPTOOL_LOGDIR}/archive">
                     <IfFileName glob="maptool_*.log*"/>
                     <IfLastModified age="14d"/>
                 </Delete>

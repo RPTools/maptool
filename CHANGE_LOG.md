@@ -1,142 +1,108 @@
-# MapTool 1.9.0
-The MapTool community continues to push MapTool forward with code patches, localization and providing support to each other on the various social media platforms.  A huge thanks goes out to everyone who takes part in making MapTool better.
+# MapTool 1.10.0
 
-MapTool currently has support for 13 languages in various stages of completion: Chinese, Danish, Dutch, French, German Italian, Japanese, Polish, Portuguese, Russian, Spanish, Swedish and Ukranian.  
+Feature release using OpenJDK 16.
 
-## Highlights 
-- Maps now have a Display Name (Players) and a True Name (GM).
-- More image types supported along with beginnings of support for non-image assets.
-- Quality of Life improvements: pan map with arrow keys, select drawings on map for deletion, hotkeys for image flip.
-- Improved performance and consistency for paths from AI pathfinding including improvements for paths for large tokens.
-- Additional UI elements available in full-screen mode. 
-- Development moved to AdoptOpen Java 16.
-- Moved from Nashorn to GraalVM JavaScript engine.
-- More bug fixes.
-- More localization for the UI.
+## Highlights
 
-## Enhancements
-- [#2731][i2731] Support for Universal VTT format updated to version 0.3.
-- [#2657][i2657] New `relativeto` updates option for `copyToken()` accepts `map`, `current` token, &amp; `source` token.
-- [#2651][i2651] Default grid size increased to 100.
-- [#2647][i2647] Maps now have both a Display Name (Players) and a True Name (GM).
-- [#2608][i2608] Updated to DiceLib 1.8.0.  New macro function `rollSubWithUpper()` and two new dice expressions `XdYaZlW` & `XdYsZuW`.
-- [#2595][i2595] To facilitate localization and consistency, several macro commands changed to accept/return enum values instead of the English display names. Functions affected: `setTokenVBL()`, `getTokenShape()`, `setTokenShape()` and `getInfo("map")`.
-- [#2583][i2583] Large number of additional UI strings have been localized.
-- [#2550][i2550] Internally sent macro commands no longer added to Chat command history.
-- [#2546][i2546] MapTool no longer uses OS User Name by default in title bar. New preference setting added for Default Username which defaults to Anonymous User.
-- [#2526][i2526] Icons for non-image assets added to build. Code to use those coming later.
-- [#2524][i2524] Activating experimental webapp server shows warning dialog and sends warning to chat.
-- [#2519][i2519] Moved to GraalVM-JS engine from Nashorn. GraalVM provides an ECMAScript-compliant (ES11) runtime to execute JavaScript.  `json.eval()` disabled until other issues resolved. 
-- [#2494][i2494] Support added for WebP, SVG, ICO, TGA images.
-- [#2466][i2466] Drawings can now be selected with the mouse and deleted via delete key.
-- [#2452][i2452] Additional UI elements added to fullscreen view with new View menu toggle.
-- [#2366][i2366] Improved tooltips and error messages from Start Server dialog. 
-- [#2360][i2360] Map view can now be panned with Ctrl + arrow keys.
-- [#2349][i2349] Shortcut keys added to flip token images. F for horizontal and Shift-F for vertical.
-- [#2234][i2234] New macro functions for drawing MBL: `drawMBL()`, `eraseMBL()`, `getMBL()`.
-- [#1496][i1496] Common Macros group now shows on Selected panel even when no macros are in common.
-- [#1420][i1420] HTML links in displayed token notes will now open default browser.
-- [#1234][i1234] New macro function for retrieving Bar & State images: `getBarImage()` and `getStateImage()`
-- [#369][i369] Dragging macro buttons now supports both move and copy depending on source/destination and active modifier keys. 
+- User database with encrypted passwords and public key support for logging in to MapTool servers plus macro functions for accessing database.
+- WebRTC supported for connecting to servers without using port-forwarding.
+- More support for JavaScript through GraalVM-JS.
+- Access HTML/CSS/JS content on lib:tokens via URI from dialogs/frames/overlays plus new macro functions to open dialogs/frames/overlays using URIs.
+- GIF anim support in dialogs, frame5 and overlays.
+- More performance improvements for Fog of War handling.
+- New macro functions, bug fixes and localization translations.
+
+## Enhancements & Features
+- [#3010][i3010] Attempting to access lib:token content via URI will produce an error message if the lib:token doesn't have URI access enabled.
+- [#3006][i3006] WebRTC support added. Checkbox added to Start Server dialog. Can only be used when connecting through RPTools.net server list.
+- [#2994][i2994] Reserved namespaces added to avoid future conflicts: 
+  - `.`, `_`, `builtin`, `builtin.`, `internal`, `internal.`, `maptool`, `maptool.`, `maptools`, `maptools.`, `net.rptools.`, `rptools`, `rptools.`, `standard`, `standard.`, `tokentool.`
+
+- [#2964][i2964] New macro functions for Dialogs/Frames/overlays allow retrieving the content directly from lib:tokens with a URI. They otherwise function as the previous versions.
+  - `html.dialog(name, liburi [, options ])`
+  - `html.dialog5(name, liburi [, options ])`
+  - `html.frame(name, liburi [, options ])`
+  - `html.frame5(name, liburi [, options ])`
+  - `html.overlay(name, liburi [, options ])`
+- [#2963][i2963] Support for accessing CSS/JS/HTML from Lib:Tokens via URI in Dialog/Frame/Overlays added.
+  - `lib://<tokename>/macro/<macro name>`
+  - `lib://<tokename>/property/<property name>`
+- [#2961][i2961] Support JavaScript UDFs via `MTScript.createFunction(funcName, jsFunction)`.
+- [#2960][i2960] New macro support for multiple Graalvm JavaScript scopes (namespaces).
+- [#2943][i2943] Experimental WebRTC supported for connecting to servers without port-forwarding.
+- [#2919][i2919] Loading GIF anims from tokens or tables into Frame5 windows and Overlays now working. Only first frame loads with old Frame() windows.
+- [#2915][i2915] Public/private key support for player login.
+- [#2913][i2913] New UI (File -> Player Database) for creating/maintaining user password database.
+- [#2912][i2912] New macro functions for accessing/managing player account/password database.
+  - `player.getInfo(name)`, `player.getName()`, `player.getPlayers()`, `player.getConnected()`
+- [#2908][i2908] New API for accessing account/password database via macros.
+- [#2906][i2906] Optional, encrypted, per-user passwords now supported. 
+- [#2885][i2885] Tokens now have Speech Names that will be used in speech bubbles.
+- [#2879][i2879] New macro functions to get/set the flipped status of a token.
+  - `flipTokenX()`, `flipTokenY()`, `flipTokenIso()`, `isFlippedX()`, `isFlippedY()`, `isFlippedIso()`
+- [#2775][i2775] New macro function `getMapName()` to returns the GM Name from the Display Name.
+- [#2774][i2774] MapTool no longer prompts to *Save Campaign* when no changes have been made.
+- [#2801][i2801] New macro function `setDrawingName()`. Updated `findDrawings()` to return all drawings if passed `*` for drawing name.
+- [#2519][i2519] JavaScript support moved to GraalVM-JS and previous functionality of `js.eval()` restored.
+- [#2155][i2155] More performance improvements. Moving a token across a large map with very complex VBL and then Exposing Last Path results in a 2x+ performance improvement. 
 
 ## Bug Fixes
-- [#2709][i2709] Two-Image bars couldn't be added. Fixed.
-- [#2716][i2716] Pathfinding performance significatnly degrades with Complex MBL. Improved.
-- [#2706][i2706] Issues with getInfo("campaign"): bars not listed, ungrouped states in two arrays, both missing important information. Fixed.
-- [#2696][i2696] Suboptimal/inconsistent pathfinding with 1-2-1 movement. Improved. 
-- [#2684][i2684] Retrieving external IP address could cause MT to seemingly hang up. Fixed.
-- [#2675][i2675] Message returned when a macro-generated frame used a reserved name wasn't helpful. Fixed.
-- [#2661][i2661] Changes made to drawings via Draw Explorer were not immediately reflected on map. Fixed.
-- [#2656][i2656] Clients forced off map if GM changed map properties. Fixed.
-- [#2652][i2652] `getMapVisible()` returned strings instead of numbers. Fixed.
-- [#2637][i2637] Tree view in Draw Explorer was showing single drawings as groups and groups as single drawings. Fixed. 
-- [#2630][i2630] Map grid type `None` was missing from `New Map Grid Type` in Preferences. Fixed. 
-- [#2601][i2601] Replaced Java native filetype detection with Apache Tika for better coverage of asset types.
-- [#2596][i2596] Assert output a stack trace when called from a macro executed by a macro link. Fixed.
-- [#2560][i2560] Layer names lacked i18n support. Fixed.
-- [#2558][i2558] Exception thrown with keyboard input on undocked frames. Fixed.
-- [#2555][i2555] Names for Dockable frames didn't use localized names. Fixed.
-- [#2551][i2551] Various UI and macro actions could clear in progress text in the Chat panel. Fixed.
-- [#2548][i2548] Light icons broken on imported Dungeondraft UVTT maps. Fixed.
-- [#2527][i2527] Unsupported asset types are now filtered in drag-and-drop to map.
-- [#2493][i2493] Images using the size parameter weren't scaling correctly. Fixed.
-- [#2485][i2485] Macro-generated frames were not restored to previous positions. Fixed.
-- [#2482][i2482] `playStream()` failing on MacOS and Linux. Fixed with update to Java 16.
-- [#2409][i2409] Pathfinding returning inconsistent/bad paths for large tokens. Fixed.
-- [#2379][i2379] Pathfinding could fail with certain configurations of VBL/MBL structures. Fixed.
-- [#2334][i2334] Using a bad size parameter when displaying assets in HTML could hang client. Fixed.
-- [#2325][i2325] Error message returned when `/reply` is used without a prior `/whisper` has been localized.
-- [#2288][i2288] Non-alphanumeric chars in the key of a String Property could break `getStrProp()`. Fixed.
-- [#2249][i2249] Javascript in Overlays would keep running after overlay closed. Fixed.
-- [#2214][i2214] Moving to Java 16 fixed startup issues with Japanese locale.
-- [#706][i706] A State & Bar with the same name can activate/deactivate together. Duplicate names no longer allowed.
-- [#685][i685] Empty asset URL in HTML `<input>` would lock up MapTool. Fixed.
+- [#3023][i3023] Frames/Dialogs/Overlays could not resolve relative URLs. Fixed.
+- [#3017][i3017] Various bugs in player database macro functions fixed.
+- [#3011][i3011] Calling functions `js.eval()`, `js.evalNS()`, are `js.evalURI()` were case sensitive. Fixed. 
+- [#3001][i3001] Missing I18n tag used in error when missing lib:token is used in URI. Fixed.  
+- [#2986][i2986] URI access denied for players if containing token is unowned. Fixed.
+- [#2970][i2970] Adding a hex-shaped light definition to campaign properties would cause an exception when reopening the campaign properties. Fixed.
+- [#2955][i2955] Placing a grid aura on a token on a gridless map would cause repeating exceptions. Fixed.
+- [#2916][i2916] Connect to Server dialog lacked a checkbox to specify using a public key to login. Fixed.
+- [#2888][i2888] Speech bubbles didn't adapt to long nong names. Fixed.
+- [#2887][i2887] Startup time for MapTool with a large asset cache could take several minutes. Fixed.
+- [#2875][i2875] Restful functions passed variables or JSON for headers would throw errors. Fixed.
+- [#2861][i2861] Bug causing an NPE with translated Bar locations. Fixed. 
+- [#2775][i2775] `setMapDisplayName()` no longer allows setting duplicate names. 
+- [#2741][i2741] Missing symbols under Linux/MacOS caused `<select>` with `multiple` to fail. Fixed.
+- [#446][i446] Macro hotkeys not working when macro panels are hidden or floating. Fixed with caveat that they still won't work if a `Dialog`, `Dialog5` or `Frame5` are open and have focus.
 
 ## Other
-- [#2708][i2708] Build.gradle updated so MT can be built without a .git directory.
-- [#2654][i2654] Abeille form designer added to [How to Setup UI Tools page](https://github.com/RPTools/maptool/blob/develop/doc/How_To_Setup_UI_Tools.md)
-- [#2601][i2601] Added Apache Tika for filetype recognition. 
-- [#2538][i2538] Builds moved to AdoptOpen Java 16. 
-- [#2519][i2519] Migrated to GraalVM-JS engine from Nashorn.
+- [#3025][i3025] Turn off warning from polyglot about JavaScript running in interpreted mode only.
+- [#2931][i2931] Updated spotless plugin for support of Java 16 features. 
 
-[i2731]: https://github.com/RPTools/maptool/issues/2731
-[i2716]: https://github.com/RPTools/maptool/issues/2716
-[i2709]: https://github.com/RPTools/maptool/issues/2709
-[i2708]: https://github.com/RPTools/maptool/issues/2708
-[i2706]: https://github.com/RPTools/maptool/issues/2706
-[i2696]: https://github.com/RPTools/maptool/issues/2696
-[i2684]: https://github.com/RPTools/maptool/issues/2684
-[i2675]: https://github.com/RPTools/maptool/issues/2675
-[i2661]: https://github.com/RPTools/maptool/issues/2661
-[i2657]: https://github.com/RPTools/maptool/issues/2657
-[i2656]: https://github.com/RPTools/maptool/issues/2656
-[i2654]: https://github.com/RPTools/maptool/issues/2654
-[i2652]: https://github.com/RPTools/maptool/issues/2652
-[i2651]: https://github.com/RPTools/maptool/issues/2651
-[i2647]: https://github.com/RPTools/maptool/issues/2647
-[i2637]: https://github.com/RPTools/maptool/issues/2637
-[i2630]: https://github.com/RPTools/maptool/issues/2630
-[i2608]: https://github.com/RPTools/maptool/issues/2608
-[i2601]: https://github.com/RPTools/maptool/issues/2601
-[i2596]: https://github.com/RPTools/maptool/issues/2596
-[i2595]: https://github.com/RPTools/maptool/issues/2595
-[i2583]: https://github.com/RPTools/maptool/issues/2583
-[i2560]: https://github.com/RPTools/maptool/issues/2560
-[i2558]: https://github.com/RPTools/maptool/issues/2558
-[i2555]: https://github.com/RPTools/maptool/issues/2555
-[i2551]: https://github.com/RPTools/maptool/issues/2551
-[i2550]: https://github.com/RPTools/maptool/issues/2550
-[i2548]: https://github.com/RPTools/maptool/issues/2548
-[i2546]: https://github.com/RPTools/maptool/issues/2546
-[i2538]: https://github.com/RPTools/maptool/issues/2538
-[i2527]: https://github.com/RPTools/maptool/issues/2527
-[i2526]: https://github.com/RPTools/maptool/issues/2526
-[i2524]: https://github.com/RPTools/maptool/issues/2524
+[Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
+
+[i3025]: https://github.com/RPTools/maptool/issues/3025
+[i3023]: https://github.com/RPTools/maptool/issues/3023
+[i3017]: https://github.com/RPTools/maptool/issues/3017
+[i3011]: https://github.com/RPTools/maptool/issues/3011
+[i3010]: https://github.com/RPTools/maptool/issues/3010
+[i3006]: https://github.com/RPTools/maptool/issues/3006
+[i3001]: https://github.com/RPTools/maptool/issues/3001
+[i2994]: https://github.com/RPTools/maptool/issues/2994
+[i2986]: https://github.com/RPTools/maptool/issues/2986
+[i2970]: https://github.com/RPTools/maptool/issues/2970
+[i2964]: https://github.com/RPTools/maptool/issues/2964
+[i2963]: https://github.com/RPTools/maptool/issues/2963
+[i2961]: https://github.com/RPTools/maptool/issues/2961
+[i2960]: https://github.com/RPTools/maptool/issues/2960
+[i2955]: https://github.com/RPTools/maptool/issues/2955
+[i2943]: https://github.com/RPTools/maptool/issues/2943
+[i2931]: https://github.com/RPTools/maptool/issues/2931
+[i2919]: https://github.com/RPTools/maptool/issues/2919
+[i2916]: https://github.com/RPTools/maptool/issues/2916
+[i2915]: https://github.com/RPTools/maptool/issues/2915
+[i2913]: https://github.com/RPTools/maptool/issues/2913
+[i2912]: https://github.com/RPTools/maptool/issues/2912
+[i2908]: https://github.com/RPTools/maptool/issues/2908
+[i2906]: https://github.com/RPTools/maptool/issues/2906
+[i2888]: https://github.com/RPTools/maptool/issues/2888
+[i2887]: https://github.com/RPTools/maptool/issues/2887
+[i2885]: https://github.com/RPTools/maptool/issues/2885
+[i2879]: https://github.com/RPTools/maptool/issues/2879
+[i2875]: https://github.com/RPTools/maptool/issues/2875
+[i2861]: https://github.com/RPTools/maptool/issues/2861
+[i2801]: https://github.com/RPTools/maptool/issues/2801
+[i2775]: https://github.com/RPTools/maptool/issues/2775
+[i2774]: https://github.com/RPTools/maptool/issues/2774
+[i2741]: https://github.com/RPTools/maptool/issues/2741
 [i2519]: https://github.com/RPTools/maptool/issues/2519
-[i2494]: https://github.com/RPTools/maptool/issues/2494
-[i2493]: https://github.com/RPTools/maptool/issues/2493
-[i2485]: https://github.com/RPTools/maptool/issues/2485
-[i2482]: https://github.com/RPTools/maptool/issues/2482
-[i2466]: https://github.com/RPTools/maptool/issues/2466
-[i2452]: https://github.com/RPTools/maptool/issues/2452
-[i2409]: https://github.com/RPTools/maptool/issues/2409
-[i2379]: https://github.com/RPTools/maptool/issues/2379
-[i2366]: https://github.com/RPTools/maptool/issues/2366
-[i2360]: https://github.com/RPTools/maptool/issues/2360
-[i2349]: https://github.com/RPTools/maptool/issues/2349
-[i2334]: https://github.com/RPTools/maptool/issues/2334
-[i2325]: https://github.com/RPTools/maptool/issues/2325
-[i2288]: https://github.com/RPTools/maptool/issues/2288
-[i2249]: https://github.com/RPTools/maptool/issues/2249
-[i2234]: https://github.com/RPTools/maptool/issues/2234
-[i2214]: https://github.com/RPTools/maptool/issues/2214
-[i1496]: https://github.com/RPTools/maptool/issues/1496
-[i1420]: https://github.com/RPTools/maptool/issues/1420
-[i1234]: https://github.com/RPTools/maptool/issues/1234
-[i706]: https://github.com/RPTools/maptool/issues/706
-[i685]: https://github.com/RPTools/maptool/issues/685
-[i369]: https://github.com/RPTools/maptool/issues/369
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-
-[Change Log for 1.8.x](https://github.com/RPTools/maptool/blob/1.8.5/CHANGE_LOG.md)
+[i2155]: https://github.com/RPTools/maptool/issues/2155
+[i446]: https://github.com/RPTools/maptool/issues/446

@@ -81,12 +81,37 @@ public class Token extends BaseModel implements Cloneable {
   public static final String NUM_ON_GM = "GM Name";
   public static final String NUM_ON_BOTH = "Both";
 
+  public static final String LIB_TOKEN_PREFIX = "lib:";
+
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
       new Gson().getAdapter(JsonObject.class);
+
+  public boolean getAllowURIAccess() {
+    if (allowURIAccess && !isLibToken()) {
+      allowURIAccess = false;
+    }
+    return allowURIAccess;
+  }
+
+  public void setAllowURIAccess(boolean allowURIAccess) {
+    if (isLibToken()) {
+      this.allowURIAccess = allowURIAccess;
+    } else {
+      this.allowURIAccess = false;
+    }
+  }
+
+  public boolean isLibToken() {
+    return isValidLibTokenName(name);
+  }
+
+  public static boolean isValidLibTokenName(String name) {
+    return name.toLowerCase().startsWith(LIB_TOKEN_PREFIX);
+  }
 
   public enum TokenShape {
     TOP_DOWN(),
@@ -177,7 +202,9 @@ public class Token extends BaseModel implements Cloneable {
     setHasSight,
     setSightType,
     flipX,
-    flipY
+    flipY,
+    flipIso,
+    setSpeechName
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -253,6 +280,8 @@ public class Token extends BaseModel implements Cloneable {
   // Jamz: allow token alpha channel modification
   private float tokenOpacity = 1.0f;
 
+  private String speechName = "";
+
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
     NONE(), // Default, no terrain modifications to pathfinding cost
@@ -324,6 +353,8 @@ public class Token extends BaseModel implements Cloneable {
   private Map<String, String> speechMap;
 
   private HeroLabData heroLabData;
+
+  private boolean allowURIAccess = false;
 
   /**
    * Constructor from another token, with the option to keep the token id
@@ -457,6 +488,8 @@ public class Token extends BaseModel implements Cloneable {
     if (token.terrainModifiersIgnored != null) {
       terrainModifiersIgnored = new HashSet<>(token.terrainModifiersIgnored);
     }
+
+    speechName = token.speechName;
   }
 
   public Token() {
@@ -679,6 +712,24 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOpacity;
   }
 
+  /**
+   * Returns the name to be displayed in speech and thought bubbles.
+   *
+   * @return the name to be displayed in speech and thought bubbles/
+   */
+  public String getSpeechName() {
+    return speechName;
+  }
+
+  /**
+   * Sets the name to be displayed in speech and thought bubbles.
+   *
+   * @param name the name to be displayed.
+   */
+  public void setSpeechName(String name) {
+    speechName = name;
+  }
+
   public double getTerrainModifier() {
     return terrainModifier;
   }
@@ -785,6 +836,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /**
+   * Sets the token's type. Sets hasSight to true if the new type is PC.
+   *
+   * @param type The new type
+   */
   public void setType(Type type) {
     tokenType = type.name();
     if (type == Type.PC) {
@@ -2414,6 +2470,7 @@ public class Token extends BaseModel implements Cloneable {
     if (exposedAreaGUID == null) {
       exposedAreaGUID = new GUID();
     }
+
     return this;
   }
 
@@ -2590,6 +2647,9 @@ public class Token extends BaseModel implements Cloneable {
         setGMName((String) parameters[0]);
         panelLookChanged = true;
         break;
+      case setSpeechName:
+        setSpeechName((String) parameters[0]);
+        break;
       case setVisible:
         setVisible((boolean) parameters[0]);
         break;
@@ -2676,6 +2736,9 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case flipY:
         setFlippedY(!isFlippedY());
+        break;
+      case flipIso:
+        setFlippedIso(!isFlippedIso());
         break;
     }
     if (lightChanged) {

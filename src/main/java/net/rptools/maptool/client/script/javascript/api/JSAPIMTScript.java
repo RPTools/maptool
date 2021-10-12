@@ -14,17 +14,43 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import net.rptools.maptool.client.functions.AbortFunction;
-import net.rptools.maptool.client.functions.AssertFunction;
-import net.rptools.maptool.client.functions.EvalMacroFunctions;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.function.Function;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
+import net.rptools.maptool.client.functions.exceptions.*;
+import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.*;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
 /** Class used to provide an API to interact with MapTool custom scripting language. */
 public class JSAPIMTScript implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MTScript";
+  }
+
+  @HostAccess.Export
+  public void registerMacro(String macroName, Function callable) throws ParserException {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    if (macroName.equals("eval")
+        || macroName.equals("evalNS")
+        || macroName.equals("evalURI")
+        || macroName.equals("removeNS")
+        || macroName.equals("createNS")) {
+      throw new ParserException(I18N.getText("macro.function.general.reservedJS", macroName));
+    }
+    if (trusted) {
+      new JSAPIRegisteredMacro(macroName, callable);
+    }
+  }
 
   @HostAccess.Export
   public Object getVariable(String name) throws ParserException {
@@ -32,46 +58,68 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public void setVariable(String name, Object value) throws ParserException {
+  public void setVariable(String name, Value value) throws ParserException {
     MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
   }
 
   @HostAccess.Export
   public void raiseError(String msg) throws ParserException {
-    throw new ParserException(msg);
+    throw new JavascriptFunctionException(msg);
   }
 
   @HostAccess.Export
   public void abort() throws ParserException {
-    throw new AbortFunction.AbortFunctionException(
+    throw new AbortFunctionException(
         I18N.getText("macro.function.abortFunction.message", "MTScript.abort()"));
   }
 
   @HostAccess.Export
-  public void mtsAssert(boolean check, String message)
-      throws AssertFunction.AssertFunctionException {
+  public void mtsAssert(boolean check, String message) throws AssertFunctionException {
+    mtsAssert(check, message, true);
+  }
+
+  @HostAccess.Export
+  public void mtsAssert(boolean check, String message, boolean padError)
+      throws AssertFunctionException {
     if (!check) {
-      throw new AssertFunction.AssertFunctionException(message);
+      if (padError) {
+        throw new AssertFunctionException(I18N.getText("macro.function.assert.message", message));
+      }
+      throw new AssertFunctionException(message);
     }
   }
 
   @HostAccess.Export
   public Object execMacro(String macro) throws ParserException {
-    return EvalMacroFunctions.getInstance()
-        .execMacro(MacroJavaScriptBridge.getInstance().getTokenInContext(), macro);
+    Token tokenInContext = MacroJavaScriptBridge.getInstance().getTokenInContext();
+    MapToolVariableResolver res = new MapToolVariableResolver(tokenInContext);
+    return _evalMacro(res, tokenInContext, macro);
   }
 
   @HostAccess.Export
   public Object evalMacro(String macro) throws ParserException {
-    return EvalMacroFunctions.getInstance()
-        .evalMacro(
-            MacroJavaScriptBridge.getInstance().getVariableResolver(),
-            MacroJavaScriptBridge.getInstance().getTokenInContext(),
-            macro);
+    Token tokenInContext = MacroJavaScriptBridge.getInstance().getTokenInContext();
+    MapToolVariableResolver res = MacroJavaScriptBridge.getInstance().getVariableResolver();
+    return _evalMacro(res, tokenInContext, macro);
+  }
+
+  private Object _evalMacro(MapToolVariableResolver res, Token tokenInContext, String line)
+      throws ParserException {
+    MapToolMacroContext context =
+        new MapToolMacroContext(
+            "<javascript>",
+            MapTool.getParser().getContext().getSource(),
+            JSScriptEngine.inTrustedContext());
+    String ret = MapTool.getParser().parseLine(res, tokenInContext, line, context);
+    try {
+      return new BigDecimal(ret);
+    } catch (Exception e) {
+      return ret;
+    }
   }
 
   @HostAccess.Export
-  public JSList getMTScriptCallingArgs() {
-    return new JSList(MacroJavaScriptBridge.getInstance().getCallingArgs());
+  public List<Object> getMTScriptCallingArgs() {
+    return MacroJavaScriptBridge.getInstance().getCallingArgs();
   }
 }

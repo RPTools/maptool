@@ -31,6 +31,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,10 +43,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -53,6 +58,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
@@ -87,6 +93,7 @@ import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
+import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -101,9 +108,7 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.LocalPlayer;
 import net.rptools.maptool.model.LookupTable;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -112,10 +117,20 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PasswordDatabaseException;
+import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
+import net.rptools.maptool.model.player.PersistedPlayerDatabase;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.MessageUtil;
+import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
@@ -123,7 +138,6 @@ import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -147,7 +161,16 @@ import org.jdesktop.swingworker.SwingWorker;
 public class AppActions {
   private static final Logger log = LogManager.getLogger(AppActions.class);
 
+  /**
+   * Hold copies of tokens for a future paste.
+   *
+   * <p>Note that the tokens stored in this set have had their positions modified to be measured
+   * relative to a reference token. This is inconsistent with the coordinate system for
+   * `ZonePoint`s, so be sure not to assume these token positions cna be used as `ZonePoint`s
+   * without further adjustment.
+   */
   private static Set<Token> tokenCopySet = null;
+
   public static final int menuShortcut = getMenuShortcutKeyMask();
   private static boolean keepIdsOnPaste = false;
 
@@ -1147,19 +1170,28 @@ public class AppActions {
         MapTool.serverCommand()
             .updateExposedAreaMeta(zone.getId(), token.getExposedAreaGUID(), meta);
       }
+
+      ZonePoint tokenOffset;
       if (newZoneSupportsSnapToGrid && gridCopiedFromSupportsSnapToGrid && token.isSnapToGrid()) {
         // Convert (x,y) offset to a cell offset using the grid from the zone where the tokens were
-        // copied from
-        CellPoint cp = gridCopiedFrom.convert(new ZonePoint(token.getX(), token.getY()));
+        // copied from. Note that the token coordinates are relative to the "top-left" token's
+        // position, so they can't be used as a ZonePoint without first adding back the grid offset.
+        CellPoint cp =
+            gridCopiedFrom.convert(
+                new ZonePoint(
+                    token.getX() + gridCopiedFrom.getOffsetX(),
+                    token.getY() + gridCopiedFrom.getOffsetY()));
         ZonePoint zp = grid.convert(cp);
-        token.setX(zp.x + destination.x);
-        token.setY(zp.y + destination.y);
+        tokenOffset =
+            new ZonePoint(zp.x - gridCopiedFrom.getOffsetX(), zp.y - gridCopiedFrom.getOffsetY());
       } else {
         // For gridless sources, gridless destinations, or tokens that are not SnapToGrid: just use
         // the pixel offsets
-        token.setX(token.getX() + destination.x);
-        token.setY(token.getY() + destination.y);
+        tokenOffset = new ZonePoint(token.getX(), token.getY());
       }
+      token.setX(tokenOffset.x + destination.x);
+      token.setY(tokenOffset.y + destination.y);
+
       // paste into correct layer
       token.setLayer(layer);
 
@@ -2189,13 +2221,25 @@ public class AppActions {
                     serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
                 policy.setUseIndividualFOW(useIF);
 
+                String gmPassword;
+                String playerPassword;
+
+                if (!serverProps.getUsePasswordFile()) {
+                  gmPassword = serverProps.getGMPassword();
+                  playerPassword = serverProps.getPlayerPassword();
+                } else {
+                  gmPassword = new PasswordGenerator().getPassword();
+                  playerPassword = new PasswordGenerator().getPassword();
+                }
+
                 ServerConfig config =
                     new ServerConfig(
                         serverProps.getUsername(),
-                        serverProps.getGMPassword(),
-                        serverProps.getPlayerPassword(),
+                        gmPassword,
+                        playerPassword,
                         serverProps.getPort(),
-                        serverProps.getRPToolsName());
+                        serverProps.getRPToolsName(),
+                        "localhost");
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2215,6 +2259,25 @@ public class AppActions {
                   // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
                   campaign.setHasUsedFogToolbar(useIF);
 
+                  PlayerDatabaseFactory.setServerConfig(config);
+                  if (serverProps.getUsePasswordFile()) {
+                    PlayerDatabaseFactory.setCurrentPlayerDatabase(
+                        PlayerDatabaseType.PASSWORD_FILE);
+                    PasswordFilePlayerDatabase db =
+                        (PasswordFilePlayerDatabase)
+                            PlayerDatabaseFactory.getCurrentPlayerDatabase();
+                    db.initialize();
+                    if (serverProps.getRole() == Role.GM) {
+                      db.addTemporaryPlayer(
+                          dialog.getUsernameTextField().getText(), Role.GM, gmPassword);
+                    } else {
+                      db.addTemporaryPlayer(
+                          dialog.getUsernameTextField().getText(), Role.PLAYER, playerPassword);
+                    }
+                  } else {
+                    PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
+                  }
+                  PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
                   // Make a copy of the campaign since we don't coordinate local changes well ...
                   // yet
 
@@ -2226,47 +2289,67 @@ public class AppActions {
                    * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
                    */
                   MapTool.startServer(
-                      dialog.getUsernameTextField().getText(), config, policy, campaign, true);
+                      dialog.getUsernameTextField().getText(),
+                      config,
+                      policy,
+                      campaign,
+                      playerDatabase,
+                      true);
 
                   // Connect to server
                   Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  Runnable onConnected =
+                      () -> {
+                        // connecting
+                        MapTool.getFrame()
+                            .getConnectionStatusPanel()
+                            .setStatus(ConnectionStatusPanel.Status.server);
+                        MapTool.addLocalMessage(
+                            MessageUtil.getFormattedSystemMsg(
+                                I18N.getText("msg.info.startServer")));
+                      };
+
                   if (playerType == Player.Role.GM) {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(),
-                            playerType,
-                            serverProps.getGMPassword()));
+                            dialog.getUsernameTextField().getText(), playerType, gmPassword),
+                        onConnected);
                   } else {
                     MapTool.createConnection(
-                        "localhost",
-                        serverProps.getPort(),
+                        config,
                         new LocalPlayer(
-                            dialog.getUsernameTextField().getText(),
-                            playerType,
-                            serverProps.getPlayerPassword()));
+                            dialog.getUsernameTextField().getText(), playerType, playerPassword),
+                        onConnected);
                   }
-
-                  // connecting
-                  MapTool.getFrame()
-                      .getConnectionStatusPanel()
-                      .setStatus(ConnectionStatusPanel.Status.server);
-                  MapTool.addLocalMessage(
-                      MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;
                 } catch (IOException ioe) {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
+                } catch (NoSuchAlgorithmException
+                    | InvalidKeySpecException
+                    | NoSuchPaddingException
+                    | InvalidKeyException
+                    | ExecutionException
+                    | InterruptedException e) {
+                  MapTool.showError("msg.error.initializeCrypto", e);
+                  failed = true;
+                } catch (PasswordDatabaseException pwde) {
+                  MapTool.showError(pwde.getMessage());
+                  failed = true;
                 }
 
                 if (failed) {
                   try {
                     MapTool.startPersonalServer(campaign);
-                  } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+                  } catch (IOException
+                      | NoSuchAlgorithmException
+                      | InvalidKeySpecException
+                      | ExecutionException
+                      | InterruptedException e) {
+                    MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
               });
@@ -2290,7 +2373,9 @@ public class AppActions {
 
           final ConnectToServerDialog dialog = new ConnectToServerDialog();
           dialog.showDialog();
-          if (!dialog.accepted()) return;
+          if (!dialog.accepted()) {
+            return;
+          }
 
           ServerDisconnectHandler.disconnectExpected = true;
           LOAD_MAP.setSeenWarning(false);
@@ -2318,28 +2403,52 @@ public class AppActions {
                 boolean failed = false;
                 try {
                   ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
-                  MapTool.createConnection(
-                      dialog.getServer(),
-                      dialog.getPort(),
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), prefs.getPassword()));
+                  ServerConfig config =
+                      new ServerConfig(
+                          prefs.getUsername(),
+                          "",
+                          "",
+                          dialog.getPort(),
+                          prefs.getServerName(),
+                          dialog.getServer());
 
-                  MapTool.getFrame().hideGlassPane();
-                  MapTool.getFrame()
-                      .showFilledGlassPane(
-                          new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                  String password =
+                      prefs.getUsePublicKey()
+                          ? new PasswordGenerator().getPassword()
+                          : prefs.getPassword();
+                  MapTool.createConnection(
+                      config,
+                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
+                      () -> {
+                        MapTool.getFrame().hideGlassPane();
+                        MapTool.getFrame()
+                            .showFilledGlassPane(
+                                new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                      });
+
                 } catch (UnknownHostException e1) {
                   MapTool.showError("msg.error.unknownHost", e1);
                   failed = true;
                 } catch (IOException e1) {
                   MapTool.showError("msg.error.failedLoadCampaign", e1);
                   failed = true;
+                } catch (NoSuchAlgorithmException
+                    | InvalidKeySpecException
+                    | ExecutionException
+                    | InterruptedException e1) {
+                  MapTool.showError("msg.error.initializeCrypto", e1);
+                  failed = true;
                 }
-                if (failed || MapTool.getConnection() == null) {
+                if (failed) {
                   MapTool.getFrame().hideGlassPane();
                   try {
                     MapTool.startPersonalServer(oldCampaign);
-                  } catch (IOException ioe) {
-                    MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+                  } catch (IOException
+                      | NoSuchAlgorithmException
+                      | InvalidKeySpecException
+                      | ExecutionException
+                      | InterruptedException e) {
+                    MapTool.showError("msg.error.failedStartPersonalServer", e);
                   }
                 }
               });
@@ -2374,10 +2483,32 @@ public class AppActions {
     MapTool.disconnect();
     try {
       MapTool.startPersonalServer(campaign);
-    } catch (IOException ioe) {
-      MapTool.showError("msg.error.failedStartPersonalServer", ioe);
+    } catch (IOException
+        | NoSuchAlgorithmException
+        | InvalidKeySpecException
+        | ExecutionException
+        | InterruptedException e) {
+      MapTool.showError("msg.error.failedStartPersonalServer", e);
     }
   }
+
+  public static final Action PLAYER_DATABASE =
+      new DefaultClientAction() {
+        {
+          init("action.playerDatabase");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return PlayerDatabaseFactory.getCurrentPlayerDatabase()
+              instanceof PersistedPlayerDatabase;
+        }
+
+        @Override
+        protected void executeAction() {
+          new PlayerDatabaseDialog().show();
+        }
+      };
 
   public static final Action LOAD_CAMPAIGN =
       new DefaultClientAction() {
@@ -2513,9 +2644,11 @@ public class AppActions {
         MapTool.getFrame().resetPanels();
 
       } catch (Throwable t) {
-        if (t.getCause() instanceof AppState.FailedToAcquireLockException)
+        if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
-        else MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        } else {
+          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+        }
       }
     }
   }
@@ -2719,6 +2852,11 @@ public class AppActions {
               // Jamz: Bug fix, would not add extension if map name had a . in it...
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+              if (mapFile.exists()) {
+                if (!MapTool.confirm("msg.confirm.fileExists")) {
+                  return;
+                }
+              }
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
               AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");

@@ -192,7 +192,8 @@ public class MessagePanel extends JPanel {
                   ; // visible for everyone
                 else if (options.contains("w:" + MapTool.getPlayer().getName().toLowerCase()))
                   ; // visible for this player
-                else if (options.contains("g") && MapTool.getPlayer().isGM()) ; // visible for GMs
+                else if (options.contains("g") && MapTool.getPlayer().isGM())
+                  ; // visible for GMs
                 else if (options.contains("s")
                     && message.getSource().equals(MapTool.getPlayer().getName()))
                   ; // visible to the player who sent it
