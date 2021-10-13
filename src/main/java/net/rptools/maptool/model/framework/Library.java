@@ -127,4 +127,6 @@ public interface Library {
    * @return information about the library.
    */
   CompletableFuture<LibraryInfo> getLibraryInfo();
+
+  CompletableFuture<MTScriptMacroInfo> getMTScriptMacroInfo(String macroName);
 }

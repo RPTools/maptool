@@ -294,6 +294,11 @@ class LibraryToken implements Library {
             });
   }
 
+  @Override
+  public CompletableFuture<MTScriptMacroInfo> getMTScriptMacroInfo(String macroName) {
+    return null;
+  }
+
   /**
    * Finds the library token with the specific path.
    *
