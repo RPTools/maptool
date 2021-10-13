@@ -28,6 +28,7 @@ public class LibraryNotValidException extends RuntimeException {
     MISSING_LIBRARY,
     MISSING_PERMISSIONS,
     BAD_CONVERSION,
+    BAD_LOCATION
   };
 
   private final Reason reason;

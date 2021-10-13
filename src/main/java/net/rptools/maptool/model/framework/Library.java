@@ -17,6 +17,7 @@ package net.rptools.maptool.model.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /** Interface for classes that represents a framework library. */
@@ -128,5 +129,11 @@ public interface Library {
    */
   CompletableFuture<LibraryInfo> getLibraryInfo();
 
-  CompletableFuture<MTScriptMacroInfo> getMTScriptMacroInfo(String macroName);
+  /**
+   * Returns the information about MapTool Macro Script on this library.
+   *
+   * @param macroName The name of the macro.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName);
 }

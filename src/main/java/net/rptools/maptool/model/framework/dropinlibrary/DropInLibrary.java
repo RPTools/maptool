@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
@@ -32,6 +33,7 @@ import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.LibraryNotValidException;
 import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.framework.MTScriptMacroInfo;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 import org.javatuples.Pair;
 
@@ -157,6 +159,22 @@ public class DropInLibrary implements Library {
             description,
             shortDescription,
             allowsUriAccess));
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
+    Pair<MD5Key, Type> macro = mtsFunctionAssetMap.get(macroName);
+    if (macro == null) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    }
+
+    return CompletableFuture.supplyAsync(
+        () -> {
+          Asset asset = AssetManager.getAsset(macro.getValue0());
+          String command = asset.getDataAsString();
+          // Drop In Library Functions are always trusted as only GM can add and no one can edit.
+          return Optional.of(new MTScriptMacroInfo(macroName, command, true));
+        });
   }
 
   @Override
