@@ -17,6 +17,7 @@ package net.rptools.maptool.model.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -136,4 +137,11 @@ public interface Library {
    * @return the information about the MapTool Macro Script.
    */
   CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName);
+
+
+  /**
+   * Returns a list of the "files" within the library.
+   * @return a list of the "files" within the library.
+   */
+  CompletableFuture<List<String>> getAllFiles();
 }

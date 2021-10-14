@@ -318,6 +318,18 @@ class LibraryToken implements Library {
             });
   }
 
+  @Override
+  public CompletableFuture<List<String>> getAllFiles() {
+    return new ThreadExecutionHelper<List<String>>().runOnSwingThread(() -> {
+      Token library = findLibrary(id);
+      List<String> files = new ArrayList<>(
+          library.getMacroList(false).stream().map(p -> "macro/" + p.getLabel()).toList());
+      files.addAll(library.getPropertyNames().stream().map(p -> "property/" + p).toList());
+
+      return files;
+    });
+  }
+
   /**
    * Finds the library token with the specific path.
    *

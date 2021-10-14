@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -112,7 +113,10 @@ public class DropInLibrary implements Library {
       if (path.startsWith(URL_PUBLIC_DIR)) {
         urlsMap.put(path.substring(URL_PUBLIC_DIR.length()), entry.getValue());
       } else if (path.startsWith(MTSCRIPT_PUBLIC_DIR)) {
-        mtsMap.put(path.substring(MTSCRIPT_PUBLIC_DIR.length()), entry.getValue());
+        if (path.toLowerCase().endsWith(".mts")) {
+          String name = path.substring(MTSCRIPT_PUBLIC_DIR.length(), path.length() - 4);
+          mtsMap.put(name, entry.getValue());
+        }
       }
     }
 
@@ -175,6 +179,11 @@ public class DropInLibrary implements Library {
           // Drop In Library Functions are always trusted as only GM can add and no one can edit.
           return Optional.of(new MTScriptMacroInfo(macroName, command, true));
         });
+  }
+
+  @Override
+  public CompletableFuture<List<String>> getAllFiles() {
+    return null; // TODO CDW
   }
 
   @Override
