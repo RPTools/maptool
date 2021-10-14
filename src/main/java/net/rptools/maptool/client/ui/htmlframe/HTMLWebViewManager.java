@@ -478,6 +478,26 @@ public class HTMLWebViewManager {
   }
 
   /**
+   * Checks the passed in href string to see if it is one that the WebView component should handle
+   * or not.
+   *
+   * @param href the href tag to check.
+   * @return {@code true} if the WebView should handle it/
+   */
+  private boolean webViewHandledHref(String href) {
+    String href2 = href.toLowerCase();
+    if (href.startsWith("lib://")) {
+      return true;
+    } else if (href.startsWith("./")) {
+      return true;
+    } else if (href.startsWith("../")) {
+      return true;
+    } else {
+      return href.startsWith("/");
+    }
+  }
+
+  /**
    * Handles the href events. MacroLinks are executed, external links open the browsers, and anchor
    * links scroll the browser to the link.
    *
@@ -491,17 +511,19 @@ public class HTMLWebViewManager {
     final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
     if (href != null && !href.equals("")) {
       String href2 = href.trim().toLowerCase();
-      if (href2.startsWith("macro")) {
-        // ran as macroLink;
-        SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
-      } else if (href2.startsWith("#")) {
-        // Java bug JDK-8199014 workaround
-        webEngine.executeScript(String.format(SCRIPT_ANCHOR, href.substring(1)));
-      } else if (!href2.startsWith("javascript")) {
-        // non-macrolink, non-anchor link, non-javascript code
-        MapTool.showDocument(href); // show in usual browser
+      if (!webViewHandledHref(href2)) {
+        if (href2.startsWith("macro")) {
+          // ran as macroLink;
+          SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
+        } else if (href2.startsWith("#")) {
+          // Java bug JDK-8199014 workaround
+          webEngine.executeScript(String.format(SCRIPT_ANCHOR, href.substring(1)));
+        } else if (!href2.startsWith("javascript")) {
+          // non-macrolink, non-anchor link, non-javascript code
+          MapTool.showDocument(href); // show in usual browser
+        }
+        event.preventDefault(); // don't change webview
       }
-      event.preventDefault(); // don't change webview
     }
   }
 

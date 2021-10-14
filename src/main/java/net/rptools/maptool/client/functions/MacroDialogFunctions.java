@@ -39,6 +39,9 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 
 public class MacroDialogFunctions extends AbstractFunction {
   private static final MacroDialogFunctions instance = new MacroDialogFunctions();
@@ -178,6 +181,21 @@ public class MacroDialogFunctions extends AbstractFunction {
       }
 
       htmlString = library.get().readAsString(url).get();
+
+      var document = Jsoup.parse(htmlString);
+      var head = document.select("head").first();
+      if (head != null) {
+        String baseURL = url.toExternalForm().replaceFirst("\\?.*", "");
+        baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
+        var baseElement = new Element(Tag.valueOf("base"), "").attr("href", baseURL);
+        if (head.children().isEmpty()) {
+          head.appendChild(baseElement);
+        } else {
+          head.child(0).before(baseElement);
+        }
+
+        htmlString = document.html();
+      }
 
     } catch (InterruptedException | ExecutionException | IOException e) {
       throw new ParserException(e);

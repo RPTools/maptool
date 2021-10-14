@@ -80,7 +80,14 @@ interface HTMLPanelInterface {
     // of a hack
     html =
         html.replaceAll(
-            "(lib://[^>]+)([?&])cachelib=false", "$1$2cachelib=" + System.currentTimeMillis());
+                "(lib://[^>]+)([?&])cachelib=false", "$1$2cachelib=" + System.currentTimeMillis())
+            .replaceAll(
+                "(\\B\\./[^>]+)([?&])cachelib=false", "$1$2cachelib=" + System.currentTimeMillis())
+            .replaceAll(
+                "(\\B\\.\\./[^?&]+)([?&])cachelib=false",
+                "$1$2cachelib=" + System.currentTimeMillis())
+            .replaceAll(
+                "(\\B/[^>]+)([?&])cachelib=false", "/$1$2cachelib=" + System.currentTimeMillis());
 
     return html;
   }
