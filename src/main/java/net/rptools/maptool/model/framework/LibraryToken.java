@@ -37,7 +37,6 @@ import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 /** Class that represents Lib:Token libraries. */
 class LibraryToken implements Library {
 
-
   /** Name of macro to divert calls to unknown macros on a lib macro to. */
   private static final String UNKNOWN_LIB_MACRO = "!!unknown-macro!!";
 
@@ -300,20 +299,23 @@ class LibraryToken implements Library {
 
   @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
-    return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>().runOnSwingThread(() -> {
-      Token library = findLibrary(id);
-      MacroButtonProperties buttonProps = library.getMacro(macroName, false);
-      if (buttonProps == null) {
-        // Try the "unknown macro"
-        buttonProps = library.getMacro(UNKNOWN_LIB_MACRO, false);
-        if (buttonProps == null) {
-          return Optional.empty();
-        }
-      }
+    return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              MacroButtonProperties buttonProps = library.getMacro(macroName, false);
+              if (buttonProps == null) {
+                // Try the "unknown macro"
+                buttonProps = library.getMacro(UNKNOWN_LIB_MACRO, false);
+                if (buttonProps == null) {
+                  return Optional.empty();
+                }
+              }
 
-      return Optional.of(new MTScriptMacroInfo(macroName, buttonProps.getCommand(),
-          buttonProps.getAllowPlayerEdits()));
-    });
+              return Optional.of(
+                  new MTScriptMacroInfo(
+                      macroName, buttonProps.getCommand(), buttonProps.getAllowPlayerEdits()));
+            });
   }
 
   /**
