@@ -125,17 +125,17 @@ public class TokenVisibleFunction extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
-    if (functionName.equals("getVisible")) {
+    if (functionName.equalsIgnoreCase("getVisible")) {
       return getVisible(resolver, param);
-    } else if (functionName.equals("setOwnerOnlyVisible")) {
+    } else if (functionName.equalsIgnoreCase("setOwnerOnlyVisible")) {
       return setOwnerOnlyVisible(resolver, param);
-    } else if (functionName.equals("getOwnerOnlyVisible")) {
+    } else if (functionName.equalsIgnoreCase("getOwnerOnlyVisible")) {
       return getOwnerOnlyVisible(resolver, param);
-    } else if (functionName.equals("setVisible")) {
+    } else if (functionName.equalsIgnoreCase("setVisible")) {
       return setVisible(resolver, param);
-    } else if (functionName.equals("setAlwaysVisible")) {
+    } else if (functionName.equalsIgnoreCase("setAlwaysVisible")) {
       return setAlwaysVisible(resolver, param);
-    } else if (functionName.equals("getAlwaysVisible")) {
+    } else if (functionName.equalsIgnoreCase("getAlwaysVisible")) {
       return getAlwaysVisible(resolver, param);
     } else {
       throw new ParserException(I18N.getText("macro.function.general.unknownFunction"));

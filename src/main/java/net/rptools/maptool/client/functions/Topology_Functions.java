@@ -106,12 +106,12 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    if (functionName.equals("drawVBL")
-        || functionName.equals("eraseVBL")
-        || functionName.equals("drawTerrainVBL")
-        || functionName.equals("eraseTerrainVBL")
-        || functionName.equals("drawMBL")
-        || functionName.equals("eraseMBL")) {
+    if (functionName.equalsIgnoreCase("drawVBL")
+        || functionName.equalsIgnoreCase("eraseVBL")
+        || functionName.equalsIgnoreCase("drawTerrainVBL")
+        || functionName.equalsIgnoreCase("eraseTerrainVBL")
+        || functionName.equalsIgnoreCase("drawMBL")
+        || functionName.equalsIgnoreCase("eraseMBL")) {
       boolean erase = false;
       if (parameters.size() != 1) {
         throw new ParserException(
@@ -123,9 +123,9 @@ public class Topology_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (functionName.equals("eraseVBL")
-          || functionName.equals("eraseTerrainVBL")
-          || functionName.equals("eraseMBL")) {
+      if (functionName.equalsIgnoreCase("eraseVBL")
+          || functionName.equalsIgnoreCase("eraseTerrainVBL")
+          || functionName.equalsIgnoreCase("eraseMBL")) {
         erase = true;
       }
 
@@ -153,10 +153,10 @@ public class Topology_Functions extends AbstractFunction {
             Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
 
         Zone.TopologyMode mode;
-        if (functionName.equals("drawVBL") || functionName.equals("eraseVBL")) {
+        if (functionName.equalsIgnoreCase("drawVBL") || functionName.equalsIgnoreCase("eraseVBL")) {
           mode = Zone.TopologyMode.VBL;
-        } else if (functionName.equals("drawTerrainVBL")
-            || functionName.equals("eraseTerrainVBL")) {
+        } else if (functionName.equalsIgnoreCase("drawTerrainVBL")
+            || functionName.equalsIgnoreCase("eraseTerrainVBL")) {
           mode = Zone.TopologyMode.TERRAIN_VBL;
         } else {
           mode = Zone.TopologyMode.MBL;
@@ -175,13 +175,13 @@ public class Topology_Functions extends AbstractFunction {
           TokenVBL.renderTopology(renderer, newArea, erase, mode);
         }
       }
-    } else if (functionName.equals("getVBL")
-        || functionName.equals("getTerrainVBL")
-        || functionName.equals("getMBL")) {
+    } else if (functionName.equalsIgnoreCase("getVBL")
+        || functionName.equalsIgnoreCase("getTerrainVBL")
+        || functionName.equalsIgnoreCase("getMBL")) {
       Zone.TopologyMode mode;
-      if (functionName.equals("getVBL")) {
+      if (functionName.equalsIgnoreCase("getVBL")) {
         mode = Zone.TopologyMode.VBL;
-      } else if (functionName.equals("getTerrainVBL")) {
+      } else if (functionName.equalsIgnoreCase("getTerrainVBL")) {
         mode = Zone.TopologyMode.TERRAIN_VBL;
       } else {
         mode = Zone.TopologyMode.MBL;
@@ -240,7 +240,7 @@ public class Topology_Functions extends AbstractFunction {
         allShapes.add(getAreaShapeObject(topologyArea));
         return allShapes.toString();
       }
-    } else if (functionName.equals("getTokenVBL")) {
+    } else if (functionName.equalsIgnoreCase("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
@@ -273,7 +273,7 @@ public class Topology_Functions extends AbstractFunction {
       } else {
         return "";
       }
-    } else if (functionName.equals("setTokenVBL")) {
+    } else if (functionName.equalsIgnoreCase("setTokenVBL")) {
       Token token = null;
 
       if (parameters.size() > 2) {
@@ -359,7 +359,7 @@ public class Topology_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    } else if (functionName.equals("transferVBL")) {
+    } else if (functionName.equalsIgnoreCase("transferVBL")) {
       Token token = null;
 
       if (parameters.size() > 3) {
