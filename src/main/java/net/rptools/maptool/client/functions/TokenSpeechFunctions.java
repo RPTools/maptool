@@ -47,7 +47,7 @@ public class TokenSpeechFunctions extends AbstractFunction {
           I18N.getText("macro.function.general.noImpersonated", functionName));
     }
 
-    if (functionName.equals("getSpeech")) {
+    if (functionName.equalsIgnoreCase("getSpeech")) {
       if (parameters.size() < 1) {
         throw new ParserException(
             I18N.getText(
@@ -57,7 +57,7 @@ public class TokenSpeechFunctions extends AbstractFunction {
       return speech == null ? "" : speech;
     }
 
-    if (functionName.equals("setSpeech")) {
+    if (functionName.equalsIgnoreCase("setSpeech")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -67,7 +67,7 @@ public class TokenSpeechFunctions extends AbstractFunction {
       return "";
     }
 
-    if (functionName.equals("getSpeechNames")) {
+    if (functionName.equalsIgnoreCase("getSpeechNames")) {
       String[] speech = new String[token.getSpeechNames().size()];
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       if ("json".equals(delim)) {

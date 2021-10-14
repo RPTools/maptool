@@ -117,7 +117,7 @@ class LibraryToken implements Library {
     return new ThreadExecutionHelper<Library>()
         .runOnSwingThread(
             () -> {
-              var tokenList = getTokensWithName(namespace);
+              var tokenList = getTokensWithName("lib:" + namespace);
               if (tokenList.isEmpty()) {
                 return null;
               } else {
@@ -246,8 +246,9 @@ class LibraryToken implements Library {
 
   @Override
   public CompletableFuture<String> getNamespace() {
-    // For LibTokens the namespace is just the name
-    return getName();
+    // For LibTokens the namespace is just the name without the lib:
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> findLibrary(id).getName().substring(4));
   }
 
   @Override
@@ -320,14 +321,19 @@ class LibraryToken implements Library {
 
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
-    return new ThreadExecutionHelper<List<String>>().runOnSwingThread(() -> {
-      Token library = findLibrary(id);
-      List<String> files = new ArrayList<>(
-          library.getMacroList(false).stream().map(p -> "macro/" + p.getLabel()).toList());
-      files.addAll(library.getPropertyNames().stream().map(p -> "property/" + p).toList());
+    return new ThreadExecutionHelper<List<String>>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              List<String> files =
+                  new ArrayList<>(
+                      library.getMacroList(false).stream()
+                          .map(p -> "macro/" + p.getLabel())
+                          .toList());
+              files.addAll(library.getPropertyNames().stream().map(p -> "property/" + p).toList());
 
-      return files;
-    });
+              return files;
+            });
   }
 
   /**

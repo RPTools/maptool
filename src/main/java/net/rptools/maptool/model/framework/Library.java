@@ -138,9 +138,9 @@ public interface Library {
    */
   CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName);
 
-
   /**
    * Returns a list of the "files" within the library.
+   *
    * @return a list of the "files" within the library.
    */
   CompletableFuture<List<String>> getAllFiles();

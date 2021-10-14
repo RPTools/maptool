@@ -22,6 +22,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.graalvm.polyglot.*;
 
 public class JSMacro extends AbstractFunction {
   private static JSMacro instance = new JSMacro();
@@ -56,6 +57,9 @@ public class JSMacro extends AbstractFunction {
     JSAPIRegisteredMacro macro = macros.get(functionName);
     Object ret = JSScriptEngine.getJSScriptEngine().applyFunction(macro, aargs);
     if (ret != null) {
+      if (ret instanceof Value val) {
+        return MacroJavaScriptBridge.getInstance().ValueToMTScriptType(val, new ArrayList());
+      }
       return MacroJavaScriptBridge.getInstance().HostObjectToMTScriptType(ret, new ArrayList());
     }
     return "";

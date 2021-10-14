@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.common.expression.Result;
@@ -32,6 +33,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
@@ -1204,16 +1206,23 @@ public class MapToolLineParser {
       }
       macroBody = mbp.getCommand();
     } else { // Search for a token called macroLocation (must start with "Lib:")
-      macroBody = getTokenLibMacro(macroName, macroLocation);
-      Token token = getTokenMacroLib(macroLocation);
+      try {
+        var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+        if (lib.isEmpty()) {
+          throw new ParserException(I18N.getText("lineParser.unknownLibToken", macroLocation));
+        }
+        var library = lib.get();
+        var macroInfo = library.getMTScriptMacroInfo(macroName).get();
+        if (macroInfo.isEmpty()) {
+          throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+        }
+        macroBody = macroInfo.get().macro();
 
-      if (macroBody == null || token == null) {
-        throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+        macroContext = new MapToolMacroContext(macroName, macroLocation, macroInfo.get().trusted());
+
+      } catch (ExecutionException | InterruptedException e) {
+        throw new ParserException(e);
       }
-      boolean secure = isSecure(macroName, token);
-      macroContext = new MapToolMacroContext(macroName, macroLocation, secure);
-
-      MacroButtonProperties mbp = token.getMacro(macroName, false);
     }
 
     // Error if macro not found

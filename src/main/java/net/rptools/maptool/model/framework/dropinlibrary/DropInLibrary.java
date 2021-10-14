@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -183,7 +184,7 @@ public class DropInLibrary implements Library {
 
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
-    return null; // TODO CDW
+    return CompletableFuture.completedFuture(new ArrayList<>(pathAssetMap.keySet()));
   }
 
   @Override

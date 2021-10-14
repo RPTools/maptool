@@ -1514,7 +1514,7 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Return the existence of the token's VBL
    *
-   * @return rue if the token's vbl is null, and false otherwise
+   * @return true if the token's vbl is not null, and false otherwise
    */
   public boolean hasVBL() {
     return vbl != null;

@@ -180,26 +180,11 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
+   * @param topologyMode Determines which topology (VBL, terrain VBL, MBL) to modify.
    * @return the untouched area if the renderer is null, and null otherwise
    */
-  public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
-    return renderTopology(renderer, area, erase, renderer.getZone().getTopologyMode());
-  }
-
-  /**
-   * This is a convenience method to send the VBL Area to be rendered to the server
-   *
-   * @param renderer Reference to the ZoneRenderer
-   * @param area A valid Area containing VBL polygons
-   * @param erase Set to true to erase the VBL, otherwise draw it
-   * @return the untouched area if the renderer is null, and null otherwise
-   */
-  public static Area renderTopology(
+  public static void renderTopology(
       ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyMode topologyMode) {
-    if (renderer == null) {
-      return area;
-    }
-
     if (erase) {
       renderer.getZone().removeTopology(area, topologyMode);
       MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyMode);
@@ -210,7 +195,6 @@ public class TokenVBL {
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
     renderer.repaint();
-    return null;
   }
 
   public static Area getMapVBL_transformed(ZoneRenderer renderer, Token token) {
@@ -243,6 +227,8 @@ public class TokenVBL {
 
     atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
+    Area mapArea = renderer.getZone().getTopology();
+
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
       // Get the center of the token bounds
@@ -255,7 +241,7 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
 
       // Capture the VBL via intersection
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(mapArea);
 
       // Rotate the area back to prep to store on Token
       captureArea =
@@ -263,7 +249,7 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
     } else {
       // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(mapArea);
     }
 
     // Translate the capture to zero out the x,y to store on the Token
@@ -296,6 +282,7 @@ public class TokenVBL {
     AffineTransform atArea = new AffineTransform();
 
     double sx, sy;
+    Area vblOnMap = renderer.getZone().getTopology();
 
     if (token.isSnapToScale()) {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
@@ -319,10 +306,10 @@ public class TokenVBL {
       newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
 
       // Capture the VBL via intersection
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(vblOnMap);
     } else {
       // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(renderer.getZone().getTopology());
+      newTokenVBL.intersect(vblOnMap);
     }
 
     return newTokenVBL;

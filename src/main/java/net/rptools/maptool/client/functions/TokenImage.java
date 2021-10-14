@@ -92,7 +92,7 @@ public class TokenImage extends AbstractFunction {
       throws ParserException {
     Token token;
 
-    if (functionName.equals("setTokenOpacity")) {
+    if (functionName.equalsIgnoreCase("setTokenOpacity")) {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
@@ -105,7 +105,7 @@ public class TokenImage extends AbstractFunction {
       return token.getTokenOpacity();
     }
 
-    if (functionName.equals("getTokenOpacity")) {
+    if (functionName.equalsIgnoreCase("getTokenOpacity")) {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
@@ -115,7 +115,7 @@ public class TokenImage extends AbstractFunction {
       return token.getTokenOpacity();
     }
 
-    if (functionName.equals("setTokenImage")) {
+    if (functionName.equalsIgnoreCase("setTokenImage")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -125,7 +125,7 @@ public class TokenImage extends AbstractFunction {
       return "";
     }
 
-    if (functionName.equals("setTokenPortrait")) {
+    if (functionName.equalsIgnoreCase("setTokenPortrait")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -135,7 +135,7 @@ public class TokenImage extends AbstractFunction {
       return "";
     }
 
-    if (functionName.equals("setTokenHandout")) {
+    if (functionName.equalsIgnoreCase("setTokenHandout")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -176,7 +176,7 @@ public class TokenImage extends AbstractFunction {
 
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
-    if (functionName.equals("getImage")) {
+    if (functionName.equalsIgnoreCase("getImage")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 2);
 
       token = findImageToken(args.get(0).toString(), "getImage");
@@ -199,17 +199,17 @@ public class TokenImage extends AbstractFunction {
     }
 
     StringBuilder assetId = new StringBuilder("asset://");
-    if (functionName.equals("getTokenImage")) {
+    if (functionName.equalsIgnoreCase("getTokenImage")) {
       if (token.getImageAssetId() == null) {
         return "";
       }
       assetId.append(token.getImageAssetId().toString());
-    } else if (functionName.equals("getTokenPortrait")) {
+    } else if (functionName.equalsIgnoreCase("getTokenPortrait")) {
       if (token.getPortraitImage() == null) {
         return "";
       }
       assetId.append(token.getPortraitImage().toString());
-    } else if (functionName.equals("getImage")) {
+    } else if (functionName.equalsIgnoreCase("getImage")) {
       if (token.getImageAssetId() == null) {
         return "";
       }

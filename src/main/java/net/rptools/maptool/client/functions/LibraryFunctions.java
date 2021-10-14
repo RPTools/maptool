@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.Library;
 import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.framework.LibraryType;
@@ -34,8 +35,13 @@ public class LibraryFunctions extends AbstractFunction {
 
   /** Creates a new {@code PlayerFunctions} object. */
   public LibraryFunctions() {
-    super(0, 1, "library.listDropInLibraries", "library.getInfo", "library.listTokenLibraries",
-        "getContents");
+    super(
+        0,
+        1,
+        "library.listDropInLibraries",
+        "library.getInfo",
+        "library.listTokenLibraries",
+        "library.getContents");
   }
 
   @Override
@@ -68,9 +74,15 @@ public class LibraryFunctions extends AbstractFunction {
         }
 
         case "library.getcontents" -> {
+          FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           String namespace = parameters.get(0).toString();
-          return listLibraryContents(namespace);
+          Optional<Library> library = libraryManager.getLibrary(namespace);
+          if (library.isPresent()) {
+            return listLibraryContents(library.get());
+          } else {
+            return "";
+          }
         }
         default -> throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -80,9 +92,17 @@ public class LibraryFunctions extends AbstractFunction {
     }
   }
 
-  private JsonObject listLibraryContents(String namespace) {
-    JsonObject json = new JsonObject();
-    return null; // TODO: CDW
+  private JsonArray listLibraryContents(Library library)
+      throws ExecutionException, InterruptedException {
+    JsonArray json = new JsonArray();
+    library
+        .getAllFiles()
+        .thenAccept(
+            l -> {
+              l.forEach(json::add);
+            });
+
+    return json;
   }
 
   /**

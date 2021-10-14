@@ -184,6 +184,24 @@ public class LibraryManager {
    */
   public Optional<LibraryInfo> getLibraryInfo(String namespace)
       throws ExecutionException, InterruptedException {
+    Optional<Library> library = getLibrary(namespace);
+    if (library.isPresent()) {
+      return Optional.ofNullable(library.get().getLibraryInfo().get());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Returns the library for a given namespace.
+   *
+   * @param namespace the namespace of the library to return.
+   * @return the library.
+   * @throws ExecutionException if an error occurs while extracting information about the library.
+   * @throws InterruptedException if an error occurs while extracting information about the library.
+   */
+  public Optional<Library> getLibrary(String namespace)
+      throws ExecutionException, InterruptedException {
     var lib = dropInLibraryManager.getLibrary(namespace);
     if (lib == null) {
       lib = LibraryToken.getLibrary(namespace).get();
@@ -192,6 +210,6 @@ public class LibraryManager {
     if (lib == null) {
       return Optional.empty();
     }
-    return Optional.of(lib.getLibraryInfo().get());
+    return Optional.of(lib);
   }
 }

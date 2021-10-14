@@ -1,4 +1,17 @@
+# MapTool 1.10.1
+
+## Updates
+- [#3037][i3037] Fix size modifier bug in getTokenImage() 
+- [#3035][i3035] Properly return numeric values from Java Script UDFs.
+- [#3031][i3031] Update README.md introduction to MapTool
+- Translation updates
+
+
+
+
+
 # MapTool 1.10.0
+
 
 Feature release using OpenJDK 16.
 
@@ -106,3 +119,7 @@ Feature release using OpenJDK 16.
 [i2519]: https://github.com/RPTools/maptool/issues/2519
 [i2155]: https://github.com/RPTools/maptool/issues/2155
 [i446]: https://github.com/RPTools/maptool/issues/446
+
+[i3037]: https://github.com/RPTools/maptool/issues/3037
+[i3035]: https://github.com/RPTools/maptool/issues/3035
+[i3031]: https://github.com/RPTools/maptool/issues/3031
