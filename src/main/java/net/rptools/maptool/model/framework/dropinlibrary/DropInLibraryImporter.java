@@ -41,7 +41,7 @@ public class DropInLibraryImporter {
   /** The name of the drop in library config file. */
   private static final String LIBRARY_INFO_FILE = "library.json";
   /** the directory where all the content files in the library live. */
-  private static final String CONTENT_DIRECTORY = "content/";
+  private static final String CONTENT_DIRECTORY = "library/";
 
   /**
    * Returns the {@link FileFilter} for drop in library files.
