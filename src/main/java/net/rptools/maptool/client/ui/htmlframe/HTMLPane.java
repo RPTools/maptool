@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -33,8 +34,11 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -309,11 +313,19 @@ public class HTMLPane extends JEditorPane {
             return;
           }
           try {
-            String cssText = MapTool.getParser().getTokenLibMacro(vals[0], vals[1]);
-            HTMLDocument document = (HTMLDocument) getDocument();
-            StyleSheet style = document.getStyleSheet();
-            style.loadRules(new StringReader(cssText), null);
-          } catch (ParserException | IOException e) {
+            var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+            if (lib.isPresent()) {
+              var library = lib.get();
+              var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();
+
+              if (macroInfo.isPresent()) {
+                String cssText = macroInfo.get().macro();
+                HTMLDocument document = (HTMLDocument) getDocument();
+                StyleSheet style = document.getStyleSheet();
+                style.loadRules(new StringReader(cssText), null);
+              }
+            }
+          } catch (IOException | ExecutionException | InterruptedException e) {
             // Do nothing
           }
         } else if (type.toString().equalsIgnoreCase("macro")) {
