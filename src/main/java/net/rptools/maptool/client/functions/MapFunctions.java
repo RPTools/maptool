@@ -59,7 +59,7 @@ public class MapFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("getCurrentMapName")) {
+    if (functionName.equalsIgnoreCase("getCurrentMapName")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
       if (currentZR == null) {
@@ -67,7 +67,7 @@ public class MapFunctions extends AbstractFunction {
       } else {
         return currentZR.getZone().getName();
       }
-    } else if (functionName.equals("getMapDisplayName")) {
+    } else if (functionName.equalsIgnoreCase("getMapDisplayName")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       if (parameters.size() == 0) {
         ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
@@ -97,7 +97,7 @@ public class MapFunctions extends AbstractFunction {
           return foundMap;
         }
       }
-    } else if (functionName.equals("setCurrentMap")) {
+    } else if (functionName.equalsIgnoreCase("setCurrentMap")) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       String mapName = parameters.get(0).toString();

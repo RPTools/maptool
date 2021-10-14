@@ -61,7 +61,7 @@ public class ExportDataFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
 
     // New function to save data to an external file.
-    if (functionName.equals("exportData")) {
+    if (functionName.equalsIgnoreCase("exportData")) {
       if (parameters.size() != 3)
         throw new ParserException(
             I18N.getText(
@@ -96,7 +96,7 @@ public class ExportDataFunctions extends AbstractFunction {
       return BigDecimal.ONE;
     }
 
-    if (functionName.equals("getEnvironmentVariable")) {
+    if (functionName.equalsIgnoreCase("getEnvironmentVariable")) {
       if (parameters.size() != 1)
         throw new ParserException(
             I18N.getText(
