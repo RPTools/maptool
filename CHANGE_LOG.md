@@ -2,7 +2,7 @@
 
 ## Updates
 - [#3037][i3037] Fix size modifier bug in getTokenImage() 
-- [#3036][i3036] Properly return numeric values from Java Script UDFs.
+- [#3035][i3035] Properly return numeric values from Java Script UDFs.
 - [#3031][i3031] Update README.md introduction to MapTool
 - Translation updates
 
@@ -121,5 +121,5 @@ Feature release using OpenJDK 16.
 [i446]: https://github.com/RPTools/maptool/issues/446
 
 [i3037]: https://github.com/RPTools/maptool/issues/3037
-[i3036]: https://github.com/RPTools/maptool/issues/3036
+[i3035]: https://github.com/RPTools/maptool/issues/3035
 [i3031]: https://github.com/RPTools/maptool/issues/3031
