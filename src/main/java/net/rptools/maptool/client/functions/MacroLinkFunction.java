@@ -38,6 +38,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MessageUtil;
@@ -639,6 +640,20 @@ public class MacroLinkFunction extends AbstractFunction {
       try {
         String[] parts = command.split("@");
         if (parts.length > 1) {
+          var lib = new LibraryManager().getLibrary(parts[1].substring(4));
+          if (lib.isEmpty()) {
+            return false;
+          }
+          var library = lib.get();
+          var macroInfo = library.getMTScriptMacroInfo(parts[0]).get();
+          if (macroInfo.isEmpty()) {
+            return false;
+          }
+
+          // TODO:  CDW
+          return macroInfo.get().isAutoExecLink();
+
+
           Token token = MapTool.getParser().getTokenMacroLib(parts[1]);
           if (token == null) {
             return false;
