@@ -320,6 +320,12 @@ class LibraryToken implements Library {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName) {
+    // There are no private macros in a token library.
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
   public CompletableFuture<List<String>> getAllFiles() {
     return new ThreadExecutionHelper<List<String>>()
         .runOnSwingThread(

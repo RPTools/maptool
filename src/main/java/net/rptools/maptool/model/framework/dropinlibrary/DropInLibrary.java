@@ -42,8 +42,13 @@ import org.javatuples.Pair;
 /** Class that implements drop in libraries. */
 public class DropInLibrary implements Library {
 
+  /** The directory where the files exposed URI are stored. */
   private static final String URL_PUBLIC_DIR = "public/";
 
+  /** The directory where MT MacroScripts are stored. */
+  private static final String MTSCRIPT_DIR = "mtscript/";
+
+  /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "mtscript/public/";
 
   /** The name of the drop in library. */
@@ -83,7 +88,10 @@ public class DropInLibrary implements Library {
   private final Map<String, Pair<MD5Key, Type>> urlPathAssetMap;
 
   /** The mapping between MTScript function paths and asset information. */
-  private final Map<String, Pair<MD5Key, Type>> mtsFunctionAssetMap;
+  private final Map<String, Pair<MD5Key, Type>> mtsPublicFunctionAssetMap;
+
+  /** The mapping between MTScript function paths and asset information. */
+  private final Map<String, Pair<MD5Key, Type>> mtsPrivateFunctionAssetMap;
 
   /**
    * Class used to represent Drop In Libraries.
@@ -108,6 +116,7 @@ public class DropInLibrary implements Library {
 
     var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
     var mtsMap = new HashMap<String, Pair<MD5Key, Type>>();
+    var mtsPrivateMap = new HashMap<String, Pair<MD5Key, Type>>();
 
     for (var entry : this.pathAssetMap.entrySet()) {
       String path = entry.getKey();
@@ -118,11 +127,17 @@ public class DropInLibrary implements Library {
           String name = path.substring(MTSCRIPT_PUBLIC_DIR.length(), path.length() - 4);
           mtsMap.put(name, entry.getValue());
         }
+      } else if (path.startsWith(MTSCRIPT_DIR)) {
+        if (path.toLowerCase().endsWith(".mts")) {
+          String name = path.substring(MTSCRIPT_DIR.length(), path.length() - 4);
+          mtsPrivateMap.put(name, entry.getValue());
+        }
       }
     }
 
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
-    mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
+    mtsPublicFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
+    mtsPrivateFunctionAssetMap = Collections.unmodifiableMap(mtsPrivateMap);
   }
 
   public static DropInLibrary fromDto(
@@ -166,20 +181,33 @@ public class DropInLibrary implements Library {
             allowsUriAccess));
   }
 
-  @Override
-  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
-    Pair<MD5Key, Type> macro = mtsFunctionAssetMap.get(macroName);
-    if (macro == null) {
-      return CompletableFuture.completedFuture(Optional.empty());
-    }
-
+  private CompletableFuture<Optional<MTScriptMacroInfo>> getMacroInfo(
+      String macroName, MD5Key key) {
     return CompletableFuture.supplyAsync(
         () -> {
-          Asset asset = AssetManager.getAsset(macro.getValue0());
+          Asset asset = AssetManager.getAsset(key);
           String command = asset.getDataAsString();
           // Drop In Library Functions are always trusted as only GM can add and no one can edit.
           return Optional.of(new MTScriptMacroInfo(macroName, command, true));
         });
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
+    Pair<MD5Key, Type> macro = mtsPublicFunctionAssetMap.get(macroName);
+    if (macro == null) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    }
+    return getMacroInfo(macroName, macro.getValue0());
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName) {
+    Pair<MD5Key, Type> macro = mtsPrivateFunctionAssetMap.get(macroName);
+    if (macro == null) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    }
+    return getMacroInfo(macroName, macro.getValue0());
   }
 
   @Override

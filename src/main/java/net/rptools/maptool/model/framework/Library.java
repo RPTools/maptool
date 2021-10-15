@@ -139,6 +139,16 @@ public interface Library {
   CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName);
 
   /**
+   * Returns the information about "non-public" MapTool Macro Script on this library. The non-public
+   * macro script should only be available im a limited set of circumstances, not to general
+   * [macro(): ] calls.
+   *
+   * @param macroName The name of the macro.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName);
+
+  /**
    * Returns a list of the "files" within the library.
    *
    * @return a list of the "files" within the library.

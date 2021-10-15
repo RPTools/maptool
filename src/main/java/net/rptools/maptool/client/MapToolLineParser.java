@@ -1214,7 +1214,13 @@ public class MapToolLineParser {
         var library = lib.get();
         var macroInfo = library.getMTScriptMacroInfo(macroName).get();
         if (macroInfo.isEmpty()) {
-          throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+          // if the macro source is the same as the location then check private macros.
+          if (macroLocation.equalsIgnoreCase(getMacroSource())) {
+            macroInfo = library.getPrivateMacroInfo(macroName).get();
+          }
+          if (macroInfo.isEmpty()) {
+            throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+          }
         }
         macroBody = macroInfo.get().macro();
 
