@@ -19,13 +19,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -50,6 +54,9 @@ public class DropInLibrary implements Library {
 
   /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "mtscript/public/";
+
+  /** The file that contains the files that are autoexecutable for macro links. */
+  private static final String MACRO_LINK_AUTO_EXEC_FILE = MTSCRIPT_PUBLIC_DIR + "autoexec";
 
   /** The name of the drop in library. */
   private final String name;
@@ -93,6 +100,9 @@ public class DropInLibrary implements Library {
   /** The mapping between MTScript function paths and asset information. */
   private final Map<String, Pair<MD5Key, Type>> mtsPrivateFunctionAssetMap;
 
+  /** The macro script files that are auto executable for macro links. */
+  private final Set<String> macroLinkAutoExecutable;
+
   /**
    * Class used to represent Drop In Libraries.
    *
@@ -117,6 +127,7 @@ public class DropInLibrary implements Library {
     var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
     var mtsMap = new HashMap<String, Pair<MD5Key, Type>>();
     var mtsPrivateMap = new HashMap<String, Pair<MD5Key, Type>>();
+    MD5Key autoExecKey = null;
 
     for (var entry : this.pathAssetMap.entrySet()) {
       String path = entry.getKey();
@@ -126,6 +137,8 @@ public class DropInLibrary implements Library {
         if (path.toLowerCase().endsWith(".mts")) {
           String name = path.substring(MTSCRIPT_PUBLIC_DIR.length(), path.length() - 4);
           mtsMap.put(name, entry.getValue());
+        } else if (path.equals(MACRO_LINK_AUTO_EXEC_FILE)) {
+          autoExecKey = entry.getValue().getValue0();
         }
       } else if (path.startsWith(MTSCRIPT_DIR)) {
         if (path.toLowerCase().endsWith(".mts")) {
@@ -138,6 +151,17 @@ public class DropInLibrary implements Library {
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
     mtsPublicFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
     mtsPrivateFunctionAssetMap = Collections.unmodifiableMap(mtsPrivateMap);
+
+    if (autoExecKey != null) {
+      macroLinkAutoExecutable =
+          Arrays.stream(AssetManager.getAssetAndWait(autoExecKey).getDataAsString().split("\n"))
+              .map(String::trim)
+              .filter(l -> !l.startsWith("#"))
+              .map(l -> l.substring(0, l.length() - 4))
+              .collect(Collectors.toSet());
+    } else {
+      macroLinkAutoExecutable = new HashSet<>();
+    }
   }
 
   public static DropInLibrary fromDto(
@@ -188,7 +212,13 @@ public class DropInLibrary implements Library {
           Asset asset = AssetManager.getAsset(key);
           String command = asset.getDataAsString();
           // Drop In Library Functions are always trusted as only GM can add and no one can edit.
-          return Optional.of(new MTScriptMacroInfo(macroName, command, true));
+          return Optional.of(
+              new MTScriptMacroInfo(
+                  macroName,
+                  command,
+                  true,
+                  mtsPublicFunctionAssetMap.containsKey(macroName)
+                      && macroLinkAutoExecutable.contains(macroName)));
         });
   }
 

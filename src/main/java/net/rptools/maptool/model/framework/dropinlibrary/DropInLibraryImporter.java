@@ -38,8 +38,10 @@ public class DropInLibraryImporter {
 
   /** The file extension for drop in library files. */
   public static final String DROP_IN_LIBRARY_EXTENSION = ".mtlib";
+
   /** The name of the drop in library config file. */
   private static final String LIBRARY_INFO_FILE = "library.json";
+
   /** the directory where all the content files in the library live. */
   private static final String CONTENT_DIRECTORY = "library/";
 
@@ -67,7 +69,7 @@ public class DropInLibraryImporter {
    * Imports the drop in library from the specified file.
    *
    * @param file the file to use for import.
-   * @return
+   * @return the {@link DropInLibrary} that was imported.
    * @throws IOException
    */
   public DropInLibrary importFromFile(File file) throws IOException {
@@ -79,12 +81,20 @@ public class DropInLibraryImporter {
       }
       var builder = DropInLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
-      var pathAssetMap = transferAssets(builder.getNamespace(), zip);
+      var pathAssetMap = processAssets(builder.getNamespace(), zip);
       return DropInLibrary.fromDto(builder.build(), pathAssetMap);
     }
   }
 
-  private Map<String, Pair<MD5Key, Type>> transferAssets(String namespace, ZipFile zip)
+  /**
+   * Reads the assets from the drop in library and adds them to the asset manager.
+   *
+   * @param namespace the namespace of the drop in library.
+   * @param zip the zipfile containing the drop in library.
+   * @return a map of asset paths and asset details.
+   * @throws IOException if there is an error reading the assets from the drop in library.
+   */
+  private Map<String, Pair<MD5Key, Type>> processAssets(String namespace, ZipFile zip)
       throws IOException {
     var pathAssetMap = new HashMap<String, Pair<MD5Key, Type>>();
     var entries =

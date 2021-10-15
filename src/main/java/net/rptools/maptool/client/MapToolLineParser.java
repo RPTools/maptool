@@ -34,7 +34,6 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;

@@ -315,7 +315,10 @@ class LibraryToken implements Library {
 
               return Optional.of(
                   new MTScriptMacroInfo(
-                      macroName, buttonProps.getCommand(), buttonProps.getAllowPlayerEdits()));
+                      macroName,
+                      buttonProps.getCommand(),
+                      !buttonProps.getAllowPlayerEdits(),
+                      !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute()));
             });
   }
 
