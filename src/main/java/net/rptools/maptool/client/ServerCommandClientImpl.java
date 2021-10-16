@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import java.awt.geom.Area;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
@@ -380,6 +381,14 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
+  }
+
+  public void addDropInLibrary(Map<String, MD5Key> namespaceAssetMap) {
+    makeServerCall(COMMAND.addDropInLibrary, namespaceAssetMap);
+  }
+
+  public void removeDropInLibrary(List<String> namespaces) {
+    makeServerCall(COMMAND.removeDropInLibrary, namespaces);
   }
 
   /**

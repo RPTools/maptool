@@ -100,7 +100,9 @@ public interface ServerCommand {
     setBoard,
     updateExposedAreaMeta,
     clearExposedArea,
-    restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and
+    restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
+    removeDropInLibrary,
+    addDropInLibrary
     // scale a player's view
     // @formatter:on
   };

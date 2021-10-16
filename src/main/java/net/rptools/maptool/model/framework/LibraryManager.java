@@ -143,6 +143,7 @@ public class LibraryManager {
       return false;
     }
     return true;
+    // TODO: CDW send to clients
   }
 
   /**
@@ -152,6 +153,24 @@ public class LibraryManager {
    */
   public void deregisterDropInLibrary(String namespace) {
     dropInLibraryManager.deregisterLibrary(namespace);
+    // TODO: CDW send to clients
+  }
+
+  /**
+   * Register a drop in library, replacing any existing library.
+   *
+   * @param dropInLibrary the drop in library to register.
+   */
+  public boolean reregisterDropInLibrary(DropInLibrary dropInLibrary) {
+    try {
+      dropInLibraryManager.deregisterLibrary(dropInLibrary.getNamespace().get());
+      dropInLibraryManager.registerLibrary(dropInLibrary);
+    } catch (InterruptedException | ExecutionException e) {
+      log.error("Error registering drop in library", e);
+      return false;
+    }
+    return true;
+    // TODO: CDW send to clients
   }
 
   /**

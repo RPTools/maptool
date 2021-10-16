@@ -3271,7 +3271,7 @@ public class AppActions {
                 }
                 libraryManager.deregisterDropInLibrary(namespace);
               }
-              libraryManager.registerDropInLibrary(dropInLibrary);
+              libraryManager.reregisterDropInLibrary(dropInLibrary);
             } catch (IOException | InterruptedException | ExecutionException ioException) {
               MapTool.showError("library.import.ioError", ioException);
             }

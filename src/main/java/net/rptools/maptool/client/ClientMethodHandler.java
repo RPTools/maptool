@@ -20,7 +20,9 @@ import java.awt.geom.Area;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
@@ -30,6 +32,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -52,6 +55,8 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -686,6 +691,33 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.setExposedAreaMetaData(tokenGUID, meta);
               return;
+
+            case addDropInLibrary:
+              var namespaceAssetMap = (Map<String, MD5Key>) parameters[0];
+              for (var entry : namespaceAssetMap.entrySet()) {
+                AssetManager.getAssetAsynchronously(
+                    entry.getValue(),
+                    a -> {
+                      Asset asset = AssetManager.getAsset(a);
+                      try {
+                        var dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
+                        new LibraryManager().reregisterDropInLibrary(dropInLibrary);
+                      } catch (IOException e) {
+                        SwingUtilities.invokeLater(
+                            () -> {
+                              MapTool.showError(
+                                  I18N.getText("library.import.error", entry.getKey()), e);
+                            });
+                      }
+                    });
+              }
+
+            case removeDropInLibrary:
+              var remLibraryManager = new LibraryManager();
+              var removedNamespaces = (List<String>) parameters[0];
+              for (String namespace : removedNamespaces) {
+                remLibraryManager.deregisterDropInLibrary(namespace);
+              }
           }
         });
   }
