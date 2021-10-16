@@ -30,6 +30,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
 
@@ -44,6 +45,9 @@ public class DropInLibraryImporter {
 
   /** the directory where all the content files in the library live. */
   private static final String CONTENT_DIRECTORY = "library/";
+
+  /** The name of the file with the macro script function properties. */
+  private static final String MACROSCRIPT_PROPERTY_FILES = "mts_properties.json";
 
   /**
    * Returns the {@link FileFilter} for drop in library files.
@@ -82,7 +86,13 @@ public class DropInLibraryImporter {
       var builder = DropInLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
-      return DropInLibrary.fromDto(builder.build(), pathAssetMap);
+      var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
+      ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILES);
+      if (mtsPropsZipEntry != null) {
+        JsonFormat.parser()
+            .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
+      }
+      return DropInLibrary.fromDto(builder.build(), mtsPropBuilder.build(), pathAssetMap);
     }
   }
 

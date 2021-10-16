@@ -19,3 +19,13 @@ message DropInLibraryDto {
   string short_description = 25;
   bool allowsUriAccess = 26;
 }
+
+message MTScriptPropertiesDto {
+  message Property {
+    string filename = 1;
+    bool auto_execute = 2;
+    string description = 3;
+  }
+
+  repeated Property properties = 1;
+}

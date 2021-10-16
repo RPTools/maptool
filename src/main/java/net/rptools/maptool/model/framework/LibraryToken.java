@@ -318,7 +318,8 @@ class LibraryToken implements Library {
                       macroName,
                       buttonProps.getCommand(),
                       !buttonProps.getAllowPlayerEdits(),
-                      !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute()));
+                      !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
+                      buttonProps.getEvaluatedToolTip()));
             });
   }
 

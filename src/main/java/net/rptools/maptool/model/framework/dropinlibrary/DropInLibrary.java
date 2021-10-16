@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -41,10 +38,15 @@ import net.rptools.maptool.model.framework.LibraryNotValidException;
 import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.framework.MTScriptMacroInfo;
 import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
 
 /** Class that implements drop in libraries. */
 public class DropInLibrary implements Library {
+
+  /** Record used to store information about the MacrScript functions for this library. */
+  private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
+  ;
 
   /** The directory where the files exposed URI are stored. */
   private static final String URL_PUBLIC_DIR = "public/";
@@ -53,10 +55,7 @@ public class DropInLibrary implements Library {
   private static final String MTSCRIPT_DIR = "mtscript/";
 
   /** The directory where public MT MacroScripts are stored. */
-  private static final String MTSCRIPT_PUBLIC_DIR = "mtscript/public/";
-
-  /** The file that contains the files that are autoexecutable for macro links. */
-  private static final String MACRO_LINK_AUTO_EXEC_FILE = MTSCRIPT_PUBLIC_DIR + "autoexec";
+  private static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
   /** The name of the drop in library. */
   private final String name;
@@ -95,21 +94,19 @@ public class DropInLibrary implements Library {
   private final Map<String, Pair<MD5Key, Type>> urlPathAssetMap;
 
   /** The mapping between MTScript function paths and asset information. */
-  private final Map<String, Pair<MD5Key, Type>> mtsPublicFunctionAssetMap;
-
-  /** The mapping between MTScript function paths and asset information. */
-  private final Map<String, Pair<MD5Key, Type>> mtsPrivateFunctionAssetMap;
-
-  /** The macro script files that are auto executable for macro links. */
-  private final Set<String> macroLinkAutoExecutable;
+  private final Map<String, MTScript> mtsFunctionAssetMap;
 
   /**
    * Class used to represent Drop In Libraries.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
+   * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    */
-  private DropInLibrary(DropInLibraryDto dto, Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
+  private DropInLibrary(
+      DropInLibraryDto dto,
+      MTScriptPropertiesDto mtsDto,
+      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -125,48 +122,56 @@ public class DropInLibrary implements Library {
     allowsUriAccess = dto.getAllowsUriAccess();
 
     var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
-    var mtsMap = new HashMap<String, Pair<MD5Key, Type>>();
-    var mtsPrivateMap = new HashMap<String, Pair<MD5Key, Type>>();
-    MD5Key autoExecKey = null;
+    var mtsMap = new HashMap<String, MTScript>();
+
+    var autoExecSet = new HashSet<String>();
+    var descriptionMap = new HashMap<String, String>();
+
+    for (var properties : mtsDto.getPropertiesList()) {
+      var path = MTSCRIPT_DIR + properties.getFilename();
+      if (properties.getAutoExecute()) {
+        autoExecSet.add(path);
+      }
+
+      descriptionMap.put(path, properties.getDescription());
+    }
 
     for (var entry : this.pathAssetMap.entrySet()) {
       String path = entry.getKey();
       if (path.startsWith(URL_PUBLIC_DIR)) {
         urlsMap.put(path.substring(URL_PUBLIC_DIR.length()), entry.getValue());
-      } else if (path.startsWith(MTSCRIPT_PUBLIC_DIR)) {
-        if (path.toLowerCase().endsWith(".mts")) {
-          String name = path.substring(MTSCRIPT_PUBLIC_DIR.length(), path.length() - 4);
-          mtsMap.put(name, entry.getValue());
-        } else if (path.equals(MACRO_LINK_AUTO_EXEC_FILE)) {
-          autoExecKey = entry.getValue().getValue0();
-        }
       } else if (path.startsWith(MTSCRIPT_DIR)) {
         if (path.toLowerCase().endsWith(".mts")) {
           String name = path.substring(MTSCRIPT_DIR.length(), path.length() - 4);
-          mtsPrivateMap.put(name, entry.getValue());
+          mtsMap.put(
+              name,
+              new MTScript(
+                  name,
+                  autoExecSet.contains(path),
+                  descriptionMap.getOrDefault(path, ""),
+                  entry.getValue().getValue0()));
         }
       }
     }
 
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
-    mtsPublicFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
-    mtsPrivateFunctionAssetMap = Collections.unmodifiableMap(mtsPrivateMap);
-
-    if (autoExecKey != null) {
-      macroLinkAutoExecutable =
-          Arrays.stream(AssetManager.getAssetAndWait(autoExecKey).getDataAsString().split("\n"))
-              .map(String::trim)
-              .filter(l -> !l.startsWith("#"))
-              .map(l -> l.substring(0, l.length() - 4))
-              .collect(Collectors.toSet());
-    } else {
-      macroLinkAutoExecutable = new HashSet<>();
-    }
+    mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
   }
 
+  /**
+   * Creates a new Drop In Library from the given {@link DropInLibraryDto}, {@link
+   * MTScriptPropertiesDto}, and file path assets map.
+   *
+   * @param dto The Drop In Libraries Data Transfer Object.
+   * @param mtsDto The MTScript Properties Data Transfer Object.
+   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
+   * @return
+   */
   public static DropInLibrary fromDto(
-      DropInLibraryDto dto, Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    return new DropInLibrary(dto, pathAssetMap);
+      DropInLibraryDto dto,
+      MTScriptPropertiesDto mtsDto,
+      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
+    return new DropInLibrary(dto, mtsDto, pathAssetMap);
   }
 
   @Override
@@ -205,39 +210,46 @@ public class DropInLibrary implements Library {
             allowsUriAccess));
   }
 
+  /**
+   * Return a {@link MTScriptMacroInfo} for the macro.
+   *
+   * @param macroName The name of the macro.
+   * @param macro The macro details.
+   * @return The {@link MTScriptMacroInfo} details.
+   */
   private CompletableFuture<Optional<MTScriptMacroInfo>> getMacroInfo(
-      String macroName, MD5Key key) {
+      String macroName, MTScript macro) {
     return CompletableFuture.supplyAsync(
         () -> {
-          Asset asset = AssetManager.getAsset(key);
+          Asset asset = AssetManager.getAsset(macro.md5Key());
           String command = asset.getDataAsString();
           // Drop In Library Functions are always trusted as only GM can add and no one can edit.
           return Optional.of(
               new MTScriptMacroInfo(
                   macroName,
                   command,
-                  true,
-                  mtsPublicFunctionAssetMap.containsKey(macroName)
-                      && macroLinkAutoExecutable.contains(macroName)));
+                  true, // Drop In Library Functions are always trusted
+                  macro.autoExecute(),
+                  macro.description()));
         });
   }
 
   @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
-    Pair<MD5Key, Type> macro = mtsPublicFunctionAssetMap.get(macroName);
+    var macro = mtsFunctionAssetMap.get(MTSCRIPT_PUBLIC_DIR + macroName);
     if (macro == null) {
       return CompletableFuture.completedFuture(Optional.empty());
     }
-    return getMacroInfo(macroName, macro.getValue0());
+    return getMacroInfo(macroName, macro);
   }
 
   @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName) {
-    Pair<MD5Key, Type> macro = mtsPrivateFunctionAssetMap.get(macroName);
+    var macro = mtsFunctionAssetMap.get(macroName);
     if (macro == null) {
       return CompletableFuture.completedFuture(Optional.empty());
     }
-    return getMacroInfo(macroName, macro.getValue0());
+    return getMacroInfo(macroName, macro);
   }
 
   @Override
