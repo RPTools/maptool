@@ -290,8 +290,7 @@ public class TransferableHelper extends TransferHandler {
       return null;
     }
     for (Object working : assets) {
-      if (working instanceof Asset) {
-        Asset asset = (Asset) working;
+      if (working instanceof Asset asset) {
         if (!asset.getMD5Key().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
           if (!AssetManager.hasAsset(asset)) {
             AssetManager.putAsset(asset);
@@ -615,8 +614,7 @@ public class TransferableHelper extends TransferHandler {
       configureTokens = new ArrayList<Boolean>(assets.size());
       // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
-        if (working instanceof Asset) {
-          Asset asset = (Asset) working;
+        if (working instanceof Asset asset) {
           Token token = new Token(asset.getName(), asset.getMD5Key());
           // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);

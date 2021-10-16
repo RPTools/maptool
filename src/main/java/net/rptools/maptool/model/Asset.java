@@ -66,6 +66,8 @@ public final class Asset {
     XML(true, "xml", Asset::createXMLAsset),
     /** The {@code Asset} is a PDF file. */
     PDF(false, "pdf", Asset::createPDFAsset),
+    /** MapTool Drop In Library */
+    MTLIB(false, "mtlib", Asset::createMTLibAsset),
     /** The {@code Asset} is not a supported type. */
     INVALID(false, "", Asset::createInvalidAssetType);
 
@@ -346,7 +348,18 @@ public final class Asset {
    * @return the HTML {@code Asset}.
    */
   public static Asset createHTMLAsset(String name, byte[] data) {
-    return new Asset(null, name, data, Type.HTML, Type.HTML.defaultExtension);
+    return new Asset(null, name, data, Type.HTML, Type.HTML.getDefaultExtension());
+  }
+
+  /**
+   * Creates a MapTool Drop In Library {@code Asset}.
+   *
+   * @param namespace The namespace of the {@code Asset}.
+   * @param data the data for the {@code Asset}.
+   * @return the MapTool Drop In Library {@code Asset}.
+   */
+  private static Asset createMTLibAsset(String namespace, byte[] data) {
+    return new Asset(null, namespace, data, Type.MTLIB, Type.MTLIB.getDefaultExtension());
   }
 
   /**

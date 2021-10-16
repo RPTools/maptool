@@ -96,6 +96,9 @@ public class DropInLibrary implements Library {
   /** The mapping between MTScript function paths and asset information. */
   private final Map<String, MTScript> mtsFunctionAssetMap;
 
+  /** The ID of the asset for the whole of the drop in Library. */
+  private final MD5Key assetKey;
+
   /**
    * Class used to represent Drop In Libraries.
    *
@@ -104,6 +107,7 @@ public class DropInLibrary implements Library {
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    */
   private DropInLibrary(
+      MD5Key libraryAssetKey,
       DropInLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
@@ -120,6 +124,7 @@ public class DropInLibrary implements Library {
     shortDescription = dto.getShortDescription();
     this.pathAssetMap = Map.copyOf(pathAssetMap);
     allowsUriAccess = dto.getAllowsUriAccess();
+    assetKey = libraryAssetKey;
 
     var urlsMap = new HashMap<String, Pair<MD5Key, Type>>();
     var mtsMap = new HashMap<String, MTScript>();
@@ -168,10 +173,11 @@ public class DropInLibrary implements Library {
    * @return
    */
   public static DropInLibrary fromDto(
+      MD5Key libraryAssetKey,
       DropInLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    return new DropInLibrary(dto, mtsDto, pathAssetMap);
+    return new DropInLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
   }
 
   @Override

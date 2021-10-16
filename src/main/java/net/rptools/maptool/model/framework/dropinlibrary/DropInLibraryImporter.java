@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -59,7 +60,7 @@ public class DropInLibraryImporter {
 
       @Override
       public boolean accept(File f) {
-        return f.isDirectory() || f.getName().endsWith(DROP_IN_LIBRARY_EXTENSION);
+        return f.isDirectory() || isDropInLibrary(f.getName());
       }
 
       @Override
@@ -67,6 +68,15 @@ public class DropInLibraryImporter {
         return I18N.getText("file.ext.dropInLib");
       }
     };
+  }
+
+  /**
+   * Returns if this filename is a valid filename for a drop in library.
+   * @param fileName The name of the file to check.
+   * @return {@code true} if this is a valid drop in library file name.
+   */
+  public static  boolean isDropInLibrary(String fileName) {
+    return fileName.endsWith(DROP_IN_LIBRARY_EXTENSION);
   }
 
   /**
@@ -78,6 +88,7 @@ public class DropInLibraryImporter {
    */
   public DropInLibrary importFromFile(File file) throws IOException {
     var diiBuilder = DropInLibraryDto.newBuilder();
+
     try (var zip = new ZipFile(file)) {
       ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
       if (entry == null) {
@@ -92,7 +103,13 @@ public class DropInLibraryImporter {
         JsonFormat.parser()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
       }
-      return DropInLibrary.fromDto(builder.build(), mtsPropBuilder.build(), pathAssetMap);
+      var dropInLib = builder.build();
+      byte[] data = Files.readAllBytes(file.toPath());
+      var asset = Type.MTLIB.getFactory().apply(dropInLib.getNamespace(), data);
+      addAsset(asset);
+
+      return DropInLibrary.fromDto(
+          asset.getMD5Key(), dropInLib, mtsPropBuilder.build(), pathAssetMap);
     }
   }
 
@@ -119,12 +136,21 @@ public class DropInLibraryImporter {
         MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
         Asset asset =
             Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
-        if (!AssetManager.hasAsset(asset)) {
-          AssetManager.putAsset(asset);
-        }
+        addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
     }
     return pathAssetMap;
+  }
+
+  /**
+   * Adds the {@lik Asset} to the {@link AssetManager} if it does not already exist.
+   *
+   * @param asset the {@link Asset} to add.
+   */
+  private void addAsset(Asset asset) {
+    if (!AssetManager.hasAsset(asset)) {
+      AssetManager.putAsset(asset);
+    }
   }
 }
