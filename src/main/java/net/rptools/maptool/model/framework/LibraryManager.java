@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryManager;
+import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -211,5 +212,19 @@ public class LibraryManager {
       return Optional.empty();
     }
     return Optional.of(lib);
+  }
+
+  /**
+   * Returns the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   *
+   * @return the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   */
+  public CompletableFuture<CampaignDropInLibraryListDto> dropInLibrariesToDto() {
+    return dropInLibraryManager.toDto();
+  }
+
+  /** Removes all the drop in libraries. */
+  public void removeAllDropInLibraries() {
+    dropInLibraryManager.removeAllLibraries();
   }
 }

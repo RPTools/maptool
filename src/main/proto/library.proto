@@ -29,3 +29,12 @@ message MTScriptPropertiesDto {
 
   repeated Property properties = 1;
 }
+
+message CampaignDropInLibraryListDto {
+  message CampaignDropInLibraryDto {
+    DropInLibraryDto details = 17;
+    string md5_hash = 18;
+  }
+  repeated CampaignDropInLibraryDto libraries = 1;
+}
+

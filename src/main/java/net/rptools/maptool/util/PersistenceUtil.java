@@ -15,6 +15,7 @@
 package net.rptools.maptool.util;
 
 import com.caucho.hessian.io.HessianInput;
+import com.google.protobuf.util.JsonFormat;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -53,6 +55,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -61,6 +64,10 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
+import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -76,10 +83,15 @@ public class PersistenceUtil {
 
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
   public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; // $NON-NLS-1$
-  private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
+  private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$;
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
+  private static final String DROP_IN_LIBRARY_DIR = "libraries/";
 
-  private static final String CAMPAIGN_VERSION = "1.4.1";
+  private static final String DROP_IN_LIBRARY_LIST_FILE = DROP_IN_LIBRARY_DIR + "libraries.json";
+
+  private static final String DROP_IN_LIBRARY_ASSET_DIR = DROP_IN_LIBRARY_DIR + ASSET_DIR;
+
+  private static final String CAMPAIGN_VERSION = "1.11.0";
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -90,6 +102,8 @@ public class PersistenceUtil {
   // how to implement?)
   // 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89
   // compatible
+  // 1.11.0 Added drop in libraries, if loaded and saved with an older version then drop in
+  //        libraries will be removed.
 
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
   private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
@@ -291,6 +305,11 @@ public class PersistenceUtil {
       saveAssets(allAssetIds, pakFile);
       saveTimer.stop("Save assets");
 
+      // Store the Drop In Libraries.
+      saveTimer.start("Save Drop In Libraries");
+      saveDropInLibraries(pakFile);
+      saveTimer.stop("Save Drop In Libraries");
+
       try {
         saveTimer.start("Set content");
 
@@ -437,6 +456,8 @@ public class PersistenceUtil {
         for (Zone zone : persistedCampaign.campaign.getZones()) {
           zone.optimize();
         }
+
+        loadDropInLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
@@ -696,6 +717,62 @@ public class PersistenceUtil {
         }
       }
       addToServer.clear();
+    }
+  }
+
+  /**
+   * Loads the drop in libraries from the campaign file.
+   *
+   * @param packedFile the file to load from.
+   * @throws IOException if there is a problem reading the drop in library information.
+   */
+  private static void loadDropInLibraries(PackedFile packedFile) throws IOException {
+    var libraryManager = new LibraryManager();
+    libraryManager.removeAllDropInLibraries();
+    if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
+      return; // No Libraries to import
+    }
+    var builder = CampaignDropInLibraryListDto.newBuilder();
+    JsonFormat.parser()
+        .merge(
+            new InputStreamReader(packedFile.getFileAsInputStream(DROP_IN_LIBRARY_LIST_FILE)),
+            builder);
+    var listDto = builder.build();
+
+    for (var library : listDto.getLibrariesList()) {
+      String libraryData = DROP_IN_LIBRARY_ASSET_DIR + library.getMd5Hash();
+      byte[] bytes = packedFile.getFileAsInputStream(libraryData).readAllBytes();
+      String libraryNamespace = library.getDetails().getNamespace();
+      Asset asset = Type.MTLIB.getFactory().apply(libraryNamespace, bytes);
+      if (!AssetManager.hasAsset(asset)) {
+        AssetManager.putAsset(asset);
+      }
+      DropInLibrary dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
+      libraryManager.registerDropInLibrary(dropInLibrary);
+    }
+  }
+
+  private static void saveDropInLibraries(PackedFile packedFile) throws IOException {
+    // remove all drop-in libraries from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(DROP_IN_LIBRARY_ASSET_DIR) && !path.equals(DROP_IN_LIBRARY_ASSET_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    CampaignDropInLibraryListDto dto = null;
+    try {
+      dto = new LibraryManager().dropInLibrariesToDto().get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+    packedFile.putFile(
+        DROP_IN_LIBRARY_LIST_FILE,
+        JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+
+    for (var ldto : dto.getLibrariesList()) {
+      Asset asset = AssetManager.getAsset(new MD5Key(ldto.getMd5Hash()));
+      packedFile.putFile(DROP_IN_LIBRARY_ASSET_DIR + asset.getMD5Key().toString(), asset.getData());
     }
   }
 

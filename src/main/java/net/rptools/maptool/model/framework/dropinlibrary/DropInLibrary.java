@@ -360,4 +360,13 @@ public class DropInLibrary implements Library {
   public CompletableFuture<String> getName() {
     return CompletableFuture.completedFuture(name);
   }
+
+  /**
+   * Returns the asset key for the asset of the drop in library.
+   *
+   * @return the asset key for the asset of the drop in library./get
+   */
+  MD5Key getAssetKey() {
+    return assetKey;
+  }
 }

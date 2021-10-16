@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,11 +82,31 @@ public class DropInLibraryImporter {
   }
 
   /**
+   * Imports the drop in library from the specified asset.
+   *
+   * @param asset the asset to use for import.
+   * @return the {@link DropInLibrary} that was imported.
+   * @throws IOException if an error occurs while reading the asset.
+   */
+  public DropInLibrary importFromAsset(Asset asset) throws IOException {
+    // Copy the data to temporary file, its a bit hacky, but it works, and we can't create a
+    // ZipFile from anything but a file.
+    File tempFile = File.createTempFile("mtlib", "tmp");
+    tempFile.deleteOnExit();
+
+    try (OutputStream outputStream = Files.newOutputStream(tempFile.toPath())) {
+      outputStream.write(asset.getData());
+    }
+
+    return importFromFile(tempFile);
+  }
+
+  /**
    * Imports the drop in library from the specified file.
    *
    * @param file the file to use for import.
    * @return the {@link DropInLibrary} that was imported.
-   * @throws IOException
+   * @throws IOException if an error occurs while reading the asset.
    */
   public DropInLibrary importFromFile(File file) throws IOException {
     var diiBuilder = DropInLibraryDto.newBuilder();

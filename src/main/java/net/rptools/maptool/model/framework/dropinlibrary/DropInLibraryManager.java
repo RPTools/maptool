@@ -16,11 +16,17 @@ package net.rptools.maptool.model.framework.dropinlibrary;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.model.framework.Library;
+import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
+import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto.CampaignDropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
 
 /** Class for managing {@link DropInLibrary} objects. */
 public class DropInLibraryManager {
@@ -114,5 +120,43 @@ public class DropInLibraryManager {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Returns the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   *
+   * @return the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   */
+  public CompletableFuture<CampaignDropInLibraryListDto> toDto() {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          var dto = CampaignDropInLibraryListDto.newBuilder();
+          for (var library : namespaceLibraryMap.values()) {
+            var detailDto = DropInLibraryDto.newBuilder();
+            try {
+              detailDto.setName(library.getName().get());
+              detailDto.setVersion(library.getVersion().get());
+              detailDto.setWebsite(library.getWebsite().get());
+              detailDto.setGithubUrl(library.getGitHubUrl().get());
+              detailDto.addAllAuthors(Arrays.asList(library.getAuthors().get()));
+              detailDto.setLicense(library.getLicense().get());
+              detailDto.setNamespace(library.getNamespace().get());
+              detailDto.setDescription(library.getDescription().get());
+              detailDto.setShortDescription(library.getShortDescription().get());
+            } catch (InterruptedException | ExecutionException e) {
+              throw new CompletionException(e);
+            }
+            var campDto = CampaignDropInLibraryDto.newBuilder();
+            campDto.setDetails(detailDto);
+            campDto.setMd5Hash(library.getAssetKey().toString());
+            dto.addLibraries(campDto);
+          }
+          return dto.build();
+        });
+  }
+
+  /** Remove all the drop in libraries. */
+  public void removeAllLibraries() {
+    namespaceLibraryMap.clear();
   }
 }
