@@ -72,10 +72,11 @@ public class DropInLibraryImporter {
 
   /**
    * Returns if this filename is a valid filename for a drop in library.
+   *
    * @param fileName The name of the file to check.
    * @return {@code true} if this is a valid drop in library file name.
    */
-  public static  boolean isDropInLibrary(String fileName) {
+  public static boolean isDropInLibrary(String fileName) {
     return fileName.endsWith(DROP_IN_LIBRARY_EXTENSION);
   }
 

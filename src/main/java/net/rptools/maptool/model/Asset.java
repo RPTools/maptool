@@ -606,7 +606,11 @@ public final class Asset {
   Object readResolve() {
     byte[] dataVal;
     dataVal = Objects.requireNonNullElseGet(this.data, () -> new byte[0]);
-    return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type);
+    try {
+      return Asset.createAssetDetectType(this.name, dataVal);
+    } catch (IOException e) {
+      return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type);
+    }
   }
 
   private static MediaType getMediaType(String filename, TikaInputStream tis) throws IOException {
