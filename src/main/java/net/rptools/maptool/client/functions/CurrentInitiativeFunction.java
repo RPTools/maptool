@@ -54,9 +54,9 @@ public class CurrentInitiativeFunction extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.initiative.mustBeGM", functionName));
     }
 
-    if (functionName.equals("getCurrentInitiative")) {
+    if (functionName.equalsIgnoreCase("getCurrentInitiative")) {
       return getCurrentInitiative();
-    } else if (functionName.equals("setCurrentInitiative")) {
+    } else if (functionName.equalsIgnoreCase("setCurrentInitiative")) {
       if (args.size() != 1)
         throw new ParserException(I18N.getText("macro.function.initiative.oneParam", functionName));
       setCurrentInitiative(args.get(0));

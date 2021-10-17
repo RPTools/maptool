@@ -66,7 +66,7 @@ public class TokenSightFunctions extends AbstractFunction {
       if (functionName.equalsIgnoreCase("hasSight"))
         return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
 
-      // if (functionName.equals("getSightType"))
+      // if (functionName.equalsIgnoreCase("getSightType"))
       // Don't test to remove code warning for always true if statement
       String sightType = token.getSightType();
       if (sightType == null) sightType = "";
@@ -77,19 +77,19 @@ public class TokenSightFunctions extends AbstractFunction {
     FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
     token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
 
-    if (functionName.equals("setHasSight")) {
+    if (functionName.equalsIgnoreCase("setHasSight")) {
       boolean hasSight = !parameters.get(0).equals(BigDecimal.ZERO);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setHasSight, hasSight);
       return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
-    if (functionName.equals("setSightType")) {
+    if (functionName.equalsIgnoreCase("setSightType")) {
       String sightType = parameters.get(0).toString();
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSightType, sightType);
       return token.getSightType();
     }
 
-    if (functionName.equals("canSeeToken")) {
+    if (functionName.equalsIgnoreCase("canSeeToken")) {
       if (!token.getHasSight()) {
         return "[]";
       }
