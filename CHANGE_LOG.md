@@ -1,3 +1,7 @@
+# MapTool 1.10.2
+- [#3037][i3037] Fix webp images for getTokenImage(), tblImg() etc..
+
+
 # MapTool 1.10.1
 
 ## Updates
