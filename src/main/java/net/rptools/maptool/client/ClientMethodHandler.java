@@ -74,8 +74,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   public ClientMethodHandler() {}
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
-    // TODO: CDW
-    System.out.println("ClientMethodHandler#handleMethod: " + method);
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
 
     // These commands are safe to do in the background, any events that cause model updates need
@@ -108,7 +106,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         }
         return;
 
-      case addOnInLibrary:
+      case addAddOnLibrary:
         var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
         for (var lib : addedLibs) {
           AssetManager.getAssetAsynchronously(

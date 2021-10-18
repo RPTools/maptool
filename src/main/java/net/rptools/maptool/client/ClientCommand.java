@@ -79,7 +79,7 @@ public class ClientCommand {
     clearExposedArea,
     setCampaignName,
     restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
-    addOnInLibrary,
+    addAddOnLibrary,
     removeAllAddOnLibraries,
     removeAddOnLibrary
     // scale a player's view

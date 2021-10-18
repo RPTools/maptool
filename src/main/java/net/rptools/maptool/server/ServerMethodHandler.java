@@ -68,8 +68,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
-    // TODO: CDW
-    System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + method);
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
 
     try {
