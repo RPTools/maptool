@@ -22,8 +22,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
 import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,12 +140,14 @@ public class LibraryManager {
   public boolean registerDropInLibrary(DropInLibrary dropInLib) {
     try {
       dropInLibraryManager.registerLibrary(dropInLib);
+      if (MapTool.isHostingServer()) {
+        MapTool.serverCommand().addDropInLibrary(List.of(new TransferableDropInLibrary(dropInLib)));
+      }
     } catch (ExecutionException | InterruptedException | IllegalStateException e) {
       log.error("Error registering drop in library", e);
       return false;
     }
     return true;
-    // TODO: CDW send to clients
   }
 
   /**
@@ -153,7 +157,9 @@ public class LibraryManager {
    */
   public void deregisterDropInLibrary(String namespace) {
     dropInLibraryManager.deregisterLibrary(namespace);
-    // TODO: CDW send to clients
+    if (MapTool.isHostingServer()) {
+      MapTool.serverCommand().removeDropInLibrary(List.of(namespace));
+    }
   }
 
   /**
@@ -165,12 +171,15 @@ public class LibraryManager {
     try {
       dropInLibraryManager.deregisterLibrary(dropInLibrary.getNamespace().get());
       dropInLibraryManager.registerLibrary(dropInLibrary);
+      if (MapTool.isHostingServer()) {
+        MapTool.serverCommand()
+            .addDropInLibrary(List.of(new TransferableDropInLibrary(dropInLibrary)));
+      }
     } catch (InterruptedException | ExecutionException e) {
       log.error("Error registering drop in library", e);
       return false;
     }
     return true;
-    // TODO: CDW send to clients
   }
 
   /**
@@ -245,5 +254,8 @@ public class LibraryManager {
   /** Removes all the drop in libraries. */
   public void removeAllDropInLibraries() {
     dropInLibraryManager.removeAllLibraries();
+    if (MapTool.isHostingServer()) {
+      MapTool.serverCommand().removeAllDropInLibraries();
+    }
   }
 }

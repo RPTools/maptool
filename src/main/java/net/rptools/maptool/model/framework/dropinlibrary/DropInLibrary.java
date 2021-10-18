@@ -366,7 +366,7 @@ public class DropInLibrary implements Library {
    *
    * @return the asset key for the asset of the drop in library./get
    */
-  MD5Key getAssetKey() {
+  public MD5Key getAssetKey() {
     return assetKey;
   }
 }

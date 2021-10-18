@@ -2006,7 +2006,11 @@ public class AppActions {
         @Override
         protected void executeAction() {
 
-          if (!confirmNewCampaign()) return;
+          if (!confirmNewCampaign()) {
+            return;
+          }
+
+          new LibraryManager().removeAllDropInLibraries();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);
@@ -2481,8 +2485,13 @@ public class AppActions {
       };
 
   public static void disconnectFromServer() {
-    Campaign campaign =
-        MapTool.isHostingServer() ? MapTool.getCampaign() : CampaignFactory.createBasicCampaign();
+    Campaign campaign;
+    if (MapTool.isHostingServer()) {
+      campaign = MapTool.getCampaign();
+    } else {
+      campaign = CampaignFactory.createBasicCampaign();
+      new LibraryManager().removeAllDropInLibraries();
+    }
     ServerDisconnectHandler.disconnectExpected = true;
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();

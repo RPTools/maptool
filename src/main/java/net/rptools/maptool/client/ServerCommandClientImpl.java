@@ -15,8 +15,8 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
@@ -41,6 +41,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -383,12 +384,21 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
   }
 
-  public void addDropInLibrary(Map<String, MD5Key> namespaceAssetMap) {
-    makeServerCall(COMMAND.addDropInLibrary, namespaceAssetMap);
+  @Override
+  public void addDropInLibrary(List<TransferableDropInLibrary> libraries) {
+    var libs = new ArrayList<TransferableDropInLibrary>();
+    libs.addAll(libraries);
+    makeServerCall(COMMAND.addDropInLibrary, libs);
   }
 
+  @Override
   public void removeDropInLibrary(List<String> namespaces) {
     makeServerCall(COMMAND.removeDropInLibrary, namespaces);
+  }
+
+  @Override
+  public void removeAllDropInLibraries() {
+    makeServerCall(COMMAND.removeAllDropInLibraries);
   }
 
   /**

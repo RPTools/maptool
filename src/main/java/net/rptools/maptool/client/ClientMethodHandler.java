@@ -20,7 +20,6 @@ import java.awt.geom.Area;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
@@ -57,6 +56,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -74,9 +74,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   public ClientMethodHandler() {}
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
+    // TODO: CDW
+    System.out.println("ClientMethodHandler#handleMethod: " + method);
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
-
-    // System.out.println("ClientMethodHandler#handleMethod: " + cmd.name());
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
@@ -106,6 +106,39 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           // gets requested again
           ioe.printStackTrace();
         }
+        return;
+
+      case addDropInLibrary:
+        var addedLibs = (List<TransferableDropInLibrary>) parameters[0];
+        for (var lib : addedLibs) {
+          AssetManager.getAssetAsynchronously(
+              lib.getAssetKey(),
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
+                  new LibraryManager().reregisterDropInLibrary(dropInLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText("library.import.error", lib.getNamespace()), e);
+                      });
+                }
+              });
+        }
+        return;
+
+      case removeDropInLibrary:
+        var remLibraryManager = new LibraryManager();
+        var removedNamespaces = (List<String>) parameters[0];
+        for (String namespace : removedNamespaces) {
+          remLibraryManager.deregisterDropInLibrary(namespace);
+        }
+        return;
+
+      case removeAllDropInLibraries:
+        new LibraryManager().removeAllDropInLibraries();
         return;
     }
 
@@ -691,33 +724,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zone = MapTool.getCampaign().getZone(zoneGUID);
               zone.setExposedAreaMetaData(tokenGUID, meta);
               return;
-
-            case addDropInLibrary:
-              var namespaceAssetMap = (Map<String, MD5Key>) parameters[0];
-              for (var entry : namespaceAssetMap.entrySet()) {
-                AssetManager.getAssetAsynchronously(
-                    entry.getValue(),
-                    a -> {
-                      Asset asset = AssetManager.getAsset(a);
-                      try {
-                        var dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
-                        new LibraryManager().reregisterDropInLibrary(dropInLibrary);
-                      } catch (IOException e) {
-                        SwingUtilities.invokeLater(
-                            () -> {
-                              MapTool.showError(
-                                  I18N.getText("library.import.error", entry.getKey()), e);
-                            });
-                      }
-                    });
-              }
-
-            case removeDropInLibrary:
-              var remLibraryManager = new LibraryManager();
-              var removedNamespaces = (List<String>) parameters[0];
-              for (String namespace : removedNamespaces) {
-                remLibraryManager.deregisterDropInLibrary(namespace);
-              }
           }
         });
   }

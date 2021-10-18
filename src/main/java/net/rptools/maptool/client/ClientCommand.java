@@ -80,6 +80,7 @@ public class ClientCommand {
     setCampaignName,
     restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     addDropInLibrary,
+    removeAllDropInLibraries,
     removeDropInLibrary
     // scale a player's view
     // @formatter:on

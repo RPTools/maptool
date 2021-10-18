@@ -46,6 +46,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
 
 /**
@@ -67,8 +68,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
+    // TODO: CDW
+    System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + method);
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-    // System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());
 
     try {
       RPCContext context = new RPCContext(id, method, parameters);
@@ -284,6 +286,15 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case clearExposedArea:
           clearExposedArea(context.getGUID(0), context.getBool(1));
+          break;
+        case addDropInLibrary:
+          addDropInLibrary((List<TransferableDropInLibrary>) context.get(0));
+          break;
+        case removeDropInLibrary:
+          removeDropInLibrary((List<String>) context.get(0));
+          break;
+        case removeAllDropInLibraries:
+          removeAllDropInLibraries();
           break;
       }
     } finally {
@@ -849,6 +860,21 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.clearExposedArea(globalOnly);
+    forwardToClients();
+  }
+
+  @Override
+  public void addDropInLibrary(List<TransferableDropInLibrary> dropInLibraries) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeDropInLibrary(List<String> namespaces) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeAllDropInLibraries() {
     forwardToClients();
   }
 
