@@ -65,9 +65,9 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
-import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -102,7 +102,7 @@ public class PersistenceUtil {
   // how to implement?)
   // 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89
   // compatible
-  // 1.11.0 Added drop in libraries, if loaded and saved with an older version then drop in
+  // 1.11.0 Added add-on libraries, if loaded and saved with an older version then add-on
   //        libraries will be removed.
 
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
@@ -307,7 +307,7 @@ public class PersistenceUtil {
 
       // Store the Drop In Libraries.
       saveTimer.start("Save Drop In Libraries");
-      saveDropInLibraries(pakFile);
+      saveAddOnLibraries(pakFile);
       saveTimer.stop("Save Drop In Libraries");
 
       try {
@@ -457,7 +457,7 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
-        loadDropInLibraries(pakFile);
+        loadAddOnLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
@@ -721,18 +721,18 @@ public class PersistenceUtil {
   }
 
   /**
-   * Loads the drop in libraries from the campaign file.
+   * Loads the add-on libraries from the campaign file.
    *
    * @param packedFile the file to load from.
-   * @throws IOException if there is a problem reading the drop in library information.
+   * @throws IOException if there is a problem reading the add-o library information.
    */
-  private static void loadDropInLibraries(PackedFile packedFile) throws IOException {
+  private static void loadAddOnLibraries(PackedFile packedFile) throws IOException {
     var libraryManager = new LibraryManager();
-    libraryManager.removeAllDropInLibraries();
+    libraryManager.removeAddOnLibraries();
     if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
       return; // No Libraries to import
     }
-    var builder = CampaignDropInLibraryListDto.newBuilder();
+    var builder = AddOnLibraryListDto.newBuilder();
     JsonFormat.parser()
         .merge(
             new InputStreamReader(packedFile.getFileAsInputStream(DROP_IN_LIBRARY_LIST_FILE)),
@@ -747,12 +747,12 @@ public class PersistenceUtil {
       if (!AssetManager.hasAsset(asset)) {
         AssetManager.putAsset(asset);
       }
-      DropInLibrary dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
-      libraryManager.registerDropInLibrary(dropInLibrary);
+      AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+      libraryManager.registerAddOnLibrary(addOnLibrary);
     }
   }
 
-  private static void saveDropInLibraries(PackedFile packedFile) throws IOException {
+  private static void saveAddOnLibraries(PackedFile packedFile) throws IOException {
     // remove all drop-in libraries from the packed file first.
     for (String path : packedFile.getPaths()) {
       if (path.startsWith(DROP_IN_LIBRARY_ASSET_DIR) && !path.equals(DROP_IN_LIBRARY_ASSET_DIR)) {
@@ -760,9 +760,9 @@ public class PersistenceUtil {
       }
     }
 
-    CampaignDropInLibraryListDto dto = null;
+    AddOnLibraryListDto dto = null;
     try {
-      dto = new LibraryManager().dropInLibrariesToDto().get();
+      dto = new LibraryManager().addOnLibrariesToDto().get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }

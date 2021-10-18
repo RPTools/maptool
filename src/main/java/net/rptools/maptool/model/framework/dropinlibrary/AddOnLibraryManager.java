@@ -24,25 +24,25 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.model.framework.Library;
-import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
-import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto.CampaignDropInLibraryDto;
-import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto.AddOnLibraryEntryDto;
 
-/** Class for managing {@link DropInLibrary} objects. */
-public class DropInLibraryManager {
+/** Class for managing {@link AddOnLibrary} objects. */
+public class AddOnLibraryManager {
 
-  /** "Protocol" for drop in libraries. */
+  /** "Protocol" for add-on libraries. */
   private static final String LIBRARY_PROTOCOL = "lib";
 
-  /** The drop in libraries that are registered. */
-  private final Map<String, DropInLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
+  /** The add-on libraries that are registered. */
+  private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
 
   /**
-   * Is there a drop in library that would handle this path. This just checks the protocol and
+   * Is there a add-on library that would handle this path. This just checks the protocol and
    * namespace, it won't check that the full path actually exists.
    *
    * @param path the path for the library (can be full path or just part of path).
-   * @return if the library at the path is handled by a drop in library.
+   * @return if the library at the path is handled by a add-on library.
    */
   public boolean handles(URL path) {
     if (path.getProtocol().toLowerCase().startsWith(LIBRARY_PROTOCOL)) {
@@ -63,14 +63,14 @@ public class DropInLibraryManager {
   }
 
   /**
-   * Registers the specified drop in library.
+   * Registers the specified add-on library.
    *
-   * @param library The drop in library to register.
+   * @param library The add-on library to register.
    * @throws ExecutionException if there is an error fetching the namespace for the library.
    * @throws InterruptedException if there is an error fetching the namespace for the library.
-   * @throws IllegalStateException if there is already a drop in library with the same namespace.
+   * @throws IllegalStateException if there is already a add-on library with the same namespace.
    */
-  public void registerLibrary(DropInLibrary library)
+  public void registerLibrary(AddOnLibrary library)
       throws ExecutionException, InterruptedException {
     String namespace = library.getNamespace().get().toLowerCase();
     var registeredLib = namespaceLibraryMap.computeIfAbsent(namespace, k -> library);
@@ -80,7 +80,7 @@ public class DropInLibraryManager {
   }
 
   /**
-   * Deregister the drop in library with the specified namespace.
+   * Deregister the add-on library with the specified namespace.
    *
    * @param namespace the namespace of the library to deregister.
    */
@@ -89,9 +89,9 @@ public class DropInLibraryManager {
   }
 
   /**
-   * Returns a list of the registered drop in libraries.
+   * Returns a list of the registered add-on libraries.
    *
-   * @return list of the registered drop in libraries.
+   * @return list of the registered add-on libraries.
    */
   public List<Library> getLibraries() {
     return new ArrayList<>(namespaceLibraryMap.values());
@@ -111,7 +111,7 @@ public class DropInLibraryManager {
   /**
    * Returns the {@link Library} that will handle the lib:// uri that is passed in.
    *
-   * @param path the path of the drop in library.
+   * @param path the path of the add-on library.
    * @return the {@link Library} representing the lib:// uri .
    */
   public Library getLibrary(URL path) {
@@ -123,16 +123,16 @@ public class DropInLibraryManager {
   }
 
   /**
-   * Returns the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   * Returns the {@link AddOnLibraryListDto} containing all the add-on libraries.
    *
-   * @return the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   * @return the {@link AddOnLibraryListDto} containing all the add-on libraries.
    */
-  public CompletableFuture<CampaignDropInLibraryListDto> toDto() {
+  public CompletableFuture<AddOnLibraryListDto> toDto() {
     return CompletableFuture.supplyAsync(
         () -> {
-          var dto = CampaignDropInLibraryListDto.newBuilder();
+          var dto = AddOnLibraryListDto.newBuilder();
           for (var library : namespaceLibraryMap.values()) {
-            var detailDto = DropInLibraryDto.newBuilder();
+            var detailDto = AddOnLibraryDto.newBuilder();
             try {
               detailDto.setName(library.getName().get());
               detailDto.setVersion(library.getVersion().get());
@@ -146,7 +146,7 @@ public class DropInLibraryManager {
             } catch (InterruptedException | ExecutionException e) {
               throw new CompletionException(e);
             }
-            var campDto = CampaignDropInLibraryDto.newBuilder();
+            var campDto = AddOnLibraryEntryDto.newBuilder();
             campDto.setDetails(detailDto);
             campDto.setMd5Hash(library.getAssetKey().toString());
             dto.addLibraries(campDto);
@@ -155,7 +155,7 @@ public class DropInLibraryManager {
         });
   }
 
-  /** Remove all the drop in libraries. */
+  /** Remove all the add-on libraries. */
   public void removeAllLibraries() {
     namespaceLibraryMap.clear();
   }

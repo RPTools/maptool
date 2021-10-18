@@ -17,16 +17,16 @@ package net.rptools.maptool.model.framework.dropinlibrary;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 
-public class TransferableDropInLibrary {
+public class TransferableAddOnLibrary {
   private final String namespace;
   private final String version;
   private final MD5Key assetKey;
 
-  public TransferableDropInLibrary(DropInLibrary dropInLibrary)
+  public TransferableAddOnLibrary(AddOnLibrary addOnLibrary)
       throws ExecutionException, InterruptedException {
-    namespace = dropInLibrary.getNamespace().get();
-    version = dropInLibrary.getVersion().get();
-    assetKey = dropInLibrary.getAssetKey();
+    namespace = addOnLibrary.getNamespace().get();
+    version = addOnLibrary.getVersion().get();
+    assetKey = addOnLibrary.getAssetKey();
   }
 
   public String getNamespace() {

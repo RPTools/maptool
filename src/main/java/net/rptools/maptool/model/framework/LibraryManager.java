@@ -23,10 +23,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibrary;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
-import net.rptools.maptool.model.framework.proto.CampaignDropInLibraryListDto;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,7 @@ public class LibraryManager {
       Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
 
   /** Drop in libraries */
-  private static final DropInLibraryManager dropInLibraryManager = new DropInLibraryManager();
+  private static final AddOnLibraryManager ADD_ON_LIBRARY_MANAGER = new AddOnLibraryManager();
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -98,9 +98,9 @@ public class LibraryManager {
    * @return the library.
    */
   public CompletableFuture<Optional<Library>> getLibrary(URL path) {
-    if (dropInLibraryManager.handles(path)) {
+    if (ADD_ON_LIBRARY_MANAGER.handles(path)) {
       return CompletableFuture.completedFuture(
-          Optional.ofNullable(dropInLibraryManager.getLibrary(path)));
+          Optional.ofNullable(ADD_ON_LIBRARY_MANAGER.getLibrary(path)));
     } else if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path);
     } else {
@@ -123,60 +123,60 @@ public class LibraryManager {
   }
 
   /**
-   * Checks if the current namespace has a drop in library registered.
+   * Checks if the current namespace has an add-on library registered.
    *
    * @param namespace the namespace to check.
-   * @return {@code true} if a drop in library has been registered for this namespace.
+   * @return {@code true} if and add-on library has been registered for this namespace.
    */
-  public boolean dropInLibraryExists(String namespace) {
-    return dropInLibraryManager.namespaceRegistered(namespace);
+  public boolean addOnLibraryExists(String namespace) {
+    return ADD_ON_LIBRARY_MANAGER.namespaceRegistered(namespace);
   }
 
   /**
-   * Register a drop in library.
+   * Register and add-on library.
    *
-   * @param dropInLib
+   * @param addOn the Add On to register.
    */
-  public boolean registerDropInLibrary(DropInLibrary dropInLib) {
+  public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
-      dropInLibraryManager.registerLibrary(dropInLib);
+      ADD_ON_LIBRARY_MANAGER.registerLibrary(addOn);
       if (MapTool.isHostingServer()) {
-        MapTool.serverCommand().addDropInLibrary(List.of(new TransferableDropInLibrary(dropInLib)));
+        MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
       }
     } catch (ExecutionException | InterruptedException | IllegalStateException e) {
-      log.error("Error registering drop in library", e);
+      log.error("Error registering add-on in library", e);
       return false;
     }
     return true;
   }
 
   /**
-   * Deregister the drop in library associated with the specified namespace.
+   * Deregister the add-on in library associated with the specified namespace.
    *
    * @param namespace the namespace to deregister.
    */
-  public void deregisterDropInLibrary(String namespace) {
-    dropInLibraryManager.deregisterLibrary(namespace);
+  public void deregisterAddOnLibrary(String namespace) {
+    ADD_ON_LIBRARY_MANAGER.deregisterLibrary(namespace);
     if (MapTool.isHostingServer()) {
-      MapTool.serverCommand().removeDropInLibrary(List.of(namespace));
+      MapTool.serverCommand().removeAddOnLibrary(List.of(namespace));
     }
   }
 
   /**
-   * Register a drop in library, replacing any existing library.
+   * Register a add-on in library, replacing any existing library.
    *
-   * @param dropInLibrary the drop in library to register.
+   * @param addOnLibrary the add-on in library to register.
    */
-  public boolean reregisterDropInLibrary(DropInLibrary dropInLibrary) {
+  public boolean reregisterAddOnLibrary(AddOnLibrary addOnLibrary) {
     try {
-      dropInLibraryManager.deregisterLibrary(dropInLibrary.getNamespace().get());
-      dropInLibraryManager.registerLibrary(dropInLibrary);
+      ADD_ON_LIBRARY_MANAGER.deregisterLibrary(addOnLibrary.getNamespace().get());
+      ADD_ON_LIBRARY_MANAGER.registerLibrary(addOnLibrary);
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand()
-            .addDropInLibrary(List.of(new TransferableDropInLibrary(dropInLibrary)));
+            .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
       }
     } catch (InterruptedException | ExecutionException e) {
-      log.error("Error registering drop in library", e);
+      log.error("Error registering add-on in library", e);
       return false;
     }
     return true;
@@ -195,7 +195,7 @@ public class LibraryManager {
     List<Library> libraries =
         switch (libraryType) {
           case TOKEN -> LibraryToken.getLibraries().get();
-          case DROP_IN -> dropInLibraryManager.getLibraries();
+          case DROP_IN -> ADD_ON_LIBRARY_MANAGER.getLibraries();
         };
 
     var libInfo = new ArrayList<LibraryInfo>();
@@ -231,7 +231,7 @@ public class LibraryManager {
    */
   public Optional<Library> getLibrary(String namespace)
       throws ExecutionException, InterruptedException {
-    var lib = dropInLibraryManager.getLibrary(namespace);
+    var lib = ADD_ON_LIBRARY_MANAGER.getLibrary(namespace);
     if (lib == null) {
       lib = LibraryToken.getLibrary(namespace).get();
     }
@@ -243,19 +243,19 @@ public class LibraryManager {
   }
 
   /**
-   * Returns the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   * Returns the {@link AddOnLibraryListDto} containing all the add-on in libraries.
    *
-   * @return the {@link CampaignDropInLibraryListDto} containing all the drop in libraries.
+   * @return the {@link AddOnLibraryListDto} containing all the add-on in libraries.
    */
-  public CompletableFuture<CampaignDropInLibraryListDto> dropInLibrariesToDto() {
-    return dropInLibraryManager.toDto();
+  public CompletableFuture<AddOnLibraryListDto> addOnLibrariesToDto() {
+    return ADD_ON_LIBRARY_MANAGER.toDto();
   }
 
-  /** Removes all the drop in libraries. */
-  public void removeAllDropInLibraries() {
-    dropInLibraryManager.removeAllLibraries();
+  /** Removes all the add-on in libraries. */
+  public void removeAddOnLibraries() {
+    ADD_ON_LIBRARY_MANAGER.removeAllLibraries();
     if (MapTool.isHostingServer()) {
-      MapTool.serverCommand().removeAllDropInLibraries();
+      MapTool.serverCommand().removeAllAddOnLibraries();
     }
   }
 }

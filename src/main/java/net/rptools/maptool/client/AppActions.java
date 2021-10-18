@@ -118,7 +118,7 @@ import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
@@ -2010,7 +2010,7 @@ public class AppActions {
             return;
           }
 
-          new LibraryManager().removeAllDropInLibraries();
+          new LibraryManager().removeAddOnLibraries();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);
@@ -2490,7 +2490,7 @@ public class AppActions {
       campaign = MapTool.getCampaign();
     } else {
       campaign = CampaignFactory.createBasicCampaign();
-      new LibraryManager().removeAllDropInLibraries();
+      new LibraryManager().removeAddOnLibraries();
     }
     ServerDisconnectHandler.disconnectExpected = true;
     LOAD_MAP.setSeenWarning(false);
@@ -3265,22 +3265,21 @@ public class AppActions {
           JFileChooser chooser = new MapPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          chooser.setFileFilter(DropInLibraryImporter.getDropInLibraryFileFilter());
+          chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File libFile = chooser.getSelectedFile();
             try {
-              var dropInLibrary = new DropInLibraryImporter().importFromFile(libFile);
+              var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
               var libraryManager = new LibraryManager();
-              String namespace = dropInLibrary.getNamespace().get();
-              if (libraryManager.dropInLibraryExists(dropInLibrary.getNamespace().get())) {
-                if (!MapTool.confirm(
-                    I18N.getText("library.error.dropInLibraryExists", namespace))) {
+              String namespace = addOnLibrary.getNamespace().get();
+              if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
+                if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {
                   return;
                 }
-                libraryManager.deregisterDropInLibrary(namespace);
+                libraryManager.deregisterAddOnLibrary(namespace);
               }
-              libraryManager.reregisterDropInLibrary(dropInLibrary);
+              libraryManager.reregisterAddOnLibrary(addOnLibrary);
             } catch (IOException | InterruptedException | ExecutionException ioException) {
               MapTool.showError("library.import.ioError", ioException);
             }

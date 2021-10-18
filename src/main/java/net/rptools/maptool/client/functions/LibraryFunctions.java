@@ -38,7 +38,7 @@ public class LibraryFunctions extends AbstractFunction {
     super(
         0,
         1,
-        "library.listDropInLibraries",
+        "library.listAddOnLibraries",
         "library.getInfo",
         "library.listTokenLibraries",
         "library.getContents");
@@ -54,7 +54,7 @@ public class LibraryFunctions extends AbstractFunction {
       var libraryManager = new LibraryManager();
 
       switch (fName) {
-        case "library.listdropinlibraries" -> {
+        case "library.listaddonlibraries" -> {
           FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
           return librariesAsJson(libraryManager.getLibraries(LibraryType.DROP_IN));
         }

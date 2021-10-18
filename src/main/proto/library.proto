@@ -7,7 +7,7 @@ option java_package = "net.rptools.maptool.model.framework.proto";
 option java_outer_classname = "LibraryProtos";
 
 
-message DropInLibraryDto {
+message AddOnLibraryDto {
   string name = 17;
   string version = 18;
   string website = 19;
@@ -30,11 +30,11 @@ message MTScriptPropertiesDto {
   repeated Property properties = 1;
 }
 
-message CampaignDropInLibraryListDto {
-  message CampaignDropInLibraryDto {
-    DropInLibraryDto details = 17;
+message AddOnLibraryListDto {
+  message AddOnLibraryEntryDto {
+    AddOnLibraryDto details = 17;
     string md5_hash = 18;
   }
-  repeated CampaignDropInLibraryDto libraries = 1;
+  repeated AddOnLibraryEntryDto libraries = 1;
 }
 

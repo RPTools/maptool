@@ -31,18 +31,18 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
 
 /** Class for importing Drop In Libraries. */
-public class DropInLibraryImporter {
+public class AddOnLibraryImporter {
 
-  /** The file extension for drop in library files. */
+  /** The file extension for add-on library files. */
   public static final String DROP_IN_LIBRARY_EXTENSION = ".mtlib";
 
-  /** The name of the drop in library config file. */
+  /** The name of the add-on library config file. */
   private static final String LIBRARY_INFO_FILE = "library.json";
 
   /** the directory where all the content files in the library live. */
@@ -52,43 +52,43 @@ public class DropInLibraryImporter {
   private static final String MACROSCRIPT_PROPERTY_FILES = "mts_properties.json";
 
   /**
-   * Returns the {@link FileFilter} for drop in library files.
+   * Returns the {@link FileFilter} for add on library files.
    *
-   * @return the {@link FileFilter} for drop in library files.
+   * @return the {@link FileFilter} for add on library files.
    */
-  public static FileFilter getDropInLibraryFileFilter() {
+  public static FileFilter getAddOnLibraryFileFilter() {
     return new FileFilter() {
 
       @Override
       public boolean accept(File f) {
-        return f.isDirectory() || isDropInLibrary(f.getName());
+        return f.isDirectory() || isAddOnLibrary(f.getName());
       }
 
       @Override
       public String getDescription() {
-        return I18N.getText("file.ext.dropInLib");
+        return I18N.getText("file.ext.addOnLib");
       }
     };
   }
 
   /**
-   * Returns if this filename is a valid filename for a drop in library.
+   * Returns if this filename is a valid filename for a add-on library.
    *
    * @param fileName The name of the file to check.
-   * @return {@code true} if this is a valid drop in library file name.
+   * @return {@code true} if this is a valid add-on library file name.
    */
-  public static boolean isDropInLibrary(String fileName) {
+  public static boolean isAddOnLibrary(String fileName) {
     return fileName.endsWith(DROP_IN_LIBRARY_EXTENSION);
   }
 
   /**
-   * Imports the drop in library from the specified asset.
+   * Imports the add-on library from the specified asset.
    *
    * @param asset the asset to use for import.
-   * @return the {@link DropInLibrary} that was imported.
+   * @return the {@link AddOnLibrary} that was imported.
    * @throws IOException if an error occurs while reading the asset.
    */
-  public DropInLibrary importFromAsset(Asset asset) throws IOException {
+  public AddOnLibrary importFromAsset(Asset asset) throws IOException {
     // Copy the data to temporary file, its a bit hacky, but it works, and we can't create a
     // ZipFile from anything but a file.
     File tempFile = File.createTempFile("mtlib", "tmp");
@@ -102,21 +102,21 @@ public class DropInLibraryImporter {
   }
 
   /**
-   * Imports the drop in library from the specified file.
+   * Imports the add-on library from the specified file.
    *
    * @param file the file to use for import.
-   * @return the {@link DropInLibrary} that was imported.
+   * @return the {@link AddOnLibrary} that was imported.
    * @throws IOException if an error occurs while reading the asset.
    */
-  public DropInLibrary importFromFile(File file) throws IOException {
-    var diiBuilder = DropInLibraryDto.newBuilder();
+  public AddOnLibrary importFromFile(File file) throws IOException {
+    var diiBuilder = AddOnLibraryDto.newBuilder();
 
     try (var zip = new ZipFile(file)) {
       ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
       if (entry == null) {
-        throw new IOException(I18N.getText("library.error.dropin.noConfigFile", file.getPath()));
+        throw new IOException(I18N.getText("library.error.addOn.noConfigFile", file.getPath()));
       }
-      var builder = DropInLibraryDto.newBuilder();
+      var builder = AddOnLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
       var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
@@ -125,23 +125,23 @@ public class DropInLibraryImporter {
         JsonFormat.parser()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
       }
-      var dropInLib = builder.build();
+      var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
-      var asset = Type.MTLIB.getFactory().apply(dropInLib.getNamespace(), data);
+      var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
       addAsset(asset);
 
-      return DropInLibrary.fromDto(
-          asset.getMD5Key(), dropInLib, mtsPropBuilder.build(), pathAssetMap);
+      return AddOnLibrary.fromDto(
+          asset.getMD5Key(), addOnLib, mtsPropBuilder.build(), pathAssetMap);
     }
   }
 
   /**
-   * Reads the assets from the drop in library and adds them to the asset manager.
+   * Reads the assets from the add-on library and adds them to the asset manager.
    *
-   * @param namespace the namespace of the drop in library.
-   * @param zip the zipfile containing the drop in library.
+   * @param namespace the namespace of the add-on library.
+   * @param zip the zipfile containing the add-on library.
    * @return a map of asset paths and asset details.
-   * @throws IOException if there is an error reading the assets from the drop in library.
+   * @throws IOException if there is an error reading the assets from the add-on library.
    */
   private Map<String, Pair<MD5Key, Type>> processAssets(String namespace, ZipFile zip)
       throws IOException {

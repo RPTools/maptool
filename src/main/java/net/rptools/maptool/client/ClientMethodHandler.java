@@ -55,8 +55,8 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.DropInLibraryImporter;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -108,16 +108,16 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         }
         return;
 
-      case addDropInLibrary:
-        var addedLibs = (List<TransferableDropInLibrary>) parameters[0];
+      case addOnInLibrary:
+        var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
         for (var lib : addedLibs) {
           AssetManager.getAssetAsynchronously(
               lib.getAssetKey(),
               a -> {
                 Asset asset = AssetManager.getAsset(a);
                 try {
-                  var dropInLibrary = new DropInLibraryImporter().importFromAsset(asset);
-                  new LibraryManager().reregisterDropInLibrary(dropInLibrary);
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {
@@ -129,16 +129,16 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         }
         return;
 
-      case removeDropInLibrary:
+      case removeAddOnLibrary:
         var remLibraryManager = new LibraryManager();
         var removedNamespaces = (List<String>) parameters[0];
         for (String namespace : removedNamespaces) {
-          remLibraryManager.deregisterDropInLibrary(namespace);
+          remLibraryManager.deregisterAddOnLibrary(namespace);
         }
         return;
 
-      case removeAllDropInLibraries:
-        new LibraryManager().removeAllDropInLibraries();
+      case removeAllAddOnLibraries:
+        new LibraryManager().removeAddOnLibraries();
         return;
     }
 

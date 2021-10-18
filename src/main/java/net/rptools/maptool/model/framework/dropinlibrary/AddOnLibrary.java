@@ -37,16 +37,15 @@ import net.rptools.maptool.model.framework.LibraryInfo;
 import net.rptools.maptool.model.framework.LibraryNotValidException;
 import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.framework.MTScriptMacroInfo;
-import net.rptools.maptool.model.framework.proto.DropInLibraryDto;
+import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
 
-/** Class that implements drop in libraries. */
-public class DropInLibrary implements Library {
+/** Class that implements add-on libraries. */
+public class AddOnLibrary implements Library {
 
   /** Record used to store information about the MacrScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
-  ;
 
   /** The directory where the files exposed URI are stored. */
   private static final String URL_PUBLIC_DIR = "public/";
@@ -57,34 +56,34 @@ public class DropInLibrary implements Library {
   /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
-  /** The name of the drop in library. */
+  /** The name of the add-on library. */
   private final String name;
 
-  /** The version of the drop in library. */
+  /** The version of the add-on library. */
   private final String version;
 
-  /** The website for the drop in library. */
+  /** The website for the add-on library. */
   private final String website;
 
-  /** The authors for the drop in library. */
+  /** The authors for the add-on library. */
   private final String[] authors;
 
-  /** The github url of the drop in library. */
+  /** The github url of the add-on library. */
   private final String gitHubUrl;
 
-  /** The license for the drop in library. */
+  /** The license for the add-on library. */
   private final String license;
 
-  /** The namespace for the drop in library. */
+  /** The namespace for the add-on library. */
   private final String namespace;
 
-  /** The description for the drop in library. */
+  /** The description for the add-on library. */
   private final String description;
 
-  /** The short description for the drop in library. */
+  /** The short description for the add-on library. */
   private final String shortDescription;
 
-  /** if the drop in library allows URI access or not. */
+  /** if the add-on library allows URI access or not. */
   private final boolean allowsUriAccess;
 
   /** The mapping between paths and asset information. */
@@ -96,7 +95,7 @@ public class DropInLibrary implements Library {
   /** The mapping between MTScript function paths and asset information. */
   private final Map<String, MTScript> mtsFunctionAssetMap;
 
-  /** The ID of the asset for the whole of the drop in Library. */
+  /** The ID of the asset for the whole of the add-on Library. */
   private final MD5Key assetKey;
 
   /**
@@ -106,9 +105,9 @@ public class DropInLibrary implements Library {
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    */
-  private DropInLibrary(
+  private AddOnLibrary(
       MD5Key libraryAssetKey,
-      DropInLibraryDto dto,
+      AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
@@ -164,20 +163,20 @@ public class DropInLibrary implements Library {
   }
 
   /**
-   * Creates a new Drop In Library from the given {@link DropInLibraryDto}, {@link
+   * Creates a new Drop In Library from the given {@link AddOnLibraryDto}, {@link
    * MTScriptPropertiesDto}, and file path assets map.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
-   * @return
+   * @return the new Add on library.
    */
-  public static DropInLibrary fromDto(
+  public static AddOnLibrary fromDto(
       MD5Key libraryAssetKey,
-      DropInLibraryDto dto,
+      AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    return new DropInLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
   }
 
   @Override
@@ -286,7 +285,7 @@ public class DropInLibrary implements Library {
       return CompletableFuture.completedFuture(getURILocation(location) != null);
     } else {
       throw new LibraryNotValidException(
-          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.dropin.no.access", name));
+          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.addOn.no.access", name));
     }
   }
 
@@ -300,7 +299,7 @@ public class DropInLibrary implements Library {
       if (!values.getValue1().isStringType()) {
         throw new LibraryNotValidException(
             Reason.BAD_CONVERSION,
-            I18N.getText("library.error.dropin.notText", values.getValue1().name()));
+            I18N.getText("library.error.addOn.notText", values.getValue1().name()));
       }
       return CompletableFuture.supplyAsync(
           () -> {
@@ -309,7 +308,7 @@ public class DropInLibrary implements Library {
           });
     } else {
       throw new LibraryNotValidException(
-          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.dropin.no.access", name));
+          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.addOn.no.access", name));
     }
   }
 
@@ -327,7 +326,7 @@ public class DropInLibrary implements Library {
           });
     } else {
       throw new LibraryNotValidException(
-          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.dropin.no.access", name));
+          Reason.MISSING_PERMISSIONS, I18N.getText("library.error.addOn.no.access", name));
     }
   }
 
@@ -362,9 +361,9 @@ public class DropInLibrary implements Library {
   }
 
   /**
-   * Returns the asset key for the asset of the drop in library.
+   * Returns the asset key for the asset of the add-on library.
    *
-   * @return the asset key for the asset of the drop in library./get
+   * @return the asset key for the asset of the add-on library./get
    */
   public MD5Key getAssetKey() {
     return assetKey;

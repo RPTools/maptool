@@ -46,7 +46,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableDropInLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
 
 /**
@@ -287,14 +287,14 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case clearExposedArea:
           clearExposedArea(context.getGUID(0), context.getBool(1));
           break;
-        case addDropInLibrary:
-          addDropInLibrary((List<TransferableDropInLibrary>) context.get(0));
+        case addAddOnLibrary:
+          addAddOnLibrary((List<TransferableAddOnLibrary>) context.get(0));
           break;
-        case removeDropInLibrary:
-          removeDropInLibrary((List<String>) context.get(0));
+        case removeAddOnLibrary:
+          removeAddOnLibrary((List<String>) context.get(0));
           break;
-        case removeAllDropInLibraries:
-          removeAllDropInLibraries();
+        case removeAllAddOnLibraries:
+          removeAllAddOnLibraries();
           break;
       }
     } finally {
@@ -864,17 +864,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   @Override
-  public void addDropInLibrary(List<TransferableDropInLibrary> dropInLibraries) {
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
     forwardToClients();
   }
 
   @Override
-  public void removeDropInLibrary(List<String> namespaces) {
+  public void removeAddOnLibrary(List<String> namespaces) {
     forwardToClients();
   }
 
   @Override
-  public void removeAllDropInLibraries() {
+  public void removeAllAddOnLibraries() {
     forwardToClients();
   }
 
