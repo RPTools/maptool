@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GridFactory;
@@ -41,7 +42,7 @@ import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.ZoneFactory;
 import org.apache.commons.io.FilenameUtils;
 
-/** Class for importing Dungeondraft VTT export format. */
+/** Class for importing Dungeondraft Universal VTT export format. */
 public class DungeonDraftImporter {
 
   /** The format / version of the dungeondraft VTT format. */
@@ -66,15 +67,15 @@ public class DungeonDraftImporter {
   /** The width to used for VBL for objects. */
   private static final int OBJECT_VBL_WIDTH = 1;
 
-  /** Stroke to use t create VBL path for walls. */
+  /** Stroke to use to create VBL path for walls. */
   private static final BasicStroke WALL_VBL_STROKE =
       new BasicStroke(WALL_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
-  /** Stroke to use t create VBL path for doors. */
+  /** Stroke to use to create VBL path for doors. */
   private static final BasicStroke DOOR_VBL_STROKE =
       new BasicStroke(DOOR_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
-  /** Stroke to use t create VBL path for doors. */
+  /** Stroke to use to create VBL path for doors. */
   private static final BasicStroke OBJECT_VBL_STROKE =
       new BasicStroke(OBJECT_VBL_WIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
@@ -101,7 +102,7 @@ public class DungeonDraftImporter {
   }
 
   /**
-   * Import the dungeondraft file and craate a new {@link Zone} which is added to the campaign.
+   * Import the dungeondraft file and create a new {@link Zone} which is added to the campaign.
    *
    * @throws IOException if an error occurs during the import.
    */
@@ -113,15 +114,20 @@ public class DungeonDraftImporter {
       ddvtt = JsonParser.parseReader(reader).getAsJsonObject();
     }
 
-    Zone zone = ZoneFactory.createZone();
-
     // Make sure this is a file format we understand
-    dd2vtt_format = ddvtt.get(VTT_FIELD_FORMAT).getAsDouble();
-    if (dd2vtt_format != 0.2 && dd2vtt_format != 0.3) {
-      MapTool.showError("dungeondraft.import.unknownVersion");
+    if (!ddvtt.has(VTT_FIELD_FORMAT)) {
+      MapTool.showError("dungeondraft.import.missingFormatField");
       return;
     }
 
+    // Will work if format value is a double or a string
+    dd2vtt_format = ddvtt.get(VTT_FIELD_FORMAT).getAsDouble();
+    if (dd2vtt_format != 0.2 && dd2vtt_format != 0.3) {
+      MapTool.showError(I18N.getText("dungeondraft.import.unknownFormat", dd2vtt_format));
+      return;
+    }
+
+    // The resolution object has map_origin, map_size in grid cells and pixels_per_grid information.
     if (!ddvtt.has(VTT_FIELD_RESOLUTION)) {
       MapTool.showError("dungeondraft.import.missingResolution");
       return;
@@ -143,8 +149,11 @@ public class DungeonDraftImporter {
     byte[] imageBytes = Base64.decode(imageString);
     String mapName = FilenameUtils.removeExtension(dungeonDraftFile.getName());
     Asset asset = Asset.createImageAsset(mapName, imageBytes);
-    zone.setPlayerAlias(mapName);
     AssetManager.putAsset(asset);
+
+    Zone zone = ZoneFactory.createZone();
+    zone.setPlayerAlias(mapName);
+
     MapPropertiesDialog dialog =
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
     dialog.setZone(zone);
