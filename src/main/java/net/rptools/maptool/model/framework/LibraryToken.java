@@ -21,7 +21,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.MapTool;
@@ -35,11 +37,32 @@ import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 /** Class that represents Lib:Token libraries. */
 class LibraryToken implements Library {
 
+  /** Name of macro to divert calls to unknown macros on a lib macro to. */
+  private static final String UNKNOWN_LIB_MACRO = "!!unknown-macro!!";
+
   /** "Protocol" for library tokens. */
   private static final String LIBRARY_PROTOCOL = "lib";
 
   /** The name of the property that holds the library version. */
   private static final String LIB_VERSION_PROPERTY_NAME = "libversion";
+
+  /** The name of the property for the authors. */
+  private static final String LIB_AUTHORS_PROPERTY_NAME = "libauthors";
+
+  /** The name of the property for the website. */
+  private static final String LIB_WEBSITE_PROPERTY_NAME = "libwebsite";
+
+  /** The name of the property for the git url. */
+  private static final String LIB_GITURL_PROPERTY_NAME = "libgiturl";
+
+  /** The name of the property for the license information. */
+  private static final String LIB_LICENSE_PROPERTY_NAME = "liblicense";
+
+  /** The name of the property for the description of the l;ibrary. */
+  private static final String LIB_DESCRIPTION_PROPERTY_NAME = "libdescription";
+
+  /** The name of the property for the short description of the l;ibrary. */
+  private static final String LIB_SHORT_DESCRIPTION_PROPERTY_NAME = "libshortdescription";
 
   /** The version number to return if the lin:token version is unknown. */
   private static final String LIB_VERSION_UNKNOWN = "unknown";
@@ -60,6 +83,47 @@ class LibraryToken implements Library {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Returns a list of the library tokens.
+   *
+   * @return list of library tokens
+   */
+  static CompletableFuture<List<Library>> getLibraries() {
+    return new ThreadExecutionHelper<List<Library>>()
+        .runOnSwingThread(
+            () -> {
+              List<Library> tokenList = new ArrayList<>();
+              for (var zone : MapTool.getCampaign().getZones()) {
+                tokenList.addAll(
+                    zone
+                        .getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"))
+                        .stream()
+                        .map(t -> new LibraryToken(t.getId()))
+                        .toList());
+              }
+              return tokenList;
+            });
+  }
+
+  /**
+   * Returns the library for a given namespace.
+   *
+   * @param namespace the namespace to return the library for.
+   * @return the library for the namespace.
+   */
+  static CompletableFuture<Library> getLibrary(String namespace) {
+    return new ThreadExecutionHelper<Library>()
+        .runOnSwingThread(
+            () -> {
+              var tokenList = getTokensWithName("lib:" + namespace);
+              if (tokenList.isEmpty()) {
+                return null;
+              } else {
+                return new LibraryToken(tokenList.get(0).getId());
+              }
+            });
   }
 
   /**
@@ -91,8 +155,8 @@ class LibraryToken implements Library {
     return new ThreadExecutionHelper<String>()
         .runOnSwingThread(
             () -> {
-              String version = findLibrary(id).getProperty(LIB_VERSION_PROPERTY_NAME).toString();
-              return version != null && version.length() > 0 ? version : LIB_VERSION_UNKNOWN;
+              String version = getProperty(LIB_VERSION_PROPERTY_NAME, LIB_VERSION_UNKNOWN);
+              return version.isEmpty() ? LIB_VERSION_UNKNOWN : version;
             });
   }
 
@@ -149,6 +213,136 @@ class LibraryToken implements Library {
               }
 
               return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+            });
+  }
+
+  @Override
+  public CompletableFuture<String> getWebsite() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_WEBSITE_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getGitUrl() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_GITURL_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String[]> getAuthors() {
+    return new ThreadExecutionHelper<String[]>()
+        .runOnSwingThread(
+            () ->
+                Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+                    .map(String::trim)
+                    .toArray(String[]::new));
+  }
+
+  @Override
+  public CompletableFuture<String> getLicense() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_LICENSE_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getNamespace() {
+    // For LibTokens the namespace is just the name without the lib:
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> findLibrary(id).getName().substring(4));
+  }
+
+  @Override
+  public CompletableFuture<String> getName() {
+    return new ThreadExecutionHelper<String>().runOnSwingThread(() -> findLibrary(id).getName());
+  }
+
+  @Override
+  public CompletableFuture<String> getDescription() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_DESCRIPTION_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<String> getShortDescription() {
+    return new ThreadExecutionHelper<String>()
+        .runOnSwingThread(() -> getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, ""));
+  }
+
+  @Override
+  public CompletableFuture<Boolean> allowsUriAccess() {
+    return new ThreadExecutionHelper<Boolean>()
+        .runOnSwingThread((() -> findLibrary(id).getAllowURIAccess()));
+  }
+
+  @Override
+  public CompletableFuture<LibraryInfo> getLibraryInfo() {
+    return new ThreadExecutionHelper<LibraryInfo>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              var authors =
+                  Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+                      .map(String::trim)
+                      .toArray(String[]::new);
+              return new LibraryInfo(
+                  library.getName(),
+                  library.getName(),
+                  getProperty(LIB_VERSION_PROPERTY_NAME),
+                  getProperty(LIB_WEBSITE_PROPERTY_NAME),
+                  getProperty(LIB_GITURL_PROPERTY_NAME),
+                  authors,
+                  getProperty(LIB_LICENSE_PROPERTY_NAME),
+                  getProperty(LIB_DESCRIPTION_PROPERTY_NAME),
+                  getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME),
+                  library.getAllowURIAccess());
+            });
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
+    return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              MacroButtonProperties buttonProps = library.getMacro(macroName, false);
+              if (buttonProps == null) {
+                // Try the "unknown macro"
+                buttonProps = library.getMacro(UNKNOWN_LIB_MACRO, false);
+                if (buttonProps == null) {
+                  return Optional.empty();
+                }
+              }
+
+              return Optional.of(
+                  new MTScriptMacroInfo(
+                      macroName,
+                      buttonProps.getCommand(),
+                      !buttonProps.getAllowPlayerEdits(),
+                      !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
+                      buttonProps.getEvaluatedToolTip()));
+            });
+  }
+
+  @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getPrivateMacroInfo(String macroName) {
+    // There are no private macros in a token library.
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
+  public CompletableFuture<List<String>> getAllFiles() {
+    return new ThreadExecutionHelper<List<String>>()
+        .runOnSwingThread(
+            () -> {
+              Token library = findLibrary(id);
+              List<String> files =
+                  new ArrayList<>(
+                      library.getMacroList(false).stream()
+                          .map(p -> "macro/" + p.getLabel())
+                          .toList());
+              files.addAll(library.getPropertyNames().stream().map(p -> "property/" + p).toList());
+
+              return files;
             });
   }
 
@@ -235,6 +429,18 @@ class LibraryToken implements Library {
     var token = findLibrary(id);
 
     return token.getProperty(name).toString();
+  }
+
+  /**
+   * Returns the property value for the specified name, Will return null if the property does not
+   * exist.
+   *
+   * @param name the name of the property.
+   * @param defaultValue the default value to return if the property is null.
+   * @return the property value for the specified name.
+   */
+  private String getProperty(String name, String defaultValue) {
+    return Objects.requireNonNullElse(getProperty(name), defaultValue);
   }
 
   /** Enumeration for location types. */

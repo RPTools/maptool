@@ -37,11 +37,12 @@ public class ZoneFactory {
         new File(AppUtil.getAppHome("resource/Default/Textures").getAbsolutePath() + "/Grass.png");
     if (grassImage.exists()) {
       try {
-        Asset asset = new Asset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
-        defaultImageId = asset.getId();
+        Asset asset =
+            Asset.createImageAsset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
+        defaultImageId = asset.getMD5Key();
 
         // Make sure the image is loaded to avoid a flash screen when it becomes visible
-        ImageManager.getImageAndWait(asset.getId());
+        ImageManager.getImageAndWait(asset.getMD5Key());
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }

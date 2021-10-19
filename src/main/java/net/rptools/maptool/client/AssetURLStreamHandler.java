@@ -57,7 +57,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
         if (Arrays.stream(url.getQuery().split("&"))
             .anyMatch(q -> q.equalsIgnoreCase("raw=true"))) {
           var asset = AssetManager.getAssetAndWait(new MD5Key(url.getHost()));
-          return new ByteArrayInputStream(asset.getImage());
+          return new ByteArrayInputStream(asset.getData());
         }
       }
 

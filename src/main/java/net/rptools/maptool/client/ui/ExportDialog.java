@@ -802,7 +802,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       int tileX = 0, tileY = 0;
 
       if (paint.getClass() == dummy.getClass()) {
-        Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
+        Image bgTexture =
+            ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getMD5Key());
         tileX = bgTexture.getWidth(null);
         tileY = bgTexture.getHeight(null);
         int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
