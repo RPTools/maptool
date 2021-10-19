@@ -1265,8 +1265,10 @@ public class MapTool {
     }
 
     try {
-      if (conn != null || conn.isAlive()) {
-        conn.close();
+      if (conn != null) {
+        if (conn.isAlive()) {
+          conn.close();
+        }
       }
     } catch (IOException ioe) {
       // This isn't critical, we're closing it anyway
