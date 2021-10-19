@@ -393,7 +393,9 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   @Override
   public void removeAddOnLibrary(List<String> namespaces) {
-    makeServerCall(COMMAND.removeAddOnLibrary, namespaces);
+    var libs = new ArrayList<String>();
+    libs.addAll(namespaces);
+    makeServerCall(COMMAND.removeAddOnLibrary, libs);
   }
 
   @Override

@@ -55,7 +55,7 @@ public class LibraryManager {
       Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
 
   /** Drop in libraries */
-  private static final AddOnLibraryManager ADD_ON_LIBRARY_MANAGER = new AddOnLibraryManager();
+  private static final AddOnLibraryManager addOnLibraryManager = new AddOnLibraryManager();
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -98,9 +98,9 @@ public class LibraryManager {
    * @return the library.
    */
   public CompletableFuture<Optional<Library>> getLibrary(URL path) {
-    if (ADD_ON_LIBRARY_MANAGER.handles(path)) {
+    if (addOnLibraryManager.handles(path)) {
       return CompletableFuture.completedFuture(
-          Optional.ofNullable(ADD_ON_LIBRARY_MANAGER.getLibrary(path)));
+          Optional.ofNullable(addOnLibraryManager.getLibrary(path)));
     } else if (LibraryToken.handles(path)) {
       return LibraryToken.getLibrary(path);
     } else {
@@ -129,7 +129,7 @@ public class LibraryManager {
    * @return {@code true} if and add-on library has been registered for this namespace.
    */
   public boolean addOnLibraryExists(String namespace) {
-    return ADD_ON_LIBRARY_MANAGER.namespaceRegistered(namespace);
+    return addOnLibraryManager.namespaceRegistered(namespace);
   }
 
   /**
@@ -139,7 +139,7 @@ public class LibraryManager {
    */
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
-      ADD_ON_LIBRARY_MANAGER.registerLibrary(addOn);
+      addOnLibraryManager.registerLibrary(addOn);
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
       }
@@ -156,7 +156,7 @@ public class LibraryManager {
    * @param namespace the namespace to deregister.
    */
   public void deregisterAddOnLibrary(String namespace) {
-    ADD_ON_LIBRARY_MANAGER.deregisterLibrary(namespace);
+    addOnLibraryManager.deregisterLibrary(namespace);
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAddOnLibrary(List.of(namespace));
     }
@@ -169,8 +169,8 @@ public class LibraryManager {
    */
   public boolean reregisterAddOnLibrary(AddOnLibrary addOnLibrary) {
     try {
-      ADD_ON_LIBRARY_MANAGER.deregisterLibrary(addOnLibrary.getNamespace().get());
-      ADD_ON_LIBRARY_MANAGER.registerLibrary(addOnLibrary);
+      addOnLibraryManager.deregisterLibrary(addOnLibrary.getNamespace().get());
+      addOnLibraryManager.registerLibrary(addOnLibrary);
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand()
             .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
@@ -195,7 +195,7 @@ public class LibraryManager {
     List<Library> libraries =
         switch (libraryType) {
           case TOKEN -> LibraryToken.getLibraries().get();
-          case DROP_IN -> ADD_ON_LIBRARY_MANAGER.getLibraries();
+          case DROP_IN -> addOnLibraryManager.getLibraries();
         };
 
     var libInfo = new ArrayList<LibraryInfo>();
@@ -231,7 +231,7 @@ public class LibraryManager {
    */
   public Optional<Library> getLibrary(String namespace)
       throws ExecutionException, InterruptedException {
-    var lib = ADD_ON_LIBRARY_MANAGER.getLibrary(namespace);
+    var lib = addOnLibraryManager.getLibrary(namespace);
     if (lib == null) {
       lib = LibraryToken.getLibrary(namespace).get();
     }
@@ -248,12 +248,12 @@ public class LibraryManager {
    * @return the {@link AddOnLibraryListDto} containing all the add-on in libraries.
    */
   public CompletableFuture<AddOnLibraryListDto> addOnLibrariesToDto() {
-    return ADD_ON_LIBRARY_MANAGER.toDto();
+    return addOnLibraryManager.toDto();
   }
 
   /** Removes all the add-on in libraries. */
   public void removeAddOnLibraries() {
-    ADD_ON_LIBRARY_MANAGER.removeAllLibraries();
+    addOnLibraryManager.removeAllLibraries();
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
