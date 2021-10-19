@@ -52,8 +52,8 @@ class LibraryToken implements Library {
   /** The name of the property for the website. */
   private static final String LIB_WEBSITE_PROPERTY_NAME = "libwebsite";
 
-  /** The name of the property for the github url. */
-  private static final String LIB_GITHUBURL_PROPERTY_NAME = "libgithuburl";
+  /** The name of the property for the git url. */
+  private static final String LIB_GITURL_PROPERTY_NAME = "libgiturl";
 
   /** The name of the property for the license information. */
   private static final String LIB_LICENSE_PROPERTY_NAME = "liblicense";
@@ -223,9 +223,9 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public CompletableFuture<String> getGitHubUrl() {
+  public CompletableFuture<String> getGitUrl() {
     return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_GITHUBURL_PROPERTY_NAME, ""));
+        .runOnSwingThread(() -> getProperty(LIB_GITURL_PROPERTY_NAME, ""));
   }
 
   @Override
@@ -289,7 +289,7 @@ class LibraryToken implements Library {
                   library.getName(),
                   getProperty(LIB_VERSION_PROPERTY_NAME),
                   getProperty(LIB_WEBSITE_PROPERTY_NAME),
-                  getProperty(LIB_GITHUBURL_PROPERTY_NAME),
+                  getProperty(LIB_GITURL_PROPERTY_NAME),
                   authors,
                   getProperty(LIB_LICENSE_PROPERTY_NAME),
                   getProperty(LIB_DESCRIPTION_PROPERTY_NAME),

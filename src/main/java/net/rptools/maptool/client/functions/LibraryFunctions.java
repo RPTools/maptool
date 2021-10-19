@@ -133,7 +133,7 @@ public class LibraryFunctions extends AbstractFunction {
     libraryJson.addProperty("namespace", library.namespace());
     libraryJson.addProperty("version", library.version());
     libraryJson.addProperty("website", library.website());
-    libraryJson.addProperty("githubUrl", library.githubUrl());
+    libraryJson.addProperty("gitUrl", library.gitUrl());
     libraryJson.add("authors", authors);
     libraryJson.addProperty("license", library.license());
     libraryJson.addProperty("description", library.description());

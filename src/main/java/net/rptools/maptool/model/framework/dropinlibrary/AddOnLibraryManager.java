@@ -137,7 +137,7 @@ public class AddOnLibraryManager {
               detailDto.setName(library.getName().get());
               detailDto.setVersion(library.getVersion().get());
               detailDto.setWebsite(library.getWebsite().get());
-              detailDto.setGithubUrl(library.getGitHubUrl().get());
+              detailDto.setGitUrl(library.getGitUrl().get());
               detailDto.addAllAuthors(Arrays.asList(library.getAuthors().get()));
               detailDto.setLicense(library.getLicense().get());
               detailDto.setNamespace(library.getNamespace().get());

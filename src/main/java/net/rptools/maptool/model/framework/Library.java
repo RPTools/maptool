@@ -70,7 +70,7 @@ public interface Library {
    *
    * @return the GitHub URL for the library.
    */
-  CompletableFuture<String> getGitHubUrl();
+  CompletableFuture<String> getGitUrl();
 
   /**
    * Returns the Authors of the library.

@@ -20,7 +20,7 @@ public record LibraryInfo(
     String namespace,
     String version,
     String website,
-    String githubUrl,
+    String gitUrl,
     String[] authors,
     String license,
     String description,

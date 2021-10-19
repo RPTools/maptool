@@ -68,8 +68,8 @@ public class AddOnLibrary implements Library {
   /** The authors for the add-on library. */
   private final String[] authors;
 
-  /** The github url of the add-on library. */
-  private final String gitHubUrl;
+  /** The git url of the add-on library. */
+  private final String gitUrl;
 
   /** The license for the add-on library. */
   private final String license;
@@ -116,7 +116,7 @@ public class AddOnLibrary implements Library {
         Objects.requireNonNull(dto.getVersion(), I18N.getText("library.error.emptyVersion", name));
     website = Objects.requireNonNullElse(dto.getWebsite(), "");
     authors = dto.getAuthorsList().toArray(String[]::new);
-    gitHubUrl = dto.getGithubUrl();
+    gitUrl = dto.getGitUrl();
     license = dto.getLicense();
     namespace = dto.getNamespace();
     description = dto.getDescription();
@@ -207,7 +207,7 @@ public class AddOnLibrary implements Library {
             namespace,
             version,
             website,
-            gitHubUrl,
+            gitUrl,
             authors,
             license,
             description,
@@ -341,8 +341,8 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
-  public CompletableFuture<String> getGitHubUrl() {
-    return CompletableFuture.completedFuture(gitHubUrl);
+  public CompletableFuture<String> getGitUrl() {
+    return CompletableFuture.completedFuture(gitUrl);
   }
 
   @Override
