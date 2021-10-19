@@ -1,4 +1,9 @@
+# MapTool 1.10.3
+## Bug Fixes
+- [#3074][i3074] Fix NPE crash on exit when connection hasn't been established.
+
 # MapTool 1.10.2
+## Bug Fixes
 - [#3037][i3037] Fix webp images for getTokenImage(), tblImg() etc..
 
 
@@ -9,9 +14,6 @@
 - [#3035][i3035] Properly return numeric values from Java Script UDFs.
 - [#3031][i3031] Update README.md introduction to MapTool
 - Translation updates
-
-
-
 
 
 # MapTool 1.10.0
@@ -86,6 +88,7 @@ Feature release using OpenJDK 16.
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3074]: https://github.com/RPTools/maptool/issues/3074
 [i3025]: https://github.com/RPTools/maptool/issues/3025
 [i3023]: https://github.com/RPTools/maptool/issues/3023
 [i3017]: https://github.com/RPTools/maptool/issues/3017
