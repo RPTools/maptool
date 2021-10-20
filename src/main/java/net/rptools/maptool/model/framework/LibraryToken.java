@@ -58,10 +58,10 @@ class LibraryToken implements Library {
   /** The name of the property for the license information. */
   private static final String LIB_LICENSE_PROPERTY_NAME = "liblicense";
 
-  /** The name of the property for the description of the l;ibrary. */
+  /** The name of the property for the description of the library. */
   private static final String LIB_DESCRIPTION_PROPERTY_NAME = "libdescription";
 
-  /** The name of the property for the short description of the l;ibrary. */
+  /** The name of the property for the short description of the library. */
   private static final String LIB_SHORT_DESCRIPTION_PROPERTY_NAME = "libshortdescription";
 
   /** The version number to return if the lin:token version is unknown. */
@@ -279,21 +279,21 @@ class LibraryToken implements Library {
     return new ThreadExecutionHelper<LibraryInfo>()
         .runOnSwingThread(
             () -> {
+              String notSet = I18N.getText("library.property.value.notSpecified");
               Token library = findLibrary(id);
+              String authorsString = getProperty(LIB_AUTHORS_PROPERTY_NAME, notSet);
               var authors =
-                  Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
-                      .map(String::trim)
-                      .toArray(String[]::new);
+                  Arrays.stream(authorsString.split(",")).map(String::trim).toArray(String[]::new);
               return new LibraryInfo(
                   library.getName(),
-                  library.getName(),
-                  getProperty(LIB_VERSION_PROPERTY_NAME),
-                  getProperty(LIB_WEBSITE_PROPERTY_NAME),
-                  getProperty(LIB_GITURL_PROPERTY_NAME),
+                  library.getName().substring(4),
+                  getProperty(LIB_VERSION_PROPERTY_NAME, notSet),
+                  getProperty(LIB_WEBSITE_PROPERTY_NAME, notSet),
+                  getProperty(LIB_GITURL_PROPERTY_NAME, notSet),
                   authors,
-                  getProperty(LIB_LICENSE_PROPERTY_NAME),
-                  getProperty(LIB_DESCRIPTION_PROPERTY_NAME),
-                  getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME),
+                  getProperty(LIB_LICENSE_PROPERTY_NAME, notSet),
+                  getProperty(LIB_DESCRIPTION_PROPERTY_NAME, notSet),
+                  getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, notSet),
                   library.getAllowURIAccess());
             });
   }
@@ -428,7 +428,12 @@ class LibraryToken implements Library {
   private String getProperty(String name) {
     var token = findLibrary(id);
 
-    return token.getProperty(name).toString();
+    Object prop = token.getProperty(name);
+    if (prop == null) {
+      return null;
+    } else {
+      return prop.toString();
+    }
   }
 
   /**
