@@ -15,6 +15,7 @@
 package net.rptools.maptool.server;
 
 import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -26,8 +27,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibrary;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
@@ -205,7 +212,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
     var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
@@ -213,6 +220,15 @@ public class ClientHandshake implements Handshake, MessageHandler {
       PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
       playerDb.setLocalPlayer(player);
+      if (!MapTool.isPersonalServer()) {
+        var libraryManager = new LibraryManager();
+        libraryManager.removeAddOnLibraries();
+        for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
+          Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
+          AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+          libraryManager.registerAddOnLibrary(addOnLibrary);
+        }
+      }
     }
     currentState = State.Success;
     notifyObservers();

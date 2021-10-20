@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -40,7 +41,7 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.parser.ParserException;
+import net.rptools.maptool.model.framework.LibraryManager;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -172,7 +173,7 @@ public class HTMLWebViewManager {
           + " https://ajax.googleapis.com " // Google CDN
           + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
           + " 'unsafe-inline' 'unsafe-eval' ; "
-          + " img-src * asset: ; "
+          + " img-src * asset: lib: ; "
           + " font-src https://fonts.gstatic.com 'self'"
           + "\">\n";
 
@@ -456,13 +457,23 @@ public class HTMLWebViewManager {
           return;
         }
         try {
-          String cssText = MapTool.getParser().getTokenLibMacro(vals[0], vals[1]);
-          Element styleNode = doc.createElement("style");
-          Text styleContent = doc.createTextNode(cssText);
-          styleNode.appendChild(styleContent);
-          // Insert the style node before the link.
-          node.getParentNode().insertBefore(styleNode, node);
-        } catch (ParserException e) {
+
+          var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+          if (lib.isPresent()) {
+            var library = lib.get();
+            var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();
+
+            if (macroInfo.isPresent()) {
+              String cssText = macroInfo.get().macro();
+
+              Element styleNode = doc.createElement("style");
+              Text styleContent = doc.createTextNode(cssText);
+              styleNode.appendChild(styleContent);
+              // Insert the style node before the link.
+              node.getParentNode().insertBefore(styleNode, node);
+            }
+          }
+        } catch (ExecutionException | InterruptedException e) {
           // Do nothing
         }
       } else if (type.getTextContent().equalsIgnoreCase("macro")) {
