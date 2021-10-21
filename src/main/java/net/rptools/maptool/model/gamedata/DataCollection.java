@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.gamedata;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /** Interface that defines the methods that a DataStore must implement. */
@@ -80,6 +81,12 @@ public interface DataCollection {
 
   CompletableFuture<Void> setString(String key, String value);
 
+
+  CompletableFuture<Void> setBoolean(String key, boolean value);
+
+  CompletableFuture<Void> setList(String key, List<String> value);
+
+  CompletableFuture<Void> setMap(String key, Map<String, String> value);
 
 
 
