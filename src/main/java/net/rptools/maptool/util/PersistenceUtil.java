@@ -663,7 +663,7 @@ public class PersistenceUtil {
           }
         } else {
           try {
-            asset = (Asset) pakFile.getFileObject(pathname); // XML deserialization
+            asset = pakFile.getAsset(pathname);
           } catch (Exception e) {
             // Do nothing. The asset will be 'null' and it'll be handled below.
             log.info("Exception while handling asset '" + pathname + "'", e);
