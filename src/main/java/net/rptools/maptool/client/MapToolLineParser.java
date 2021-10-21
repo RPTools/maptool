@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.common.expression.Result;
@@ -32,7 +33,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.framework.LibraryManager;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
@@ -1204,16 +1205,29 @@ public class MapToolLineParser {
       }
       macroBody = mbp.getCommand();
     } else { // Search for a token called macroLocation (must start with "Lib:")
-      macroBody = getTokenLibMacro(macroName, macroLocation);
-      Token token = getTokenMacroLib(macroLocation);
+      try {
+        var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+        if (lib.isEmpty()) {
+          throw new ParserException(I18N.getText("lineParser.unknownLibToken", macroLocation));
+        }
+        var library = lib.get();
+        var macroInfo = library.getMTScriptMacroInfo(macroName).get();
+        if (macroInfo.isEmpty()) {
+          // if the macro source is the same as the location then check private macros.
+          if (macroLocation.equalsIgnoreCase(getMacroSource())) {
+            macroInfo = library.getPrivateMacroInfo(macroName).get();
+          }
+          if (macroInfo.isEmpty()) {
+            throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+          }
+        }
+        macroBody = macroInfo.get().macro();
 
-      if (macroBody == null || token == null) {
-        throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));
+        macroContext = new MapToolMacroContext(macroName, macroLocation, macroInfo.get().trusted());
+
+      } catch (ExecutionException | InterruptedException e) {
+        throw new ParserException(e);
       }
-      boolean secure = isSecure(macroName, token);
-      macroContext = new MapToolMacroContext(macroName, macroLocation, secure);
-
-      MacroButtonProperties mbp = token.getMacro(macroName, false);
     }
 
     // Error if macro not found
@@ -1291,41 +1305,6 @@ public class MapToolLineParser {
   }
 
   /**
-   * Returns if the specified macro on the token is secure, that is player would not be able to edit
-   * it.
-   *
-   * @param macroName The name of the macro.
-   * @param token the token.
-   * @return true if it is secure.
-   */
-  private boolean isSecure(String macroName, Token token) {
-    MacroButtonProperties mbp = token.getMacro(macroName, false);
-
-    // Macro button may be null as we could be running the unknown macro
-    if (mbp != null && !mbp.getAllowPlayerEdits()) {
-      return true;
-    }
-
-    if (token.isOwnedByAll()) {
-      return false;
-    } else {
-      Set<String> gmPlayers = new HashSet<String>();
-      for (Object o : MapTool.getPlayerList()) {
-        Player p = (Player) o;
-        if (p.isGM()) {
-          gmPlayers.add(p.getName());
-        }
-      }
-      for (String owner : token.getOwners()) {
-        if (!gmPlayers.contains(owner)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
    * Run a block of text as a macro.
    *
    * @param tokenInContext the token in context.
@@ -1363,31 +1342,6 @@ public class MapToolLineParser {
       throws ParserException {
     String macroOutput = parseLine(resolver, tokenInContext, macroBody, context);
     return macroOutput;
-  }
-
-  /**
-   * Searches all maps for a token and returns the body of the requested macro.
-   *
-   * @param macro The name of the macro to fetch.
-   * @param location The name of the token containing the macro. Must begin with "lib:".
-   * @return The body of the requested macro.
-   * @throws ParserException if the token name is illegal, the token appears multiple times, or if
-   *     the caller doesn't have access to the token.
-   */
-  public String getTokenLibMacro(String macro, String location) throws ParserException {
-    Token token = getTokenMacroLib(location);
-    if (token == null) {
-      throw new ParserException(I18N.getText("lineParser.unknownLibToken", location));
-    }
-    MacroButtonProperties buttonProps = token.getMacro(macro, false);
-    if (buttonProps == null) {
-      // Try the "unknown macro"
-      buttonProps = token.getMacro(UNKNOWN_LIB_MACRO, false);
-      if (buttonProps == null) {
-        throw new ParserException(I18N.getText("lineParser.unknownMacro", macro + "@" + location));
-      }
-    }
-    return buttonProps.getCommand();
   }
 
   /**

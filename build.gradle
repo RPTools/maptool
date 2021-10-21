@@ -28,6 +28,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -444,6 +445,11 @@ dependencies {
 
         // protobuf
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+
+    // Java Tuples
+    implementation 'com.flipkart.utils:javatuples:3.0'
 
     // HTTP End Point
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
