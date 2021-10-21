@@ -185,7 +185,11 @@ public class AppPreferences {
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
 
-  private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
+  // When terrain VBL was introduced, older versions of MapTool were unable to read the new topology
+  // modes. So we use a different preference key than in the past so older versions would not
+  // unexpectedly break.
+  private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyMode";
+  private static final String KEY_OLD_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
   private static final String DEFAULT_TOPOLOGY_DRAWING_MODE = "VBL";
 
   private static final String KEY_WEB_END_POINT_PORT = "webEndPointPort";
@@ -1246,8 +1250,15 @@ public class AppPreferences {
   }
 
   public static TopologyMode getTopologyDrawingMode() {
-    return TopologyMode.valueOf(
-        prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
+    try {
+      String oldDrawingMode =
+          prefs.get(KEY_OLD_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE);
+      String drawingMode = prefs.get(KEY_TOPOLOGY_DRAWING_MODE, oldDrawingMode);
+
+      return TopologyMode.valueOf(drawingMode);
+    } catch (Exception exc) {
+      return TopologyMode.VBL;
+    }
   }
 
   public static void setWebEndPointPort(int value) {
