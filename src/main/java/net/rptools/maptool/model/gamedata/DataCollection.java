@@ -73,6 +73,16 @@ public interface DataCollection {
    */
   CompletableFuture<Void> setValue(String key, DataValue value);
 
+
+  CompletableFuture<Void> setLong(String key, long value);
+
+  CompletableFuture<Void> setDouble(String key, double value);
+
+  CompletableFuture<Void> setString(String key, String value);
+
+
+
+
   /**
    * removes the value for the given key.
    *
@@ -80,4 +90,8 @@ public interface DataCollection {
    * @return nothing.
    */
   CompletableFuture<Void> remove(String key);
+
+
+
+
 }
