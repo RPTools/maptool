@@ -456,6 +456,9 @@ dependencies {
 
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.14.3'
+
+    // H2 Database
+    testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 }
 
 
