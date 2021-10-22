@@ -18,22 +18,18 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.maptool.language.I18N;
 
-/** The IntegerDataValue class represents a data value that is an integer. */
-public final class IntegerDataValue implements DataValue {
+/** The UndefinedDataValue class represents a data value that is an undefined value. */
+public final class UndefinedDataValue implements DataValue {
 
   /** The name of the value. */
   private final String name;
-  /** The value. */
-  private final long value;
 
   /**
-   * Creates a new IntegerDataValue.
+   * Creates a new UndefinedDataValue.
    * @param name the name of the value.
-   * @param value the value.
    */
-  IntegerDataValue(String name, long value) {
+  UndefinedDataValue(String name) {
     this.name = name;
-    this.value = value;
   }
 
   @Override
@@ -48,40 +44,36 @@ public final class IntegerDataValue implements DataValue {
 
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
-    return switch (dataType) {
-      case LONG, DOUBLE, BOOLEAN, STRING, LIST -> true;
-      case MAP, UNDEFINED -> false;
-    };
+    return false;
   }
 
   @Override
   public long asLong() {
-    return value;
+    throw InvalidDataOperation.createInvalidConversion(DataType.UNDEFINED, DataType.LONG);
   }
 
   @Override
   public double asDouble() {
-    return value;
+    throw InvalidDataOperation.createInvalidConversion(DataType.UNDEFINED, DataType.DOUBLE);
   }
 
   @Override
   public String asString() {
-    return Long.toString(value);
+    throw InvalidDataOperation.createInvalidConversion(DataType.UNDEFINED, DataType.STRING);
   }
 
   @Override
   public boolean asBoolean() {
-    return value != 0;
+    throw InvalidDataOperation.createInvalidConversion(DataType.UNDEFINED, DataType.BOOLEAN);
   }
 
   @Override
   public List<DataValue> asList() {
-    return List.of(this);
+    throw InvalidDataOperation.createInvalidConversion(DataType.UNDEFINED, DataType.LIST);
   }
 
   @Override
   public Map<String, DataValue> asMap() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LONG.name(), DataType.MAP.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.MAP, DataType.UNDEFINED);
   }
 }

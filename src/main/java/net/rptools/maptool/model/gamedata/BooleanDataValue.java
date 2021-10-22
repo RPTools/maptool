@@ -44,12 +44,8 @@ public final class BooleanDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER -> true;
-      case DOUBLE -> true;
-      case BOOLEAN -> true;
-      case STRING -> true;
-      case LIST -> true;
-      case MAP -> false;
+      case LONG, DOUBLE, BOOLEAN, STRING, LIST -> true;
+      case MAP, UNDEFINED -> false;
     };
   }
 
@@ -80,7 +76,6 @@ public final class BooleanDataValue implements DataValue {
 
   @Override
   public Map<String, DataValue> asMap() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.BOOLEAN.name(), DataType.MAP.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.BOOLEAN, DataType.MAP);
   }
 }

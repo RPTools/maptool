@@ -122,7 +122,7 @@ public interface DataCollection {
    * @return nothing.
    * @throws InvalidDataOperation if the value cannot be converted to the correct type.
    */
-  CompletableFuture<Void> setList(String key, List<String> value);
+  CompletableFuture<Void> setList(String key, List<DataValue> value);
 
   /**
    * Sets the Map value for the given key.
@@ -131,7 +131,7 @@ public interface DataCollection {
    * @return nothing.
    * @throws InvalidDataOperation if the value cannot be converted to the correct type.
    */
-  CompletableFuture<Void> setMap(String key, Map<String, String> value);
+  CompletableFuture<Void> setMap(String key, Map<String, DataValue> value);
 
 
   /**
@@ -185,6 +185,4 @@ public interface DataCollection {
    * @return the keys for the given DataCollection is defined and present.
    */
   CompletableFuture<Boolean> isDefined(String key);
-  }
-
 }

@@ -18,20 +18,20 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.maptool.language.I18N;
 
-/** The IntegerDataValue class represents a data value that is a double. */
-public final class DoubleDataValue implements DataValue {
+/** The LongDataValue class represents a data value that is an integer. */
+public final class LongDataValue implements DataValue {
 
   /** The name of the value. */
   private final String name;
   /** The value. */
-  private final double value;
+  private final long value;
 
   /**
-   * Creates a new DoubleDataValue.
+   * Creates a new IntegerDataValue.
    * @param name the name of the value.
    * @param value the value.
    */
-  DoubleDataValue(String name, double value) {
+  LongDataValue(String name, long value) {
     this.name = name;
     this.value = value;
   }
@@ -43,7 +43,7 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public DataType getDataType() {
-    return DataType.DOUBLE;
+    return DataType.LONG;
   }
 
   @Override
@@ -56,7 +56,7 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public long asLong() {
-    return (long) value;
+    return value;
   }
 
   @Override
@@ -66,7 +66,7 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public String asString() {
-    return Double.toString(value);
+    return Long.toString(value);
   }
 
   @Override
@@ -81,6 +81,6 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public Map<String, DataValue> asMap() {
-    throw InvalidDataOperation.createInvalidConversion(DataType.DOUBLE, DataType.MAP);
+    throw InvalidDataOperation.createInvalidConversion(DataType.LONG, DataType.MAP);
   }
 }

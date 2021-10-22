@@ -26,10 +26,17 @@ public final class StringDataValue implements DataValue {
   /** The value. */
   private final String value;
 
+  /** Can this value be converted to a Number? */
   private final boolean canConvertToNumber;
 
+  /** The numerical value of the string. */
   private final double doubleValue;
 
+  /**
+   * Creates a new StringDataValue.
+   * @param name the name of the value.
+   * @param value the value.
+   */
   StringDataValue(String name, String value) {
     this.name = name;
     this.value = value;
@@ -58,17 +65,16 @@ public final class StringDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER, DOUBLE, BOOLEAN -> canConvertToNumber;
+      case LONG, DOUBLE, BOOLEAN -> canConvertToNumber;
       case STRING, LIST -> true;
-      case MAP -> false;
+      case MAP, UNDEFINED -> false;
     };
   }
 
   @Override
   public long asLong() {
     if (!canConvertToNumber) {
-      throw new IllegalStateException(
-          I18N.getText("data.error.cantConvertTo", value, DataType.INTEGER.name()));
+      throw InvalidDataOperation.createInvalidConversion(value, DataType.LONG);
     }
     return (long) doubleValue;
   }
@@ -76,8 +82,7 @@ public final class StringDataValue implements DataValue {
   @Override
   public double asDouble() {
     if (!canConvertToNumber) {
-      throw new IllegalStateException(
-          I18N.getText("data.error.cantConvertTo", value, DataType.DOUBLE.name()));
+      throw InvalidDataOperation.createInvalidConversion(value, DataType.DOUBLE);
     }
     return doubleValue;
   }
@@ -95,8 +100,7 @@ public final class StringDataValue implements DataValue {
       } else if (value.equalsIgnoreCase("false")) {
         return false;
       } else {
-        throw new IllegalStateException(
-            I18N.getText("data.error.cantConvertTo", value, DataType.BOOLEAN.name()));
+        throw InvalidDataOperation.createInvalidConversion(value, DataType.BOOLEAN);
       }
     }
     return doubleValue != 0;
@@ -109,7 +113,6 @@ public final class StringDataValue implements DataValue {
 
   @Override
   public Map<String, DataValue> asMap() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.STRING.name(), DataType.MAP.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.STRING, DataType.MAP);
   }
 }

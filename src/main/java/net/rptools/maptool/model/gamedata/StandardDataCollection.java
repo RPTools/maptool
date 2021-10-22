@@ -7,15 +7,24 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Class to manage a data collection.
+ */
 public class StandardDataCollection implements DataCollection{
 
 
+  /** the namespace of the data collection */
   private final String namespace;
+
+  /** Is the data collection persistent? */
   private final boolean persistent;
 
+  /** is the data collection local only? */
   private final boolean local;
 
+  /** Map of keys to values */
   private final Map<String, DataValue> valueMap = new ConcurrentHashMap<>();
+  /** Map of keys to data types */
   private final Map<String, DataType> typeMap = new ConcurrentHashMap<>();
 
   /**
@@ -57,43 +66,70 @@ public class StandardDataCollection implements DataCollection{
 
   @Override
   public CompletableFuture<Optional<DataValue>> getValue(String key) {
-    return !valueMap.containsKey(key);l
-    }
+    return CompletableFuture.completedFuture(Optional.ofNullable(valueMap.get(key)));
   }
+
+  /**
+   * Returns the {@code DataValue} for the given key, or throws an exception if the key is not defined.
+   * @param key the key to get the value for.
+   * @return the {@code DataValue} for the given key.
+   * @throws InvalidDataOperation if the key is not defined.
+   */
+  private DataValue getFailOnUndefined(String key) {
+    DataValue dataValue = valueMap.get(key);
+    if (dataValue == null) {
+      throw InvalidDataOperation.createUndefined(key);
+    }
+    return dataValue;
+  }
+
 
   @Override
   public CompletableFuture<Void> setValue(String key, DataValue value) {
+    DataType dataType = typeMap.get(key);
+    if (dataType == null) {
+      typeMap.put(key, value.getDataType());
+      valueMap.put(key, value);
+    } else {
+      valueMap.put(key, value.getDataType().convert(value, dataType));
+    }
     return null;
   }
 
   @Override
   public CompletableFuture<Void> setLong(String key, long value) {
-    return null;
+    var dataValue = new LongDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
   public CompletableFuture<Void> setDouble(String key, double value) {
-    return null;
+    var dataValue = new DoubleDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
   public CompletableFuture<Void> setString(String key, String value) {
-    return null;
+    var dataValue = new StringDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
   public CompletableFuture<Void> setBoolean(String key, boolean value) {
-    return null;
+    var dataValue = new BooleanDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
-  public CompletableFuture<Void> setList(String key, List<String> value) {
-    return null;
+  public CompletableFuture<Void> setList(String key, List<DataValue> value) {
+    var dataValue = new ListDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
-  public CompletableFuture<Void> setMap(String key, Map<String, String> value) {
-    return null;
+  public CompletableFuture<Void> setMap(String key, Map<String, DataValue> value) {
+    var dataValue = new MapDataValue(key, value);
+    return setValue(key, dataValue);
   }
 
   @Override
@@ -118,6 +154,11 @@ public class StandardDataCollection implements DataCollection{
 
   @Override
   public CompletableFuture<Void> changeDataType(String key, DataType dataType) {
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> isDefined(String key) {
     return null;
   }
 }

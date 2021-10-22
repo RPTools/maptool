@@ -57,26 +57,22 @@ public final class ListDataValue implements DataValue {
 
   @Override
   public long asLong() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.LONG.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.LIST, DataType.LONG);
   }
 
   @Override
   public double asDouble() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.DOUBLE.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.LIST, DataType.DOUBLE);
   }
 
   @Override
   public String asString() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.STRING.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.LIST, DataType.STRING);
   }
 
   @Override
   public boolean asBoolean() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.BOOLEAN.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.LIST, DataType.BOOLEAN);
   }
 
   @Override
@@ -86,7 +82,6 @@ public final class ListDataValue implements DataValue {
 
   @Override
   public Map<String, DataValue> asMap() {
-    throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.MAP.name()));
+    throw InvalidDataOperation.createInvalidConversion(DataType.LIST, DataType.MAP);
   }
 }

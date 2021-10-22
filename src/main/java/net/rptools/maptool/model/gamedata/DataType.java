@@ -21,5 +21,18 @@ public enum DataType {
   BOOLEAN,
   LIST,
   MAP,
-  UNDEFINED
+  UNDEFINED;
+
+  public DataValue convert(DataValue dataValue, DataType to) {
+    return switch (to) {
+      case LONG -> new LongDataValue(dataValue.getName(), dataValue.asLong());
+      case DOUBLE -> new DoubleDataValue(dataValue.getName(),dataValue.asDouble());
+      case BOOLEAN -> new BooleanDataValue(dataValue.getName(), dataValue.asBoolean());
+      case STRING -> new StringDataValue(dataValue.getName(), dataValue.asString());
+      case LIST -> new ListDataValue(dataValue.getName(), dataValue.asList());
+      case MAP -> new MapDataValue(dataValue.getName(), dataValue.asMap());
+      case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(dataValue.getDataType(),
+          to);
+    };
+  }
 }
