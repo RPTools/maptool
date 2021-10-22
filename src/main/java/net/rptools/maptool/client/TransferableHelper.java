@@ -42,10 +42,12 @@ import net.rptools.lib.transferable.MapToolTokenTransferData;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.config.TikaConfig;
@@ -255,7 +257,7 @@ public class TransferableHelper extends TransferHandler {
         if (log.isInfoEnabled()) log.info("Selected: " + X_JAVA_IMAGE);
         BufferedImage image =
             (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
-        o = new Asset("unnamed", ImageUtil.imageToBytes(image));
+        o = Asset.createImageAsset("unnamed", ImageUtil.imageToBytes(image));
       }
 
       // DIRECT/BROWSER
@@ -288,9 +290,8 @@ public class TransferableHelper extends TransferHandler {
       return null;
     }
     for (Object working : assets) {
-      if (working instanceof Asset) {
-        Asset asset = (Asset) working;
-        if (!asset.getId().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
+      if (working instanceof Asset asset) {
+        if (!asset.getMD5Key().equals(AssetManager.BAD_ASSET_LOCATION_KEY)) {
           if (!AssetManager.hasAsset(asset)) {
             AssetManager.putAsset(asset);
           }
@@ -349,7 +350,7 @@ public class TransferableHelper extends TransferHandler {
     }
     if (image != null) {
       String name = findName(url);
-      asset = new Asset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
+      asset = Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
     } else {
       throw new IllegalArgumentException("cannot convert drop object to image: " + url.toString());
     }
@@ -411,14 +412,19 @@ public class TransferableHelper extends TransferHandler {
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
         } else {
-          if (!checkValidType(url)) {
+          // Get the MediaType so we can use it when creating the Asset later
+          MediaType mediaType = Asset.getMediaType(url);
+
+          if (Asset.Type.fromMediaType(mediaType) == Type.INVALID) {
             MapTool.showError("dragdrop.unsupportedType");
+            log.info("Unsupported file type: " + mediaType.toString() + " (" + url + ")");
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
           } else {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) // `null' means no image available
-            assets.add(temp);
-            else if (log.isInfoEnabled()) log.info("No image available for " + url);
+              assets.add(temp);
+            else if (log.isInfoEnabled())
+              log.info("No image available for " + url);
           }
         }
       }
@@ -426,19 +432,8 @@ public class TransferableHelper extends TransferHandler {
     return assets;
   }
 
-  private static boolean checkValidType(URL url) throws IOException {
-    Metadata metadata = new Metadata();
-    metadata.set(Metadata.RESOURCE_NAME_KEY, url.getPath());
 
-
-    TikaConfig tika;
-    try {
-      tika = new TikaConfig();
-    } catch (TikaException e) {
-      throw new IOException(e);
-    }
-
-    MediaType mediaType = tika.getDetector().detect(TikaInputStream.get(url), metadata);
+  private static boolean checkValidType(MediaType mediaType) {
     String contentType = mediaType.getType();
 
     String subType = mediaType.getSubtype();
@@ -619,9 +614,8 @@ public class TransferableHelper extends TransferHandler {
       configureTokens = new ArrayList<Boolean>(assets.size());
       // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
-        if (working instanceof Asset) {
-          Asset asset = (Asset) working;
-          Token token = new Token(asset.getName(), asset.getId());
+        if (working instanceof Asset asset) {
+          Token token = new Token(asset.getName(), asset.getMD5Key());
           // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an image asset needs additional configuration.

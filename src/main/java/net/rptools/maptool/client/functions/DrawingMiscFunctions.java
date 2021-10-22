@@ -161,14 +161,14 @@ public class DrawingMiscFunctions extends DrawingFunctions {
    * Searches the list of drawn elements for items with a matching name
    *
    * @param drawableList List of drawables.
-   * @param name String value for the search
+   * @param name String name to match or * to match all
    * @return List<String> of ids
    */
   private List<String> findDrawings(List<DrawnElement> drawableList, String name) {
     List<String> drawingList = new LinkedList<String>();
     for (DrawnElement de : drawableList) {
       if (de.getDrawable() instanceof AbstractDrawing) {
-        if (name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
+        if (name.equals("*") || name.equals(((AbstractDrawing) de.getDrawable()).getName())) {
           drawingList.add(de.getDrawable().getId().toString());
         }
       }

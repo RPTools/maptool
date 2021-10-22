@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
@@ -30,6 +31,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -42,7 +44,6 @@ import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
@@ -53,6 +54,10 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
@@ -70,8 +75,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
-
-    // System.out.println("ClientMethodHandler#handleMethod: " + cmd.name());
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
@@ -101,6 +104,39 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           // gets requested again
           ioe.printStackTrace();
         }
+        return;
+
+      case addAddOnLibrary:
+        var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
+        for (var lib : addedLibs) {
+          AssetManager.getAssetAsynchronously(
+              lib.getAssetKey(),
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText("library.import.error", lib.getNamespace()), e);
+                      });
+                }
+              });
+        }
+        return;
+
+      case removeAddOnLibrary:
+        var remLibraryManager = new LibraryManager();
+        var removedNamespaces = (List<String>) parameters[0];
+        for (String namespace : removedNamespaces) {
+          remLibraryManager.deregisterAddOnLibrary(namespace);
+        }
+        return;
+
+      case removeAllAddOnLibraries:
+        new LibraryManager().removeAddOnLibraries();
         return;
     }
 
@@ -522,6 +558,22 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               if (zone != null) {
                 zone.setName(name);
               }
+              MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+              return;
+
+            case changeZoneDispName:
+              zoneGUID = (GUID) parameters[0];
+              String dispName = (String) parameters[1];
+
+              zone = MapTool.getCampaign().getZone(zoneGUID);
+              if (zone != null) {
+                zone.setPlayerAlias(dispName);
+              }
+              MapTool.getFrame()
+                  .setTitleViaRenderer(
+                      MapTool.getFrame()
+                          .getCurrentZoneRenderer()); // fixes a bug where the display name at the
+              // program title was not updating
               return;
 
             case updateCampaign:

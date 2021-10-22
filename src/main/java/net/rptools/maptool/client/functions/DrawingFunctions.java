@@ -265,7 +265,7 @@ public class DrawingFunctions extends AbstractFunction {
           + Integer.toHexString(((DrawableColorPaint) drawablePaint).getColor()).substring(2);
     }
     if (drawablePaint instanceof DrawableTexturePaint) {
-      return "asset://" + ((DrawableTexturePaint) drawablePaint).getAsset().getId();
+      return "asset://" + ((DrawableTexturePaint) drawablePaint).getAsset().getMD5Key();
     }
     return "";
   }
@@ -425,6 +425,17 @@ public class DrawingFunctions extends AbstractFunction {
       pen.setOpacity(op);
       d.setPen(pen);
       MapTool.serverCommand().updateDrawing(map.getId(), pen, d);
+    }
+  }
+
+  protected void setDrawingName(Zone map, GUID guid, String name) throws ParserException {
+    DrawnElement de = getDrawnElement("setDrawingName", map, guid);
+    AbstractDrawing ad = (AbstractDrawing) de.getDrawable();
+
+    if (name != null) {
+      ad.setName(name);
+      MapTool.getFrame().updateDrawTree();
+      MapTool.getFrame().refresh();
     }
   }
 

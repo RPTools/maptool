@@ -47,10 +47,10 @@ import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -802,7 +802,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       int tileX = 0, tileY = 0;
 
       if (paint.getClass() == dummy.getClass()) {
-        Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
+        Image bgTexture =
+            ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getMD5Key());
         tileX = bgTexture.getWidth(null);
         tileY = bgTexture.getHeight(null);
         int x = ((int) Math.floor((float) extents.x / tileX)) * tileX;

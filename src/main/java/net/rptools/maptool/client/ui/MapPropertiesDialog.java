@@ -152,6 +152,7 @@ public class MapPropertiesDialog extends JDialog {
     initMapPreviewPanel();
 
     initDistanceTextField();
+    initPlayerAliasTextField();
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
     initVisionTypeCombo();
@@ -256,6 +257,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void copyZoneToUI() {
     getNameTextField().setText(zone.getName());
+    getPlayerAliasTextField().setText(zone.getPlayerAlias());
     // Localizes units per cell, using the proper separator. Fixes #507.
     getDistanceTextField().setText(StringUtil.formatDecimal(zone.getUnitsPerCell(), 1));
     getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
@@ -280,6 +282,7 @@ public class MapPropertiesDialog extends JDialog {
     zone.setName(getNameTextField().getText().trim());
     zone.setUnitsPerCell(
         StringUtil.parseDecimal(getDistanceTextField().getText(), zone.getUnitsPerCell()));
+    zone.setPlayerAlias(getPlayerAliasTextField().getText().trim());
     zone.setGrid(createZoneGrid());
     zone.setTokenVisionDistance(
         StringUtil.parseInteger(
@@ -291,7 +294,7 @@ public class MapPropertiesDialog extends JDialog {
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
-    zone.setMapAsset(mapAsset != null ? mapAsset.getId() : null);
+    zone.setMapAsset(mapAsset != null ? mapAsset.getMD5Key() : null);
     // TODO: Handle grid type changes
   }
 
@@ -323,6 +326,14 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initDistanceTextField() {
     getDistanceTextField().setText("5");
+  }
+
+  public JTextField getPlayerAliasTextField() {
+    return formPanel.getTextField("playerMapAlias");
+  }
+
+  private void initPlayerAliasTextField() {
+    getPlayerAliasTextField().setText("NewMap0000");
   }
 
   private void initMapPreviewPanel() {
@@ -703,7 +714,7 @@ public class MapPropertiesDialog extends JDialog {
       }
       // Map
       if (mapAsset != null) {
-        BufferedImage image = ImageManager.getImageAndWait(mapAsset.getId());
+        BufferedImage image = ImageManager.getImageAndWait(mapAsset.getMD5Key());
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
         SwingUtil.constrainTo(imgSize, size.width - 10 * 4, size.height - 10 * 4);
 

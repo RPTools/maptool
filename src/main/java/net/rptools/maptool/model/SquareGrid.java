@@ -293,8 +293,8 @@ public class SquareGrid extends Grid {
     boolean exactCalcX = (zp.x - getOffsetX()) % getSize() == 0;
     boolean exactCalcY = (zp.y - getOffsetY()) % getSize() == 0;
 
-    int newX = (int) (zp.x < 0 && !exactCalcX ? calcX - 1 : calcX);
-    int newY = (int) (zp.y < 0 && !exactCalcY ? calcY - 1 : calcY);
+    int newX = (int) (calcX < 0 && !exactCalcX ? calcX - 1 : calcX);
+    int newY = (int) (calcY < 0 && !exactCalcY ? calcY - 1 : calcY);
 
     // System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX,
     // newY);

@@ -29,7 +29,7 @@ public class MTWebClientManager {
   private Set<MTWebSocket> clientSockets = Collections.synchronizedSet(new HashSet<MTWebSocket>());
 
   /** Create a new MTWebClientManager. */
-  private MTWebClientManager() {};
+  private MTWebClientManager() {}
 
   /**
    * Returns the singleton instance of MTWebClientManager.

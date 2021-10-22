@@ -18,15 +18,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
@@ -34,9 +35,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.player.Player;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,13 +45,16 @@ import org.apache.logging.log4j.Logger;
 
 /** This class provides utility functions for maptool client. */
 public class AppUtil {
-
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
-  private static final Logger log = LogManager.getLogger(AppUtil.class);
+  public static final String LOGDIR_PROPERTY_NAME = "MAPTOOL_LOGDIR";
   private static final String CLIENT_ID_FILE = "client-id";
   private static final String CONFIG_SUB_DIR = "config";
   private static final String APP_HOME_CONFIG_FILENAME = "maptool.cfg";
+  public static final ScheduledExecutorService fileCheckExecutor =
+      new ScheduledThreadPoolExecutor(1);
+
+  private static Logger log;
 
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
@@ -72,14 +76,18 @@ public class AppUtil {
           : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   private static File dataDirPath;
-  private static String packagerCfgFileName;
+  private static String packagerCfgFileName =
+      getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
+          ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
+          : null;
 
-  static {
-    System.setProperty("appHome", getAppHome("logs").getAbsolutePath());
-    packagerCfgFileName =
-        getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null
-            ? getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) + ".cfg"
-            : null;
+  /** Sets the MAPTOOL_LOGDIR system property and initializes the first logger. */
+  public static void initLogging() {
+    if (log == null) {
+      // Note: This property MUST be set before the logger is initialized
+      System.setProperty(LOGDIR_PROPERTY_NAME, getAppHome("logs").getAbsolutePath());
+      log = LogManager.getLogger(AppUtil.class);
+    }
   }
 
   /**
@@ -121,7 +129,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log.isInfoEnabled()) {
+        if (log != null && log.isInfoEnabled()) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;
@@ -347,7 +355,21 @@ public class AppUtil {
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
-      return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+      final var visitor =
+          new SimpleFileVisitor<Path>() {
+            public long totalSize = 0;
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+              if (!attrs.isSymbolicLink()) {
+                totalSize += attrs.size();
+              }
+              return FileVisitResult.CONTINUE;
+            }
+          };
+      Files.walkFileTree(directory.toPath(), visitor);
+
+      return FileUtils.byteCountToDisplaySize(visitor.totalSize) + " ";
     } catch (Exception e) {
       e.printStackTrace();
     }

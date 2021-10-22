@@ -74,7 +74,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private String fontSize;
   private String minWidth;
   private String maxWidth;
-  private Boolean allowPlayerEdits = true;
+  private Boolean allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
   private String toolTip;
   private Boolean displayHotKey = true;
 
@@ -94,6 +94,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String fontSize,
       String minWidth,
       String maxWidth,
+      boolean allowPlayerEdits,
       String toolTip,
       boolean displayHotKey) {
     setIndex(index);
@@ -113,7 +114,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setButton(null);
     setTokenId((GUID) null);
     setSaveLocation("");
-    setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setAllowPlayerEdits(allowPlayerEdits);
     setDisplayHotKey(displayHotKey);
     setCompareGroup(true);
     setCompareSortPrefix(true);
@@ -145,7 +146,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setButton(other.button);
     setTokenId(other.tokenId);
     setSaveLocation(other.saveLocation);
-    setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setAllowPlayerEdits(other.allowPlayerEdits);
     setDisplayHotKey(other.displayHotKey);
     setCompareGroup(other.compareGroup);
     setCompareSortPrefix(other.compareSortPrefix);
@@ -831,6 +832,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     fontSize = "";
     minWidth = "";
     maxWidth = "";
+    allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
     toolTip = "";
   }
 
@@ -1098,7 +1100,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (compareIncludeLabel == null) compareIncludeLabel = true;
     if (compareAutoExecute == null) compareAutoExecute = true;
     if (compareApplyToSelectedTokens == null) compareApplyToSelectedTokens = true;
-    if (allowPlayerEdits == null) allowPlayerEdits = true;
+    if (allowPlayerEdits == null)
+      allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
     return this;
   }
 }

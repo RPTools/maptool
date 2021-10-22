@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.DockingManager;
 import com.jidesoft.docking.event.DockableFrameAdapter;
 import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.*;
@@ -228,7 +229,21 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     addHTMLPanel(isHTML5);
 
     this.getContext().setInitMode(DockContext.STATE_FLOATING);
-    MapTool.getFrame().getDockingManager().addFrame(this);
+
+    /* Issue #2485
+     * If the frame exists, then it's a placeholder frame that should be removed
+     * Note: There should be no risk of MT frames being removed, as that is checked
+     * for in showFrame() (the only place this constructor is called)
+     */
+    DockingManager dm = MapTool.getFrame().getDockingManager();
+    if (dm.getFrame(name) != null) {
+      // The frame needs to be shown before being removed otherwise the layout gets messed up
+      dm.showFrame(name);
+      dm.removeFrame(name, true);
+    }
+    /* /Issue #2485 */
+
+    dm.addFrame(this);
     this.setVisible(true);
     addDockableFrameListener(
         new DockableFrameAdapter() {

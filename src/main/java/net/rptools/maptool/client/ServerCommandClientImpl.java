@@ -15,6 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,6 +41,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -108,6 +110,10 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void renameZone(GUID zoneGUID, String name) {
     makeServerCall(COMMAND.renameZone, zoneGUID, name);
+  }
+
+  public void changeZoneDispName(GUID zoneGUID, String name) {
+    makeServerCall(COMMAND.changeZoneDispName, zoneGUID, name);
   }
 
   public void putAsset(Asset asset) {
@@ -378,6 +384,25 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
   }
 
+  @Override
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+    var libs = new ArrayList<TransferableAddOnLibrary>();
+    libs.addAll(addOnLibraries);
+    makeServerCall(COMMAND.addAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAddOnLibrary(List<String> namespaces) {
+    var libs = new ArrayList<String>();
+    libs.addAll(namespaces);
+    makeServerCall(COMMAND.removeAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAllAddOnLibraries() {
+    makeServerCall(COMMAND.removeAllAddOnLibraries);
+  }
+
   /**
    * Some events become obsolete very quickly, such as dragging a token around. This queue always
    * has exactly one element, the more current version of the event. The event is then dispatched at
@@ -394,6 +419,7 @@ public class ServerCommandClientImpl implements ServerCommand {
     final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
+      setName("ServerCommandClientImpl.TimedEventQueue");
       delay = millidelay;
     }
 

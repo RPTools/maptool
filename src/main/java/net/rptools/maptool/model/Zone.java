@@ -38,6 +38,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -152,7 +153,21 @@ public class Zone extends BaseModel {
   public enum TopologyMode {
     VBL,
     MBL,
-    COMBINED
+    TERRAIN_VBL,
+    COMBINED,
+    COMBINED_TERRAIN_VBL;
+
+    public boolean isRegularVbl() {
+      return this == VBL || this == COMBINED;
+    }
+
+    public boolean isTerrainVbl() {
+      return this == TERRAIN_VBL || this == COMBINED_TERRAIN_VBL;
+    }
+
+    public boolean isMbl() {
+      return this == MBL || this == COMBINED || this == COMBINED_TERRAIN_VBL;
+    }
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -208,6 +223,8 @@ public class Zone extends BaseModel {
   /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
 
+  private Area terrainVbl = new Area();
+
   // New topology to hold Movement Blocking Only
   private Area topologyTerrain = new Area();
 
@@ -227,6 +244,7 @@ public class Zone extends BaseModel {
   private transient boolean exposeFogAtWaypoints = false;
 
   private String name;
+  private String playerAlias;
   private boolean isVisible;
 
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
@@ -313,8 +331,24 @@ public class Zone extends BaseModel {
     return name;
   }
 
+  public String getPlayerAlias() {
+    return playerAlias == null ? name : playerAlias;
+  }
+
   public void setName(String name) {
     this.name = name;
+  }
+
+  public boolean setPlayerAlias(String playerAlias) {
+    List<ZoneRenderer> rendererList =
+        new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
+    for (ZoneRenderer z : rendererList) {
+      if (z.getZone().getPlayerAlias().equals(playerAlias)) {
+        return false;
+      }
+    }
+    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
+    return true;
   }
 
   public MD5Key getMapAssetId() {
@@ -373,6 +407,7 @@ public class Zone extends BaseModel {
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
     imageScaleY = zone.imageScaleY;
+    playerAlias = zone.playerAlias;
 
     // In the following blocks we allocate a new linked list then fill it with null values
     // because the Collections.copy() method requires the destination list to already be
@@ -453,6 +488,7 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    terrainVbl = (Area) zone.terrainVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
     topologyMode = zone.topologyMode;
@@ -746,11 +782,6 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
-  public void clearTopology() {
-    topology = new Area();
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
@@ -758,17 +789,14 @@ public class Zone extends BaseModel {
    * @param topologyMode the mode of the topology
    */
   public void addTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
-        getTopology().add(area);
-        break;
-      case MBL:
-        getTopologyTerrain().add(area);
-        break;
-      case COMBINED:
-        getTopology().add(area);
-        getTopologyTerrain().add(area);
-        break;
+    if (topologyMode.isRegularVbl()) {
+      getTopology().add(area);
+    }
+    if (topologyMode.isTerrainVbl()) {
+      getTerrainVbl().add(area);
+    }
+    if (topologyMode.isMbl()) {
+      getTopologyTerrain().add(area);
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
@@ -785,17 +813,14 @@ public class Zone extends BaseModel {
    * @param topologyMode the mode of the topology
    */
   public void removeTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
-        getTopology().subtract(area);
-        break;
-      case MBL:
-        getTopologyTerrain().subtract(area);
-        break;
-      case COMBINED:
-        getTopology().subtract(area);
-        getTopologyTerrain().subtract(area);
-        break;
+    if (topologyMode.isRegularVbl()) {
+      getTopology().subtract(area);
+    }
+    if (topologyMode.isTerrainVbl()) {
+      getTerrainVbl().subtract(area);
+    }
+    if (topologyMode.isMbl()) {
+      getTopologyTerrain().subtract(area);
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
@@ -813,6 +838,10 @@ public class Zone extends BaseModel {
   /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
+  }
+
+  public Area getTerrainVbl() {
+    return terrainVbl;
   }
 
   /** @return the terrain topology of the zone */
@@ -1990,6 +2019,9 @@ public class Zone extends BaseModel {
       undo = new UndoPerZone(this);
     }
 
+    if (terrainVbl == null) {
+      terrainVbl = new Area();
+    }
     // Movement Blocking Layer
     if (topologyTerrain == null) {
       topologyTerrain = new Area();

@@ -24,7 +24,7 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">C:\code\rptools\mtfx\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
+   <at name="id">C:\Development\rptools\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
    <at name="path">resources\net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
    <at name="colspecs">FILL:15DLU:GROW(1.0),FILL:DEFAULT:NONE</at>
@@ -76,7 +76,7 @@
             </at>
             <at name="actionCommand">OK</at>
             <at name="name">okButton</at>
-            <at name="width">78</at>
+            <at name="width">79</at>
             <at name="text">Button.ok</at>
             <at name="height">22</at>
            </object>
@@ -130,7 +130,7 @@
               </at>
              </object>
             </at>
-            <at name="componentCount">5</at>
+            <at name="componentCount">6</at>
             <at name="name">TabPane</at>
             <at name="tabs">
              <object classname="com.jeta.forms.store.properties.TabbedPaneProperties">
@@ -165,7 +165,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.638320288</at>
+                     <at name="id">embedded.1559944473</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -187,7 +187,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.2004141328</at>
+                          <at name="id">embedded.-294737781</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -236,7 +236,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.snap</at>
                                    <at name="fill">
@@ -299,7 +299,7 @@
                                    </at>
                                    <at name="actionCommand">Tokens start with snap to grid</at>
                                    <at name="name">tokensStartSnapToGridCheckBox</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -352,7 +352,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.visible</at>
                                    <at name="fill">
@@ -415,7 +415,7 @@
                                    </at>
                                    <at name="actionCommand">New tokens are visible to players</at>
                                    <at name="name">newTokensVisibleCheckBox</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -468,7 +468,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.duplicate</at>
                                    <at name="fill">
@@ -530,7 +530,7 @@
                                     </object>
                                    </at>
                                    <at name="name">duplicateTokenCombo</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -591,7 +591,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.numbering</at>
                                    <at name="fill">
@@ -652,7 +652,7 @@
                                     </object>
                                    </at>
                                    <at name="name">showNumberingCombo</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -713,7 +713,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.naming</at>
                                    <at name="fill">
@@ -775,7 +775,7 @@
                                     </object>
                                    </at>
                                    <at name="name">tokenNamingCombo</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -836,7 +836,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.free</at>
                                    <at name="fill">
@@ -899,7 +899,7 @@
                                    </at>
                                    <at name="actionCommand">Start tokens in freesize</at>
                                    <at name="name">tokensStartFreeSize</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -952,7 +952,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.dialog</at>
                                    <at name="fill">
@@ -1015,7 +1015,7 @@
                                    </at>
                                    <at name="actionCommand">Show token creation dialog</at>
                                    <at name="name">showDialogOnNewToken</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1068,7 +1068,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.statsheet</at>
                                    <at name="fill">
@@ -1131,7 +1131,7 @@
                                    </at>
                                    <at name="columns">5</at>
                                    <at name="name">statsheetPortraitSize</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -1184,7 +1184,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.delete</at>
                                    <at name="fill">
@@ -1247,7 +1247,7 @@
                                    </at>
                                    <at name="actionCommand">Warn when tokens are deleted</at>
                                    <at name="name">tokensPopupWarningWhenDeletedCheckBox</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1302,7 +1302,7 @@
                                    </at>
                                    <at name="actionCommand">Show statsheet on mouseover</at>
                                    <at name="name">showStatSheet</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1355,7 +1355,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.statsheet.mouse</at>
                                    <at name="fill">
@@ -1418,7 +1418,7 @@
                                    </at>
                                    <at name="actionCommand">Show statsheet on mouseover</at>
                                    <at name="name">forceFacingArrow</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1471,7 +1471,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.portrait.mouse</at>
                                    <at name="fill">
@@ -1534,7 +1534,7 @@
                                    </at>
                                    <at name="actionCommand">Show statsheet on mouseover</at>
                                    <at name="name">showPortrait</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1587,7 +1587,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.statsheet.shift</at>
                                    <at name="fill">
@@ -1650,7 +1650,7 @@
                                    </at>
                                    <at name="actionCommand">Show statsheet on mouseover</at>
                                    <at name="name">showStatSheetModifier</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="height">15</at>
                                   </object>
                                  </at>
@@ -1703,7 +1703,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.drag.snap</at>
                                    <at name="fill">
@@ -1766,7 +1766,7 @@
                                    </at>
                                    <at name="actionCommand">	</at>
                                    <at name="name">tokensSnapWhileDragging</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="text">	</at>
                                    <at name="height">16</at>
                                   </object>
@@ -1820,7 +1820,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.arrow</at>
                                    <at name="fill">
@@ -1881,7 +1881,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">204</at>
+                                   <at name="width">205</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.tokens.drag.hide</at>
                                    <at name="fill">
@@ -1944,7 +1944,7 @@
                                    </at>
                                    <at name="actionCommand">	</at>
                                    <at name="name">hideMousePointerWhileDragging</at>
-                                   <at name="width">52</at>
+                                   <at name="width">47</at>
                                    <at name="text">	</at>
                                    <at name="height">16</at>
                                   </object>
@@ -2164,7 +2164,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.57231710</at>
+                          <at name="id">embedded.252147455</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2213,7 +2213,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">169</at>
+                                   <at name="width">170</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.snap</at>
                                    <at name="fill">
@@ -2329,7 +2329,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">169</at>
+                                   <at name="width">170</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.free</at>
                                    <at name="fill">
@@ -2533,7 +2533,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.688989477</at>
+                          <at name="id">embedded.-1690277304</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2582,7 +2582,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">241</at>
+                                   <at name="width">237</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.snap</at>
                                    <at name="fill">
@@ -2698,7 +2698,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">241</at>
+                                   <at name="width">237</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.objects.free</at>
                                    <at name="fill">
@@ -2902,7 +2902,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.932681697</at>
+                          <at name="id">embedded.473858688</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:23DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -2951,7 +2951,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.avatar</at>
                                    <at name="fill">
@@ -3122,7 +3122,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.smilies</at>
                                    <at name="fill">
@@ -3183,7 +3183,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.rolls</at>
                                    <at name="fill">
@@ -3300,7 +3300,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.trusted.background</at>
                                    <at name="fill">
@@ -3361,7 +3361,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.trusted.foreground</at>
                                    <at name="fill">
@@ -3488,7 +3488,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.type.duration</at>
                                    <at name="fill">
@@ -3549,7 +3549,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.type.color</at>
                                    <at name="fill">
@@ -3643,7 +3643,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.type.background</at>
                                    <at name="fill">
@@ -3794,7 +3794,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">206</at>
+                                   <at name="width">208</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.chat.macrolinks</at>
                                    <at name="fill">
@@ -4041,7 +4041,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.897475575</at>
+                          <at name="id">embedded.-1997988000</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -4090,7 +4090,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">222</at>
+                                   <at name="width">224</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.facing.edge</at>
                                    <at name="fill">
@@ -4206,7 +4206,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">222</at>
+                                   <at name="width">224</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.facing.vertices</at>
                                    <at name="fill">
@@ -4410,8 +4410,8 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1752732005</at>
-                          <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
+                          <at name="id">embedded.1499660848</at>
+                          <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
                            <object classname="java.util.LinkedList">
@@ -4459,7 +4459,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.fow</at>
                                    <at name="fill">
@@ -4575,7 +4575,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.visible</at>
                                    <at name="fill">
@@ -4691,7 +4691,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.grid</at>
                                    <at name="fill">
@@ -4811,7 +4811,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.grid.new</at>
                                    <at name="fill">
@@ -4926,7 +4926,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.units</at>
                                    <at name="fill">
@@ -5041,7 +5041,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.vision</at>
                                    <at name="fill">
@@ -5156,7 +5156,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">ServerDialog.label.metric</at>
                                    <at name="fill">
@@ -5276,7 +5276,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">159</at>
+                                   <at name="width">160</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.maps.light</at>
                                    <at name="fill">
@@ -5338,6 +5338,126 @@
                                     </object>
                                    </at>
                                    <at name="name">defaultVisionType</at>
+                                   <at name="width">25</at>
+                                   <at name="items">
+                                    <object classname="com.jeta.forms.store.properties.ItemsProperty">
+                                     <at name="name">items</at>
+                                    </object>
+                                   </at>
+                                   <at name="height">20</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">2</at>
+                                  <at name="row">18</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="width">160</at>
+                                   <at name="name"/>
+                                   <at name="text">Preferences.label.maps.sortType</at>
+                                   <at name="fill">
+                                    <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                     <at name="name">fill</at>
+                                    </object>
+                                   </at>
+                                   <at name="toolTipText">Preferences.label.maps.sortType.tooltip</at>
+                                   <at name="height">14</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">4</at>
+                                  <at name="row">18</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">javax.swing.JComboBox</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">javax.swing.JComboBox</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="name">mapSortType</at>
                                    <at name="width">25</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
@@ -5430,7 +5550,7 @@
                           <at name="cellpainters">
                            <object classname="com.jeta.forms.store.support.Matrix">
                             <at name="rows">
-                             <object classname="[Ljava.lang.Object;" size="17">
+                             <object classname="[Ljava.lang.Object;" size="19">
                               <at name="item" index="0">
                                <object classname="[Ljava.lang.Object;" size="5"/>
                               </at>
@@ -5482,6 +5602,12 @@
                               <at name="item" index="16">
                                <object classname="[Ljava.lang.Object;" size="5"/>
                               </at>
+                              <at name="item" index="17">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
+                              <at name="item" index="18">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
                              </object>
                             </at>
                            </object>
@@ -5520,7 +5646,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.779063573</at>
+                          <at name="id">embedded.-449507472</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:23DLU:GROW(1.0),FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5583,7 +5709,7 @@
                                     </object>
                                    </at>
                                    <at name="name">macroEditorThemeCombo</at>
-                                   <at name="width">154</at>
+                                   <at name="width">157</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -5661,7 +5787,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">83</at>
+                                   <at name="width">82</at>
                                    <at name="name"/>
                                    <at name="text">Label.styletheme</at>
                                    <at name="fill">
@@ -5947,7 +6073,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.2033050116</at>
+                     <at name="id">embedded.-1145483414</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -5996,7 +6122,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">188</at>
+                              <at name="width">187</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.access.size</at>
                               <at name="fill">
@@ -6059,7 +6185,7 @@
                               </at>
                               <at name="columns">4</at>
                               <at name="name">fontSize</at>
-                              <at name="width">43</at>
+                              <at name="width">39</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -6112,7 +6238,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">188</at>
+                              <at name="width">187</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.access.delay</at>
                               <at name="fill">
@@ -6173,7 +6299,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">188</at>
+                              <at name="width">187</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.access.delay.dismiss</at>
                               <at name="fill">
@@ -6236,7 +6362,7 @@
                               </at>
                               <at name="columns">4</at>
                               <at name="name">toolTipInitialDelay</at>
-                              <at name="width">43</at>
+                              <at name="width">39</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -6291,7 +6417,7 @@
                               </at>
                               <at name="columns">4</at>
                               <at name="name">toolTipDismissDelay</at>
-                              <at name="width">43</at>
+                              <at name="width">39</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -6430,7 +6556,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1084316938</at>
+                     <at name="id">embedded.-2018918297</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,TOP:DEFAULT:NONE,CENTER:4DLU:NONE,TOP:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -6452,7 +6578,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1134926530</at>
+                          <at name="id">embedded.-1066598017</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:MIN(20DLU;DEFAULT):NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:5DLU:NONE,FILL:MIN(20DLU;DEFAULT):NONE</at>
                           <at name="components">
@@ -6501,7 +6627,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">328</at>
+                                   <at name="width">510</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave</at>
                                    <at name="fill">
@@ -6596,7 +6722,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">328</at>
+                                   <at name="width">510</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.save.reminder</at>
                                    <at name="fill">
@@ -6713,7 +6839,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">328</at>
+                                   <at name="width">510</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat</at>
                                    <at name="fill">
@@ -6808,7 +6934,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">328</at>
+                                   <at name="width">510</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat.filename</at>
                                    <at name="fill">
@@ -6870,7 +6996,7 @@
                                     </object>
                                    </at>
                                    <at name="name">chatFilenameFormat</at>
-                                   <at name="width">242</at>
+                                   <at name="width">240</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -6923,7 +7049,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">328</at>
+                                   <at name="width">510</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.directory.sync</at>
                                    <at name="fill">
@@ -6989,7 +7115,7 @@
                                    <at name="background" object="color">236,233,216</at>
                                    <at name="editable">false</at>
                                    <at name="name">fileSyncPath</at>
-                                   <at name="width">242</at>
+                                   <at name="width">240</at>
                                    <at name="toolTipText">Preferences.label.directory.sync.set</at>
                                    <at name="height">20</at>
                                   </object>
@@ -7099,7 +7225,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">63</at>
+                                   <at name="width">61</at>
                                    <at name="name"/>
                                    <at name="text">Label.minute</at>
                                    <at name="fill">
@@ -7159,7 +7285,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">63</at>
+                                   <at name="width">61</at>
                                    <at name="name"/>
                                    <at name="text">Label.minute</at>
                                    <at name="fill">
@@ -7325,7 +7451,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.505843722</at>
+                          <at name="id">embedded.-723816005</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                           <at name="components">
@@ -7347,7 +7473,7 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.422534629</at>
+                               <at name="id">embedded.217859244</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -7451,7 +7577,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">389</at>
+                                        <at name="width">570</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.fillselection</at>
                                         <at name="fill">
@@ -7512,8 +7638,8 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="name"></at>
-                                        <at name="width">389</at>
+                                        <at name="width">570</at>
+                                        <at name="name"/>
                                         <at name="text">Preferences.label.performance.cap</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -7712,7 +7838,7 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1703074708</at>
+                               <at name="id">embedded.-718467363</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -7761,7 +7887,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">172</at>
+                                        <at name="width">169</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.initiative.hidenpc</at>
                                         <at name="fill">
@@ -7877,7 +8003,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">172</at>
+                                        <at name="width">169</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.initiative.owner</at>
                                         <at name="fill">
@@ -7993,7 +8119,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">172</at>
+                                        <at name="width">169</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.initiative.lock</at>
                                         <at name="fill">
@@ -8109,7 +8235,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">172</at>
+                                        <at name="width">169</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.initiative.msg</at>
                                         <at name="fill">
@@ -8325,72 +8451,11 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.2037786316</at>
-                               <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:2DLU:NONE</at>
+                               <at name="id">embedded.-557164011</at>
+                               <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:80DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
                                 <object classname="java.util.LinkedList">
-                                 <item >
-                                  <at name="value">
-                                   <object classname="com.jeta.forms.store.memento.BeanMemento">
-                                    <super classname="com.jeta.forms.store.memento.ComponentMemento">
-                                     <at name="cellconstraints">
-                                      <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                                       <at name="column">2</at>
-                                       <at name="row">1</at>
-                                       <at name="colspan">1</at>
-                                       <at name="rowspan">1</at>
-                                       <at name="halign">default</at>
-                                       <at name="valign">default</at>
-                                       <at name="insets" object="insets">0,0,0,0</at>
-                                      </object>
-                                     </at>
-                                     <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-                                    </super>
-                                    <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-                                    <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
-                                    <at name="beanproperties">
-                                     <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-                                      <at name="classname">com.jeta.forms.components.label.JETALabel</at>
-                                      <at name="properties">
-                                       <object classname="com.jeta.forms.store.support.PropertyMap">
-                                        <at name="border">
-                                         <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
-                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                           <at name="name">border</at>
-                                          </super>
-                                          <at name="borders">
-                                           <object classname="java.util.LinkedList">
-                                            <item >
-                                             <at name="value">
-                                              <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
-                                               <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                                <at name="name">border</at>
-                                               </super>
-                                              </object>
-                                             </at>
-                                            </item>
-                                           </object>
-                                          </at>
-                                         </object>
-                                        </at>
-                                        <at name="name"></at>
-                                        <at name="width">329</at>
-                                        <at name="text">Preferences.label.client.fitview</at>
-                                        <at name="fill">
-                                         <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
-                                          <at name="name">fill</at>
-                                         </object>
-                                        </at>
-                                        <at name="toolTipText">Preferences.label.client.fitview.tooltip</at>
-                                        <at name="height">14</at>
-                                       </object>
-                                      </at>
-                                     </object>
-                                    </at>
-                                   </object>
-                                  </at>
-                                 </item>
                                  <item >
                                   <at name="value">
                                    <object classname="com.jeta.forms.store.memento.BeanMemento">
@@ -8452,6 +8517,123 @@
                                     <super classname="com.jeta.forms.store.memento.ComponentMemento">
                                      <at name="cellconstraints">
                                       <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                       <at name="column">4</at>
+                                       <at name="row">2</at>
+                                       <at name="colspan">1</at>
+                                       <at name="rowspan">1</at>
+                                       <at name="halign">default</at>
+                                       <at name="valign">default</at>
+                                       <at name="insets" object="insets">0,0,0,0</at>
+                                      </object>
+                                     </at>
+                                     <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                                    </super>
+                                    <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                                    <at name="beanclass">javax.swing.JTextField</at>
+                                    <at name="beanproperties">
+                                     <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                      <at name="classname">javax.swing.JTextField</at>
+                                      <at name="properties">
+                                       <object classname="com.jeta.forms.store.support.PropertyMap">
+                                        <at name="border">
+                                         <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                          <at name="borders">
+                                           <object classname="java.util.LinkedList">
+                                            <item >
+                                             <at name="value">
+                                              <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                               <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                                <at name="name">border</at>
+                                               </super>
+                                              </object>
+                                             </at>
+                                            </item>
+                                           </object>
+                                          </at>
+                                         </object>
+                                        </at>
+                                        <at name="horizontalAlignment">2</at>
+                                        <at name="name">defaultUsername</at>
+                                        <at name="width">116</at>
+                                        <at name="toolTipText">Preferences.label.client.default.username.tooltip</at>
+                                        <at name="height">20</at>
+                                       </object>
+                                      </at>
+                                     </object>
+                                    </at>
+                                   </object>
+                                  </at>
+                                 </item>
+                                 <item >
+                                  <at name="value">
+                                   <object classname="com.jeta.forms.store.memento.BeanMemento">
+                                    <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                     <at name="cellconstraints">
+                                      <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                       <at name="column">2</at>
+                                       <at name="row">1</at>
+                                       <at name="colspan">1</at>
+                                       <at name="rowspan">1</at>
+                                       <at name="halign">default</at>
+                                       <at name="valign">default</at>
+                                       <at name="insets" object="insets">0,0,0,0</at>
+                                      </object>
+                                     </at>
+                                     <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                                    </super>
+                                    <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                                    <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                                    <at name="beanproperties">
+                                     <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                      <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                                      <at name="properties">
+                                       <object classname="com.jeta.forms.store.support.PropertyMap">
+                                        <at name="border">
+                                         <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                          <at name="borders">
+                                           <object classname="java.util.LinkedList">
+                                            <item >
+                                             <at name="value">
+                                              <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                               <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                                <at name="name">border</at>
+                                               </super>
+                                              </object>
+                                             </at>
+                                            </item>
+                                           </object>
+                                          </at>
+                                         </object>
+                                        </at>
+                                        <at name="width">510</at>
+                                        <at name="name"/>
+                                        <at name="text">Preferences.label.client.fitview</at>
+                                        <at name="fill">
+                                         <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                          <at name="name">fill</at>
+                                         </object>
+                                        </at>
+                                        <at name="toolTipText">Preferences.label.client.fitview.tooltip</at>
+                                        <at name="height">14</at>
+                                       </object>
+                                      </at>
+                                     </object>
+                                    </at>
+                                   </object>
+                                  </at>
+                                 </item>
+                                 <item >
+                                  <at name="value">
+                                   <object classname="com.jeta.forms.store.memento.BeanMemento">
+                                    <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                     <at name="cellconstraints">
+                                      <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                                        <at name="column">2</at>
                                        <at name="row">2</at>
                                        <at name="colspan">1</at>
@@ -8490,8 +8672,8 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="name"></at>
-                                        <at name="width">329</at>
+                                        <at name="width">510</at>
+                                        <at name="name"/>
                                         <at name="text">Preferences.label.client.default.username</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -8500,62 +8682,6 @@
                                         </at>
                                         <at name="toolTipText">Preferences.label.client.default.username.tooltip</at>
                                         <at name="height">14</at>
-                                       </object>
-                                      </at>
-                                     </object>
-                                    </at>
-                                   </object>
-                                  </at>
-                                 </item>
-                                 <item >
-                                  <at name="value">
-                                   <object classname="com.jeta.forms.store.memento.BeanMemento">
-                                    <super classname="com.jeta.forms.store.memento.ComponentMemento">
-                                     <at name="cellconstraints">
-                                      <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                                       <at name="column">4</at>
-                                       <at name="row">2</at>
-                                       <at name="colspan">3</at>
-                                       <at name="rowspan">1</at>
-                                       <at name="halign">default</at>
-                                       <at name="valign">default</at>
-                                       <at name="insets" object="insets">0,0,0,0</at>
-                                      </object>
-                                     </at>
-                                     <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-                                    </super>
-                                    <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-                                    <at name="beanclass">javax.swing.JTextField</at>
-                                    <at name="beanproperties">
-                                     <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-                                      <at name="classname">javax.swing.JTextField</at>
-                                      <at name="properties">
-                                       <object classname="com.jeta.forms.store.support.PropertyMap">
-                                        <at name="border">
-                                         <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
-                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                           <at name="name">border</at>
-                                          </super>
-                                          <at name="borders">
-                                           <object classname="java.util.LinkedList">
-                                            <item >
-                                             <at name="value">
-                                              <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
-                                               <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                                <at name="name">border</at>
-                                               </super>
-                                              </object>
-                                             </at>
-                                            </item>
-                                           </object>
-                                          </at>
-                                         </object>
-                                        </at>
-                                        <at name="horizontalAlignment">2</at>
-                                        <at name="name">defaultUsername</at>
-                                        <at name="width">148</at>
-                                        <at name="toolTipText">Preferences.label.client.default.username.tooltip</at>
-                                        <at name="height">20</at>
                                        </object>
                                       </at>
                                      </object>
@@ -8641,7 +8767,7 @@
                                <at name="cellpainters">
                                 <object classname="com.jeta.forms.store.support.Matrix">
                                  <at name="rows">
-                                  <object classname="[Ljava.lang.Object;" size="3">
+                                  <object classname="[Ljava.lang.Object;" size="4">
                                    <at name="item" index="0">
                                     <object classname="[Ljava.lang.Object;" size="7"/>
                                    </at>
@@ -8649,6 +8775,9 @@
                                     <object classname="[Ljava.lang.Object;" size="7"/>
                                    </at>
                                    <at name="item" index="2">
+                                    <object classname="[Ljava.lang.Object;" size="7"/>
+                                   </at>
+                                   <at name="item" index="3">
                                     <object classname="[Ljava.lang.Object;" size="7"/>
                                    </at>
                                   </object>
@@ -8689,7 +8818,7 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1591535399</at>
+                               <at name="id">embedded.-255882316</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8738,7 +8867,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">389</at>
+                                        <at name="width">570</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.edit</at>
                                         <at name="fill">
@@ -8936,7 +9065,7 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1871562951</at>
+                               <at name="id">embedded.444960984</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8985,7 +9114,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">389</at>
+                                        <at name="width">570</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.permissions</at>
                                         <at name="fill">
@@ -9095,7 +9224,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="name"></at>
+                                   <at name="name"/>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -9183,7 +9312,7 @@
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.2058190220</at>
+                               <at name="id">embedded.-1435570245</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -9286,7 +9415,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">389</at>
+                                        <at name="width">570</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.upnp.timeout</at>
                                         <at name="fill">
@@ -9544,7 +9673,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.734071783</at>
+                          <at name="id">embedded.1579903965</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -9593,7 +9722,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.width</at>
                                    <at name="fill">
@@ -9722,7 +9851,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.opacity</at>
                                    <at name="fill">
@@ -9783,7 +9912,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.autoexpose</at>
                                    <at name="fill">
@@ -9899,7 +10028,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.aura.opacity</at>
                                    <at name="fill">
@@ -9960,7 +10089,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.light.opacity</at>
                                    <at name="fill">
@@ -10089,7 +10218,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.opacity</at>
                                    <at name="fill">
@@ -10184,7 +10313,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">497</at>
+                                   <at name="width">677</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.color</at>
                                    <at name="fill">
@@ -10418,7 +10547,7 @@
                            </at>
                           </object>
                          </at>
-                         <at name="name"></at>
+                         <at name="name"/>
                          <at name="fill">
                           <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                            <at name="name">fill</at>
@@ -10528,7 +10657,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1868869219</at>
+                     <at name="id">embedded.-529864782</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -10632,7 +10761,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">171</at>
+                              <at name="width">172</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.sound.system</at>
                               <at name="fill">
@@ -10748,7 +10877,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">171</at>
+                              <at name="width">172</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.sound.syrinscape</at>
                               <at name="fill">
@@ -10918,7 +11047,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">171</at>
+                              <at name="width">172</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.sound.stream</at>
                               <at name="fill">
@@ -10979,7 +11108,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">171</at>
+                              <at name="width">172</at>
                               <at name="name"/>
                               <at name="text">Preferences.label.sound.focus</at>
                               <at name="fill">
@@ -11163,6 +11292,443 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
+                   <at name="title">Label.auth</at>
+                   <at name="icon">
+                    <object classname="com.jeta.forms.store.properties.IconProperty">
+                     <at name="embedded">false</at>
+                     <at name="width">0</at>
+                     <at name="height">0</at>
+                    </object>
+                   </at>
+                   <at name="form">
+                    <object classname="com.jeta.forms.store.memento.FormMemento">
+                     <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                      <at name="cellconstraints">
+                       <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                        <at name="column">1</at>
+                        <at name="row">1</at>
+                        <at name="colspan">1</at>
+                        <at name="rowspan">1</at>
+                        <at name="halign">default</at>
+                        <at name="valign">default</at>
+                        <at name="insets" object="insets">0,0,0,0</at>
+                       </object>
+                      </at>
+                      <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
+                     </super>
+                     <at name="id">embedded.1348227783</at>
+                     <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
+                     <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
+                     <at name="components">
+                      <object classname="java.util.LinkedList">
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">2</at>
+                             <at name="row">2</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="width">159</at>
+                              <at name="name"/>
+                              <at name="text">Preferences.label.auth.publicKey</at>
+                              <at name="fill">
+                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                <at name="name">fill</at>
+                               </object>
+                              </at>
+                              <at name="toolTipText">Preferences.label.auth.publicKey.tooltip</at>
+                              <at name="height">14</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">4</at>
+                             <at name="row">2</at>
+                             <at name="colspan">50</at>
+                             <at name="rowspan">19</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">javax.swing.JTextArea</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">javax.swing.JTextArea</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="editable">false</at>
+                              <at name="scrollableTracksViewportHeight">true</at>
+                              <at name="scrollableTracksViewportWidth">true</at>
+                              <at name="name">publicKeyTextArea</at>
+                              <at name="width">1149</at>
+                              <at name="scollBars">
+                               <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
+                                <at name="name">scollBars</at>
+                                <at name="verticalpolicy">20</at>
+                                <at name="horizontalpolicy">30</at>
+                                <at name="border">
+                                 <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                  <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                   <at name="name">border</at>
+                                  </super>
+                                  <at name="borders">
+                                   <object classname="java.util.LinkedList">
+                                    <item >
+                                     <at name="value">
+                                      <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                       <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                        <at name="name">border</at>
+                                       </super>
+                                      </object>
+                                     </at>
+                                    </item>
+                                   </object>
+                                  </at>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="height">300</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">4</at>
+                             <at name="row">22</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">javax.swing.JButton</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">javax.swing.JButton</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="actionCommand">Preferences.label.auth.regenKey</at>
+                              <at name="name">regeneratePublicKey</at>
+                              <at name="width">192</at>
+                              <at name="text">Preferences.label.auth.regenKey</at>
+                              <at name="height">22</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">53</at>
+                             <at name="row">22</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">javax.swing.JButton</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">javax.swing.JButton</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="actionCommand">Preferences.label.auth.copyKey</at>
+                              <at name="name">copyKey</at>
+                              <at name="width">187</at>
+                              <at name="text">Preferences.label.auth.copyKey</at>
+                              <at name="height">22</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                      </object>
+                     </at>
+                     <at name="properties">
+                      <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                       <at name="classname">com.jeta.forms.gui.form.GridView</at>
+                       <at name="properties">
+                        <object classname="com.jeta.forms.store.support.PropertyMap">
+                         <at name="border">
+                          <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                           <super classname="com.jeta.forms.store.properties.BorderProperty">
+                            <at name="name">border</at>
+                           </super>
+                           <at name="borders">
+                            <object classname="java.util.LinkedList"/>
+                           </at>
+                          </object>
+                         </at>
+                         <at name="name"/>
+                         <at name="fill">
+                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                           <at name="name">fill</at>
+                          </object>
+                         </at>
+                         <at name="scollBars">
+                          <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
+                           <at name="name">scollBars</at>
+                           <at name="verticalpolicy">21</at>
+                           <at name="horizontalpolicy">31</at>
+                           <at name="border">
+                            <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                             <super classname="com.jeta.forms.store.properties.BorderProperty">
+                              <at name="name">border</at>
+                             </super>
+                             <at name="borders">
+                              <object classname="java.util.LinkedList">
+                               <item >
+                                <at name="value">
+                                 <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                  <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                   <at name="name">border</at>
+                                  </super>
+                                 </object>
+                                </at>
+                               </item>
+                              </object>
+                             </at>
+                            </object>
+                           </at>
+                          </object>
+                         </at>
+                        </object>
+                       </at>
+                      </object>
+                     </at>
+                     <at name="cellpainters">
+                      <object classname="com.jeta.forms.store.support.Matrix">
+                       <at name="rows">
+                        <object classname="[Ljava.lang.Object;" size="22">
+                         <at name="item" index="0">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="1">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="2">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="3">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="4">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="5">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="6">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="7">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="8">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="9">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="10">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="11">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="12">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="13">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="14">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="15">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="16">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="17">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="18">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="19">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="20">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                         <at name="item" index="21">
+                          <object classname="[Ljava.lang.Object;" size="53"/>
+                         </at>
+                        </object>
+                       </at>
+                      </object>
+                     </at>
+                     <at name="rowgroups">
+                      <object classname="com.jeta.forms.store.memento.FormGroupSet">
+                       <at name="groups">
+                        <object classname="java.util.HashMap"/>
+                       </at>
+                      </object>
+                     </at>
+                     <at name="colgroups">
+                      <object classname="com.jeta.forms.store.memento.FormGroupSet">
+                       <at name="groups">
+                        <object classname="java.util.HashMap"/>
+                       </at>
+                      </object>
+                     </at>
+                    </object>
+                   </at>
+                  </object>
+                 </at>
+                </item>
+                <item >
+                 <at name="value">
+                  <object classname="com.jeta.forms.store.properties.TabProperty">
+                   <at name="name">tab</at>
                    <at name="title">Label.startup</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -11187,7 +11753,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1741343108</at>
+                     <at name="id">embedded.-1353113593</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0)</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -11209,7 +11775,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1270520505</at>
+                          <at name="id">embedded.1333315611</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -11718,7 +12284,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1377335001</at>
+                          <at name="id">embedded.-51376077</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),CENTER:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -12206,7 +12772,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.2006472268</at>
+                          <at name="id">embedded.1558966218</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:MAX(40DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -12255,7 +12821,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">137</at>
+                                   <at name="width">138</at>
                                    <at name="name"/>
                                    <at name="text">Language</at>
                                    <at name="fill">
@@ -12330,7 +12896,7 @@
                                     </object>
                                    </at>
                                    <at name="name">jvmLanguageOverideComboBox</at>
-                                   <at name="width">59</at>
+                                   <at name="width">57</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -12491,7 +13057,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.416774946</at>
+                          <at name="id">embedded.-318822343</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),LEFT:MAX(80DLU;DEFAULT):NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -12743,7 +13309,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1216021499</at>
+                          <at name="id">embedded.336027533</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                           <at name="components">
@@ -12793,7 +13359,7 @@
                                     </object>
                                    </at>
                                    <at name="name">startupInfoLabel</at>
-                                   <at name="width">840</at>
+                                   <at name="width">1201</at>
                                    <at name="text">startup.preferences.info</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -13029,8 +13595,8 @@
               </at>
              </object>
             </at>
-            <at name="width">1291</at>
-            <at name="tabCount">5</at>
+            <at name="width">1652</at>
+            <at name="tabCount">6</at>
             <at name="height">832</at>
            </object>
           </at>
@@ -13056,7 +13622,7 @@
          </at>
         </object>
        </at>
-       <at name="name"></at>
+       <at name="name"/>
        <at name="fill">
         <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
          <at name="name">fill</at>

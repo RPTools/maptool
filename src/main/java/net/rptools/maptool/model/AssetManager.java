@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.rptools.lib.FileUtil;
@@ -78,10 +82,14 @@ public class AssetManager {
   /** Property string associated with asset name */
   public static final String NAME = "name";
 
+  /** Property string associated with asset type. */
+  public static final String TYPE = "type";
+
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
 
   private static ExecutorService assetLoaderThreadPool = Executors.newFixedThreadPool(1);
+  private static ExecutorService assetWriterThreadPool = Executors.newFixedThreadPool(1);
 
   static {
     cacheDir = AppUtil.getAppHome("assetcache");
@@ -191,7 +199,7 @@ public class AssetManager {
    * @return True if the asset exists, false otherwise
    */
   public static boolean hasAsset(Asset asset) {
-    return hasAsset(asset.getId());
+    return hasAsset(asset.getMD5Key());
   }
 
   /**
@@ -224,40 +232,40 @@ public class AssetManager {
    */
   public static void putAsset(Asset asset) {
 
-    if (asset == null || asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
+    if (asset == null || asset.getMD5Key().equals(BAD_ASSET_LOCATION_KEY)) {
       return;
     }
 
     try {
-      if (sanitizeAssetId(asset.getId()) != asset.getId()) {
+      if (sanitizeAssetId(asset.getMD5Key()) != asset.getMD5Key()) {
         // If a different asset is returned we know this asset is invalid so dont add it
         return;
       }
     } catch (IOException e) {
-      if (!asset.getId().equals(BAD_ASSET_LOCATION_KEY)) {
-        log.error(I18N.getText("msg.error.errorResolvingCacheDir", asset.getId(), e));
+      if (!asset.getMD5Key().equals(BAD_ASSET_LOCATION_KEY)) {
+        log.error(I18N.getText("msg.error.errorResolvingCacheDir", asset.getMD5Key(), e));
       }
     }
 
-    assetMap.put(asset.getId(), asset);
+    assetMap.put(asset.getMD5Key(), asset);
 
     // Invalid images are represented by empty assets.
     // Don't persist those
-    if (asset.getImage().length > 0) {
+    if (asset.getData().length > 0) {
       putInPersistentCache(asset);
     }
 
     // Clear the waiting status
-    assetLoader.completeRequest(asset.getId());
+    assetLoader.completeRequest(asset.getMD5Key());
 
     // Listeners
-    List<AssetAvailableListener> listenerList = assetListenerListMap.get(asset.getId());
+    List<AssetAvailableListener> listenerList = assetListenerListMap.get(asset.getMD5Key());
     if (listenerList != null) {
       for (AssetAvailableListener listener : listenerList) {
-        listener.assetAvailable(asset.getId());
+        listener.assetAvailable(asset.getMD5Key());
       }
 
-      assetListenerListMap.remove(asset.getId());
+      assetListenerListMap.remove(asset.getMD5Key());
     }
   }
 
@@ -329,10 +337,10 @@ public class AssetManager {
           String name = FileUtil.getNameWithoutExtension(imageFile);
           byte[] data = FileUtils.readFileToByteArray(imageFile);
 
-          asset = new Asset(name, data);
+          asset = Asset.createAssetDetectType(name, data);
 
           // Just to be sure the image didn't change
-          if (!asset.getId().equals(assetId)) {
+          if (!asset.getMD5Key().equals(assetId)) {
             throw new IOException("Image reference did not match the requested image");
           }
 
@@ -448,10 +456,21 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      Asset asset = new Asset(props.getProperty(NAME), data);
+      String name = props.getProperty(NAME);
+      String type = props.getProperty(TYPE);
 
-      if (!asset.getId().equals(id)) {
-        log.error("MD5 for asset " + asset.getName() + " corrupted");
+      Asset asset;
+
+      if (type != null) {
+        asset = Asset.Type.valueOf(type).getFactory().apply(name, data);
+      } else {
+        asset = Asset.createAssetDetectType(props.getProperty(NAME), data);
+      }
+
+      if (!asset.getMD5Key().equals(id)) {
+        log.error("MD5 for asset " + asset.getName() + " corrupted; purging corrupted file");
+        assetFile.delete();
+        return null;
       }
 
       assetMap.put(id, asset);
@@ -471,7 +490,8 @@ public class AssetManager {
    * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(File file) throws IOException {
-    return new Asset(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
+    return Asset.createAssetDetectType(
+        FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
   }
 
   /**
@@ -488,7 +508,8 @@ public class AssetManager {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
       Asset temp =
-          new Asset(FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
+          Asset.createAssetDetectType(
+              FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
       return temp;
     } finally {
       newFile.delete();
@@ -525,23 +546,26 @@ public class AssetManager {
     }
 
     if (!assetIsInPersistentCache(asset)) {
-
       final File assetFile = getAssetCacheFile(asset);
 
-      new Thread(
-              () -> {
-                assetFile.getParentFile().mkdirs();
-                try (OutputStream out = new FileOutputStream(assetFile)) {
-                  out.write(asset.getImage());
-                } catch (IOException ioe) {
-                  log.error("Could not persist asset while writing image data", ioe);
-                  return;
-                } catch (NullPointerException npe) {
-                  // Not an issue, will update once th frame is finished loading...
-                  log.warn("Could not update statusbar while MapTool frame is loading.", npe);
-                }
-              })
-          .start();
+      assetWriterThreadPool.submit(
+          () -> {
+            assetFile.getParentFile().mkdirs();
+
+            try (var operation = new AssetWriteRenameOperation(assetFile)) {
+              try (var temporaryFileStream = new FileOutputStream(operation.temporaryFile)) {
+                temporaryFileStream.write(asset.getData());
+              }
+
+              // Now that the data is in a file, we move it to its final resting place.
+              operation.commit();
+            } catch (IOException ioe) {
+              log.error("Could not persist asset while writing image data", ioe);
+            } catch (NullPointerException npe) {
+              // Not an issue, will update once th frame is finished loading...
+              log.warn("Could not update statusbar while MapTool frame is loading.", npe);
+            }
+          });
     }
     if (!assetInfoIsInPersistentCache(asset)) {
 
@@ -549,6 +573,7 @@ public class AssetManager {
       Properties props = new Properties();
       try (OutputStream out = new FileOutputStream(infoFile)) {
         props.put(NAME, asset.getName() != null ? asset.getName() : "");
+        props.put(TYPE, asset.getType().name());
         props.store(out, "Asset Info");
       } catch (IOException ioe) {
         log.error("Could not persist asset while writing image properties", ioe);
@@ -638,7 +663,7 @@ public class AssetManager {
    * @return True if asset is in the persistent cache, false otherwise
    */
   private static boolean assetIsInPersistentCache(Asset asset) {
-    return assetIsInPersistentCache(asset.getId());
+    return assetIsInPersistentCache(asset.getMD5Key());
   }
 
   /**
@@ -648,7 +673,7 @@ public class AssetManager {
    * @return True if the assets information exists in the persistent cache
    */
   private static boolean assetInfoIsInPersistentCache(Asset asset) {
-    return getAssetInfoFile(asset.getId()).exists();
+    return getAssetInfoFile(asset.getMD5Key()).exists();
   }
 
   /**
@@ -670,7 +695,42 @@ public class AssetManager {
    * @return The assets cache file, or null if it doesn't have one
    */
   public static File getAssetCacheFile(Asset asset) {
-    return getAssetCacheFile(asset.getId());
+    return getAssetCacheFile(asset.getMD5Key());
+  }
+
+  /**
+   * Loads the asset, and waits for the asset to load.
+   *
+   * @param assetId Load image data from this asset
+   * @return Asset Return the loaded asset
+   */
+  public static Asset getAssetAndWait(final MD5Key assetId) {
+    if (assetId == null) {
+      return null;
+    }
+    Asset asset = null;
+    final CountDownLatch loadLatch = new CountDownLatch(1);
+    getAssetAsynchronously(
+        assetId,
+        (key) -> {
+          // If we're here then the image has just finished loading
+          // release the blocked thread
+          log.debug("Countdown: " + assetId);
+          loadLatch.countDown();
+        });
+    if (asset == null) {
+      try {
+        log.debug("Wait for:  " + assetId);
+        loadLatch.await();
+        // This time we'll get the cached version
+        asset = getAsset(assetId);
+      } catch (InterruptedException ie) {
+        log.error(
+            "getAssetAndWait(" + assetId + "):  asset not resolved; InterruptedException", ie);
+        asset = null;
+      }
+    }
+    return asset;
   }
 
   /**
@@ -691,7 +751,7 @@ public class AssetManager {
    * @return The assets info file, or null if it doesn't have one
    */
   private static File getAssetInfoFile(Asset asset) {
-    return getAssetInfoFile(asset.getId());
+    return getAssetInfoFile(asset.getMD5Key());
   }
 
   /**
@@ -815,5 +875,48 @@ public class AssetManager {
       missing.put(entry.getKey(), entry.getValue());
     }
     return missing;
+  }
+
+  /** Helper type to handle creating and moving temporary files. */
+  private static class AssetWriteRenameOperation implements AutoCloseable {
+    private final File assetFile;
+    private final File temporaryFile;
+
+    public AssetWriteRenameOperation(File assetFile) throws IOException {
+      this.assetFile = assetFile;
+      // Placing the temp file in the cache dir means it will be on the same filesystem in typical
+      // cases.
+      this.temporaryFile =
+          Files.createTempFile(assetFile.getParentFile().toPath(), "tmp.", "").toFile();
+    }
+
+    /**
+     * Move the temporary file to its final location.
+     *
+     * <p>The move will be done atomically if possible, but a non-atomic move may be used as a
+     * fallback.
+     *
+     * @throws IOException If the move fails.
+     */
+    public void commit() throws IOException {
+      try {
+        Files.move(temporaryFile.toPath(), assetFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
+      } catch (AtomicMoveNotSupportedException e) {
+        Files.move(temporaryFile.toPath(), assetFile.toPath());
+      }
+    }
+
+    /**
+     * Clean up the temporary file.
+     *
+     * <p>If the operation has been committed, there is no longer a temporary file and this does
+     * nothing.
+     *
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+      Files.deleteIfExists(temporaryFile.toPath());
+    }
   }
 }

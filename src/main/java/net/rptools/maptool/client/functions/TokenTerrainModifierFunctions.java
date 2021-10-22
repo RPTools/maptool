@@ -69,9 +69,9 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
-    if (functionName.equals("getTerrainModifier")) {
+    if (functionName.equalsIgnoreCase("getTerrainModifier")) {
       return getTerrainModifierInfo(resolver, param);
-    } else if (functionName.equals("setTerrainModifier")) {
+    } else if (functionName.equalsIgnoreCase("setTerrainModifier")) {
       return setTerrainModifier(resolver, param);
     } else {
       throw new ParserException(I18N.getText("macro.function.general.unknownFunction"));

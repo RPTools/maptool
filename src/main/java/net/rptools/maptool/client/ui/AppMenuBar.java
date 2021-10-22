@@ -97,10 +97,12 @@ public class AppMenuBar extends JMenuBar {
     fileMenu.add(createExportMenu());
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.ADD_RESOURCE_TO_LIBRARY));
+    fileMenu.add(new JMenuItem(AppActions.IMPORT_DROP_IN_LIBRARY));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.START_SERVER));
     fileMenu.add(new JMenuItem(AppActions.CONNECT_TO_SERVER));
     fileMenu.add(new JMenuItem(AppActions.DISCONNECT_FROM_SERVER));
+    fileMenu.add(new JMenuItem(AppActions.PLAYER_DATABASE));
     fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
     fileMenu.addSeparator();
     fileMenu.add(createRecentCampaignMenu());
@@ -393,10 +395,6 @@ public class AppMenuBar extends JMenuBar {
       menu.addSeparator();
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
-
-    // Jamz: Box2d Testing...
-    // menu.addSeparator();
-    // menu.add(new JMenuItem(AppActions.SHOW_BOX2D_TEST));
 
     if (!AppUtil.MAC_OS_X) {
       menu.addSeparator();

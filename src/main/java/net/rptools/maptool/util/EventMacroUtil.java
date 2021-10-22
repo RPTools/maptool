@@ -18,11 +18,11 @@ import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -180,7 +180,7 @@ public class EventMacroUtil {
             new TextMessage(
                 TextMessage.Channel.SAY, null, MapTool.getPlayer().getName(), resultVal, null));
       }
-    } catch (AbortFunction.AbortFunctionException afe) {
+    } catch (AbortFunctionException afe) {
       // Do nothing
     } catch (ParserException e) {
       MapTool.addLocalMessage(

@@ -833,6 +833,6 @@ public class TokenStatesController
       return null;
     }
     AssetManager.putAsset(asset);
-    return asset.getId();
+    return asset.getMD5Key();
   }
 }

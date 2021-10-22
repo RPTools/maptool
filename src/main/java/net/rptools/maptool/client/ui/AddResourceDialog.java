@@ -38,6 +38,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppSetup;
@@ -50,7 +51,6 @@ import net.rptools.maptool.language.I18N;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
 
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   private static final long serialVersionUID = -1709712124453405062L;

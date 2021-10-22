@@ -23,22 +23,23 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
@@ -461,7 +462,7 @@ public class MacroLinkFunction extends AbstractFunction {
         }
       } catch (AbortFunctionException e) {
         // Do nothing
-      } catch (AssertFunction.AssertFunctionException afe) {
+      } catch (AssertFunctionException afe) {
         MapTool.addLocalMessage(afe.getMessage());
       } catch (ParserException e) {
         e.addMacro(macroName);
@@ -639,44 +640,20 @@ public class MacroLinkFunction extends AbstractFunction {
       try {
         String[] parts = command.split("@");
         if (parts.length > 1) {
-          Token token = MapTool.getParser().getTokenMacroLib(parts[1]);
-          if (token == null) {
+          var lib = new LibraryManager().getLibrary(parts[1].substring(4));
+          if (lib.isEmpty()) {
             return false;
           }
-          MacroButtonProperties mbp = token.getMacro(parts[0], false);
-          if (mbp == null) {
+          var library = lib.get();
+          var macroInfo = library.getMTScriptMacroInfo(parts[0]).get();
+          if (macroInfo.isEmpty()) {
             return false;
           }
-          if (mbp.getAutoExecute()) {
-            // Next make sure that it is trusted
-            boolean trusted = true;
 
-            // If the token is not owned by everyone and all
-            // owners are GMs then we are in
-            // a secure context as players can not modify the
-            // macro so GM can specify what
-            // ever they want.
-            if (token.isOwnedByAll()) {
-              trusted = false;
-            } else {
-              Set<String> gmPlayers = new HashSet<>();
-              for (Object o : MapTool.getPlayerList()) {
-                Player p = (Player) o;
-                if (p.isGM()) {
-                  gmPlayers.add(p.getName());
-                }
-              }
-              for (String owner : token.getOwners()) {
-                if (!gmPlayers.contains(owner)) {
-                  trusted = false;
-                  break;
-                }
-              }
-            }
-            return trusted;
-          }
+          return macroInfo.get().trusted() && macroInfo.get().autoExecute();
         }
-      } catch (ParserException e) {
+
+      } catch (ExecutionException | InterruptedException e) {
         log.error("Exception while handling macro " + command, e);
       }
     }

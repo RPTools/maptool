@@ -46,6 +46,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
 
 /**
@@ -68,7 +69,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-    // System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());
 
     try {
       RPCContext context = new RPCContext(id, method, parameters);
@@ -235,6 +235,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
           break;
+        case changeZoneDispName:
+          changeZoneDispName(context.getGUID(0), context.getString(1));
+          break;
         case heartbeat:
           heartbeat(context.getString(0));
           break;
@@ -281,6 +284,15 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case clearExposedArea:
           clearExposedArea(context.getGUID(0), context.getBool(1));
+          break;
+        case addAddOnLibrary:
+          addAddOnLibrary((List<TransferableAddOnLibrary>) context.get(0));
+          break;
+        case removeAddOnLibrary:
+          removeAddOnLibrary((List<String>) context.get(0));
+          break;
+        case removeAllAddOnLibraries:
+          removeAllAddOnLibraries();
           break;
       }
     } finally {
@@ -460,8 +472,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken
       // image instead of blowing up
-      Asset asset = new Asset("broken", new byte[] {});
-      asset.setId(assetID);
+      Asset asset = Asset.createBrokenImageAsset(assetID);
       server
           .getConnection()
           .callMethod(RPCContext.getCurrent().id, ClientCommand.COMMAND.putAsset.name(), asset);
@@ -536,6 +547,14 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     Zone zone = server.getCampaign().getZone(zoneGUID);
     if (zone != null) {
       zone.setName(name);
+      forwardToAllClients();
+    }
+  }
+
+  public void changeZoneDispName(GUID zoneGUID, String name) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    if (zone != null) {
+      zone.setPlayerAlias(name);
       forwardToAllClients();
     }
   }
@@ -839,6 +858,21 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.clearExposedArea(globalOnly);
+    forwardToClients();
+  }
+
+  @Override
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeAddOnLibrary(List<String> namespaces) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeAllAddOnLibraries() {
     forwardToClients();
   }
 

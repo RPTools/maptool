@@ -90,7 +90,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     boolean useDistancePerCell = true;
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
-    if (functionName.equals("getLastPath")) {
+    if (functionName.equalsIgnoreCase("getLastPath")) {
       BigDecimal val = null;
       if (parameters.size() == 1) {
         if (!(parameters.get(0) instanceof BigDecimal)) {
@@ -105,7 +105,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       List<Map<String, Integer>> pathPoints = getLastPathList(path, useDistancePerCell);
       return pathPointsToJSONArray(pathPoints);
     }
-    if (functionName.equals("movedOverPoints")) {
+    if (functionName.equalsIgnoreCase("movedOverPoints")) {
       // macro.function.general.noPerm
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -134,7 +134,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
     }
-    if (functionName.equals("getMoveCount")) {
+    if (functionName.equalsIgnoreCase("getMoveCount")) {
       boolean useFractionOnly = false;
       boolean useTerrainModifiers = false;
 
@@ -159,7 +159,7 @@ public class TokenMoveFunctions extends AbstractFunction {
         return getMovement(tokenInContext, useFractionOnly, useTerrainModifiers);
       }
     }
-    if (functionName.equals("movedOverToken")) {
+    if (functionName.equalsIgnoreCase("movedOverToken")) {
       // macro.function.general.noPerm
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
