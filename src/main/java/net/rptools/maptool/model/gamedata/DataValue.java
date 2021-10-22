@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import static net.rptools.maptool.model.gamedata.DataType.UNDEFINED;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.List;
@@ -94,12 +96,13 @@ public interface DataValue {
         .forEach(
             e -> {
               switch (e.getDataType()) {
-                case INTEGER -> jsonArray.add(e.asLong());
+                case LONG -> jsonArray.add(e.asLong());
                 case DOUBLE -> jsonArray.add(e.asDouble());
                 case STRING -> jsonArray.add(e.asString());
                 case BOOLEAN -> jsonArray.add(e.asBoolean());
                 case LIST -> jsonArray.add(e.asJsonArray());
                 case MAP -> jsonArray.add(e.asJsonObject());
+                case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(UNDEFINED, e.getDataType());
               }
             });
     return jsonArray;
@@ -125,12 +128,13 @@ public interface DataValue {
         .forEach(
             (key, value) -> {
               switch (value.getDataType()) {
-                case INTEGER -> jsonObject.addProperty(key, value.asLong());
+                case LONG -> jsonObject.addProperty(key, value.asLong());
                 case DOUBLE -> jsonObject.addProperty(key, value.asDouble());
                 case STRING -> jsonObject.addProperty(key, value.asString());
                 case BOOLEAN -> jsonObject.addProperty(key, value.asBoolean());
                 case LIST -> jsonObject.add(key, value.asJsonArray());
                 case MAP -> jsonObject.add(key, value.asJsonObject());
+                case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(UNDEFINED, value.getDataType());
               }
             });
     return jsonObject;

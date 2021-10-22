@@ -15,10 +15,11 @@
 package net.rptools.maptool.model.gamedata;
 
 public enum DataType {
-  INTEGER,
+  LONG,
   DOUBLE,
   STRING,
   BOOLEAN,
   LIST,
-  MAP
+  MAP,
+  UNDEFINED
 }

@@ -27,6 +27,11 @@ public final class ListDataValue implements DataValue {
   /** The value. */
   private final List<DataValue> values;
 
+  /**
+   * Creates a new ListDataValue.
+   * @param name the name of the value.
+   * @param values the values.
+   */
   ListDataValue(String name, Collection<DataValue> values) {
     this.name = name;
     this.values = List.copyOf(values);
@@ -45,7 +50,7 @@ public final class ListDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER, DOUBLE, BOOLEAN, STRING, MAP -> false;
+      case LONG, DOUBLE, BOOLEAN, STRING, MAP, UNDEFINED -> false;
       case LIST -> true;
     };
   }
@@ -53,7 +58,7 @@ public final class ListDataValue implements DataValue {
   @Override
   public long asLong() {
     throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.INTEGER.name()));
+        I18N.getText("data.error.cantConvertTo", DataType.LIST.name(), DataType.LONG.name()));
   }
 
   @Override

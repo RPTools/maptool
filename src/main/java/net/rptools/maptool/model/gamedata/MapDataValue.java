@@ -26,6 +26,11 @@ public final class MapDataValue implements DataValue {
   /** The value. */
   private final Map<String, DataValue> values;
 
+  /**
+   * Creates a new MapDataValue.
+   * @param name the name of the value
+   * @param values the values.
+   */
   MapDataValue(String name, Map<String, DataValue> values) {
     this.name = name;
     this.values = Map.copyOf(values);
@@ -44,7 +49,7 @@ public final class MapDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER, DOUBLE, BOOLEAN, STRING, LIST -> false;
+      case LONG, DOUBLE, BOOLEAN, STRING, LIST, UNDEFINED -> false;
       case MAP -> true;
     };
   }
@@ -52,7 +57,7 @@ public final class MapDataValue implements DataValue {
   @Override
   public long asLong() {
     throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.MAP.name(), DataType.INTEGER.name()));
+        I18N.getText("data.error.cantConvertTo", DataType.MAP.name(), DataType.LONG.name()));
   }
 
   @Override

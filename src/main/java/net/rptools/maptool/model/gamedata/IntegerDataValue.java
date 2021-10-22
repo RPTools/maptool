@@ -26,6 +26,11 @@ public final class IntegerDataValue implements DataValue {
   /** The value. */
   private final long value;
 
+  /**
+   * Creates a new IntegerDataValue.
+   * @param name the name of the value.
+   * @param value the value.
+   */
   IntegerDataValue(String name, long value) {
     this.name = name;
     this.value = value;
@@ -38,14 +43,14 @@ public final class IntegerDataValue implements DataValue {
 
   @Override
   public DataType getDataType() {
-    return DataType.INTEGER;
+    return DataType.LONG;
   }
 
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER, DOUBLE, BOOLEAN, STRING, LIST -> true;
-      case MAP -> false;
+      case LONG, DOUBLE, BOOLEAN, STRING, LIST -> true;
+      case MAP, UNDEFINED -> false;
     };
   }
 
@@ -77,6 +82,6 @@ public final class IntegerDataValue implements DataValue {
   @Override
   public Map<String, DataValue> asMap() {
     throw new IllegalStateException(
-        I18N.getText("data.error.cantConvertTo", DataType.INTEGER.name(), DataType.MAP.name()));
+        I18N.getText("data.error.cantConvertTo", DataType.LONG.name(), DataType.MAP.name()));
   }
 }

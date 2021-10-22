@@ -26,6 +26,11 @@ public final class DoubleDataValue implements DataValue {
   /** The value. */
   private final double value;
 
+  /**
+   * Creates a new DoubleDataValue.
+   * @param name the name of the value.
+   * @param value the value.
+   */
   DoubleDataValue(String name, double value) {
     this.name = name;
     this.value = value;
@@ -44,8 +49,8 @@ public final class DoubleDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     return switch (dataType) {
-      case INTEGER, DOUBLE, BOOLEAN, STRING, LIST -> true;
-      case MAP -> false;
+      case LONG, DOUBLE, BOOLEAN, STRING, LIST -> true;
+      case MAP, UNDEFINED -> false;
     };
   }
 
