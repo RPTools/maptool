@@ -15,7 +15,7 @@
 package net.rptools.clientserver.simple.server;
 
 import com.google.gson.Gson;
-import dev.onvoid.webrtc.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -34,17 +34,15 @@ import org.java_websocket.handshake.ServerHandshake;
 public class WebRTCServerConnection extends AbstractServerConnection {
   private static final Logger log = Logger.getLogger(WebRTCServerConnection.class);
 
-  private WebSocketClient signalingCLient;
+  private WebSocketClient signalingClient;
   private final ServerConfig config;
   private final Gson gson = new Gson();
-  private RTCConfiguration rtcConfig;
   private String lastError = null;
-  private URI websocketUri = null;
+  private URI webSocketUri = null;
   private int reconnectCounter = -1;
   private Thread reconnectThread;
-  private Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
+  private final Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
 
-  // public static String WebSocketUrl = "ws://172.31.222.156:8080";
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
@@ -52,42 +50,40 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     super(handshake);
     this.config = config;
 
-    RTCIceServer iceServer = new RTCIceServer();
-    iceServer.urls.add("stun:stun.l.google.com:19302");
-
-    rtcConfig = new RTCConfiguration();
-    rtcConfig.iceServers.add(iceServer);
-
     try {
-      websocketUri = new URI(WebSocketUrl);
+      webSocketUri = new URI(WebSocketUrl);
     } catch (Exception e) {
     }
 
-    signalingCLient = createSignalingClient();
+    signalingClient = createSignalingClient();
+  }
+
+  private void sendSignalingMessage(String message) {
+    log.info("S sent signaling message: " + message);
+    signalingClient.send(message);
   }
 
   private WebSocketClient createSignalingClient() {
-    return new WebSocketClient(websocketUri) {
+    return new WebSocketClient(webSocketUri) {
       @Override
-      public void onOpen(ServerHandshake handshakedata) {
+      public void onOpen(ServerHandshake handshakeData) {
         reconnectCounter = 30;
-        log.info("Websocket connected\n");
+        log.info("S WebSocket connected\n");
         var msg = new LoginMessageDto();
         msg.source = config.getServerName();
 
-        send(gson.toJson(msg));
+        sendSignalingMessage(gson.toJson(msg));
       }
 
       @Override
       public void onMessage(String message) {
-        // log.info("Got message: " + message + "\n");
         handleSignalingMessage(message);
       }
 
       @Override
       public void onClose(int code, String reason, boolean remote) {
-        lastError = "Websocket closed: remote:" + remote + " (" + code + ") " + reason;
-        log.info(lastError);
+        lastError = "WebSocket closed: remote:" + remote + " (" + code + ") " + reason;
+        log.info("S " + lastError);
         if (disconnectExpected) return;
 
         // if the connection get closed remotely the rptools.net server disconnected. Try to
@@ -98,67 +94,39 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
       @Override
       public void onError(Exception ex) {
-        lastError = "Websocket error: " + ex.toString() + "\n";
-        log.error(lastError);
+        lastError = "WebSocket error: " + ex.toString() + "\n";
+        log.error("S " + lastError);
         // onClose will be called after this method
       }
     };
   }
 
   private void handleSignalingMessage(String message) {
+    log.info("S got signaling message: " + message);
     var msg = gson.fromJson(message, MessageDto.class);
 
     switch (msg.type) {
-      case "login":
-        {
-          var loginMsg = gson.fromJson(message, LoginMessageDto.class);
-          onLogin(loginMsg);
-          break;
+      case "login" -> {
+        var loginMsg = gson.fromJson(message, LoginMessageDto.class);
+        if (!loginMsg.success) {
+          MapTool.showError("Servername already taken!");
         }
-      case "offer":
-        {
-          var offerMsg = gson.fromJson(message, OfferMessageDto.class);
-          onOffer(offerMsg);
-          break;
-        }
-        //      case "answer": //server side should not get answers
-        //  onAnswer(data.getString("answer"));
-        //        break;
-      case "candidate":
-        {
-          var candiateMessage = gson.fromJson(message, CandidateMessageDto.class);
-          onCandidate(candiateMessage);
-          break;
-        }
-      default:
-        log.error("unhandled signaling: " + msg.type);
+      }
+      case "offer" -> {
+        var offerMsg = gson.fromJson(message, OfferMessageDto.class);
+        var clientConnection = new WebRTCClientConnection(offerMsg, this);
+        openConnections.put(offerMsg.source, clientConnection);
+      }
+      case "candidate" -> {
+        var candidateMessage = gson.fromJson(message, CandidateMessageDto.class);
+        openConnections.get(candidateMessage.source).addIceCandidate(candidateMessage.candidate);
+      }
+      default -> log.error("S unhandled signaling: " + msg.type);
     }
   }
 
-  private void onLogin(LoginMessageDto msg) {
-    if (!msg.success) {
-      MapTool.showError("Servername already taken!");
-      return;
-    }
-  }
-
-  private void onOffer(OfferMessageDto message) {
-    WebRTCClientConnection clientConnection = null;
-    try {
-      clientConnection = new WebRTCClientConnection(message, this);
-
-      openConnections.put(message.source, clientConnection);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void onCandidate(CandidateMessageDto message) {
-    openConnections.get(message.source).addIceCandidate(message.candidate);
-  }
-
-  public WebSocketClient getSignalingCLient() {
-    return signalingCLient;
+  public WebSocketClient getSignalingClient() {
+    return signalingClient;
   }
 
   public ServerConfig getConfig() {
@@ -180,7 +148,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
 
   @Override
   public void open() throws IOException {
-    signalingCLient.connect();
+    signalingClient.connect();
   }
 
   @Override
@@ -188,7 +156,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     super.close();
     disconnectExpected = true;
     reconnectCounter = -1;
-    signalingCLient.close();
+    signalingClient.close();
   }
 
   void retryConnect() {
@@ -196,7 +164,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
         new Thread(
             () -> {
               log.info(
-                  "Trying to reconnect to signaling server after "
+                  "S Trying to reconnect to signaling server after "
                       + reconnectCounter
                       + " seconds.");
               try {
@@ -204,8 +172,8 @@ public class WebRTCServerConnection extends AbstractServerConnection {
               } catch (InterruptedException e) {
               }
               reconnectCounter *= 2;
-              signalingCLient = createSignalingClient();
-              signalingCLient.connect();
+              signalingClient = createSignalingClient();
+              signalingClient.connect();
             });
     reconnectThread.setName("WebRTCServerConnection.reconnectThread");
     reconnectThread.start();
