@@ -454,11 +454,11 @@ class LibraryToken implements Library {
     PROPERTY
   }
 
-  /** The location type and location. */
+  /** The location propertyType and location. */
   private record Location(LocationType locationType, String location) {
 
     /**
-     * Splits the location string into location type and location.
+     * Splits the location string into location propertyType and location.
      *
      * @param location the location string to split.
      * @return the location for the location string.

@@ -12,28 +12,25 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.gamedata;
+package net.rptools.maptool.model.gamedata.data;
 
-import java.util.List;
-import java.util.Map;
-import net.rptools.maptool.language.I18N;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
-/** The IntegerDataValue class represents a data value that is a double. */
-public final class DoubleDataValue implements DataValue {
+/** The UndefinedDataValue class represents a data value that is an undefined value. */
+public final class UndefinedDataValue implements DataValue {
 
   /** The name of the value. */
   private final String name;
-  /** The value. */
-  private final double value;
 
   /**
-   * Creates a new DoubleDataValue.
+   * Creates a new UndefinedDataValue.
+   *
    * @param name the name of the value.
-   * @param value the value.
    */
-  DoubleDataValue(String name, double value) {
+  UndefinedDataValue(String name) {
     this.name = name;
-    this.value = value;
   }
 
   @Override
@@ -43,44 +40,46 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public DataType getDataType() {
-    return DataType.DOUBLE;
+    return DataType.LONG;
   }
 
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
-    return switch (dataType) {
-      case LONG, DOUBLE, BOOLEAN, STRING, LIST -> true;
-      case MAP, UNDEFINED -> false;
-    };
+    return false;
   }
 
   @Override
   public long asLong() {
-    return (long) value;
+    throw InvalidDataOperation.createUndefined(name);
   }
 
   @Override
   public double asDouble() {
-    return value;
+    throw InvalidDataOperation.createUndefined(name);
   }
 
   @Override
   public String asString() {
-    return Double.toString(value);
+    throw InvalidDataOperation.createUndefined(name);
   }
 
   @Override
   public boolean asBoolean() {
-    return value != 0;
+    throw InvalidDataOperation.createUndefined(name);
   }
 
   @Override
-  public List<DataValue> asList() {
-    return List.of(this);
+  public JsonArray asJsonArray() {
+    throw InvalidDataOperation.createUndefined(name);
   }
 
   @Override
-  public Map<String, DataValue> asMap() {
-    throw InvalidDataOperation.createInvalidConversion(DataType.DOUBLE, DataType.MAP);
+  public JsonObject asJsonObject() {
+    throw InvalidDataOperation.createUndefined(name);
+  }
+
+  @Override
+  public boolean isUndefined() {
+    return true;
   }
 }

@@ -185,7 +185,7 @@ public class LibraryManager {
   /**
    * Returns a list of information about the registered libraries.
    *
-   * @param libraryType the type of library to get the information about.
+   * @param libraryType the propertyType of library to get the information about.
    * @return list of information about the registered libraries.
    * @throws ExecutionException if an error occurs while extracting information about the library.
    * @throws InterruptedException if an error occurs while extracting information about the library.

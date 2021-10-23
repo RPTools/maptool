@@ -12,27 +12,33 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.gamedata;
+package net.rptools.maptool.model.gamedata.data;
+
+import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
 public enum DataType {
   LONG,
   DOUBLE,
   STRING,
   BOOLEAN,
-  LIST,
-  MAP,
+  JSON_ARRAY,
+  JSON_OBJECT,
   UNDEFINED;
 
-  public DataValue convert(DataValue dataValue, DataType to) {
+  public static DataValue convert(DataValue dataValue, DataType to) {
     return switch (to) {
       case LONG -> new LongDataValue(dataValue.getName(), dataValue.asLong());
-      case DOUBLE -> new DoubleDataValue(dataValue.getName(),dataValue.asDouble());
+      case DOUBLE -> new DoubleDataValue(dataValue.getName(), dataValue.asDouble());
       case BOOLEAN -> new BooleanDataValue(dataValue.getName(), dataValue.asBoolean());
       case STRING -> new StringDataValue(dataValue.getName(), dataValue.asString());
-      case LIST -> new ListDataValue(dataValue.getName(), dataValue.asList());
-      case MAP -> new MapDataValue(dataValue.getName(), dataValue.asMap());
-      case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(dataValue.getDataType(),
-          to);
+      case JSON_ARRAY -> new JsonArrayDataValue(dataValue.getName(), dataValue.asJsonArray());
+      case JSON_OBJECT -> new JsonObjectDataValue(dataValue.getName(), dataValue.asJsonObject());
+      case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(
+          dataValue.getDataType(), to);
     };
+  }
+
+  public DataValue convert(DataValue dataValue) {
+    return convert(dataValue, this);
   }
 }

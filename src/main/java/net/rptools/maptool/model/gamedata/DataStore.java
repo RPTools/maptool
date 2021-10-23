@@ -1,0 +1,189 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
+package net.rptools.maptool.model.gamedata;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.gamedata.data.DataType;
+import net.rptools.maptool.model.gamedata.data.DataValue;
+
+/** Interface for a data store. */
+public interface DataStore {
+
+  /**
+   * Returns the types of properties that are stored in this data store.
+   *
+   * @return the types of properties that are stored in this data store.
+   */
+  CompletableFuture<Set<String>> getPropertyTypes();
+
+  /**
+   * Returns the namespaces of properties that are stored in this data store for a sepcific
+   * propertyType.
+   *
+   * @param type the propertyType of properties to get the namespaces of.
+   * @return the namespaces of properties that are stored in this data store for a sepcific
+   *     propertyType.
+   */
+  CompletableFuture<Set<String>> getPropertyNamespaces(String type);
+
+  /**
+   * Checks if a property and namespace exists.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @return {@code true} if the property and namespace exists.
+   */
+  CompletableFuture<Boolean> hasPropertyNamespace(String type, String namespace);
+
+  /**
+   * Returns the data propertyType for a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @return the data propertyType for the property.
+   */
+  CompletableFuture<DataType> getPropertyDataType(String type, String namespace, String name);
+
+  /**
+   * Returns the property names and their data types for a type and namespace.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @return the property names and their data types for a type and namespace.
+   */
+  CompletableFuture<Map<String, DataType>> getPropertyDataTypeMap(String type, String namespace);
+
+  /**
+   * Checks if a property exists, the value may be undefined, if you want to check for both property
+   * existing and value being defined use {@link #isPropertyDefined(String, String, String)}.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @return {@code true} if the property exists.
+   */
+  CompletableFuture<Boolean> hasProperty(String type, String namespace, String name);
+
+  /**
+   * Checks if a property exists, and has a value. property existing and value being defined use
+   * {@link #isPropertyDefined(String, String, String)}.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @return {@code true} if the property exists and has a value.
+   */
+  CompletableFuture<Boolean> isPropertyDefined(String type, String namespace, String name);
+
+  /**
+   * Sets the value of a property.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setProperty(String type, String namespace, DataValue value);
+
+  /**
+   * Sets the value of a property to a long.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setLongProperty(String type, String namespace, String name, long value);
+
+  /**
+   * Sets the value of a property to a double.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setDoubleProperty(
+      String type, String namespace, String name, double value);
+
+  /**
+   * Sets the value of a property to a string.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setStringProperty(
+      String type, String namespace, String name, String value);
+
+  /**
+   * Sets the value of a property to a boolean.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setBooleanProperty(
+      String type, String namespace, String name, boolean value);
+
+  /**
+   * Sets the value of a property to a long.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setJsonArrayProperty(
+      String type, String namespace, String name, JsonArray value);
+
+  /**
+   * Sets the value of a property to a long.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return nothing.
+   * @throws InvalidDataOperation exception if the value can not be converted to the properties'
+   *     data propertyType.
+   */
+  CompletableFuture<Void> setJsonObjectProperty(
+      String type, String namespace, String name, JsonObject value);
+}

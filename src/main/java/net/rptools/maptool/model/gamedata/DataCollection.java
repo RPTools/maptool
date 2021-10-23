@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.gamedata.data.DataType;
+import net.rptools.maptool.model.gamedata.data.DataValue;
 
 /** Interface that defines the methods that a DataStore must implement. */
 public interface DataCollection {
@@ -51,10 +53,9 @@ public interface DataCollection {
   CompletableFuture<List<String>> getKeys();
 
   /**
-   * Returns if the key is contained in the given DataCollection.
-   * This will return {@code true} if the key is contained in the DataCollection even if
-   * the value for it has not been defined. If you want to check if the value is present
-   * and defined use {link #isDefined(String)}.
+   * Returns if the key is contained in the given DataCollection. This will return {@code true} if
+   * the key is contained in the DataCollection even if the value for it has not been defined. If
+   * you want to check if the value is present and defined use {link #isDefined(String)}.
    *
    * @param key the key to check for.
    * @return if the key is contained in the given DataCollection.
@@ -75,88 +76,94 @@ public interface DataCollection {
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setValue(String key, DataValue value);
 
   /**
    * Sets the Long value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setLong(String key, long value);
 
   /**
    * Sets the Double value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setDouble(String key, double value);
 
   /**
    * Sets the String value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setString(String key, String value);
 
   /**
    * Sets the Boolean value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setBoolean(String key, boolean value);
 
   /**
    * Sets the Long value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setList(String key, List<DataValue> value);
 
   /**
    * Sets the Map value for the given key.
+   *
    * @param key the key to set the value for.
    * @param value the value to set.
    * @return nothing.
-   * @throws InvalidDataOperation if the value cannot be converted to the correct type.
+   * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setMap(String key, Map<String, DataValue> value);
 
-
   /**
-   * Sets the type for a key.
-   * @param key the key to set the type for.
-   * @param type the type to define.
+   * Sets the propertyType for a key.
+   *
+   * @param key the key to set the propertyType for.
+   * @param type the propertyType to define.
    * @return nothing
    */
   CompletableFuture<Void> setDataType(String key, DataType type);
 
-
   /**
-   * Returns the data type for a key.
-   * @param key the key to get the type for.
-   * @return the data type for a key.
+   * Returns the data propertyType for a key.
+   *
+   * @param key the key to get the propertyType for.
+   * @return the data propertyType for a key.
    */
   CompletableFuture<DataType> getDataType(String key);
 
-
   /**
    * Clears the value for the given key.
-   * @param key  the key to clear the value for.
+   *
+   * @param key the key to clear the value for.
    * @return nothing.
-   * @throws InvalidDataOperation if the key doesn't already exist as we wont be able to
-   * determine type.
+   * @throws InvalidDataOperation if the key doesn't already exist as we wont be able to determine
+   *     propertyType.
    */
   CompletableFuture<Void> setUndefined(String key);
 
@@ -168,19 +175,19 @@ public interface DataCollection {
    */
   CompletableFuture<Void> remove(String key);
 
-
   /**
-   * Changes the data type for a key.
-   * @param key the key to change the type for.
-   * @param dataType the new data type.
+   * Changes the data propertyType for a key.
+   *
+   * @param key the key to change the propertyType for.
+   * @param dataType the new data propertyType.
    * @return nothing.
-   * @throws InvalidDataOperation if the key cannot be converted to the new type.
+   * @throws InvalidDataOperation if the key cannot be converted to the new propertyType.
    */
   CompletableFuture<Void> changeDataType(String key, DataType dataType);
 
-
   /**
    * Returns the keys for the given DataCollection is defined and present.
+   *
    * @param key the key to get the keys for.
    * @return the keys for the given DataCollection is defined and present.
    */
