@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
 
 public class ServerPolicy {
@@ -40,6 +42,8 @@ public class ServerPolicy {
 
   private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
   private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
+
+  private boolean usePasswordFile;
 
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
@@ -207,6 +211,14 @@ public class ServerPolicy {
     this.vblBlocksMove = vblBlocksMove;
   }
 
+  public void setUsePasswordFile(boolean usePwdFile) {
+    this.usePasswordFile = usePwdFile;
+  }
+
+  public boolean getUsePasswordFile() {
+    return this.usePasswordFile;
+  }
+
   /**
    * Retrieves the server side preferences as a json object.
    *
@@ -261,6 +273,13 @@ public class ServerPolicy {
     sinfo.addProperty(
         "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
+    sinfo.addProperty("useWebRTC", AppState.useWebRTC() ? BigDecimal.ONE : BigDecimal.ZERO);
+
+    StartServerDialogPreferences prefs = new StartServerDialogPreferences();
+    sinfo.addProperty(
+        "usePasswordFile", prefs.getUsePasswordFile() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("server name", prefs.getRPToolsName());
+    sinfo.addProperty("port number", prefs.getPort());
     return sinfo;
   }
 }

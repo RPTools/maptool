@@ -976,6 +976,7 @@ public class MapTool {
       clientFrame.setCurrentZoneRenderer(null);
       return;
     }
+
     // Install new campaign
     for (Zone zone : campaign.getZones()) {
       ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);

@@ -64,7 +64,7 @@ public class FogOfWarFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    int maxParamSize = functionName.equals("exposeFOW") || functionName.equals("exposeFoW") ? 3 : 1;
+    int maxParamSize = functionName.equalsIgnoreCase("exposeFOW") ? 3 : 1;
 
     if (parameters.size() > maxParamSize) {
       throw new ParserException(
@@ -90,21 +90,21 @@ public class FogOfWarFunctions extends AbstractFunction {
     /*
      * String empty = exposePCOnlyArea(optional String mapName)
      */
-    if (functionName.equals("exposePCOnlyArea")) {
+    if (functionName.equalsIgnoreCase("exposePCOnlyArea")) {
       FogUtil.exposePCArea(zoneRenderer);
       return "<!---->";
     }
     /*
      * String empty = exposeAllOwnedArea(optional String mapName)
      */
-    if (functionName.equals("exposeAllOwnedArea")) {
+    if (functionName.equalsIgnoreCase("exposeAllOwnedArea")) {
       FogUtil.exposeAllOwnedArea(zoneRenderer);
       return "<!---->";
     }
     /*
      * String empty = exposeFOW(optional String mapName, optional String tokens, optional String delim)
      */
-    if (functionName.equals("exposeFOW") || functionName.equals("exposeFoW")) {
+    if (functionName.equalsIgnoreCase("exposeFOW")) {
 
       Set<GUID> tokenSet;
 
@@ -123,14 +123,14 @@ public class FogOfWarFunctions extends AbstractFunction {
     /*
      * String empty = restoreFOW(optional String mapName)
      */
-    if (functionName.equals("restoreFOW") || functionName.equals("restoreFoW")) {
+    if (functionName.equalsIgnoreCase("restoreFOW")) {
       FogUtil.restoreFoW(zoneRenderer);
       return "<!---->";
     }
     /*
      * Lee: String empty = toggleFoW()
      */
-    if (functionName.equals("toggleFoW")) {
+    if (functionName.equalsIgnoreCase("toggleFoW")) {
       ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).execute(null);
       return ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).isSelected()
           ? I18N.getText("msg.info.action.enableFoW")
@@ -139,7 +139,7 @@ public class FogOfWarFunctions extends AbstractFunction {
     /*
      * Lee: String empty = exposeFogAtWaypoints()
      */
-    if (functionName.equals("exposeFogAtWaypoints")) {
+    if (functionName.equalsIgnoreCase("exposeFogAtWaypoints")) {
 
       if (((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL).isAvailable()) {
         ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL).execute(null);

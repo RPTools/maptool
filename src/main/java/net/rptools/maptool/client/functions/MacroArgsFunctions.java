@@ -45,7 +45,7 @@ public class MacroArgsFunctions extends AbstractFunction {
       argCount = ((BigDecimal) numArgs).intValue();
     }
 
-    if (functionName.equals("argCount")) {
+    if (functionName.equalsIgnoreCase("argCount")) {
       return BigDecimal.valueOf(argCount);
     } else if ("arg".equalsIgnoreCase(functionName)) {
 

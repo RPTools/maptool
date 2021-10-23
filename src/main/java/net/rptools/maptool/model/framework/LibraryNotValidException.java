@@ -26,12 +26,14 @@ package net.rptools.maptool.model.framework;
 public class LibraryNotValidException extends RuntimeException {
   public enum Reason {
     MISSING_LIBRARY,
-    MISSING_PERMISSIONS
+    MISSING_PERMISSIONS,
+    BAD_CONVERSION,
+    BAD_LOCATION
   };
 
   private final Reason reason;
 
-  LibraryNotValidException(Reason reason, String message) {
+  public LibraryNotValidException(Reason reason, String message) {
     super(message);
     this.reason = reason;
   }

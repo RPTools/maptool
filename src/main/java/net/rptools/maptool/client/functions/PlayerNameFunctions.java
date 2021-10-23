@@ -43,7 +43,7 @@ public class PlayerNameFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("getPlayerName")) {
+    if (functionName.equalsIgnoreCase("getPlayerName")) {
       return MapTool.getPlayer().getName();
     } else if ("getAllPlayerNames".equalsIgnoreCase(functionName)) {
       ObservableList<Player> players = MapTool.getPlayerList();

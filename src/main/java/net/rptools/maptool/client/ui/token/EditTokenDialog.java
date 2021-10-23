@@ -1229,12 +1229,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                   }
                 }
 
-                TokenVBL.renderVBL(
+                TokenVBL.renderTopology(
                     MapTool.getFrame().getCurrentZoneRenderer(),
                     getTokenVblPanel()
                         .getToken()
                         .getTransformedVBL(getTokenVblPanel().getTokenVBL_optimized()),
-                    false);
+                    false,
+                    Zone.TopologyMode.VBL);
 
                 if (getCopyOrMoveCheckbox().isSelected()) {
                   getTokenVblPanel().setTokenVBL_optimized(null);
@@ -1258,7 +1259,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 Area newTokenVBL =
                     TokenVBL.getVBL_underToken(
                         MapTool.getFrame().getCurrentZoneRenderer(), getTokenVblPanel().getToken());
-                TokenVBL.renderVBL(MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true);
+                TokenVBL.renderTopology(
+                    MapTool.getFrame().getCurrentZoneRenderer(),
+                    newTokenVBL,
+                    true,
+                    Zone.TopologyMode.VBL);
               }
 
               getTokenVblPanel().repaint();
