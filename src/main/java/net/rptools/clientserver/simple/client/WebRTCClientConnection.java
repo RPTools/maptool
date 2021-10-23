@@ -32,9 +32,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class WebRTCClientConnection extends AbstractConnection
-    implements ClientConnection,
-        PeerConnectionObserver,
-        RTCDataChannelObserver {
+    implements ClientConnection, PeerConnectionObserver, RTCDataChannelObserver {
   private static final Logger log = Logger.getLogger(WebRTCClientConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
@@ -70,44 +68,50 @@ public class WebRTCClientConnection extends AbstractConnection
     init();
 
     peerConnection = factory.createPeerConnection(rtcConfig, this);
-    peerConnection.setRemoteDescription(message.offer, new SetSessionDescriptionObserver() {
-      @Override
-      public void onSuccess() {
-        log.info(prefix() + " setRemoteDescription success.");
-      }
-
-      @Override
-      public void onFailure(String error) {
-        log.error(prefix() + " error setting remote description: " + error);
-      }
-    });
-
-    var answerOptions = new RTCAnswerOptions();
-    peerConnection.createAnswer(answerOptions, new CreateSessionDescriptionObserver() {
-      @Override
-      public void onSuccess(RTCSessionDescription description) {
-        peerConnection.setLocalDescription(description, new SetSessionDescriptionObserver() {
+    peerConnection.setRemoteDescription(
+        message.offer,
+        new SetSessionDescriptionObserver() {
           @Override
           public void onSuccess() {
-              var msg = new AnswerMessageDto();
-              msg.source = serverConnection.getConfig().getServerName();
-              msg.destination = getId();
-              msg.answer = description;
-              sendSignalingMessage(gson.toJson(msg));
+            log.info(prefix() + " setRemoteDescription success.");
           }
 
           @Override
           public void onFailure(String error) {
-            log.error(prefix() + "Error setting answer as local description: " + error);
+            log.error(prefix() + " error setting remote description: " + error);
           }
         });
-      }
 
-      @Override
-      public void onFailure(String error) {
-        log.error(prefix() + "Error creating answer: " + error);
-      }
-    });
+    var answerOptions = new RTCAnswerOptions();
+    peerConnection.createAnswer(
+        answerOptions,
+        new CreateSessionDescriptionObserver() {
+          @Override
+          public void onSuccess(RTCSessionDescription description) {
+            peerConnection.setLocalDescription(
+                description,
+                new SetSessionDescriptionObserver() {
+                  @Override
+                  public void onSuccess() {
+                    var msg = new AnswerMessageDto();
+                    msg.source = serverConnection.getConfig().getServerName();
+                    msg.destination = getId();
+                    msg.answer = description;
+                    sendSignalingMessage(gson.toJson(msg));
+                  }
+
+                  @Override
+                  public void onFailure(String error) {
+                    log.error(prefix() + "Error setting answer as local description: " + error);
+                  }
+                });
+          }
+
+          @Override
+          public void onFailure(String error) {
+            log.error(prefix() + "Error creating answer: " + error);
+          }
+        });
   }
 
   private boolean isServerSide() {
@@ -229,17 +233,19 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private void onAnswer(AnswerMessageDto answerMessage) {
-    peerConnection.setRemoteDescription(answerMessage.answer, new SetSessionDescriptionObserver() {
-      @Override
-      public void onSuccess() {
-        log.info(prefix() + " setRemoteDescription success.");
-      }
+    peerConnection.setRemoteDescription(
+        answerMessage.answer,
+        new SetSessionDescriptionObserver() {
+          @Override
+          public void onSuccess() {
+            log.info(prefix() + " setRemoteDescription success.");
+          }
 
-      @Override
-      public void onFailure(String error) {
-        log.error(prefix() + " error setting remote description: " + error);
-      }
-    });
+          @Override
+          public void onFailure(String error) {
+            log.error(prefix() + " error setting remote description: " + error);
+          }
+        });
   }
 
   private void onLogin(LoginMessageDto message) {
@@ -255,31 +261,35 @@ public class WebRTCClientConnection extends AbstractConnection
     localDataChannel.registerObserver(this);
 
     var offerOptions = new RTCOfferOptions();
-    peerConnection.createOffer(offerOptions, new CreateSessionDescriptionObserver() {
-      @Override
-      public void onSuccess(RTCSessionDescription description) {
-        peerConnection.setLocalDescription(description, new SetSessionDescriptionObserver() {
+    peerConnection.createOffer(
+        offerOptions,
+        new CreateSessionDescriptionObserver() {
           @Override
-          public void onSuccess() {
-            var msg = new OfferMessageDto();
-            msg.offer = description;
-            msg.source = getSource();
-            msg.destination = config.getServerName();
-            sendSignalingMessage(gson.toJson(msg));
+          public void onSuccess(RTCSessionDescription description) {
+            peerConnection.setLocalDescription(
+                description,
+                new SetSessionDescriptionObserver() {
+                  @Override
+                  public void onSuccess() {
+                    var msg = new OfferMessageDto();
+                    msg.offer = description;
+                    msg.source = getSource();
+                    msg.destination = config.getServerName();
+                    sendSignalingMessage(gson.toJson(msg));
+                  }
+
+                  @Override
+                  public void onFailure(String error) {
+                    log.error(prefix() + "Error setting answer as local description: " + error);
+                  }
+                });
           }
 
           @Override
           public void onFailure(String error) {
-            log.error(prefix() + "Error setting answer as local description: " + error);
+            log.error(prefix() + "Error creating offer: " + error);
           }
         });
-      }
-
-      @Override
-      public void onFailure(String error) {
-        log.error(prefix() + "Error creating offer: " + error);
-      }
-    });
   }
 
   private String prefix() {
@@ -340,9 +350,18 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void onIceCandidateError(RTCPeerConnectionIceErrorEvent event) {
-    log.info(prefix() + "PeerConnection.onIceCandidateError: code:" + event.getErrorCode()  +
-        " url: " + event.getUrl() + " address/port: " + event.getAddress() + ":" + event.getPort() +
-        " text: "+ event.getErrorText());
+    log.info(
+        prefix()
+            + "PeerConnection.onIceCandidateError: code:"
+            + event.getErrorCode()
+            + " url: "
+            + event.getUrl()
+            + " address/port: "
+            + event.getAddress()
+            + ":"
+            + event.getPort()
+            + " text: "
+            + event.getErrorText());
   }
 
   @Override
@@ -368,9 +387,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
     if (isServerSide()) {
       handleConnect =
-          new Thread(
-              () -> serverConnection.onDataChannelOpened(this),
-              "handleConnect_" + id);
+          new Thread(() -> serverConnection.onDataChannelOpened(this), "handleConnect_" + id);
       if (handleConnect.getContextClassLoader() == null) {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
         handleConnect.setContextClassLoader(cl);

@@ -15,7 +15,6 @@
 package net.rptools.clientserver.simple.server;
 
 import com.google.gson.Gson;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
