@@ -58,7 +58,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   }
 
   private void sendSignalingMessage(String message) {
-    log.info("S sent signaling message: " + message);
+    log.debug("S sent signaling message: " + message);
     signalingClient.send(message);
   }
 
@@ -101,7 +101,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   }
 
   private void handleSignalingMessage(String message) {
-    log.info("S got signaling message: " + message);
+    log.debug("S got signaling message: " + message);
     var msg = gson.fromJson(message, MessageDto.class);
 
     switch (msg.type) {

@@ -208,12 +208,12 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private void sendSignalingMessage(String message) {
-    log.info(prefix() + "sent signaling message: " + message);
+    log.debug(prefix() + "sent signaling message: " + message);
     signalingClient.send(message);
   }
 
   private void handleSignalingMessage(String message) {
-    log.info(prefix() + "got signaling message: " + message);
+    log.debug(prefix() + "got signaling message: " + message);
     var msg = gson.fromJson(message, MessageDto.class);
     switch (msg.type) {
       case "login" -> {
