@@ -1,3 +1,7 @@
+# MapTool 1.10.4
+## Bug Fixes
+- [#3108][i3108] Fix connecting via WebRTC issues.
+
 # MapTool 1.10.3
 ## Bug Fixes
 - [#3074][i3074] Fix NPE crash on exit when connection hasn't been established.
@@ -88,6 +92,7 @@ Feature release using OpenJDK 16.
 
 [Change Log for 1.9.3](https://github.com/RPTools/maptool/blob/1.9.3/CHANGE_LOG.md)
 
+[i3108]: https://github.com/RPTools/maptool/issues/3108
 [i3074]: https://github.com/RPTools/maptool/issues/3074
 [i3025]: https://github.com/RPTools/maptool/issues/3025
 [i3023]: https://github.com/RPTools/maptool/issues/3023
