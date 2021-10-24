@@ -52,7 +52,7 @@ public class MemoryDataStore implements DataStore {
  ) {};
 
 
-  private final ConcurrentHashMap<String, Set<PropertyTypeNamespace>> propertyTypeNamespaceMap =
+  private final ConcurrentHashMap<String, Set<String>> propertyTypeNamespaceMap =
       new ConcurrentHashMap<>();
 
   private final ConcurrentHashMap<PropertyTypeNamespace, Map<String, Data>> dataMap =
@@ -83,7 +83,7 @@ public class MemoryDataStore implements DataStore {
     return CompletableFuture.supplyAsync(() -> {
       var propertyTypeNamespace = propertyTypeNamespaceMap.get(type);
       if (propertyTypeNamespace != null) {
-        return propertyTypeNamespace.stream().map(PropertyTypeNamespace::namespace).collect(Collectors.toSet());
+        return new HashSet<>(propertyTypeNamespace);
      } else {
         return new HashSet<>();
     }
@@ -92,23 +92,41 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<Boolean> hasPropertyNamespace(String type, String namespace) {
-    return CompletableFuture.completedFuture(() -> {
+    return CompletableFuture.supplyAsync(() -> {
       var propertyTypeNamespace = propertyTypeNamespaceMap.get(type);
+      if (propertyTypeNamespace != null) {
+        return propertyTypeNamespace.contains(namespace);
+      }
+      return Boolean.FALSE;
     });
+  }
+
+  /**
+   * Returns the data value for the given property type, namespace and name. This will return
+   * null if the data does not exist.
+   *
+   * @param type the property type.
+   * @param namespace the property namespace.
+   * @param name the property name.
+   * @return the data value.
+   */
+  private Data getData(String type, String namespace, String name) {
+    var propertyTypeNamespace = new PropertyTypeNamespace(type, namespace);
+    var values = dataMap.get(propertyTypeNamespace);
+    return values.get(name);
   }
 
   @Override
   public CompletableFuture<DataType> getPropertyDataType(
       String type, String namespace, String name) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          var def = getDefinition(type, namespace, name);
-          if (def != null) {
-            return def.dataType();
-          } else {
-            return DataType.UNDEFINED;
-          }
-        });
+    return CompletableFuture.supplyAsync( () -> {
+       var data = getData(type, namespace, name);
+       if (data == null) {
+         return DataValueFactory.undefined(name);
+       } else {
+         return data.dataValue().getDataType();
+       }
+    });
   }
 
   /**

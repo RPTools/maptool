@@ -116,4 +116,13 @@ public class DataValueFactory {
       case UNDEFINED -> new UndefinedDataValue(name);
     };
   }
+
+  /**
+   * Returns an undefined DataValue.
+   * @param name The name of the value.
+   * @return An undefined DataValue.
+   */
+  public static DataValue undefined(String name) {
+    return new UndefinedDataValue(name);
+  }
 }
