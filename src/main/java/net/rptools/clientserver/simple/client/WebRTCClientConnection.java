@@ -487,7 +487,10 @@ public class WebRTCClientConnection extends AbstractConnection
     if (sendThread.stopRequested) return;
 
     sendThread.requestStop();
-    if (peerConnection != null) peerConnection.close();
+    if (peerConnection != null) {
+      peerConnection.close();
+      peerConnection = null;
+    }
   }
 
   @Override
