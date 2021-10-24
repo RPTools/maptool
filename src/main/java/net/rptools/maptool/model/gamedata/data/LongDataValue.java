@@ -54,11 +54,7 @@ public final class LongDataValue implements DataValue {
 
   @Override
   public String getName() {
-    if (undefined) {
-      throw InvalidDataOperation.createUndefined(name);
-    } else {
-      return name;
-    }
+    return name;
   }
 
   @Override

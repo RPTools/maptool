@@ -40,7 +40,7 @@ public final class UndefinedDataValue implements DataValue {
 
   @Override
   public DataType getDataType() {
-    return DataType.LONG;
+    return DataType.UNDEFINED;
   }
 
   @Override
