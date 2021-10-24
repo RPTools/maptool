@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
 /** Class that implements the DataStore interface. */
 public class MemoryDataStore implements DataStore {
 
-  private record PropertyTypeNamespace(String propertyType, String namespace)
+  private record PropertyTypeNamespace(String propertyType, String namespace) {};
 
   /** Class used to cache definitions. */
   private record Data(
@@ -51,10 +52,11 @@ public class MemoryDataStore implements DataStore {
  ) {};
 
 
-  private final ConcurrentHashMap<String, PropertyTypeNamespace> propertyTypeNamespaceMap =
+  private final ConcurrentHashMap<String, Set<PropertyTypeNamespace>> propertyTypeNamespaceMap =
       new ConcurrentHashMap<>();
 
-  private final ConcurrentHashMap<PropertyTypeNamespace, Data> dataMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<PropertyTypeNamespace, Map<String, Data>> dataMap =
+      new ConcurrentHashMap<>();
 
 
 
@@ -77,44 +79,22 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<Set<String>> getPropertyNamespaces(String type) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          var namespaces = new HashSet<String>();
-          try (PreparedStatement stmt =
-              connection.getConnection().prepareStatement(GET_NAMESPACES)) {
-            stmt.setString(1, type);
-            try (var resultSet = stmt.executeQuery()) {
-              namespaces.add(resultSet.getString(1));
-            }
-          } catch (SQLException e) {
-            log.error("Unable to fetch property namespaces", e);
-            throw new CompletionException(e);
-          }
-          return namespaces;
-        });
+
+    return CompletableFuture.supplyAsync(() -> {
+      var propertyTypeNamespace = propertyTypeNamespaceMap.get(type);
+      if (propertyTypeNamespace != null) {
+        return propertyTypeNamespace.stream().map(PropertyTypeNamespace::namespace).collect(Collectors.toSet());
+     } else {
+        return new HashSet<>();
+    }
+    });
   }
 
   @Override
   public CompletableFuture<Boolean> hasPropertyNamespace(String type, String namespace) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try (PreparedStatement stmt =
-              connection.getConnection().prepareStatement(GET_NAMESPACE_DETAILS)) {
-            stmt.setString(1, type);
-            stmt.setString(2, namespace);
-            stmt.executeQuery();
-            try (var resultSet = stmt.executeQuery()) {
-              if (resultSet.next()) {
-                return Boolean.TRUE;
-              } else {
-                return Boolean.FALSE;
-              }
-            }
-          } catch (SQLException e) {
-            log.error("Unable to fetch property namespaces", e);
-            throw new CompletionException(e);
-          }
-        });
+    return CompletableFuture.completedFuture(() -> {
+      var propertyTypeNamespace = propertyTypeNamespaceMap.get(type);
+    });
   }
 
   @Override
