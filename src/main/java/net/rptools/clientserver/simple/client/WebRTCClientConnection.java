@@ -48,7 +48,6 @@ public class WebRTCClientConnection extends AbstractConnection
   private String lastError = null;
 
   private final SendThread sendThread = new SendThread(this);
-  private Thread handleConnect;
   private Thread handleDisconnect;
 
   // used from client side
@@ -544,7 +543,7 @@ public class WebRTCClientConnection extends AbstractConnection
           }
         }
       } catch (Exception e) {
-        log.error(prefix() + e.toString());
+        log.error(prefix() + e);
         fireDisconnect();
       }
       log.debug(prefix() + " sendThread ended");
