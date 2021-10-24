@@ -47,7 +47,7 @@ public class InvalidDataOperation extends RuntimeException {
    *
    * @return the propertyType of error that occurred.
    */
-  public Type getErrType() {
+  public Type getErrorType() {
     return errorType;
   }
 
