@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -98,9 +99,10 @@ public interface DataStore {
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setProperty(String type, String namespace, DataValue value);
 
@@ -111,9 +113,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setLongProperty(String type, String namespace, String name, long value);
 
@@ -124,9 +127,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setDoubleProperty(
       String type, String namespace, String name, double value);
@@ -138,9 +142,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setStringProperty(
       String type, String namespace, String name, String value);
@@ -152,9 +157,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setBooleanProperty(
       String type, String namespace, String name, boolean value);
@@ -166,9 +172,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setJsonArrayProperty(
       String type, String namespace, String name, JsonArray value);
@@ -179,11 +186,48 @@ public interface DataStore {
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
    * @param name the name of the property.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    * @param value the value of the property.
-   * @return nothing.
+   * @return a {@code Void} completable future.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
+   * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
   CompletableFuture<Void> setJsonObjectProperty(
       String type, String namespace, String name, JsonObject value);
+
+  /**
+   * Creates a new namespace with no initial data or types.
+   *
+   * @param propertyType the propertyType of the namespace.
+   * @param namespace the namespace to create.
+   * @return a {@code Void} completable future.
+   * @throws InvalidDataOperation exception if the namespace already exists.
+   */
+  CompletableFuture<Void> createNamespace(String propertyType, String namespace);
+
+  /**
+   * Creates a new namespace with the specified initial data.
+   *
+   * @param propertyType the propertyType of the namespace.
+   * @param namespace the namespace to create.
+   * @param initialData the initial data to set.
+   * @return a {@code Void} completable future.
+   * @throws InvalidDataOperation exception if the namespace already exists.
+   */
+  CompletableFuture<Void> createNamespaceWithInitialData(
+      String propertyType, String namespace, Collection<DataValue> initialData);
+
+  /**
+   * Creates a new namespace with the specified with the specified types, initial data will be
+   * undefined.
+   *
+   * @param propertyType the propertyType of the namespace.
+   * @param namespace the namespace to create.
+   * @param dataTypes the data types to set.
+   * @return a {@code Void} completable future.
+   * @throws InvalidDataOperation exception if the namespace already exists.
+   */
+  CompletableFuture<Void> createNamespaceWithTypes(
+      String propertyType, String namespace, Map<String, DataType> dataTypes);
 }

@@ -24,7 +24,8 @@ public class InvalidDataOperation extends RuntimeException {
   public enum Type {
     INVALID_CONVERSION,
     ALREADY_EXISTS,
-    UNDEFINED
+    UNDEFINED,
+    NAMESPACE_DOES_NOT_EXIST
   }
 
   /** the propertyType of error that occurred */
@@ -94,5 +95,33 @@ public class InvalidDataOperation extends RuntimeException {
    */
   public static InvalidDataOperation createUndefined(String name) {
     return new InvalidDataOperation(I18N.getText("data.error.undefined", name), Type.UNDEFINED);
+  }
+
+  /**
+   * Create an InvalidDataOperation for when a namespace does not exist for a propertyType.
+   *
+   * @param propertyType the propertyType for the namespace.
+   * @param namespace The namespace that does not exist.
+   * @return the InvalidDataOperation.
+   */
+  public static InvalidDataOperation createNamespaceDoesNotExist(
+      String propertyType, String namespace) {
+    return new InvalidDataOperation(
+        I18N.getText("data.error.namespaceDoesNotExist", namespace, propertyType),
+        Type.NAMESPACE_DOES_NOT_EXIST);
+  }
+
+  /**
+   * Create an InvalidDataOperation for when a namespace already exists for a property type.
+   *
+   * @param propertyType the propertyType for the namespace.
+   * @param namespace The namespace that already exists.
+   * @return
+   */
+  public static InvalidDataOperation createNamespaceAlreadyExists(
+      String propertyType, String namespace) {
+    return new InvalidDataOperation(
+        I18N.getText("data.error.namespaceAlreadyExists", namespace, propertyType),
+        Type.ALREADY_EXISTS);
   }
 }

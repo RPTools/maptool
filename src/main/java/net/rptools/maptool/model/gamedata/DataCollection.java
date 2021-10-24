@@ -75,7 +75,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setValue(String key, DataValue value);
@@ -85,7 +85,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setLong(String key, long value);
@@ -95,7 +95,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setDouble(String key, double value);
@@ -105,7 +105,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setString(String key, String value);
@@ -115,7 +115,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setBoolean(String key, boolean value);
@@ -125,7 +125,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setList(String key, List<DataValue> value);
@@ -135,7 +135,7 @@ public interface DataCollection {
    *
    * @param key the key to set the value for.
    * @param value the value to set.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the value cannot be converted to the correct propertyType.
    */
   CompletableFuture<Void> setMap(String key, Map<String, DataValue> value);
@@ -145,7 +145,7 @@ public interface DataCollection {
    *
    * @param key the key to set the propertyType for.
    * @param type the propertyType to define.
-   * @return nothing
+   * @return a {@code Void} completable future.
    */
   CompletableFuture<Void> setDataType(String key, DataType type);
 
@@ -161,7 +161,7 @@ public interface DataCollection {
    * Clears the value for the given key.
    *
    * @param key the key to clear the value for.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the key doesn't already exist as we wont be able to determine
    *     propertyType.
    */
@@ -171,7 +171,7 @@ public interface DataCollection {
    * removes the value for the given key.
    *
    * @param key the key to remove the value for.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    */
   CompletableFuture<Void> remove(String key);
 
@@ -180,7 +180,7 @@ public interface DataCollection {
    *
    * @param key the key to change the propertyType for.
    * @param dataType the new data propertyType.
-   * @return nothing.
+   * @return a {@code Void} completable future..
    * @throws InvalidDataOperation if the key cannot be converted to the new propertyType.
    */
   CompletableFuture<Void> changeDataType(String key, DataType dataType);
