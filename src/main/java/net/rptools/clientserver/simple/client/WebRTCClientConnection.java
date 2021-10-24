@@ -27,6 +27,7 @@ import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.ServerConfig;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -386,13 +387,7 @@ public class WebRTCClientConnection extends AbstractConnection
     localDataChannel.registerObserver(this);
 
     if (isServerSide()) {
-      handleConnect =
-          new Thread(() -> serverConnection.onDataChannelOpened(this), "handleConnect_" + id);
-      if (handleConnect.getContextClassLoader() == null) {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        handleConnect.setContextClassLoader(cl);
-      }
-      handleConnect.start();
+      serverConnection.onDataChannelOpened(this);
     }
   }
 
@@ -487,7 +482,10 @@ public class WebRTCClientConnection extends AbstractConnection
     if (sendThread.stopRequested) return;
 
     sendThread.requestStop();
-    if (peerConnection != null) peerConnection.close();
+    if (peerConnection != null) {
+      peerConnection.close();
+      peerConnection = null;
+    }
   }
 
   @Override
