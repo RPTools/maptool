@@ -386,13 +386,7 @@ public class WebRTCClientConnection extends AbstractConnection
     localDataChannel.registerObserver(this);
 
     if (isServerSide()) {
-      handleConnect =
-          new Thread(() -> serverConnection.onDataChannelOpened(this), "handleConnect_" + id);
-      if (handleConnect.getContextClassLoader() == null) {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        handleConnect.setContextClassLoader(cl);
-      }
-      handleConnect.start();
+      serverConnection.onDataChannelOpened(this);
     }
   }
 
