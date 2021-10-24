@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
@@ -35,152 +36,43 @@ import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import org.apache.log4j.Logger;
 
 /** Class that implements the DataStore interface. */
-public class DataStoreImpl implements DataStore {
+public class MemoryDataStore implements DataStore {
+
+  private record PropertyTypeNamespace(String propertyType, String namespace)
 
   /** Class used to cache definitions. */
-  private record Definition(
+  private record Data(
       String propertyType,
       String namespace,
       String name,
       long collectionId,
       long dataId,
-      DataType dataType,
-      boolean defined,
-      boolean clob) {}
+      DataValue dataValue
+ ) {};
 
-  /** cache of definitions. */
-  private final AtomicReference<Definition> cachedDefinition = new AtomicReference<>();
+
+  private final ConcurrentHashMap<String, PropertyTypeNamespace> propertyTypeNamespaceMap =
+      new ConcurrentHashMap<>();
+
+  private final ConcurrentHashMap<PropertyTypeNamespace, Data> dataMap = new ConcurrentHashMap<>();
+
+
 
   /** Class for logging. */
-  private static final Logger log = Logger.getLogger(DataStoreImpl.class);
+  private static final Logger log = Logger.getLogger(MemoryDataStore.class);
 
-  /** SQL query to get the property types. */
-  private static final String GET_PROPERTY_TYPE = "select property_type from property_collection";
-
-  /** SQL query to get the property namespaces for a type. */
-  private static final String GET_NAMESPACES =
-      """
-        select namespace
-          from property_collection
-         where property_type = ?
-      """;
-
-  private static final String GET_NAMESPACE_DETAILS =
-      """
-        select property_type, namespace, collection_id
-          from property_collection
-         where property_type = ?
-           and namespace = ?
-      """;
-
-  /** SQL query to get the property definitions for a type/namespace/name. */
-  private static String GET_PROPERTY_DEFINITION =
-      """
-        select c.property_type, c.namespace, c.collection_id,
-               d.name, d.type, d.defined, c.is_clob
-          from property_collection c
-          join property_definition d on c.collection_id = d.collection_id
-         where c.property_type = ?
-           and c.namespace = ?
-           and d.name = ?
-      """;
-
-  /** SQL query to get the property names and data values for a property type + namespace. */
-  private static String GET_PROPERTY_VALUES =
-      """
-        select d.name, pd.numeric_value, pd.string_value, pc.clob_value, d.is_clob
-          from property_collection c
-          join property_definition d on c.collection_id = d.collection_id
-         outer join property_data pd on d.data_id = pd.data_id
-         outer join property_data_clob pc on d.data_id = pc.data_id
-         where c.property_type = ?
-           and c.namespace = ?
-          """;
-
-  /** SQL query to get the data value for a property type + namespace. */
-  private static String GET_PROPERTY_VALUE =
-      """
-        select pd.numeric_value, pd.string_value, pc.clob_value
-          from property_collection c
-          join property_definition d on c.collection_id = d.collection_id
-         outer join property_data pd on d.data_id = pd.data_id
-         outer join property_data_clob pc on d.data_id = pc.data_id
-         where c.property_type = ?
-           and c.namespace = ?
-           and d.name = ?
-          """;
-
-  /** The connection to the database. */
-  private final DataConnection connection;
 
   /**
-   * Creates a new DataStoreImpl.
+   * Creates a new MemoryDataStore.
    *
-   * @param connection the connection to the database
    */
-  public DataStoreImpl(DataConnection connection) {
-    this.connection = connection;
+  MemoryDataStore() {
   }
 
-  private Definition getDefinition(String type, String namespace, String name) {
-    Definition def = cachedDefinition.get();
-    if (def != null
-        && def.name.equals(name)
-        && def.propertyType.equals(type)
-        && def.namespace.equals(namespace)) {
-      return def;
-    }
-    try (PreparedStatement stmt =
-        connection.getConnection().prepareStatement(GET_PROPERTY_DEFINITION)) {
-      stmt.setString(1, type);
-      stmt.setString(2, namespace);
-      stmt.setString(3, name);
-      try (var resultSet = stmt.executeQuery()) {
-        if (resultSet.next()) {
-          def =
-              new Definition(
-                  resultSet.getString("property_type"),
-                  resultSet.getString("namespace"),
-                  resultSet.getString("name"),
-                  resultSet.getLong("collection_id"),
-                  resultSet.getLong("data_id"),
-                  DataType.valueOf(resultSet.getString("type")),
-                  resultSet.getBoolean("defined"),
-                  resultSet.getBoolean("is_clob"));
-        } else {
-          def = null;
-        }
-      } catch (IllegalArgumentException e) {
-        log.error("Unable to fetch property definition", e);
-        throw new CompletionException(e);
-      }
-
-    } catch (SQLException e) {
-      log.error("Unable to fetch property definition", e);
-      throw new CompletionException(e);
-    }
-    cachedDefinition.set(def);
-    return def;
-  }
 
   @Override
   public CompletableFuture<Set<String>> getPropertyTypes() {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          var types = new HashSet<String>();
-          try (PreparedStatement stmt =
-              connection.getConnection().prepareStatement(GET_PROPERTY_TYPE)) {
-            try (var resultSet = stmt.executeQuery()) {
-              while (resultSet.next()) {
-                types.add(resultSet.getString(1));
-              }
-            }
-          } catch (SQLException e) {
-            log.error("Unable to fetch property types", e);
-            throw new CompletionException(e);
-          }
-          return types;
-        });
+    return CompletableFuture.completedFuture(new HashSet<>(propertyTypeNamespaceMap.keySet()));
   }
 
   @Override
