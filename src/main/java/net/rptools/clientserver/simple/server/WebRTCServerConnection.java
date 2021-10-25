@@ -136,7 +136,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     try {
       handleConnection(connection);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error(e);
     }
   }
 

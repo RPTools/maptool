@@ -27,6 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
+import org.apache.log4j.Logger;
 
 /**
  * @author drice
@@ -36,6 +37,7 @@ import net.rptools.clientserver.ActivityListener.State;
 public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
+  private static final Logger log = Logger.getLogger(AbstractConnection.class);
   protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();
   protected List<List<byte[]>> outQueueList = new LinkedList<List<byte[]>>();
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
@@ -52,6 +54,10 @@ public abstract class AbstractConnection implements Connection {
   }
 
   public final void dispatchMessage(String id, byte[] message) {
+    if (messageHandlers.size() == 0) {
+      log.warn("message received but not messageHandlers registered.");
+    }
+
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
     }

@@ -48,7 +48,6 @@ public class WebRTCClientConnection extends AbstractConnection
   private String lastError = null;
 
   private final SendThread sendThread = new SendThread(this);
-  private Thread handleConnect;
   private Thread handleDisconnect;
 
   // used from client side
@@ -386,13 +385,7 @@ public class WebRTCClientConnection extends AbstractConnection
     localDataChannel.registerObserver(this);
 
     if (isServerSide()) {
-      handleConnect =
-          new Thread(() -> serverConnection.onDataChannelOpened(this), "handleConnect_" + id);
-      if (handleConnect.getContextClassLoader() == null) {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        handleConnect.setContextClassLoader(cl);
-      }
-      handleConnect.start();
+      serverConnection.onDataChannelOpened(this);
     }
   }
 
@@ -487,7 +480,10 @@ public class WebRTCClientConnection extends AbstractConnection
     if (sendThread.stopRequested) return;
 
     sendThread.requestStop();
-    if (peerConnection != null) peerConnection.close();
+    if (peerConnection != null) {
+      peerConnection.close();
+      peerConnection = null;
+    }
   }
 
   @Override
@@ -547,7 +543,7 @@ public class WebRTCClientConnection extends AbstractConnection
           }
         }
       } catch (Exception e) {
-        log.error(prefix() + e.toString());
+        log.error(prefix() + e);
         fireDisconnect();
       }
       log.debug(prefix() + " sendThread ended");
