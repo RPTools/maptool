@@ -184,12 +184,8 @@ public class DungeonDraftImporter {
     if (vbl != null) {
       vbl.forEach(
           v -> {
-            Area vblArea =
-                new Area(
-                    OBJECT_VBL_STROKE.createStrokedShape(
-                        getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
-            zone.addTopology(vblArea, TopologyMode.VBL);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            Area vblArea = new Area(getVBLPath(v.getAsJsonArray(), pixelsPerCell));
+            zone.addTopology(vblArea, TopologyMode.TERRAIN_VBL);
           });
     }
 

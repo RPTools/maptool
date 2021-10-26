@@ -317,7 +317,7 @@ class LibraryToken implements Library {
                   new MTScriptMacroInfo(
                       macroName,
                       buttonProps.getCommand(),
-                      !buttonProps.getAllowPlayerEdits(),
+                      library.getOwners().size() == 0 || !buttonProps.getAllowPlayerEdits(),
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
                       buttonProps.getEvaluatedToolTip()));
             });
