@@ -48,6 +48,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -61,6 +62,7 @@ import net.rptools.maptool.transfer.AssetProducer;
 public class ServerMethodHandler extends AbstractMethodHandler implements ServerCommand {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
+  private static final Logger log = Logger.getLogger(ServerMethodHandler.class);
 
   public ServerMethodHandler(MapToolServer server) {
     this.server = server;
@@ -69,6 +71,8 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
+
+    log.debug("from " + id + " got " + method);
 
     try {
       RPCContext context = new RPCContext(id, method, parameters);
