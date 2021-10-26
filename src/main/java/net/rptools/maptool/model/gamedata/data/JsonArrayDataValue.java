@@ -91,10 +91,14 @@ public final class JsonArrayDataValue implements DataValue {
 
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
-    return switch (dataType) {
-      case LONG, DOUBLE, BOOLEAN, STRING, JSON_OBJECT, UNDEFINED -> false;
-      case JSON_ARRAY -> true;
-    };
+    if (undefined) {
+      return false;
+    } else {
+      return switch (dataType) {
+        case LONG, DOUBLE, BOOLEAN, STRING, JSON_OBJECT, UNDEFINED -> false;
+        case JSON_ARRAY -> true;
+      };
+    }
   }
 
   @Override

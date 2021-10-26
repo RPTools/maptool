@@ -78,10 +78,13 @@ public final class StringDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     if (undefined) {
-      throw InvalidDataOperation.createUndefined(name);
+      return false;
     } else {
       return switch (dataType) {
-        case LONG, DOUBLE, BOOLEAN -> canConvertToNumber;
+        case LONG, DOUBLE -> canConvertToNumber;
+        case BOOLEAN -> canConvertToNumber
+            || value.equalsIgnoreCase("true")
+            || value.equalsIgnoreCase("false");
         case STRING, JSON_ARRAY -> true;
         case JSON_OBJECT, UNDEFINED -> false;
       };

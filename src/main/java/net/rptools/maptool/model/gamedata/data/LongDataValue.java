@@ -65,7 +65,7 @@ public final class LongDataValue implements DataValue {
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
     if (undefined) {
-      throw InvalidDataOperation.createUndefined(name);
+      return false;
     } else {
       return switch (dataType) {
         case LONG, DOUBLE, BOOLEAN, STRING, JSON_ARRAY -> true;
