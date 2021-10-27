@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -157,6 +158,14 @@ public class MemoryDataStore implements DataStore {
   }
 
   @Override
+  public CompletableFuture<DataValue> getProperty(String type, String namespace, String name) {
+    return CompletableFuture.supplyAsync(() -> {
+      var prop = getData(type, namespace, name);
+      return Objects.requireNonNullElseGet(prop, () -> DataValueFactory.undefined(name));
+    });
+  }
+
+  @Override
   public CompletableFuture<Void> setProperty(String type, String namespace, DataValue value) {
 
     return CompletableFuture.supplyAsync(()  -> {
@@ -167,11 +176,15 @@ public class MemoryDataStore implements DataStore {
       var existing = getData(type, namespace, value.getName());
       // If no value exists we can put anything there, if a value exists we have to check type is
       // correct
+      var dataMap =
+          namespaceDataMap.computeIfAbsent(
+              new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
       if (existing == null) {
-        var dataMap =
-            namespaceDataMap.computeIfAbsent(
-                new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
+
         dataMap.put(value.getName(), value);
+      } else {
+        var newValue = DataType.convert(value, existing.getDataType());
+        dataMap.put(newValue.getName(), newValue);
       }
       return null;
     });

@@ -93,6 +93,16 @@ public interface DataStore {
    */
   CompletableFuture<Boolean> isPropertyDefined(String type, String namespace, String name);
 
+
+  /**
+   * Returns the value of a property.
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @return the value of a property.
+   */
+  CompletableFuture<DataValue> getProperty(String type, String namespace, String name);
+
   /**
    * Sets the value of a property.
    *
