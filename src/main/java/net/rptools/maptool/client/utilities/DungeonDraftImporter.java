@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.utils.Base64;
 import java.awt.BasicStroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
@@ -50,6 +51,9 @@ public class DungeonDraftImporter {
 
   /** The resolution section of the dungeondraft vtt map. */
   public static final String VTT_FIELD_RESOLUTION = "resolution";
+
+  /** The map origin section of the dungeondraft vtt map. */
+  public static final String VTT_FIELD_MAP_ORIGIN = "map_origin";
 
   /** The number of pixels per grid cell on the vtt map. */
   public static final String VTT_FIELD_PIXELS_PER_GRID = "pixels_per_grid";
@@ -109,6 +113,8 @@ public class DungeonDraftImporter {
   public void importVTT() throws IOException {
     JsonObject ddvtt;
     double dd2vtt_format;
+    boolean do_transform = false;
+    AffineTransform at = new AffineTransform();
 
     try (InputStreamReader reader = new InputStreamReader(new FileInputStream(dungeonDraftFile))) {
       ddvtt = JsonParser.parseReader(reader).getAsJsonObject();
@@ -165,6 +171,25 @@ public class DungeonDraftImporter {
       MapTool.addZone(zone);
     }
 
+    /**
+     * If the top or left sides of the map get cropped off, all the LOS points will need to be
+     * adjusted.
+     */
+    if (resolution.has(VTT_FIELD_MAP_ORIGIN)) {
+      JsonObject origin = resolution.get(VTT_FIELD_MAP_ORIGIN).getAsJsonObject();
+      double origin_x = origin.get("x").getAsDouble() * -1 * pixelsPerCell;
+      double origin_y = origin.get("y").getAsDouble() * -1 * pixelsPerCell;
+      if (origin_x != 0.0 || origin_y != 0.0) {
+        at.translate(origin_x, origin_y);
+        do_transform = true;
+        // if the map was not cropped on the grid fix the grid offset.
+        zone.getGrid()
+            .setOffset((int) (origin_x % pixelsPerCell), (int) (origin_y % pixelsPerCell));
+      }
+    }
+
+    final boolean finalDo_transform = do_transform;
+
     // Handle Walls
     JsonArray vbl = ddvtt.getAsJsonArray("line_of_sight");
     if (vbl != null) {
@@ -174,17 +199,19 @@ public class DungeonDraftImporter {
                 new Area(
                     WALL_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
+            if (finalDo_transform) vblArea.transform(at);
             zone.addTopology(vblArea, TopologyMode.VBL);
             zone.addTopology(vblArea, TopologyMode.MBL);
           });
     }
 
     // Handle Objects - added with Dungeondraft 1.0.2.1
-    vbl = ddvtt.getAsJsonArray("objects_line_of_sight");
-    if (vbl != null) {
-      vbl.forEach(
+    JsonArray objVBL = ddvtt.getAsJsonArray("objects_line_of_sight");
+    if (objVBL != null) {
+      objVBL.forEach(
           v -> {
             Area vblArea = new Area(getVBLPath(v.getAsJsonArray(), pixelsPerCell));
+            if (finalDo_transform) vblArea.transform(at);
             zone.addTopology(vblArea, TopologyMode.TERRAIN_VBL);
           });
     }
@@ -207,6 +234,7 @@ public class DungeonDraftImporter {
 
               Area vblArea =
                   new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
+              if (finalDo_transform) vblArea.transform(at);
               zone.addTopology(vblArea, TopologyMode.COMBINED);
               zone.addTopology(vblArea, TopologyMode.MBL);
             }
