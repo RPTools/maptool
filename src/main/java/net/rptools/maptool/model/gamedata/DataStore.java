@@ -34,11 +34,11 @@ public interface DataStore {
   CompletableFuture<Set<String>> getPropertyTypes();
 
   /**
-   * Returns the namespaces of properties that are stored in this data store for a sepcific
+   * Returns the namespaces of properties that are stored in this data store for a specific
    * propertyType.
    *
    * @param type the propertyType of properties to get the namespaces of.
-   * @return the namespaces of properties that are stored in this data store for a sepcific
+   * @return the namespaces of properties that are stored in this data store for a specific
    *     propertyType.
    */
   CompletableFuture<Set<String>> getPropertyNamespaces(String type);
@@ -93,15 +93,24 @@ public interface DataStore {
    */
   CompletableFuture<Boolean> isPropertyDefined(String type, String namespace, String name);
 
-
   /**
    * Returns the value of a property.
+   *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @return the value of a property.
    */
   CompletableFuture<DataValue> getProperty(String type, String namespace, String name);
+
+  /**
+   * Returns all the properties for a type and namespace.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @return all the properties for a type and namespace.
+   */
+  CompletableFuture<Set<DataValue>> getProperties(String type, String namespace);
 
   /**
    * Sets the value of a property.

@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model.gamedata;
 
-import static com.oracle.truffle.js.builtins.AtomicsBuiltins.Atomics.and;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.Collection;
@@ -101,7 +99,7 @@ public class MemoryDataStore implements DataStore {
   private DataValue getData(String type, String namespace, String name) {
     var propertyTypeNamespace = new PropertyTypeNamespace(type, namespace);
     var values = namespaceDataMap.get(propertyTypeNamespace);
-    return values.get(name);
+    return values != null ? values.get(name) : null;
   }
 
   @Override
@@ -159,35 +157,51 @@ public class MemoryDataStore implements DataStore {
 
   @Override
   public CompletableFuture<DataValue> getProperty(String type, String namespace, String name) {
-    return CompletableFuture.supplyAsync(() -> {
-      var prop = getData(type, namespace, name);
-      return Objects.requireNonNullElseGet(prop, () -> DataValueFactory.undefined(name));
-    });
+    return CompletableFuture.supplyAsync(
+        () -> {
+          var prop = getData(type, namespace, name);
+          return Objects.requireNonNullElseGet(prop, () -> DataValueFactory.undefined(name));
+        });
+  }
+
+  @Override
+  public CompletableFuture<Set<DataValue>> getProperties(String type, String namespace) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          var values = namespaceDataMap.get(new PropertyTypeNamespace(type, namespace));
+          if (values != null) {
+            return Set.copyOf(values.values());
+          } else {
+            return Set.of();
+          }
+        });
   }
 
   @Override
   public CompletableFuture<Void> setProperty(String type, String namespace, DataValue value) {
 
-    return CompletableFuture.supplyAsync(()  -> {
-      if (!checkPropertyNamespace(type, namespace)) {
-        throw InvalidDataOperation.createNamespaceDoesNotExist(namespace, type);
-      }
+    return CompletableFuture.supplyAsync(
+        () -> {
+          if (!checkPropertyNamespace(type, namespace)) {
+            throw InvalidDataOperation.createNamespaceDoesNotExist(namespace, type);
+          }
 
-      var existing = getData(type, namespace, value.getName());
-      // If no value exists we can put anything there, if a value exists we have to check type is
-      // correct
-      var dataMap =
-          namespaceDataMap.computeIfAbsent(
-              new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
-      if (existing == null) {
+          var existing = getData(type, namespace, value.getName());
+          // If no value exists we can put anything there, if a value exists we have to check type
+          // is
+          // correct
+          var dataMap =
+              namespaceDataMap.computeIfAbsent(
+                  new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
+          if (existing == null) {
 
-        dataMap.put(value.getName(), value);
-      } else {
-        var newValue = DataType.convert(value, existing.getDataType());
-        dataMap.put(newValue.getName(), newValue);
-      }
-      return null;
-    });
+            dataMap.put(value.getName(), value);
+          } else {
+            var newValue = DataType.convert(value, existing.getDataType());
+            dataMap.put(newValue.getName(), newValue);
+          }
+          return null;
+        });
   }
 
   @Override
@@ -240,10 +254,9 @@ public class MemoryDataStore implements DataStore {
             throw InvalidDataOperation.createNamespaceAlreadyExists(namespace, propertyType);
           }
 
-          Set<String> namespaces = propertyTypeNamespaceMap.computeIfAbsent(
-              propertyType,
-              k -> Collections.synchronizedSet(new HashSet<>())
-          );
+          Set<String> namespaces =
+              propertyTypeNamespaceMap.computeIfAbsent(
+                  propertyType, k -> Collections.synchronizedSet(new HashSet<>()));
 
           namespaces.add(namespace);
 
