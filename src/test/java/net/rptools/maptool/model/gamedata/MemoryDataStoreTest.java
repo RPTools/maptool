@@ -646,6 +646,9 @@ class MemoryDataStoreTest {
   }
 
   @Test
-  void createNamespaceWithTypes() {
+  void createNamespaceWithTypes() throws ExecutionException, InterruptedException {
+    var mds = new MemoryDataStore();
+    mds.createNamespaceWithTypes()
+
   }
 }
