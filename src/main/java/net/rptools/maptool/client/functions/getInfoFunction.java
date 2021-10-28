@@ -17,12 +17,15 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
@@ -88,10 +91,12 @@ public class getInfoFunction extends AbstractFunction {
       return getMapInfo();
     } else if (infoType.equalsIgnoreCase("client")) {
       return getClientInfo();
-    } else if (infoType.equals("server")) {
+    } else if (infoType.equalsIgnoreCase("server")) {
       return getServerInfo();
-    } else if (infoType.equals("campaign")) {
+    } else if (infoType.equalsIgnoreCase("campaign")) {
       return getCampaignInfo();
+    } else if (infoType.equalsIgnoreCase("theme")) {
+      return getThemeInfo();
     } else if (infoType.equalsIgnoreCase("debug")) {
       return getDebugInfo();
     } else {
@@ -407,6 +412,23 @@ public class getInfoFunction extends AbstractFunction {
     return cinfo;
   }
 
+  /**
+   * Get Theme Info
+   *
+   * @return JsonObject of theme information
+   */
+  private JsonObject getThemeInfo() {
+    JsonObject theme = new JsonObject();
+    
+    // Currently, just the color info is returned.
+    for (Map.Entry<Object, Object> entry : UIManager.getDefaults().entrySet()) {
+      if (entry.getValue() instanceof Color) {
+        Color color = (Color) entry.getValue();
+        theme.addProperty((String) entry.getKey(), Integer.toHexString(color.getRGB()));
+      }
+    }
+    return theme;
+  }
   /**
    * Retrieves debug information
    *
