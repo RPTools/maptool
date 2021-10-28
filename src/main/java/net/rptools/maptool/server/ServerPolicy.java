@@ -43,8 +43,6 @@ public class ServerPolicy {
   private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
   private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
 
-  private boolean usePasswordFile;
-
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
     useToolTipsForDefaultRollFormat = AppPreferences.getUseToolTipForInlineRoll();
@@ -209,14 +207,6 @@ public class ServerPolicy {
 
   public void setVblBlocksMove(boolean vblBlocksMove) {
     this.vblBlocksMove = vblBlocksMove;
-  }
-
-  public void setUsePasswordFile(boolean usePwdFile) {
-    this.usePasswordFile = usePwdFile;
-  }
-
-  public boolean getUsePasswordFile() {
-    return this.usePasswordFile;
   }
 
   /**
