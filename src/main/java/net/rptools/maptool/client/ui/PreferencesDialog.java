@@ -87,6 +87,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
   private final JCheckBox forceFacingArrowCheckBox;
+  private final JCheckBox mapVisibilityWarning;
   private final JSpinner haloLineWidthSpinner;
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
@@ -269,6 +270,7 @@ public class PreferencesDialog extends JDialog {
     auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
     lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
     fogOverlayOpacitySpinner = panel.getSpinner("fogOverlayOpacitySpinner");
+    mapVisibilityWarning = panel.getCheckBox("mapVisibilityWarning");
 
     useHaloColorAsVisionOverlayCheckBox = panel.getCheckBox("useHaloColorAsVisionOverlayCheckBox");
     autoRevealVisionOnGMMoveCheckBox = panel.getCheckBox("autoRevealVisionOnGMMoveCheckBox");
@@ -652,6 +654,8 @@ public class PreferencesDialog extends JDialog {
         e -> AppPreferences.setShowSmilies(showSmiliesCheckBox.isSelected()));
     playSystemSoundCheckBox.addActionListener(
         e -> AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected()));
+    mapVisibilityWarning.addActionListener(
+            e -> AppPreferences.setMapVisibilityWarning(mapVisibilityWarning.isSelected()));
 
     playStreamsCheckBox.addActionListener(
         e -> {
@@ -967,6 +971,7 @@ public class PreferencesDialog extends JDialog {
     statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));
     fontSizeTextField.setText(Integer.toString(AppPreferences.getFontSize()));
     haloLineWidthSpinner.setValue(AppPreferences.getHaloLineWidth());
+    mapVisibilityWarning.setSelected(AppPreferences.getMapVisibilityWarning());
 
     haloOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getHaloOverlayOpacity(), 0, 255, 1));

@@ -45,6 +45,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useIndividualViews;
   private JCheckBox autoRevealOnMovement;
   private JCheckBox playersCanRevealVision;
+  private JCheckBox hideMapSelectUI;
   private JButton generateGMPassword;
   private JButton generatePlayerPassword;
   private JTextField gmPassword;
@@ -74,6 +75,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
     usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
+    hideMapSelectUI = (JCheckBox) getComponent("@hideMapSelectUI");
 
     getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
     getRoleCombo().setSelectedItem(prefs.getRole());
@@ -109,6 +111,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
           playerPassword.setEnabled(!passwordFile);
           gmPassword.setEnabled(!passwordFile);
         });
+    hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
 
     movementMetricCombo = getMovementMetric();
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
@@ -233,6 +236,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
                 prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
                 JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
                 AppState.setUseWebRTC(
                     useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
