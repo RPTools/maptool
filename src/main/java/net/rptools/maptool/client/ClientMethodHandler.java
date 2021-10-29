@@ -63,6 +63,7 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -71,10 +72,14 @@ import net.rptools.maptool.transfer.AssetHeader;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
+  private static final Logger log = Logger.getLogger(ClientMethodHandler.class);
+
   public ClientMethodHandler() {}
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
+
+    log.debug("from " + id + " got " + method);
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)

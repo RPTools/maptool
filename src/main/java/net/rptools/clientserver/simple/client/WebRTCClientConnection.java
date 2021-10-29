@@ -17,9 +17,7 @@ package net.rptools.clientserver.simple.client;
 import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
 import dev.onvoid.webrtc.media.MediaStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import net.rptools.clientserver.simple.AbstractConnection;
@@ -349,7 +347,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   @Override
   public void onIceCandidateError(RTCPeerConnectionIceErrorEvent event) {
-    log.info(
+    log.debug(
         prefix()
             + "PeerConnection.onIceCandidateError: code:"
             + event.getErrorCode()
@@ -424,13 +422,20 @@ public class WebRTCClientConnection extends AbstractConnection
   // dataChannel
   @Override
   public void onStateChange() {
-    log.info(prefix() + "localDataChannel onStateChange " + localDataChannel.getState());
-    if (localDataChannel.getState() == RTCDataChannelState.OPEN) {
-      // connection established we don't need the signaling server anymore
-      // for now disabled. We may get additional ice candidates.
-      if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
+    var state = localDataChannel.getState();
+    log.info(prefix() + "localDataChannel onStateChange " + state);
+    switch (state) {
+      case OPEN -> {
+        // connection established we don't need the signaling server anymore
+        // for now disabled. We may get additional ice candidates.
+        if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
 
-      sendThread.start();
+        sendThread.start();
+      }
+      case CLOSED -> {
+        close();
+        fireDisconnectAsync();
+      }
     }
   }
 
@@ -439,26 +444,14 @@ public class WebRTCClientConnection extends AbstractConnection
   public void onMessage(RTCDataChannelBuffer channelBuffer) {
     log.debug(
         prefix() + "localDataChannel onMessage: got " + channelBuffer.data.capacity() + " bytes");
-    var buffer = channelBuffer.data;
 
     if (Thread.currentThread().getContextClassLoader() == null) {
       ClassLoader cl = ClassLoader.getSystemClassLoader();
       Thread.currentThread().setContextClassLoader(cl);
     }
 
-    int len = buffer.capacity();
-    var byteArray = new byte[len];
-    buffer.get(byteArray);
-
-    InputStream byteStream = new ByteArrayInputStream(byteArray);
-    try {
-      while (byteStream.available() > 0) {
-        var message = readMessage(byteStream);
-        dispatchMessage(id, message);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    var message = readMessage(channelBuffer.data);
+    if (message != null) dispatchMessage(id, message);
   }
 
   private void fireDisconnectAsync() {
@@ -518,17 +511,29 @@ public class WebRTCClientConnection extends AbstractConnection
               continue;
             }
 
-            var length = message.length;
-            var buffer = ByteBuffer.allocate(length + 4);
+            ByteBuffer buffer = ByteBuffer.allocate(message.length + Integer.BYTES);
+            buffer.putInt(message.length).put(message).rewind();
 
-            buffer.put((byte) (length >> 24));
-            buffer.put((byte) (length >> 16));
-            buffer.put((byte) (length >> 8));
-            buffer.put((byte) (length));
-            buffer.put(message);
+            int chunkSize = 16 * 1024;
 
-            localDataChannel.send(new RTCDataChannelBuffer(buffer, true));
-            log.debug(prefix() + " sent " + (length + 4) + " bytes");
+            while (buffer.remaining() > 0) {
+              var amountToSend = buffer.remaining() <= chunkSize ? buffer.remaining() : chunkSize;
+              ByteBuffer part = buffer;
+
+              if (amountToSend != buffer.capacity()) {
+                // we need to allocation a new ByteBuffer because send calls ByteBuffer.array()
+                // which would return
+                // the whole byte[] and not only the slice. But the lib doesn't use
+                // ByteBuffer.arrayOffset().
+                var slice = buffer.slice(buffer.position(), amountToSend);
+                part = ByteBuffer.allocate(amountToSend);
+                part.put(slice);
+              }
+
+              buffer.position(buffer.position() + amountToSend);
+              localDataChannel.send(new RTCDataChannelBuffer(part, true));
+              log.debug(prefix() + " sent " + part.capacity() + " bytes");
+            }
           }
           synchronized (this) {
             if (!stopRequested) {

@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -183,6 +184,38 @@ public abstract class AbstractConnection implements Connection {
     }
     notifyListeners(Direction.Inbound, State.Complete, length, length);
     return ret;
+  }
+
+  private ByteBuffer messageBuffer = null;
+
+  public final byte[] readMessage(ByteBuffer part) {
+    if (messageBuffer == null) {
+      int length = part.getInt();
+      notifyListeners(Direction.Inbound, State.Start, length, 0);
+
+      if (part.remaining() == length) {
+        var ret = new byte[length];
+        part.get(ret);
+        notifyListeners(Direction.Inbound, State.Complete, length, length);
+        return ret;
+      }
+
+      messageBuffer = ByteBuffer.allocate(length);
+    }
+
+    messageBuffer.put(part);
+    notifyListeners(
+        Direction.Inbound, State.Progress, messageBuffer.capacity(), messageBuffer.position());
+
+    if (messageBuffer.capacity() == messageBuffer.position()) {
+      notifyListeners(
+          Direction.Inbound, State.Complete, messageBuffer.capacity(), messageBuffer.capacity());
+      var ret = messageBuffer.array();
+      messageBuffer = null;
+      return ret;
+    }
+
+    return null;
   }
 
   public abstract String getError();
