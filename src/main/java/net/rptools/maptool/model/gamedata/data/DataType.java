@@ -23,6 +23,7 @@ public enum DataType {
   BOOLEAN,
   JSON_ARRAY,
   JSON_OBJECT,
+  ASSET,
   UNDEFINED;
 
   public static DataValue convert(DataValue dataValue, DataType to) {
@@ -33,6 +34,7 @@ public enum DataType {
       case STRING -> new StringDataValue(dataValue.getName(), dataValue.asString());
       case JSON_ARRAY -> new JsonArrayDataValue(dataValue.getName(), dataValue.asJsonArray());
       case JSON_OBJECT -> new JsonObjectDataValue(dataValue.getName(), dataValue.asJsonObject());
+      case ASSET -> new AssetDataValue(dataValue.getName(), dataValue.asAsset());
       case UNDEFINED -> throw InvalidDataOperation.createInvalidConversion(
           dataValue.getDataType(), to);
     };

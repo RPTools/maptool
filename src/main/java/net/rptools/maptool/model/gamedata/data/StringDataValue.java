@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
 /** The IntegerDataValue class represents a data value that is a String. */
@@ -86,7 +87,7 @@ public final class StringDataValue implements DataValue {
             || value.equalsIgnoreCase("true")
             || value.equalsIgnoreCase("false");
         case STRING, JSON_ARRAY -> true;
-        case JSON_OBJECT, UNDEFINED -> false;
+        case JSON_OBJECT, UNDEFINED, ASSET -> false;
       };
     }
   }
@@ -165,5 +166,14 @@ public final class StringDataValue implements DataValue {
   @Override
   public boolean isUndefined() {
     return undefined;
+  }
+
+  @Override
+  public Asset asAsset() {
+    if (undefined) {
+      throw InvalidDataOperation.createUndefined(name);
+    } else {
+      throw InvalidDataOperation.createInvalidConversion(DataType.BOOLEAN, DataType.ASSET);
+    }
   }
 }

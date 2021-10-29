@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
 /** The UndefinedDataValue class represents a data value that is an undefined value. */
@@ -81,5 +82,10 @@ public final class UndefinedDataValue implements DataValue {
   @Override
   public boolean isUndefined() {
     return true;
+  }
+
+  @Override
+  public Asset asAsset() {
+    throw InvalidDataOperation.createUndefined(name);
   }
 }

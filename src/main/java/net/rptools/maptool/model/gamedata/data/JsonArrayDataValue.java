@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import java.util.Collection;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
 /** The IntegerDataValue class represents a data value that is a list. */
@@ -34,8 +35,11 @@ public final class JsonArrayDataValue implements DataValue {
   /**
    * Creates a new JsonArrayDataValue.
    *
+   * @note You can't store an Assert in a JsonArray you will have to convert it to another value
+   *     first.
    * @param name the name of the value.
    * @param values the values.
+   * @throws InvalidDataOperation if the values can not be stored in a JsonArray.
    */
   JsonArrayDataValue(String name, Collection<DataValue> values) {
     var array = new JsonArray();
@@ -96,7 +100,7 @@ public final class JsonArrayDataValue implements DataValue {
     } else {
       return switch (dataType) {
         case LONG, DOUBLE, BOOLEAN, STRING, JSON_OBJECT, UNDEFINED -> false;
-        case JSON_ARRAY -> true;
+        case JSON_ARRAY, ASSET -> true;
       };
     }
   }
@@ -158,5 +162,14 @@ public final class JsonArrayDataValue implements DataValue {
   @Override
   public boolean isUndefined() {
     return undefined;
+  }
+
+  @Override
+  public Asset asAsset() {
+    if (undefined) {
+      throw InvalidDataOperation.createUndefined(name);
+    } else {
+      throw InvalidDataOperation.createInvalidConversion(DataType.JSON_ARRAY, DataType.ASSET);
+    }
   }
 }

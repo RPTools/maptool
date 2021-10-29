@@ -16,6 +16,7 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
 /** Interface for data values. */
@@ -103,4 +104,11 @@ public interface DataValue {
    * @return if the data value has not yet been set.
    */
   boolean isUndefined();
+
+  /**
+   * Returns the data value as an Asset if it can be converted.
+   *
+   * @return the data value as an Asset if it can be converted.
+   */
+  Asset asAsset();
 }

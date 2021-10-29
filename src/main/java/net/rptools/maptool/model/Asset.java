@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import java.awt.image.BufferedImage;
@@ -172,6 +174,11 @@ public final class Asset {
 
   /** The value of the data as a {@link String}. */
   private final transient String dataAsString;
+
+  /**
+   * The value of the data as a {@link JsonElement} if it is of type JSON, otherwise {@code null}.
+   */
+  private final transient JsonElement json;
 
   /** The data that makes up the {@code Asset}. */
   @XStreamConverter(AssetImageConverter.class)
@@ -405,6 +412,12 @@ public final class Asset {
     } else {
       dataAsString = null;
     }
+
+    if (type == Type.JSON && dataAsString != null) {
+      json = JsonParser.parseString(dataAsString);
+    } else {
+      json = null;
+    }
   }
 
   /**
@@ -443,6 +456,8 @@ public final class Asset {
     } else {
       dataAsString = null;
     }
+
+    json = null;
   }
 
   /**
@@ -465,6 +480,12 @@ public final class Asset {
       dataAsString = new String(data);
     } else {
       dataAsString = null;
+    }
+
+    if (type == Type.JSON && dataAsString != null) {
+      json = JsonParser.parseString(dataAsString);
+    } else {
+      json = null;
     }
   }
 
@@ -568,6 +589,22 @@ public final class Asset {
     }
 
     return dataAsString;
+  }
+
+  /**
+   * Returns the data for the {@code Asset} as a {@link JsonElement}. If the {@code Asset} can't be
+   * represented as a {@link JsonElement} then {@link IllegalStateException} will be thrown.
+   *
+   * @return the date as a {@link JsonElement}.
+   * @throws IllegalStateException if this {@code Asset} cannot be represented as a {@link
+   *     JsonElement}.
+   */
+  public JsonElement getDataAsJson() {
+    if (json == null) {
+      throw new IllegalStateException("Asset can't be represented as a JsonElement.");
+    } else {
+      return json;
+    }
   }
 
   /**

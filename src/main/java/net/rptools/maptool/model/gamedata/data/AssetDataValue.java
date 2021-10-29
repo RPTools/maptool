@@ -16,41 +16,40 @@ package net.rptools.maptool.model.gamedata.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.Asset.Type;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
-/** The IntegerDataValue class represents a data value that is a double. */
-public final class DoubleDataValue implements DataValue {
+public class AssetDataValue implements DataValue {
 
-  /** The name of the value. */
   private final String name;
-  /** The value. */
-  private final double value;
-
-  /** Has no value been set? */
+  private final MD5Key asset;
+  private final boolean jsonObject;
+  private final boolean jsonArray;
   private final boolean undefined;
 
-  /**
-   * Creates a new DoubleDataValue.
-   *
-   * @param name the name of the value.
-   * @param value the value.
-   */
-  DoubleDataValue(String name, double value) {
+  AssetDataValue(String name, Asset asset) {
     this.name = name;
-    this.value = value;
-    this.undefined = false;
+    this.asset = asset.getMD5Key();
+    if (asset.getType() == Type.JSON) {
+      var json = asset.getDataAsJson();
+      jsonObject = json.isJsonObject();
+      jsonArray = json.isJsonArray();
+    } else {
+      jsonObject = false;
+      jsonArray = false;
+    }
+    undefined = false;
   }
 
-  /**
-   * Creates a new undefined DoubleDataValue.
-   *
-   * @param name the name of the value.
-   */
-  DoubleDataValue(String name) {
+  AssetDataValue(String name) {
     this.name = name;
-    this.value = Double.NaN;
-    this.undefined = true;
+    this.asset = null;
+    undefined = true;
+    jsonObject = false;
+    jsonArray = false;
   }
 
   @Override
@@ -60,19 +59,17 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public DataType getDataType() {
-    return DataType.DOUBLE;
+    return DataType.ASSET;
   }
 
   @Override
   public boolean canBeConvertedTo(DataType dataType) {
-    if (undefined) {
-      return false;
-    } else {
-      return switch (dataType) {
-        case LONG, DOUBLE, BOOLEAN, STRING, JSON_ARRAY -> true;
-        case JSON_OBJECT, UNDEFINED, ASSET -> false;
-      };
-    }
+    return switch (dataType) {
+      case LONG, DOUBLE, BOOLEAN, UNDEFINED -> false;
+      case STRING, ASSET -> true;
+      case JSON_ARRAY -> jsonArray;
+      case JSON_OBJECT -> jsonObject;
+    };
   }
 
   @Override
@@ -80,7 +77,7 @@ public final class DoubleDataValue implements DataValue {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
     } else {
-      return (long) value;
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.LONG);
     }
   }
 
@@ -89,7 +86,7 @@ public final class DoubleDataValue implements DataValue {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
     } else {
-      return value;
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.DOUBLE);
     }
   }
 
@@ -98,7 +95,7 @@ public final class DoubleDataValue implements DataValue {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
     } else {
-      return Double.toString(value);
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.DOUBLE);
     }
   }
 
@@ -107,7 +104,7 @@ public final class DoubleDataValue implements DataValue {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
     } else {
-      return value != 0;
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.BOOLEAN);
     }
   }
 
@@ -115,10 +112,10 @@ public final class DoubleDataValue implements DataValue {
   public JsonArray asJsonArray() {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
+    } else if (!jsonArray) {
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.BOOLEAN);
     } else {
-      var array = new JsonArray();
-      array.add(value);
-      return array;
+      return AssetManager.getAssetAndWait(asset).getDataAsJson().getAsJsonArray();
     }
   }
 
@@ -126,8 +123,10 @@ public final class DoubleDataValue implements DataValue {
   public JsonObject asJsonObject() {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
+    } else if (!jsonObject) {
+      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.BOOLEAN);
     } else {
-      throw InvalidDataOperation.createInvalidConversion(DataType.DOUBLE, DataType.JSON_OBJECT);
+      return AssetManager.getAssetAndWait(asset).getDataAsJson().getAsJsonObject();
     }
   }
 
@@ -138,10 +137,6 @@ public final class DoubleDataValue implements DataValue {
 
   @Override
   public Asset asAsset() {
-    if (undefined) {
-      throw InvalidDataOperation.createUndefined(name);
-    } else {
-      throw InvalidDataOperation.createInvalidConversion(DataType.DOUBLE, DataType.ASSET);
-    }
+    return AssetManager.getAssetAndWait(asset);
   }
 }
