@@ -17,6 +17,9 @@ package net.rptools.maptool.model.gamedata.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.Collection;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 
 /** Class to create DataValues from different values. */
 public class DataValueFactory {
@@ -99,6 +102,30 @@ public class DataValueFactory {
   }
 
   /**
+   * Returns a DataValue that represents an Asset.
+   *
+   * @param name The name of the value.
+   * @param asset The asset to create a DataValue from.
+   * @return A DataValue that represents an Asset.
+   */
+  public static DataValue fromAsset(String name, Asset asset) {
+    return new AssetDataValue(name, asset);
+  }
+
+  /**
+   * Returns a DataValue from the given AssetManager. The asset will be fetched from the
+   * AssetManager which may require a network request to fetch the asset from the server.
+   *
+   * @param name The name of the value.
+   * @param assetId The id of the asset to create a DataValue from.
+   * @return A DataValue from the id of the asset.
+   */
+  public static DataValue fromAsset(String name, MD5Key assetId) {
+    Asset asset = AssetManager.getAssetAndWait(assetId);
+    return new AssetDataValue(name, asset);
+  }
+
+  /**
    * Returns a DataValue that represents an undefined value.
    *
    * @param name The name of the value.
@@ -114,6 +141,7 @@ public class DataValueFactory {
       case JSON_ARRAY -> new JsonArrayDataValue(name);
       case JSON_OBJECT -> new JsonObjectDataValue(name);
       case UNDEFINED -> new UndefinedDataValue(name);
+      case ASSET -> new AssetDataValue(name);
     };
   }
 
