@@ -419,7 +419,7 @@ public class getInfoFunction extends AbstractFunction {
    */
   private JsonObject getThemeInfo() {
     JsonObject theme = new JsonObject();
-    
+
     // Currently, just the color info is returned.
     for (Map.Entry<Object, Object> entry : UIManager.getDefaults().entrySet()) {
       if (entry.getValue() instanceof Color) {
