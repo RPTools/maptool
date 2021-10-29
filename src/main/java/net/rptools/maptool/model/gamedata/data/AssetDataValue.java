@@ -22,6 +22,7 @@ import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.gamedata.InvalidDataOperation;
 
+/** Class to represent an asset data value. */
 public class AssetDataValue implements DataValue {
 
   private final String name;
@@ -30,6 +31,12 @@ public class AssetDataValue implements DataValue {
   private final boolean jsonArray;
   private final boolean undefined;
 
+  /**
+   * Creates a new AssetDataValue from the given asset.
+   *
+   * @param name the name of the value.
+   * @param asset the asset to use.
+   */
   AssetDataValue(String name, Asset asset) {
     this.name = name;
     this.asset = asset.getMD5Key();
@@ -44,6 +51,11 @@ public class AssetDataValue implements DataValue {
     undefined = false;
   }
 
+  /**
+   * Creates a new AssetDataValue with an undefined value.
+   *
+   * @param name the name of the value.
+   */
   AssetDataValue(String name) {
     this.name = name;
     this.asset = null;
