@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.dropinlibrary;
+package net.rptools.maptool.model.library.addon;
 
 import com.google.protobuf.util.JsonFormat;
 import java.io.File;
@@ -31,8 +31,8 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
-import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
 

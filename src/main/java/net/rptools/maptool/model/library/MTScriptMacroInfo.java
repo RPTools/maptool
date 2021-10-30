@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library;
 
 public record MTScriptMacroInfo(
     String name, String macro, boolean trusted, boolean autoExecute, String description) {}

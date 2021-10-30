@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,10 +23,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibrary;
-import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
+import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
+import net.rptools.maptool.model.library.token.LibraryTokenManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,6 +57,9 @@ public class LibraryManager {
 
   /** Drop in libraries */
   private static final AddOnLibraryManager addOnLibraryManager = new AddOnLibraryManager();
+
+  /** Library Tokens. */
+  private static final LibraryTokenManager libraryTokenManager = new LibraryTokenManager();
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -101,8 +105,8 @@ public class LibraryManager {
     if (addOnLibraryManager.handles(path)) {
       return CompletableFuture.completedFuture(
           Optional.ofNullable(addOnLibraryManager.getLibrary(path)));
-    } else if (LibraryToken.handles(path)) {
-      return LibraryToken.getLibrary(path);
+    } else if (libraryTokenManager.handles(path)) {
+      return libraryTokenManager.getLibrary(path);
     } else {
       return CompletableFuture.completedFuture(Optional.empty());
     }
@@ -115,8 +119,8 @@ public class LibraryManager {
    * @return {@code true} if the library exists {@code false} if it does not.
    */
   public CompletableFuture<Boolean> libraryExists(URL path) {
-    if (LibraryToken.handles(path)) {
-      return LibraryToken.getLibrary(path).thenApply(Optional::isPresent);
+    if (libraryTokenManager.handles(path)) {
+      return libraryTokenManager.getLibrary(path).thenApply(Optional::isPresent);
     } else {
       return CompletableFuture.completedFuture(Boolean.FALSE);
     }
@@ -194,7 +198,7 @@ public class LibraryManager {
       throws ExecutionException, InterruptedException {
     List<Library> libraries =
         switch (libraryType) {
-          case TOKEN -> LibraryToken.getLibraries().get();
+          case TOKEN -> libraryTokenManager.getLibraries().get();
           case DROP_IN -> addOnLibraryManager.getLibraries();
         };
 
@@ -233,7 +237,7 @@ public class LibraryManager {
       throws ExecutionException, InterruptedException {
     var lib = addOnLibraryManager.getLibrary(namespace);
     if (lib == null) {
-      lib = LibraryToken.getLibrary(namespace).get();
+      lib = libraryTokenManager.getLibrary(namespace).get();
     }
 
     if (lib == null) {

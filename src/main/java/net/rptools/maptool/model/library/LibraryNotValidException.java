@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library;
 
 /**
  * Exception that is thrown if the library is not valid Some of the reasons that a library may not

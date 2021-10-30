@@ -12,18 +12,25 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library.data;
 
-/** Record that contains the information about a library. */
-public record LibraryInfo(
-    String name,
-    String namespace,
-    String version,
-    String website,
-    String gitUrl,
-    String[] authors,
-    String license,
-    String description,
-    String shortDescription,
-    boolean allowsUrlAccess) {}
-;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.gamedata.data.DataType;
+import net.rptools.maptool.model.gamedata.data.DataValue;
+
+public interface LibraryData {
+
+  String libraryName();
+
+  CompletableFuture<Set<String>> getAllKeys();
+
+  CompletableFuture<Map<String, DataType>> getKeyDataTypeMap();
+
+  CompletableFuture<DataType> getDataType(String key);
+
+  CompletableFuture<Boolean> isDefined(String key);
+
+  CompletableFuture<DataValue> getValue(String key);
+}

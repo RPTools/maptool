@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.dropinlibrary;
+package net.rptools.maptool.model.library.addon;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,13 +32,13 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.framework.Library;
-import net.rptools.maptool.model.framework.LibraryInfo;
-import net.rptools.maptool.model.framework.LibraryNotValidException;
-import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
-import net.rptools.maptool.model.framework.MTScriptMacroInfo;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
-import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryInfo;
+import net.rptools.maptool.model.library.LibraryNotValidException;
+import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.library.MTScriptMacroInfo;
+import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */

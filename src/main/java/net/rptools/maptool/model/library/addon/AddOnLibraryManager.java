@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.dropinlibrary;
+package net.rptools.maptool.model.library.addon;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,10 +23,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import net.rptools.maptool.model.framework.Library;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto.AddOnLibraryEntryDto;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryListDto.AddOnLibraryEntryDto;
 
 /** Class for managing {@link AddOnLibrary} objects. */
 public class AddOnLibraryManager {

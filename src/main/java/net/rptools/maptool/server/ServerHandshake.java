@@ -30,7 +30,7 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;

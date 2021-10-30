@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library.url;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +20,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 
 public class LibraryURLConnection extends URLConnection {
 

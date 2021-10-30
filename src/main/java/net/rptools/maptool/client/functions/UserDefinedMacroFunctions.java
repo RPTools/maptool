@@ -35,7 +35,7 @@ import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;

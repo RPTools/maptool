@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library.token;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,7 +31,12 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryInfo;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.LibraryNotValidException;
+import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -127,26 +132,11 @@ class LibraryToken implements Library {
   }
 
   /**
-   * Returns the {@link Library} representing the lib:token.
-   *
-   * @param path the path of the lib:token.
-   * @return the {@link Library} representing the lib:token.
-   */
-  static CompletableFuture<Optional<Library>> getLibrary(URL path) {
-    if (!handles(path)) {
-      return CompletableFuture.completedFuture(Optional.empty());
-    }
-
-    return new ThreadExecutionHelper<Optional<Library>>()
-        .runOnSwingThread(() -> Optional.ofNullable(findLibrary(path)));
-  }
-
-  /**
    * Creates a new {@code LibraryToken} for the lib:token id.
    *
    * @param id the id of the lib:token.
    */
-  private LibraryToken(GUID id) {
+  LibraryToken(GUID id) {
     this.id = id;
   }
 

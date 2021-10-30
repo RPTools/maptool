@@ -12,10 +12,18 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library;
 
-/** Library types */
-public enum LibraryType {
-  TOKEN,
-  DROP_IN
-}
+/** Record that contains the information about a library. */
+public record LibraryInfo(
+    String name,
+    String namespace,
+    String version,
+    String website,
+    String gitUrl,
+    String[] authors,
+    String license,
+    String description,
+    String shortDescription,
+    boolean allowsUrlAccess) {}
+;

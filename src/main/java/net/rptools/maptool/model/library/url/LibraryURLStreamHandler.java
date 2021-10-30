@@ -12,25 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.data;
+package net.rptools.maptool.model.library.url;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import net.rptools.maptool.model.gamedata.data.DataType;
-import net.rptools.maptool.model.gamedata.data.DataValue;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
-public interface LibraryData {
+public class LibraryURLStreamHandler extends URLStreamHandler {
 
-  String libraryName();
-
-  CompletableFuture<Set<String>> getAllKeys();
-
-  CompletableFuture<Map<String, DataType>> getKeyDataTypeMap();
-
-  CompletableFuture<DataType> getDataType(String key);
-
-  CompletableFuture<Boolean> isDefined(String key);
-
-  CompletableFuture<DataValue> getValue(String key);
+  @Override
+  protected URLConnection openConnection(URL u) throws IOException {
+    return new LibraryURLConnection(u);
+  }
 }

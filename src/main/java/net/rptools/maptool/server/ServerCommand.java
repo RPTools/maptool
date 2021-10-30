@@ -36,7 +36,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 
 public interface ServerCommand {
   public enum COMMAND {
