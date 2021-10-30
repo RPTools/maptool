@@ -23,6 +23,11 @@ public class AttachedLightSource {
     // for serialization
   }
 
+  public AttachedLightSource(GUID lightSourceId, String direction) {
+    this.lightSourceId = lightSourceId;
+    this.direction = direction;
+  }
+
   public AttachedLightSource(LightSource source, Direction direction) {
     lightSourceId = source.getId();
     this.direction = direction.name();

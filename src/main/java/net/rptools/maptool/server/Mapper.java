@@ -1139,19 +1139,46 @@ public class Mapper {
     return dto.build();
   }
 
-  private static AttachedLightSource map(AttachedLightSourceDto light) {
-    return null;
+  private static AttachedLightSource map(AttachedLightSourceDto dto) {
+    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()), dto.getDirection());
   }
 
   private static AttachedLightSourceDto map(AttachedLightSource light) {
-    return null;
+    var dto = AttachedLightSourceDto.newBuilder();
+    dto.setLightSourceId(light.getLightSourceId().toString());
+    dto.setDirection(light.getDirection().name());
+    return dto.build();
   }
 
-  private static Path<? extends AbstractPoint> map(PathDto lastPath) {
-    return null;
+  private static Path<? extends AbstractPoint> map(PathDto dto) {
+    if (dto.getPointType() == PathDto.PointType.CELL_POINT) {
+      final var path = new Path<CellPoint>();
+      dto.getCellsList().forEach(p -> path.addPathCell(new CellPoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.addWayPoint(new CellPoint(p.getX(), p.getY())));
+      return path;
+    } else {
+      final var path = new Path<ZonePoint>();
+      dto.getCellsList().forEach(p -> path.addPathCell(new ZonePoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.addWayPoint(new ZonePoint(p.getX(), p.getY())));
+      return path;
+    }
   }
 
-  private static PathDto map(Path<? extends AbstractPoint> lastPath) {
-    return null;
+  private static PathDto map(Path<? extends AbstractPoint> path) {
+    if (path == null) return null;
+
+    var cellPath = path.getCellPath();
+    if (cellPath.size() == 0) return null;
+
+    var dto = PathDto.newBuilder();
+
+    if (cellPath.get(0) instanceof CellPoint) dto.setPointType(PathDto.PointType.CELL_POINT);
+    else dto.setPointType(PathDto.PointType.ZONE_POINT);
+
+    cellPath.forEach(p -> dto.addCells(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+    path.getWayPointList()
+        .forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+
+    return dto.build();
   }
 }

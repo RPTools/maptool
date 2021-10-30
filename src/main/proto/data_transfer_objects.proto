@@ -145,8 +145,13 @@ message TokenDto {
 }
 
 message PathDto {
-  repeated IntPointDto cells = 1;
-  repeated IntPointDto waypoints = 2;
+  enum PointType {
+    CELL_POINT = 0;
+    ZONE_POINT = 1;
+  }
+  PointType point_type = 1;
+  repeated IntPointDto cells = 2;
+  repeated IntPointDto waypoints = 3;
 }
 
 enum TerrainModifierOperationDto {
