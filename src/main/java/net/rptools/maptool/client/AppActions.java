@@ -2463,11 +2463,6 @@ public class AppActions {
                   }
                 }
               });
-            if (MapTool.getServerPolicy().hiddenMapSelectUI()) {
-                MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(false);
-            } else {
-                MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
-            }
         }
       };
 
