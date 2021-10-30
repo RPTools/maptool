@@ -130,7 +130,7 @@ public class ServerPolicy {
     playersReceiveCampaignMacros = flag;
   }
 
-  public boolean hiddenMapSelectUI() {
+  public boolean getMapSelectUIHidden() {
     return hidemapselectui;
   }
 
@@ -259,7 +259,8 @@ public class ServerPolicy {
     sinfo.addProperty(
         "players receive campaign macros",
         playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.addProperty("hide map select ui", hiddenMapSelectUI() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "hide map select ui", getMapSelectUIHidden() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();

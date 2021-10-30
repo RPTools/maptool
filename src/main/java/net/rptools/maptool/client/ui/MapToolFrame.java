@@ -147,6 +147,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
+  private JButton fullsZoneButton;
   private JPanel fullScreenToolPanel;
   private final JPanel rendererBorderPanel;
   private final List<ZoneRenderer> zoneRendererList;
@@ -1698,6 +1699,10 @@ public class MapToolFrame extends DefaultDockableHolder
     paintDrawingMeasurement = aPaintDrawingMeasurements;
   }
 
+  public JButton getFullsZoneButton() {
+    return fullsZoneButton;
+  }
+
   public void showFullScreen() {
     GraphicsConfiguration graphicsConfig = getGraphicsConfiguration();
     Rectangle bounds = graphicsConfig.getBounds();
@@ -1734,10 +1739,10 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
 
     var btn = toolbarPanel.getPointerGroupButton();
-
-    var zoneButton = toolbarPanel.createZoneSelectionButton();
-    zoneButton.setBorder(btn.getBorder());
-    fullScreenToolPanel.add(zoneButton);
+    fullsZoneButton = toolbarPanel.createZoneSelectionButton();
+    fullsZoneButton.setBorder(btn.getBorder());
+    fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
+    fullScreenToolPanel.add(fullsZoneButton);
 
     var initiativeButton =
         new JButton(
