@@ -356,6 +356,10 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     commonMacro = true;
   }
 
+  public MacroButtonProperties(String macroUUID) {
+    this.macroUUID = macroUUID;
+  }
+
   public MacroButtonProperties(Token token, Map<String, String> props) {
     this(
         props.containsKey("index")

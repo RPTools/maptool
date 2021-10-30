@@ -1092,12 +1092,51 @@ public class Mapper {
     return data;
   }
 
-  private static MacroButtonProperties map(MacroButtonPropertiesDto macroButtonPropertiesDto) {
-    return null;
+  private static MacroButtonProperties map(MacroButtonPropertiesDto dto) {
+    var macro = new MacroButtonProperties(dto.getMacroId());
+    macro.setSaveLocation(dto.getSaveLocation());
+    macro.setIndex(dto.getIndex());
+    macro.setColorKey(dto.getColorKey());
+    macro.setHotKey(dto.getHotKey());
+    macro.setCommand(dto.getCommand());
+    macro.setLabel(dto.getLabel());
+    macro.setGroup(dto.getGroup());
+    macro.setSortby(dto.getSortby());
+    macro.setAutoExecute(dto.getAutoExecute());
+    macro.setIncludeLabel(dto.getIncludeLabel());
+    macro.setApplyToTokens(dto.getApplyToTokens());
+    macro.setFontColorKey(dto.getFontColorKey());
+    macro.setFontSize(dto.getFontSize());
+    macro.setMinWidth(dto.getMinWidth());
+    macro.setMaxWidth(dto.getMaxWidth());
+    macro.setAllowPlayerEdits(dto.getAllowPlayerEdits());
+    macro.setToolTip(dto.getToolTip());
+    macro.setDisplayHotKey(dto.getDisplayHotKey());
+    return macro;
   }
 
-  private static MacroButtonPropertiesDto map(MacroButtonProperties macroButtonProperties) {
-    return null;
+  private static MacroButtonPropertiesDto map(MacroButtonProperties macro) {
+    var dto = MacroButtonPropertiesDto.newBuilder();
+    dto.setMacroId(macro.getMacroUUID());
+    dto.setSaveLocation(macro.getSaveLocation());
+    dto.setIndex(macro.getIndex());
+    dto.setColorKey(macro.getColorKey());
+    dto.setHotKey(macro.getHotKey());
+    dto.setCommand(macro.getCommand());
+    dto.setLabel(macro.getLabel());
+    dto.setGroup(macro.getGroup());
+    dto.setSortby(macro.getSortby());
+    dto.setAutoExecute(macro.getAutoExecute());
+    dto.setIncludeLabel(macro.getIncludeLabel());
+    dto.setApplyToTokens(macro.getApplyToTokens());
+    dto.setFontColorKey(macro.getFontColorKey());
+    dto.setFontSize(macro.getFontSize());
+    dto.setMinWidth(macro.getMinWidth());
+    dto.setMaxWidth(macro.getMaxWidth());
+    dto.setAllowPlayerEdits(macro.getAllowPlayerEdits());
+    dto.setToolTip(macro.getToolTip());
+    dto.setDisplayHotKey(macro.getDisplayHotKey());
+    return dto.build();
   }
 
   private static AttachedLightSource map(AttachedLightSourceDto light) {
