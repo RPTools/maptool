@@ -55,6 +55,7 @@ public class Mapper {
     destination.setMovementMetric(WalkerMetric.valueOf(source.getMovementMetric().name()));
     destination.setUsingAstarPathfinding(source.getUsingAstarPathfinding());
     destination.setVblBlocksMove(source.getVblBlocksMove());
+    destination.setHiddenMapSelectUI(source.getHideMapSelectUi());
     return destination;
   }
 
@@ -75,6 +76,7 @@ public class Mapper {
     destination.setMovementMetric(WalkerMetricDto.valueOf(source.getMovementMetric().name()));
     destination.setUsingAstarPathfinding(source.isUsingAstarPathfinding());
     destination.setVblBlocksMove(source.getVblBlocksMove());
+    destination.setHideMapSelectUi(source.hiddenMapSelectUI());
     return destination.build();
   }
 

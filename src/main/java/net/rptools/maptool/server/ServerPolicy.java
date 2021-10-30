@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
 
 public class ServerPolicy {
@@ -37,6 +39,7 @@ public class ServerPolicy {
   private boolean isAutoRevealOnMovement;
   private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
   private WalkerMetric movementMetric;
+  private boolean hidemapselectui;
 
   private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
   private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
@@ -123,6 +126,14 @@ public class ServerPolicy {
 
   public void setPlayersReceiveCampaignMacros(boolean flag) {
     playersReceiveCampaignMacros = flag;
+  }
+
+  public boolean hiddenMapSelectUI() {
+    return hidemapselectui;
+  }
+
+  public void setHiddenMapSelectUI(boolean flag) {
+    hidemapselectui = flag;
   }
 
   /**
@@ -238,6 +249,7 @@ public class ServerPolicy {
     sinfo.addProperty(
         "players receive campaign macros",
         playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("hide map select ui", hiddenMapSelectUI() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
@@ -261,6 +273,13 @@ public class ServerPolicy {
     sinfo.addProperty(
         "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
+    sinfo.addProperty("useWebRTC", AppState.useWebRTC() ? BigDecimal.ONE : BigDecimal.ZERO);
+
+    StartServerDialogPreferences prefs = new StartServerDialogPreferences();
+    sinfo.addProperty(
+        "usePasswordFile", prefs.getUsePasswordFile() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("server name", prefs.getRPToolsName());
+    sinfo.addProperty("port number", prefs.getPort());
     return sinfo;
   }
 }

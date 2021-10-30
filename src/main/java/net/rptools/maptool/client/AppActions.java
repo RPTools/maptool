@@ -117,6 +117,8 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
@@ -361,11 +363,15 @@ public class AppActions {
             for (Asset asset : assetSet) {
 
               // Index it
-              builder.append(asset.getId()).append(" assets/").append(asset.getId()).append("\n");
+              builder
+                  .append(asset.getMD5Key())
+                  .append(" assets/")
+                  .append(asset.getMD5Key())
+                  .append("\n");
               // Save it
-              ZipEntry entry = new ZipEntry("assets/" + asset.getId().toString());
+              ZipEntry entry = new ZipEntry("assets/" + asset.getMD5Key().toString());
               out.putNextEntry(entry);
-              out.write(asset.getImage());
+              out.write(asset.getData());
             }
 
             // Handle the index
@@ -500,7 +506,7 @@ public class AppActions {
               repoEntries.put(remote, new File(dir, remote).getPath());
               ftp.addToQueue(
                   new FTPTransferObject(
-                      Direction.FTP_PUT, entry.getValue().getImage(), dir, remote));
+                      Direction.FTP_PUT, entry.getValue().getData(), dir, remote));
             }
             // We're done with "missing", so empty it now.
             missing.clear();
@@ -2000,7 +2006,11 @@ public class AppActions {
         @Override
         protected void executeAction() {
 
-          if (!confirmNewCampaign()) return;
+          if (!confirmNewCampaign()) {
+            return;
+          }
+
+          new LibraryManager().removeAddOnLibraries();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);
@@ -2207,6 +2217,7 @@ public class AppActions {
                     serverProps.getPlayersReceiveCampaignMacros());
                 policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
                 policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
+                policy.setHiddenMapSelectUI(serverProps.getMapSelectUIHidden());
 
                 // Tool Tips for unformatted inline rolls.
                 policy.setUseToolTipsForDefaultRollFormat(
@@ -2475,12 +2486,18 @@ public class AppActions {
       };
 
   public static void disconnectFromServer() {
-    Campaign campaign =
-        MapTool.isHostingServer() ? MapTool.getCampaign() : CampaignFactory.createBasicCampaign();
+    Campaign campaign;
+    if (MapTool.isHostingServer()) {
+      campaign = MapTool.getCampaign();
+    } else {
+      campaign = CampaignFactory.createBasicCampaign();
+      new LibraryManager().removeAddOnLibraries();
+    }
     ServerDisconnectHandler.disconnectExpected = true;
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();
     MapTool.disconnect();
+    MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
     try {
       MapTool.startPersonalServer(campaign);
     } catch (IOException
@@ -2849,8 +2866,6 @@ public class AppActions {
           if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             try {
               File mapFile = chooser.getSelectedFile();
-              // Jamz: Bug fix, would not add extension if map name had a . in it...
-              // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               if (mapFile.exists()) {
                 if (!MapTool.confirm("msg.confirm.fileExists")) {
@@ -3114,8 +3129,8 @@ public class AppActions {
 
     public QuickMapAction(String name, File imagePath) {
       try {
-        Asset asset = new Asset(name, FileUtils.readFileToByteArray(imagePath));
-        assetId = asset.getId();
+        Asset asset = Asset.createImageAsset(name, FileUtils.readFileToByteArray(imagePath));
+        assetId = asset.getMD5Key();
 
         // Make smaller
         BufferedImage iconImage =
@@ -3133,7 +3148,7 @@ public class AppActions {
         AssetManager.putAsset(asset);
 
         // But don't use up any extra memory
-        AssetManager.removeAsset(asset.getId());
+        AssetManager.removeAsset(asset.getMD5Key());
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
@@ -3147,7 +3162,7 @@ public class AppActions {
             Asset asset = AssetManager.getAsset(assetId);
 
             Zone zone = ZoneFactory.createZone();
-            zone.setBackgroundPaint(new DrawableTexturePaint(asset.getId()));
+            zone.setBackgroundPaint(new DrawableTexturePaint(asset.getMD5Key()));
             zone.setName(asset.getName());
 
             MapTool.addZone(zone);
@@ -3232,6 +3247,45 @@ public class AppActions {
                 AddResourceDialog dialog = new AddResourceDialog();
                 dialog.showDialog();
               });
+        }
+      };
+
+  public static final Action IMPORT_DROP_IN_LIBRARY =
+      new DefaultClientAction() {
+        {
+          init("action.importLibrary");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.isHostingServer()
+              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+        }
+
+        @Override
+        protected void executeAction() {
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File libFile = chooser.getSelectedFile();
+            try {
+              var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
+              var libraryManager = new LibraryManager();
+              String namespace = addOnLibrary.getNamespace().get();
+              if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
+                if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {
+                  return;
+                }
+                libraryManager.deregisterAddOnLibrary(namespace);
+              }
+              libraryManager.reregisterAddOnLibrary(addOnLibrary);
+            } catch (IOException | InterruptedException | ExecutionException ioException) {
+              MapTool.showError("library.import.ioError", ioException);
+            }
+          }
         }
       };
 

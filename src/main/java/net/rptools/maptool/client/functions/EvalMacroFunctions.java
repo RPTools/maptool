@@ -57,7 +57,7 @@ public class EvalMacroFunctions extends AbstractFunction {
     Token tokenInContext = ((MapToolVariableResolver) resolver).getTokenInContext();
 
     // execMacro has new variable scope where as evalMacro does not.
-    if (functionName.equals("execMacro")) {
+    if (functionName.equalsIgnoreCase("execMacro")) {
       return execMacro(tokenInContext, parameters.get(0).toString());
     } else if ("evalMacro".equalsIgnoreCase(functionName)) {
       return evalMacro(

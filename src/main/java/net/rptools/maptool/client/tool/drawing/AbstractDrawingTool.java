@@ -281,7 +281,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   protected void paintTopologyOverlay(Graphics2D g, Drawable drawable, int penMode) {
     if (MapTool.getPlayer().isGM()) {
       Zone zone = renderer.getZone();
-      Area topology = zone.getTopology();
 
       Graphics2D g2 = (Graphics2D) g.create();
       g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
@@ -294,7 +293,10 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.fill(zone.getTopologyTerrain());
 
       g2.setColor(AppStyle.topologyColor);
-      g2.fill(topology);
+      g2.fill(zone.getTopology());
+
+      g2.setColor(AppStyle.terrainVblColor);
+      g2.fill(zone.getTerrainVbl());
 
       g2.dispose();
     }

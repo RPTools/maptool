@@ -41,6 +41,7 @@ public class ServerDisconnectHandler implements DisconnectHandler {
 
       // hide map so player doesn't get a brief GM view
       MapTool.getFrame().setCurrentZoneRenderer(null);
+      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
 
       try {
         MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());

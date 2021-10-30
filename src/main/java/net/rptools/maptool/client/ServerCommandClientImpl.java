@@ -15,6 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -41,6 +42,7 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -414,6 +416,25 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
+  }
+
+  @Override
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+    var libs = new ArrayList<TransferableAddOnLibrary>();
+    libs.addAll(addOnLibraries);
+    makeServerCall(COMMAND.addAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAddOnLibrary(List<String> namespaces) {
+    var libs = new ArrayList<String>();
+    libs.addAll(namespaces);
+    makeServerCall(COMMAND.removeAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAllAddOnLibraries() {
+    makeServerCall(COMMAND.removeAllAddOnLibraries);
   }
 
   /**

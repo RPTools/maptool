@@ -36,6 +36,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 
 public interface ServerCommand {
   enum COMMAND {
@@ -91,7 +92,11 @@ public interface ServerCommand {
     exposePCArea,
     setBoard,
     updateExposedAreaMeta,
-    restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and
+    clearExposedArea,
+    restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
+    removeAddOnLibrary,
+    removeAllAddOnLibraries,
+    addAddOnLibrary
     // scale a player's view
     // @formatter:on
   }
@@ -227,4 +232,10 @@ public interface ServerCommand {
   void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
   void clearExposedArea(GUID zoneGUID, boolean globalOnly);
+
+  void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries);
+
+  void removeAddOnLibrary(List<String> namespaces);
+
+  void removeAllAddOnLibraries();
 }

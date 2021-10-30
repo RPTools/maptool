@@ -66,7 +66,7 @@ public class ImageChooserDialog extends JDialog {
           // putting in a check for it.  On Sentry:  MAPTOOL-11H
           Asset asset = imageChooser.getAsset((Integer) selected.get(0));
           if (asset != null) {
-            imageId = asset.getId();
+            imageId = asset.getMD5Key();
 
             // Put the asset into the asset manager since we have the asset handy here
             AssetManager.putAsset(asset);

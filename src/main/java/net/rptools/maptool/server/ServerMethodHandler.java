@@ -47,9 +47,11 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.proto.*;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -63,8 +65,7 @@ import org.apache.logging.log4j.Logger;
 public class ServerMethodHandler extends AbstractMethodHandler {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
-  /** Instance used for log messages. */
-  private static final Logger log = LogManager.getLogger(ServerMethodHandler.class);
+  private static final Logger log = Logger.getLogger(ServerMethodHandler.class);
 
   public ServerMethodHandler(MapToolServer server) {
     this.server = server;
@@ -191,7 +192,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   @SuppressWarnings("unchecked")
   public void handleMethod(String id, String method, Object... parameters) {
     ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-    log.info("got " + id + ": " + cmd.name());
+
+    log.debug("from " + id + " got " + method);
 
     try {
       RPCContext context = new RPCContext(id, method, parameters);
@@ -381,6 +383,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           updateExposedAreaMeta(
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
           break;
+        case addAddOnLibrary:
+          addAddOnLibrary((List<TransferableAddOnLibrary>) context.get(0));
+          break;
+        case removeAddOnLibrary:
+          removeAddOnLibrary((List<String>) context.get(0));
+          break;
+        case removeAllAddOnLibraries:
+          removeAllAddOnLibraries();
+          break;
       }
     } finally {
       RPCContext.setCurrent(null);
@@ -554,8 +565,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // Sending an empty asset will cause a failure of the image to load on the client side,
       // showing a broken
       // image instead of blowing up
-      Asset asset = new Asset("broken", new byte[] {});
-      asset.setId(assetID);
+      Asset asset = Asset.createBrokenImageAsset(assetID);
       server
           .getConnection()
           .callMethod(RPCContext.getCurrent().id, ClientCommand.COMMAND.putAsset.name(), asset);
@@ -901,6 +911,21 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
+    forwardToClients();
+  }
+
+  @Override
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeAddOnLibrary(List<String> namespaces) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeAllAddOnLibraries() {
     forwardToClients();
   }
 

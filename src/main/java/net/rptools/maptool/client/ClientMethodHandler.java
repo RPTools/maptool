@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
@@ -30,6 +31,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -52,6 +54,9 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
+import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMethodHandler;
@@ -60,8 +65,7 @@ import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -70,7 +74,7 @@ import org.apache.logging.log4j.Logger;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
-  private static final Logger log = LogManager.getLogger(ClientMethodHandler.class);
+  private static final Logger log = Logger.getLogger(ClientMethodHandler.class);
 
   public ClientMethodHandler() {}
 
@@ -197,7 +201,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
 
-    log.info("got " + id + ": " + cmd.name());
+    log.debug("from " + id + " got " + method);
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
@@ -227,6 +231,39 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           // gets requested again
           ioe.printStackTrace();
         }
+        return;
+
+      case addAddOnLibrary:
+        var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
+        for (var lib : addedLibs) {
+          AssetManager.getAssetAsynchronously(
+              lib.getAssetKey(),
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText("library.import.error", lib.getNamespace()), e);
+                      });
+                }
+              });
+        }
+        return;
+
+      case removeAddOnLibrary:
+        var remLibraryManager = new LibraryManager();
+        var removedNamespaces = (List<String>) parameters[0];
+        for (String namespace : removedNamespaces) {
+          remLibraryManager.deregisterAddOnLibrary(namespace);
+        }
+        return;
+
+      case removeAllAddOnLibraries:
+        new LibraryManager().removeAddOnLibraries();
         return;
     }
 

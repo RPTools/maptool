@@ -27,6 +27,7 @@ import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -52,6 +53,14 @@ import net.rptools.parser.function.AbstractFunction;
  *
  * <p>getVBL(jsonArray) :: Get the VBL for a given area and return as array of points
  *
+ * <p>drawTerrainVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a
+ * Shape in VBL
+ *
+ * <p>eraseTerrainVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
+ * Shape in VBL
+ *
+ * <p>getTerrainVBL(jsonArray) :: Get the VBL for a given area and return as array of points
+ *
  * <p>drawMBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
  * MBL
  *
@@ -75,6 +84,9 @@ public class Topology_Functions extends AbstractFunction {
         "drawVBL",
         "eraseVBL",
         "getVBL",
+        "drawTerrainVBL",
+        "eraseTerrainVBL",
+        "getTerrainVBL",
         "drawMBL",
         "eraseMBL",
         "getMBL",
@@ -94,16 +106,13 @@ public class Topology_Functions extends AbstractFunction {
     ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
     int results = -1;
 
-    if (functionName.equals("drawVBL")
-        || functionName.equals("eraseVBL")
-        || functionName.equals("drawMBL")
-        || functionName.equals("eraseMBL")) {
+    if (functionName.equalsIgnoreCase("drawVBL")
+        || functionName.equalsIgnoreCase("eraseVBL")
+        || functionName.equalsIgnoreCase("drawTerrainVBL")
+        || functionName.equalsIgnoreCase("eraseTerrainVBL")
+        || functionName.equalsIgnoreCase("drawMBL")
+        || functionName.equalsIgnoreCase("eraseMBL")) {
       boolean erase = false;
-      Zone.TopologyMode mode =
-          (functionName.equals("drawVBL") || functionName.equals("eraseVBL"))
-              ? Zone.TopologyMode.VBL
-              : Zone.TopologyMode.MBL;
-
       if (parameters.size() != 1) {
         throw new ParserException(
             I18N.getText(
@@ -114,7 +123,9 @@ public class Topology_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (functionName.equals("eraseVBL") || functionName.equals("eraseMBL")) {
+      if (functionName.equalsIgnoreCase("eraseVBL")
+          || functionName.equalsIgnoreCase("eraseTerrainVBL")
+          || functionName.equalsIgnoreCase("eraseMBL")) {
         erase = true;
       }
 
@@ -140,34 +151,47 @@ public class Topology_Functions extends AbstractFunction {
 
         Shape topologyShape =
             Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
-        switch (topologyShape) {
-          case RECTANGLE:
-            drawRectangleTopology(renderer, topologyObject, erase, mode, functionName);
-            break;
-          case POLYGON:
-            drawPolygonTopology(renderer, topologyObject, erase, mode, functionName);
-            break;
-          case CROSS:
-            drawCrossTopology(renderer, topologyObject, erase, mode, functionName);
-            break;
-          case CIRCLE:
-            drawCircleTopology(renderer, topologyObject, erase, mode, functionName);
-            break;
-          case NONE:
-            break;
-          default:
-            break;
+
+        Zone.TopologyMode mode;
+        if (functionName.equalsIgnoreCase("drawVBL") || functionName.equalsIgnoreCase("eraseVBL")) {
+          mode = Zone.TopologyMode.VBL;
+        } else if (functionName.equalsIgnoreCase("drawTerrainVBL")
+            || functionName.equalsIgnoreCase("eraseTerrainVBL")) {
+          mode = Zone.TopologyMode.TERRAIN_VBL;
+        } else {
+          mode = Zone.TopologyMode.MBL;
+        }
+
+        Area newArea =
+            switch (topologyShape) {
+              case RECTANGLE -> makeRectangle(topologyObject, functionName);
+              case POLYGON -> makePolygon(topologyObject, functionName);
+              case CROSS -> makeCross(topologyObject, functionName);
+              case CIRCLE -> makeCircle(topologyObject, functionName);
+              case NONE -> null;
+              default -> null;
+            };
+        if (newArea != null) {
+          TokenVBL.renderTopology(renderer, newArea, erase, mode);
         }
       }
-    } else if (functionName.equals("getVBL") || functionName.equals("getMBL")) {
-      Zone.TopologyMode mode =
-          functionName.equals("getVBL") ? Zone.TopologyMode.VBL : Zone.TopologyMode.MBL;
+    } else if (functionName.equalsIgnoreCase("getVBL")
+        || functionName.equalsIgnoreCase("getTerrainVBL")
+        || functionName.equalsIgnoreCase("getMBL")) {
+      Zone.TopologyMode mode;
+      if (functionName.equalsIgnoreCase("getVBL")) {
+        mode = Zone.TopologyMode.VBL;
+      } else if (functionName.equalsIgnoreCase("getTerrainVBL")) {
+        mode = Zone.TopologyMode.TERRAIN_VBL;
+      } else {
+        mode = Zone.TopologyMode.MBL;
+      }
       boolean simpleJSON = false; // If true, send only array of x,y
 
       if (parameters.size() > 2) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+                "macro.function.general.tooManyParam", functionName, 2, parameters.size()));
       }
 
       if (parameters.isEmpty()) {
@@ -180,7 +204,7 @@ public class Topology_Functions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
 
-      if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
+      if (parameters.size() >= 2 && !parameters.get(1).equals(BigDecimal.ZERO)) {
         simpleJSON = true;
       }
 
@@ -200,18 +224,23 @@ public class Topology_Functions extends AbstractFunction {
                 functionName));
       }
 
-      Area topologyArea = null;
+      Area topologyArea = new Area();
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
         Area tempTopologyArea = getTopology(renderer, topologyObject, mode, functionName);
-        if (topologyArea == null) {
-          topologyArea = tempTopologyArea;
-        } else {
-          topologyArea.add(tempTopologyArea);
-        }
+        topologyArea.add(tempTopologyArea);
       }
-      return getAreaPoints(topologyArea, simpleJSON);
-    } else if (functionName.equals("getTokenVBL")) {
+
+      if (simpleJSON) {
+        // Build a single list of points for the area.
+        return getAreaPoints(topologyArea);
+      } else {
+        // Build separate objects for each area.
+        JsonArray allShapes = new JsonArray();
+        allShapes.add(getAreaShapeObject(topologyArea));
+        return allShapes.toString();
+      }
+    } else if (functionName.equalsIgnoreCase("getTokenVBL")) {
       Token token;
 
       if (parameters.size() == 1) {
@@ -238,11 +267,13 @@ public class Topology_Functions extends AbstractFunction {
 
       Area vblArea = token.getVBL();
       if (vblArea != null) {
-        return getAreaPoints(vblArea, false);
+        JsonArray allShapes = new JsonArray();
+        allShapes.add(getAreaShapeObject(vblArea));
+        return allShapes.toString();
       } else {
         return "";
       }
-    } else if (functionName.equals("setTokenVBL")) {
+    } else if (functionName.equalsIgnoreCase("setTokenVBL")) {
       Token token = null;
 
       if (parameters.size() > 2) {
@@ -295,20 +326,16 @@ public class Topology_Functions extends AbstractFunction {
         Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
-            tokenVBL.add(
-                drawRectangleTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
+            tokenVBL.add(makeRectangle(vblObject, functionName));
             break;
           case POLYGON:
-            tokenVBL.add(
-                drawPolygonTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
+            tokenVBL.add(makePolygon(vblObject, functionName));
             break;
           case CROSS:
-            tokenVBL.add(
-                drawCrossTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
+            tokenVBL.add(makeCross(vblObject, functionName));
             break;
           case CIRCLE:
-            tokenVBL.add(
-                drawCircleTopology(null, vblObject, false, Zone.TopologyMode.VBL, functionName));
+            tokenVBL.add(makeCircle(vblObject, functionName));
             break;
           case AUTO:
             tokenVBL = autoGenerateVBL(token, vblObject);
@@ -332,7 +359,7 @@ public class Topology_Functions extends AbstractFunction {
       }
       // Replace with new VBL
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
-    } else if (functionName.equals("transferVBL")) {
+    } else if (functionName.equalsIgnoreCase("transferVBL")) {
       Token token = null;
 
       if (parameters.size() > 3) {
@@ -446,21 +473,12 @@ public class Topology_Functions extends AbstractFunction {
   /**
    * Get the required parameters needed from the JSON to draw a rectangle and render as topology.
    *
-   * @param renderer Reference to the ZoneRenderer. Can be null.
    * @param topologyObject The JsonObject containing all the coordinates and values to needed to
    *     draw a rectangle.
-   * @param erase Set to true to erase the rectangle in the topology, otherwise draw it.
-   * @param mode The topology mode to operate in.
-   * @return the topology area if the renderer is null, and null otherwise.
+   * @return the topology area
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawRectangleTopology(
-      ZoneRenderer renderer,
-      JsonObject topologyObject,
-      boolean erase,
-      Zone.TopologyMode mode,
-      String funcname)
-      throws ParserException {
+  private Area makeRectangle(JsonObject topologyObject, String funcname) throws ParserException {
     funcname += "[Rectangle]";
     // Required Parameters
     String[] requiredParms = {"x", "y", "w", "h"};
@@ -554,47 +572,18 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
-  }
-
-  private void applyTranslate(
-      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
-      throws ParserException {
-    if (jsonKeysExist(topologyObject, params, funcname)) {
-      double tx = getJSONdouble(topologyObject, "tx", funcname);
-      double ty = getJSONdouble(topologyObject, "ty", funcname);
-      at.translate(tx, ty);
-    }
-  }
-
-  private void applyScale(
-      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
-      throws ParserException {
-    if (jsonKeysExist(topologyObject, params, funcname)) {
-      double sx = getJSONdouble(topologyObject, "sx", funcname);
-      double sy = getJSONdouble(topologyObject, "sy", funcname);
-      at.scale(sx, sy);
-    }
+    return area;
   }
 
   /**
    * Get the required parameters needed from the JSON to draw a Polygon and render as topology.
    *
-   * @param renderer Reference to the ZoneRenderer
    * @param topologyObject The JsonObject containing all the coordinates and values to needed to
-   *     draw a rectangle.
-   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
-   * @param mode The topology mode to operate in.
-   * @return the topology area if the renderer is null, and null otherwise.
+   *     draw a polygon.
+   * @return the topology area
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawPolygonTopology(
-      ZoneRenderer renderer,
-      JsonObject topologyObject,
-      boolean erase,
-      Zone.TopologyMode mode,
-      String funcname)
-      throws ParserException {
+  private Area makePolygon(JsonObject topologyObject, String funcname) throws ParserException {
     funcname += "[Polygon]";
     String requiredParms[] = {"points"};
     if (!jsonKeysExist(topologyObject, requiredParms, funcname)) {
@@ -706,7 +695,7 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    return area;
   }
 
   /**
@@ -714,21 +703,12 @@ public class Topology_Functions extends AbstractFunction {
    * topology. This is a convenience function to draw two lines perpendicular to each other to form
    * a "cross" commonly used to block LOS for objects like Trees but still show most of the image.
    *
-   * @param renderer Reference to the ZoneRenderer
    * @param topologyObject The JsonObject containing all the coordinates and values to needed to
-   *     draw a rectangle.
-   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
-   * @param mode The topology mode to operate in.
-   * @return the topology area if the renderer is null, and null otherwise.
+   *     draw a cross.
+   * @return the topology area
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCrossTopology(
-      ZoneRenderer renderer,
-      JsonObject topologyObject,
-      boolean erase,
-      Zone.TopologyMode mode,
-      String funcname)
-      throws ParserException {
+  private Area makeCross(JsonObject topologyObject, String funcname) throws ParserException {
     funcname += "[Cross]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -800,28 +780,19 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    return area;
   }
 
   /**
    * Get the required parameters needed from the JSON to draw an approximate circle and render as
    * topology.
    *
-   * @param renderer Reference to the ZoneRenderer
    * @param topologyObject The JsonObject containing all the coordinates and values to needed to
-   *     draw a rectangle.
-   * @param erase Set to true to erase the rectangle in the topology mode, otherwise draw it
-   * @param mode The topology mode to operate in.
-   * @return the topology area if the renderer is null, and null otherwise.
+   *     draw a circle.
+   * @return the topology area
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCircleTopology(
-      ZoneRenderer renderer,
-      JsonObject topologyObject,
-      boolean erase,
-      Zone.TopologyMode mode,
-      String funcname)
-      throws ParserException {
+  private Area makeCircle(JsonObject topologyObject, String funcname) throws ParserException {
     funcname += "[Circle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "radius", "sides"};
@@ -907,7 +878,27 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    return TokenVBL.renderTopology(renderer, area, erase, mode);
+    return area;
+  }
+
+  private void applyTranslate(
+      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
+      throws ParserException {
+    if (jsonKeysExist(topologyObject, params, funcname)) {
+      double tx = getJSONdouble(topologyObject, "tx", funcname);
+      double ty = getJSONdouble(topologyObject, "ty", funcname);
+      at.translate(tx, ty);
+    }
+  }
+
+  private void applyScale(
+      String funcname, AffineTransform at, JsonObject topologyObject, String[] params)
+      throws ParserException {
+    if (jsonKeysExist(topologyObject, params, funcname)) {
+      double sx = getJSONdouble(topologyObject, "sx", funcname);
+      double sy = getJSONdouble(topologyObject, "sy", funcname);
+      at.scale(sx, sy);
+    }
   }
 
   /**
@@ -1005,30 +996,56 @@ public class Topology_Functions extends AbstractFunction {
       area.transform(atArea);
     }
 
-    switch (mode) {
-      case VBL:
-        area.intersect(renderer.getZone().getTopology());
-        break;
-      case MBL:
-        area.intersect(renderer.getZone().getTopologyTerrain());
-        break;
-      case COMBINED:
-        // Only returns the area where VBL+MBL overlap.
-        area.intersect(renderer.getZone().getTopology());
-        area.intersect(renderer.getZone().getTopologyTerrain());
-        break;
+    // Note: when multiple modes are requested, the overlap between each topology is returned.
+    if (mode.isRegularVbl()) {
+      area.intersect(renderer.getZone().getTopology());
     }
+    if (mode.isTerrainVbl()) {
+      area.intersect(renderer.getZone().getTerrainVbl());
+    }
+    if (mode.isMbl()) {
+      area.intersect(renderer.getZone().getTopologyTerrain());
+    }
+
     return area;
   }
 
-  /**
-   * Get the required parameters needed from the JSON to get/set topology within a defined
-   * rectangle.
-   *
-   * @param area Area passed in to convert to path of points
-   * @param simpleJSON Boolean to set output to array of points or key/value pairs
-   */
-  private String getAreaPoints(Area area, boolean simpleJSON) {
+  private JsonObject getAreaShapeObject(Area area) {
+    // Each shape will be its own json object which each object contains an  array of x,y coords
+    JsonObject polygon = new JsonObject();
+
+    polygon.addProperty("generated", 1);
+    polygon.addProperty("shape", "polygon");
+    polygon.addProperty("fill", 1);
+    polygon.addProperty("close", 1);
+    polygon.addProperty("thickness", 0);
+
+    JsonArray points = new JsonArray();
+    consumeAreaPoints(
+        area,
+        (x, y) -> {
+          var point = new JsonObject();
+          point.addProperty("x", x);
+          point.addProperty("y", y);
+          points.add(point);
+        });
+    polygon.add("points", points);
+
+    return polygon;
+  }
+
+  private JsonArray getAreaPoints(Area area) {
+    JsonArray allPoints = new JsonArray();
+    consumeAreaPoints(
+        area,
+        (x, y) -> {
+          allPoints.add(x);
+          allPoints.add(y);
+        });
+    return allPoints;
+  }
+
+  private void consumeAreaPoints(Area area, BiConsumer<Double, Double> pointConsumer) {
     ArrayList<double[]> areaPoints = new ArrayList<>();
     double[] coords = new double[6];
 
@@ -1042,23 +1059,11 @@ public class Topology_Functions extends AbstractFunction {
       areaPoints.add(pathIteratorCoords);
     }
     // Now that we have the Area defined as commands, lets record the points
-    // into a json array of json objects.
-    // Each shape will be it's own json object which each object contains an
-    // array of x,y coords
-    JsonObject polygon = new JsonObject();
-    JsonArray linePoints = new JsonArray();
-    JsonArray allPolygons = new JsonArray();
-
-    polygon.addProperty("generated", 1);
-    polygon.addProperty("shape", "polygon");
 
     double[] defaultPos = null;
     double[] moveTo = null;
 
     for (double[] currentElement : areaPoints) {
-      // Create a json object to hold the x,y key/value pairs
-      JsonObject line = new JsonObject();
-
       // 2 decimals is precise enough, we will deal in .5 pixels mostly.
       currentElement[1] = Math.floor(currentElement[1] * 100) / 100;
       currentElement[2] = Math.floor(currentElement[2] * 100) / 100;
@@ -1068,43 +1073,19 @@ public class Topology_Functions extends AbstractFunction {
         if (defaultPos == null) {
           defaultPos = currentElement;
         } else {
-          line.addProperty("x", defaultPos[1]);
-          line.addProperty("y", defaultPos[2]);
-          linePoints.add(line);
-          line = new JsonObject();
+          pointConsumer.accept(defaultPos[1], defaultPos[2]);
         }
         moveTo = currentElement;
 
-        line.addProperty("x", currentElement[1]);
-        line.addProperty("y", currentElement[2]);
-        linePoints.add(line);
+        pointConsumer.accept(currentElement[1], currentElement[2]);
       } else if (currentElement[0] == PathIterator.SEG_LINETO) {
-        line.addProperty("x", currentElement[1]);
-        line.addProperty("y", currentElement[2]);
-        linePoints.add(line);
+        pointConsumer.accept(currentElement[1], currentElement[2]);
       } else if (currentElement[0] == PathIterator.SEG_CLOSE) {
-        line.addProperty("x", moveTo[1]);
-        line.addProperty("y", moveTo[2]);
-        linePoints.add(line);
+        pointConsumer.accept(moveTo[1], moveTo[2]);
       } else {
         // System.out.println("in getAreaPoints(): found a curve, ignoring");
       }
     }
-    if (simpleJSON) {
-      for (int i = 0; i < linePoints.size(); i++) {
-        JsonObject points = linePoints.get(i).getAsJsonObject();
-        allPolygons.add(points.get("x"));
-        allPolygons.add(points.get("y"));
-      }
-    } else {
-      polygon.addProperty("fill", 1);
-      polygon.addProperty("close", 1);
-      polygon.addProperty("thickness", 0);
-      polygon.add("points", linePoints);
-      allPolygons.add(polygon);
-    }
-
-    return allPolygons.toString();
   }
 
   /**

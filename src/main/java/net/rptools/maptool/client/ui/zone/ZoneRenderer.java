@@ -847,7 +847,7 @@ public class ZoneRenderer extends JComponent
     int noteVPos = 20;
     if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
 
-    if (!zone.isVisible() && pl.isGMView()) {
+    if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
       GraphicsUtil.drawBoxedString(
           g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
       noteVPos += 20;
@@ -1995,7 +1995,7 @@ public class ZoneRenderer extends JComponent
       downloadCount++;
 
       // Have we loaded the image into memory yet ?
-      Image image = ImageManager.getImage(asset.getId(), this);
+      Image image = ImageManager.getImage(asset.getMD5Key(), this);
       if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
         loaded = false;
         continue;
