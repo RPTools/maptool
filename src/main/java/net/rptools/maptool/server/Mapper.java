@@ -23,7 +23,6 @@ import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
@@ -798,8 +797,7 @@ public class Mapper {
     token.setExposedAreaGUID(GUID.valueOf(dto.getExposedAreaGuid()));
 
     var assetMap = dto.getImageAssetMapMap();
-    for(var key: assetMap.keySet())
-      token.setImageAsset(key, new MD5Key(assetMap.get(key)));
+    for (var key : assetMap.keySet()) token.setImageAsset(key, new MD5Key(assetMap.get(key)));
 
     token.setImageAsset(dto.getCurrentImageAsset());
     token.setX(dto.getLastX());
@@ -822,7 +820,7 @@ public class Mapper {
 
     var tokenSizeMap = token.getSizeMap();
     var dtoSizeMap = dto.getSizeMapMap();
-    for(var key: dtoSizeMap.keySet()) {
+    for (var key : dtoSizeMap.keySet()) {
       switch (key) {
         case 0 -> {
           tokenSizeMap.put(SquareGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
@@ -864,10 +862,11 @@ public class Mapper {
     token.setTokenOpacity(dto.getTokenOpacity());
     token.setSpeechName(dto.getSpeechname());
     token.setTerrainModifier(dto.getTerrainModifier());
-    token.setTerrainModifierOperation(Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name()));
+    token.setTerrainModifierOperation(
+        Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name()));
 
     var ignoredSet = new HashSet<Token.TerrainModifierOperation>();
-    for(var value: dto.getTerrainModifiersIgnoredList())
+    for (var value : dto.getTerrainModifiersIgnoredList())
       ignoredSet.add(Token.TerrainModifierOperation.valueOf(value.name()));
     token.setTerrainModifiersIgnored(ignoredSet);
 
@@ -878,8 +877,7 @@ public class Mapper {
     token.setPortraitImage(new MD5Key(dto.getPortraitImage()));
 
     var lightSources = token.getLightSourcesModifiable();
-    for(var light: dto.getLightSourcesList())
-      lightSources.add(map(light));
+    for (var light : dto.getLightSourcesList()) lightSources.add(map(light));
 
     token.setSightType(dto.getSightType());
     token.setHasSight(dto.getHasSight());
@@ -891,7 +889,7 @@ public class Mapper {
     token.setGMName(dto.getGmName());
 
     var dtoStateMap = dto.getStateMap();
-    for(var key: dtoStateMap.keySet()) {
+    for (var key : dtoStateMap.keySet()) {
       var stateDto = dtoStateMap.get(key);
       switch (stateDto.getStateTypeCase()) {
         case BOOL_VALUE -> {
@@ -908,13 +906,11 @@ public class Mapper {
     }
 
     var dtoProperties = dto.getPropertiesMap();
-    for(var key: dtoProperties.keySet())
-      token.setProperty(key, dtoProperties.get(key));
+    for (var key : dtoProperties.keySet()) token.setProperty(key, dtoProperties.get(key));
 
-    var dtoMacros =  dto.getMacroPropertiesMap();
+    var dtoMacros = dto.getMacroPropertiesMap();
     var tokenMacros = token.getMacroPropertiesMap(false);
-    for(var key: dtoMacros.keySet())
-      tokenMacros.put(key, map(dtoMacros.get(key)));
+    for (var key : dtoMacros.keySet()) tokenMacros.put(key, map(dtoMacros.get(key)));
 
     token.setSpeechMap(dto.getSpeechMap());
     token.setHeroLabData(map(dto.getHeroLabData()));

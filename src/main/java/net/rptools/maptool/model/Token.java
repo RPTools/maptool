@@ -1075,8 +1075,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public List<AttachedLightSource> getLightSourcesModifiable() {
-    if(lightSourceList == null)
-      lightSourceList = new LinkedList<>();
+    if (lightSourceList == null) lightSourceList = new LinkedList<>();
 
     return lightSourceList;
   }
@@ -1334,7 +1333,9 @@ public class Token extends BaseModel implements Cloneable {
     return lastY;
   }
 
-  public int getLastX() { return lastX; }
+  public int getLastX() {
+    return lastX;
+  }
 
   public Path<? extends AbstractPoint> getLastPath() {
     return lastPath;

@@ -46,11 +46,9 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.log4j.Logger;
 
 /**
@@ -914,18 +912,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToClients();
   }
 
-  @Override
-  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+  private void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
     forwardToClients();
   }
 
-  @Override
-  public void removeAddOnLibrary(List<String> namespaces) {
+  private void removeAddOnLibrary(List<String> namespaces) {
     forwardToClients();
   }
 
-  @Override
-  public void removeAllAddOnLibraries() {
+  private void removeAllAddOnLibraries() {
     forwardToClients();
   }
 

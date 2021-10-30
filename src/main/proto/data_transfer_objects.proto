@@ -28,6 +28,7 @@ message ServerPolicyDto {
   WalkerMetricDto movement_metric = 13;
   bool using_astar_pathfinding = 14;
   bool vbl_blocks_move = 15;
+  bool hide_map_select_ui = 16;
 }
 
 enum WalkerMetricDto {
