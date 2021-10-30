@@ -809,6 +809,7 @@ public class Mapper {
     token.setSizeScale(dto.getSizeScale());
     token.setLastPath(map(dto.getLastPath()));
     token.setSnapToScale(dto.getSnapToScale());
+    // this is only to set sizes flipped an nonflipped
     token.setFlippedIso(false);
     token.setWidth(dto.getWidth());
     token.setHeight(dto.getHeight());
@@ -853,14 +854,14 @@ public class Mapper {
     dto.getOwnerListList().forEach(owner -> token.addOwner(owner));
     token.setOwnerType(dto.getOwnerType());
     token.setShape(Token.TokenShape.valueOf(dto.getTokenShape()));
-    token.setType(Token.Type.valueOf(dto.getTokenShape()));
+    token.setType(Token.Type.valueOf(dto.getTokenType()));
     token.setLayer(Zone.Layer.valueOf(dto.getLayer()));
     token.setPropertyType(dto.getPropertyType());
     token.setFacing(dto.getFacing());
     token.setHaloColor(new Color(dto.getHaloColor(), true));
     token.setVisionOverlayColor(new Color(dto.getVisionOverlayColor(), true));
     token.setTokenOpacity(dto.getTokenOpacity());
-    token.setSpeechName(dto.getSpeechname());
+    token.setSpeechName(dto.getSpeechName());
     token.setTerrainModifier(dto.getTerrainModifier());
     token.setTerrainModifierOperation(
         Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name()));
@@ -906,7 +907,21 @@ public class Mapper {
     }
 
     var dtoProperties = dto.getPropertiesMap();
-    for (var key : dtoProperties.keySet()) token.setProperty(key, dtoProperties.get(key));
+    for (var key : dtoProperties.keySet()) {
+      var proptertyDto = dtoProperties.get(key);
+      switch (proptertyDto.getPropertyTypeCase()) {
+        case STRING_VALUE -> {
+          var value = proptertyDto.getStringValue();
+          token.setProperty(key, value);
+        }
+        case DOUBLE_VALUE -> {
+          token.setProperty(key, new BigDecimal(proptertyDto.getDoubleValue()));
+        }
+        default -> {
+          log.warn("unknown token property type:" + proptertyDto.getPropertyTypeCase());
+        }
+      }
+    }
 
     var dtoMacros = dto.getMacroPropertiesMap();
     var tokenMacros = token.getMacroPropertiesMap(false);
@@ -919,14 +934,169 @@ public class Mapper {
   }
 
   public static TokenDto map(Token token) {
-    return null;
+    var dto = TokenDto.newBuilder();
+    dto.setId(token.getId().toString());
+    dto.setBeingImpersonated(token.isBeingImpersonated());
+    dto.setExposedAreaGuid(token.getExposedAreaGUID().toString());
+
+    var assetMap = token.getImageAssetMap();
+    for (var key : assetMap.keySet()) {
+      dto.putImageAssetMap(key, assetMap.get(key).toString());
+    }
+
+    dto.setCurrentImageAsset(token.getImageAsset());
+    dto.setLastX(token.getLastX());
+    dto.setX(token.getX());
+    dto.setLastY(token.getLastY());
+    dto.setY(token.getY());
+    dto.setZ(token.getZOrder());
+    dto.setAnchorX(token.getAnchorX());
+    dto.setAnchorY(token.getAnchorY());
+    dto.setSizeScale(token.getSizeScale());
+    dto.setLastPath(map(token.getLastPath()));
+    dto.setSnapToScale(token.isSnapToScale());
+    dto.setWidth(token.getNormalWidth());
+    dto.setHeight(token.getNormalHeight());
+    dto.setIsoHeight(token.getIsoWidth());
+    dto.setIsoHeight(token.getIsoHeight());
+    dto.setScaleX(token.getScaleX());
+    dto.setScaleY(token.getScaleY());
+
+    var tokenSizeMap = token.getSizeMap();
+    for (var key : tokenSizeMap.keySet()) {
+      if (SquareGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(0, tokenSizeMap.get(key).toString());
+      } else if (GridlessGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(1, tokenSizeMap.get(key).toString());
+      } else if (HexGridVertical.class.equals(key.getClass())) {
+        dto.putSizeMap(2, tokenSizeMap.get(key).toString());
+      } else if (HexGridHorizontal.class.equals(key.getClass())) {
+        dto.putSizeMap(3, tokenSizeMap.get(key).toString());
+      } else if (IsometricGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(4, tokenSizeMap.get(key).toString());
+      } else {
+        log.warn("unknown grid in tokensizemap: " + key);
+      }
+    }
+    dto.setSnapToGrid(token.isSnapToGrid());
+    dto.setIsVisible(token.isVisible());
+    dto.setVisibleOnlyToOwner(token.isVisibleOnlyToOwner());
+    dto.setVblColorSensitivity(token.getColorSensitivity());
+    dto.setAlwaysVisibleTolerance(token.getAlwaysVisibleTolerance());
+    dto.setIsAlwaysVisible(token.isAlwaysVisible());
+    dto.setVbl(map(token.getVBL()));
+    dto.setName(token.getName());
+    token.getOwners().forEach(owner -> dto.addOwnerList(owner));
+    dto.setOwnerType(token.getOwnerType());
+    dto.setTokenShape(token.getShape().name());
+    dto.setTokenType(token.getType().name());
+    dto.setLayer(token.getLayer().name());
+    dto.setPropertyType(token.getPropertyType());
+    dto.setFacing(token.getFacing());
+    dto.setHaloColor(token.getHaloColor().getRGB());
+    dto.setVisionOverlayColor(token.getVisionOverlayColor().getRGB());
+    dto.setTokenOpacity(token.getTokenOpacity());
+    dto.setSpeechName(token.getSpeechName());
+    dto.setTerrainModifier(token.getTerrainModifier());
+    dto.setTerrainModifierOperation(
+        TerrainModifierOperationDto.valueOf(token.getTerrainModifierOperation().name()));
+
+    for (var value : token.getTerrainModifiersIgnored())
+      dto.addTerrainModifiersIgnored(TerrainModifierOperationDto.valueOf(value.name()));
+
+    dto.setIsFlippedX(token.isFlippedX());
+    dto.setIsFlippedY(token.isFlippedY());
+    dto.setIsFlippedIso(token.isFlippedIso());
+    dto.setCharsheetImage(token.getCharsheetImage().toString());
+    dto.setPortraitImage(token.getPortraitImage().toString());
+
+    for (var light : token.getLightSourcesModifiable()) dto.addLightSources(map(light));
+
+    dto.setSightType(token.getSightType());
+    dto.setHasSight(token.getHasSight());
+    dto.setHasImageTable(token.getHasImageTable());
+    dto.setImageTableName(token.getImageTableName());
+    dto.setLabel(token.getLabel());
+    dto.setNotes(token.getNotes());
+    dto.setGmNotes(token.getGMNotes());
+    dto.setGmName(token.getGMName());
+
+    for (var key : token.getStatePropertyNames()) {
+      var state = token.getState(key);
+      if (Boolean.class.equals(state.getClass())) {
+        var value = (boolean) state;
+        dto.putState(key, TokenDto.State.newBuilder().setBoolValue(value).build());
+      } else if (BigDecimal.class.equals(state.getClass())) {
+        var value = ((BigDecimal) state).doubleValue();
+        token.setState(key, TokenDto.State.newBuilder().setDoubleValue(value).build());
+      } else {
+        log.warn("unknown state type:" + state.getClass());
+      }
+    }
+
+    for (var key : token.getPropertyNamesRaw()) {
+      var property = token.getProperty(key);
+      if (String.class.equals(property.getClass())) {
+        var value = (String) property;
+        dto.putProperties(key, TokenDto.Property.newBuilder().setStringValue(value).build());
+      } else if (BigDecimal.class.equals(property.getClass())) {
+        var value = ((BigDecimal) property).doubleValue();
+        dto.putProperties(key, TokenDto.Property.newBuilder().setDoubleValue(value).build());
+      } else {
+        log.warn("unknown token property type:" + property.getClass());
+      }
+    }
+
+    var tokenMacros = token.getMacroPropertiesMap(false);
+    for (var key : tokenMacros.keySet()) dto.putMacroProperties(key, map(tokenMacros.get(key)));
+
+    dto.putAllSpeech(token.getSpeechMap());
+    dto.setHeroLabData(map(token.getHeroLabData()));
+    dto.setAllowUriAccess(token.getAllowURIAccess());
+    return dto.build();
   }
 
-  private static HeroLabData map(HeroLabDataDto heroLabData) {
-    return null;
+  private static HeroLabDataDto map(HeroLabData data) {
+    var dto = HeroLabDataDto.newBuilder();
+    dto.setHeroLabStatblockAssetId(data.getHeroLabStatblockAssetID().toString());
+    dto.setName(data.getName());
+    dto.setSummary(data.getSummary());
+    dto.setPlayerName(data.getPlayerName());
+    dto.setGameSystem(data.getGameSystem());
+    dto.setHeroLabIndex(data.getHeroLabIndex());
+    dto.setMinionMasterIndex(data.getMinionMasterIndex());
+    dto.setMinionMasterName(data.getMinionMasterName());
+    dto.setIsAlly(data.isAlly());
+    dto.setIsDirty(data.isDirty());
+    dto.setIsMinion(data.isMinion());
+    dto.setPortfolioPath(data.getPortfolioPath());
+    data.getAssetMap().forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+    return dto.build();
+  }
+
+  private static HeroLabData map(HeroLabDataDto dto) {
+    var data = new HeroLabData(dto.getName());
+    data.setHeroLabStatblockAssetID(new MD5Key(dto.getHeroLabStatblockAssetId()));
+    data.setSummary(dto.getSummary());
+    data.setPlayerName(dto.getPlayerName());
+    data.setGameSystem(dto.getGameSystem());
+    data.setHeroLabIndex(dto.getHeroLabIndex());
+    data.setMinionMasterIndex(dto.getMinionMasterIndex());
+    data.setMinionMasterName(dto.getMinionMasterName());
+    data.setAlly(dto.getIsAlly());
+    data.setDirty(dto.getIsDirty());
+    data.setMinion(dto.getIsMinion());
+    data.setPortfolioPath(dto.getPortfolioPath());
+    var assets = data.getAssetMap();
+    dto.getHeroImageAssetsMap().forEach((key, value) -> assets.put(key, new MD5Key(value)));
+    return data;
   }
 
   private static MacroButtonProperties map(MacroButtonPropertiesDto macroButtonPropertiesDto) {
+    return null;
+  }
+
+  private static MacroButtonPropertiesDto map(MacroButtonProperties macroButtonProperties) {
     return null;
   }
 
@@ -934,7 +1104,15 @@ public class Mapper {
     return null;
   }
 
+  private static AttachedLightSourceDto map(AttachedLightSource light) {
+    return null;
+  }
+
   private static Path<? extends AbstractPoint> map(PathDto lastPath) {
+    return null;
+  }
+
+  private static PathDto map(Path<? extends AbstractPoint> lastPath) {
     return null;
   }
 }

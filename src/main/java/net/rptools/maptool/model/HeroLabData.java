@@ -525,4 +525,12 @@ public class HeroLabData {
 
     return heroLabInfo;
   }
+
+  public MD5Key getHeroLabStatblockAssetID() {
+    return heroLabStatblockAssetID;
+  }
+
+  public void setHeroLabStatblockAssetID(MD5Key statblockAssetID) {
+    heroLabStatblockAssetID = statblockAssetID;
+  }
 }

@@ -578,6 +578,22 @@ public class Token extends BaseModel implements Cloneable {
     this.imageTableName = imageTableName;
   }
 
+  public int getIsoWidth() {
+    return isoWidth;
+  }
+
+  public int getNormalWidth() {
+    return width;
+  }
+
+  public int getIsoHeight() {
+    return isoHeight;
+  }
+
+  public int getNormalHeight() {
+    return height;
+  }
+
   public void setWidth(int width) {
     if (isFlippedIso()) {
       isoWidth = width;
@@ -1118,6 +1134,10 @@ public class Token extends BaseModel implements Cloneable {
     return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
   }
 
+  public int getOwnerType() {
+    return ownerType;
+  }
+
   public void setOwnerType(int ownerType) {
     this.ownerType = ownerType;
   }
@@ -1188,6 +1208,10 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  public Map<String, MD5Key> getImageAssetMap() {
+    return imageAssetMap;
+  }
+
   public MD5Key getImageAssetId() {
     MD5Key assetId = imageAssetMap.get(currentImageAsset);
     if (assetId == null) {
@@ -1212,6 +1236,10 @@ public class Token extends BaseModel implements Cloneable {
 
   public void setImageAsset(String name) {
     currentImageAsset = name;
+  }
+
+  public String getImageAsset() {
+    return currentImageAsset;
   }
 
   public Set<MD5Key> getAllImageAssets() {
@@ -2052,7 +2080,7 @@ public class Token extends BaseModel implements Cloneable {
     getSpeechMap().put(key, value);
   }
 
-  private Map<String, String> getSpeechMap() {
+  public Map<String, String> getSpeechMap() {
     if (speechMap == null) {
       speechMap = new HashMap<String, String>();
     }

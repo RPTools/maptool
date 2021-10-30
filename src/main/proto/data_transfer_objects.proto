@@ -65,6 +65,12 @@ message TokenDto {
       double double_value = 2;
     }
   }
+  message Property {
+    oneof property_type {
+      string string_value = 1;
+      double double_value = 2;
+    }
+  }
   string id = 1;
   bool being_impersonated = 2;
   string exposed_area_guid = 3;
@@ -112,7 +118,7 @@ message TokenDto {
   int32 halo_color = 38;
   int32 vision_overlay_color = 39;
   float token_opacity = 40;
-  string speechname = 41;
+  string speech_name = 41;
   double terrain_modifier = 42;
   TerrainModifierOperationDto terrain_modifier_operation = 43;
   repeated TerrainModifierOperationDto terrain_modifiers_ignored = 44;
@@ -131,7 +137,7 @@ message TokenDto {
   string gm_notes = 57;
   string gm_name = 58;
   map<string, TokenDto.State> state = 59;
-  map<string, string> properties = 60;
+  map<string, TokenDto.Property> properties = 60;
   map<int32, MacroButtonPropertiesDto> macro_properties = 61;
   map<string, string> speech = 62;
   HeroLabDataDto hero_lab_data = 63;
