@@ -2217,6 +2217,7 @@ public class AppActions {
                     serverProps.getPlayersReceiveCampaignMacros());
                 policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
                 policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
+                policy.setHiddenMapSelectUI(serverProps.getMapSelectUIHidden());
 
                 // Tool Tips for unformatted inline rolls.
                 policy.setUseToolTipsForDefaultRollFormat(
@@ -2496,6 +2497,7 @@ public class AppActions {
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();
     MapTool.disconnect();
+    MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
     try {
       MapTool.startPersonalServer(campaign);
     } catch (IOException
