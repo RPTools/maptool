@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -61,24 +63,15 @@ class AssetTransferTest {
     assertTrue(consumer.getFilename().exists());
     assertEquals(header.getSize(), consumer.getFilename().length());
 
-    int count = 0;
-    int val;
-    FileInputStream in = new FileInputStream(consumer.getFilename());
-    while ((val = in.read()) != -1) {
-      assertEquals(data[count], (byte) val);
-      count++;
-    }
-    in.close();
-    assertEquals(data.length, count);
+    byte[] fileContent = Files.readAllBytes(consumer.getFilename().toPath());
+    assertArrayEquals(data, fileContent);
 
     // CLEANUP
     tmpFile.delete();
     consumer.getFilename().delete();
   }
 
-  @Test
-  @DisplayName("Test Creating a temporary file.")
-  File createTempFile(byte[] data) throws IOException {
+  private File createTempFile(byte[] data) throws IOException {
 
     File file = new File("tmp.dat");
     FileOutputStream out = new FileOutputStream(file);
