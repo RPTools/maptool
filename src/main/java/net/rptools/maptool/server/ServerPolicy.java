@@ -259,8 +259,7 @@ public class ServerPolicy {
     sinfo.addProperty(
         "players receive campaign macros",
         playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.addProperty(
-            "hide map select ui", hiddenMapSelectUI() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("hide map select ui", hiddenMapSelectUI() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();

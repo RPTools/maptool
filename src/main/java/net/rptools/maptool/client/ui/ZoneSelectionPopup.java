@@ -44,32 +44,31 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
   private JMenuItem createEntries() {
 
     JMenuItem selection = null;
-    if(MapTool.getServerPolicy().hiddenMapSelectUI() && !MapTool.getPlayer().isGM()) {
+    if (MapTool.getServerPolicy().hiddenMapSelectUI() && !MapTool.getPlayer().isGM()) {
       MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(false);
-    }
-    else {
+    } else {
       List<ZoneRenderer> rendererList =
-              new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
+          new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
       if (!MapTool.getPlayer().isGM()) {
         rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
       }
 
       if (AppPreferences.getMapSortType().equals(AppPreferences.MapSortType.GMNAME))
         rendererList.sort(
-                (o1, o2) -> {
-                  String name1 = o1.getZone().getName();
-                  String name2 = o2.getZone().getName();
+            (o1, o2) -> {
+              String name1 = o1.getZone().getName();
+              String name2 = o2.getZone().getName();
 
-                  return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-                });
+              return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+            });
       else
         rendererList.sort(
-                (o1, o2) -> {
-                  String name1 = o1.getZone().getPlayerAlias();
-                  String name2 = o2.getZone().getPlayerAlias();
+            (o1, o2) -> {
+              String name1 = o1.getZone().getPlayerAlias();
+              String name2 = o2.getZone().getPlayerAlias();
 
-                  return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
-                });
+              return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+            });
 
       for (ZoneRenderer renderer : rendererList) {
         ZoneItem item = new ZoneItem(renderer);

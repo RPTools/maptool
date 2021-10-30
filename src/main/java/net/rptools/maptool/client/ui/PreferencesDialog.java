@@ -655,7 +655,7 @@ public class PreferencesDialog extends JDialog {
     playSystemSoundCheckBox.addActionListener(
         e -> AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected()));
     mapVisibilityWarning.addActionListener(
-            e -> AppPreferences.setMapVisibilityWarning(mapVisibilityWarning.isSelected()));
+        e -> AppPreferences.setMapVisibilityWarning(mapVisibilityWarning.isSelected()));
 
     playStreamsCheckBox.addActionListener(
         e -> {
