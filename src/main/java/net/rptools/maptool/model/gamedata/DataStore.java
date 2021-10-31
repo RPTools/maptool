@@ -20,8 +20,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 
 /** Interface for a data store. */
 public interface DataStore {
@@ -185,7 +187,7 @@ public interface DataStore {
       String type, String namespace, String name, boolean value);
 
   /**
-   * Sets the value of a property to a long.
+   * Sets the value of a property to a json array.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -200,7 +202,7 @@ public interface DataStore {
       String type, String namespace, String name, JsonArray value);
 
   /**
-   * Sets the value of a property to a long.
+   * Sets the value of a property to a json object.
    *
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
@@ -214,6 +216,17 @@ public interface DataStore {
    */
   CompletableFuture<Void> setJsonObjectProperty(
       String type, String namespace, String name, JsonObject value);
+
+  /**
+   * Sets the value of a property to an asset.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @param value the value of the property.
+   * @return a {@code Void} completable future.
+   */
+  CompletableFuture<Void> setAssetProperty(String type, String namespace, String name, Asset value);
 
   /**
    * Creates a new namespace with no initial data or types.
@@ -249,4 +262,14 @@ public interface DataStore {
    */
   CompletableFuture<Void> createNamespaceWithTypes(
       String propertyType, String namespace, Map<String, DataType> dataTypes);
+
+  /**
+   * Returns the data transfer object representation of the data in the namespace.
+   *
+   * @param type the propertyType of the namespace.
+   * @param namespace the namespace to get the data for.
+   * @return a {@code CompletableFuture} containing the data transfer object representation of the
+   *     data.
+   */
+  CompletableFuture<GameDataDto> toDto(String type, String namespace);
 }

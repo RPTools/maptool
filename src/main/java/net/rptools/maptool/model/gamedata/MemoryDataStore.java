@@ -25,10 +25,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import org.apache.log4j.Logger;
 
 /** Class that implements the DataStore interface. */
@@ -241,6 +246,12 @@ public class MemoryDataStore implements DataStore {
   }
 
   @Override
+  public CompletableFuture<Void> setAssetProperty(
+      String type, String namespace, String name, Asset value) {
+    return setProperty(type, namespace, DataValueFactory.fromAsset(name, value));
+  }
+
+  @Override
   public CompletableFuture<Void> createNamespace(String propertyType, String namespace) {
     return createNamespaceWithInitialData(propertyType, namespace, List.of());
   }
@@ -282,5 +293,22 @@ public class MemoryDataStore implements DataStore {
         dataTypes.entrySet().stream()
             .map(e -> DataValueFactory.undefined(e.getKey(), e.getValue()))
             .toList());
+  }
+
+  @Override
+  public CompletableFuture<GameDataDto> toDto(String type, String namespace) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            var builder = GameDataDto.newBuilder();
+            for (var data : getProperties(type, namespace).get()) {
+              var dataBuilder = GameDataValueDto.newBuilder();
+              dataBuilder.setName(data.getName());
+            }
+            return builder.build();
+          } catch (InterruptedException | ExecutionException e) {
+            throw new CompletionException(e.getCause());
+          }
+        });
   }
 }
