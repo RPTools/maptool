@@ -44,7 +44,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
   private JMenuItem createEntries() {
 
     JMenuItem selection = null;
-    if (MapTool.getServerPolicy().hiddenMapSelectUI() && !MapTool.getPlayer().isGM()) {
+    if (MapTool.getServerPolicy().getMapSelectUIHidden() && !MapTool.getPlayer().isGM()) {
       MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(false);
     } else {
       List<ZoneRenderer> rendererList =
