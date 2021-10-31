@@ -93,6 +93,8 @@ public class AppPreferences {
   private static final String KEY_USE_SOFT_FOG_EDGES = "useSoftFog";
   private static final boolean DEFAULT_USE_SOFT_FOG_EDGES = true;
 
+  private static final String KEY_MAP_VISIBILITY_WARNING = "mapVisibilityWarning";
+
   private static final String KEY_NEW_MAPS_HAVE_FOW = "newMapsHaveFow";
   private static final boolean DEFAULT_NEW_MAPS_HAVE_FOW = false;
 
@@ -286,6 +288,14 @@ public class AppPreferences {
   public static boolean getUseHaloColorOnVisionOverlay() {
     return prefs.getBoolean(
         KEY_USE_HALO_COLOR_ON_VISION_OVERLAY, DEFAULT_USE_HALO_COLOR_ON_VISION_OVERLAY);
+  }
+
+  public static void setMapVisibilityWarning(boolean flag) {
+    prefs.putBoolean(KEY_MAP_VISIBILITY_WARNING, flag);
+  }
+
+  public static boolean getMapVisibilityWarning() {
+    return prefs.getBoolean(KEY_MAP_VISIBILITY_WARNING, false);
   }
 
   public static void setAutoRevealVisionOnGMMovement(boolean flag) {

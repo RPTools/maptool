@@ -48,7 +48,8 @@ public class MapFunctions extends AbstractFunction {
         "setMapName",
         "setMapDisplayName",
         "copyMap",
-        "getMapName");
+        "getMapName",
+        "setMapSelectButton");
   }
 
   public static MapFunctions getInstance() {
@@ -239,6 +240,17 @@ public class MapFunctions extends AbstractFunction {
         }
       }
       throw new ParserException(I18N.getText("macro.function.map.notFound", functionName));
+    } else if ("setMapSelectButton".equalsIgnoreCase(functionName)) {
+      // this is kind of a map function? :)
+      checkTrusted(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      boolean vis = !parameters.get(0).toString().equals("0");
+      if (MapTool.getFrame().getFullsZoneButton() != null)
+        MapTool.getFrame().getFullsZoneButton().setVisible(vis);
+      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(vis);
+      return (MapTool.getFrame().getToolbarPanel().getMapselect().isVisible()
+          ? BigDecimal.ONE
+          : BigDecimal.ZERO);
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
