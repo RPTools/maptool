@@ -56,7 +56,7 @@ public class DataStoreManager {
           try {
             for (String propertyType : memoryDataStore.getPropertyTypes().get()) {
               for (String namespace : memoryDataStore.getPropertyNamespaces(propertyType).get()) {
-                memoryDataStore.toDto(propertyType, namespace).thenAccept(builder::addData);
+                memoryDataStore.toDto(propertyType, namespace).thenAccept(builder::addData).get();
               }
             }
           } catch (InterruptedException | ExecutionException e) {
@@ -73,5 +73,10 @@ public class DataStoreManager {
    */
   public CompletableFuture<Set<MD5Key>> getAssets() {
     return memoryDataStore.getAssets();
+  }
+
+  /** Removes all the data from the data store. */
+  public void clear() {
+    memoryDataStore.clear();
   }
 }

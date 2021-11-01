@@ -144,4 +144,17 @@ public final class DoubleDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.DOUBLE, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "DoubleDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", value="
+        + value
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }

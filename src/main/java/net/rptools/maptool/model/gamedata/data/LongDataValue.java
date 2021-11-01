@@ -144,4 +144,17 @@ public final class LongDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.BOOLEAN, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "LongDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", value="
+        + value
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }

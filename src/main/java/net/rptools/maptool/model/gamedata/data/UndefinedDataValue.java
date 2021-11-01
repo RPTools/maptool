@@ -88,4 +88,9 @@ public final class UndefinedDataValue implements DataValue {
   public Asset asAsset() {
     throw InvalidDataOperation.createUndefined(name);
   }
+
+  @Override
+  public String toString() {
+    return "UndefinedDataValue{" + "name='" + name + '\'' + '}';
+  }
 }

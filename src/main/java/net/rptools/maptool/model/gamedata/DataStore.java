@@ -281,4 +281,7 @@ public interface DataStore {
    *     the data store.
    */
   CompletableFuture<Set<MD5Key>> getAssets();
+
+  /** Removes all the data in the DataStore. */
+  void clear();
 }

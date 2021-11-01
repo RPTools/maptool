@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.Collection;
@@ -303,9 +304,23 @@ public class MemoryDataStore implements DataStore {
         () -> {
           try {
             var builder = GameDataDto.newBuilder();
+            builder.setType(type);
+            builder.setNamespace(namespace);
+            Gson gson = new Gson();
             for (var data : getProperties(type, namespace).get()) {
               var dataBuilder = GameDataValueDto.newBuilder();
               dataBuilder.setName(data.getName());
+              switch (data.getDataType()) {
+                case LONG -> dataBuilder.setLongValue(data.asLong());
+                case DOUBLE -> dataBuilder.setDoubleValue(data.asDouble());
+                case BOOLEAN -> dataBuilder.setBooleanValue(data.asBoolean());
+                case STRING -> dataBuilder.setStringValue(data.asString());
+                case JSON_ARRAY -> dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
+                case JSON_OBJECT -> dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
+                case ASSET -> dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+                case UNDEFINED -> dataBuilder.setUndefinedValue(true);
+              }
+              builder.addValues(dataBuilder);
             }
             return builder.build();
           } catch (InterruptedException | ExecutionException e) {
@@ -320,8 +335,15 @@ public class MemoryDataStore implements DataStore {
         () -> {
           return namespaceDataMap.values().stream()
               .flatMap(m -> m.values().stream())
+              .filter(d -> d.getDataType() == DataType.ASSET)
               .map(a -> a.asAsset().getMD5Key())
               .collect(Collectors.toSet());
         });
+  }
+
+  @Override
+  public void clear() {
+    propertyTypeNamespaceMap.clear();
+    namespaceDataMap.clear();
   }
 }

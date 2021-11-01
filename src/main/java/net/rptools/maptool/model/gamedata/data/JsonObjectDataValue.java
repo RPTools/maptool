@@ -142,4 +142,17 @@ public final class JsonObjectDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.JSON_OBJECT, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "JsonObjectDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", value="
+        + value
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }

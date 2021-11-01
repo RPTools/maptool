@@ -65,6 +65,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
@@ -468,6 +469,7 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
+        loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
@@ -787,6 +789,26 @@ public class PersistenceUtil {
     }
   }
 
+  private static void loadGameData(PackedFile packedFile) throws IOException {
+    var dataStore = new DataStoreManager();
+    dataStore.clear();
+
+    if (!packedFile.hasFile(GAME_DATA_FILE)) {
+      return; // No game data to import
+    }
+
+    var builder = DataStoreDto.newBuilder();
+    JsonFormat.parser()
+        .merge(new InputStreamReader(packedFile.getFileAsInputStream(GAME_DATA_FILE)), builder);
+    var dataStoreDto = builder.build();
+
+    try {
+      new GameDataImporter().importData(dataStoreDto);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
   private static void saveGameData(PackedFile packedFile) throws IOException {
     // Remove all the game data from the packed file first.
     for (String path : packedFile.getPaths()) {
@@ -801,6 +823,7 @@ public class PersistenceUtil {
       packedFile.putFile(
           GAME_DATA_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
 
+      Set<MD5Key> assets = dataStoreManager.getAssets().get();
       saveAssets(dataStoreManager.getAssets().get(), packedFile);
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);

@@ -151,4 +151,9 @@ public class AssetDataValue implements DataValue {
   public Asset asAsset() {
     return AssetManager.getAssetAndWait(asset);
   }
+
+  @Override
+  public String toString() {
+    return "AssetDataValue{" + "name='" + name + '\'' + ", asset=" + asset + '}';
+  }
 }

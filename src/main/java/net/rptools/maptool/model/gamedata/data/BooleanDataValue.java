@@ -144,4 +144,17 @@ public final class BooleanDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.BOOLEAN, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "BooleanDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", value="
+        + value
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }

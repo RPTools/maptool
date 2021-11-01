@@ -172,4 +172,17 @@ public final class JsonArrayDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.JSON_ARRAY, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "JsonArrayDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", values="
+        + values
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }

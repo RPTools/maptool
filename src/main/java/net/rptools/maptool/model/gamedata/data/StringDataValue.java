@@ -176,4 +176,22 @@ public final class StringDataValue implements DataValue {
       throw InvalidDataOperation.createInvalidConversion(DataType.BOOLEAN, DataType.ASSET);
     }
   }
+
+  @Override
+  public String toString() {
+    return "StringDataValue{"
+        + "name='"
+        + name
+        + '\''
+        + ", value='"
+        + value
+        + '\''
+        + ", canConvertToNumber="
+        + canConvertToNumber
+        + ", doubleValue="
+        + doubleValue
+        + ", undefined="
+        + undefined
+        + '}';
+  }
 }
