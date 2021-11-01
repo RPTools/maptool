@@ -116,6 +116,7 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
@@ -2010,7 +2011,7 @@ public class AppActions {
             return;
           }
 
-          new LibraryManager().removeAddOnLibraries();
+          new CampaignManager().clearCampaignData();
 
           Campaign campaign = CampaignFactory.createBasicCampaign();
           AppState.setCampaignFile(null);
@@ -2491,7 +2492,7 @@ public class AppActions {
       campaign = MapTool.getCampaign();
     } else {
       campaign = CampaignFactory.createBasicCampaign();
-      new LibraryManager().removeAddOnLibraries();
+      new CampaignManager().clearCampaignData();
     }
     ServerDisconnectHandler.disconnectExpected = true;
     LOAD_MAP.setSeenWarning(false);

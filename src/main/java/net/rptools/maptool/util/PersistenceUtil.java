@@ -64,6 +64,7 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
@@ -469,6 +470,7 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
+        new CampaignManager().clearCampaignData();
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
@@ -741,7 +743,6 @@ public class PersistenceUtil {
    */
   private static void loadAddOnLibraries(PackedFile packedFile) throws IOException {
     var libraryManager = new LibraryManager();
-    libraryManager.removeAddOnLibraries();
     if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
       return; // No Libraries to import
     }
@@ -791,7 +792,6 @@ public class PersistenceUtil {
 
   private static void loadGameData(PackedFile packedFile) throws IOException {
     var dataStore = new DataStoreManager();
-    dataStore.clear();
 
     if (!packedFile.hasFile(GAME_DATA_FILE)) {
       return; // No game data to import

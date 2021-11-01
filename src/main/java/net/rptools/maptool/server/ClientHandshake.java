@@ -32,6 +32,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
@@ -225,8 +226,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
       playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
+        new CampaignManager().clearCampaignData();
         var libraryManager = new LibraryManager();
-        libraryManager.removeAddOnLibraries();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
           Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
           AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
