@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
@@ -272,4 +273,12 @@ public interface DataStore {
    *     data.
    */
   CompletableFuture<GameDataDto> toDto(String type, String namespace);
+
+  /**
+   * Returns all of the {@link MD5Key} of assets in the DataStore.
+   *
+   * @return a {@code CompletableFuture} containing a list of all of the {@link MD5Key} of assets in
+   *     the data store.
+   */
+  CompletableFuture<Set<MD5Key>> getAssets();
 }

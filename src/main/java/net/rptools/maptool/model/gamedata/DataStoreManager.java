@@ -14,9 +14,11 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 
 /** Class that manages the data stores. */
@@ -62,5 +64,14 @@ public class DataStoreManager {
           }
           return builder.build();
         });
+  }
+
+  /**
+   * Returns all the {@link MD5Key} for assets in the data store.
+   *
+   * @return a {@code CompletableFuture} containing the {@link MD5Key} for assets in the data store.
+   */
+  public CompletableFuture<Set<MD5Key>> getAssets() {
+    return memoryDataStore.getAssets();
   }
 }

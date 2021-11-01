@@ -64,6 +64,8 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
@@ -90,6 +92,10 @@ public class PersistenceUtil {
   private static final String DROP_IN_LIBRARY_LIST_FILE = DROP_IN_LIBRARY_DIR + "libraries.json";
 
   private static final String DROP_IN_LIBRARY_ASSET_DIR = DROP_IN_LIBRARY_DIR + ASSET_DIR;
+
+  private static final String GAME_DATA_DIR = "data/";
+
+  private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
 
   private static final String CAMPAIGN_VERSION = "1.11.0";
 
@@ -309,6 +315,11 @@ public class PersistenceUtil {
       saveTimer.start("Save Drop In Libraries");
       saveAddOnLibraries(pakFile);
       saveTimer.stop("Save Drop In Libraries");
+
+      // Store the Game Data
+      saveTimer.start("Save Game Data");
+      saveGameData(pakFile);
+      saveTimer.stop("Save Game Data");
 
       try {
         saveTimer.start("Set content");
@@ -773,6 +784,26 @@ public class PersistenceUtil {
     for (var ldto : dto.getLibrariesList()) {
       Asset asset = AssetManager.getAsset(new MD5Key(ldto.getMd5Hash()));
       packedFile.putFile(DROP_IN_LIBRARY_ASSET_DIR + asset.getMD5Key().toString(), asset.getData());
+    }
+  }
+
+  private static void saveGameData(PackedFile packedFile) throws IOException {
+    // Remove all the game data from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(GAME_DATA_DIR) && !path.equals(GAME_DATA_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    try {
+      DataStoreManager dataStoreManager = new DataStoreManager();
+      DataStoreDto dto = dataStoreManager.toDto().get();
+      packedFile.putFile(
+          GAME_DATA_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+
+      saveAssets(dataStoreManager.getAssets().get(), packedFile);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
     }
   }
 

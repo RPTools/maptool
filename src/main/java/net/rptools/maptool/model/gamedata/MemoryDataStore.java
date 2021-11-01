@@ -28,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
@@ -309,6 +311,17 @@ public class MemoryDataStore implements DataStore {
           } catch (InterruptedException | ExecutionException e) {
             throw new CompletionException(e.getCause());
           }
+        });
+  }
+
+  @Override
+  public CompletableFuture<Set<MD5Key>> getAssets() {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          return namespaceDataMap.values().stream()
+              .flatMap(m -> m.values().stream())
+              .map(a -> a.asAsset().getMD5Key())
+              .collect(Collectors.toSet());
         });
   }
 }
