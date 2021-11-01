@@ -20,45 +20,52 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 
 public class GameDataImporter {
 
-  private Object JSONValueFactory;
+  private final DataStore dataStore = new DataStoreManager().getDefaultDataStore();
 
   public void importData(DataStoreDto dataStoreDto)
       throws ExecutionException, InterruptedException {
-    var dataStore = new DataStoreManager().getDefaultDataStore();
     for (var data : dataStoreDto.getDataList()) {
-      String type = data.getType();
-      String namespace = data.getNamespace();
-      System.out.println("Importing " + type + "." + namespace);
-      dataStore.createNamespace(type, namespace).get();
-      for (var value : data.getValuesList()) {
-        var dataValue =
-            switch (value.getValueCase()) {
-              case STRING_VALUE -> DataValueFactory.fromString(
-                  value.getName(), value.getStringValue());
-              case LONG_VALUE -> DataValueFactory.fromLong(value.getName(), value.getLongValue());
-              case DOUBLE_VALUE -> DataValueFactory.fromDouble(
-                  value.getName(), value.getDoubleValue());
-              case BOOLEAN_VALUE -> DataValueFactory.fromBoolean(
-                  value.getName(), value.getBooleanValue());
-              case ASSET_VALUE -> {
-                var asset = AssetManager.getAssetAndWait(new MD5Key(value.getAssetValue()));
-                yield DataValueFactory.fromAsset(value.getName(), asset);
-              }
-              case JSON_VALUE -> {
-                var json = JsonParser.parseString(value.getJsonValue());
-                if (json.isJsonArray()) {
-                  yield DataValueFactory.fromJsonArray(value.getName(), json.getAsJsonArray());
-                } else {
-                  yield DataValueFactory.fromJsonObject(value.getName(), json.getAsJsonObject());
-                }
-              }
-              case UNDEFINED_VALUE, VALUE_NOT_SET -> DataValueFactory.undefined(value.getName());
-            };
-        dataStore.setProperty(type, namespace, dataValue).get();
-      }
+      importData(data);
     }
+  }
+
+  public void importData(GameDataDto data) throws ExecutionException, InterruptedException {
+    String type = data.getType();
+    String namespace = data.getNamespace();
+    dataStore.createNamespace(type, namespace).get();
+    for (var value : data.getValuesList()) {
+      importData(type, namespace, value);
+    }
+  }
+
+  public void importData(String type, String namespace, GameDataValueDto value)
+      throws ExecutionException, InterruptedException {
+    var dataValue =
+        switch (value.getValueCase()) {
+          case STRING_VALUE -> DataValueFactory.fromString(value.getName(), value.getStringValue());
+          case LONG_VALUE -> DataValueFactory.fromLong(value.getName(), value.getLongValue());
+          case DOUBLE_VALUE -> DataValueFactory.fromDouble(value.getName(), value.getDoubleValue());
+          case BOOLEAN_VALUE -> DataValueFactory.fromBoolean(
+              value.getName(), value.getBooleanValue());
+          case ASSET_VALUE -> {
+            var asset = AssetManager.getAssetAndWait(new MD5Key(value.getAssetValue()));
+            yield DataValueFactory.fromAsset(value.getName(), asset);
+          }
+          case JSON_VALUE -> {
+            var json = JsonParser.parseString(value.getJsonValue());
+            if (json.isJsonArray()) {
+              yield DataValueFactory.fromJsonArray(value.getName(), json.getAsJsonArray());
+            } else {
+              yield DataValueFactory.fromJsonObject(value.getName(), json.getAsJsonObject());
+            }
+          }
+          case UNDEFINED_VALUE, VALUE_NOT_SET -> DataValueFactory.undefined(value.getName());
+        };
+    dataStore.setProperty(type, namespace, dataValue).get();
   }
 }

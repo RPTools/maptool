@@ -230,6 +230,16 @@ public interface DataStore {
   CompletableFuture<Void> setAssetProperty(String type, String namespace, String name, Asset value);
 
   /**
+   * Removes a property from the Data store.
+   *
+   * @param type the propertyType of the property.
+   * @param namespace the namespace of the property.
+   * @param name the name of the property.
+   * @return a {@code Void} completable future.
+   */
+  CompletableFuture<Void> removeProperty(String type, String namespace, String name);
+
+  /**
    * Creates a new namespace with no initial data or types.
    *
    * @param propertyType the propertyType of the namespace.
@@ -284,4 +294,12 @@ public interface DataStore {
 
   /** Removes all the data in the DataStore. */
   void clear();
+
+  /**
+   * Removes the namespace from the DataStore.
+   *
+   * @param propertyType the propertyType of the namespace.
+   * @param namespace the namespace to remove.
+   */
+  void clearNamespace(String propertyType, String namespace);
 }

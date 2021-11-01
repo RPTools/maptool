@@ -255,6 +255,19 @@ public class MemoryDataStore implements DataStore {
   }
 
   @Override
+  public CompletableFuture<Void> removeProperty(String type, String namespace, String name) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          var key = new PropertyTypeNamespace(type, namespace);
+          namespaceDataMap.remove(key);
+          if (!namespaceDataMap.containsKey(key)) {
+            propertyTypeNamespaceMap.remove(type);
+          }
+          return null;
+        });
+  }
+
+  @Override
   public CompletableFuture<Void> createNamespace(String propertyType, String namespace) {
     return createNamespaceWithInitialData(propertyType, namespace, List.of());
   }
@@ -345,5 +358,10 @@ public class MemoryDataStore implements DataStore {
   public void clear() {
     propertyTypeNamespaceMap.clear();
     namespaceDataMap.clear();
+  }
+
+  @Override
+  public void clearNamespace(String propertyType, String namespace) {
+    namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
   }
 }

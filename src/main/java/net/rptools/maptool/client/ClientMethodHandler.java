@@ -14,13 +14,17 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.protobuf.util.JsonFormat;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
@@ -54,6 +58,11 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
@@ -143,6 +152,68 @@ public class ClientMethodHandler extends AbstractMethodHandler {
       case removeAllAddOnLibraries:
         new LibraryManager().removeAddOnLibraries();
         return;
+
+      case updateDataStore:
+        var storeBuilder = DataStoreDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                  storeBuilder);
+          var dataStoreDto = storeBuilder.build();
+          new GameDataImporter().importData(dataStoreDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case updateDataNamespace:
+        var namespaceBuilder = GameDataDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                  namespaceBuilder);
+          var dataNamespaceDto = namespaceBuilder.build();
+          new GameDataImporter().importData(dataNamespaceDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case updateData:
+        String type = (String) parameters[0];
+        String namespace = (String) parameters[1];
+        var dataBuilder = GameDataValueDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
+                  dataBuilder);
+          var dataDto = dataBuilder.build();
+          new GameDataImporter().importData(type, namespace, dataDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case removeDataStore:
+        new DataStoreManager().clear();
+        break;
+
+      case removeDataNamespace:
+        String removeType = (String) parameters[0];
+        String removeNamespace = (String) parameters[1];
+        new DataStoreManager().clearNamespace(removeType, removeNamespace);
+        break;
+
+      case removeData:
+        String removeDType = (String) parameters[0];
+        String removeDNamespace = (String) parameters[1];
+        String removeDName = (String) parameters[2];
+        new DataStoreManager()
+            .getDefaultDataStore()
+            .removeProperty(removeDType, removeDNamespace, removeDName);
     }
 
     // Model events need to update on the EDT

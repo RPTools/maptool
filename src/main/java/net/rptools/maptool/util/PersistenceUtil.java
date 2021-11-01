@@ -791,7 +791,6 @@ public class PersistenceUtil {
   }
 
   private static void loadGameData(PackedFile packedFile) throws IOException {
-    var dataStore = new DataStoreManager();
 
     if (!packedFile.hasFile(GAME_DATA_FILE)) {
       return; // No game data to import

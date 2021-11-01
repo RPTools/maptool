@@ -79,4 +79,14 @@ public class DataStoreManager {
   public void clear() {
     memoryDataStore.clear();
   }
+
+  /**
+   * Removes the namespace from the data store.
+   *
+   * @param propertyType the property type.
+   * @param namespace the namespace.
+   */
+  public void clearNamespace(String propertyType, String namespace) {
+    memoryDataStore.clearNamespace(propertyType, namespace);
+  }
 }
