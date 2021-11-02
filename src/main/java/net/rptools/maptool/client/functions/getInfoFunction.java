@@ -31,9 +31,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
+import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -350,6 +348,7 @@ public class getInfoFunction extends AbstractFunction {
       JsonObject state = new JsonObject();
       state.addProperty("name", bto.getName());
       state.addProperty("type", bto.getClass().getSimpleName());
+      state.addProperty("group", group);
       state.addProperty("isShowGM", bto.isShowGM() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
@@ -358,6 +357,12 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
+      if (bto instanceof FlowColorDotTokenOverlay) {
+        state.addProperty("grid", ((FlowColorDotTokenOverlay) bto).getGrid());
+      }
+      if (bto instanceof CornerImageTokenOverlay) {
+        state.addProperty("corner", ((CornerImageTokenOverlay) bto).getCorner().name());
+      }
 
       sgroup.add(state);
       sinfo.add(group, sgroup);
