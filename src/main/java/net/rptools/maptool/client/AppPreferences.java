@@ -27,7 +27,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -187,7 +186,7 @@ public class AppPreferences {
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
 
-  // When terrain VBL was introduced, older versions of MapTool were unable to read the new topology
+  // When hill VBL was introduced, older versions of MapTool were unable to read the new topology
   // modes. So we use a different preference key than in the past so older versions would not
   // unexpectedly break.
   private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyMode";
@@ -1259,15 +1258,25 @@ public class AppPreferences {
     prefs.put(MACRO_EDITOR_THEME, type);
   }
 
-  public static TopologyMode getTopologyDrawingMode() {
+  public static Zone.TopologyMode getTopologyDrawingMode() {
     try {
-      String oldDrawingMode =
-          prefs.get(KEY_OLD_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE);
-      String drawingMode = prefs.get(KEY_TOPOLOGY_DRAWING_MODE, oldDrawingMode);
-
-      return TopologyMode.valueOf(drawingMode);
+      String drawingMode = prefs.get(KEY_TOPOLOGY_DRAWING_MODE, "");
+      if ("".equals(drawingMode)) {
+        // Fallback to the key used prior to the introduction of various VBL types.
+        String oldDrawingMode =
+            prefs.get(KEY_OLD_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE);
+        return switch (oldDrawingMode) {
+          default -> new Zone.TopologyMode(Zone.TopologyType.WALL_VBL);
+          case "VBL" -> new Zone.TopologyMode(Zone.TopologyType.WALL_VBL);
+          case "MBL" -> new Zone.TopologyMode(Zone.TopologyType.MBL);
+          case "COMBINED" -> new Zone.TopologyMode(
+              Zone.TopologyType.WALL_VBL, Zone.TopologyType.MBL);
+        };
+      } else {
+        return Zone.TopologyMode.valueOf(drawingMode);
+      }
     } catch (Exception exc) {
-      return TopologyMode.VBL;
+      return new Zone.TopologyMode(Zone.TopologyType.WALL_VBL);
     }
   }
 
@@ -1302,7 +1311,7 @@ public class AppPreferences {
    *
    * @param mode the mode. A value of null resets to default.
    */
-  public static void setTopologyDrawingMode(TopologyMode mode) {
+  public static void setTopologyDrawingMode(Zone.TopologyMode mode) {
     if (mode == null) {
       prefs.remove(KEY_TOPOLOGY_DRAWING_MODE);
     } else {

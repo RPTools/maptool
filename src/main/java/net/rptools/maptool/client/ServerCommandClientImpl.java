@@ -35,7 +35,6 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -283,12 +282,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyType);
   }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyType);
   }
 
   public void exposePCArea(GUID zoneGUID) {

@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -72,19 +71,20 @@ public class FogUtil {
    * @return the visible area.
    */
   public static Area calculateVisibility(
-      int x, int y, Area vision, AreaTree topology, AreaTree terrainVbl) {
+      int x, int y, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
     vision = new Area(vision);
     vision.transform(AffineTransform.getTranslateInstance(x, y));
 
     Point origin = new Point(x, y);
-    List<VisibleAreaSegment> visionBlockingSegments = new ArrayList<>();
-    if (!addVisionBlockingSegments(visionBlockingSegments, topology, origin)
-        || !addVisionBlockingSegments(visionBlockingSegments, terrainVbl, origin)) {
+    var accumulator = new VisionBlockingAccumulator(origin);
+    if (!accumulator.addWallBlocking(topology)
+        || !accumulator.addHillBlocking(hillVbl)
+        || !accumulator.addPitBlocking(pitVbl)) {
       // Vision has been completely blocked by topology.
       return null;
     }
 
-    Geometry totalClearedArea = calculateBlockedVision(visionBlockingSegments);
+    Geometry totalClearedArea = calculateBlockedVision(accumulator.getVisionBlockingSegments());
 
     if (totalClearedArea != null) {
       // Convert back to AWT area to modify vision.
@@ -95,100 +95,6 @@ public class FogUtil {
 
     // For simplicity, this catches some of the edge cases
     return vision;
-  }
-
-  /**
-   * Finds all topology segments that can take part in blocking vision.
-   *
-   * <p>If false is returned, no segments are added to visionBlockingSegments.
-   *
-   * @param visionBlockingSegments
-   * @param topology
-   * @param origin
-   * @return false if the vision has been completely blocked by topology, or true if vision can be
-   *     blocked by particular segments.
-   */
-  private static boolean addVisionBlockingSegments(
-      List<VisibleAreaSegment> visionBlockingSegments, AreaTree topology, Point origin) {
-    final AreaContainer container = topology.getContainerAt(origin);
-    if (container == null) {
-      // Should never happen since the global ocean should catch everything.
-      return false;
-    }
-
-    final BiConsumer<AreaContainer, Boolean> addVisionBlockingSegments =
-        (areaContainer, frontSide) ->
-            visionBlockingSegments.addAll(
-                areaContainer.getVisionBlockingBoundarySegements(
-                    geometryFactory, origin, frontSide));
-
-    if (container instanceof AreaIsland island) {
-      // We're in an island. For normal VBL, vision is entirely blocked. But for terrain VBL,
-      // vision can continue until we hit the front of any contained ocean or the boundary of
-      // the island.
-      if (!island.isTerrain()) {
-        // Since we're contained in a non-terrain island, there can be no vision through it.
-        return false;
-      } else {
-        // The back side of terrain VBL blocks vision.
-        addVisionBlockingSegments.accept(island, false);
-
-        // The front side of any nested oceans blocks vision.
-        for (var nestedOcean : island.getOceans()) {
-          addVisionBlockingSegments.accept(nestedOcean, true);
-        }
-      }
-    } else if (container instanceof AreaOcean ocean) {
-      // We're in an ocean. Vision is blocked in one way or another by the parent island and
-      // containing island.
-      // For the parent island, if it is regular VBL, vision is blocked by the near side of the
-      // island, which is defined as the boundary of this ocean. If it is terrain VBL, vision
-      // is blocked by the boundary of the parent island, as well as the front side of the
-      // boundary of any other ocean contained in the same island.
-      // For any contained island, if it is regular VBL, vision is blocked by the front side of
-      // the boundary of the island. If it is terrain VBL, vision is blocked by the back side of
-      // the boundary of the island, as well as the front side of any oceans contained within.
-
-      // Check the parent island.
-      final var parentIsland = ocean.getParentIsland();
-      if (parentIsland != null) {
-        if (!parentIsland.isTerrain()) {
-          // The near edge of the island blocks vision, which is the same as the boundary of this
-          // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
-          // back side.
-          addVisionBlockingSegments.accept(ocean, false);
-        } else {
-          // The back side of the containing terrain VBL blocks vision.
-          addVisionBlockingSegments.accept(parentIsland, false);
-
-          // The front side of the boundary of any sibling oceans blocks vision.
-          // Note that it is important to block vision even when `siblingOcean == ocean`. This is
-          // because a single ocean can have concave sections with intervening VBL from the
-          // containing island.
-          for (var siblingOcean : parentIsland.getOceans()) {
-            addVisionBlockingSegments.accept(siblingOcean, true);
-          }
-        }
-      }
-
-      // Check each contained island.
-      for (var containedIsland : ocean.getIslands()) {
-        if (!containedIsland.isTerrain()) {
-          // The front side of regular VBL blocks vision.
-          addVisionBlockingSegments.accept(containedIsland, true);
-        } else {
-          // The back side of terrain VBL blocks vision.
-          addVisionBlockingSegments.accept(containedIsland, false);
-
-          // The front side of any nested oceans blocks vision.
-          for (var nestedOcean : containedIsland.getOceans()) {
-            addVisionBlockingSegments.accept(nestedOcean, true);
-          }
-        }
-      }
-    }
-
-    return true;
   }
 
   private static @Nullable Geometry calculateBlockedVision(
@@ -535,5 +441,181 @@ public class FogUtil {
     y = bounds.y + bounds.height / 2;
 
     return new Point(x, y);
+  }
+
+  private static final class VisionBlockingAccumulator {
+    private final Point origin;
+    private final List<VisibleAreaSegment> visionBlockingSegments;
+
+    public VisionBlockingAccumulator(Point origin) {
+      this.origin = origin;
+      this.visionBlockingSegments = new ArrayList<>();
+    }
+
+    public List<VisibleAreaSegment> getVisionBlockingSegments() {
+      return visionBlockingSegments;
+    }
+
+    private void addVisionBlockingSegments(AreaContainer areaContainer, boolean frontSide) {
+      var segments =
+          areaContainer.getVisionBlockingBoundarySegements(geometryFactory, origin, frontSide);
+      visionBlockingSegments.addAll(segments);
+    }
+
+    private void addIslandForHillBlocking(
+        AreaIsland blockingIsland, @Nullable AreaOcean excludeChildOcean) {
+      // The back side of the island blocks.
+      addVisionBlockingSegments(blockingIsland, false);
+      // The front side of each contained ocean also acts as a back side boundary of the island.
+      for (var blockingOcean : blockingIsland.getOceans()) {
+        if (blockingOcean == excludeChildOcean) {
+          continue;
+        }
+
+        addVisionBlockingSegments(blockingOcean, true);
+      }
+    }
+
+    /**
+     * Finds all wall topology segments that can take part in blocking vision.
+     *
+     * @param topology The topology to treat as Wall VBL.
+     * @return false if the vision has been completely blocked by topology, or true if vision may be
+     *     blocked by particular segments.
+     */
+    public boolean addWallBlocking(AreaTree topology) {
+      final AreaContainer container = topology.getContainerAt(origin);
+      if (container == null) {
+        // Should never happen since the global ocean should catch everything.
+        return false;
+      }
+
+      if (container instanceof AreaIsland) {
+        // Since we're contained in a wall island, there can be no vision through it.
+        return false;
+      } else if (container instanceof AreaOcean ocean) {
+        final var parentIsland = ocean.getParentIsland();
+        if (parentIsland != null) {
+          // The near edge of the island blocks vision, which is the same as the boundary of this
+          // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
+          // back side.
+          addVisionBlockingSegments(ocean, false);
+        }
+
+        // Check each contained island.
+        for (var containedIsland : ocean.getIslands()) {
+          // The front side of wall VBL blocks vision.
+          addVisionBlockingSegments(containedIsland, true);
+        }
+      }
+
+      return true;
+    }
+
+    /**
+     * Finds all hill topology segments that can take part in blocking vision.
+     *
+     * @param topology The topology to treat as Hill VBL.
+     * @return false if the vision has been completely blocked by topology, or true if vision can be
+     *     blocked by particular segments.
+     */
+    public boolean addHillBlocking(AreaTree topology) {
+      final AreaContainer container = topology.getContainerAt(origin);
+      if (container == null) {
+        // Should never happen since the global ocean should catch everything.
+        return false;
+      }
+
+      /*
+       * There are two cases for Hill VBL:
+       * 1. A token inside hill VBL can see into adjacent oceans, and therefore into other areas of
+       *    Hill VBL in those oceans.
+       * 2. A token outside hill VBL can see into hill VBL, but not into any oceans adjacent to it.
+       */
+
+      if (container instanceof final AreaIsland island) {
+        /*
+         * Since we're in an island, vision is blocked by:
+         * 1. The back side of the parent ocean's parent island.
+         * 2. The back side of any sibling islands (other children of the parent ocean).
+         * 3. The back side of any child ocean's islands.
+         * 4. For each island in the above, any child ocean provided it's not the parent of the
+         *    current island.
+         */
+        final var parentOcean = island.getParentOcean();
+
+        final var grandparentIsland = parentOcean.getParentIsland();
+        if (grandparentIsland != null) {
+          addIslandForHillBlocking(grandparentIsland, parentOcean);
+        }
+
+        for (final var siblingIsland : parentOcean.getIslands()) {
+          if (siblingIsland == island) {
+            // We don't want to block vision for the hill we're currently in.
+            // TODO Ideally we could block the second occurence of the current island, but we need
+            //  a way to do that reliably.
+            continue;
+          }
+
+          addIslandForHillBlocking(siblingIsland, null);
+        }
+
+        for (final var childOcean : island.getOceans()) {
+          for (final var grandchildIsland : childOcean.getIslands()) {
+            addIslandForHillBlocking(grandchildIsland, null);
+          }
+        }
+      } else if (container instanceof final AreaOcean ocean) {
+        /*
+         * Since we're in an ocean, vision is blocked by:
+         * 1. The back side of the parent island.
+         * 2. The back side of any child island
+         * 3. For each island in the above, any child ocean provided it's not the current ocean.
+         */
+        final var parentIsland = ocean.getParentIsland();
+        if (parentIsland != null) {
+          addIslandForHillBlocking(parentIsland, null);
+        }
+        // Check each contained island.
+        for (var containedIsland : ocean.getIslands()) {
+          addIslandForHillBlocking(containedIsland, null);
+        }
+      }
+
+      return true;
+    }
+
+    /**
+     * Finds all pit topology segments that can take part in blocking vision.
+     *
+     * @param topology The topology to treat as Pit VBL.
+     * @return false if the vision has been completely blocked by topology, or true if vision can be
+     *     blocked by particular segments.
+     */
+    public boolean addPitBlocking(AreaTree topology) {
+      final AreaContainer container = topology.getContainerAt(origin);
+      if (container == null) {
+        // Should never happen since the global ocean should catch everything.
+        return false;
+      }
+
+      /*
+       * There are two cases for Pit VBL:
+       * 1. A token inside Pit VBL can see only see within the current island, not into any adjacent
+       *    oceans.
+       * 2. A token outside Pit VBL is unobstructed by the Pit VBL (nothing special to do).
+       */
+
+      if (container instanceof final AreaIsland island) {
+        /*
+         * Since we're in an island, vision is blocked by:
+         * 1. The back side of the island.
+         * 2. The front side of any child ocean.
+         */
+        addIslandForHillBlocking(island, null);
+      }
+
+      return true;
+    }
   }
 }

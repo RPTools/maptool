@@ -46,20 +46,28 @@ import net.rptools.parser.function.AbstractFunction;
  * New class extending AbstractFunction to create new "Macro Functions" drawVBL, eraseVBL, getVBL
  *
  * <p>drawVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
- * VBL
+ * Wall VBL
  *
  * <p>eraseVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a Shape
- * in VBL
+ * in Wall VBL
  *
- * <p>getVBL(jsonArray) :: Get the VBL for a given area and return as array of points
+ * <p>getVBL(jsonArray) :: Get the Wall VBL for a given area and return as array of points
  *
- * <p>drawTerrainVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a
- * Shape in VBL
+ * <p>drawHillVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a
+ * Shape in Hill VBL
  *
- * <p>eraseTerrainVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
- * Shape in VBL
+ * <p>eraseHillVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
+ * Shape in Hill VBL
  *
- * <p>getTerrainVBL(jsonArray) :: Get the VBL for a given area and return as array of points
+ * <p>getHillVBL(jsonArray) :: Get the Hill VBL for a given area and return as array of points
+ *
+ * <p>drawPitVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape
+ * in Pit VBL
+ *
+ * <p>erasePitVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
+ * Shape in Pit VBL
+ *
+ * <p>getPitVBL(jsonArray) :: Get the Pit VBL for a given area and return as array of points
  *
  * <p>drawMBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
  * MBL
@@ -84,9 +92,12 @@ public class Topology_Functions extends AbstractFunction {
         "drawVBL",
         "eraseVBL",
         "getVBL",
-        "drawTerrainVBL",
-        "eraseTerrainVBL",
-        "getTerrainVBL",
+        "drawHillVBL",
+        "eraseHillVBL",
+        "getHillVBL",
+        "drawPitVBL",
+        "erasePitVBL",
+        "getPitVBL",
         "drawMBL",
         "eraseMBL",
         "getMBL",
@@ -108,8 +119,10 @@ public class Topology_Functions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("drawVBL")
         || functionName.equalsIgnoreCase("eraseVBL")
-        || functionName.equalsIgnoreCase("drawTerrainVBL")
-        || functionName.equalsIgnoreCase("eraseTerrainVBL")
+        || functionName.equalsIgnoreCase("drawHillVBL")
+        || functionName.equalsIgnoreCase("eraseHillVBL")
+        || functionName.equalsIgnoreCase("drawPitVBL")
+        || functionName.equalsIgnoreCase("erasePitVBL")
         || functionName.equalsIgnoreCase("drawMBL")
         || functionName.equalsIgnoreCase("eraseMBL")) {
       boolean erase = false;
@@ -124,7 +137,8 @@ public class Topology_Functions extends AbstractFunction {
       }
 
       if (functionName.equalsIgnoreCase("eraseVBL")
-          || functionName.equalsIgnoreCase("eraseTerrainVBL")
+          || functionName.equalsIgnoreCase("eraseHillVBL")
+          || functionName.equalsIgnoreCase("erasePitVBL")
           || functionName.equalsIgnoreCase("eraseMBL")) {
         erase = true;
       }
@@ -152,14 +166,17 @@ public class Topology_Functions extends AbstractFunction {
         Shape topologyShape =
             Shape.valueOf(topologyObject.get("shape").getAsString().toUpperCase());
 
-        Zone.TopologyMode mode;
+        Zone.TopologyType topologyType;
         if (functionName.equalsIgnoreCase("drawVBL") || functionName.equalsIgnoreCase("eraseVBL")) {
-          mode = Zone.TopologyMode.VBL;
-        } else if (functionName.equalsIgnoreCase("drawTerrainVBL")
-            || functionName.equalsIgnoreCase("eraseTerrainVBL")) {
-          mode = Zone.TopologyMode.TERRAIN_VBL;
+          topologyType = Zone.TopologyType.WALL_VBL;
+        } else if (functionName.equalsIgnoreCase("drawHillVBL")
+            || functionName.equalsIgnoreCase("eraseHillVBL")) {
+          topologyType = Zone.TopologyType.HILL_VBL;
+        } else if (functionName.equalsIgnoreCase("drawPitVBL")
+            || functionName.equalsIgnoreCase("erasePitVBL")) {
+          topologyType = Zone.TopologyType.PIT_VBL;
         } else {
-          mode = Zone.TopologyMode.MBL;
+          topologyType = Zone.TopologyType.MBL;
         }
 
         Area newArea =
@@ -172,19 +189,22 @@ public class Topology_Functions extends AbstractFunction {
               default -> null;
             };
         if (newArea != null) {
-          TokenVBL.renderTopology(renderer, newArea, erase, mode);
+          TokenVBL.renderTopology(renderer, newArea, erase, topologyType);
         }
       }
     } else if (functionName.equalsIgnoreCase("getVBL")
-        || functionName.equalsIgnoreCase("getTerrainVBL")
+        || functionName.equalsIgnoreCase("getHillVBL")
+        || functionName.equalsIgnoreCase("getPitVBL")
         || functionName.equalsIgnoreCase("getMBL")) {
-      Zone.TopologyMode mode;
+      Zone.TopologyType topologyType;
       if (functionName.equalsIgnoreCase("getVBL")) {
-        mode = Zone.TopologyMode.VBL;
-      } else if (functionName.equalsIgnoreCase("getTerrainVBL")) {
-        mode = Zone.TopologyMode.TERRAIN_VBL;
+        topologyType = Zone.TopologyType.WALL_VBL;
+      } else if (functionName.equalsIgnoreCase("getHillVBL")) {
+        topologyType = Zone.TopologyType.HILL_VBL;
+      } else if (functionName.equalsIgnoreCase("getPitVBL")) {
+        topologyType = Zone.TopologyType.PIT_VBL;
       } else {
-        mode = Zone.TopologyMode.MBL;
+        topologyType = Zone.TopologyType.MBL;
       }
       boolean simpleJSON = false; // If true, send only array of x,y
 
@@ -227,7 +247,7 @@ public class Topology_Functions extends AbstractFunction {
       Area topologyArea = new Area();
       for (int i = 0; i < topologyArray.size(); i++) {
         JsonObject topologyObject = topologyArray.get(i).getAsJsonObject();
-        Area tempTopologyArea = getTopology(renderer, topologyObject, mode, functionName);
+        Area tempTopologyArea = getTopology(renderer, topologyObject, topologyType, functionName);
         topologyArea.add(tempTopologyArea);
       }
 
@@ -421,7 +441,8 @@ public class Topology_Functions extends AbstractFunction {
       }
 
       if (vblFromToken) {
-        TokenVBL.renderTopology(renderer, token.getTransformedVBL(), false, Zone.TopologyMode.VBL);
+        TokenVBL.renderTopology(
+            renderer, token.getTransformedVBL(), false, Zone.TopologyType.WALL_VBL);
         if (delete) {
           token.setVBL(null);
         }
@@ -429,7 +450,7 @@ public class Topology_Functions extends AbstractFunction {
         Area vbl = TokenVBL.getVBL_underToken(renderer, token);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
         if (delete) {
-          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyMode.VBL);
+          TokenVBL.renderTopology(renderer, vbl, true, Zone.TopologyType.WALL_VBL);
         }
       }
     } else {
@@ -908,12 +929,15 @@ public class Topology_Functions extends AbstractFunction {
    * @param renderer Reference to the ZoneRenderer
    * @param topologyObject JsonObject containing all the coordinates and values needed to draw a
    *     rectangle.
-   * @param mode The topology mode to operate in.
+   * @param topologyType The topology type to operate on.
    * @return the topology area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
   private Area getTopology(
-      ZoneRenderer renderer, JsonObject topologyObject, Zone.TopologyMode mode, String funcname)
+      ZoneRenderer renderer,
+      JsonObject topologyObject,
+      Zone.TopologyType topologyType,
+      String funcname)
       throws ParserException {
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -997,15 +1021,15 @@ public class Topology_Functions extends AbstractFunction {
     }
 
     // Note: when multiple modes are requested, the overlap between each topology is returned.
-    if (mode.isRegularVbl()) {
-      area.intersect(renderer.getZone().getTopology());
-    }
-    if (mode.isTerrainVbl()) {
-      area.intersect(renderer.getZone().getTerrainVbl());
-    }
-    if (mode.isMbl()) {
-      area.intersect(renderer.getZone().getTopologyTerrain());
-    }
+    var zone = renderer.getZone();
+    var topology =
+        switch (topologyType) {
+          case WALL_VBL -> zone.getTopology();
+          case HILL_VBL -> zone.getHillVbl();
+          case PIT_VBL -> zone.getPitVbl();
+          case MBL -> zone.getTopologyTerrain();
+        };
+    area.intersect(topology);
 
     return area;
   }

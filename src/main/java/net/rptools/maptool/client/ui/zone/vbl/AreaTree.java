@@ -36,8 +36,8 @@ public class AreaTree {
    *
    * @param area the area to digest.
    */
-  public AreaTree(Area area, boolean isTerrainVbl) {
-    digest(area, isTerrainVbl);
+  public AreaTree(Area area) {
+    digest(area);
   }
 
   /**
@@ -54,7 +54,7 @@ public class AreaTree {
     return theArea;
   }
 
-  private void digest(Area area, boolean isTerrainVbl) {
+  private void digest(Area area) {
     if (area == null) {
       return;
     }
@@ -77,7 +77,7 @@ public class AreaTree {
           if (areaMeta.isHole()) {
             oceanList.add(new AreaOcean(areaMeta));
           } else {
-            islandList.add(new AreaIsland(areaMeta, isTerrainVbl));
+            islandList.add(new AreaIsland(areaMeta));
           }
           break;
         case PathIterator.SEG_LINETO:
