@@ -18,6 +18,7 @@ import com.google.gson.JsonParser;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
@@ -79,6 +80,18 @@ public class GameDataImporter {
               yield DataValueFactory.fromJsonObject(value.getName(), json.getAsJsonObject());
             }
           }
+          case UNDEFINED_STRING_VALUE -> DataValueFactory.undefined(
+              value.getName(), DataType.STRING);
+          case UNDEFINED_LONG_VALUE -> DataValueFactory.undefined(value.getName(), DataType.LONG);
+          case UNDEFINED_DOUBLE_VALUE -> DataValueFactory.undefined(
+              value.getName(), DataType.DOUBLE);
+          case UNDEFINED_BOOLEAN_VALUE -> DataValueFactory.undefined(
+              value.getName(), DataType.BOOLEAN);
+          case UNDEFINED_JSON_ARRAY_VALUE -> DataValueFactory.undefined(
+              value.getName(), DataType.JSON_ARRAY);
+          case UNDEFINED_JSON_OBJECT_VALUE -> DataValueFactory.undefined(
+              value.getName(), DataType.JSON_OBJECT);
+          case UNDEFINED_ASSET_VALUE -> DataValueFactory.undefined(value.getName(), DataType.ASSET);
           case UNDEFINED_VALUE, VALUE_NOT_SET -> DataValueFactory.undefined(value.getName());
         };
     dataStore.setProperty(type, namespace, dataValue).get();

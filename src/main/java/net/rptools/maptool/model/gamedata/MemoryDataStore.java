@@ -380,13 +380,55 @@ public class MemoryDataStore implements DataStore {
     var dataBuilder = GameDataValueDto.newBuilder();
     dataBuilder.setName(data.getName());
     switch (data.getDataType()) {
-      case LONG -> dataBuilder.setLongValue(data.asLong());
-      case DOUBLE -> dataBuilder.setDoubleValue(data.asDouble());
-      case BOOLEAN -> dataBuilder.setBooleanValue(data.asBoolean());
-      case STRING -> dataBuilder.setStringValue(data.asString());
-      case JSON_ARRAY -> dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
-      case JSON_OBJECT -> dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
-      case ASSET -> dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+      case LONG -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedLongValue(true);
+        } else {
+          dataBuilder.setLongValue(data.asLong());
+        }
+      }
+      case DOUBLE -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedDoubleValue(true);
+        } else {
+          dataBuilder.setDoubleValue(data.asDouble());
+        }
+      }
+      case BOOLEAN -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedBooleanValue(true);
+        } else {
+          dataBuilder.setBooleanValue(data.asBoolean());
+        }
+      }
+      case STRING -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedStringValue(true);
+        } else {
+          dataBuilder.setStringValue(data.asString());
+        }
+      }
+      case JSON_ARRAY -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedJsonArrayValue(true);
+        } else {
+          dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
+        }
+      }
+      case JSON_OBJECT -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedJsonObjectValue(true);
+        } else {
+          dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
+        }
+      }
+      case ASSET -> {
+        if (data.isUndefined()) {
+          dataBuilder.setUndefinedAssetValue(true);
+        } else {
+          dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+        }
+      }
       case UNDEFINED -> dataBuilder.setUndefinedValue(true);
     }
     return dataBuilder.build();

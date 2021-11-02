@@ -33,4 +33,18 @@ public interface LibraryData {
   CompletableFuture<Boolean> isDefined(String key);
 
   CompletableFuture<DataValue> getValue(String key);
+
+  CompletableFuture<Void> setData(DataValue value);
+
+  CompletableFuture<Void> setLongData(String name, Long value);
+
+  CompletableFuture<Void> setDoubleData(String name, Double value);
+
+  CompletableFuture<Void> setBooleanData(String name, Double value);
+
+  CompletableFuture<Void> setStringData(String name, Double value);
+
+  CompletableFuture<Void> setJsonArrayData(String name, Double value);
+
+  CompletableFuture<Void> setJsonObjectData(String name, Double value);
 }
