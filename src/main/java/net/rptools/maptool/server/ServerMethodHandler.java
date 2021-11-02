@@ -355,13 +355,6 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   /** Send the current call to all other clients except for the sender */
   private void forwardToClients() {
-    System.out.println(
-        "Forwarding to clients "
-            + RPCContext.getCurrent().method
-            + ", "
-            + RPCContext.getCurrent().id
-            + ", "
-            + RPCContext.getCurrent().parameters.toString());
     server
         .getConnection()
         .broadcastCallMethod(

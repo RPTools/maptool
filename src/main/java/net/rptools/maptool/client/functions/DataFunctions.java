@@ -45,7 +45,10 @@ public class DataFunctions extends AbstractFunction {
         "data.createNamespace",
         "data.setData",
         "data.getData",
-        "data.listData");
+        "data.listData",
+        "data.clearData",
+        "data.clearNamespace",
+        "data.clearAllData");
   }
 
   @Override
@@ -83,7 +86,7 @@ public class DataFunctions extends AbstractFunction {
           dataStore.createNamespace(parameters.get(0).toString(), parameters.get(1).toString());
           return "";
         }
-        case "data.createdata" -> {
+        case "data.setdata" -> {
           MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
           FunctionUtil.checkNumberParam(functionName, parameters, 4, 4);
           String type = parameters.get(0).toString();
@@ -151,6 +154,31 @@ public class DataFunctions extends AbstractFunction {
             case ASSET -> "asset://" + data.asAsset().getMD5Key().toString();
             case UNDEFINED -> throw new ParserException(I18N.getText("data.error.undefined", name));
           };
+        }
+        case "data.clearalldata" -> {
+          MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
+          new DataStoreManager().getDefaultDataStore().clear();
+          return "";
+        }
+        case "data.clearnamespace" -> {
+          MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
+          FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+          String type = parameters.get(0).toString();
+          String namespace = parameters.get(1).toString();
+          new DataStoreManager()
+              .getDefaultDataStore()
+              .clearNamespace(parameters.get(0).toString(), parameters.get(1).toString());
+
+          return "";
+        }
+        case "data.cleardata" -> {
+          MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
+          FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+          String type = parameters.get(0).toString();
+          String namespace = parameters.get(1).toString();
+          String name = parameters.get(2).toString();
+          new DataStoreManager().getDefaultDataStore().removeProperty(type, namespace, name);
+          return "";
         }
         default -> throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));

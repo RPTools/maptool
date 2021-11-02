@@ -33,6 +33,8 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.campaign.CampaignManager;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
@@ -227,6 +229,15 @@ public class ClientHandshake implements Handshake, MessageHandler {
       playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
         new CampaignManager().clearCampaignData();
+        if (connectionSuccessfulMsg.hasGameDataDto()) {
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          try {
+            new GameDataImporter(dataStore).importData(connectionSuccessfulMsg.getGameDataDto());
+          } catch (ExecutionException | InterruptedException e) {
+            log.error(I18N.getText("msg.error.importGameData"), e);
+            throw new IOException(e.getCause());
+          }
+        }
         var libraryManager = new LibraryManager();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
           Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
