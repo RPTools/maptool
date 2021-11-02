@@ -30,6 +30,6 @@ public class CampaignManager {
    */
   public void clearCampaignData() {
     new LibraryManager().removeAddOnLibraries();
-    new DataStoreManager().clear();
+    new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
   }
 }

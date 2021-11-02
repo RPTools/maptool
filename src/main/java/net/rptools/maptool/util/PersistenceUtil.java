@@ -802,7 +802,8 @@ public class PersistenceUtil {
     var dataStoreDto = builder.build();
 
     try {
-      new GameDataImporter().importData(dataStoreDto);
+      var dataStore = new DataStoreManager().getDefaultDataStore();
+      new GameDataImporter(dataStore).importData(dataStoreDto);
     } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }

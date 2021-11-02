@@ -43,7 +43,6 @@ import org.apache.log4j.Logger;
 public class MemoryDataStore implements DataStore {
 
   private record PropertyTypeNamespace(String propertyType, String namespace) {}
-  ;
 
   /** Class used to cache definitions. */
   private final Map<String, Set<String>> propertyTypeNamespaceMap =
@@ -185,73 +184,90 @@ public class MemoryDataStore implements DataStore {
         });
   }
 
-  @Override
-  public CompletableFuture<Void> setProperty(String type, String namespace, DataValue value) {
+  /**
+   * Method to set the data value for the given property type, namespace and name.
+   *
+   * @param type the property type.
+   * @param namespace the property namespace.
+   * @param value the data value.
+   */
+  private DataValue setData(String type, String namespace, DataValue value) {
+    if (!checkPropertyNamespace(type, namespace)) {
+      throw InvalidDataOperation.createNamespaceDoesNotExist(namespace, type);
+    }
 
-    return CompletableFuture.supplyAsync(
-        () -> {
-          if (!checkPropertyNamespace(type, namespace)) {
-            throw InvalidDataOperation.createNamespaceDoesNotExist(namespace, type);
-          }
+    DataValue setValue = value;
+    var existing = getData(type, namespace, value.getName());
+    // If no value exists we can put anything there, if a value exists we have to check type
+    // is
+    // correct
+    var dataMap =
+        namespaceDataMap.computeIfAbsent(
+            new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
+    if (existing == null) {
 
-          var existing = getData(type, namespace, value.getName());
-          // If no value exists we can put anything there, if a value exists we have to check type
-          // is
-          // correct
-          var dataMap =
-              namespaceDataMap.computeIfAbsent(
-                  new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
-          if (existing == null) {
+      dataMap.put(value.getName(), value);
+    } else {
+      var newValue = DataType.convert(value, existing.getDataType());
+      dataMap.put(newValue.getName(), newValue);
+      setValue = newValue;
+    }
 
-            dataMap.put(value.getName(), value);
-          } else {
-            var newValue = DataType.convert(value, existing.getDataType());
-            dataMap.put(newValue.getName(), newValue);
-          }
-          return null;
-        });
+    return setValue;
   }
 
   @Override
-  public CompletableFuture<Void> setLongProperty(
+  public CompletableFuture<DataValue> setProperty(String type, String namespace, DataValue value) {
+    return CompletableFuture.supplyAsync(() -> setData(type, namespace, value));
+  }
+
+  @Override
+  public CompletableFuture<DataValue> setLongProperty(
       String type, String namespace, String name, long value) {
-    return setProperty(type, namespace, DataValueFactory.fromLong(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromLong(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setDoubleProperty(
+  public CompletableFuture<DataValue> setDoubleProperty(
       String type, String namespace, String name, double value) {
-    return setProperty(type, namespace, DataValueFactory.fromDouble(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromDouble(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setStringProperty(
+  public CompletableFuture<DataValue> setStringProperty(
       String type, String namespace, String name, String value) {
-    return setProperty(type, namespace, DataValueFactory.fromString(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromString(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setBooleanProperty(
+  public CompletableFuture<DataValue> setBooleanProperty(
       String type, String namespace, String name, boolean value) {
-    return setProperty(type, namespace, DataValueFactory.fromBoolean(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromBoolean(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setJsonArrayProperty(
+  public CompletableFuture<DataValue> setJsonArrayProperty(
       String type, String namespace, String name, JsonArray value) {
-    return setProperty(type, namespace, DataValueFactory.fromJsonArray(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromJsonArray(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setJsonObjectProperty(
+  public CompletableFuture<DataValue> setJsonObjectProperty(
       String type, String namespace, String name, JsonObject value) {
-    return setProperty(type, namespace, DataValueFactory.fromJsonObject(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromJsonObject(name, value)));
   }
 
   @Override
-  public CompletableFuture<Void> setAssetProperty(
+  public CompletableFuture<DataValue> setAssetProperty(
       String type, String namespace, String name, Asset value) {
-    return setProperty(type, namespace, DataValueFactory.fromAsset(name, value));
+    return CompletableFuture.supplyAsync(
+        () -> setData(type, namespace, DataValueFactory.fromAsset(name, value)));
   }
 
   @Override
@@ -267,9 +283,41 @@ public class MemoryDataStore implements DataStore {
         });
   }
 
+  /**
+   * Creates a new namespace populated with the given data.
+   *
+   * @param propertyType the property type.
+   * @param namespace the namespace.
+   * @param initialData the initial data.
+   */
+  private void createDataNamespace(
+      String propertyType, String namespace, Collection<DataValue> initialData) {
+    if (checkPropertyNamespace(propertyType, namespace)) {
+      throw InvalidDataOperation.createNamespaceAlreadyExists(namespace, propertyType);
+    }
+
+    Set<String> namespaces =
+        propertyTypeNamespaceMap.computeIfAbsent(
+            propertyType, k -> Collections.synchronizedSet(new HashSet<>()));
+
+    namespaces.add(namespace);
+
+    var dataMap =
+        namespaceDataMap.computeIfAbsent(
+            new PropertyTypeNamespace(propertyType, namespace), k -> new ConcurrentHashMap<>());
+
+    for (var dataValue : initialData) {
+      dataMap.put(dataValue.getName(), dataValue);
+    }
+  }
+
   @Override
   public CompletableFuture<Void> createNamespace(String propertyType, String namespace) {
-    return createNamespaceWithInitialData(propertyType, namespace, List.of());
+    return CompletableFuture.supplyAsync(
+        () -> {
+          createNamespaceWithInitialData(propertyType, namespace, List.of());
+          return null;
+        });
   }
 
   @Override
@@ -277,25 +325,7 @@ public class MemoryDataStore implements DataStore {
       String propertyType, String namespace, Collection<DataValue> initialData) {
     return CompletableFuture.supplyAsync(
         () -> {
-          if (checkPropertyNamespace(propertyType, namespace)) {
-            throw InvalidDataOperation.createNamespaceAlreadyExists(namespace, propertyType);
-          }
-
-          Set<String> namespaces =
-              propertyTypeNamespaceMap.computeIfAbsent(
-                  propertyType, k -> Collections.synchronizedSet(new HashSet<>()));
-
-          namespaces.add(namespace);
-
-          var dataMap =
-              namespaceDataMap.computeIfAbsent(
-                  new PropertyTypeNamespace(propertyType, namespace),
-                  k -> new ConcurrentHashMap<>());
-
-          for (var dataValue : initialData) {
-            dataMap.put(dataValue.getName(), dataValue);
-          }
-
+          createDataNamespace(propertyType, namespace, initialData);
           return null;
         });
   }
@@ -303,12 +333,16 @@ public class MemoryDataStore implements DataStore {
   @Override
   public CompletableFuture<Void> createNamespaceWithTypes(
       String propertyType, String namespace, Map<String, DataType> dataTypes) {
-    return createNamespaceWithInitialData(
-        propertyType,
-        namespace,
-        dataTypes.entrySet().stream()
-            .map(e -> DataValueFactory.undefined(e.getKey(), e.getValue()))
-            .toList());
+    return CompletableFuture.supplyAsync(
+        () -> {
+          createDataNamespace(
+              propertyType,
+              namespace,
+              dataTypes.entrySet().stream()
+                  .map(e -> DataValueFactory.undefined(e.getKey(), e.getValue()))
+                  .toList());
+          return null;
+        });
   }
 
   @Override
@@ -319,21 +353,9 @@ public class MemoryDataStore implements DataStore {
             var builder = GameDataDto.newBuilder();
             builder.setType(type);
             builder.setNamespace(namespace);
-            Gson gson = new Gson();
             for (var data : getProperties(type, namespace).get()) {
-              var dataBuilder = GameDataValueDto.newBuilder();
-              dataBuilder.setName(data.getName());
-              switch (data.getDataType()) {
-                case LONG -> dataBuilder.setLongValue(data.asLong());
-                case DOUBLE -> dataBuilder.setDoubleValue(data.asDouble());
-                case BOOLEAN -> dataBuilder.setBooleanValue(data.asBoolean());
-                case STRING -> dataBuilder.setStringValue(data.asString());
-                case JSON_ARRAY -> dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
-                case JSON_OBJECT -> dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
-                case ASSET -> dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
-                case UNDEFINED -> dataBuilder.setUndefinedValue(true);
-              }
-              builder.addValues(dataBuilder);
+              var dataDto = gameValueToDto(data);
+              builder.addValues(dataDto);
             }
             return builder.build();
           } catch (InterruptedException | ExecutionException e) {
@@ -343,15 +365,42 @@ public class MemoryDataStore implements DataStore {
   }
 
   @Override
+  public CompletableFuture<GameDataValueDto> toDto(DataValue data) {
+    return CompletableFuture.supplyAsync(() -> gameValueToDto(data));
+  }
+
+  /**
+   * Converts a {@link DataValue} to a {@link GameDataValueDto}.
+   *
+   * @param data The {@link DataValue} to convert.
+   * @return The converted {@link GameDataValueDto}.
+   */
+  private GameDataValueDto gameValueToDto(DataValue data) {
+    var gson = new Gson();
+    var dataBuilder = GameDataValueDto.newBuilder();
+    dataBuilder.setName(data.getName());
+    switch (data.getDataType()) {
+      case LONG -> dataBuilder.setLongValue(data.asLong());
+      case DOUBLE -> dataBuilder.setDoubleValue(data.asDouble());
+      case BOOLEAN -> dataBuilder.setBooleanValue(data.asBoolean());
+      case STRING -> dataBuilder.setStringValue(data.asString());
+      case JSON_ARRAY -> dataBuilder.setJsonValue(gson.toJson(data.asJsonArray()));
+      case JSON_OBJECT -> dataBuilder.setJsonValue(gson.toJson(data.asJsonObject()));
+      case ASSET -> dataBuilder.setAssetValue(data.asAsset().getMD5Key().toString());
+      case UNDEFINED -> dataBuilder.setUndefinedValue(true);
+    }
+    return dataBuilder.build();
+  }
+
+  @Override
   public CompletableFuture<Set<MD5Key>> getAssets() {
     return CompletableFuture.supplyAsync(
-        () -> {
-          return namespaceDataMap.values().stream()
-              .flatMap(m -> m.values().stream())
-              .filter(d -> d.getDataType() == DataType.ASSET)
-              .map(a -> a.asAsset().getMD5Key())
-              .collect(Collectors.toSet());
-        });
+        () ->
+            namespaceDataMap.values().stream()
+                .flatMap(m -> m.values().stream())
+                .filter(d -> d.getDataType() == DataType.ASSET)
+                .map(a -> a.asAsset().getMD5Key())
+                .collect(Collectors.toSet()));
   }
 
   @Override

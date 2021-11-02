@@ -25,8 +25,13 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 
-/** Interface for a data store. */
+/**
+ * Interface for a data store. Classes that implement this interfaces may be proxied by other
+ * classes that are responsible for replicating the data to other clients, as such they should not
+ * call any of their own public methods. or they risk sending superfluous data to other clients.
+ */
 public interface DataStore {
 
   /**
@@ -121,12 +126,12 @@ public interface DataStore {
    * @param type the propertyType of the property.
    * @param namespace the namespace of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setProperty(String type, String namespace, DataValue value);
+  CompletableFuture<DataValue> setProperty(String type, String namespace, DataValue value);
 
   /**
    * Sets the value of a property to a long.
@@ -135,12 +140,13 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setLongProperty(String type, String namespace, String name, long value);
+  CompletableFuture<DataValue> setLongProperty(
+      String type, String namespace, String name, long value);
 
   /**
    * Sets the value of a property to a double.
@@ -149,12 +155,12 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setDoubleProperty(
+  CompletableFuture<DataValue> setDoubleProperty(
       String type, String namespace, String name, double value);
 
   /**
@@ -164,12 +170,12 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setStringProperty(
+  CompletableFuture<DataValue> setStringProperty(
       String type, String namespace, String name, String value);
 
   /**
@@ -179,12 +185,12 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setBooleanProperty(
+  CompletableFuture<DataValue> setBooleanProperty(
       String type, String namespace, String name, boolean value);
 
   /**
@@ -194,12 +200,12 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setJsonArrayProperty(
+  CompletableFuture<DataValue> setJsonArrayProperty(
       String type, String namespace, String name, JsonArray value);
 
   /**
@@ -210,12 +216,12 @@ public interface DataStore {
    * @param name the name of the property.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    * @throws InvalidDataOperation exception if the value can not be converted to the properties'
    *     data propertyType.
    * @throws InvalidDataOperation exception if the namespace does not exist for the propertyType.
    */
-  CompletableFuture<Void> setJsonObjectProperty(
+  CompletableFuture<DataValue> setJsonObjectProperty(
       String type, String namespace, String name, JsonObject value);
 
   /**
@@ -225,9 +231,10 @@ public interface DataStore {
    * @param namespace the namespace of the property.
    * @param name the name of the property.
    * @param value the value of the property.
-   * @return a {@code Void} completable future.
+   * @return the value that was set.
    */
-  CompletableFuture<Void> setAssetProperty(String type, String namespace, String name, Asset value);
+  CompletableFuture<DataValue> setAssetProperty(
+      String type, String namespace, String name, Asset value);
 
   /**
    * Removes a property from the Data store.
@@ -283,6 +290,14 @@ public interface DataStore {
    *     data.
    */
   CompletableFuture<GameDataDto> toDto(String type, String namespace);
+
+  /**
+   * Returns the data transfer object representation of the data in the namespace.
+   *
+   * @param value the data value to convert to a dto.
+   * @return a {@code CompletableFuture} containing the data transfer object representation of the
+   */
+  CompletableFuture<GameDataValueDto> toDto(DataValue value);
 
   /**
    * Returns all of the {@link MD5Key} of assets in the DataStore.

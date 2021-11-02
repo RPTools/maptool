@@ -23,12 +23,27 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 
+/**
+ * Imports data from the data transfer objects into the data store. This will not clear the data
+ * store before importing.
+ */
 public class GameDataImporter {
 
-  private final DataStore dataStore = new DataStoreManager().getDefaultDataStore();
+  private final DataStore dataStore;
+
+  /**
+   * Creates a new GameDataImporter
+   *
+   * @param dataStore teh data store to import into.
+   */
+  public GameDataImporter(DataStore dataStore) {
+    this.dataStore = dataStore;
+    ;
+  }
 
   public void importData(DataStoreDto dataStoreDto)
       throws ExecutionException, InterruptedException {
+    var datStore = new DataStoreManager().getDefaultDataStore();
     for (var data : dataStoreDto.getDataList()) {
       importData(data);
     }

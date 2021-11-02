@@ -161,13 +161,15 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
                   storeBuilder);
           var dataStoreDto = storeBuilder.build();
-          new GameDataImporter().importData(dataStoreDto);
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(dataStoreDto);
         } catch (IOException | ExecutionException | InterruptedException e) {
           MapTool.showError("data.error.receivingUpdate", e);
         }
         break;
 
       case updateDataNamespace:
+        System.out.println("updateDataNamespace");
         var namespaceBuilder = GameDataDto.newBuilder();
         try {
           JsonFormat.parser()
@@ -175,13 +177,15 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
                   namespaceBuilder);
           var dataNamespaceDto = namespaceBuilder.build();
-          new GameDataImporter().importData(dataNamespaceDto);
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(dataNamespaceDto);
         } catch (IOException | ExecutionException | InterruptedException e) {
           MapTool.showError("data.error.receivingUpdate", e);
         }
         break;
 
       case updateData:
+        System.out.println("updateData");
         String type = (String) parameters[0];
         String namespace = (String) parameters[1];
         var dataBuilder = GameDataValueDto.newBuilder();
@@ -191,20 +195,23 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                   new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
                   dataBuilder);
           var dataDto = dataBuilder.build();
-          new GameDataImporter().importData(type, namespace, dataDto);
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(type, namespace, dataDto);
         } catch (IOException | ExecutionException | InterruptedException e) {
           MapTool.showError("data.error.receivingUpdate", e);
         }
         break;
 
       case removeDataStore:
-        new DataStoreManager().clear();
+        new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
         break;
 
       case removeDataNamespace:
         String removeType = (String) parameters[0];
         String removeNamespace = (String) parameters[1];
-        new DataStoreManager().clearNamespace(removeType, removeNamespace);
+        new DataStoreManager()
+            .getDefaultDataStoreForRemoteUpdate()
+            .clearNamespace(removeType, removeNamespace);
         break;
 
       case removeData:
@@ -212,7 +219,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         String removeDNamespace = (String) parameters[1];
         String removeDName = (String) parameters[2];
         new DataStoreManager()
-            .getDefaultDataStore()
+            .getDefaultDataStoreForRemoteUpdate()
             .removeProperty(removeDType, removeDNamespace, removeDName);
     }
 

@@ -43,7 +43,7 @@ public class DataFunctions extends AbstractFunction {
         "data.listTypes",
         "data.listNamespaces",
         "data.createNamespace",
-        "data.createData",
+        "data.setData",
         "data.getData",
         "data.listData");
   }
@@ -71,7 +71,8 @@ public class DataFunctions extends AbstractFunction {
           MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           JsonArray json = new JsonArray();
-          for (String namespace : dataStore.getPropertyTypes().get()) {
+          for (String namespace :
+              dataStore.getPropertyNamespaces(parameters.get(0).toString()).get()) {
             json.add(namespace);
           }
           return json;

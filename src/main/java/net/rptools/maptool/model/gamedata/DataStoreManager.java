@@ -34,11 +34,23 @@ public class DataStoreManager {
   private static final DataStore memoryDataStore = new MemoryDataStore();
 
   /**
-   * Returns the default data store.
+   * Returns the default data store. Any updates to the data store using the returned data store
+   * will be propagated to other clients.
    *
    * @return the default data store.
    */
   public DataStore getDefaultDataStore() {
+    return new DataStoreUpdateClientsProxy(memoryDataStore);
+  }
+
+  /**
+   * Returns the data store for use when the updates come from a remote client. Any updates to the
+   * data store using the returned data store will be assumed to be coming from a remote client so
+   * will not be propagated to other clients.
+   *
+   * @return the data store for use when the updates come from a remote client.
+   */
+  public DataStore getDefaultDataStoreForRemoteUpdate() {
     return memoryDataStore;
   }
 
@@ -73,20 +85,5 @@ public class DataStoreManager {
    */
   public CompletableFuture<Set<MD5Key>> getAssets() {
     return memoryDataStore.getAssets();
-  }
-
-  /** Removes all the data from the data store. */
-  public void clear() {
-    memoryDataStore.clear();
-  }
-
-  /**
-   * Removes the namespace from the data store.
-   *
-   * @param propertyType the property type.
-   * @param namespace the namespace.
-   */
-  public void clearNamespace(String propertyType, String namespace) {
-    memoryDataStore.clearNamespace(propertyType, namespace);
   }
 }
