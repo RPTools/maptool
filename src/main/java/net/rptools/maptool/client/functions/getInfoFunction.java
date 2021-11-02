@@ -358,7 +358,7 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
       if (bto instanceof FlowColorDotTokenOverlay) {
-        state.addProperty("grid", ((FlowColorDotTokenOverlay) bto).getGrid());
+        state.addProperty("gridSize", ((FlowColorDotTokenOverlay) bto).getGrid());
       }
       if (bto instanceof CornerImageTokenOverlay) {
         state.addProperty("corner", ((CornerImageTokenOverlay) bto).getCorner().name());
