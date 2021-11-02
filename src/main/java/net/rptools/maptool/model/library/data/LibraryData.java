@@ -14,37 +14,123 @@
  */
 package net.rptools.maptool.model.library.data;
 
-import java.util.Map;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 
+/** Intererface for a library data object. */
 public interface LibraryData {
 
-  String libraryName();
+  /**
+   * Returns the name of the library.
+   *
+   * @return the name of the library
+   */
+  CompletableFuture<String> libraryName();
 
+  /**
+   * Returns the set of keys in the library.
+   *
+   * @return the set of keys in the library
+   */
   CompletableFuture<Set<String>> getAllKeys();
 
-  CompletableFuture<Map<String, DataType>> getKeyDataTypeMap();
-
+  /**
+   * Returns the data type of the specified key.
+   *
+   * @param key the key to get the data type of
+   * @return the data type of the specified key
+   */
   CompletableFuture<DataType> getDataType(String key);
 
+  /**
+   * Checks if the library has the specified key.
+   *
+   * @param key the key to check for.
+   * @return true if the library has the specified key, false otherwise.
+   */
   CompletableFuture<Boolean> isDefined(String key);
 
+  /**
+   * Returns the data value of the specified key.
+   *
+   * @param key the key to get the data value of
+   * @return the data value of the specified key
+   */
   CompletableFuture<DataValue> getValue(String key);
 
+  /**
+   * Sets the data value of the specified key.
+   *
+   * @param value the data value to set.
+   * @return a future that completes when the data value is set
+   */
   CompletableFuture<Void> setData(DataValue value);
 
+  /**
+   * Sets the data long value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
   CompletableFuture<Void> setLongData(String name, Long value);
 
+  /**
+   * Sets the double value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
   CompletableFuture<Void> setDoubleData(String name, Double value);
 
-  CompletableFuture<Void> setBooleanData(String name, Double value);
+  /**
+   * Sets the boolen value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
+  CompletableFuture<Void> setBooleanData(String name, boolean value);
 
+  /**
+   * Sets the string value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
   CompletableFuture<Void> setStringData(String name, Double value);
 
-  CompletableFuture<Void> setJsonArrayData(String name, Double value);
+  /**
+   * Sets the Json Array value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
+  CompletableFuture<Void> setJsonArrayData(String name, JsonArray value);
 
-  CompletableFuture<Void> setJsonObjectData(String name, Double value);
+  /**
+   * Sets the Json Object value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
+  CompletableFuture<Void> setJsonObjectData(String name, JsonObject value);
+
+  /**
+   * Sets the asset value of the specified key.
+   *
+   * @param name the name of the key to set
+   * @param value the value to set
+   * @return a future that completes when the data value is set
+   */
+  CompletableFuture<Void> setAssetData(String name, Asset value);
 }

@@ -471,4 +471,13 @@ class LibraryToken implements Library {
       return new Location(locType, URLDecoder.decode(vals[1], StandardCharsets.UTF_8));
     }
   }
+
+  /**
+   * Returns the token for the library.
+   *
+   * @return the token for the library.
+   */
+  CompletableFuture<Token> getToken() {
+    return new ThreadExecutionHelper<Token>().runOnSwingThread(() -> findLibrary(id));
+  }
 }
