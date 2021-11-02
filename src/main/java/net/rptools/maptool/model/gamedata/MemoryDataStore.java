@@ -275,9 +275,9 @@ public class MemoryDataStore implements DataStore {
     return CompletableFuture.supplyAsync(
         () -> {
           var key = new PropertyTypeNamespace(type, namespace);
-          namespaceDataMap.remove(key);
-          if (!namespaceDataMap.containsKey(key)) {
-            propertyTypeNamespaceMap.remove(type);
+          var dataMap = namespaceDataMap.get(key);
+          if (dataMap != null) {
+            dataMap.remove(name);
           }
           return null;
         });

@@ -221,6 +221,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         new DataStoreManager()
             .getDefaultDataStoreForRemoteUpdate()
             .removeProperty(removeDType, removeDNamespace, removeDName);
+        break;
     }
 
     // Model events need to update on the EDT
