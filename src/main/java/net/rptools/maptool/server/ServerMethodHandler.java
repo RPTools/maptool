@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.server;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +51,7 @@ import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrar
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
+import org.apache.tika.utils.ExceptionUtils;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -104,31 +106,34 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getDrawMsg());
         }
         case EDIT_TOKEN_MSG -> {
-          handle(msg.getEditTokenMsg());
+          handle(id, msg.getEditTokenMsg());
           sendToClients(id, msg);
         }
         case PUT_TOKEN_MSG -> {
-          handle(msg.getPutTokenMsg());
+          handle(id, msg.getPutTokenMsg());
           sendToClients(id, msg);
         }
         default -> log.warn(msgType + "not handled.");
       }
 
-    } catch (Exception e) {
+    } catch (InvalidProtocolBufferException e) {
       super.handleMessage(id, message);
+    } catch (Exception e) {
+      log.error(ExceptionUtils.getStackTrace(e));
+      MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
   }
 
-  private void handle(PutTokenMsg putTokenMsg) {
+  private void handle(String clientId, PutTokenMsg putTokenMsg) {
     var zoneGUID = GUID.valueOf(putTokenMsg.getZoneGuid());
     var token = Mapper.map(putTokenMsg.getToken());
-    putToken(zoneGUID, token);
+    putToken(clientId, zoneGUID, token);
   }
 
-  private void handle(EditTokenMsg editTokenMsg) {
+  private void handle(String clientId, EditTokenMsg editTokenMsg) {
     var zoneGUID = GUID.valueOf(editTokenMsg.getZoneGuid());
     var token = Mapper.map(editTokenMsg.getToken());
-    putToken(zoneGUID, token);
+    putToken(clientId, zoneGUID, token);
   }
 
   private void handle(DrawMsg drawMsg) {
@@ -664,7 +669,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToClients();
   }
 
-  private void putToken(GUID zoneGUID, Token token) {
+  private void putToken(String clientId, GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
     int zOrder = 0;
@@ -682,8 +687,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       Object[] parameters = {
         zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
       };
-      broadcastToClient(
-          RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
+      broadcastToClient(clientId, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
   }
 

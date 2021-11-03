@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.server;
 
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.geom.Area;
@@ -195,6 +196,8 @@ public class Mapper {
   }
 
   public static AreaDto map(Area area) {
+    if (area == null) return null;
+
     var builder = AreaDto.newBuilder();
 
     var it = area.getPathIterator(null);
@@ -794,12 +797,19 @@ public class Mapper {
     var token = new Token();
     token.setId(GUID.valueOf(dto.getId()));
     token.setBeingImpersonated(dto.getBeingImpersonated());
-    token.setExposedAreaGUID(GUID.valueOf(dto.getExposedAreaGuid()));
+    if (dto.hasExposedAreaGuid())
+      token.setExposedAreaGUID(GUID.valueOf(dto.getExposedAreaGuid().getValue()));
+    else token.setExposedAreaGUID(null);
 
     var assetMap = dto.getImageAssetMapMap();
-    for (var key : assetMap.keySet()) token.setImageAsset(key, new MD5Key(assetMap.get(key)));
+    var tokenAssetMap = token.getImageAssetMap();
+    for (var key : assetMap.keySet()) {
+      var nullKey = key == "" ? null : key;
+      tokenAssetMap.put(nullKey, new MD5Key(assetMap.get(key)));
+    }
 
-    token.setImageAsset(dto.getCurrentImageAsset());
+    if (dto.hasCurrentImageAsset()) token.setImageAsset(dto.getCurrentImageAsset().getValue());
+    else token.setImageAsset(null);
     token.setX(dto.getLastX());
     token.setX(dto.getX());
     token.setY(dto.getLastY());
@@ -807,7 +817,8 @@ public class Mapper {
     token.setZOrder(dto.getZ());
     token.setAnchor(dto.getAnchorX(), dto.getAnchorY());
     token.setSizeScale(dto.getSizeScale());
-    token.setLastPath(map(dto.getLastPath()));
+    if (dto.hasLastPath()) token.setLastPath(map(dto.getLastPath()));
+    else token.setLastPath(null);
     token.setSnapToScale(dto.getSnapToScale());
     // this is only to set sizes flipped an nonflipped
     token.setFlippedIso(false);
@@ -849,7 +860,8 @@ public class Mapper {
     token.setColorSensitivity(dto.getVblColorSensitivity());
     token.setAlwaysVisibleTolerance(dto.getAlwaysVisibleTolerance());
     token.setIsAlwaysVisible(dto.getIsAlwaysVisible());
-    token.setVBL(map(dto.getVbl()));
+    if (dto.hasVbl()) token.setVBL(map(dto.getVbl()));
+    else token.setVBL(null);
     token.setName(dto.getName());
     dto.getOwnerListList().forEach(owner -> token.addOwner(owner));
     token.setOwnerType(dto.getOwnerType());
@@ -857,9 +869,16 @@ public class Mapper {
     token.setType(Token.Type.valueOf(dto.getTokenType()));
     token.setLayer(Zone.Layer.valueOf(dto.getLayer()));
     token.setPropertyType(dto.getPropertyType());
-    token.setFacing(dto.getFacing());
-    token.setHaloColor(new Color(dto.getHaloColor(), true));
-    token.setVisionOverlayColor(new Color(dto.getVisionOverlayColor(), true));
+    if (dto.hasFacing()) token.setFacing(dto.getFacing().getValue());
+    else token.setFacing(null);
+
+    if (dto.hasHaloColor()) token.setHaloColor(new Color(dto.getHaloColor().getValue(), true));
+    else token.setHaloColor(null);
+
+    if (dto.hasVisionOverlayColor())
+      token.setVisionOverlayColor(new Color(dto.getVisionOverlayColor().getValue(), true));
+    else token.setVisionOverlayColor(null);
+
     token.setTokenOpacity(dto.getTokenOpacity());
     token.setSpeechName(dto.getSpeechName());
     token.setTerrainModifier(dto.getTerrainModifier());
@@ -874,20 +893,31 @@ public class Mapper {
     token.setFlippedX(dto.getIsFlippedX());
     token.setFlippedY(dto.getIsFlippedY());
     token.setFlippedIso(dto.getIsFlippedIso());
-    token.setCharsheetImage(new MD5Key(dto.getCharsheetImage()));
-    token.setPortraitImage(new MD5Key(dto.getPortraitImage()));
+    if (dto.hasCharsheetImage())
+      token.setCharsheetImage(new MD5Key(dto.getCharsheetImage().getValue()));
+    else token.setCharsheetImage(null);
+
+    if (dto.hasPortraitImage())
+      token.setPortraitImage(new MD5Key(dto.getPortraitImage().getValue()));
+    else token.setPortraitImage(null);
 
     var lightSources = token.getLightSourcesModifiable();
     for (var light : dto.getLightSourcesList()) lightSources.add(map(light));
 
-    token.setSightType(dto.getSightType());
+    if (dto.hasSightType()) token.setSightType(dto.getSightType().getValue());
+    else token.setSightType(null);
     token.setHasSight(dto.getHasSight());
     token.setHasImageTable(dto.getHasImageTable());
-    token.setImageTableName(dto.getImageTableName());
-    token.setLabel(dto.getLabel());
-    token.setNotes(dto.getNotes());
-    token.setGMNotes(dto.getGmNotes());
-    token.setGMName(dto.getGmName());
+    if (dto.hasImageTableName()) token.setImageTableName(dto.getImageTableName().getValue());
+    else token.setImageTableName(null);
+    if (dto.hasLabel()) token.setLabel(dto.getLabel().getValue());
+    else token.setLabel(null);
+    if (dto.hasNotes()) token.setNotes(dto.getNotes().getValue());
+    else token.setNotes(null);
+    if (dto.hasGmNotes()) token.setGMNotes(dto.getGmNotes().getValue());
+    else token.setGMNotes(null);
+    if (dto.hasGmName()) token.setGMName(dto.getGmName().getValue());
+    else token.setGMName(null);
 
     var dtoStateMap = dto.getStateMap();
     for (var key : dtoStateMap.keySet()) {
@@ -928,7 +958,8 @@ public class Mapper {
     for (var key : dtoMacros.keySet()) tokenMacros.put(key, map(dtoMacros.get(key)));
 
     token.setSpeechMap(dto.getSpeechMap());
-    token.setHeroLabData(map(dto.getHeroLabData()));
+    if (dto.hasHeroLabData()) token.setHeroLabData(map(dto.getHeroLabData()));
+    else token.setHeroLabData(null);
     token.setAllowURIAccess(dto.getAllowUriAccess());
     return token;
   }
@@ -937,14 +968,18 @@ public class Mapper {
     var dto = TokenDto.newBuilder();
     dto.setId(token.getId().toString());
     dto.setBeingImpersonated(token.isBeingImpersonated());
-    dto.setExposedAreaGuid(token.getExposedAreaGUID().toString());
+
+    if (token.getExposedAreaGUID() != null)
+      dto.setExposedAreaGuid(StringValue.of(token.getExposedAreaGUID().toString()));
 
     var assetMap = token.getImageAssetMap();
     for (var key : assetMap.keySet()) {
-      dto.putImageAssetMap(key, assetMap.get(key).toString());
+      var notNullKey = key == null ? "" : key;
+      dto.putImageAssetMap(notNullKey, assetMap.get(key).toString());
     }
 
-    dto.setCurrentImageAsset(token.getImageAsset());
+    if (token.getImageAsset() != null)
+      dto.setCurrentImageAsset(StringValue.of(token.getImageAsset()));
     dto.setLastX(token.getLastX());
     dto.setX(token.getX());
     dto.setLastY(token.getLastY());
@@ -953,7 +988,8 @@ public class Mapper {
     dto.setAnchorX(token.getAnchorX());
     dto.setAnchorY(token.getAnchorY());
     dto.setSizeScale(token.getSizeScale());
-    dto.setLastPath(map(token.getLastPath()));
+    var lastPath = map(token.getLastPath());
+    if (lastPath != null) dto.setLastPath(lastPath);
     dto.setSnapToScale(token.isSnapToScale());
     dto.setWidth(token.getNormalWidth());
     dto.setHeight(token.getNormalHeight());
@@ -984,7 +1020,7 @@ public class Mapper {
     dto.setVblColorSensitivity(token.getColorSensitivity());
     dto.setAlwaysVisibleTolerance(token.getAlwaysVisibleTolerance());
     dto.setIsAlwaysVisible(token.isAlwaysVisible());
-    dto.setVbl(map(token.getVBL()));
+    if (token.getVBL() != null) dto.setVbl(map(token.getVBL()));
     dto.setName(token.getName());
     token.getOwners().forEach(owner -> dto.addOwnerList(owner));
     dto.setOwnerType(token.getOwnerType());
@@ -992,9 +1028,12 @@ public class Mapper {
     dto.setTokenType(token.getType().name());
     dto.setLayer(token.getLayer().name());
     dto.setPropertyType(token.getPropertyType());
-    dto.setFacing(token.getFacing());
-    dto.setHaloColor(token.getHaloColor().getRGB());
-    dto.setVisionOverlayColor(token.getVisionOverlayColor().getRGB());
+    if (token.getFacing() != null) dto.setFacing(Int32Value.of(token.getFacing()));
+
+    if (token.getHaloColor() != null)
+      dto.setHaloColor(Int32Value.of(token.getHaloColor().getRGB()));
+    if (token.getVisionOverlayColor() != null)
+      dto.setVisionOverlayColor(Int32Value.of(token.getVisionOverlayColor().getRGB()));
     dto.setTokenOpacity(token.getTokenOpacity());
     dto.setSpeechName(token.getSpeechName());
     dto.setTerrainModifier(token.getTerrainModifier());
@@ -1007,19 +1046,27 @@ public class Mapper {
     dto.setIsFlippedX(token.isFlippedX());
     dto.setIsFlippedY(token.isFlippedY());
     dto.setIsFlippedIso(token.isFlippedIso());
-    dto.setCharsheetImage(token.getCharsheetImage().toString());
-    dto.setPortraitImage(token.getPortraitImage().toString());
+
+    if (token.getCharsheetImage() != null)
+      dto.setCharsheetImage(StringValue.of(token.getCharsheetImage().toString()));
+    if (token.getPortraitImage() != null)
+      dto.setPortraitImage(StringValue.of(token.getPortraitImage().toString()));
 
     for (var light : token.getLightSourcesModifiable()) dto.addLightSources(map(light));
 
-    dto.setSightType(token.getSightType());
+    if (token.getSightType() != null) dto.setSightType(StringValue.of(token.getSightType()));
     dto.setHasSight(token.getHasSight());
     dto.setHasImageTable(token.getHasImageTable());
-    dto.setImageTableName(token.getImageTableName());
-    dto.setLabel(token.getLabel());
-    dto.setNotes(token.getNotes());
-    dto.setGmNotes(token.getGMNotes());
-    dto.setGmName(token.getGMName());
+    if (token.getImageTableName() != null)
+      dto.setImageTableName(StringValue.of(token.getImageTableName()));
+
+    if (token.getLabel() != null) dto.setLabel(StringValue.of(token.getLabel()));
+
+    if (token.getNotes() != null) dto.setNotes(StringValue.of(token.getNotes()));
+
+    if (token.getGMNotes() != null) dto.setGmNotes(StringValue.of(token.getGMNotes()));
+
+    if (token.getGMName() != null) dto.setGmName(StringValue.of(token.getGMName()));
 
     for (var key : token.getStatePropertyNames()) {
       var state = token.getState(key);
@@ -1051,12 +1098,15 @@ public class Mapper {
     for (var key : tokenMacros.keySet()) dto.putMacroProperties(key, map(tokenMacros.get(key)));
 
     dto.putAllSpeech(token.getSpeechMap());
-    dto.setHeroLabData(map(token.getHeroLabData()));
+    var heroLabData = map(token.getHeroLabData());
+    if (heroLabData != null) dto.setHeroLabData(heroLabData);
     dto.setAllowUriAccess(token.getAllowURIAccess());
     return dto.build();
   }
 
   private static HeroLabDataDto map(HeroLabData data) {
+    if (data == null) return null;
+
     var dto = HeroLabDataDto.newBuilder();
     dto.setHeroLabStatblockAssetId(data.getHeroLabStatblockAssetID().toString());
     dto.setName(data.getName());

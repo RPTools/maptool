@@ -7,6 +7,7 @@ option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "DataTranferObjectProtos";
 
 import "drawing_dto.proto";
+import "google/protobuf/wrappers.proto";
 /*
  * For easier differentiation between protobuf classes and "normal" classes
  * protobuf classes end with "Dto" or "Msg".
@@ -73,9 +74,9 @@ message TokenDto {
   }
   string id = 1;
   bool being_impersonated = 2;
-  string exposed_area_guid = 3;
+  google.protobuf.StringValue exposed_area_guid = 3;
   map<string, string> image_asset_map = 4;
-  string current_image_asset = 5;
+  google.protobuf.StringValue current_image_asset = 5;
   int32 x = 6;
   int32 y = 7;
   int32 z = 8;
@@ -114,9 +115,9 @@ message TokenDto {
   string token_type = 34;
   string layer = 35;
   string property_type = 36;
-  int32 facing = 37;
-  int32 halo_color = 38;
-  int32 vision_overlay_color = 39;
+  google.protobuf.Int32Value facing = 37;
+  google.protobuf.Int32Value halo_color = 38;
+  google.protobuf.Int32Value  vision_overlay_color = 39;
   float token_opacity = 40;
   string speech_name = 41;
   double terrain_modifier = 42;
@@ -125,17 +126,17 @@ message TokenDto {
   bool is_flipped_x = 45;
   bool is_flipped_y = 46;
   bool is_flipped_iso = 47;
-  string charsheet_image = 48;
-  string portrait_image = 49;
+  google.protobuf.StringValue charsheet_image = 48;
+  google.protobuf.StringValue portrait_image = 49;
   repeated AttachedLightSourceDto light_sources = 50;
-  string sight_type = 51;
+  google.protobuf.StringValue sight_type = 51;
   bool has_sight = 52;
   bool has_image_table = 53;
-  string image_table_name = 54;
-  string label = 55;
-  string notes = 56;
-  string gm_notes = 57;
-  string gm_name = 58;
+  google.protobuf.StringValue image_table_name = 54;
+  google.protobuf.StringValue label = 55;
+  google.protobuf.StringValue notes = 56;
+  google.protobuf.StringValue gm_notes = 57;
+  google.protobuf.StringValue gm_name = 58;
   map<string, TokenDto.State> state = 59;
   map<string, TokenDto.Property> properties = 60;
   map<int32, MacroButtonPropertiesDto> macro_properties = 61;
