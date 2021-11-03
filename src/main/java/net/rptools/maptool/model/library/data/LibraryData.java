@@ -78,7 +78,7 @@ public interface LibraryData {
    * @param value the value to set
    * @return a future that completes when the data value is set
    */
-  CompletableFuture<Void> setLongData(String name, Long value);
+  CompletableFuture<Void> setLongData(String name, long value);
 
   /**
    * Sets the double value of the specified key.
@@ -87,10 +87,10 @@ public interface LibraryData {
    * @param value the value to set
    * @return a future that completes when the data value is set
    */
-  CompletableFuture<Void> setDoubleData(String name, Double value);
+  CompletableFuture<Void> setDoubleData(String name, double value);
 
   /**
-   * Sets the boolen value of the specified key.
+   * Sets the boolean value of the specified key.
    *
    * @param name the name of the key to set
    * @param value the value to set
@@ -105,7 +105,7 @@ public interface LibraryData {
    * @param value the value to set
    * @return a future that completes when the data value is set
    */
-  CompletableFuture<Void> setStringData(String name, Double value);
+  CompletableFuture<Void> setStringData(String name, String value);
 
   /**
    * Sets the Json Array value of the specified key.

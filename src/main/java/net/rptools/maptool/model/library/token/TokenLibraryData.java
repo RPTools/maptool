@@ -144,12 +144,12 @@ public class TokenLibraryData implements LibraryData {
   }
 
   @Override
-  public CompletableFuture<Void> setLongData(String name, Long value) {
+  public CompletableFuture<Void> setLongData(String name, long value) {
     return setData(DataValueFactory.fromLong(name, value));
   }
 
   @Override
-  public CompletableFuture<Void> setDoubleData(String name, Double value) {
+  public CompletableFuture<Void> setDoubleData(String name, double value) {
     return setData(DataValueFactory.fromDouble(name, value));
   }
 
@@ -159,8 +159,8 @@ public class TokenLibraryData implements LibraryData {
   }
 
   @Override
-  public CompletableFuture<Void> setStringData(String name, Double value) {
-    return setData(DataValueFactory.fromString(name, value.toString()));
+  public CompletableFuture<Void> setStringData(String name, String value) {
+    return setData(DataValueFactory.fromString(name, value));
   }
 
   @Override
