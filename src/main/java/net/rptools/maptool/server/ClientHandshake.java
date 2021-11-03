@@ -215,11 +215,14 @@ public class ClientHandshake implements Handshake, MessageHandler {
       throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
     var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
+    player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     MapTool.getFrame()
         .getToolbarPanel()
         .getMapselect()
         .setVisible((!policy.getMapSelectUIHidden()) || MapTool.getPlayer().isGM());
-    player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
+    MapTool.getFrame()
+        .getAssetPanel()
+        .setVisible((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM());
     if (!MapTool.isHostingServer()) {
       PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();

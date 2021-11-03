@@ -2218,6 +2218,14 @@ public class AppActions {
                 policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
                 policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
                 policy.setHiddenMapSelectUI(serverProps.getMapSelectUIHidden());
+                policy.setIsMovementLocked(serverProps.getPlayerLibraryLock());
+                if (serverProps.getLockTokenEditOnStart()) {
+                  policy.setIsTokenEditorLocked(true);
+                }
+                if (serverProps.getLockPlayerMovementOnStart()) {
+                  policy.setIsMovementLocked(true);
+                }
+                policy.setDisablePlayerAssetPanel(serverProps.getPlayerLibraryLock());
 
                 // Tool Tips for unformatted inline rolls.
                 policy.setUseToolTipsForDefaultRollFormat(
