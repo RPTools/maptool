@@ -1,0 +1,64 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug report! Please fill out this form as completely as possible.
+  - type: markdown
+    attributes:
+      value: Please first verify that an issue does not already exist for the bug.
+  - type: textarea
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: To Reproduce
+      description: The steps to reproduce the bug
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. If macro related, sample macro code '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behaviour
+      description: A clear and concise description pof what you expected to happen.
+    validations:
+      required: true
+  - type: textarea 
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: MapTool Info
+      description: Information about your MapTool installation.
+      placeholder: |
+        Version: 1.x.y
+        Install type: New, Upgrade [previous version], or JAR [Java Version]
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Desktop
+      description: Desktop Operating System and version
+      placeholder: |
+        OS: (e.g. Windows, Linux [Ubuntu, Debian, CentOs, etc], MacOS), Version: [10, 18.04, etc]
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
+      placeholder: | 
+        e.g. From MapTool, paste info from menu Help -> Gather Debug Information...
+        or You can also attach files (drag and drop here) such as log files or paste a file sharing link.
