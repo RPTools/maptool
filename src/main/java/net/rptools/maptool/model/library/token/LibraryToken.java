@@ -37,6 +37,7 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
+import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -334,6 +335,11 @@ class LibraryToken implements Library {
 
               return files;
             });
+  }
+
+  @Override
+  public CompletableFuture<LibraryData> getLibraryData() {
+    return CompletableFuture.completedFuture(new TokenLibraryData(this));
   }
 
   /**

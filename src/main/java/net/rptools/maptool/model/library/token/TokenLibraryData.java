@@ -17,7 +17,6 @@ package net.rptools.maptool.model.library.token;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.math.BigDecimal;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -25,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
@@ -120,19 +120,7 @@ public class TokenLibraryData implements LibraryData {
     return new ThreadExecutionHelper<Void>()
         .runOnSwingThread(
             () -> {
-              Object tokenVal =
-                  switch (value.getDataType()) {
-                    case LONG -> BigDecimal.valueOf(value.asLong());
-                    case DOUBLE -> BigDecimal.valueOf(value.asDouble());
-                    case BOOLEAN -> value.asBoolean()
-                        ? BigDecimal.valueOf(1)
-                        : BigDecimal.valueOf(0);
-                    case STRING -> value.asString();
-                    case JSON_ARRAY -> value.asJsonArray();
-                    case JSON_OBJECT -> value.asJsonObject();
-                    case ASSET -> value.asAsset();
-                    case UNDEFINED -> "";
-                  };
+              Object tokenVal = new MTScriptDataConversion().convertToMTScriptType(value);
               MapTool.serverCommand()
                   .updateTokenProperty(
                       libraryToken.getToken().get(),

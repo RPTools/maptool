@@ -37,6 +37,7 @@ import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
+import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
@@ -260,6 +261,11 @@ public class AddOnLibrary implements Library {
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
     return CompletableFuture.completedFuture(new ArrayList<>(pathAssetMap.keySet()));
+  }
+
+  @Override
+  public CompletableFuture<LibraryData> getLibraryData() {
+    return CompletableFuture.completedFuture(new AddOnLibraryData(this, this.namespace));
   }
 
   @Override
