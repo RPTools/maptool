@@ -209,18 +209,30 @@ public class ClientMethodHandler extends AbstractMethodHandler {
       case removeDataNamespace:
         String removeType = (String) parameters[0];
         String removeNamespace = (String) parameters[1];
-        new DataStoreManager()
-            .getDefaultDataStoreForRemoteUpdate()
-            .clearNamespace(removeType, removeNamespace);
+        try {
+          new DataStoreManager()
+              .getDefaultDataStoreForRemoteUpdate()
+              .clearNamespace(removeType, removeNamespace)
+              .get();
+        } catch (InterruptedException | ExecutionException e) {
+          log.error(I18N.getText("data.error.clearingNamespace", removeType, removeNamespace), e);
+        }
         break;
 
       case removeData:
         String removeDType = (String) parameters[0];
         String removeDNamespace = (String) parameters[1];
         String removeDName = (String) parameters[2];
-        new DataStoreManager()
-            .getDefaultDataStoreForRemoteUpdate()
-            .removeProperty(removeDType, removeDNamespace, removeDName);
+        try {
+          new DataStoreManager()
+              .getDefaultDataStoreForRemoteUpdate()
+              .removeProperty(removeDType, removeDNamespace, removeDName)
+              .get();
+        } catch (InterruptedException | ExecutionException e) {
+          log.error(
+              I18N.getText("data.error.removingData", removeDType, removeDNamespace, removeDName),
+              e);
+        }
         break;
     }
 

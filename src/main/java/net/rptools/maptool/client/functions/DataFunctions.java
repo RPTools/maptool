@@ -167,7 +167,8 @@ public class DataFunctions extends AbstractFunction {
           String namespace = parameters.get(1).toString();
           new DataStoreManager()
               .getDefaultDataStore()
-              .clearNamespace(parameters.get(0).toString(), parameters.get(1).toString());
+              .clearNamespace(parameters.get(0).toString(), parameters.get(1).toString())
+              .get();
 
           return "";
         }
@@ -177,7 +178,7 @@ public class DataFunctions extends AbstractFunction {
           String type = parameters.get(0).toString();
           String namespace = parameters.get(1).toString();
           String name = parameters.get(2).toString();
-          new DataStoreManager().getDefaultDataStore().removeProperty(type, namespace, name);
+          new DataStoreManager().getDefaultDataStore().removeProperty(type, namespace, name).get();
           return "";
         }
         default -> throw new ParserException(

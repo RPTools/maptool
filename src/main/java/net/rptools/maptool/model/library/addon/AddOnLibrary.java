@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -177,7 +179,13 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    var addOn = new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    try {
+      addOn.getLibraryData().thenApply(ld -> ((AddOnLibraryData) ld).initialize()).get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new CompletionException(e.getCause());
+    }
+    return addOn;
   }
 
   @Override

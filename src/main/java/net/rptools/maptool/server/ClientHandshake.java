@@ -234,7 +234,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
           try {
             new GameDataImporter(dataStore).importData(connectionSuccessfulMsg.getGameDataDto());
           } catch (ExecutionException | InterruptedException e) {
-            log.error(I18N.getText("msg.error.importGameData"), e);
+            log.error(I18N.getText("data.error.importGameData"), e);
             throw new IOException(e.getCause());
           }
         }

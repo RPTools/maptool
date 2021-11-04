@@ -265,9 +265,9 @@ class DataStoreUpdateClientsProxy implements DataStore {
   }
 
   @Override
-  public void clearNamespace(String propertyType, String namespace) {
-    dataStore.clearNamespace(propertyType, namespace);
+  public CompletableFuture<Void> clearNamespace(String propertyType, String namespace) {
     MapTool.serverCommand().removeDataNamespace(propertyType, namespace);
+    return dataStore.clearNamespace(propertyType, namespace);
   }
 
   @Override

@@ -129,4 +129,15 @@ public class AddOnLibraryData implements LibraryData {
   private CompletableFuture<DataValue> getDataValue(String key) {
     return new DataStoreManager().getDefaultDataStore().getProperty(DATA_TYPE, dataNameSpace, key);
   }
+
+  /**
+   * Initializes the data for this library, only needs to be called once but safe to call multiple
+   * times.
+   *
+   * @return a CompletableFuture that completes when the data is initialized.
+   */
+  CompletableFuture<Void> initialize() {
+    var ds = new DataStoreManager().getDefaultDataStore();
+    return ds.createNamespace(DATA_TYPE, dataNameSpace);
+  }
 }

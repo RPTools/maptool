@@ -292,9 +292,6 @@ public class MemoryDataStore implements DataStore {
    */
   private void createDataNamespace(
       String propertyType, String namespace, Collection<DataValue> initialData) {
-    if (checkPropertyNamespace(propertyType, namespace)) {
-      throw InvalidDataOperation.createNamespaceAlreadyExists(namespace, propertyType);
-    }
 
     Set<String> namespaces =
         propertyTypeNamespaceMap.computeIfAbsent(
@@ -315,7 +312,7 @@ public class MemoryDataStore implements DataStore {
   public CompletableFuture<Void> createNamespace(String propertyType, String namespace) {
     return CompletableFuture.supplyAsync(
         () -> {
-          createNamespaceWithInitialData(propertyType, namespace, List.of());
+          createDataNamespace(propertyType, namespace, List.of());
           return null;
         });
   }
@@ -452,7 +449,11 @@ public class MemoryDataStore implements DataStore {
   }
 
   @Override
-  public void clearNamespace(String propertyType, String namespace) {
-    namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
+  public CompletableFuture<Void> clearNamespace(String propertyType, String namespace) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          namespaceDataMap.remove(new PropertyTypeNamespace(propertyType, namespace));
+          return null;
+        });
   }
 }

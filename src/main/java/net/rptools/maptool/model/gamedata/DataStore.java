@@ -247,30 +247,30 @@ public interface DataStore {
   CompletableFuture<Void> removeProperty(String type, String namespace, String name);
 
   /**
-   * Creates a new namespace with no initial data or types.
+   * Creates a new namespace with no initial data or types. This method can be called on an existing
+   * namespace with no adverse effects.
    *
    * @param propertyType the propertyType of the namespace.
    * @param namespace the namespace to create.
    * @return a {@code Void} completable future.
-   * @throws InvalidDataOperation exception if the namespace already exists.
    */
   CompletableFuture<Void> createNamespace(String propertyType, String namespace);
 
   /**
-   * Creates a new namespace with the specified initial data.
+   * Creates a new namespace with the specified initial data. If the namespace already exists, this
+   * method will overwrite any existing data with the same name.
    *
    * @param propertyType the propertyType of the namespace.
    * @param namespace the namespace to create.
    * @param initialData the initial data to set.
    * @return a {@code Void} completable future.
-   * @throws InvalidDataOperation exception if the namespace already exists.
    */
   CompletableFuture<Void> createNamespaceWithInitialData(
       String propertyType, String namespace, Collection<DataValue> initialData);
 
   /**
    * Creates a new namespace with the specified with the specified types, initial data will be
-   * undefined.
+   * undefined, this method will overwrite any existing data with the same name.
    *
    * @param propertyType the propertyType of the namespace.
    * @param namespace the namespace to create.
@@ -316,5 +316,5 @@ public interface DataStore {
    * @param propertyType the propertyType of the namespace.
    * @param namespace the namespace to remove.
    */
-  void clearNamespace(String propertyType, String namespace);
+  CompletableFuture<Void> clearNamespace(String propertyType, String namespace);
 }
