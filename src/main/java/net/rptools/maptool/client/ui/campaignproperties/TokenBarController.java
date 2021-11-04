@@ -63,6 +63,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.util.ImageManager;
@@ -718,9 +719,9 @@ public class TokenBarController
         Side.valueOf(((ListItemProperty) formPanel.getSelectedItem(SIDE)).getName().toUpperCase());
 
     BarTokenOverlay to = null;
-    if (overlay.equals("Solid")) {
+    if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.solid"))) {
       to = new DrawnBarTokenOverlay(name, color, thickness);
-    } else if (overlay.equals("Two Tone")) {
+    } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.twoTone"))) {
       to = new TwoToneBarTokenOverlay(name, color, bgColor, thickness);
     } else {
 
@@ -731,11 +732,11 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals("Two Images")) {
+      if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.twoImages"))) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals("Single Image")) {
+      } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.singleImage"))) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals("Multiple Images")) {
+      } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.multipleImages"))) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
