@@ -734,9 +734,11 @@ public class TokenBarController
       // Create the bars
       if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.twoImages"))) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.singleImage"))) {
+      } else if (overlay.equals(
+          I18N.getText("CampaignPropertiesDialog.combo.bars.type.singleImage"))) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.multipleImages"))) {
+      } else if (overlay.equals(
+          I18N.getText("CampaignPropertiesDialog.combo.bars.type.multipleImages"))) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
