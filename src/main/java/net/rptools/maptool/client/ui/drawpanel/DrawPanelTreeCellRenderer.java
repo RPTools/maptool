@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
@@ -50,7 +49,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       boolean hasFocus) {
 
     setBorder(null);
-    setBackgroundNonSelectionColor(Color.white);
 
     String text = "";
     this.row = row;
@@ -59,7 +57,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       DrawnElement de = (DrawnElement) value;
       text = de.getDrawable().toString();
       if (de.getDrawable() instanceof DrawablesGroup) {
-        text = "Group";
+        text = I18N.getString("panel.DrawExplorer.group");
       } else if (de.getDrawable() instanceof ShapeDrawable) {
         ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
         key =
@@ -99,10 +97,10 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   private String addText(Pen pen, String text, Drawable drawing) {
     if (pen == null) return text;
     String result = text;
-    if (pen.isEraser()) result = "CUT: " + result;
+    if (pen.isEraser()) result = I18N.getText("panel.DrawExplorer.eraser", result);
     if (pen.getOpacity() < 1) {
       int perc = (int) (pen.getOpacity() * 100);
-      result = result + String.format(" opacity %s%%", perc);
+      result += " " + I18N.getText("panel.DrawExplorer.opacity", perc);
     }
     if (drawing instanceof AbstractDrawing) {
       String dName = ((AbstractDrawing) drawing).getName();
@@ -112,6 +110,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   }
 
   private Icon setDrawPanelIcon(String key, boolean eraser) {
+    String streamName;
     try {
       switch (key) {
         case "panel.DrawExplorer.ShapeDrawable.Area":

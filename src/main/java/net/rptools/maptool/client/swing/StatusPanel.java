@@ -14,8 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -30,6 +29,7 @@ public class StatusPanel extends JPanel {
   public StatusPanel() {
 
     statusLabel = new JLabel();
+    statusLabel.setMinimumSize(new Dimension(0, 0));
 
     setLayout(new GridBagLayout());
 

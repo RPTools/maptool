@@ -131,7 +131,7 @@ below it will have the memory settings.  The "-Xss" option sets the
 stack size, the "-Xms" option sets the starting/minimum memory
 size, and the "-Xmx" option sets the maximum memory size.
 
-Our wiki has more information:  http://lmwcs.com/rptools/wiki/Stack_Size
+Our wiki has more information:  https://wiki.rptools.info/index.php/Stack_Size
 
 			<<< Troubleshooting >>>
 		<<< Troubleshooting WebStart Version >>>

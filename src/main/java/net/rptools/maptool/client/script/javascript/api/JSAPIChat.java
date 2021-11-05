@@ -17,16 +17,25 @@ package net.rptools.maptool.client.script.javascript.api;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIChat {
+public class JSAPIChat implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.chat";
+  }
+
+  @HostAccess.Export
   public void broadcast(String message) {
     MapTool.addGlobalMessage(message);
   }
 
+  @HostAccess.Export
   public void broadcastTo(List<String> who, String message) {
     MapTool.addGlobalMessage(message, who);
   }
 
+  @HostAccess.Export
   public void broadcastToGM(String message) {
     List<String> who = new ArrayList<>();
     who.add("gm");

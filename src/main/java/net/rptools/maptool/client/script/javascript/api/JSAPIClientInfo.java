@@ -21,50 +21,57 @@ import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import org.graalvm.polyglot.HostAccess;
 
-public class JSAPIClientInfo {
+public class JSAPIClientInfo implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.ClientInfo";
+  }
+
+  @HostAccess.Export
   public boolean faceEdge() {
     return AppPreferences.getFaceEdge();
   }
 
+  @HostAccess.Export
   public boolean faceVertex() {
     return AppPreferences.getFaceVertex();
   }
 
+  @HostAccess.Export
   public int portraitSize() {
     return AppPreferences.getPortraitSize();
   }
 
-  public boolean showPortrait() {
-    return AppPreferences.getShowPortrait();
-  }
-
+  @HostAccess.Export
   public boolean showStatSheet() {
     return AppPreferences.getShowStatSheet();
   }
 
-  public boolean showStatSheetModifier() {
-    return AppPreferences.getShowStatSheetModifier();
-  }
-
+  @HostAccess.Export
   public String version() {
     return MapTool.getVersion();
   }
 
+  @HostAccess.Export
   public boolean fullScreen() {
     return MapTool.getFrame().isFullScreen();
   }
 
+  @HostAccess.Export
   public long timeInMs() {
     return System.currentTimeMillis();
   }
 
+  @HostAccess.Export
   public Date timeDate() {
     return Calendar.getInstance().getTime();
   }
 
-  public Map<String, String> libraryTokens() {
-    Map<String, String> libInfo = new HashMap<>();
+  @HostAccess.Export
+  public Map<String, Object> libraryTokens() {
+    Map<String, Object> libInfo = new HashMap<>();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
       for (Token token : zone.getTokens()) {
@@ -80,10 +87,12 @@ public class JSAPIClientInfo {
     return libInfo;
   }
 
-  public Collection<String> userDefinedFunctions() {
-    return Arrays.asList(UserDefinedMacroFunctions.getInstance().getAliases());
+  @HostAccess.Export
+  public String[] userDefinedFunctions() {
+    return UserDefinedMacroFunctions.getInstance().getAliases();
   }
 
+  @HostAccess.Export
   public String clientId() {
     return MapTool.getClientId();
   }

@@ -25,6 +25,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class isVisibleFunction extends AbstractFunction {
@@ -46,7 +47,8 @@ public class isVisibleFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> param)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> param)
       throws ParserException {
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     Token token = null;
@@ -65,7 +67,7 @@ public class isVisibleFunction extends AbstractFunction {
                 "macro.function.general.unknownToken", functionName, param.get(2).toString()));
       }
     } else {
-      MapToolVariableResolver mvr = (MapToolVariableResolver) parser.getVariableResolver();
+      MapToolVariableResolver mvr = (MapToolVariableResolver) resolver;
       if (mvr.getTokenInContext() != null) {
         token = mvr.getTokenInContext();
       }

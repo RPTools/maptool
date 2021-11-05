@@ -112,7 +112,6 @@ public class PolygonExposeTool extends PolygonTool implements MouseMotionListene
       zone.hideArea(area, selectedToks);
       MapTool.serverCommand().hideFoW(zone.getId(), area, selectedToks);
     } else {
-      zone.exposeArea(area, selectedToks);
       MapTool.serverCommand().exposeFoW(zone.getId(), area, selectedToks);
     }
     MapTool.getFrame().refresh();

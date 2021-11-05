@@ -32,13 +32,13 @@ import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
 
 @SuppressWarnings("serial")
 public abstract class AbstractMacroPanel extends JPanel
@@ -97,11 +97,13 @@ public abstract class AbstractMacroPanel extends JPanel
     this.panelClass = panelClass;
   }
 
+  /** @return the token on the current map corresponding to the stored token id. */
   public Token getToken() {
     if (this.tokenId == null) {
       return null;
     } else {
-      return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      return zr == null ? null : zr.getZone().getToken(this.tokenId);
     }
   }
 
@@ -128,6 +130,22 @@ public abstract class AbstractMacroPanel extends JPanel
   }
 
   public abstract void reset();
+
+  protected abstract List<MacroButtonProperties> getMacroButtonProperties();
+
+  protected void postChangeMacroButtonProperties(MacroButtonProperties properties) {
+    /* we do nothing, by default */
+  }
+
+  public void renameMacroGroup(String oldMacroGroup, String newMacroGroup) {
+    for (MacroButtonProperties properties : getMacroButtonProperties()) {
+      if (properties.getGroup().equals(oldMacroGroup)) {
+        properties.setGroup(newMacroGroup);
+        postChangeMacroButtonProperties(properties);
+      }
+    }
+    reset();
+  }
 
   // SCROLLABLE
   public Dimension getPreferredScrollableViewportSize() {
@@ -172,12 +190,8 @@ public abstract class AbstractMacroPanel extends JPanel
 
   // currently only used for Impersonate/Selection panels to refresh when the token is removed or a
   // macro changes
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Token.ChangeEvent.MACRO_CHANGED
-        || event.eventType == Event.TOKEN_REMOVED) {
-      reset();
-    }
-  }
+  @Override
+  public void modelChanged(ModelChangeEvent event) {}
 
   public void handleAppEvent(AppEvent event) {
     Zone oldZone = (Zone) event.getOldValue();

@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Layer:</at>
+            <at name="text">Label.layer</at>
             <at name="height">15</at>
             <at name="width">1144</at>
             <at name="name"></at>

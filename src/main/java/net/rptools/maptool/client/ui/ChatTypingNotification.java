@@ -48,7 +48,7 @@ public class ChatTypingNotification extends JPanel {
     if (chatTypers == null || chatTypers.isEmpty()) {
       return;
     }
-    Boolean showBackground = AppPreferences.getChatNotificationShowBackground();
+    boolean showBackground = AppPreferences.getChatNotificationShowBackground();
 
     Graphics2D statsG = (Graphics2D) g.create();
 
@@ -104,9 +104,9 @@ public class ChatTypingNotification extends JPanel {
             AppStyle.chatImage.getWidth(),
             AppStyle.chatImage.getHeight());
 
-    Set<?> keySet = chatTypers.keySet();
+    Set<String> keySet = chatTypers.keySet();
     @SuppressWarnings("unchecked")
-    Set<String> playerTimers = (Set<String>) keySet;
+    Set<String> playerTimers = keySet;
     for (String playerNamer : playerTimers) {
       if (showBackground) {
         statsG.setColor(new Color(249, 241, 230, 140));

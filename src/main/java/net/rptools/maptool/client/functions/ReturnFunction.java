@@ -16,8 +16,10 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 
@@ -44,7 +46,8 @@ public class ReturnFunction extends AbstractFunction implements DefinesSpecialVa
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
     BigDecimal value = (BigDecimal) parameters.get(0);
@@ -69,28 +72,6 @@ public class ReturnFunction extends AbstractFunction implements DefinesSpecialVa
       arrobject[1] = BigDecimal.class.getName();
       throw new ParameterException(
           String.format("Illegal argument type %s, expecting %s", arrobject));
-    }
-  }
-
-  /**
-   * Exception type thrown by return() function. Semantics are to silently halt the current
-   * execution.
-   */
-  public static class ReturnFunctionException extends ParserException {
-
-    private Object result;
-
-    public Object getResult() {
-      return result;
-    }
-
-    public void setResult(Object result) {
-      this.result = result;
-    }
-
-    public ReturnFunctionException(Object result) {
-      super("");
-      this.result = result;
     }
   }
 

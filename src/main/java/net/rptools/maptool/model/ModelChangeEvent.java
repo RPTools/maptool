@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.model;
 
+import java.util.Collections;
+import java.util.List;
+
 public class ModelChangeEvent {
   public Object model;
   public Object eventType;
@@ -44,5 +47,13 @@ public class ModelChangeEvent {
   @Override
   public String toString() {
     return "ModelChangeEvent: " + model + " - " + eventType + " - " + arg;
+  }
+
+  public List<Token> getTokensAsList() {
+    if (arg instanceof List<?>) {
+      return (List<Token>) arg;
+    } else {
+      return Collections.singletonList((Token) arg);
+    }
   }
 }

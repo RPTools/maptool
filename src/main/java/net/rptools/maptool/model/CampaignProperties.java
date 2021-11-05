@@ -66,6 +66,12 @@ public class CampaignProperties {
   /** Flag indicating that owners can only move tokens when they have initiative */
   private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
 
+  /** Whether the default initiative sort order is reversed */
+  private boolean initiativeUseReverseSort = false;
+
+  /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
+  private boolean initiativePanelButtonsDisabled = false;
+
   public CampaignProperties() {
     init();
   }
@@ -73,8 +79,8 @@ public class CampaignProperties {
   public CampaignProperties(CampaignProperties properties) {
     tokenTypeMap = new HashMap<String, List<TokenProperty>>();
     for (Entry<String, List<TokenProperty>> entry : properties.tokenTypeMap.entrySet()) {
-      List<TokenProperty> typeList = new ArrayList<TokenProperty>();
-      typeList.addAll(properties.tokenTypeMap.get(entry.getKey()));
+      List<TokenProperty> typeList =
+          new ArrayList<TokenProperty>(properties.tokenTypeMap.get(entry.getKey()));
 
       tokenTypeMap.put(entry.getKey(), typeList);
     }
@@ -113,6 +119,8 @@ public class CampaignProperties {
 
     initiativeOwnerPermissions = properties.initiativeOwnerPermissions;
     initiativeMovementLock = properties.initiativeMovementLock;
+    initiativeUseReverseSort = properties.initiativeUseReverseSort;
+    initiativePanelButtonsDisabled = properties.initiativePanelButtonsDisabled;
 
     characterSheets = new HashMap<String, String>();
     if (properties.characterSheets == null || properties.characterSheets.isEmpty()) {
@@ -264,9 +272,10 @@ public class CampaignProperties {
 
     try {
       Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (String key : map.keySet()) {
+      for (var entry : map.entrySet()) {
+        String key = entry.getKey();
         Map<GUID, LightSource> lightSourceMap = new LinkedHashMap<GUID, LightSource>();
-        for (LightSource source : map.get(key)) {
+        for (LightSource source : entry.getValue()) {
           lightSourceMap.put(source.getId(), source);
         }
         lightSourcesMap.put(key, lightSourceMap);
@@ -420,9 +429,27 @@ public class CampaignProperties {
     this.initiativeMovementLock = initiativeMovementLock;
   }
 
+  public boolean isInitiativeUseReverseSort() {
+    return initiativeUseReverseSort;
+  }
+
+  public void setInitiativeUseReverseSort(boolean initiativeUseReverseSort) {
+    this.initiativeUseReverseSort = initiativeUseReverseSort;
+  }
+
+  public boolean isInitiativePanelButtonsDisabled() {
+    return initiativePanelButtonsDisabled;
+  }
+
+  public void setInitiativePanelButtonsDisabled(boolean initiativePanelButtonsDisabled) {
+    this.initiativePanelButtonsDisabled = initiativePanelButtonsDisabled;
+  }
+
   /**
    * Getter for characterSheets. Only called by {@link Campaign#getCharacterSheets()} and that
    * function is never used elsewhere within MapTool. Yet. ;-)
+   *
+   * @return a Map of the characterSheets
    */
   public Map<String, String> getCharacterSheets() {
     if (characterSheets == null) initCharacterSheetsMap();

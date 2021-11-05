@@ -26,4 +26,6 @@ public interface DrawableRenderer {
       Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale);
 
   public void flush();
+
+  public void setDirty();
 }

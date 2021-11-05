@@ -14,14 +14,11 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +28,8 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
+import org.apache.commons.collections4.map.AbstractReferenceMap;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,7 +49,10 @@ public class ImageManager {
   /** Cache of images loaded for assets. */
   private static final Map<MD5Key, BufferedImage> imageMap = new HashMap<MD5Key, BufferedImage>();
 
-  private static final Map<MD5Key, byte[]> textureMap = new HashMap<MD5Key, byte[]>();
+  /** Additional Soft-reference Cache of images that allows best . */
+  private static final Map<MD5Key, BufferedImage> backupImageMap =
+      new ReferenceMap(
+          AbstractReferenceMap.ReferenceStrength.HARD, AbstractReferenceMap.ReferenceStrength.SOFT);
 
   /**
    * The unknown image, a "?" is used for all situations where the image will eventually appear e.g.
@@ -71,7 +73,7 @@ public class ImageManager {
 
   private static ExecutorService largeImageLoader = Executors.newFixedThreadPool(1);
 
-  private static Object imageLoaderMutex = new Object();
+  private static final Object imageLoaderMutex = new Object();
 
   /**
    * A Map containing sets of observers for each asset id. Observers are notified when the image is
@@ -118,6 +120,8 @@ public class ImageManager {
   /**
    * Flush all images that are <b>not</b> in the provided set. This presumes that the images in the
    * exception set will still be in use after the flush.
+   *
+   * @param exceptionSet a set of images not to be flushed
    */
   public static void flush(Set<MD5Key> exceptionSet) {
     synchronized (imageLoaderMutex) {
@@ -145,22 +149,17 @@ public class ImageManager {
     image =
         getImage(
             assetId,
-            new ImageObserver() {
-              public boolean imageUpdate(
-                  Image img, int infoflags, int x, int y, int width, int height) {
-                // If we're here then the image has just finished loading
-                // release the blocked thread
-                log.debug("Countdown: " + assetId);
-                loadLatch.countDown();
-                return false;
-              }
+            (img, infoflags, x, y, width, height) -> {
+              // If we're here then the image has just finished loading
+              // release the blocked thread
+              log.debug("Countdown: " + assetId);
+              loadLatch.countDown();
+              return false;
             });
     if (image == TRANSFERING_IMAGE) {
       try {
-        synchronized (loadLatch) {
-          log.debug("Wait for:  " + assetId);
-          loadLatch.await();
-        }
+        log.debug("Wait for:  " + assetId);
+        loadLatch.await();
         // This time we'll get the cached version
         image = getImage(assetId);
       } catch (InterruptedException ie) {
@@ -201,6 +200,14 @@ public class ImageManager {
       if (image != null && image != TRANSFERING_IMAGE) {
         return image;
       }
+
+      // check if the soft reference still resolves image
+      image = backupImageMap.get(assetId);
+      if (image != null) {
+        imageMap.put(assetId, image);
+        return image;
+      }
+
       // Make note that we're currently processing it
       imageMap.put(assetId, TRANSFERING_IMAGE);
 
@@ -209,11 +216,127 @@ public class ImageManager {
 
       // Force a load of the asset, this will trigger a transfer if the
       // asset is not available locally
-      if (image == null) {
-        AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
-      }
+      AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
       return TRANSFERING_IMAGE;
     }
+  }
+
+  /**
+   * Returns an image from an asset:// URL.<br>
+   * The returned image may be scaled based on parameters in the URL:<br>
+   * <b>width</b> - Query parameter. Desired width in px.<br>
+   * <b>height</b> - Query parameter. Desired height in px.<br>
+   * <b>size</b> - A suffix added after the asset id in the form of "-size" where size is a value
+   * indicating the size in px to scale the largest side of the image to, maintaining aspect ratio.
+   * This parameter is ignored if a width or height are present.<br>
+   * (ex. asset://9e9687c80a3c9796b328711df6bd67cf-50)<br>
+   * All parameters expect an integer >0. Any invalid value (a value <= 0 or non-integer) will
+   * result in {@code BROKEN_IMAGE} being returned. Images are only scaled down and if any parameter
+   * exceeds the image's native size the image will be returned unscaled.
+   *
+   * @param url URL to an asset
+   * @return the image, scaled if indicated by the URL, or {@code BROKEN_IMAGE} if url is null, the
+   *     URL protocol is not asset://, or it has invalid parameter values.
+   */
+  public static BufferedImage getImageFromUrl(URL url) {
+    if (url == null || !url.getProtocol().equals("asset")) {
+      return BROKEN_IMAGE;
+    }
+
+    String id = url.getHost();
+    String query = url.getQuery();
+    BufferedImage image;
+    int imageW, imageH, scaleW = -1, scaleH = -1, size = -1;
+
+    // Get size parameter
+    int szIndex = id.indexOf('-');
+    if (szIndex != -1) {
+      String szStr = id.substring(szIndex + 1);
+      id = id.substring(0, szIndex);
+      try {
+        size = Integer.parseInt(szStr);
+      } catch (NumberFormatException nfe) {
+        // Do nothing
+      }
+      if (size <= 0) {
+        return BROKEN_IMAGE;
+      }
+    }
+
+    // Get query parameters
+    if (query != null && !query.isEmpty()) {
+      HashMap<String, String> params = new HashMap<>();
+
+      for (String param : query.split("&")) {
+        if (param.isBlank()) continue;
+
+        int eqIndex = param.indexOf("=");
+        if (eqIndex != -1) {
+          String k, v;
+          k = param.substring(0, eqIndex).trim();
+          v = param.substring(eqIndex + 1).trim();
+          params.put(k, v);
+        } else {
+          params.put(param.trim(), "");
+        }
+      }
+
+      if (params.containsKey("width")) {
+        size = -1; // Don't use size param if width is present
+        try {
+          scaleW = Integer.parseInt(params.get("width"));
+        } catch (NumberFormatException nfe) {
+          // Do nothing
+        }
+        if (scaleW <= 0) {
+          return BROKEN_IMAGE;
+        }
+      }
+
+      if (params.containsKey("height")) {
+        size = -1; // Don't use size param if height is present
+        try {
+          scaleH = Integer.parseInt(params.get("height"));
+        } catch (NumberFormatException nfe) {
+          // Do nothing
+        }
+        if (scaleH <= 0) {
+          return BROKEN_IMAGE;
+        }
+      }
+    }
+
+    image = getImageAndWait(new MD5Key(id), null);
+    imageW = image.getWidth();
+    imageH = image.getHeight();
+
+    // We only want to scale down, so if scaleW or ScaleH are too large just return the image
+    if (scaleW > imageW || scaleH > imageH) {
+      return image;
+    }
+
+    // Note: size will never be >0 if height or width parameters are present
+    if (size > 0) {
+      if (imageW > imageH) {
+        scaleW = size;
+      } else if (imageH > imageW) {
+        scaleH = size;
+      } else {
+        scaleW = scaleH = size;
+      }
+    }
+
+    if ((scaleW > 0 && imageW > scaleW) || (scaleH > 0 && imageH > scaleH)) {
+      // Maintain aspect ratio if one dimension isn't given
+      if (scaleW <= 0) {
+        scaleW = Math.max((int) ((double) scaleH / imageH * imageW), 1);
+      } else if (scaleH <= 0) {
+        scaleH = Math.max((int) ((double) scaleW / imageW * imageH), 1);
+      }
+      image = ImageUtil.scaleBufferedImage(image, scaleW, scaleH);
+    }
+
+    return image;
   }
 
   /**
@@ -233,7 +356,6 @@ public class ImageManager {
   public static void flushImage(MD5Key assetId) {
     // LATER: investigate how this effects images that are already in progress
     imageMap.remove(assetId);
-    textureMap.remove(assetId);
   }
 
   /**
@@ -247,14 +369,9 @@ public class ImageManager {
     if (observers == null || observers.length == 0) {
       return;
     }
-    Set<ImageObserver> observerSet = imageObserverMap.get(assetId);
-    if (observerSet == null) {
-      observerSet = new HashSet<ImageObserver>();
-      imageObserverMap.put(assetId, observerSet);
-    }
-    for (ImageObserver observer : observers) {
-      observerSet.add(observer);
-    }
+    Set<ImageObserver> observerSet =
+        imageObserverMap.computeIfAbsent(assetId, k -> new HashSet<ImageObserver>());
+    observerSet.addAll(Arrays.asList(observers));
   }
 
   /**
@@ -302,17 +419,22 @@ public class ImageManager {
         try {
           assert asset.getImage() != null
               : "asset.getImage() for " + asset.toString() + "returns null?!";
-          image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
+          image =
+              ImageUtil.createCompatibleImage(
+                  ImageUtil.bytesToImage(asset.getImage(), asset.getName()), hints);
         } catch (Throwable t) {
-          log.error(
-              "BackgroundImageLoader.run("
-                  + asset.getName()
-                  + ","
-                  + asset.getImageExtension()
-                  + ", "
-                  + asset.getId()
-                  + "): image not resolved",
-              t);
+          if (!AssetManager.BAD_ASSET_LOCATION_KEY.toString().equals(asset.getId())) {
+            // Don't bother logging cache miss of internal bad location asset
+            log.error(
+                "BackgroundImageLoader.run("
+                    + asset.getName()
+                    + ","
+                    + asset.getImageExtension()
+                    + ", "
+                    + asset.getId()
+                    + "): image not resolved",
+                t);
+          }
           image = BROKEN_IMAGE;
         }
       }
@@ -320,6 +442,7 @@ public class ImageManager {
       synchronized (imageLoaderMutex) {
         // Replace placeholder with actual image
         imageMap.put(asset.getId(), image);
+        backupImageMap.put(asset.getId(), image);
         notifyObservers(asset, image);
       }
     }
@@ -385,8 +508,11 @@ public class ImageManager {
     }
 
     @Override
-    public boolean equals(Object obj) {
-      return id.equals(obj);
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      AssetListener that = (AssetListener) o;
+      return Objects.equals(id, that.id);
     }
   }
 }

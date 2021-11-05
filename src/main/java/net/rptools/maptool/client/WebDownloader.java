@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import org.apache.commons.io.IOUtils;
 
 public class WebDownloader {
   private final URL url;
@@ -46,11 +45,8 @@ public class WebDownloader {
     // Send the request.
     conn.connect();
 
-    InputStream in = null;
-    ByteArrayOutputStream out = null;
-    try {
-      in = conn.getInputStream();
-      out = new ByteArrayOutputStream();
+    try (InputStream in = conn.getInputStream();
+        ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
       int buflen = 1024 * 30;
       int bytesRead = 0;
@@ -60,11 +56,8 @@ public class WebDownloader {
         bytesRead += nRead;
         out.write(buf, 0, nRead);
       }
-    } finally {
-      IOUtils.closeQuietly(in);
-      IOUtils.closeQuietly(out);
+      return new String(out.toByteArray());
     }
-    return out != null ? new String(out.toByteArray()) : null;
   }
 
   public static void main(String[] args) throws Exception {

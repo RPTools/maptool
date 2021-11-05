@@ -31,23 +31,30 @@ public class LaunchInstructions {
   }
 
   public static void main(String[] args) {
-    // This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the
-    // System.property
-    AppUtil.getAppHome();
+    try {
+      // This is called just to make sure there's a valid data dir
+      AppUtil.getAppHome();
+      // Initialize the first logger with the correct log path
+      AppUtil.initLogging();
 
-    long mem = Runtime.getRuntime().maxMemory();
-    String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
+      long mem = Runtime.getRuntime().maxMemory();
+      String msg = String.format(USAGE, mem / (1024 * 1024));
 
-    /*
-     * Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount maxMemory() reports will be 256MB. The actual amount seems to vary from PC to PC. 200MB seems to be a safe value
-     * for now. <Phergus>
-     */
-    if (mem < 200 * 1024 * 1024) {
-      JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
+      /*
+       * Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount maxMemory() reports will be 256MB. The actual amount seems to vary from PC to PC. 200MB seems to be a safe value
+       * for now. <Phergus>
+       */
+      if (mem < 200 * 1024 * 1024) {
+        JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
+      }
+
+      MapTool.main(args);
+
+      AppUpdate.gitHubReleases();
+    } catch (Exception e) {
+      // Shows a proper error message if MapTool can't initialize. Fix #1678.
+      JOptionPane.showMessageDialog(new JFrame(), e.getMessage());
+      System.exit(1);
     }
-
-    MapTool.main(args);
-
-    AppUpdate.gitHubReleases();
   }
 }

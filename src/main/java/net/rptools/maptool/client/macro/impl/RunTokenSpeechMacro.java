@@ -48,11 +48,7 @@ public class RunTokenSpeechMacro implements Macro {
       if (tmacro == null) {
         continue;
       }
-      MapTool.getFrame()
-          .getCommandPanel()
-          .getCommandTextArea()
-          .setText("/im " + token.getId() + ": " + tmacro);
-      MapTool.getFrame().getCommandPanel().commitCommand();
+      MapTool.getFrame().getCommandPanel().commitCommand("/im " + token.getId() + ": " + tmacro);
     }
   }
 }

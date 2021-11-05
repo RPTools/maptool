@@ -22,6 +22,7 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 
 public class DrawingSetterFunctions extends DrawingFunctions {
   private static final DrawingSetterFunctions instance = new DrawingSetterFunctions();
@@ -41,11 +42,13 @@ public class DrawingSetterFunctions extends DrawingFunctions {
         "setFillColor",
         "setDrawingEraser",
         "setPenWidth",
-        "setLineCap");
+        "setLineCap",
+        "setDrawingName");
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     checkTrusted(functionName);
     FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
@@ -55,7 +58,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
     GUID guid = getGUID(functionName, id);
     if ("setDrawingLayer".equalsIgnoreCase(functionName)) {
       Layer layer = getLayer(parameters.get(2).toString());
-      return changeLayer(map, layer, guid);
+      return changeLayer(map, layer, guid).name();
     } else if ("setDrawingOpacity".equalsIgnoreCase(functionName)) {
       String opacity = parameters.get(2).toString();
       float op = getFloatPercent(functionName, opacity);
@@ -97,6 +100,10 @@ public class DrawingSetterFunctions extends DrawingFunctions {
       boolean squareCap = parseBoolean(functionName, parameters, 2);
       Pen p = getPen(functionName, map, guid);
       p.setSquareCap(squareCap);
+      return "";
+    } else if ("setDrawingName".equalsIgnoreCase(functionName)) {
+      String name = parameters.get(2).toString();
+      setDrawingName(map, guid, name);
       return "";
     }
     return null;

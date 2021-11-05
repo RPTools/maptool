@@ -28,7 +28,7 @@ public class TaskBarFlasher {
   private final Image originalImage;
   private final Frame frame;
 
-  private FlashThread flashThread;
+  private FlashThread flashThread = new FlashThread();
 
   public TaskBarFlasher(Frame frame) {
     this.frame = frame;
@@ -55,7 +55,7 @@ public class TaskBarFlasher {
   }
 
   public synchronized void flash() {
-    if (flashThread != null) {
+    if (flashThread.isAlive()) {
       // Already flashing
       return;
     }
@@ -78,7 +78,6 @@ public class TaskBarFlasher {
           break;
         }
       }
-      flashThread = null;
     }
   }
 }

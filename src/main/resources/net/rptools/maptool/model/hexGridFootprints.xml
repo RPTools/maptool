@@ -65,6 +65,7 @@
       </id>
       <scale>1.0</scale>
       <isDefault>true</isDefault>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -83,6 +84,7 @@
       </id>
       <scale>0.9</scale>
       <isDefault>false</isDefault>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -117,6 +119,7 @@
       </id>
       <isDefault>false</isDefault>
       <scale>1</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
   </a>
 </java.util.Arrays_-ArrayList>

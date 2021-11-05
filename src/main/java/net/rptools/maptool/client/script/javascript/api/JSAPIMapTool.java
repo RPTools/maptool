@@ -14,23 +14,19 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import net.rptools.maptool.client.script.javascript.*;
+import org.graalvm.polyglot.*;
+
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
 public class JSAPIMapTool implements MapToolJSAPIInterface {
-  private final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
-
-  private final JSAPIChat chat = new JSAPIChat();
-
-  private final JSAPITokens tokens = new JSAPITokens();
-
-  public JSAPIClientInfo getClientInfo() {
-    return clientInfo;
+  @Override
+  public String serializeToString() {
+    return "MapTool";
   }
 
-  public JSAPIChat getChat() {
-    return chat;
-  }
+  @HostAccess.Export public final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
 
-  public JSAPITokens getTokens() {
-    return tokens;
-  }
+  @HostAccess.Export public final JSAPIChat chat = new JSAPIChat();
+
+  @HostAccess.Export public final JSAPITokens tokens = new JSAPITokens();
 }

@@ -21,6 +21,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -44,11 +45,12 @@ public class InitiativeRoundFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     if (functionName.equals("getInitiativeRound")) {
       return getInitiativeRound();
-    } else {
+    } else if ("setInitiativeRound".equalsIgnoreCase(functionName)) {
       if (args.size() != 1)
         throw new ParserException(I18N.getText("macro.function.setinitiativeRound.oneParam"));
       if (MapTool.getParser().isMacroTrusted()
@@ -59,6 +61,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.initiative.mustBeGM", functionName));
       } // endif
     } // endif
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
@@ -87,7 +90,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
    * @param value Convert this value
    * @return The integer value or 0 if no value could be determined.
    */
-  public static final int getInt(Object value) {
+  public static int getInt(Object value) {
     if (value == null) return 0;
     if (value instanceof Number) {
       return ((Number) value).intValue();

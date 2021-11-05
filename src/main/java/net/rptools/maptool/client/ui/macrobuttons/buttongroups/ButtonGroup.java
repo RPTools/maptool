@@ -19,12 +19,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JLabel;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
@@ -118,74 +120,103 @@ public class ButtonGroup extends AbstractButtonGroup {
               data.fontSize,
               data.minWidth,
               data.maxWidth,
+              data.allowPlayerEdits,
               data.toolTip,
               data.displayHotKey);
 
-      if (panelClass.equals("GlobalPanel")) {
-        event.acceptDrop(event.getDropAction());
-        tempProperties.setGroup(
-            getMacroGroup()); // assign the group you are dropping it into, rather than the original
-        if (!tempProperties.isDuplicateMacro("GlobalPanel", null)) {
-          new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), tempProperties);
-        }
-      } else if (panelClass.equals("CampaignPanel")) {
-        event.acceptDrop(event.getDropAction());
-        tempProperties.setGroup(
-            getMacroGroup()); // assign the group you are dropping it into, rather than the original
-        if (!tempProperties.isDuplicateMacro("CampaignPanel", null)) {
-          new MacroButtonProperties(
-              panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), tempProperties);
-        }
-      } else if (panelClass.equals("GmPanel")) {
-        event.acceptDrop(event.getDropAction());
-        tempProperties.setGroup(
-            getMacroGroup()); // assign the group you are dropping it into, rather than the original
-        if (!tempProperties.isDuplicateMacro("GmPanel", null)) {
-          new MacroButtonProperties(
-              panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), tempProperties);
-        }
-      } else if (panelClass.equals("SelectionPanel")) {
-        if (getArea() != null) {
-          if (getArea()
-              .getGroupLabel()
-              .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
-            event.acceptDrop(event.getDropAction());
-            tempProperties.setGroup(
-                getMacroGroup()); // assign the group you are dropping it into, rather than the
-            // original
-            for (Token nextToken :
-                MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-              if (!tempProperties.isDuplicateMacro("Token", nextToken)) {
-                new MacroButtonProperties(nextToken, nextToken.getMacroNextIndex(), tempProperties);
+      // if a reference is needed when moving instead of copying
+      MacroButtonProperties oldMacroProps = new MacroButtonProperties(tempProperties);
+
+      // stops players from moving macros into/from the Campaign/GM panels
+      if (!MapTool.getPlayer().isGM()
+          && (panelClass.equals("CampaignPanel")
+              || panelClass.equals("GmPanel")
+              || (data.panelClass.equals("CampaignPanel")
+                  && !MapTool.getServerPolicy().playersReceiveCampaignMacros())
+              || data.panelClass.equals("GmPanel"))) {
+        MapTool.showError(
+            I18N.getText(
+                "macro.function.MacroFunctions.noPermMove",
+                MapTool.getPlayer().getName(),
+                tempProperties.getLabel(),
+                tempProperties.getIndex()));
+        event.dropComplete(false);
+      } else {
+
+        if (panelClass.equals("GlobalPanel")) {
+          tempProperties.setGroup(
+              getMacroGroup()); // assign the group you are dropping it into, rather than the
+          // original
+          if (!tempProperties.isDuplicateMacro("GlobalPanel", null)) {
+            deleteOriginalMacroIfMove(event, oldMacroProps, data);
+            new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), tempProperties);
+          }
+        } else if (panelClass.equals("CampaignPanel")) {
+          tempProperties.setGroup(
+              getMacroGroup()); // assign the group you are dropping it into, rather than the
+          // original
+          if (!tempProperties.isDuplicateMacro("CampaignPanel", null)) {
+            deleteOriginalMacroIfMove(event, oldMacroProps, data);
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), tempProperties);
+          }
+        } else if (panelClass.equals("GmPanel")) {
+          tempProperties.setGroup(
+              getMacroGroup()); // assign the group you are dropping it into, rather than the
+          // original
+          if (!tempProperties.isDuplicateMacro("GmPanel", null)) {
+            deleteOriginalMacroIfMove(event, oldMacroProps, data);
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), tempProperties);
+          }
+        } else if (panelClass.equals("SelectionPanel")) {
+          if (getArea() != null) {
+            if (getArea()
+                .getGroupLabel()
+                .equals(I18N.getText("component.areaGroup.macro.commonMacros"))) {
+              tempProperties.setGroup(
+                  getMacroGroup()); // assign the group you are dropping it into, rather than the
+              // original
+
+              // delete original macro just once before duplicating it to all selected
+              deleteOriginalMacroIfMove(event, oldMacroProps, data);
+              for (Token nextToken :
+                  MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
+                if (!tempProperties.isDuplicateMacro("Token", nextToken)) {
+                  new MacroButtonProperties(
+                      nextToken, nextToken.getMacroNextIndex(), tempProperties);
+                }
+              }
+            } else if (getToken() != null) {
+              // this is a token group, copy macro to token
+              tempProperties.setGroup(
+                  getMacroGroup()); // assign the group you are dropping it into, rather than the
+              // original
+              Token token = getToken();
+              if (!tempProperties.isDuplicateMacro("Token", token)) {
+                deleteOriginalMacroIfMove(event, oldMacroProps, data);
+                new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
               }
             }
-          } else if (getToken() != null) {
-            // this is a token group, copy macro to token
-            event.acceptDrop(event.getDropAction());
-            tempProperties.setGroup(
-                getMacroGroup()); // assign the group you are dropping it into, rather than the
-            // original
-            Token token = getToken();
-            if (!tempProperties.isDuplicateMacro("Token", token)) {
-              new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
-            }
           }
+        } else if (getToken() != null) {
+          // this is a token group, copy macro to token
+          tempProperties.setGroup(
+              getMacroGroup()); // assign the group you are dropping it into, rather than the
+          // original
+          Token token = getToken();
+          if (!tempProperties.isDuplicateMacro("Token", token)) {
+            deleteOriginalMacroIfMove(event, oldMacroProps, data);
+            new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
+          }
+
+        } else {
+          // if this happens, it's a bug
+          MapTool.showError(I18N.getText("msg.error.macro.buttonGroupDnDFail"));
         }
-      } else if (getToken() != null) {
-        // this is a token group, copy macro to token
-        event.acceptDrop(event.getDropAction());
-        tempProperties.setGroup(
-            getMacroGroup()); // assign the group you are dropping it into, rather than the original
-        Token token = getToken();
-        if (!tempProperties.isDuplicateMacro("Token", token)) {
-          new MacroButtonProperties(token, token.getMacroNextIndex(), tempProperties);
-        }
-      } else {
-        // if this happens, it's a bug
-        throw new Exception(I18N.getText("msg.error.macro.buttonGroupDnDFail"));
+        // System.out.println("drop accepted");
+        event.dropComplete(true);
       }
-      // System.out.println("drop accepted");
-      event.dropComplete(true);
     } catch (Exception e) {
       e.printStackTrace();
       event.dropComplete(false);
@@ -246,5 +277,55 @@ public class ButtonGroup extends AbstractButtonGroup {
       }
     }
     return myButtons;
+  }
+
+  // A little helper to delete a macro if the drop event was a move and not a copy
+  private void deleteOriginalMacroIfMove(
+      DropTargetDropEvent event, MacroButtonProperties oldProperties, TransferData oldData) {
+    // which modifier keys were held (1024 = none, 1088 = shift, 1152 = ctrl, 1536 = alt)
+    if ((oldData.transferModifiers == 1152)
+        ^ (AppUtil.MAC_OS_X && oldData.transferModifiers == 1536)) {
+      // explicit copy
+      event.acceptDrop(DnDConstants.ACTION_COPY);
+    } else if (oldData.transferModifiers == 1088) {
+      // explicit move
+      event.acceptDrop(DnDConstants.ACTION_MOVE);
+      deleteMacro(oldProperties, oldData);
+    } else {
+      if (oldData.panelHashcode == System.identityHashCode(getPanel())) {
+        // intra-panel move
+        event.acceptDrop(DnDConstants.ACTION_MOVE);
+        deleteMacro(oldProperties, oldData);
+      } else {
+        // inter-panel copy
+        event.acceptDrop(DnDConstants.ACTION_COPY);
+      }
+    }
+  }
+
+  private void deleteMacro(MacroButtonProperties properties, TransferData data) {
+    if (data.panelClass.equals("GlobalPanel")) {
+      MacroButtonPrefs.delete(properties);
+    } else if (data.panelClass.equals("CampaignPanel")) {
+      if (MapTool.getPlayer().isGM()) {
+        MapTool.getCampaign().deleteMacroButton(properties);
+      }
+    } else if (data.panelClass.equals("GmPanel")) {
+      if (MapTool.getPlayer().isGM()) {
+        MapTool.getCampaign().deleteGmMacroButton(properties);
+      }
+    } else if ((data.panelClass.equals("SelectionPanel")
+            || data.panelClass.equals("ImpersonatePanel"))
+        && (data.tokenID != null)) {
+      Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(data.tokenID);
+      int index = properties.getIndex();
+
+      if (token != null) {
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+      }
+    } else {
+      // not quite sure where that macro came from
+      // do something?
+    }
   }
 }

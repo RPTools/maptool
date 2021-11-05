@@ -23,6 +23,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -51,12 +52,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
+  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     int count = 0;
@@ -67,9 +66,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
     if (functionName.equals("removeAllFromInitiative")) {
       count = list.getSize();
       list.clearModel();
-    } else {
+    } else if ("removeAllNPCsFromInitiative".equalsIgnoreCase(functionName)
+        || "removeAllPCsFromInitiative".equalsIgnoreCase(functionName)) {
       list.startUnitOfWork();
-      boolean pcs = functionName.equals("removeAllPCsFromInitiative");
+      boolean pcs = functionName.equalsIgnoreCase("removeAllPCsFromInitiative");
       for (int i = list.getSize() - 1; i >= 0; i--) {
         Token token = list.getTokenInitiative(i).getToken();
         if (token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs) {
@@ -80,7 +80,10 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
       list.setRound(-1);
       list.setCurrent(-1);
       list.finishUnitOfWork();
-    } // endif
+    } else {
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
     return new BigDecimal(count);
   }
 }

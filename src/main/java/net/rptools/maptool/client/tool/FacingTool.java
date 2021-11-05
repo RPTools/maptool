@@ -168,8 +168,8 @@ public class FacingTool extends DefaultTool {
       if (token == null) {
         continue;
       }
-      renderer.flush(token);
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      // Send the facing to other players
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, token.getFacing());
     }
     // Go back to the pointer tool
     resetTool();

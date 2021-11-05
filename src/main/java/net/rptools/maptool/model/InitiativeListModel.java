@@ -30,7 +30,8 @@ import net.rptools.maptool.model.Token.Type;
  *
  * @author Jay
  */
-public class InitiativeListModel extends AbstractListModel implements PropertyChangeListener {
+public class InitiativeListModel extends AbstractListModel<TokenInitiative>
+    implements PropertyChangeListener {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -144,8 +145,8 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
     if (evt.getPropertyName().equals(InitiativeList.CURRENT_PROP)) {
 
       // Change the two old and new token with initiative
-      int oldIndex = getDisplayIndex(((Integer) evt.getOldValue()).intValue());
-      int newIndex = getDisplayIndex(((Integer) evt.getNewValue()).intValue());
+      int oldIndex = getDisplayIndex((Integer) evt.getOldValue());
+      int newIndex = getDisplayIndex((Integer) evt.getNewValue());
       if (oldIndex != newIndex) {
         if (oldIndex != -1) fireContentsChanged(InitiativeListModel.this, oldIndex, oldIndex);
         if (newIndex != -1) fireContentsChanged(InitiativeListModel.this, newIndex, newIndex);
@@ -179,8 +180,8 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 
         // Changed visibility of NPC tokens.
         List<TokenInitiative> tokens = list.getTokens();
-        int oldSize = getSize(tokens, ((Boolean) evt.getOldValue()).booleanValue());
-        int newSize = getSize(tokens, ((Boolean) evt.getNewValue()).booleanValue());
+        int oldSize = getSize(tokens, (Boolean) evt.getOldValue());
+        int newSize = getSize(tokens, (Boolean) evt.getNewValue());
         if (oldSize > newSize) {
           fireIntervalRemoved(InitiativeListModel.this, newSize, oldSize - 1);
         } else if (newSize > oldSize) {
@@ -233,7 +234,8 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
    *
    * @see javax.swing.ListModel#getElementAt(int)
    */
-  public Object getElementAt(int index) {
+  @Override
+  public TokenInitiative getElementAt(int index) {
     if (MapTool.getFrame().getInitiativePanel().hasGMPermission())
       return list.getTokenInitiative(index);
     int found = index;
@@ -252,6 +254,7 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
    *
    * @see javax.swing.ListModel#getSize()
    */
+  @Override
   public int getSize() {
     if (list == null) {
       return 0;

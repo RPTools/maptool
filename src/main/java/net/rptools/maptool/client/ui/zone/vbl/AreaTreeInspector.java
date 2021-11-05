@@ -82,10 +82,12 @@ public class AreaTreeInspector extends JPanel {
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .25f));
       g2d.setColor(Color.red);
 
-      for (VisibleAreaSegment segment : ocean.getVisibleAreaSegments(point)) {
-        Area area = segment.getArea();
-        if (area != null) {
-          g2d.fill(area);
+      if (ocean != null) {
+        for (VisibleAreaSegment segment : ocean.getVisibleAreaSegments(point)) {
+          Area area = segment.getArea();
+          if (area != null) {
+            g2d.fill(area);
+          }
         }
       }
       g2d.dispose();

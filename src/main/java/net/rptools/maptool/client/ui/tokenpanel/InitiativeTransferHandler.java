@@ -70,8 +70,8 @@ public class InitiativeTransferHandler extends TransferHandler {
    */
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] transferFlavors) {
-    for (int i = 0; i < transferFlavors.length; i++)
-      if (InitiativeTransferable.INIT_TOKEN_FLAVOR.equals(transferFlavors[i])) return true;
+    for (DataFlavor transferFlavor : transferFlavors)
+      if (InitiativeTransferable.INIT_TOKEN_FLAVOR.equals(transferFlavor)) return true;
     return false;
   }
 

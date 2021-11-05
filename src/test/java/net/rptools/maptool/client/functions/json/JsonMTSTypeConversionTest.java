@@ -81,7 +81,7 @@ class JsonMTSTypeConversionTest {
   }
 
   @Test
-  void asJsonElement() throws ParserException {
+  void asJsonElement() {
     JsonObject jsonObject = new JsonObject();
     assertEquals(jsonObject, typeConversion.asJsonElement(jsonObject.toString()));
     jsonObject.add("test", new JsonPrimitive("test1"));

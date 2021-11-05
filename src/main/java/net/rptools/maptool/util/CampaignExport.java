@@ -58,11 +58,11 @@ public class CampaignExport {
    *
    * @author Jamz
    * @since 1.4.1.4
-   * @param pakFile
-   * @param persistedCampaign
-   * @param campaignVersion
-   * @return
-   * @throws IOException
+   * @param pakFile the packed file to remove classes from
+   * @param persistedCampaign the campaign to be sent
+   * @param campaignVersion version of the campaign
+   * @return the updated pakFile
+   * @throws IOException If an I/O error occurs
    */
   public static PackedFile stripContent(
       PackedFile pakFile, PersistedCampaign persistedCampaign, String campaignVersion)
@@ -153,7 +153,7 @@ public class CampaignExport {
    */
   private static boolean setVersions(String mapToolVersion) {
     String[] mapToolVersions =
-        mapToolVersion.indexOf(".") > 0
+        mapToolVersion.indexOf('.') > 0
             ? mapToolVersion.split("\\.")
             : new String[] {mapToolVersion};
 

@@ -14,6 +14,11 @@
  */
 package net.rptools.maptool.client.swing;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.Serializable;
+import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
@@ -39,6 +44,8 @@ public class MessagePanelEditorKit extends HTMLEditorKit {
     macroLinkTTips = show;
   }
 
+  private LinkController linkHandler = new LinkController2();
+
   @Override
   public ViewFactory getViewFactory() {
     return viewFactory;
@@ -58,6 +65,9 @@ public class MessagePanelEditorKit extends HTMLEditorKit {
       Object o = (elementName != null) ? null : attrs.getAttribute(StyleConstants.NameAttribute);
       if (o instanceof HTML.Tag) {
         HTML.Tag kind = (HTML.Tag) o;
+        if (kind == HTML.Tag.INPUT || kind == HTML.Tag.SELECT || kind == HTML.Tag.TEXTAREA) {
+          return new SubmitFormView(elem);
+        }
         if (kind == HTML.Tag.IMG) {
           return new MessagePanelImageView(elem, imageCache);
         }
@@ -67,6 +77,35 @@ public class MessagePanelEditorKit extends HTMLEditorKit {
       }
 
       return super.create(elem);
+    }
+  }
+
+  @Override
+  public void install(JEditorPane c) {
+    super.install(c);
+    for (MouseListener listener : c.getMouseListeners()) {
+      if (listener instanceof LinkController) {
+        c.removeMouseListener(listener); // remove the link handler
+      }
+    }
+    c.addMouseListener(linkHandler); // add the modified one
+  }
+
+  @Override
+  public void deinstall(JEditorPane c) {
+    c.removeMouseListener(linkHandler); // remove the modified link handler
+    super.deinstall(c);
+  }
+
+  /** Modify the link controller so that links are triggered on mouse release */
+  private static class LinkController2 extends LinkController
+      implements MouseMotionListener, Serializable {
+    @Override
+    public void mouseClicked(MouseEvent e) {} // don't activate links by clicks
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+      super.mouseClicked(e); // activate links by mouse release instead
     }
   }
 }

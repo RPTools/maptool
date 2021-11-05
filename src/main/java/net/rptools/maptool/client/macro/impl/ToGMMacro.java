@@ -18,8 +18,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.MessageUtil;
 
 @MacroDefinition(
     name = "gm",
@@ -27,36 +27,35 @@ import net.rptools.maptool.model.TextMessage;
     description = "togm.description")
 public class ToGMMacro extends AbstractRollMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-    StringBuilder sb = new StringBuilder();
+    String toGmMsg;
 
-    if (executionContext != null
-        && MapTool.getParser().isMacroPathTrusted()
-        && !MapTool.getPlayer().isGM()) {
-      sb.append("<span class='trustedPrefix' ")
-          .append("title='")
-          .append(executionContext.getName());
-      sb.append("@").append(executionContext.getSource()).append("'>");
-      sb.append(I18N.getText("togm.saysToGM", MapTool.getPlayer().getName()))
-          .append("</span> ")
-          .append(macro);
+    if (executionContext != null) {
+      toGmMsg =
+          MessageUtil.getFormattedToGmRecipient(
+              macro,
+              MapTool.getPlayer().getName(),
+              MapTool.getParser().isMacroPathTrusted(),
+              executionContext.getName(),
+              executionContext.getSource());
     } else {
-      sb.append(I18N.getText("togm.saysToGM", MapTool.getPlayer().getName()))
-          .append(" ")
-          .append(macro);
+      toGmMsg =
+          MessageUtil.getFormattedToGmRecipient(
+              macro, MapTool.getPlayer().getName(), false, null, null);
     }
+
     MapTool.addMessage(
         new TextMessage(
             TextMessage.Channel.GM,
             null,
             MapTool.getPlayer().getName(),
-            sb.toString(),
+            toGmMsg,
             context.getTransformationHistory()));
     MapTool.addMessage(
         new TextMessage(
             TextMessage.Channel.ME,
             null,
             MapTool.getPlayer().getName(),
-            I18N.getText("togm.self", macro),
+            MessageUtil.getFormattedToGmSender(macro),
             context.getTransformationHistory()));
   }
 }

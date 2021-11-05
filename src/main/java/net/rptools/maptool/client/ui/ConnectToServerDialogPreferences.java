@@ -16,7 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectToServerDialogPreferences {
@@ -31,6 +31,8 @@ public class ConnectToServerDialogPreferences {
   private static final String KEY_PASSWORD = "password";
   private static final String KEY_TAB = "tab";
   private static final String KEY_SERVER_NAME = "serverName";
+  private static final String USE_PUBLIC_KEY = "usePublicKey";
+  private static final String USE_WEB_RTC = "useWebRTC";
 
   public String getUsername() {
     return prefs.get(KEY_USERNAME, "");
@@ -86,5 +88,21 @@ public class ConnectToServerDialogPreferences {
 
   public String getServerName() {
     return prefs.get(KEY_SERVER_NAME, "");
+  }
+
+  public boolean getUsePublicKey() {
+    return prefs.getBoolean(USE_PUBLIC_KEY, false);
+  }
+
+  public void setUsePublicKey(boolean usePublicKey) {
+    prefs.putBoolean(USE_PUBLIC_KEY, usePublicKey);
+  }
+
+  public boolean getUseWebRTC() {
+    return prefs.getBoolean(USE_WEB_RTC, false);
+  }
+
+  public void setUseWebRTC(boolean useWebRTC) {
+    prefs.putBoolean(USE_WEB_RTC, useWebRTC);
   }
 }

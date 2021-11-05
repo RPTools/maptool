@@ -31,8 +31,6 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.List;
@@ -92,12 +90,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
       cancelButton.setFocusable(false);
       cancelButton.setMargin(new Insets(0, 0, 0, 0));
 
-      cancelButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              setImageId(null);
-            }
-          });
+      cancelButton.addActionListener(e -> setImageId(null));
     }
     return cancelButton;
   }
@@ -111,17 +104,15 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
       addButton.setMargin(new Insets(0, 0, 0, 0));
 
       addButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-              chooserDialog.setVisible(true);
+          e -> {
+            ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
+            chooserDialog.setVisible(true);
 
-              MD5Key imageId = chooserDialog.getImageId();
-              if (imageId == null) {
-                return;
-              }
-              setImageId(imageId);
+            MD5Key imageId = chooserDialog.getImageId();
+            if (imageId == null) {
+              return;
             }
+            setImageId(imageId);
           });
     }
     return addButton;

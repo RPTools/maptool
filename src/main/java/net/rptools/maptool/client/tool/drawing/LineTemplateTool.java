@@ -214,27 +214,25 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
         pathVertex = new ZonePoint(vertex.x, vertex.y);
         lt.setPathVertex(pathVertex);
       } // endif
-      if (pathVertex != null && setCellAtMouse(e, pathVertex)) lt.clearPath();
+      if (setCellAtMouse(e, pathVertex)) lt.clearPath();
 
       // Determine which of the extra squares are used on diagonals
-      if (pathVertex != null) {
-        double dx = pathVertex.x - vertex.x;
-        double dy = pathVertex.y - vertex.y;
-        if (dx != 0 && dy != 0) { // Ignore straight lines
-          boolean mouseSlopeGreater = false;
-          double m = Math.abs(dy / dx);
-          double edx = e.getX() - vertex.x;
-          double edy = e.getY() - vertex.y;
-          if (edx != 0 && edy != 0) { // Handle straight lines differently
-            double em = Math.abs(edy / edx);
-            mouseSlopeGreater = em > m;
-          } else if (edx == 0) {
-            mouseSlopeGreater = true;
-          } // endif
-          if (mouseSlopeGreater != lt.isMouseSlopeGreater()) {
-            lt.setMouseSlopeGreater(mouseSlopeGreater);
-            renderer.repaint();
-          } // endif
+      double dx = pathVertex.x - vertex.x;
+      double dy = pathVertex.y - vertex.y;
+      if (dx != 0 && dy != 0) { // Ignore straight lines
+        boolean mouseSlopeGreater = false;
+        double m = Math.abs(dy / dx);
+        double edx = e.getX() - vertex.x;
+        double edy = e.getY() - vertex.y;
+        if (edx != 0 && edy != 0) { // Handle straight lines differently
+          double em = Math.abs(edy / edx);
+          mouseSlopeGreater = em > m;
+        } else if (edx == 0) {
+          mouseSlopeGreater = true;
+        } // endif
+        if (mouseSlopeGreater != lt.isMouseSlopeGreater()) {
+          lt.setMouseSlopeGreater(mouseSlopeGreater);
+          renderer.repaint();
         } // endif
       } // endif
 
@@ -272,6 +270,6 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
 
   /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
   public void propertyChange(PropertyChangeEvent aEvt) {
-    ((LineTemplate) template).setDoubleWide(((Boolean) aEvt.getNewValue()).booleanValue());
+    ((LineTemplate) template).setDoubleWide((Boolean) aEvt.getNewValue());
   }
 }

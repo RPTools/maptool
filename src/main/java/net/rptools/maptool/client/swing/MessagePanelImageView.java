@@ -112,6 +112,7 @@ public class MessagePanelImageView extends View {
    * Creates a new view that represents an IMG element.
    *
    * @param elem the element to create a view for
+   * @param imageCache the image cache instance to load images into
    */
   public MessagePanelImageView(Element elem, ImageLoaderCache imageCache) {
     super(elem);
@@ -122,14 +123,14 @@ public class MessagePanelImageView extends View {
   }
 
   /**
-   * Returns the text to display if the image can't be loaded. This is obtained from the Elements
-   * attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
+   * @return the text to display if the image can't be loaded. This is obtained from the Elements
+   *     attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
    */
   public String getAltText() {
     return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
   }
 
-  /** Return a URL for the image source, or null if it could not be determined. */
+  /** @return a URL for the image source, or null if it could not be determined. */
   public URL getImageURL() {
     String src = (String) getElement().getAttributes().getAttribute(HTML.Attribute.SRC);
     if (src == null) {
@@ -144,17 +145,17 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** Returns the icon to use if the image couldn't be found. */
+  /** @return the icon to use if the image couldn't be found. */
   public Icon getNoImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(MISSING_IMAGE);
   }
 
-  /** Returns the icon to use while in the process of loading the image. */
+  /** @return the icon to use while in the process of loading the image. */
   public Icon getLoadingImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(PENDING_IMAGE);
   }
 
-  /** Returns the image to render. */
+  /** @return the image to render. */
   public Image getImage() {
     sync();
     return imageCache.get(getImageURL(), imageObserver);
@@ -164,9 +165,12 @@ public class MessagePanelImageView extends View {
    * Sets how the image is loaded. If <code>newValue</code> is true, the image we be loaded when
    * first asked for, otherwise it will be loaded asynchronously. The default is to not load
    * synchronously, that is to load the image asynchronously.
+   *
+   * @param newValue If true, the image we be loaded when first asked for, otherwise it will be
+   *     loaded asynchronously.
    */
   public void setLoadsSynchronously(boolean newValue) {
-    synchronized (this) {
+    synchronized (stateLock) {
       if (newValue) {
         state |= SYNC_LOAD_FLAG;
       } else {
@@ -175,12 +179,16 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** Returns true if the image should be loaded when first asked for. */
+  /** @return true if the image should be loaded when first asked for. */
   public boolean getLoadsSynchronously() {
     return ((state & SYNC_LOAD_FLAG) != 0);
   }
 
-  /** Convenience method to get the StyleSheet. */
+  /**
+   * Convenience method to get the StyleSheet.
+   *
+   * @return the StyleSheet
+   */
   protected StyleSheet getStyleSheet() {
     HTMLDocument doc = (HTMLDocument) getDocument();
     return doc.getStyleSheet();
@@ -189,6 +197,8 @@ public class MessagePanelImageView extends View {
   /**
    * Fetches the attributes to use when rendering. This is implemented to multiplex the attributes
    * specified in the model with a StyleSheet.
+   *
+   * @return the attributes for rendering
    */
   @Override
   public AttributeSet getAttributes() {
@@ -206,6 +216,8 @@ public class MessagePanelImageView extends View {
   public String getToolTipText(float x, float y, Shape allocation) {
     return getAltText();
   }
+
+  private final Object stateLock = new Object();
 
   /** Update any cached values that come from attributes. */
   protected void setPropertiesFromAttributes() {
@@ -239,11 +251,11 @@ public class MessagePanelImageView extends View {
 
     AttributeSet anchorAttr = (AttributeSet) attr.getAttribute(HTML.Tag.A);
     if (anchorAttr != null && anchorAttr.isDefined(HTML.Attribute.HREF)) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state |= LINK_FLAG;
       }
     } else {
-      synchronized (this) {
+      synchronized (stateLock) {
         state = (state | LINK_FLAG) ^ LINK_FLAG;
       }
     }
@@ -258,7 +270,7 @@ public class MessagePanelImageView extends View {
     super.setParent(parent);
     container = (parent != null) ? getContainer() : null;
     if (oldParent != parent) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state |= RELOAD_FLAG;
       }
     }
@@ -269,7 +281,7 @@ public class MessagePanelImageView extends View {
   public void changedUpdate(DocumentEvent e, Shape a, ViewFactory f) {
     super.changedUpdate(e, a, f);
 
-    synchronized (this) {
+    synchronized (stateLock) {
       state |= RELOAD_FLAG | RELOAD_IMAGE_FLAG;
     }
 
@@ -306,7 +318,7 @@ public class MessagePanelImageView extends View {
     if (image != null) {
       if (!hasPixels(image)) {
         // No pixels yet, use the default
-        Icon icon = (image == null) ? getNoImageIcon() : getLoadingImageIcon();
+        Icon icon = getLoadingImageIcon();
 
         if (icon != null) {
           icon.paintIcon(getContainer(), g, rect.x + leftInset, rect.y + topInset);
@@ -433,12 +445,10 @@ public class MessagePanelImageView extends View {
    */
   @Override
   public float getAlignment(int axis) {
-    switch (axis) {
-      case View.Y_AXIS:
-        return vAlign;
-      default:
-        return super.getAlignment(axis);
+    if (axis == View.Y_AXIS) {
+      return vAlign;
     }
+    return super.getAlignment(axis);
   }
 
   /**
@@ -453,7 +463,7 @@ public class MessagePanelImageView extends View {
    * @see View#modelToView
    */
   @Override
-  public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+  public Shape modelToView(int pos, Shape a, Position.Bias b) {
     int p0 = getStartOffset();
     int p1 = getEndOffset();
     if ((pos >= p0) && (pos <= p1)) {
@@ -569,7 +579,7 @@ public class MessagePanelImageView extends View {
     }
     s = state;
     if ((s & RELOAD_FLAG) != 0) {
-      synchronized (this) {
+      synchronized (stateLock) {
         state = (state | RELOAD_FLAG) ^ RELOAD_FLAG;
       }
       setPropertiesFromAttributes();
@@ -581,7 +591,7 @@ public class MessagePanelImageView extends View {
    * <code>loadImage</code> or <code>updateImageSize</code> directly.
    */
   private void refreshImage() {
-    synchronized (this) {
+    synchronized (stateLock) {
       // clear out width/height/realoadimage flag and set loading flag
       state =
           (state | LOADING_FLAG | RELOAD_IMAGE_FLAG | WIDTH_FLAG | HEIGHT_FLAG)
@@ -594,7 +604,7 @@ public class MessagePanelImageView extends View {
       // And update the size params
       updateImageSize();
     } finally {
-      synchronized (this) {
+      synchronized (stateLock) {
         // Clear out state in case someone threw an exception.
         state = (state | LOADING_FLAG) ^ LOADING_FLAG;
       }
@@ -653,7 +663,7 @@ public class MessagePanelImageView extends View {
       }
 
       boolean createText = false;
-      synchronized (this) {
+      synchronized (stateLock) {
         // If imageloading failed, other thread may have called
         // ImageLoader which will null out image, hence we check
         // for it.
@@ -687,6 +697,8 @@ public class MessagePanelImageView extends View {
     }
   }
 
+  private final Object altViewLock = new Object();
+
   /** Updates the view representing the alt text. */
   private void updateAltTextView() {
     String text = getAltText();
@@ -695,7 +707,7 @@ public class MessagePanelImageView extends View {
       ImageLabelView newView;
 
       newView = new ImageLabelView(getElement(), text);
-      synchronized (this) {
+      synchronized (altViewLock) {
         altView = newView;
       }
     }
@@ -705,7 +717,7 @@ public class MessagePanelImageView extends View {
   private View getAltView() {
     View view;
 
-    synchronized (this) {
+    synchronized (altViewLock) {
       view = altView;
     }
     if (view != null && view.getParent() == null) {
@@ -726,12 +738,7 @@ public class MessagePanelImageView extends View {
         ((AbstractDocument) doc).readUnlock();
       }
     } else {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              safePreferenceChanged();
-            }
-          });
+      SwingUtilities.invokeLater(this::safePreferenceChanged);
     }
   }
 
@@ -765,12 +772,7 @@ public class MessagePanelImageView extends View {
       } else {
         // Avoids a possible deadlock between us waiting for imageLoaderMutex and it waiting on
         // us...
-        SwingUtilities.invokeLater(
-            new Runnable() {
-              public void run() {
-                imageUpdate(img, flags, x, y, newWidth, newHeight);
-              }
-            });
+        SwingUtilities.invokeLater(() -> imageUpdate(img, flags, x, y, newWidth, newHeight));
       }
       return ((flags & ALLBITS) == 0);
     }
@@ -781,7 +783,7 @@ public class MessagePanelImageView extends View {
    * attribute. It overriden a handle of methods as the text is hardcoded and does not come from the
    * document.
    */
-  private class ImageLabelView extends InlineView {
+  private static class ImageLabelView extends InlineView {
     private Segment segment;
     private Color fg;
 

@@ -35,12 +35,20 @@ public class MRUCampaignManager {
     loadMruCampaignList();
   }
 
-  /** Returns the MRU Campaigns menu item and sub-menu */
+  /**
+   * Returns the MRU Campaigns menu item and sub-menu.
+   *
+   * @return the MRU Campaigns menu item and sub-menu.
+   */
   public JMenu getMRUMenu() {
     return mruMenu;
   }
 
-  /** Adds a new Campaign to the MRU list, then resort the list and update the menu */
+  /**
+   * Adds a new Campaign to the MRU list, then resort the list and update the menu
+   *
+   * @param newCampaign the campaign to add to the most recently used list.
+   */
   public void addMRUCampaign(File newCampaign) {
     // FIXME (this coupling is too tight; change the calling function to avoid this call entirely)
     // don't add the autosave recovery file until it is resaved
@@ -57,8 +65,7 @@ public class MRUCampaignManager {
       // newMruList.removeLast();
       ArrayList<File> newMruList = new ArrayList<File>(DEFAULT_MAX_MRU + 1);
       newMruList.add(newCampaign);
-      for (ListIterator<File> iter = mruCampaigns.listIterator(); iter.hasNext(); ) {
-        File next = iter.next();
+      for (File next : mruCampaigns) {
         if (newMruList.size() == DEFAULT_MAX_MRU) break;
         else if (next.equals(newCampaign)) continue;
         else newMruList.add(next);

@@ -29,6 +29,7 @@ public class TooltipView extends InlineView {
    * Constructs a new view wrapped on an element.
    *
    * @param elem the element
+   * @param macroLinkToolTips if to show macrolinks as tooltips
    */
   public TooltipView(Element elem, boolean macroLinkToolTips) {
     super(elem);

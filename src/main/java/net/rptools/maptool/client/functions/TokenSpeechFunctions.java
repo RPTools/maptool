@@ -22,6 +22,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenSpeechFunctions extends AbstractFunction {
@@ -37,10 +38,10 @@ public class TokenSpeechFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    final Token token =
-        ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+    final Token token = ((MapToolVariableResolver) resolver).getTokenInContext();
     if (token == null) {
       throw new ParserException(
           I18N.getText("macro.function.general.noImpersonated", functionName));
@@ -77,6 +78,6 @@ public class TokenSpeechFunctions extends AbstractFunction {
         return StringFunctions.getInstance().join(token.getSpeechNames().toArray(speech), delim);
       }
     }
-    return null;
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 }

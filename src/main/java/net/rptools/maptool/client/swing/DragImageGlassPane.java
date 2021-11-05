@@ -42,10 +42,10 @@ public class DragImageGlassPane extends JPanel {
   }
 
   public void setImagePosition(Point p) {
-    if (p.equals(location)) {
+    if (p == null || p.equals(location)) {
       return;
     }
-    if (p != null && image != null) {
+    if (image != null) {
       Dimension size = getImageSize();
 
       if (location == null) {

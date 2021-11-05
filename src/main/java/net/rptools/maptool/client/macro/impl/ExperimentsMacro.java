@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
+import javax.swing.JOptionPane;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
@@ -39,6 +40,10 @@ public class ExperimentsMacro implements Macro {
         if (args.length < 2) {
           displayUsage();
         } else {
+          if (!confirmWebServerStart()) {
+            return;
+          }
+
           if (args.length > 2) {
             for (int i = 2; i < args.length; i++) {
               String[] dirArgs = args[i].split("=");
@@ -65,8 +70,28 @@ public class ExperimentsMacro implements Macro {
     }
   }
 
+  private boolean confirmWebServerStart() {
+    String msg = I18N.getText("msg.confirm.webServerStart");
+    Object[] options = {
+      I18N.getText("msg.title.messageDialog.continue"),
+      I18N.getText("msg.title.messageDialog.cancel")
+    };
+    String title = I18N.getText("msg.confirm.webServerStartTitle");
+    int val =
+        JOptionPane.showOptionDialog(
+            MapTool.getFrame(),
+            msg,
+            title,
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+            null,
+            options,
+            options[1]);
+    return val == 0;
+  }
+
   private void displayUsage() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("<table border=1><tr><td><b>")
         .append(I18N.getText("experiments.listTitle"))
         .append("</b></td></tr>");

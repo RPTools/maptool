@@ -22,6 +22,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class SwitchTokenFunction extends AbstractFunction {
@@ -36,7 +37,8 @@ public class SwitchTokenFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -53,7 +55,7 @@ public class SwitchTokenFunction extends AbstractFunction {
           I18N.getText(
               "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
     }
-    ((MapToolVariableResolver) parser.getVariableResolver()).setTokenIncontext(token);
+    ((MapToolVariableResolver) resolver).setTokenIncontext(token);
     return "";
   }
 }

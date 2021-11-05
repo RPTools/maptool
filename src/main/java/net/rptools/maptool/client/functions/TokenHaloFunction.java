@@ -25,6 +25,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenHaloFunction extends AbstractFunction {
@@ -45,14 +46,16 @@ public class TokenHaloFunction extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
     if (functionName.equals("getHalo")) {
-      return getHalo(parser, args);
-    } else {
-      return setHalo(parser, args);
+      return getHalo((MapToolVariableResolver) resolver, args);
+    } else if ("setHalo".equalsIgnoreCase(functionName)) {
+      return setHalo((MapToolVariableResolver) resolver, args);
     }
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
@@ -99,12 +102,12 @@ public class TokenHaloFunction extends AbstractFunction {
   /**
    * Gets the halo of the token.
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return the halo color.
    * @throws ParserException if an error occurs.
    */
-  private Object getHalo(Parser parser, List<Object> args) throws ParserException {
+  private Object getHalo(MapToolVariableResolver resolver, List<Object> args)
+      throws ParserException {
     Token token;
 
     if (args.size() == 1) {
@@ -117,8 +120,7 @@ public class TokenHaloFunction extends AbstractFunction {
             I18N.getText("macro.function.general.unknownToken", "getHalo", args.get(0).toString()));
       }
     } else if (args.size() == 0) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
+      token = resolver.getTokenInContext();
       if (token == null) {
         throw new ParserException(I18N.getText("macro.function.general.noImpersonated", "getHalo"));
       }
@@ -132,12 +134,12 @@ public class TokenHaloFunction extends AbstractFunction {
   /**
    * Sets the halo of the token.
    *
-   * @param parser The parser that called the object.
    * @param args The arguments.
    * @return the halo color.
    * @throws ParserException if an error occurs.
    */
-  private Object setHalo(Parser parser, List<Object> args) throws ParserException {
+  private Object setHalo(MapToolVariableResolver resolver, List<Object> args)
+      throws ParserException {
 
     Token token;
     Object value = args.get(0);
@@ -150,8 +152,7 @@ public class TokenHaloFunction extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.general.tooManyParam", "setHalo", 2, args.size()));
       case 1:
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
+        token = resolver.getTokenInContext();
         if (token == null) {
           throw new ParserException(
               I18N.getText("macro.function.general.noImpersonated", "setHalo"));

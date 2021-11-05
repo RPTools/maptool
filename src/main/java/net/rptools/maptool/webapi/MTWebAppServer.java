@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -24,7 +25,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.sf.json.JSONObject;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -32,9 +32,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.log.StdErrLog;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.server.WebSocketHandler;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 public class MTWebAppServer {
@@ -63,7 +60,7 @@ public class MTWebAppServer {
   /**
    * Sets the port
    *
-   * @param port
+   * @param port the port for the server
    */
   public synchronized void setPort(int port) {
     if (started) {
@@ -91,24 +88,19 @@ public class MTWebAppServer {
           @Override
           public void configure(WebSocketServletFactory factory) {
             factory.setCreator(
-                new WebSocketCreator() {
+                (req, resp) -> {
+                  String query = req.getRequestURI().toString();
+                  if ((query == null) || (query.length() <= 0)) {
+                    try {
+                      resp.sendForbidden("DEBUG: Unspecified query");
+                    } catch (IOException e) {
 
-                  @Override
-                  public Object createWebSocket(
-                      ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-                    String query = req.getRequestURI().toString();
-                    if ((query == null) || (query.length() <= 0)) {
-                      try {
-                        resp.sendForbidden("DEBUG: Unspecified query");
-                      } catch (IOException e) {
-
-                      }
-
-                      return null;
                     }
 
-                    return new MTWebSocket();
+                    return null;
                   }
+
+                  return new MTWebSocket();
                 });
           }
         });
@@ -161,12 +153,9 @@ public class MTWebAppServer {
     ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 
     ses.scheduleAtFixedRate(
-        new Runnable() {
-          @Override
-          public void run() {
-            JSONObject data = new JSONObject();
-            MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
-          }
+        () -> {
+          JsonObject data = new JsonObject();
+          MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
         },
         1,
         1,

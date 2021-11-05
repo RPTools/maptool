@@ -14,16 +14,17 @@
  */
 package net.rptools.maptool.client.walker;
 
-import java.util.Collection;
+import java.awt.geom.Area;
+import java.util.Map;
 import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.TokenFootprint;
 
 public interface ZoneWalker {
+
   public void setWaypoints(CellPoint... points);
 
   public void addWaypoints(CellPoint... point);
@@ -33,7 +34,8 @@ public interface ZoneWalker {
   public CellPoint replaceLastWaypoint(
       CellPoint point,
       boolean restrictMovement,
-      Set<TerrainModifierOperation> terrainModifiersIgnored);
+      Set<TerrainModifierOperation> terrainModifiersIgnored,
+      Area tokenVBL);
 
   public boolean isWaypoint(CellPoint point);
 
@@ -65,7 +67,7 @@ public interface ZoneWalker {
 
   public void setFootprint(TokenFootprint footprint);
 
-  public default Collection<AStarCellPoint> getCheckedPoints() {
+  public default Map<CellPoint, Set<CellPoint>> getBlockedMoves() {
     return null;
   }
 }

@@ -17,8 +17,6 @@ package net.rptools.maptool.client.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.JTextComponent;
+import net.rptools.maptool.language.I18N;
 
 public class NoteFrame extends JFrame {
   private JTextComponent noteArea;
@@ -63,26 +62,17 @@ public class NoteFrame extends JFrame {
 
   private JButton getClearButton() {
     if (clearButton == null) {
-      clearButton = new JButton("Clear");
-      clearButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              getNoteArea().setText("");
-            }
-          });
+      clearButton = new JButton(I18N.getText("Button.clear"));
+      clearButton.addActionListener(e -> getNoteArea().setText(""));
     }
     return clearButton;
   }
 
   private JButton getCloseButton() {
     if (closeButton == null) {
-      closeButton = new JButton("Close");
+      closeButton = new JButton(I18N.getText("Button.close"));
       closeButton.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              processWindowEvent(new WindowEvent(NoteFrame.this, WindowEvent.WINDOW_CLOSING));
-            }
-          });
+          e -> processWindowEvent(new WindowEvent(NoteFrame.this, WindowEvent.WINDOW_CLOSING)));
     }
     return closeButton;
   }

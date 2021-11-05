@@ -26,8 +26,8 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 
 /**
@@ -92,7 +92,11 @@ public class FunctionUtil {
    *     token can not be found, or if no token is specified and no token is impersonated.
    */
   public static Token getTokenFromParam(
-      Parser parser, String functionName, List<Object> param, int indexToken, int indexMap)
+      VariableResolver resolver,
+      String functionName,
+      List<Object> param,
+      int indexToken,
+      int indexMap)
       throws ParserException {
 
     int size = param.size();
@@ -114,7 +118,7 @@ public class FunctionUtil {
         }
       }
     } else {
-      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+      token = ((MapToolVariableResolver) resolver).getTokenInContext();
       if (token == null) {
         throw new ParserException(I18N.getText(KEY_NO_IMPERSONATED, functionName));
       }
@@ -353,6 +357,54 @@ public class FunctionUtil {
   }
 
   /**
+   * Return the jsonElement value of a parameter. Throws a <code>ParserException</code> if the
+   * parameter can't be converted to a jsonArray.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters the list of parameters
+   * @param index the index of the parameter to return as jsonArray
+   * @return the parameter as a jsonArray
+   */
+  public static JsonElement paramConvertedToJson(
+      String functionName, List<Object> parameters, int index) {
+    try {
+      return paramAsJson(functionName, parameters, index);
+    } catch (ParserException e) {
+      JsonArray json = new JsonArray();
+      Object val = parameters.get(index);
+      if (val.toString().length() > 0) {
+        if (val instanceof Number) {
+          json.add((Number) val);
+        } else {
+          json.add(val.toString());
+        }
+      }
+
+      return json;
+    }
+  }
+
+  /**
+   * Return the jsonObject or jsonArray value of a parameter. if the parameter can't be converted to
+   * a json. Then an empty json array will be returned if its an empty string, otherwise a a
+   * JsonArray containing the argument will be returned.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters the list of parameters
+   * @param index the index of the parameter to return as Json
+   * @return the parameter as a jsonObject or jsonArray
+   * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
+   */
+  public static JsonArray paramConvertedToJsonArray(
+      String functionName, List<Object> parameters, int index) throws ParserException {
+    JsonElement json = paramConvertedToJson(functionName, parameters, index);
+    if (!json.isJsonArray()) {
+      throw new ParserException(I18N.getText(KEY_NOT_JSON_ARRAY, functionName, index + 1));
+    } else {
+      return json.getAsJsonArray();
+    }
+  }
+  /**
    * Convert an object into a boolean value. Never returns an error.
    *
    * @param value Convert this object. Must be {@link Boolean}, {@link BigDecimal}, or will have its
@@ -362,7 +414,7 @@ public class FunctionUtil {
   public static boolean getBooleanValue(Object value) {
     boolean set = false;
     if (value instanceof Boolean) {
-      set = ((Boolean) value).booleanValue();
+      set = (Boolean) value;
     } else if (value instanceof Number) {
       set = ((Number) value).doubleValue() != 0;
     } else if (value == null) {
@@ -377,6 +429,15 @@ public class FunctionUtil {
     return set;
   }
 
+  /**
+   * Get our standard BigDecimal representation (1 or 0) of a boolean value.
+   *
+   * @param b the boolean value
+   * @return {@link BigDecimal#ONE} if true, {@link BigDecimal#ZERO} if false
+   */
+  public static BigDecimal getDecimalForBoolean(boolean b) {
+    return b ? BigDecimal.ONE : BigDecimal.ZERO;
+  }
   /**
    * Throw an exception if the macro isn't trusted.
    *

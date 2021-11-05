@@ -46,6 +46,11 @@ public class GmPanel extends AbstractMacroPanel {
     init();
   }
 
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    return getGmMacroButtonArray();
+  }
+
   public static void deleteButtonGroup(String macroGroup) {
     AbstractButtonGroup.clearHotkeys(getGmPanel(), macroGroup);
     List<MacroButtonProperties> campProps = getGmMacroButtonArray();
@@ -54,7 +59,7 @@ public class GmPanel extends AbstractMacroPanel {
     campProps.clear();
     for (MacroButtonProperties nextProp : startingProps) {
       if (!macroGroup.equals(nextProp.getGroup())) {
-        MapTool.getCampaign().saveGmMacroButtonProperty(nextProp);
+        MapTool.getCampaign().saveMacroButtonProperty(nextProp, true);
       }
     }
     getGmPanel().reset();

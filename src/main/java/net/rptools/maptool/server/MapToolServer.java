@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.server;
 
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +33,8 @@ import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
@@ -45,6 +49,7 @@ public class MapToolServer {
   private final MapToolServerConnection conn;
   private final ServerMethodHandler handler;
   private final ServerConfig config;
+  private final PlayerDatabase playerDatabase;
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
@@ -56,18 +61,19 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy) throws IOException {
+  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
+      throws IOException {
+    this.config = config;
+    this.policy = policy;
     handler = new ServerMethodHandler(this);
-    conn = new MapToolServerConnection(this, config.getPort());
+    playerDatabase = playerDb;
+    conn = new MapToolServerConnection(this, playerDatabase);
     conn.addMessageHandler(handler);
 
     campaign = new Campaign();
 
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
-
-    this.config = config;
-    this.policy = policy;
 
     // Start a heartbeat if requested
     if (config.isServerRegistered()) {
@@ -98,11 +104,7 @@ public class MapToolServer {
   public void releaseClientConnection(String id) {
     ClientConnection connection = getClientConnection(id);
     if (connection != null) {
-      try {
-        connection.close();
-      } catch (IOException e) {
-        log.error("Could not release connection: " + id, e);
-      }
+      connection.close();
     }
     assetManagerMap.remove(id);
     connectionMap.remove(id);
@@ -164,25 +166,24 @@ public class MapToolServer {
   }
 
   public void stop() {
-    try {
-      conn.close();
-      if (heartbeatThread != null) {
-        heartbeatThread.shutdown();
-      }
-      if (assetProducerThread != null) {
-        assetProducerThread.shutdown();
-      }
-    } catch (IOException e) {
-      // Not too concerned about this
-      log.info("Couldn't close connection", e);
+    conn.close();
+    if (heartbeatThread != null) {
+      heartbeatThread.shutdown();
+    }
+    if (assetProducerThread != null) {
+      assetProducerThread.shutdown();
     }
   }
 
   private static final Random random = new Random();
 
+  public void start() throws IOException {
+    conn.open();
+  }
+
   private class HeartbeatThread extends Thread {
     private boolean stop = false;
-    private static final int HEARTBEAT_DELAY = 7 * 60 * 1000; // 7 minutes
+    private static final int HEARTBEAT_DELAY = 10 * 60 * 1000; // 10 minutes
     private static final int HEARTBEAT_FLUX = 20 * 1000; // 20 seconds
 
     private boolean ever_had_an_error = false;
@@ -198,18 +199,16 @@ public class MapToolServer {
         try {
           Thread.sleep(HEARTBEAT_DELAY + (int) (HEARTBEAT_FLUX * random.nextFloat()));
           // Pulse
-          MapToolRegistry.heartBeat(config.getPort());
+          MapToolRegistry.getInstance().heartBeat();
           // If the heartbeat worked, reset the counter if the last one failed
           if (errors != 0) {
             String msg = I18N.getText("msg.info.heartbeat.registrySuccess", errors);
             SwingUtilities.invokeLater(
-                new Runnable() {
-                  public void run() {
-                    // Write to the GM's console. (Code taken from client.functions.ChatFunction)
-                    MapTool.serverCommand().message(TextMessage.gm(null, msg));
-                    // Write to our console. (Code taken from client.functions.ChatFunction)
-                    MapTool.addServerMessage(TextMessage.me(null, msg));
-                  }
+                () -> {
+                  // Write to the GM's console. (Code taken from client.functions.ChatFunction)
+                  MapTool.serverCommand().message(TextMessage.gm(null, msg));
+                  // Write to our console. (Code taken from client.functions.ChatFunction)
+                  MapTool.addServerMessage(TextMessage.me(null, msg));
                 });
             errors = 0;
             WARNING_TIME = 2;
@@ -234,21 +233,19 @@ public class MapToolServer {
 
             String msg = I18N.getText("msg.info.heartbeat.registryFailure", IP_addr, port, errors);
             SwingUtilities.invokeLater(
-                new Runnable() {
-                  public void run() {
-                    // Write to the GM's console. (Code taken from client.functions.ChatFunction)
-                    MapTool.serverCommand().message(TextMessage.gm(null, msg));
-                    // Write to our console. (Code taken from client.functions.ChatFunction)
-                    MapTool.addServerMessage(TextMessage.me(null, msg));
+                () -> {
+                  // Write to the GM's console. (Code taken from client.functions.ChatFunction)
+                  MapTool.serverCommand().message(TextMessage.gm(null, msg));
+                  // Write to our console. (Code taken from client.functions.ChatFunction)
+                  MapTool.addServerMessage(TextMessage.me(null, msg));
 
-                    // This is the first time the heartbeat has failed in this stretch of time.
-                    // Only writes to the log on the first error. Should it always add an entry?
-                    if (!ever_had_an_error) {
-                      ever_had_an_error = true;
-                      // Uses a popup to tell the user what's going on. Includes a 'Logger.warn()'
-                      // message.
-                      MapTool.showWarning(msg, e);
-                    }
+                  // This is the first time the heartbeat has failed in this stretch of time.
+                  // Only writes to the log on the first error. Should it always add an entry?
+                  if (!ever_had_an_error) {
+                    ever_had_an_error = true;
+                    // Uses a popup to tell the user what's going on. Includes a 'Logger.warn()'
+                    // message.
+                    MapTool.showWarning(msg, e);
                   }
                 });
           }
@@ -266,6 +263,10 @@ public class MapToolServer {
   // CLASSES
   private class AssetProducerThread extends Thread {
     private boolean stop = false;
+
+    public AssetProducerThread() {
+      setName("AssetProducerThread");
+    }
 
     @Override
     public void run() {
@@ -309,6 +310,9 @@ public class MapToolServer {
   // STANDALONE SERVER
   public static void main(String[] args) throws IOException {
     // This starts the server thread.
-    MapToolServer server = new MapToolServer(new ServerConfig(), new ServerPolicy());
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
+    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    MapToolServer server =
+        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
   }
 }

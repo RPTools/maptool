@@ -96,14 +96,9 @@ public class ModelVersionManager {
       String version, ModelVersionTransformation... transforms) {
     version = cleanVersionNumber(version);
 
-    List<ModelVersionTransformation> transformList = transformMap.get(version);
-    if (transformList == null) {
-      transformList = new LinkedList<ModelVersionTransformation>();
-      transformMap.put(version, transformList);
-    }
-    for (ModelVersionTransformation transform : transforms) {
-      transformList.add(transform);
-    }
+    List<ModelVersionTransformation> transformList =
+        transformMap.computeIfAbsent(version, k -> new LinkedList<ModelVersionTransformation>());
+    transformList.addAll(Arrays.asList(transforms));
   }
 
   /**
@@ -161,8 +156,8 @@ public class ModelVersionManager {
       return false;
     }
 
-    String[] v1 = version1.indexOf(".") > 0 ? version1.split("\\.") : new String[] {version1};
-    String[] v2 = version2.indexOf(".") > 0 ? version2.split("\\.") : new String[] {version2};
+    String[] v1 = version1.indexOf('.') > 0 ? version1.split("\\.") : new String[] {version1};
+    String[] v2 = version2.indexOf('.') > 0 ? version2.split("\\.") : new String[] {version2};
 
     int maxIndex = Math.max(v1.length, v2.length);
     int val1 = 0;

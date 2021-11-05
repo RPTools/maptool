@@ -64,7 +64,7 @@ public class HeroLabData {
   private String portfolioPath;
   private long lastModified = 0L;
 
-  private final HashMap<String, MD5Key> heroImageAssets = new HashMap<>();
+  private final Map<String, MD5Key> heroImageAssets = new HashMap<>();
 
   private static interface DefaultAssetKey {
     final String PORTRAIT_KEY = "0";
@@ -116,17 +116,47 @@ public class HeroLabData {
     heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
   }
 
-  /*
-   * Evaluate the HeroLab XML statBlock against the supplied xPath expression Sample expression: /document/public/character/race/@racetext
+  /**
+   * Evaluate the HeroLab XML statBlock against the supplied xPath expression, returning the results
+   * as a String List with the requested delimiter.
+   *
+   * <p>Sample expression: /document/public/character/race/@racetext
+   *
+   * @param xPathExpression the expression
+   * @param delim the delimiter to use for the returned list
+   * @return the String list (which may contain only a single element)
+   * @throws IllegalArgumentException if xPathExpression is empty, invalid, or does not point to
+   *     text or attribute nodes.
    */
-  public String parseXML(String xPathExpression) {
-    if (xPathExpression.isEmpty()) return "Error: No XPath expression given.";
+  public String parseXML(String xPathExpression, String delim) {
+    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
 
     String results;
     XML xmlObj = new XMLDocument(getStatBlock_xml());
-    results = String.join(", ", xmlObj.xpath(xPathExpression));
+    results = String.join(delim, xmlObj.xpath(xPathExpression));
 
     // System.out.println("HeroLabData parseXML(" + xPathExpression + ") :: '" + results + "'");
+
+    return results;
+  }
+
+  /**
+   * Evaluate the HeroLab XML statBlock against the supplied xPath expression, returning the results
+   * as a JsonArray.
+   *
+   * @param xPathExpression the expression
+   * @return a JsonArray of results
+   * @throws IllegalArgumentException if xPathExpression is empty, invalid, or does not point to
+   *     text or attribute nodes.
+   */
+  public JsonArray parseXmlToJson(String xPathExpression) {
+    if (xPathExpression.isEmpty()) throw new IllegalArgumentException("Empty XPath expression");
+
+    JsonArray results = new JsonArray();
+    XML xmlObj = new XMLDocument(getStatBlock_xml());
+    for (String r : xmlObj.xpath(xPathExpression)) {
+      results.add(r);
+    }
 
     return results;
   }
@@ -145,8 +175,8 @@ public class HeroLabData {
   }
 
   @SuppressWarnings("unchecked")
-  public HashMap<String, HashMap<String, String>> getStatBlocks() {
-    HashMap<String, HashMap<String, String>> statBlocks = new HashMap<>();
+  public Map<String, HashMap<String, String>> getStatBlocks() {
+    Map<String, HashMap<String, String>> statBlocks = new HashMap<>();
 
     if (heroLabStatblockAssetID == null) return statBlocks;
 
@@ -183,7 +213,7 @@ public class HeroLabData {
     return statBlocks;
   }
 
-  public void setStatBlocks(HashMap<String, HashMap<String, String>> statBlocks) {
+  public void setStatBlocks(Map<String, Map<String, String>> statBlocks) {
     // Jamz: Since statblocks do not change or accessed often, moved object data to an Asset
     // as heroLabData could be pretty large with XML data causing lag on token transfers
     if (heroLabStatblockAssetID != null) AssetManager.removeAsset(heroLabStatblockAssetID);
@@ -222,10 +252,10 @@ public class HeroLabData {
 
     if (getStatBlocks().get(type) == null) return "";
 
-    Object statBlock = getStatBlocks().get(type).get(StatBlockKey.DATA);
+    String statBlock = getStatBlocks().get(type).get(StatBlockKey.DATA);
 
     if (statBlock == null) return "";
-    else return (String) statBlock;
+    else return statBlock;
   }
 
   public String getStatBlock_text() {
@@ -296,7 +326,7 @@ public class HeroLabData {
         portfolioPath = "";
       }
     } else {
-      portfolioPath = portfolioFile.getPath().toString();
+      portfolioPath = portfolioFile.getPath();
     }
   }
 
@@ -406,9 +436,7 @@ public class HeroLabData {
   }
 
   public MD5Key getHandoutImage() {
-    if (heroImageAssets.containsKey(DefaultAssetKey.HANDOUT_KEY))
-      return heroImageAssets.get(DefaultAssetKey.HANDOUT_KEY);
-    else return null;
+    return heroImageAssets.getOrDefault(DefaultAssetKey.HANDOUT_KEY, null);
   }
 
   public void setHandoutImage(MD5Key imageAsset) {

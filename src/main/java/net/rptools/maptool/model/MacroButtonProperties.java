@@ -15,10 +15,7 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.text.JTextComponent;
@@ -36,6 +33,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This (data)class is used by all Macro Buttons, including campaign, global and token macro
@@ -76,7 +74,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private String fontSize;
   private String minWidth;
   private String maxWidth;
-  private Boolean allowPlayerEdits = true;
+  private Boolean allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
   private String toolTip;
   private Boolean displayHotKey = true;
 
@@ -96,6 +94,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String fontSize,
       String minWidth,
       String maxWidth,
+      boolean allowPlayerEdits,
       String toolTip,
       boolean displayHotKey) {
     setIndex(index);
@@ -115,7 +114,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setButton(null);
     setTokenId((GUID) null);
     setSaveLocation("");
-    setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setAllowPlayerEdits(allowPlayerEdits);
     setDisplayHotKey(displayHotKey);
     setCompareGroup(true);
     setCompareSortPrefix(true);
@@ -126,10 +125,42 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setToolTip(toolTip);
   }
 
+  // exact copy constructor (including UUID!)
+  public MacroButtonProperties(MacroButtonProperties other) {
+    macroUUID = other.macroUUID; // IMPORTANT
+    setCommonMacro(other.commonMacro);
+    setIndex(other.index);
+    setColorKey(other.colorKey);
+    setHotKey(other.hotKey);
+    setCommand(other.command);
+    setLabel(other.label);
+    setGroup(other.group);
+    setSortby(other.sortby);
+    setAutoExecute(other.autoExecute);
+    setIncludeLabel(other.includeLabel);
+    setApplyToTokens(other.applyToTokens);
+    setFontColorKey(other.fontColorKey);
+    setFontSize(other.fontSize);
+    setMinWidth(other.minWidth);
+    setMaxWidth(other.maxWidth);
+    setButton(other.button);
+    setTokenId(other.tokenId);
+    setSaveLocation(other.saveLocation);
+    setAllowPlayerEdits(other.allowPlayerEdits);
+    setDisplayHotKey(other.displayHotKey);
+    setCompareGroup(other.compareGroup);
+    setCompareSortPrefix(other.compareSortPrefix);
+    setCompareCommand(other.compareCommand);
+    setCompareIncludeLabel(other.compareIncludeLabel);
+    setCompareAutoExecute(other.compareAutoExecute);
+    setCompareApplyToSelectedTokens(other.compareApplyToSelectedTokens);
+    setToolTip(other.toolTip);
+  }
+
   // constructor that creates a new instance, doesn't auto save
   public MacroButtonProperties(int index) {
     setIndex(index);
-    setColorKey("");
+    setColorKey("default");
     setHotKey(MacroButtonHotKeyManager.HOTKEYS[0]);
     setCommand("");
     setLabel("(new)");
@@ -191,8 +222,29 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     save();
   }
 
-  // constructor for creating a new copy of an existing button, auto-saves
+  /**
+   * Creates a copy of an existing button on the designated panel. Auto-saves.
+   *
+   * @param panelClass the panel name where the new button is being created
+   * @param index the next index to use on the panel
+   * @param properties the properties from which to copy
+   */
   public MacroButtonProperties(String panelClass, int index, MacroButtonProperties properties) {
+    this(panelClass, index, properties, true);
+  }
+
+  /**
+   * Creates a copy of an existing button on the designated panel. Optionally auto-saves. Auto-save
+   * should be requested unless multiple buttons are being created at once, and the intention is to
+   * save in bulk.
+   *
+   * @param panelClass the panel name where the new button is being created
+   * @param index the next index to use on the panel
+   * @param properties the properties from which to copy
+   * @param autoSave whether to automatically call {@link #save()}
+   */
+  public MacroButtonProperties(
+      String panelClass, int index, MacroButtonProperties properties, boolean autoSave) {
     this(index);
     setSaveLocation(panelClass);
     setColorKey(properties.getColorKey());
@@ -218,7 +270,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setCompareCommand(properties.getCompareCommand());
     String tt = properties.getToolTip();
     setToolTip(tt);
-    save();
+    if (autoSave) {
+      save();
+    }
   }
 
   /**
@@ -349,16 +403,16 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (saveLocation.equals("Token") && tokenId != null) {
       Token token = getToken();
       if (token != null) {
-        token.saveMacroButtonProperty(this);
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.saveMacro, this);
       } else {
         MapTool.showError(I18N.getText("msg.error.macro.buttonNullToken", getLabel(), tokenId));
       }
     } else if (saveLocation.equals("GlobalPanel")) {
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
-      MapTool.getCampaign().saveMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, false);
     } else if (saveLocation.equals("GmPanel")) {
-      MapTool.getCampaign().saveGmMacroButtonProperty(this);
+      MapTool.getCampaign().saveMacroButtonProperty(this, true);
     }
   }
 
@@ -372,7 +426,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
    * for the duration of the macro barring any use of the <b>token()</b> or <b>switchToken()</b>
    * roll options inside the macro itself.
    *
-   * @param tokenList
+   * @param tokenList tokens to execute macro on
    */
   public void executeMacro(Collection<Token> tokenList) {
     if (tokenList == null || tokenList.size() == 0) {
@@ -380,10 +434,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     } else if (commonMacro) {
       executeCommonMacro(tokenList);
     } else {
-      if (tokenList.size() > 0) {
-        for (Token token : tokenList) {
-          executeCommand(token.getId());
-        }
+      for (Token token : tokenList) {
+        executeCommand(token.getId());
       }
     }
   }
@@ -393,11 +445,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
      * This is actually one of the "common macro" buttons that are on the selection panel so we need to handle this case a little differently. If apply to all tokens is checked by the user then we
      * need to check that the command is part of the common values otherwise it would cause unexpected things to occur.
      */
-    if (applyToTokens) {
-      if (!compareCommand) {
-        MapTool.showError("msg.error.cantApplyMacroToSelected");
-        return;
-      }
+    if (applyToTokens && (!compareCommand)) {
+      MapTool.showError("msg.error.cantApplyMacroToSelected");
+      return;
     }
 
     if (compareCommand) {
@@ -432,10 +482,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String oldText = commandArea.getText();
 
       if (getIncludeLabel()) {
-        String commandToExecute = getLabel();
-        commandArea.setText(impersonatePrefix + commandToExecute);
-
-        MapTool.getFrame().getCommandPanel().commitCommand();
+        MapTool.getFrame().getCommandPanel().commitCommand(impersonatePrefix + getLabel());
       }
 
       String commandsToExecute[] = parseMultiLineCommand(getCommand());
@@ -446,7 +493,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String loc;
       for (String command : commandsToExecute) {
         // If we aren't auto execute, then append the text instead of replace it
-        commandArea.setText(impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command);
+        command = impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command;
         if (getAutoExecute()) {
           boolean trusted = false;
           if (allowPlayerEdits == null) {
@@ -477,7 +524,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             loc = MapToolLineParser.CHAT_INPUT;
           }
           MapToolMacroContext newMacroContext = new MapToolMacroContext(label, loc, trusted, index);
-          MapTool.getFrame().getCommandPanel().commitCommand(newMacroContext);
+          MapTool.getFrame().getCommandPanel().commitCommand(command, newMacroContext);
+        } else {
+          commandArea.setText(command);
         }
       }
       commandArea.requestFocusInWindow();
@@ -783,6 +832,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     fontSize = "";
     minWidth = "";
     maxWidth = "";
+    allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
     toolTip = "";
   }
 
@@ -810,36 +860,34 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (index != that.index) {
       return false;
     }
-    if (colorKey != null ? !colorKey.equals(that.colorKey) : that.colorKey != null) {
+    if (!Objects.equals(colorKey, that.colorKey)) {
       return false;
     }
-    if (command != null ? !command.equals(that.command) : that.command != null) {
+    if (!Objects.equals(command, that.command)) {
       return false;
     }
-    if (hotKey != null ? !hotKey.equals(that.hotKey) : that.hotKey != null) {
+    if (!Objects.equals(hotKey, that.hotKey)) {
       return false;
     }
-    if (label != null ? !label.equals(that.label) : that.label != null) {
+    if (!Objects.equals(label, that.label)) {
       return false;
     }
-    if (group != null ? !group.equals(that.group) : that.group != null) {
+    if (!Objects.equals(group, that.group)) {
       return false;
     }
-    if (sortby != null ? !sortby.equals(that.sortby) : that.sortby != null) {
+    if (!Objects.equals(sortby, that.sortby)) {
       return false;
     }
-    if (fontColorKey != null
-        ? !fontColorKey.equals(that.fontColorKey)
-        : that.fontColorKey != null) {
+    if (!Objects.equals(fontColorKey, that.fontColorKey)) {
       return false;
     }
-    if (fontSize != null ? !fontSize.equals(that.fontSize) : that.fontSize != null) {
+    if (!Objects.equals(fontSize, that.fontSize)) {
       return false;
     }
-    if (minWidth != null ? !minWidth.equals(that.minWidth) : that.minWidth != null) {
+    if (!Objects.equals(minWidth, that.minWidth)) {
       return false;
     }
-    if (maxWidth != null ? !maxWidth.equals(that.maxWidth) : that.maxWidth != null) {
+    if (!Objects.equals(maxWidth, that.maxWidth)) {
       return false;
     }
 
@@ -883,7 +931,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   // function to enable sorting of buttons; uses the group first, then sortby field
   // concatenated with the label field. Case Insensitive
-  public int compareTo(MacroButtonProperties b2) throws ClassCastException {
+  public int compareTo(@NotNull MacroButtonProperties b2) throws ClassCastException {
     if (b2 != this) {
       String b1group = getGroup();
       if (b1group == null) b1group = "";
@@ -925,7 +973,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   // function found at http://www.rgagnon.com/javadetails/java-0448.html
   // to pad a string by inserting additional characters
   public static String paddingString(String s, int n, char c, boolean paddingLeft) {
-    StringBuffer str = new StringBuffer(s);
+    StringBuilder str = new StringBuilder(s);
     int strLength = str.length();
     if (n > 0 && n > strLength) {
       for (int i = 0; i <= n; i++) {
@@ -1007,28 +1055,28 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   public static void fixOldMacroCompare(MacroButtonProperties oldMacro) {
     if (oldMacro.getCommonMacro() == null) {
-      oldMacro.setCommonMacro(new Boolean(true));
+      oldMacro.setCommonMacro(Boolean.TRUE);
     }
     if (oldMacro.getAllowPlayerEdits() == null) {
-      oldMacro.setAllowPlayerEdits(new Boolean(true));
+      oldMacro.setAllowPlayerEdits(Boolean.TRUE);
     }
     if (oldMacro.getCompareApplyToSelectedTokens() == null) {
-      oldMacro.setCompareApplyToSelectedTokens(new Boolean(true));
+      oldMacro.setCompareApplyToSelectedTokens(Boolean.TRUE);
     }
     if (oldMacro.getCompareAutoExecute() == null) {
-      oldMacro.setCompareAutoExecute(new Boolean(true));
+      oldMacro.setCompareAutoExecute(Boolean.TRUE);
     }
     if (oldMacro.getCompareCommand() == null) {
-      oldMacro.setCompareCommand(new Boolean(true));
+      oldMacro.setCompareCommand(Boolean.TRUE);
     }
     if (oldMacro.getCompareGroup() == null) {
-      oldMacro.setCompareGroup(new Boolean(true));
+      oldMacro.setCompareGroup(Boolean.TRUE);
     }
     if (oldMacro.getCompareIncludeLabel() == null) {
-      oldMacro.setCompareIncludeLabel(new Boolean(true));
+      oldMacro.setCompareIncludeLabel(Boolean.TRUE);
     }
     if (oldMacro.getCompareSortPrefix() == null) {
-      oldMacro.setCompareSortPrefix(new Boolean(true));
+      oldMacro.setCompareSortPrefix(Boolean.TRUE);
     }
   }
 
@@ -1052,7 +1100,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (compareIncludeLabel == null) compareIncludeLabel = true;
     if (compareAutoExecute == null) compareAutoExecute = true;
     if (compareApplyToSelectedTokens == null) compareApplyToSelectedTokens = true;
-    if (allowPlayerEdits == null) allowPlayerEdits = true;
+    if (allowPlayerEdits == null)
+      allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
     return this;
   }
 }

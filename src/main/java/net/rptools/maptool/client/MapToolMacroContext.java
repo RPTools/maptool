@@ -27,6 +27,9 @@ public class MapToolMacroContext {
   /** The index of the button that was clicked on to fire of this macro */
   private int macroButtonIndex;
 
+  /** Use tooltips for unformatted roles */
+  private boolean useToolTipsForUnformatedRolls = MapTool.useToolTipsForUnformatedRolls();
+
   /**
    * Creates a new Macro Context.
    *
@@ -87,5 +90,14 @@ public class MapToolMacroContext {
    */
   public int getMacroButtonIndex() {
     return macroButtonIndex;
+  }
+
+  /**
+   * Use tooltips for unformatted rolls
+   *
+   * @return whether to use tooltips
+   */
+  public boolean isUseToolTipsForUnformatedRolls() {
+    return useToolTipsForUnformatedRolls;
   }
 }

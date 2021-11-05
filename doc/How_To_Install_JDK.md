@@ -1,6 +1,10 @@
 How to Install Java Development Kit (JDK)
 =======================
 
+See [the Contributor Setup page](https://github.com/RPTools/maptool/wiki/Contributor-Setup-Instructions-For-MapTool) for instructions on installing the appropriate JDK.
+
+**The following only applies to older MT versions.**
+ 
 You will need to install a Java Development Kit in order to build MapTool from source.  At the time of writing, MapTool 1.5 is built against Java JDK 10. Neither older nor newer Java versions will work.  Only 64-bit builds are supported.
 
 Install Java SE Development Kit 10

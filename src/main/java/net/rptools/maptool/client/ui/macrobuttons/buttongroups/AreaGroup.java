@@ -146,7 +146,7 @@ public class AreaGroup extends AbstractButtonGroup {
   public void mouseReleased(MouseEvent event) {
     Token token = getToken();
     if (SwingUtilities.isRightMouseButton(event)) {
-      if (getPanelClass() == "CampaignPanel" && !MapTool.getPlayer().isGM()) {
+      if ("CampaignPanel".equals(getPanelClass()) && !MapTool.getPlayer().isGM()) {
         return;
       }
       // open button group menu

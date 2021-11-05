@@ -28,6 +28,7 @@ import javax.swing.border.TitledBorder;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.language.I18N;
 
 /*
  * A File chooser with an image preview panel
@@ -83,7 +84,12 @@ public class PreviewPanelFileChooser extends JFileChooser {
           BorderFactory.createCompoundBorder(
               BorderFactory.createEmptyBorder(0, 5, 0, 0),
               BorderFactory.createTitledBorder(
-                  null, "Preview", TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM, null, null)));
+                  null,
+                  I18N.getText("Label.preview"),
+                  TitledBorder.CENTER,
+                  TitledBorder.BELOW_BOTTOM,
+                  null,
+                  null)));
       previewWrapperPanel.setLayout(gridLayout);
       previewWrapperPanel.add(getPreviewPanel(), null);
     }

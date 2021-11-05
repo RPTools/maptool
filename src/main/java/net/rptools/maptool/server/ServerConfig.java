@@ -17,6 +17,7 @@ package net.rptools.maptool.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;
+import net.rptools.maptool.util.PasswordGenerator;
 
 public class ServerConfig {
   public static final int DEFAULT_PORT = 51234;
@@ -24,24 +25,56 @@ public class ServerConfig {
   public static final int PORT_RANGE_START = 4000;
   public static final int PORT_RANGE_END = 20000;
 
+  private static final String personalServerGMPassword;
+
+  private static final String personalServerPlayerPassword;
+
+  static {
+    PasswordGenerator passwordGenerator = new PasswordGenerator();
+    // Generate a random password for personal server
+    personalServerGMPassword = passwordGenerator.getPassword();
+    String playerPass = passwordGenerator.getPassword();
+    if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
+      personalServerPlayerPassword = playerPass + "!";
+    } else {
+      personalServerPlayerPassword = playerPass;
+    }
+  }
+
   private int port;
   private String hostPlayerId;
-  private String gmPassword;
-  private String playerPassword;
+  private final String gmPassword;
+  private final String playerPassword;
   private boolean personalServer;
   private String serverName;
+  private String hostName;
+
+  public static String getPersonalServerGMPassword() {
+    return personalServerGMPassword;
+  }
+
+  public static String getPersonalServerPlayerPassword() {
+    return personalServerPlayerPassword;
+  }
 
   public ServerConfig() {
-    /* no op */
+    playerPassword = getPersonalServerPlayerPassword();
+    gmPassword = getPersonalServerGMPassword();
   }
 
   public ServerConfig(
-      String hostPlayerId, String gmPassword, String playerPassword, int port, String serverName) {
+      String hostPlayerId,
+      String gmPassword,
+      String playerPassword,
+      int port,
+      String serverName,
+      String hostName) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
+    this.hostName = hostName;
   }
 
   public String getHostPlayerId() {
@@ -74,9 +107,22 @@ public class ServerConfig {
 
   public static ServerConfig createPersonalServerConfig() {
     ServerConfig config = new ServerConfig();
+    config.hostName = "localhost";
     config.personalServer = true;
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
     return config;
+  }
+
+  public String getGmPassword() {
+    return gmPassword;
+  }
+
+  public String getPlayerPassword() {
+    return playerPassword;
+  }
+
+  public String getHostName() {
+    return hostName;
   }
 
   private static Random r = new Random();

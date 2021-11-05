@@ -42,12 +42,8 @@ public class AssetProducer {
     length = assetFile.length();
   }
 
-  /**
-   * Get the header needed to create the corresponding AssetConsumer
-   *
-   * @throws IOException
-   */
-  public AssetHeader getHeader() throws IOException {
+  /** @return the header needed to create the corresponding AssetConsumer */
+  public AssetHeader getHeader() {
     return new AssetHeader(id, name, assetFile.length());
   }
 
@@ -55,24 +51,27 @@ public class AssetProducer {
    * Get the next chunk of data
    *
    * @param size how many bytes to grab, may end up being less if there isn't enough data
-   * @throws IOException
+   * @throws IOException if an I/O error occurs or current position in the file is wrong
+   * @return an {@link AssetChunk} with the next chunk of data
    */
   public AssetChunk nextChunk(int size) throws IOException {
     if (currentPosition + size > length) {
       size = (int) (length - currentPosition);
     }
     byte[] data = new byte[size];
-    FileInputStream in = new FileInputStream(assetFile);
-
-    in.skip(currentPosition);
-    in.read(data, 0, size);
-    in.close();
-
+    try (FileInputStream in = new FileInputStream(assetFile)) {
+      in.skip(currentPosition);
+      in.read(data, 0, size);
+    }
     currentPosition += size;
     return new AssetChunk(id, data);
   }
 
-  /** Whether all the data has been transferred */
+  /**
+   * Whether all the data has been transferred
+   *
+   * @return true if all data been transferred
+   */
   public boolean isComplete() {
     return currentPosition >= length;
   }

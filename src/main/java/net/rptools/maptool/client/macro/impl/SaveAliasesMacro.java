@@ -17,6 +17,7 @@ package net.rptools.maptool.client.macro.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ public class SaveAliasesMacro implements Macro {
       }
       aliasFile = chooser.getSelectedFile();
     }
-    if (aliasFile.getName().indexOf(".") < 0) {
+    if (!aliasFile.getName().contains(".")) {
       aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
     }
     if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) {
@@ -69,8 +70,7 @@ public class SaveAliasesMacro implements Macro {
           .append("\n\n");
 
       Map<String, String> aliasMap = MacroManager.getAliasMap();
-      List<String> aliasList = new ArrayList<String>();
-      aliasList.addAll(aliasMap.keySet());
+      List<String> aliasList = new ArrayList<String>(aliasMap.keySet());
       Collections.sort(aliasList);
       for (String key : aliasList) {
         String value = aliasMap.get(key);
@@ -81,7 +81,8 @@ public class SaveAliasesMacro implements Macro {
             .append("\n"); // LATER: this character should be externalized and shared with the load
         // alias macro
       }
-      FileUtils.writeByteArrayToFile(aliasFile, builder.toString().getBytes("UTF-8"));
+      FileUtils.writeByteArrayToFile(
+          aliasFile, builder.toString().getBytes(StandardCharsets.UTF_8));
 
       MapTool.addLocalMessage(I18N.getText("aliases.saved"));
     } catch (FileNotFoundException fnfe) {

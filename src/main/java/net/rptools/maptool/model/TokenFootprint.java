@@ -16,10 +16,8 @@ package net.rptools.maptool.model;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import net.rptools.maptool.language.I18N;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -33,6 +31,7 @@ public class TokenFootprint {
   private GUID id;
   private boolean isDefault;
   private double scale = 1;
+  private boolean localizeName = false;
 
   private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
@@ -45,14 +44,12 @@ public class TokenFootprint {
     id = new GUID();
     this.isDefault = isDefault;
     this.scale = scale;
-    for (Point p : points) {
-      cellSet.add(p);
-    }
+    cellSet.addAll(Arrays.asList(points));
   }
 
   @Override
   public String toString() {
-    return name;
+    return getLocalizedName();
   }
 
   public void addOffsetTranslator(OffsetTranslator translator) {
@@ -92,7 +89,16 @@ public class TokenFootprint {
     return id;
   }
 
+  /** Returns the English name of the footprint */
   public String getName() {
+    return name;
+  }
+
+  /** Returns the localized name of the footprint */
+  public String getLocalizedName() {
+    if (localizeName) {
+      return I18N.getString("TokenFootprint.name." + name.toLowerCase());
+    }
     return name;
   }
 
@@ -110,6 +116,7 @@ public class TokenFootprint {
    * @param grid the {@link Grid} that the footprint corresponds to
    * @param cell origin cell of this footprint; <code>null</code> means that <code>(0,0)</code> will
    *     be used
+   * @return the bounding rectangle that bounds the footprint
    */
   public Rectangle getBounds(Grid grid, CellPoint cell) {
     cell = cell != null ? cell : new CellPoint(0, 0);
@@ -118,8 +125,7 @@ public class TokenFootprint {
     for (CellPoint cp : getOccupiedCells(cell)) {
       bounds.add(grid.getBounds(cp));
     }
-    bounds.x += grid.getOffsetX();
-    bounds.y += grid.getOffsetY();
+
     return bounds;
   }
 
@@ -129,6 +135,11 @@ public class TokenFootprint {
       return false;
     }
     return ((TokenFootprint) obj).id.equals(id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name);
   }
 
   private Object readResolve() {

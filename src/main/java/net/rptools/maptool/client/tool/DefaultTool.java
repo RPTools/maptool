@@ -17,6 +17,7 @@ package net.rptools.maptool.client.tool;
 import java.awt.dnd.DragSource;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
@@ -29,6 +30,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.ViewMovementKey;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.TokenUtil;
 
@@ -79,16 +81,65 @@ public abstract class DefaultTool extends Tool
     return renderer.getZone();
   }
 
+  @Override
+  protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
+    super.installKeystrokes(actionMap);
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, -1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, 1));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, -1));
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, -1, 0));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, 1));
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK),
+        new ViewMovementKey(this, 0, -1));
+
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), new FlipTokenHorizontalActionListener());
+    actionMap.put(
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
+        new FlipTokenVerticalActionListener());
+  }
+
   ////
   // Mouse
+  @Override
   public void mousePressed(MouseEvent e) {
     // Potential map dragging
     if (SwingUtilities.isRightMouseButton(e)) {
-      dragStartX = e.getX();
-      dragStartY = e.getY();
+      setDragStart(e.getX(), e.getY());
     }
   }
 
+  /**
+   * Set the location of the start of the drag
+   *
+   * @param x the x coordinate of the drag start
+   * @param y the y coordinate of the drag start
+   */
+  public void setDragStart(int x, int y) {
+    dragStartX = x;
+    dragStartY = y;
+  }
+
+  @Override
   public void mouseReleased(MouseEvent e) {
     if (isDraggingMap && isRightMouseButton(e)) {
       renderer.maybeForcePlayersView();
@@ -97,11 +148,17 @@ public abstract class DefaultTool extends Tool
     isDraggingMap = false;
   }
 
+  /** @param isDraggingMap whether the user drags the map */
+  void setDraggingMap(boolean isDraggingMap) {
+    this.isDraggingMap = isDraggingMap;
+  }
+
   /*
    * (non-Javadoc)
    *
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseClicked(MouseEvent e) {}
 
   /*
@@ -109,6 +166,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseEntered(MouseEvent e) {}
 
   /*
@@ -116,6 +174,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseExited(MouseEvent e) {}
 
   ////
@@ -125,6 +184,7 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
    */
+  @Override
   public void mouseMoved(MouseEvent e) {
     if (renderer == null) {
       return;
@@ -141,6 +201,7 @@ public abstract class DefaultTool extends Tool
     }
   }
 
+  @Override
   public void mouseDragged(MouseEvent e) {
     int mX = e.getX();
     int mY = e.getY();
@@ -160,8 +221,7 @@ public abstract class DefaultTool extends Tool
         isDraggingMap = true;
       }
 
-      dragStartX = mX;
-      dragStartY = mY;
+      setDragStart(mX, mY);
 
       long now = System.currentTimeMillis();
       if (now - lastMoveRedraw > REDRAW_DELAY) {
@@ -176,8 +236,13 @@ public abstract class DefaultTool extends Tool
     }
   }
 
+  public void moveViewByCells(int dx, int dy) {
+    renderer.moveViewByCells(dx, dy);
+  }
+
   ////
   // Mouse Wheel
+  @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
     // Fix for High Resolution Mouse Wheels
     if (e.getWheelRotation() == 0) {
@@ -270,7 +335,6 @@ public abstract class DefaultTool extends Tool
 
         token.setFacing(facing);
 
-        renderer.flush(token);
         MapTool.serverCommand().putToken(getZone().getId(), token);
       }
 
@@ -279,8 +343,8 @@ public abstract class DefaultTool extends Tool
     }
     // ZOOM
     if (!AppState.isZoomLocked()) {
-      boolean direction = e.getWheelRotation() > 0;
-      direction = isKeyDown('z') ? !direction : direction;
+      boolean direction = e.getWheelRotation() < 0;
+      direction = isKeyDown('z') == direction; // XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {
@@ -316,5 +380,39 @@ public abstract class DefaultTool extends Tool
    */
   public boolean isMiddleMouseButton(MouseEvent event) {
     return SwingUtilities.isMiddleMouseButton(event);
+  }
+
+  private class FlipTokenHorizontalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892136L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null && AppUtil.playerOwns(token)) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipX);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
+  }
+
+  private class FlipTokenVerticalActionListener extends AbstractAction {
+    private static final long serialVersionUID = -6286351028470892137L;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      renderer
+          .getSelectedTokensList()
+          .forEach(
+              token -> {
+                if (token != null && AppUtil.playerOwns(token)) {
+                  MapTool.serverCommand().updateTokenProperty(token, Token.Update.flipY);
+                }
+              });
+      MapTool.getFrame().refresh();
+    }
   }
 }

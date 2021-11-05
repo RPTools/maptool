@@ -78,7 +78,7 @@ public class SetTokenPropertyMacro implements Macro {
     for (Token token : selectedTokenSet) {
       for (String command : commands) {
         try {
-          MapTool.getParser().parseExpression(token, command);
+          MapTool.getParser().parseExpression(token, command, false);
         } catch (ParserException e) {
           MapTool.addLocalMessage(I18N.getText("msg.error.evaluatingExpr", e.getMessage()));
           break;

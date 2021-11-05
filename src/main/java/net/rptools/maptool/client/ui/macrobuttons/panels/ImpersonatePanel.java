@@ -15,12 +15,11 @@
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
 import com.jidesoft.docking.DockableFrame;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
+import javax.swing.*;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -28,7 +27,10 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone.Event;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -48,9 +50,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
       if (impersonatePanel != null)
         panelVisible =
             (impersonatePanel.isVisible() && !impersonatePanel.isAutohide())
-                    || impersonatePanel.isAutohideShowing()
-                ? true
-                : false;
+                || impersonatePanel.isAutohideShowing();
     }
     // Only repaint the panel if its visible
     if (panelVisible && mtf != null && mtf.getCurrentZoneRenderer() != null) {
@@ -59,7 +59,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
       if (currentlyImpersonating && getToken() != null) {
         Token token = getToken();
         mtf.getFrame(MTFrame.IMPERSONATED).setFrameIcon(token.getIcon(16, 16));
-        mtf.getFrame(MTFrame.IMPERSONATED).setTitle(getTitle(token));
+        mtf.setFrameTitle(MTFrame.IMPERSONATED, getTitle(token));
         addArea(getTokenId());
       } else if (selectedTokenList.size() != 1) {
         return;
@@ -82,7 +82,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
               new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent event) {
-                  MapTool.getFrame().getCommandPanel().quickCommit("/im " + t.getId(), false);
+                  MapTool.getFrame().getCommandPanel().commitCommand("/im " + t.getId());
                 }
               });
           button.setBackground(null);
@@ -124,7 +124,9 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
         .setFrameIcon(new ImageIcon(AppStyle.impersonatePanelImage));
-    MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setTitle(Tab.IMPERSONATED.title);
+    MapTool.getFrame()
+        .setFrameTitle(
+            MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));
     if (getTokenId() == null) {
       currentlyImpersonating = false;
     }
@@ -137,6 +139,46 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  /** Resets the panel only if no token is impersonated. */
+  public void resetIfNotImpersonating() {
+    if (!currentlyImpersonating || getToken() == null) {
+      reset();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
+      // Only resets if the impersonated token is among those changed/deleted
+      if (isImpersonatedAmongList(event.getTokensAsList())) {
+        reset();
+      }
+    }
+  }
+
+  private boolean isTokenImpersonated(Token token) {
+    return token != null && getTokenId() != null && token.getId().equals(getTokenId());
+  }
+
+  private boolean isImpersonatedAmongList(List<Token> list) {
+    for (Token token : list) {
+      if (isTokenImpersonated(token)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* this is not going to be called for this panel */
+    return null;
   }
 
   /**
@@ -157,7 +199,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
         new MouseAdapter() {
           @Override
           public void mouseClicked(MouseEvent event) {
-            MapTool.getFrame().getCommandPanel().quickCommit("/im");
+            MapTool.getFrame().getCommandPanel().commitCommand("/im");
           }
         });
     button.setBackground(null);

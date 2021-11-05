@@ -161,8 +161,7 @@ public class ImagePanel extends JComponent
   }
 
   public List<Object> getSelectedIds() {
-    List<Object> list = new ArrayList<Object>();
-    list.addAll(selectedIDList);
+    List<Object> list = new ArrayList<Object>(selectedIDList);
     return list;
   }
 
@@ -259,8 +258,7 @@ public class ImagePanel extends JComponent
       // Selected
       if (selectedIDList.contains(model.getID(i))) {
         // TODO: Let the user pick the border
-        ImageBorder.RED.paintAround(
-            (Graphics2D) g, bounds.x, bounds.y, bounds.width, bounds.height);
+        ImageBorder.RED.paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
       }
       // Decorations
       Image[] decorations = model.getDecorations(i);
@@ -324,8 +322,8 @@ public class ImagePanel extends JComponent
    * Go through the image bounds map to see if any of the entries encompass the passed in X,Y values
    * and return the index.
    *
-   * @param x
-   * @param y
+   * @param x the x value
+   * @param y the y value
    * @return the index or -1 if not found
    */
   protected int getIndex(int x, int y) {
@@ -340,8 +338,8 @@ public class ImagePanel extends JComponent
   /**
    * Get the ID for the image currently displayed at X,Y
    *
-   * @param x
-   * @param y
+   * @param x the x value
+   * @param y the y value
    * @return Asset ID or null if no selection
    */
   protected Object getImageIDAt(int x, int y) {
@@ -354,8 +352,8 @@ public class ImagePanel extends JComponent
 
   protected void fireSelectionEvent() {
     List<Object> selectionList = Collections.unmodifiableList(selectedIDList);
-    for (int i = 0; i < selectionListenerList.size(); i++) {
-      selectionListenerList.get(i).selectionPerformed(selectionList);
+    for (SelectionListener selectionListener : selectionListenerList) {
+      selectionListener.selectionPerformed(selectionList);
     }
   }
 
@@ -394,7 +392,8 @@ public class ImagePanel extends JComponent
     if (width < gridSize + gridPadding.width * 2) {
       rowCount = model.getImageCount();
     } else {
-      rowCount = model.getImageCount() / (width / itemWidth);
+      int itemsPerRow = width / itemWidth;
+      rowCount = (int) Math.ceil(model.getImageCount() / (float) itemsPerRow);
     }
     int height = rowCount * itemHeight;
     return new Dimension(width, height);
@@ -406,9 +405,9 @@ public class ImagePanel extends JComponent
   }
 
   protected int getImageIndexAt(int x, int y) {
-    for (Rectangle rect : imageBoundsMap.keySet()) {
-      if (rect.contains(x, y)) {
-        return imageBoundsMap.get(rect);
+    for (var imageBounds : imageBoundsMap.entrySet()) {
+      if (imageBounds.getKey().contains(x, y)) {
+        return imageBounds.getValue();
       }
     }
     return -1;

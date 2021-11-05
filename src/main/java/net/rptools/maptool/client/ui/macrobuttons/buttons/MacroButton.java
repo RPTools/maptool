@@ -240,11 +240,11 @@ public class MacroButton extends JButton implements MouseListener {
     if (SwingUtil.isShiftDown(event) || getProperties().getApplyToTokens()) {
       MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(selectedTokens);
     } else {
-      if (getPanelClass() == "SelectionPanel") {
+      if ("SelectionPanel".equals(getPanelClass())) {
         List<Token> affectedTokens = new ArrayList<Token>();
         if (getProperties().getCommonMacro()) {
           for (Token nextSelected : selectedTokens) {
-            Boolean isCommonToToken = false;
+            boolean isCommonToToken = false;
             for (MacroButtonProperties nextMacro : nextSelected.getMacroList(true)) {
               if (nextMacro.hashCodeForComparison() == getProperties().hashCodeForComparison()) {
                 isCommonToToken = true;
@@ -272,7 +272,8 @@ public class MacroButton extends JButton implements MouseListener {
   private void makeDraggable(Cursor cursor) {
     dragSource = DragSource.getDefaultDragSource();
     dgListener = new DGListener(cursor);
-    dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, dgListener);
+    dragSource.createDefaultDragGestureRecognizer(
+        this, DnDConstants.ACTION_COPY_OR_MOVE, dgListener);
     dsListener = new DSListener();
   }
 
@@ -285,7 +286,11 @@ public class MacroButton extends JButton implements MouseListener {
     }
 
     public void dragGestureRecognized(DragGestureEvent dge) {
-      Transferable t = new TransferableMacroButton(MacroButton.this);
+      Transferable t =
+          new TransferableMacroButton(
+              MacroButton.this,
+              dge.getTriggerEvent().getModifiersEx(),
+              System.identityHashCode(panel));
       dge.startDrag(cursor, t, dsListener);
     }
   }

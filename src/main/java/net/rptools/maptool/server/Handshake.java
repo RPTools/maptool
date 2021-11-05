@@ -14,107 +14,68 @@
  */
 package net.rptools.maptool.server;
 
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
-import java.io.IOException;
-import java.net.Socket;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import java.util.concurrent.ExecutionException;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.maptool.model.player.Player;
 
-/** @author trevor */
-public class Handshake {
+public interface Handshake extends MessageHandler {
 
-  public interface Code {
-    public static final int UNKNOWN = 0;
-    public static final int OK = 1;
-    public static final int ERROR = 2;
-  }
+  /**
+   * Returns if the handshake has been successful or not.
+   *
+   * @return {@code true} if the handshake has been successful, {code false} if it has failed or is
+   *     still in progress.
+   */
+  boolean isSuccessful();
 
-  /** Server side of the handshake */
-  public static Player receiveHandshake(MapToolServer server, Socket s) throws IOException {
-    // TODO: remove server config as a param
-    ServerConfig config = server.getConfig();
+  /**
+   * Returns the message for the error -- if any -- that occurred during the handshake.
+   *
+   * @return the message for the error that occurred during handshake.
+   */
+  String getErrorMessage();
 
-    HessianInput input = new HessianInput(s.getInputStream());
-    HessianOutput output = new HessianOutput(s.getOutputStream());
+  /**
+   * Returns the connection for this {@code ServerHandshake}.
+   *
+   * @return the connection for this {@code ServerHandshake}.
+   */
+  ClientConnection getConnection();
 
-    // Jamz: Method renamed in Hessian 4.0.+
-    // output.findSerializerFactory().setAllowNonSerializable(true);
-    output.getSerializerFactory().setAllowNonSerializable(true);
+  /**
+   * Returns the exception -- if any -- that occurred during processing of the handshake.
+   *
+   * @return the exception that occurred during the processing of the handshake.
+   */
+  Exception getException();
 
-    Request request = (Request) input.readObject();
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
+  Player getPlayer();
 
-    Response response = new Response();
-    response.code = Code.OK;
+  /**
+   * Adds an observer to the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void addObserver(HandshakeObserver observer);
 
-    boolean passwordMatches =
-        Player.Role.valueOf(request.role) == Player.Role.GM
-            ? config.gmPasswordMatches(request.password)
-            : config.playerPasswordMatches(request.password);
-    if (!passwordMatches) {
+  /**
+   * Removes an observer from the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void removeObserver(HandshakeObserver observer);
 
-      // PASSWORD
-      response.code = Code.ERROR;
-      response.message = I18N.getString("Handshake.msg.wrongPassword");
-    } else if (server.isPlayerConnected(request.name)) {
-
-      // UNIQUE NAME
-      response.code = Code.ERROR;
-      response.message = I18N.getString("Handshake.msg.duplicateName");
-    } else if (!MapTool.isDevelopment()
-        && !MapTool.getVersion().equals(request.version)
-        && !"DEVELOPMENT".equals(request.version)
-        && !"@buildNumber@".equals(request.version)) {
-      // Allows a version running without a 'version.txt' to act as client or server to any other
-      // version
-
-      // CORRECT VERSION
-      response.code = Code.ERROR;
-      String clientUsed = request.version;
-      String serverUsed = MapTool.getVersion();
-      response.message = I18N.getText("Handshake.msg.wrongVersion", clientUsed, serverUsed);
-    }
-    response.policy = server.getPolicy();
-    output.writeObject(response);
-    return response.code == Code.OK
-        ? new Player(request.name, Player.Role.valueOf(request.role), request.password)
-        : null;
-  }
-
-  /** Client side of the handshake */
-  public static Response sendHandshake(Request request, Socket s) throws IOException {
-    HessianInput input = new HessianInput(s.getInputStream());
-    HessianOutput output = new HessianOutput(s.getOutputStream());
-    // Jamz: Method renamed in Hessian 4.0.+
-    // output.findSerializerFactory().setAllowNonSerializable(true);
-    output.getSerializerFactory().setAllowNonSerializable(true);
-    output.writeObject(request);
-
-    return (Response) input.readObject();
-  }
-
-  public static class Request {
-    public String name;
-    public String password;
-    public String role;
-    public String version;
-
-    public Request() {
-      // for serialization
-    }
-
-    public Request(String name, String password, Player.Role role, String version) {
-      this.name = name;
-      this.password = password;
-      this.role = role.name();
-      this.version = version;
-    }
-  }
-
-  public static class Response {
-    public int code;
-    public String message;
-    public ServerPolicy policy;
-  }
+  /**
+   * Starts the handshake process.
+   *
+   * @throws ExecutionException when there is an exception in the background task.
+   * @throws InterruptedException when the background task is interrupted.
+   */
+  void startHandshake() throws ExecutionException, InterruptedException;
 }

@@ -19,6 +19,7 @@ import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.text.DecimalFormat;
 import javax.swing.JProgressBar;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FileUtil;
 
 /** */
@@ -41,26 +42,25 @@ public class MemoryStatusBar extends JProgressBar {
     setMinimum(0);
     setStringPainted(true);
 
-    // Adjust the minimum size to be big enought for the font used
+    // Adjust the minimum size to be big enough for the font used
     // plus a bit extra padding.
     fm = getFontMetrics(getFont());
     int w = 26 + fm.stringWidth("9.99 MB/9.99 MB");
     int h = 4 + fm.getHeight();
     minSize = new Dimension(w, h);
 
-    new Thread() {
-      @Override
-      public void run() {
-        while (true) {
-          update();
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException ie) {
-            break;
-          }
-        }
-      }
-    }.start();
+    new Thread(
+            () -> {
+              while (true) {
+                update();
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException ie) {
+                  break;
+                }
+              }
+            })
+        .start();
     addMouseListener(
         new MouseAdapter() {
           @Override
@@ -116,12 +116,10 @@ public class MemoryStatusBar extends JProgressBar {
             + FileUtil.byteCountToDisplaySize(totalMemory));
 
     setToolTipText(
-        "Used Memory: "
-            + format.format((totalMemory - freeMemory) / (1024 * 1024))
-            + "M, Total Memory: "
-            + format.format(totalMemory / (1024 * 1024))
-            + "M, Maximum Memory: "
-            + format.format(maxMemory / (1024 * 1024))
-            + "M");
+        I18N.getText(
+            "MemoryStatusBar.tooltip",
+            format.format((totalMemory - freeMemory) / (1024 * 1024)),
+            format.format(totalMemory / (1024 * 1024)),
+            format.format(maxMemory / (1024 * 1024))));
   }
 }

@@ -134,8 +134,6 @@ public class TaskPanel extends JPanel {
 
   private JPanel createTitlePanel(String title) {
 
-    // JPanel panel = new GradientPanel(new Color(0, 0, 100), Color.lightGray, new GridBagLayout())
-    // {
     JPanel panel =
         new JPanel(new GridBagLayout()) {
           @Override

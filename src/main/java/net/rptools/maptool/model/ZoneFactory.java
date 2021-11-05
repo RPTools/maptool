@@ -60,6 +60,7 @@ public class ZoneFactory {
     zone.setHasFog(AppPreferences.getNewMapsHaveFOW());
     zone.setUnitsPerCell(AppPreferences.getDefaultUnitsPerCell());
     zone.setTokenVisionDistance(AppPreferences.getDefaultVisionDistance());
+    zone.setVisionType(AppPreferences.getDefaultVisionType());
 
     zone.setGrid(
         GridFactory.createGrid(

@@ -19,6 +19,7 @@
         <baGUID>fwABAc1lFSoBAAAAKgABAQ==</baGUID>
       </id>
       <scale>0.5</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
@@ -27,6 +28,7 @@
         <baGUID>fwABAc1lFSoCAAAAKgABAQ==</baGUID>
       </id>
       <scale>0.5</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
@@ -35,6 +37,7 @@
         <baGUID>fwABAc5lFSoDAAAAKgABAA==</baGUID>
       </id>
       <scale>0.5</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
@@ -43,6 +46,7 @@
         <baGUID>fwABAc5lFSoEAAAAKgABAA==</baGUID>
       </id>
       <scale>0.75</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet/>
@@ -52,6 +56,7 @@
       </id>
       <scale>1</scale>
       <isDefault>true</isDefault>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -73,6 +78,7 @@
         <baGUID>fwABAdBlFSoGAAAAKgABAA==</baGUID>
       </id>
       <scale>1</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -114,6 +120,7 @@
         <baGUID>fwABAdBlFSoHAAAAKgABAA==</baGUID>
       </id>
       <scale>1</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -183,6 +190,7 @@
         <baGUID>fwABAdFlFSoIAAAAKgABAQ==</baGUID>
       </id>
       <scale>1</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
@@ -332,6 +340,7 @@
         <baGUID>fwABAeFlFSoJAAAAKgABAQ==</baGUID>
       </id>
       <scale>1</scale>
+      <localizeName>true</localizeName>
     </net.rptools.maptool.model.TokenFootprint>
   </a>
 </java.util.Arrays_-ArrayList>

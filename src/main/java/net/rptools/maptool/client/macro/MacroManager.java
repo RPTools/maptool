@@ -19,9 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
-import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.client.functions.AboutMacro;
-import net.rptools.maptool.client.functions.AssertFunction;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -101,8 +100,7 @@ public class MacroManager {
   }
 
   public static Set<Macro> getRegisteredMacros() {
-    Set<Macro> ret = new HashSet<Macro>();
-    ret.addAll(MACROS.values());
+    Set<Macro> ret = new HashSet<Macro>(MACROS.values());
     return ret;
   }
 
@@ -130,6 +128,10 @@ public class MacroManager {
   public static void executeMacro(String command, MapToolMacroContext macroExecutionContext) {
     MacroContext context = new MacroContext();
     context.addTransform(command);
+    String macroButtonName =
+        macroExecutionContext == null
+            ? "chat"
+            : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
 
     try {
       command = preprocess(command);
@@ -140,7 +142,7 @@ public class MacroManager {
         recurseCount++;
 
         command = command.trim();
-        if (command == null || command.length() == 0) {
+        if (command.length() == 0) {
           return;
         }
         if (command.charAt(0) == '/') {
@@ -158,12 +160,7 @@ public class MacroManager {
         Macro macro = getRegisteredMacro(key);
         MacroDefinition def = macro.getClass().getAnnotation(MacroDefinition.class);
 
-        boolean trustedPath =
-            macroExecutionContext == null ? false : macroExecutionContext.isTrusted();
-        String macroButtonName =
-            macroExecutionContext == null
-                ? "<chat>"
-                : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
+        boolean trustedPath = macroExecutionContext != null && macroExecutionContext.isTrusted();
 
         // Preprocess line if required.
         if (def == null || def.expandRolls()) {
@@ -199,14 +196,15 @@ public class MacroManager {
         context.addTransform(command);
         continue;
       }
-    } catch (AbortFunction.AbortFunctionException afe) {
+    } catch (AbortFunctionException | ReturnFunctionException fe) {
       // Do nothing, just silently exit
       return;
-    } catch (AssertFunction.AssertFunctionException afe) {
+    } catch (JavascriptFunctionException | AssertFunctionException afe) {
       MapTool.addLocalMessage(afe.getMessage());
       return;
     } catch (ParserException e) {
-      MapTool.addLocalMessage(e.getMessage());
+      e.addMacro(macroButtonName);
+      MapTool.addErrorMessage(e);
       // These are not errors to worry about as they are usually user input errors so no need to log
       // them.
       return;

@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
 import java.io.Serializable;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 
 public class TransferData implements Serializable {
@@ -29,6 +30,7 @@ public class TransferData implements Serializable {
   public boolean autoExecute = true;
   public boolean includeLabel = false;
   public boolean applyToTokens = true;
+  public boolean allowPlayerEdits = false;
   public String fontColorKey = "";
   public String fontSize = "";
   public String minWidth = "";
@@ -36,8 +38,11 @@ public class TransferData implements Serializable {
   public String panelClass = "";
   public String toolTip = "";
   public boolean displayHotKey = true;
+  public int transferModifiers = 1024;
+  public int panelHashcode = 0;
+  public GUID tokenID = null;
 
-  public TransferData(MacroButton button) {
+  public TransferData(MacroButton button, int modifiers, int buttonPanelHashcode) {
     MacroButtonProperties prop = button.getProperties();
     this.index = prop.getIndex();
     this.label = prop.getLabel();
@@ -49,6 +54,7 @@ public class TransferData implements Serializable {
     this.autoExecute = prop.getAutoExecute();
     this.includeLabel = prop.getIncludeLabel();
     this.applyToTokens = prop.getApplyToTokens();
+    this.allowPlayerEdits = prop.getAllowPlayerEdits();
     this.panelClass = button.getPanelClass();
     this.fontColorKey = prop.getFontColorKey();
     this.fontSize = prop.getFontSize();
@@ -56,5 +62,10 @@ public class TransferData implements Serializable {
     this.maxWidth = prop.getMaxWidth();
     this.toolTip = prop.getToolTip();
     this.displayHotKey = prop.getDisplayHotKey();
+    this.transferModifiers = modifiers;
+    this.panelHashcode = buttonPanelHashcode;
+    if (prop.getToken() != null) {
+      this.tokenID = prop.getToken().getId();
+    }
   }
 }

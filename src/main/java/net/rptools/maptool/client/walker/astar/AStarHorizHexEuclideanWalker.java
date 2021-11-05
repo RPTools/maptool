@@ -47,6 +47,6 @@ public class AStarHorizHexEuclideanWalker extends AbstractAStarHexEuclideanWalke
 
   @Override
   protected int[][] getNeighborMap(int x, int y) {
-    return y % 2 == 0 ? evenNeighborMap : oddNeighborMap;
+    return (y & 1) == 0 ? evenNeighborMap : oddNeighborMap;
   }
 }

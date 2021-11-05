@@ -16,9 +16,11 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractNumberFunction;
 
 /**
@@ -44,27 +46,14 @@ public class AbortFunction extends AbstractNumberFunction implements DefinesSpec
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     BigDecimal value = (BigDecimal) parameters.get(0);
     if (value.intValue() == 0)
       throw new AbortFunctionException(
           I18N.getText("macro.function.abortFunction.message", "Abort()"));
     else return new BigDecimal(value.intValue());
-  }
-
-  /**
-   * Exception type thrown by abort() function. Semantics are to silently halt the current
-   * execution.
-   */
-  public static class AbortFunctionException extends ParserException {
-    public AbortFunctionException(Throwable cause) {
-      super(cause);
-    }
-
-    public AbortFunctionException(String msg) {
-      super(msg);
-    }
   }
 
   @Override

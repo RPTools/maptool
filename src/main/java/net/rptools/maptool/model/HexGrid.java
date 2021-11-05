@@ -18,6 +18,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -27,6 +28,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Set;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
@@ -40,26 +42,13 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  * <p>The v-axis points along the direction of edge to edge hexes
  */
 public abstract class HexGrid extends Grid {
+
   // A regular hexagon is one where all angles are 60 degrees.
   // the ratio = minor_radius / edge_length
   public static final double REGULAR_HEX_RATIO = Math.sqrt(3) / 2;
 
   /** One DirectionCalculator object is shared by all instances of this hex grid class. */
   private static final DirectionCalculator calculator = new DirectionCalculator();
-
-  @Override
-  public boolean isHex() {
-    return true;
-  }
-
-  static {
-    try {
-      pathHighlight =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/hexBorder.png");
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
 
   private static final GridCapabilities GRID_CAPABILITIES =
       new GridCapabilities() {
@@ -83,99 +72,66 @@ public abstract class HexGrid extends Grid {
           return false;
         }
       };
+  protected static BufferedImage pathHighlight;
 
-  static class DirectionCalculator {
-    private static final int NW = 0;
-    private static final int N = 1;
-    private static final int NE = 2;
-    private static final int SE = 3;
-    private static final int S = 4;
-    private static final int SW = 5;
-
-    /**
-     * Given delta movement on the X and Y axes, determine which direction that would be for the
-     * current grid type. Note that horizontal and vertical hex grids will be different.
-     *
-     * @param dirx movement on the X axis
-     * @param diry movement on the Y axis
-     * @return direction being moved
-     */
-    public int getDirection(int dirx, int diry) {
-      int direction = -1;
-      // @formatter:off
-      if (dirx > 0 && diry > 0) direction = NW;
-      if (dirx > 0 && diry < 0) direction = SW;
-      if (dirx < 0 && diry > 0) direction = NE;
-      if (dirx < 0 && diry < 0) direction = SE;
-      if (dirx == 0 && diry > 0) direction = N;
-      if (dirx == 0 && diry < 0) direction = S;
-      // @formatter:on
-      return direction;
+  static {
+    try {
+      pathHighlight =
+          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/hexBorder.png");
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
     }
-
-    /**
-     * Given a particular direction returns the opposite direction. Used for finding the "pie slice"
-     * on the 'other side' of the hex grid cell.
-     *
-     * @param dir one of the constants <code>DirectionCalculator.NW</code> .. <code>
-     *     DirectionCalculator.SW</code> (0..5)
-     * @return
-     */
-    public int oppositeDirection(int dir) {
-      return (dir + 3) % 6;
-    }
-
-    /**
-     * <div style="float: left">Image of a <i>vertical hex</i> grid:<br>
-     * <img src="doc-files/HexGridVertical.png" title="Vertical Hex"> </div> <div>
-     *
-     * <p>Returns a {@link Shape} that can be used to test for exposed fog areas in the direction
-     * specified by <code>dir</code>. Note that <code>dir</code> is the direction from which a token
-     * is entering a grid cell. So if the token is coming from the North, <code>dir</code> should be
-     * Direction.Calculator.N (i.e. "2"). The resulting Shape returned would be the isosceles
-     * triangle that represents one-sixth of the hex in an upward direction. The returned Shape has
-     * its origin at the center of the hex grid cell.
-     *
-     * @param dir direction that the movement is coming from
-     * @return a {@link Shape} representing one slice of the 6-slice pie </div>
-     */
-    public Shape getFogAreaToCheck(int dir) {
-      // pieSlices = null; // debugging -- forces the following IF statement to always be true
-      if (pieSlices == null) {
-        double coords[][] = {
-          {0, 0, -114, 0, -57, -100}, // NW
-          {0, 0, -57, -100, 57, -100}, // N
-          {0, 0, 57, -100, 114, 0}, // NE
-          {0, 0, 114, 0, 57, 100}, // SE
-          {0, 0, 57, 100, -57, 100}, // S
-          {0, 0, -57, 100, -114, 0}, // SW
-        };
-        pieSlices = new Shape[6];
-        for (int i = 0; i < 6; i++) {
-          double row[] = coords[i];
-          GeneralPath slice = new GeneralPath();
-          slice.moveTo(row[0], row[1]);
-          slice.lineTo(row[2], row[3]);
-          slice.lineTo(row[4], row[5]);
-          pieSlices[i] = slice;
-        }
-      }
-      return pieSlices[dir];
-    }
-
-    private Shape[] pieSlices = null;
   }
 
-  protected static BufferedImage pathHighlight;
+  @Override
+  public Point2D.Double getCenterOffset() {
+    return new Point2D.Double(0, 0);
+  }
 
   /** minorRadius / edgeLength */
   private double hexRatio = REGULAR_HEX_RATIO;
-
   /**
    * One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a
    * right triangle.
    */
   private double edgeProjection;
+  /** Distance from centerpoint to middle of a face. Set to gridSize/2. */
+  private double minorRadius;
+  /**
+   * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree
+   * cosine to calculate sqrt(3)/2).
+   */
+  private double edgeLength;
+  // Hex defining variables scaled for zoom
+  private double scaledEdgeProjection;
+  private double scaledMinorRadius;
+  private double scaledEdgeLength;
+  /** Cached value from the last request to scale the hex grid */
+  private double lastScale = -1;
+  /** Cached value of the hex shape using <code>lastScale</code> */
+  private transient GeneralPath scaledHex;
+  /**
+   * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
+   * the cell's bounding rectangle.
+   */
+  private Dimension cellOffset;
+
+  public HexGrid() {
+    super();
+  }
+
+  @Override
+  public boolean isHex() {
+    return true;
+  }
+
+  public boolean isHexHorizontal() {
+    return false;
+  }
+
+  public boolean isHexVertical() {
+    return false;
+  }
 
   public double getEdgeProjection() {
     return edgeProjection;
@@ -185,9 +141,6 @@ public abstract class HexGrid extends Grid {
     this.edgeProjection = edgeProjection;
   }
 
-  /** Distance from centerpoint to middle of a face. Set to gridSize/2. */
-  private double minorRadius;
-
   public double getMinorRadius() {
     return minorRadius;
   }
@@ -196,38 +149,12 @@ public abstract class HexGrid extends Grid {
     this.minorRadius = minorRadius;
   }
 
-  /**
-   * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree
-   * cosine to calculate sqrt(3)/2).
-   */
-  private double edgeLength;
-
   public double getEdgeLength() {
     return edgeLength;
   }
 
   public void setEdgeLength(double edgeLength) {
     this.edgeLength = edgeLength;
-  }
-
-  // Hex defining variables scaled for zoom
-  private double scaledEdgeProjection;
-  private double scaledMinorRadius;
-  private double scaledEdgeLength;
-
-  /** Cached value from the last request to scale the hex grid */
-  private double lastScale = -1;
-  /** Cached value of the hex shape using <code>lastScale</code> */
-  private transient GeneralPath scaledHex;
-
-  /**
-   * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
-   * the cell's bounding rectangle.
-   */
-  private Dimension cellOffset;
-
-  public HexGrid() {
-    super();
   }
 
   @Override
@@ -256,8 +183,8 @@ public abstract class HexGrid extends Grid {
     int w = shape.getBounds().width;
     int h = shape.getBounds().height;
 
-    zp.x -= w / 2 + getOffsetX();
-    zp.y -= h / 2 + getOffsetY();
+    zp.x -= w / 2;
+    zp.y -= h / 2;
 
     // System.out.println(new Rectangle(zp.x, zp.y, w, h));
     return new Rectangle(zp.x, zp.y, w, h);
@@ -300,6 +227,8 @@ public abstract class HexGrid extends Grid {
   /**
    * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
    * the cell's bounding rectangle.
+   *
+   * @return a {@link Dimension} object where width and height is translated to the grid
    */
   protected abstract Dimension setCellOffset();
 
@@ -365,12 +294,6 @@ public abstract class HexGrid extends Grid {
     return hex;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.Grid#validateMove(java.awt.Rectangle, int, int, java.awt.geom.Area)
-   */
-
   @Override
   public boolean validateMove(
       Token token, Rectangle areaToCheck, int dirx, int diry, Area exposedFog) {
@@ -389,10 +312,14 @@ public abstract class HexGrid extends Grid {
     }
     // If we are SnapToGrid, round off the position and check that instead.
     CellPoint cp = convertZP(actual.x, actual.y);
-    if (cp.x == 3 && cp.y == 0) cp.y = 0; // hook for setting breakpoint in debugger while testing
+    if (cp.x == 3 && cp.y == 0) {
+      cp.y = 0; // hook for setting breakpoint in debugger while testing
+    }
 
     ZonePoint snappedZP = convertCP(cp.x, cp.y);
-    if (!exposedFog.contains(snappedZP.x, snappedZP.y)) return false;
+    if (!exposedFog.contains(snappedZP.x, snappedZP.y)) {
+      return false;
+    }
 
     // The next step is to check the triangle that covers the hex face we are leaving from and teh
     // one we
@@ -409,7 +336,9 @@ public abstract class HexGrid extends Grid {
     result = checkOneSlice(snappedZP, direction, exposedFog);
 
     // If this one is false, don't bother checking the other one...
-    if (!result) return false;
+    if (!result) {
+      return false;
+    }
 
     snappedZP.translate(-dirx, -diry);
     cp = convert(snappedZP); // takes grid orientation and cellOffset into account
@@ -421,6 +350,12 @@ public abstract class HexGrid extends Grid {
             exposedFog); // can we exit our own cell?
     return result;
   }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see net.rptools.maptool.model.Grid#validateMove(java.awt.Rectangle, int, int, java.awt.geom.Area)
+   */
 
   private boolean checkOneSlice(ZonePoint zp, int dir, Area exposedFog) {
     Shape s = calculator.getFogAreaToCheck(dir);
@@ -444,7 +379,7 @@ public abstract class HexGrid extends Grid {
   /**
    * Default orientation is for a vertical hex grid Override for other orientations
    *
-   * @param hex
+   * @param hex a grid to orient
    */
   protected void orientHex(GeneralPath hex) {
     return;
@@ -485,7 +420,7 @@ public abstract class HexGrid extends Grid {
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < getRendererSizeV(renderer);
         v += scaledMinorRadius) {
-      double offsetU = (int) (count % 2 == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
+      double offsetU = (int) ((count & 1) == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
       count++;
 
       double start =
@@ -519,6 +454,8 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(ZonePoint zp) to allow for alternate grid orientations
    *
+   * @param zpU Zone point U dimension
+   * @param zpV Zone point V dimension
    * @return Coordinates in Cell-space of the ZonePoint
    */
   protected CellPoint convertZP(int zpU, int zpV) {
@@ -534,12 +471,17 @@ public abstract class HexGrid extends Grid {
       xSect = (int) (offsetZpU / (edgeProjection + edgeLength));
     }
     if (offsetZpV < 0) {
-      if (Math.abs(xSect) % 2 == 1)
+      if ((xSect & 1) == 1) {
         ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius)) - 1;
-      else ySect = (int) (offsetZpV / (2 * minorRadius)) - 1;
+      } else {
+        ySect = (int) (offsetZpV / (2 * minorRadius)) - 1;
+      }
     } else {
-      if (Math.abs(xSect) % 2 == 1) ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius));
-      else ySect = (int) (offsetZpV / (2 * minorRadius));
+      if ((xSect & 1) == 1) {
+        ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius));
+      } else {
+        ySect = (int) (offsetZpV / (2 * minorRadius));
+      }
     }
     int xPxl = Math.abs((int) (offsetZpU - xSect * (edgeProjection + edgeLength)));
     int yPxl = Math.abs((int) (offsetZpV - ySect * (2 * minorRadius)));
@@ -552,7 +494,7 @@ public abstract class HexGrid extends Grid {
     // System.out.format("gx:%d gy:%d px:%d py:%d m:%f\n", xSect, ySect, xPxl, yPxl, m);
     // System.out.format("gx:%d gy:%d px:%d py:%d\n", xSect, ySect, zp.x, zp.y);
 
-    switch (Math.abs(xSect) % 2) {
+    switch (xSect & 1) {
       case 0:
         if (yPxl <= minorRadius) {
           if (xPxl < edgeProjection - yPxl * m) {
@@ -594,17 +536,22 @@ public abstract class HexGrid extends Grid {
   /**
    * A method used by HexGrid.convert(CellPoint cp) to allow for alternate grid orientations
    *
+   * @param cpU Cell point U dimension
+   * @param cpV Cell point V dimension
    * @return A ZonePoint positioned at the center of the Hex
    */
   protected ZonePoint convertCP(int cpU, int cpV) {
     int u, v;
 
     u = (int) Math.round(cpU * (edgeProjection + edgeLength) + edgeLength) + getOffsetU();
-    v =
-        (int)
-            (cpV * 2 * minorRadius + (Math.abs(cpU) % 2 == 0 ? 1 : 2) * minorRadius + getOffsetV());
+    v = (int) (cpV * 2 * minorRadius + ((cpU & 1) == 0 ? 1 : 2) * minorRadius + getOffsetV());
 
     return new ZonePoint(u, v);
+  }
+
+  @Override
+  public double getSecondDimension() {
+    return getURadius() * 2;
   }
 
   @Override
@@ -623,9 +570,134 @@ public abstract class HexGrid extends Grid {
   }
 
   @Override
-  public double getSecondDimension() {
-    return getURadius() * 2;
+  protected Area createGridArea(int gridRadius) {
+    final Area cellArea = new Area(createCellShape(getSize()));
+    final Set<Point> points = generateRing(gridRadius);
+    Area gridArea = new Area();
+
+    // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap
+    // artifacts in the rendering
+    // TODO: Look at cellShape and see if it needs adjusting, and if so what does that affect
+    // downstream if anything?
+    final double hexScale = 1.025;
+
+    for (Point point : points) {
+      final CellPoint cellPoint = new CellPoint(point.x, point.y);
+      final ZonePoint zp = cellPoint.convertToZonePoint(this);
+
+      final AffineTransform at = new AffineTransform();
+      at.translate(zp.x, zp.y);
+
+      if (isHexHorizontal()) {
+        at.scale(1, hexScale);
+      } else {
+        at.scale(hexScale, 1);
+      }
+
+      gridArea.add(cellArea.createTransformedArea(at));
+    }
+
+    // Fill inner Hex Area with one large area to save time
+    final int hexRadius = gridRadius * getSize();
+
+    if (isHexHorizontal()) {
+      gridArea.add(createHex(getSize(), getSize(), hexRadius, 0));
+    } else {
+      gridArea.add(createHex(getSize(), -getSize(), hexRadius, Math.toRadians(90)));
+    }
+
+    setGridShapeCache(gridRadius, gridArea);
+
+    return gridArea;
+  }
+
+  @Override
+  protected Area getScaledGridArea(Token token, int gridRadius) {
+    gridRadius += (int) (token.getFootprint(this).getBounds(this).getWidth() / getSize() / 2);
+    return getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
   }
 
   protected abstract OffsetTranslator getOffsetTranslator();
+
+  static class DirectionCalculator {
+
+    private static final int NW = 0;
+    private static final int N = 1;
+    private static final int NE = 2;
+    private static final int SE = 3;
+    private static final int S = 4;
+    private static final int SW = 5;
+    private Shape[] pieSlices = null;
+
+    /**
+     * Given delta movement on the X and Y axes, determine which direction that would be for the
+     * current grid type. Note that horizontal and vertical hex grids will be different.
+     *
+     * @param dirx movement on the X axis
+     * @param diry movement on the Y axis
+     * @return direction being moved
+     */
+    public int getDirection(int dirx, int diry) {
+      int direction = -1;
+      // @formatter:off
+      if (dirx > 0 && diry > 0) direction = NW;
+      if (dirx > 0 && diry < 0) direction = SW;
+      if (dirx < 0 && diry > 0) direction = NE;
+      if (dirx < 0 && diry < 0) direction = SE;
+      if (dirx == 0 && diry > 0) direction = N;
+      if (dirx == 0 && diry < 0) direction = S;
+      // @formatter:on
+      return direction;
+    }
+
+    /**
+     * Given a particular direction returns the opposite direction. Used for finding the "pie slice"
+     * on the 'other side' of the hex grid cell.
+     *
+     * @param dir one of the constants <code>DirectionCalculator.NW</code> .. <code>
+     *            DirectionCalculator.SW</code> (0..5)
+     * @return
+     */
+    public int oppositeDirection(int dir) {
+      return (dir + 3) % 6;
+    }
+
+    /**
+     * <div style="float: left">Image of a <i>vertical hex</i> grid:<br>
+     * <img src="doc-files/HexGridVertical.png" title="Vertical Hex"> </div> <div>
+     *
+     * <p>Returns a {@link Shape} that can be used to test for exposed fog areas in the direction
+     * specified by <code>dir</code>. Note that <code>dir</code> is the direction from which a token
+     * is entering a grid cell. So if the token is coming from the North, <code>dir</code> should be
+     * Direction.Calculator.N (i.e. "2"). The resulting Shape returned would be the isosceles
+     * triangle that represents one-sixth of the hex in an upward direction. The returned Shape has
+     * its origin at the center of the hex grid cell.
+     *
+     * @param dir direction that the movement is coming from
+     * @return a {@link Shape} representing one slice of the 6-slice pie </div>
+     */
+    public Shape getFogAreaToCheck(int dir) {
+      // pieSlices = null; // debugging -- forces the following IF statement to always be true
+      if (pieSlices == null) {
+        double[][] coords = {
+          {0, 0, -114, 0, -57, -100}, // NW
+          {0, 0, -57, -100, 57, -100}, // N
+          {0, 0, 57, -100, 114, 0}, // NE
+          {0, 0, 114, 0, 57, 100}, // SE
+          {0, 0, 57, 100, -57, 100}, // S
+          {0, 0, -57, 100, -114, 0}, // SW
+        };
+        pieSlices = new Shape[6];
+        for (int i = 0; i < 6; i++) {
+          double[] row = coords[i];
+          GeneralPath slice = new GeneralPath();
+          slice.moveTo(row[0], row[1]);
+          slice.lineTo(row[2], row[3]);
+          slice.lineTo(row[4], row[5]);
+          pieSlices[i] = slice;
+        }
+      }
+      return pieSlices[dir];
+    }
+  }
 }

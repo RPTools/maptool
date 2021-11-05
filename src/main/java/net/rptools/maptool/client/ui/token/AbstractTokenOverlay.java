@@ -17,8 +17,8 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.player.Player;
 
 /**
  * An overlay that may be applied to a token to show state.
@@ -66,11 +66,7 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 
   /** This comparator is used to order the states. */
   public static final Comparator<AbstractTokenOverlay> COMPARATOR =
-      new Comparator<AbstractTokenOverlay>() {
-        public int compare(AbstractTokenOverlay o1, AbstractTokenOverlay o2) {
-          return o1.getOrder() - o2.getOrder();
-        }
-      };
+      (o1, o2) -> o1.getOrder() - o2.getOrder();
 
   /*---------------------------------------------------------------------------------------------
    * Constructors

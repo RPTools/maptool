@@ -26,6 +26,7 @@ import java.util.ListIterator;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
@@ -47,10 +48,10 @@ public class LineTemplate extends AbstractTemplate {
   private ZonePoint pathVertex;
 
   /** The calculated path for this line. */
-  private ArrayList<CellPoint> path;
+  private List<CellPoint> path;
 
   /** The pool of points. */
-  private ArrayList<CellPoint> pool;
+  private List<CellPoint> pool;
 
   /**
    * The line is drawn in this quadrant. A string is used as a hack to get around the hessian
@@ -352,12 +353,12 @@ public class LineTemplate extends AbstractTemplate {
   }
 
   /** @return Getter for path */
-  public ArrayList<CellPoint> getPath() {
+  public List<CellPoint> getPath() {
     return path;
   }
 
   /** @param path Setter for the path to set */
-  public void setPath(ArrayList<CellPoint> path) {
+  public void setPath(List<CellPoint> path) {
     this.path = path;
   }
 
@@ -430,15 +431,30 @@ public class LineTemplate extends AbstractTemplate {
     return new Rectangle(minp.x, minp.y, width, height);
   }
 
+  @Override
   public Area getArea() {
     if (path == null) {
       calcPath();
-      if (path == null) {
-        // If the calculated path is still null, then the line is invalid and should be deleted.
-        return new Area();
-      }
     }
-    // I don't feel like figuring out the exact shape of this right now
-    return null;
+    Zone zone = MapTool.getCampaign().getZone(getZoneId());
+    if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
+      return new Area();
+    }
+    // Create an area by merging all the squares along the path
+    Area result = new Area();
+    int gridSize = zone.getGrid().getSize();
+    Quadrant q = getQuadrant();
+
+    // Mimic paintArea to get the correct area
+    ListIterator<CellPoint> i = path.listIterator();
+    while (i.hasNext()) {
+      CellPoint p = i.next();
+      int xOff = p.x * gridSize;
+      int yOff = p.y * gridSize;
+      int rx = getVertex().x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
+      int ry = getVertex().y + getYMult(q) * yOff + ((getYMult(q) - 1) / 2) * gridSize;
+      result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
+    }
+    return result;
   }
 }

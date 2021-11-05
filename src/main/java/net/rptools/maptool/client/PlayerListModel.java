@@ -18,7 +18,7 @@ import java.util.Observable;
 import java.util.Observer;
 import javax.swing.AbstractListModel;
 import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 
 public class PlayerListModel extends AbstractListModel implements Observer {
 

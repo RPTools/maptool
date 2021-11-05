@@ -23,6 +23,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
@@ -46,14 +47,12 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
+  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> args)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
-    Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
+    Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
 
     InitiativeList list = token.getZoneRenderer().getZone().getInitiativeList();
 
@@ -67,7 +66,7 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
     }
     List<Integer> tokens = list.indexOf(token);
     list.startUnitOfWork();
-    for (int i = tokens.size() - 1; i >= 0; i--) list.removeToken(tokens.get(i).intValue());
+    for (int i = tokens.size() - 1; i >= 0; i--) list.removeToken(tokens.get(i));
     list.finishUnitOfWork();
     return new BigDecimal(tokens.size());
   }

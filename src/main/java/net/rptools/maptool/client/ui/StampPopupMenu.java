@@ -66,7 +66,7 @@ public class StampPopupMenu extends AbstractTokenPopupMenu {
 
     add(new JSeparator());
 
-    add(new ShowPropertiesDialogAction());
+    add(new ShowPropertiesDialogAction().asJMenuItem());
     add(new SaveAction());
   }
 }

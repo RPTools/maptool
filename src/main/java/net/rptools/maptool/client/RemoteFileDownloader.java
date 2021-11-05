@@ -46,6 +46,7 @@ public class RemoteFileDownloader {
    * Read the data at the given URL. This method should not be called on the EDT.
    *
    * @return File pointer to the location of the data, file will be deleted at program end
+   * @throws IOException if an error occurs while processing/downloading the URL.
    */
   public File read() throws IOException {
     URLConnection conn = url.openConnection();
@@ -65,14 +66,10 @@ public class RemoteFileDownloader {
     File tempFile = new File(tempDir + "/" + new GUID() + ".dat");
     tempFile.deleteOnExit();
 
-    InputStream in = null;
-    OutputStream out = null;
-
     ProgressMonitor monitor =
         new ProgressMonitor(parentComponent, "Downloading " + url, null, 0, length);
-    try {
-      in = conn.getInputStream();
-      out = new BufferedOutputStream(new FileOutputStream(tempFile));
+    try (InputStream in = conn.getInputStream();
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile))) {
 
       int buflen = 1024 * 30;
       int bytesRead = 0;
@@ -90,12 +87,6 @@ public class RemoteFileDownloader {
         // seconds");
       }
     } finally {
-      if (in != null) {
-        in.close();
-      }
-      if (out != null) {
-        out.close();
-      }
       monitor.close();
     }
     return tempFile;

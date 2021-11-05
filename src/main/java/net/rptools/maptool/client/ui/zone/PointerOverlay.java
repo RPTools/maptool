@@ -24,6 +24,10 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.ui.zone.callout.CalloutArgumentBuilder;
+import net.rptools.maptool.client.ui.zone.callout.CalloutArguments;
+import net.rptools.maptool.client.ui.zone.callout.SpeechBubbleRenderer;
+import net.rptools.maptool.client.ui.zone.callout.ThoughtBubbleRenderer;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -37,14 +41,12 @@ import net.rptools.maptool.util.GraphicsUtil;
 public class PointerOverlay implements ZoneOverlay {
   private final List<PointerPair> pointerList = new ArrayList<PointerPair>();
   private static BufferedImage POINTER_IMAGE;
-  private static BufferedImage SPEECH_IMAGE;
   private static BufferedImage THOUGHT_IMAGE;
   private static BufferedImage LOOK_HERE_IMAGE;
 
   static {
     try {
       POINTER_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow.png");
-      SPEECH_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/speech.png");
       THOUGHT_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/thought.png");
       LOOK_HERE_IMAGE =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/look_here.png");
@@ -57,8 +59,7 @@ public class PointerOverlay implements ZoneOverlay {
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();
 
-    for (int i = 0; i < pointerList.size(); i++) {
-      PointerPair p = pointerList.get(i);
+    for (PointerPair p : pointerList) {
       if (p.pointer.getZoneGUID().equals(zone.getId())) {
         ZonePoint zPoint = new ZonePoint(p.pointer.getX(), p.pointer.getY());
         ScreenPoint sPoint = ScreenPoint.fromZonePointRnd(renderer, zPoint.x, zPoint.y);
@@ -75,18 +76,14 @@ public class PointerOverlay implements ZoneOverlay {
             image = POINTER_IMAGE;
             break;
           case SPEECH_BUBBLE:
-            offX = -19;
-            offY = -61;
-            centX = 36;
-            centY = 23;
-            image = SPEECH_IMAGE;
+            CalloutArguments speechCalloutArguments =
+                new CalloutArgumentBuilder().addText(p.player).build();
+            new SpeechBubbleRenderer(renderer, g, sPoint, speechCalloutArguments).render();
             break;
           case THOUGHT_BUBBLE:
-            offX = -13;
-            offY = -65;
-            centX = 36;
-            centY = 23;
-            image = THOUGHT_IMAGE;
+            CalloutArguments thoughtCalloutArguments =
+                new CalloutArgumentBuilder().addText(p.player).build();
+            new ThoughtBubbleRenderer(renderer, g, sPoint, thoughtCalloutArguments).render();
             break;
           case LOOK_HERE:
             offX = 0;
@@ -94,38 +91,41 @@ public class PointerOverlay implements ZoneOverlay {
             image = LOOK_HERE_IMAGE;
             break;
         }
-        g.drawImage(image, (int) sPoint.x + offX, (int) sPoint.y + offY, null);
 
-        switch (p.pointer.getType()) {
-          case ARROW:
-            GraphicsUtil.drawBoxedString(
-                g,
-                p.player,
-                (int) sPoint.x + POINTER_IMAGE.getWidth() - 10,
-                (int) sPoint.y - POINTER_IMAGE.getHeight() + 15,
-                SwingUtilities.LEFT);
-            break;
-          case THOUGHT_BUBBLE:
-          case SPEECH_BUBBLE:
-            FontMetrics fm = renderer.getFontMetrics(renderer.getFont());
-            String name = p.player;
-            int len = SwingUtilities.computeStringWidth(fm, name);
+        if (image != null) {
+          g.drawImage(image, (int) sPoint.x + offX, (int) sPoint.y + offY, null);
 
-            g.setColor(Color.black);
-            int x = (int) sPoint.x + centX + offX + 5;
-            int y = (int) sPoint.y + offY + centY + fm.getHeight() / 2;
-            g.drawString(name, x - len / 2, y);
-            break;
-          case LOOK_HERE:
-            GraphicsUtil.drawBoxedString(
-                g,
-                p.player,
-                (int) sPoint.x + LOOK_HERE_IMAGE.getWidth() - 22,
-                (int) sPoint.y + 2,
-                SwingUtilities.LEFT);
-            break;
-          default:
-            break;
+          switch (p.pointer.getType()) {
+            case ARROW:
+              GraphicsUtil.drawBoxedString(
+                  g,
+                  p.player,
+                  (int) sPoint.x + POINTER_IMAGE.getWidth() - 10,
+                  (int) sPoint.y - POINTER_IMAGE.getHeight() + 15,
+                  SwingUtilities.LEFT);
+              break;
+            case THOUGHT_BUBBLE:
+            case SPEECH_BUBBLE:
+              FontMetrics fm = renderer.getFontMetrics(renderer.getFont());
+              String name = p.player;
+              int len = SwingUtilities.computeStringWidth(fm, name);
+
+              g.setColor(Color.black);
+              int x = (int) sPoint.x + centX + offX + 5;
+              int y = (int) sPoint.y + offY + centY + fm.getHeight() / 2;
+              g.drawString(name, x - len / 2, y);
+              break;
+            case LOOK_HERE:
+              GraphicsUtil.drawBoxedString(
+                  g,
+                  p.player,
+                  (int) sPoint.x + LOOK_HERE_IMAGE.getWidth() - 22,
+                  (int) sPoint.y + 2,
+                  SwingUtilities.LEFT);
+              break;
+            default:
+              break;
+          }
         }
       }
     }
@@ -136,23 +136,19 @@ public class PointerOverlay implements ZoneOverlay {
   }
 
   public void removePointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        pointerList.remove(i);
-      }
-    }
+    pointerList.removeIf(pair -> pair.player.equals(player));
   }
 
   public Pointer getPointer(String player) {
-    for (int i = 0; i < pointerList.size(); i++) {
-      if (pointerList.get(i).player.equals(player)) {
-        return pointerList.get(i).pointer;
+    for (PointerPair pointerPair : pointerList) {
+      if (pointerPair.player.equals(player)) {
+        return pointerPair.pointer;
       }
     }
     return null;
   }
 
-  private class PointerPair {
+  private static class PointerPair {
     Pointer pointer;
     String player;
 

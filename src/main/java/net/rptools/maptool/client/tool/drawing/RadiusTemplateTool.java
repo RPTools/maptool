@@ -220,7 +220,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       centerText.translate(CURSOR_WIDTH, -CURSOR_WIDTH);
       ToolHelper.drawMeasurement(
           g,
-          Double.valueOf(template.getRadius() * renderer.getZone().getUnitsPerCell()),
+          template.getRadius() * renderer.getZone().getUnitsPerCell(),
           (int) centerText.x,
           (int) centerText.y);
     } // endif
@@ -423,7 +423,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       } // endif
 
       // Need to finish the radius?
-      if (!painting || template.getRadius() < AbstractTemplate.MIN_RADIUS) return;
+      if (template.getRadius() < AbstractTemplate.MIN_RADIUS) return;
 
       // Set the eraser, set the drawable, reset the tool.
       setIsEraser(isEraser(e));

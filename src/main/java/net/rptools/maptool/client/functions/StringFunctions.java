@@ -14,20 +14,23 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class StringFunctions extends AbstractFunction {
   private int matchNo = 0;
@@ -71,7 +74,8 @@ public class StringFunctions extends AbstractFunction {
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+  public Object childEvaluate(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     try {
       if (functionName.equals("replace")) {
@@ -227,12 +231,9 @@ public class StringFunctions extends AbstractFunction {
       if (functionName.equals("strformat")) {
         int size = parameters.size();
         if (size > 1) {
-          return format(
-              parameters.get(0).toString(),
-              parser.getVariableResolver(),
-              parameters.subList(1, size));
+          return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
         } else {
-          return format(parameters.get(0).toString(), parser.getVariableResolver(), null);
+          return format(parameters.get(0).toString(), resolver, null);
         }
       }
       if (functionName.equals("matches")) {
@@ -272,16 +273,9 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     if (functionName.equals("isNumber")) {
-      try {
-        BigDecimal.valueOf(Integer.parseInt(parameters.get(0).toString()));
+      if (NumberUtils.isParsable(parameters.get(0).toString())) {
         return BigDecimal.ONE;
-      } catch (NumberFormatException e) {
-        // Do nothing as we will try it as a double
-      }
-      try {
-        BigDecimal.valueOf(Double.parseDouble(parameters.get(0).toString()));
-        return BigDecimal.ONE;
-      } catch (NumberFormatException e) {
+      } else {
         return BigDecimal.ZERO;
       }
     }
@@ -291,8 +285,7 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
       }
-      return stringFind(
-          parser.getVariableResolver(), parameters.get(0).toString(), parameters.get(1).toString());
+      return stringFind(resolver, parameters.get(0).toString(), parameters.get(1).toString());
     }
     if (functionName.equals("getGroupCount")) {
       if (parameters.size() < 1) {
@@ -300,7 +293,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".groupCount");
       return resolver.getVariable(sb.toString());
@@ -311,7 +303,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 3, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0));
       sb.append(".m").append(parameters.get(1));
@@ -329,7 +320,6 @@ public class StringFunctions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
-      VariableResolver resolver = parser.getVariableResolver();
       StringBuilder sb = new StringBuilder();
       sb.append("match.").append(parameters.get(0)).append(".matchCount");
       return resolver.getVariable(sb.toString());
@@ -341,14 +331,10 @@ public class StringFunctions extends AbstractFunction {
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
       String encoded;
-      try {
-        // Shouldn't this use '&#59;' like
-        // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
-        encoded = parameters.get(0).toString().replaceAll(";", "&semi;");
-        encoded = URLEncoder.encode(encoded, "utf-8");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
+      // Shouldn't this use '&#59;' like
+      // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
+      encoded = parameters.get(0).toString().replaceAll(";", "&semi;");
+      encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8);
       return encoded;
     }
     if (functionName.equals("decode")) {
@@ -358,14 +344,10 @@ public class StringFunctions extends AbstractFunction {
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
       String decoded;
-      try {
-        // Shouldn't this use '&#59;' like
-        // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
-        decoded = URLDecoder.decode(parameters.get(0).toString(), "utf-8");
-        decoded = decoded.replaceAll("&semi;", ";");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
+      // Shouldn't this use '&#59;' like
+      // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
+      decoded = URLDecoder.decode(parameters.get(0).toString(), StandardCharsets.UTF_8);
+      decoded = decoded.replaceAll("&semi;", ";");
       return decoded;
     }
     if (functionName.equals("startsWith")) {
@@ -389,12 +371,13 @@ public class StringFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
     }
     if (functionName.equals("capitalize")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      boolean treatNumbersSymbolsAsBoundaries = true;
+      if (parameters.size() == 2) {
+        treatNumbersSymbolsAsBoundaries =
+            FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
       }
-      return capitalize(parameters.get(0).toString());
+      return capitalize(parameters.get(0).toString(), treatNumbersSymbolsAsBoundaries);
     }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
@@ -405,21 +388,28 @@ public class StringFunctions extends AbstractFunction {
    * title case.
    *
    * @param str The string converted to title case.
+   * @param treatNumbersSymbolsAsBoundaries whether to count numbers and symbols such as ' as a word
+   *     boundary
    * @return The string converted to title case.
    */
-  private String capitalize(String str) {
-    Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
-    Matcher matcher = pattern.matcher(str);
+  private String capitalize(String str, boolean treatNumbersSymbolsAsBoundaries) {
+    if (treatNumbersSymbolsAsBoundaries) {
+      Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
+      Matcher matcher = pattern.matcher(str);
 
-    StringBuffer result = new StringBuffer();
-    while (matcher.find()) {
-      String word = matcher.group();
-      matcher.appendReplacement(result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      StringBuffer result = new StringBuffer();
+      while (matcher.find()) {
+        String word = matcher.group();
+        matcher.appendReplacement(
+            result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+      }
+
+      matcher.appendTail(result);
+
+      return result.toString();
+    } else {
+      return WordUtils.capitalize(str);
     }
-
-    matcher.appendTail(result);
-
-    return result.toString();
   }
 
   /**
@@ -430,7 +420,7 @@ public class StringFunctions extends AbstractFunction {
    * @param resolver The variable resolver used to resolve variables within %{}.
    * @param args The arguments for formating options.
    * @return the formated string.
-   * @throws ParserException
+   * @throws ParserException when an error occurs.
    */
   public String format(String string, VariableResolver resolver, List<Object> args)
       throws ParserException {

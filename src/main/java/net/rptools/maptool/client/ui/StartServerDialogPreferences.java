@@ -14,11 +14,12 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.util.Objects;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerConfig;
 
 public class StartServerDialogPreferences {
@@ -43,6 +44,7 @@ public class StartServerDialogPreferences {
   private static final String KEY_WALKER_METRIC = "movementMetric";
   private static final String KEY_USE_INDIVIDUAL_FOW = "useIndividualFOW";
   private static final String KEY_AUTO_REVEAL_ON_MOVE = "autoRevealOnMovement";
+  private static final String KEY_USE_PASSWORD_FILE = "usePasswordFile";
 
   private static Boolean useToolTipsForUnformattedRolls = null;
 
@@ -96,7 +98,7 @@ public class StartServerDialogPreferences {
 
   // my addition
   public boolean getRestrictedImpersonation() {
-    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, true);
+    return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, false);
   }
 
   public void setRestrictedImpersonation(boolean impersonation) {
@@ -171,10 +173,8 @@ public class StartServerDialogPreferences {
     // Tool tips works slightly differently as its a setting that has to be available
     // to the user to configure before the start server dialog. So if it has not been
     // specified we default to the users preferences.
-    if (useToolTipsForUnformattedRolls == null) {
-      return AppPreferences.getUseToolTipForInlineRoll();
-    }
-    return useToolTipsForUnformattedRolls;
+    return Objects.requireNonNullElseGet(
+        useToolTipsForUnformattedRolls, AppPreferences::getUseToolTipForInlineRoll);
   }
 
   public void setUseToolTipsForUnformattedRolls(boolean flag) {
@@ -187,7 +187,7 @@ public class StartServerDialogPreferences {
   }
 
   public void setMovementMetric(WalkerMetric metric) {
-    prefs.put(KEY_WALKER_METRIC, metric.toString());
+    prefs.put(KEY_WALKER_METRIC, metric.name());
   }
 
   public boolean getUseIndividualFOW() {
@@ -204,5 +204,13 @@ public class StartServerDialogPreferences {
 
   public void setAutoRevealOnMovement(boolean flag) {
     prefs.putBoolean(KEY_AUTO_REVEAL_ON_MOVE, flag);
+  }
+
+  public boolean getUsePasswordFile() {
+    return prefs.getBoolean(KEY_USE_PASSWORD_FILE, false);
+  }
+
+  public void setUsePasswordFile(boolean flag) {
+    prefs.putBoolean(KEY_USE_PASSWORD_FILE, flag);
   }
 }

@@ -15,8 +15,8 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.util.List;
-import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.player.Player;
 
 public class PlayerView {
   /** The role of the player (GM or PLAYER). */
@@ -61,7 +61,7 @@ public class PlayerView {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof PlayerView)) {
+    if (!(obj instanceof PlayerView)) {
       return false;
     }
     PlayerView other = (PlayerView) obj;

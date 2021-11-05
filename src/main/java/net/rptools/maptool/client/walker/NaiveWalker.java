@@ -16,8 +16,8 @@ package net.rptools.maptool.client.walker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
@@ -37,7 +37,7 @@ public class NaiveWalker extends AbstractZoneWalker {
     int y = start.y;
 
     int count = 0;
-    while (true && count < 100) {
+    while (count < 100) {
       list.add(new CellPoint(x, y));
 
       if (x == end.x && y == end.y) {
@@ -65,7 +65,7 @@ public class NaiveWalker extends AbstractZoneWalker {
   }
 
   @Override
-  public Set<AStarCellPoint> getCheckedPoints() {
+  public Map<CellPoint, Set<CellPoint>> getBlockedMoves() {
     return null;
   }
 }

@@ -15,12 +15,8 @@
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
 import com.jidesoft.docking.DockableFrame;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.ImageIcon;
+import java.util.*;
+import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
@@ -31,7 +27,9 @@ import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -73,9 +71,7 @@ public class SelectionPanel extends AbstractMacroPanel {
       if (selectionPanel != null)
         panelVisible =
             (selectionPanel.isVisible() && !selectionPanel.isAutohide())
-                    || selectionPanel.isAutohideShowing()
-                ? true
-                : false;
+                || selectionPanel.isAutohideShowing();
     }
     // Set up a code timer to get some performance data
     timer = new CodeTimer("selectionpanel");
@@ -86,15 +82,11 @@ public class SelectionPanel extends AbstractMacroPanel {
 
     // paint panel only when it's visible or active
     if (panelVisible) {
-      // add the selection panel controls first
-      add(new MenuButtonsPanel());
 
       // draw common group only when there is more than one token selected
       if (selectedTokenList.size() > 1) {
         populateCommonButtons(selectedTokenList);
-        if (!commonMacros.isEmpty()) {
-          addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
-        }
+        addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
         // add(new ButtonGroup(selectedTokenList, commonMacros, this));
       }
       for (Token token : selectedTokenList) {
@@ -118,6 +110,26 @@ public class SelectionPanel extends AbstractMacroPanel {
       if (log.isDebugEnabled()) log.debug(results);
     }
     MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+  }
+
+  @Override
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Event.TOKEN_REMOVED
+        || event.eventType == Event.TOKEN_MACRO_CHANGED
+        || event.eventType == Event.TOKEN_PANEL_CHANGED
+        || event.eventType == Event.TOKEN_EDITED) {
+      // Only resets if one of the selected tokens is among those changed/deleted.
+      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+      if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
+        List<Token> tokenList = event.getTokensAsList();
+        for (Token token : tokenList) {
+          if (zr.getSelectedTokenSet().contains(token.getId())) {
+            reset();
+            break;
+          }
+        }
+      }
+    }
   }
 
   private void populateCommonButtons(List<Token> tokenList) {
@@ -198,5 +210,11 @@ public class SelectionPanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* not used for the moment by this one */
+    return null;
   }
 }

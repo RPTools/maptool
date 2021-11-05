@@ -25,6 +25,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Map;
+import javafx.application.Platform;
+import javafx.scene.ImageCursor;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -48,22 +50,36 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
   private ZoneWalker walker;
   private Path<ZonePoint> gridlessPath;
-  private Cursor measureCursor;
+  private static Cursor measureCursor;
+  private static javafx.scene.Cursor measureCursorFX;
+
+  private static final String PATH_RULER_IMG =
+      "net/rptools/maptool/client/image/tool/ruler-blue.png";
+  private static final String PATH_MEASURE_IMG =
+      "net/rptools/maptool/client/image/cursor-tape-measure.png";
 
   public MeasureTool() {
     try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/ruler-blue.png")));
+      setIcon(new ImageIcon(ImageUtil.getImage(PATH_RULER_IMG)));
       measureCursor =
           Toolkit.getDefaultToolkit()
               .createCustomCursor(
-                  ImageUtil.getImage("net/rptools/maptool/client/image/cursor-tape-measure.png"),
-                  new Point(2, 28),
-                  CURSOR_NAME);
+                  ImageUtil.getImage(PATH_MEASURE_IMG), new Point(2, 28), CURSOR_NAME);
+      Platform.runLater(
+          () ->
+              measureCursorFX =
+                  new ImageCursor(new javafx.scene.image.Image(PATH_MEASURE_IMG), 2, 28));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+  }
+
+  public static Cursor getMeasureCursor() {
+    return measureCursor;
+  }
+
+  public static javafx.scene.Cursor getMeasureCursorFX() {
+    return measureCursorFX;
   }
 
   @Override

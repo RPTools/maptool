@@ -199,7 +199,7 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
 
   ////
   // MOUSE HANDLER
-  private class MouseHandler extends MouseAdapter {
+  private static class MouseHandler extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
 

@@ -19,8 +19,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.Transparency;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -54,6 +52,8 @@ public class NewTokenDialog extends AbeillePanel<Token> {
    * Create a new token notes dialog.
    *
    * @param token The token being displayed.
+   * @param x x value for center point of the token dialog
+   * @param y y value for center point of the token dialog
    */
   public NewTokenDialog(Token token, int x, int y) {
     super("net/rptools/maptool/client/ui/forms/newTokenDialog.xml");
@@ -67,7 +67,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 
   public void showDialog() {
     dialog =
-        new GenericDialog("New Token", MapTool.getFrame(), this) {
+        new GenericDialog(I18N.getString("dialog.NewToken.title"), MapTool.getFrame(), this) {
           @Override
           protected void positionInitialView() {
 
@@ -161,19 +161,17 @@ public class NewTokenDialog extends AbeillePanel<Token> {
   public void initOKButton() {
     getOKButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                success = true;
-                if (!getShowDialogCheckbox().isSelected()) {
-                  AppPreferences.setShowDialogOnNewToken(false);
-                }
-                if (getNameTextField().getText().equals("")) {
-                  MapTool.showError(I18N.getText("msg.error.emptyTokenName"));
-                  return;
-                }
-                if (commit()) {
-                  dialog.closeDialog();
-                }
+            e -> {
+              success = true;
+              if (!getShowDialogCheckbox().isSelected()) {
+                AppPreferences.setShowDialogOnNewToken(false);
+              }
+              if (getNameTextField().getText().equals("")) {
+                MapTool.showError(I18N.getText("msg.error.emptyTokenName"));
+                return;
+              }
+              if (commit()) {
+                dialog.closeDialog();
               }
             });
   }
@@ -181,11 +179,9 @@ public class NewTokenDialog extends AbeillePanel<Token> {
   public void initCancelButton() {
     getCancelButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                success = false;
-                dialog.closeDialog();
-              }
+            e -> {
+              success = false;
+              dialog.closeDialog();
             });
   }
 

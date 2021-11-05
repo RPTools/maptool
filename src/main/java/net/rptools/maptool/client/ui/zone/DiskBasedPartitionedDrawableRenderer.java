@@ -47,12 +47,13 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 
   private final Map<String, BufferedImage> chunkMap = new HashMap<String, BufferedImage>();
 
-  private double lastDrawableCount;
   private double lastScale;
   private Rectangle lastViewport;
 
   private int horizontalChunkCount;
   private int verticalChunkCount;
+
+  private boolean dirty = false;
 
   static {
     try {
@@ -81,16 +82,21 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
       ioe.printStackTrace();
     }
     chunkMap.clear();
+    dirty = false;
+  }
+
+  public void setDirty() {
+    dirty = true;
   }
 
   public void renderDrawables(
       Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale) {
     // NOTHING TO DO
     if (drawableList == null || drawableList.size() == 0) {
-      flush();
+      if (dirty) flush();
       return;
     }
-    if (drawableList.size() != lastDrawableCount || lastScale != scale) {
+    if (dirty || lastScale != scale) {
       flush();
     }
     if (lastViewport == null
@@ -102,8 +108,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
     int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
 
-    Set<String> chunkCache = new HashSet<String>();
-    chunkCache.addAll(chunkMap.keySet());
+    Set<String> chunkCache = new HashSet<String>(chunkMap.keySet());
     int count = 0;
     for (int row = 0; row < verticalChunkCount; row++) {
       for (int col = 0; col < horizontalChunkCount; col++) {
@@ -160,7 +165,6 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 
     // REMEMBER
     lastViewport = viewport;
-    lastDrawableCount = drawableList.size();
     lastScale = scale;
   }
 

@@ -243,7 +243,7 @@ public class AddTokenStateMacro implements Macro {
       return Color.decode(name);
     } catch (NumberFormatException e) {
       if (!MapToolUtil.isValidColor(name.toLowerCase())) {
-        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidColor", name));
+        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidColor", name), e);
       } // endif
       return MapToolUtil.getColor(name);
     } // endtry
@@ -262,7 +262,7 @@ public class AddTokenStateMacro implements Macro {
     try {
       return Integer.parseInt(name);
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidNumber", name));
+      throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidNumber", name), e);
     } // endtry
   }
 
@@ -279,7 +279,7 @@ public class AddTokenStateMacro implements Macro {
       return Quadrant.valueOf(name.toUpperCase());
     } catch (IllegalArgumentException e) {
       if (!CORNER_MAP.containsKey(name.toLowerCase())) {
-        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidCorner", name));
+        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidCorner", name), e);
       } // endif
       return CORNER_MAP.get(name);
     } // endtry

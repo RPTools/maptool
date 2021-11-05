@@ -16,8 +16,6 @@ package net.rptools.maptool.client.ui.io;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
@@ -30,6 +28,7 @@ import javax.swing.JProgressBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,23 +77,16 @@ public class ProgressBarList extends JDialog implements ChangeListener {
     // the event will fire.
     ftp.addChangeListener(this);
 
-    hideButton = new JButton("Hide");
-    hideButton.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            ProgressBarList.this.setVisible(false);
-          }
-        });
-    cancelButton = new JButton("Cancel");
+    hideButton = new JButton(I18N.getText("Button.hide"));
+    hideButton.addActionListener(e -> ProgressBarList.this.setVisible(false));
+    cancelButton = new JButton(I18N.getText("Button.cancel"));
     cancelButton.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            cancelling = true;
-            JButton btn = (JButton) e.getSource();
-            btn.setText("Cancelling...");
-            ftp.setEnabled(false);
-            ftp.removeAllFromQueue();
-          }
+        e -> {
+          cancelling = true;
+          JButton btn = (JButton) e.getSource();
+          btn.setText("Cancelling...");
+          ftp.setEnabled(false);
+          ftp.removeAllFromQueue();
         });
     autohide = new JCheckBox("Close this window on completion");
     countDown = new JLabel(numFiles + " file(s) remaining");
