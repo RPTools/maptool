@@ -20,9 +20,13 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +39,8 @@ import org.apache.logging.log4j.Logger;
  * @author Jay
  */
 public class InitiativeList implements Serializable {
+
+  private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -99,9 +105,6 @@ public class InitiativeList implements Serializable {
 
   /** "callback" name used for the onInitiativeChange (non-vetoable) event */
   public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK = "onInitiativeChange";
-
-  /** Logger for this class */
-  private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
 
   /*---------------------------------------------------------------------------------------------
    * Constructor
@@ -639,30 +642,43 @@ public class InitiativeList implements Serializable {
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
-    List<Token> libTokens =
-        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK);
-    boolean isVetoed = false;
-    if (!libTokens.isEmpty()) {
-      JsonObject args = new JsonObject();
-      args.add("old", getInfoForOffset(oldOffset, oldRound));
-      args.add("new", getInfoForOffset(newOffset, newRound));
-      args.addProperty("direction", direction.toString());
-      String argStr = args.toString();
-      String prefix = ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK + "@";
-      for (Token handler : libTokens) {
-        boolean thisVote =
-            EventMacroUtil.pollEventHandlerForVeto(
-                prefix + handler.getName(),
-                argStr,
-                null,
-                ON_INITIATIVE_CHANGE_DENY_VARIABLE,
-                Collections.emptyMap());
-        isVetoed = isVetoed || thisVote;
+    try {
+      var libs =
+          new LibraryManager()
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK)
+              .get();
+      boolean isVetoed = false;
+      if (!libs.isEmpty()) {
+        JsonObject args = new JsonObject();
+        args.add("old", getInfoForOffset(oldOffset, oldRound));
+        args.add("new", getInfoForOffset(newOffset, newRound));
+        args.addProperty("direction", direction.toString());
+        String argStr = args.toString();
+        for (Library handler : libs) {
+          String libraryNamespace = null;
+          try {
+            libraryNamespace = handler.getNamespace().get();
+            boolean thisVote =
+                EventMacroUtil.pollEventHandlerForVeto(
+                    ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
+                    libraryNamespace,
+                    argStr,
+                    null,
+                    ON_INITIATIVE_CHANGE_DENY_VARIABLE,
+                    Collections.emptyMap());
+            isVetoed = isVetoed || thisVote;
+          } catch (InterruptedException | ExecutionException e) {
+            // Should not be possible
+            throw new AssertionError("Error retrieving library namespace");
+          }
+        }
       }
+      return isVetoed;
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
+      return false; // if we completely fail we should never prevent the change of initiative.
     }
-    return isVetoed;
   }
-
   /**
    * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
    * are present. Passes in some relevant info to each qualifying lib:token macro identified.
@@ -690,7 +706,11 @@ public class InitiativeList implements Serializable {
       String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
       for (Token handler : libTokens) {
         EventMacroUtil.callEventHandler(
-            prefix + handler.getName(), argStr, null, Collections.emptyMap());
+            ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
+            prefix + handler.getName(),
+            argStr,
+            null,
+            Collections.emptyMap());
       }
     }
   }

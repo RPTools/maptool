@@ -16,11 +16,14 @@ package net.rptools.maptool.model.library;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
@@ -261,5 +264,33 @@ public class LibraryManager {
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<List<Library>> getLegacyEventTargets(String eventName) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            var addons = addOnLibraryManager.getLegacyEventTargets(eventName).get();
+            var tokens = libraryTokenManager.getLegacyEventTargets(eventName).get();
+            var libs = new HashSet<Library>(addons);
+            var addonLibNamespaces =
+                addons.stream().map(Library::getNamespace).collect(Collectors.toSet());
+            // Only add lib:tokens if there are no addon libraries with the same namespace
+            for (var token : tokens) {
+              if (!addonLibNamespaces.contains(token.getNamespace())) {
+                libs.add(token);
+              }
+            }
+            return new ArrayList<>(libs);
+          } catch (InterruptedException | ExecutionException e) {
+            throw new CompletionException(e.getCause());
+          }
+        });
   }
 }

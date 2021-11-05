@@ -92,47 +92,6 @@ class LibraryToken implements Library {
   }
 
   /**
-   * Returns a list of the library tokens.
-   *
-   * @return list of library tokens
-   */
-  static CompletableFuture<List<Library>> getLibraries() {
-    return new ThreadExecutionHelper<List<Library>>()
-        .runOnSwingThread(
-            () -> {
-              List<Library> tokenList = new ArrayList<>();
-              for (var zone : MapTool.getCampaign().getZones()) {
-                tokenList.addAll(
-                    zone
-                        .getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"))
-                        .stream()
-                        .map(t -> new LibraryToken(t.getId()))
-                        .toList());
-              }
-              return tokenList;
-            });
-  }
-
-  /**
-   * Returns the library for a given namespace.
-   *
-   * @param namespace the namespace to return the library for.
-   * @return the library for the namespace.
-   */
-  static CompletableFuture<Library> getLibrary(String namespace) {
-    return new ThreadExecutionHelper<Library>()
-        .runOnSwingThread(
-            () -> {
-              var tokenList = getTokensWithName("lib:" + namespace);
-              if (tokenList.isEmpty()) {
-                return null;
-              } else {
-                return new LibraryToken(tokenList.get(0).getId());
-              }
-            });
-  }
-
-  /**
    * Creates a new {@code LibraryToken} for the lib:token id.
    *
    * @param id the id of the lib:token.
@@ -342,45 +301,18 @@ class LibraryToken implements Library {
     return CompletableFuture.completedFuture(new TokenLibraryData(this));
   }
 
-  /**
-   * Finds the library token with the specific path.
-   *
-   * @param path the path of the token to find.
-   * @return the library token or {@code null} if it can not be found.
-   */
-  private static Library findLibrary(URL path) {
-    String name = "lib:" + path.getHost();
-    List<Token> tokenList = getTokensWithName(name);
-    if (tokenList.size() > 0) {
-      Optional<Token> token = tokenList.stream().filter(Token::getAllowURIAccess).findFirst();
-      if (token.isPresent()) {
-        return new LibraryToken(token.get().getId());
-      } else { // There are some tokens but none with "Allow URI Access"
-        throw new LibraryNotValidException(
-            Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
-      }
-    }
-    return null;
+  @Override
+  public CompletableFuture<Optional<String>> getLegacyEventHandlerName(String eventName) {
+    // For library tokens the legacy event handler name is the same as the event name.
+    return CompletableFuture.completedFuture(Optional.of(eventName));
+  }
+
+  @Override
+  public CompletableFuture<Optional<Token>> getAssociatedToken() {
+    return getToken().thenApply(Optional::of);
   }
 
   /**
-   * Returns a list of all tokens that match the specified name (case-insensitive)
-   *
-   * @param name the name to match.
-   * @return list of tokens.
-   */
-  private static List<Token> getTokensWithName(String name) {
-    List<Token> tokenList = new ArrayList<Token>();
-    for (var zone : MapTool.getCampaign().getZones()) {
-      tokenList.addAll(zone.getTokensFiltered(t -> name.equalsIgnoreCase(t.getName())));
-    }
-
-    return tokenList;
-  }
-
-  /**
-   * Returns the {@link Token} for the library.
-   *
    * @param id the id of the token Lib:Token to get.
    * @return the Token for the library.
    */
@@ -416,12 +348,12 @@ class LibraryToken implements Library {
 
   /**
    * Returns the property value for the specified name, Will return null if the property does not
-   * exist.
+   * exist. This method must be run on the swing thread.
    *
    * @param name the name of the property
    * @return the property value for the specified name.
    */
-  private String getProperty(String name) {
+  String getProperty(String name) {
     var token = findLibrary(id);
 
     Object prop = token.getProperty(name);
@@ -434,13 +366,13 @@ class LibraryToken implements Library {
 
   /**
    * Returns the property value for the specified name, Will return null if the property does not
-   * exist.
+   * exist. This method must be run on the swing thread.
    *
    * @param name the name of the property.
    * @param defaultValue the default value to return if the property is null.
    * @return the property value for the specified name.
    */
-  private String getProperty(String name, String defaultValue) {
+  String getProperty(String name, String defaultValue) {
     return Objects.requireNonNullElse(getProperty(name), defaultValue);
   }
 

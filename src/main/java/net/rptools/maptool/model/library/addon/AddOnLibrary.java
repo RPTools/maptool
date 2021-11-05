@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -34,6 +35,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryNotValidException;
@@ -41,6 +43,7 @@ import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
 
@@ -98,6 +101,9 @@ public class AddOnLibrary implements Library {
   /** The mapping between MTScript function paths and asset information. */
   private final Map<String, MTScript> mtsFunctionAssetMap;
 
+  /** The mapping between MTScript function paths and legacy events. */
+  private final Map<String, String> legacyEventNameMap = new HashMap<>();
+
   /** The ID of the asset for the whole of the add-on Library. */
   private final MD5Key assetKey;
 
@@ -106,12 +112,14 @@ public class AddOnLibrary implements Library {
    *
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
+   * @param eventsDto The MTScript Events Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    */
   private AddOnLibrary(
       MD5Key libraryAssetKey,
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
+      AddOnLibraryEventsDto eventsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
@@ -143,6 +151,10 @@ public class AddOnLibrary implements Library {
       descriptionMap.put(path, properties.getDescription());
     }
 
+    eventsDto.getEventsList().stream()
+        .filter(e -> !e.getMts().isEmpty())
+        .forEach(e -> legacyEventNameMap.put(e.getName(), e.getMts()));
+
     for (var entry : this.pathAssetMap.entrySet()) {
       String path = entry.getKey();
       if (path.startsWith(URL_PUBLIC_DIR)) {
@@ -171,6 +183,7 @@ public class AddOnLibrary implements Library {
    *
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
+   * @param eventsDto The Events Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    * @return the new Add on library.
    */
@@ -178,8 +191,9 @@ public class AddOnLibrary implements Library {
       MD5Key libraryAssetKey,
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
+      AddOnLibraryEventsDto eventsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    var addOn = new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    var addOn = new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
     try {
       addOn.getLibraryData().thenApply(ld -> ((AddOnLibraryData) ld).initialize()).get();
     } catch (InterruptedException | ExecutionException e) {
@@ -274,6 +288,17 @@ public class AddOnLibrary implements Library {
   @Override
   public CompletableFuture<LibraryData> getLibraryData() {
     return CompletableFuture.completedFuture(new AddOnLibraryData(this, this.namespace));
+  }
+
+  @Override
+  public CompletableFuture<Optional<String>> getLegacyEventHandlerName(String eventName) {
+    return CompletableFuture.completedFuture(
+        Optional.ofNullable(legacyEventNameMap.get(eventName)));
+  }
+
+  @Override
+  public CompletableFuture<Optional<Token>> getAssociatedToken() {
+    return CompletableFuture.completedFuture(Optional.empty());
   }
 
   @Override
@@ -381,5 +406,14 @@ public class AddOnLibrary implements Library {
    */
   public MD5Key getAssetKey() {
     return assetKey;
+  }
+
+  /**
+   * Returns the legacy events handled by this add-on library. This method is thread safe.
+   *
+   * @return the legacy events handled by this add-on library.
+   */
+  public Set<String> getLegacyEvents() {
+    return legacyEventNameMap.keySet();
   }
 }

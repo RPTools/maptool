@@ -137,7 +137,7 @@ public class AddOnLibraryImporter {
       ZipEntry eventsZipEntry = zip.getEntry(EVENT_PROPERTY_FILE);
       if (eventsZipEntry != null) {
         JsonFormat.parser()
-            .merge();
+            .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
@@ -145,7 +145,11 @@ public class AddOnLibraryImporter {
       addAsset(asset);
 
       return AddOnLibrary.fromDto(
-          asset.getMD5Key(), addOnLib, mtsPropBuilder.build(), pathAssetMap);
+          asset.getMD5Key(),
+          addOnLib,
+          mtsPropBuilder.build(),
+          eventPropBuilder.build(),
+          pathAssetMap);
     }
   }
 

@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -158,5 +160,19 @@ public class AddOnLibraryManager {
   /** Remove all the add-on libraries. */
   public void removeAllLibraries() {
     namespaceLibraryMap.clear();
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<Set<Library>> getLegacyEventTargets(String eventName) {
+    return CompletableFuture.supplyAsync(
+        () ->
+            namespaceLibraryMap.values().stream()
+                .filter(l -> l.getLegacyEvents().contains(eventName))
+                .collect(Collectors.toSet()));
   }
 }

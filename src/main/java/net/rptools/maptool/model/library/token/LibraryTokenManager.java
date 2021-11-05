@@ -83,6 +83,19 @@ public class LibraryTokenManager {
    * @return list of library tokens
    */
   public CompletableFuture<List<Library>> getLibraries() {
+    return getMatchingLibraryList(null, null);
+  }
+
+  /**
+   * Returns a list of the library tokens filtered by those that have a given property and macro
+   * name. if either the property or macro name is null then it will match all tokens for that
+   * filter.
+   *
+   * @param property the name of the property to match or null to ignore
+   * @param macro the name of the macro to match or null to ignore
+   * @return list of library tokens that match the filters.
+   */
+  private CompletableFuture<List<Library>> getMatchingLibraryList(String property, String macro) {
     return new ThreadExecutionHelper<List<Library>>()
         .runOnSwingThread(
             () -> {
@@ -92,6 +105,8 @@ public class LibraryTokenManager {
                     zone
                         .getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"))
                         .stream()
+                        .filter(t -> property == null || t.getProperty(property) != null)
+                        .filter(t -> macro == null || t.getMacro(macro, false) != null)
                         .map(t -> new LibraryToken(t.getId()))
                         .toList());
               }
@@ -185,5 +200,15 @@ public class LibraryTokenManager {
 
     throw new LibraryNotValidException(
         Reason.MISSING_LIBRARY, I18N.getText("library.error.libtoken.missing"));
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<List<Library>> getLegacyEventTargets(String eventName) {
+    return getMatchingLibraryList(null, eventName);
   }
 }
