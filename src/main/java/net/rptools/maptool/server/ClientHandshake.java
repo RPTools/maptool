@@ -220,9 +220,11 @@ public class ClientHandshake implements Handshake, MessageHandler {
         .getToolbarPanel()
         .getMapselect()
         .setVisible((!policy.getMapSelectUIHidden()) || MapTool.getPlayer().isGM());
-    MapTool.getFrame()
-        .getAssetPanel()
-        .setVisible((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM());
+    if ((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM()) {
+      MapTool.getFrame().getAssetPanel().enableAssets();
+    } else {
+      MapTool.getFrame().getAssetPanel().disableAssets();
+    }
     if (!MapTool.isHostingServer()) {
       PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
       var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
