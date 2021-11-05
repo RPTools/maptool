@@ -4158,7 +4158,7 @@
                                    </at>
                                    <at name="selectedItem">
                                     <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                     <at name="name">listitem</at>
+                                     <at name="name">TWO_IMAGES_BAR</at>
                                      <at name="label">CampaignPropertiesDialog.combo.bars.type.twoImages</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -4179,7 +4179,7 @@
                                        <item >
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                          <at name="name">listitem</at>
+                                          <at name="name">TWO_IMAGES_BAR</at>
                                           <at name="label">CampaignPropertiesDialog.combo.bars.type.twoImages</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -4194,7 +4194,7 @@
                                        <item >
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                          <at name="name">listitem</at>
+                                          <at name="name">SINGLE_IMAGE_BAR</at>
                                           <at name="label">CampaignPropertiesDialog.combo.bars.type.singleImage</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -4209,7 +4209,7 @@
                                        <item >
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                          <at name="name">listitem</at>
+                                          <at name="name">MULTIPLE_IMAGES_BAR</at>
                                           <at name="label">CampaignPropertiesDialog.combo.bars.type.multipleImages</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -4224,7 +4224,7 @@
                                        <item >
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                          <at name="name">listitem</at>
+                                          <at name="name">SOLID_BAR</at>
                                           <at name="label">CampaignPropertiesDialog.combo.bars.type.solid</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
@@ -4239,7 +4239,7 @@
                                        <item >
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
-                                          <at name="name">listitem</at>
+                                          <at name="name">TWO_TONE_BAR</at>
                                           <at name="label">CampaignPropertiesDialog.combo.bars.type.twoTone</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">

@@ -63,7 +63,6 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.util.ImageManager;
@@ -708,7 +707,7 @@ public class TokenBarController
     Color bgColor = ((JETAColorWell) formPanel.getComponentByName(BG_COLOR)).getColor();
     String name = formPanel.getText(NAME);
     boolean mouseover = formPanel.isSelected(MOUSEOVER);
-    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getLabel();
+    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName();
     int opacity = TokenStatesController.getSpinner(OPACITY, "opacity", formPanel);
     boolean showGM = formPanel.isSelected(SHOW_GM);
     boolean showOwner = formPanel.isSelected(SHOW_OWNER);
@@ -719,9 +718,9 @@ public class TokenBarController
         Side.valueOf(((ListItemProperty) formPanel.getSelectedItem(SIDE)).getName().toUpperCase());
 
     BarTokenOverlay to = null;
-    if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.solid"))) {
+    if (overlay.equals("SOLID_BAR")) {
       to = new DrawnBarTokenOverlay(name, color, thickness);
-    } else if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.twoTone"))) {
+    } else if (overlay.equals("TWO_TONE_BAR")) {
       to = new TwoToneBarTokenOverlay(name, color, bgColor, thickness);
     } else {
 
@@ -732,13 +731,11 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals(I18N.getText("CampaignPropertiesDialog.combo.bars.type.twoImages"))) {
+      if (overlay.equals("TWO_IMAGES_BAR")) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals(
-          I18N.getText("CampaignPropertiesDialog.combo.bars.type.singleImage"))) {
+      } else if (overlay.equals("SINGLE_IMAGE_BAR")) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals(
-          I18N.getText("CampaignPropertiesDialog.combo.bars.type.multipleImages"))) {
+      } else if (overlay.equals("MULTIPLE_IMAGES_BAR")) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
