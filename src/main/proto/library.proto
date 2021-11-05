@@ -3,7 +3,7 @@ syntax = "proto3";
 package maptool;
 
 option java_multiple_files = true;
-option java_package = "net.rptools.maptool.model.framework.proto";
+option java_package = "net.rptools.maptool.model.library.proto";
 option java_outer_classname = "LibraryProtos";
 
 
@@ -38,3 +38,11 @@ message AddOnLibraryListDto {
   repeated AddOnLibraryEntryDto libraries = 1;
 }
 
+message AddOnLibraryEventsDto {
+  message AddOnLibraryEventDto {
+    string name = 1;
+    string mts = 2;
+    string js = 3;
+  }
+  repeated AddOnLibraryEventDto events = 1;
+}

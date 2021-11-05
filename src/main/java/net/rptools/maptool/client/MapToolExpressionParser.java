@@ -107,7 +107,8 @@ public class MapToolExpressionParser extends ExpressionParser {
               TokenSpeechNameFunction.getInstance(),
               new MarkDownFunctions(),
               new PlayerFunctions(),
-              new LibraryFunctions())
+              new LibraryFunctions(),
+              new DataFunctions())
           .collect(Collectors.toList());
 
   public MapToolExpressionParser() {

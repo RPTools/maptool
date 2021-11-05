@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.dropinlibrary;
+package net.rptools.maptool.model.library.addon;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,18 +27,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.framework.Library;
-import net.rptools.maptool.model.framework.LibraryInfo;
-import net.rptools.maptool.model.framework.LibraryNotValidException;
-import net.rptools.maptool.model.framework.LibraryNotValidException.Reason;
-import net.rptools.maptool.model.framework.MTScriptMacroInfo;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryDto;
-import net.rptools.maptool.model.framework.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryInfo;
+import net.rptools.maptool.model.library.LibraryNotValidException;
+import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.library.MTScriptMacroInfo;
+import net.rptools.maptool.model.library.data.LibraryData;
+import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */
@@ -176,7 +179,13 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    var addOn = new AddOnLibrary(libraryAssetKey, dto, mtsDto, pathAssetMap);
+    try {
+      addOn.getLibraryData().thenApply(ld -> ((AddOnLibraryData) ld).initialize()).get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new CompletionException(e.getCause());
+    }
+    return addOn;
   }
 
   @Override
@@ -260,6 +269,11 @@ public class AddOnLibrary implements Library {
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
     return CompletableFuture.completedFuture(new ArrayList<>(pathAssetMap.keySet()));
+  }
+
+  @Override
+  public CompletableFuture<LibraryData> getLibraryData() {
+    return CompletableFuture.completedFuture(new AddOnLibraryData(this, this.namespace));
   }
 
   @Override

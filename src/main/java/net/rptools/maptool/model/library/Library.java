@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework;
+package net.rptools.maptool.model.library;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.library.data.LibraryData;
 
 /** Interface for classes that represents a framework library. */
 public interface Library {
@@ -53,7 +54,7 @@ public interface Library {
    * Returns an {@link InputStream} for the location specified.
    *
    * @param location the location to return the input stream for.
-   * @return the inpute stream for the location
+   * @return the input stream for the location
    * @throws IOException if there is an io error reading the location.
    */
   CompletableFuture<InputStream> read(URL location) throws IOException;
@@ -154,4 +155,11 @@ public interface Library {
    * @return a list of the "files" within the library.
    */
   CompletableFuture<List<String>> getAllFiles();
+
+  /**
+   * Returns the data for the library.
+   *
+   * @return the data for the library.
+   */
+  CompletableFuture<LibraryData> getLibraryData();
 }

@@ -36,7 +36,10 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 
 public interface ServerCommand {
   public enum COMMAND {
@@ -104,7 +107,14 @@ public interface ServerCommand {
     restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     removeAddOnLibrary,
     removeAllAddOnLibraries,
-    addAddOnLibrary
+    addAddOnLibrary,
+    updateDataStore,
+    updateData,
+    updateDataNamespace,
+    removeDataStore,
+    removeDataNamespace,
+    removeData
+
     // scale a player's view
     // @formatter:on
   };
@@ -249,4 +259,16 @@ public interface ServerCommand {
   public void removeAddOnLibrary(List<String> namespaces);
 
   public void removeAllAddOnLibraries();
+
+  void updateDataStore(DataStoreDto dataStore);
+
+  void updateDataNamespace(GameDataDto gameData);
+
+  void updateData(String type, String namespace, GameDataValueDto gameData);
+
+  void removeDataStore();
+
+  void removeDataNamespace(String type, String namespace);
+
+  void removeData(String type, String namespace, String name);
 }

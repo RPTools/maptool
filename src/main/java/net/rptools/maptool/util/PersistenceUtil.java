@@ -64,10 +64,14 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.framework.LibraryManager;
-import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibrary;
-import net.rptools.maptool.model.framework.dropinlibrary.AddOnLibraryImporter;
-import net.rptools.maptool.model.framework.proto.AddOnLibraryListDto;
+import net.rptools.maptool.model.campaign.CampaignManager;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -90,6 +94,10 @@ public class PersistenceUtil {
   private static final String DROP_IN_LIBRARY_LIST_FILE = DROP_IN_LIBRARY_DIR + "libraries.json";
 
   private static final String DROP_IN_LIBRARY_ASSET_DIR = DROP_IN_LIBRARY_DIR + ASSET_DIR;
+
+  private static final String GAME_DATA_DIR = "data/";
+
+  private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
 
   private static final String CAMPAIGN_VERSION = "1.11.0";
 
@@ -310,6 +318,11 @@ public class PersistenceUtil {
       saveAddOnLibraries(pakFile);
       saveTimer.stop("Save Drop In Libraries");
 
+      // Store the Game Data
+      saveTimer.start("Save Game Data");
+      saveGameData(pakFile);
+      saveTimer.stop("Save Game Data");
+
       try {
         saveTimer.start("Set content");
 
@@ -457,6 +470,8 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
+        new CampaignManager().clearCampaignData();
+        loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
@@ -728,7 +743,6 @@ public class PersistenceUtil {
    */
   private static void loadAddOnLibraries(PackedFile packedFile) throws IOException {
     var libraryManager = new LibraryManager();
-    libraryManager.removeAddOnLibraries();
     if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
       return; // No Libraries to import
     }
@@ -773,6 +787,46 @@ public class PersistenceUtil {
     for (var ldto : dto.getLibrariesList()) {
       Asset asset = AssetManager.getAsset(new MD5Key(ldto.getMd5Hash()));
       packedFile.putFile(DROP_IN_LIBRARY_ASSET_DIR + asset.getMD5Key().toString(), asset.getData());
+    }
+  }
+
+  private static void loadGameData(PackedFile packedFile) throws IOException {
+
+    if (!packedFile.hasFile(GAME_DATA_FILE)) {
+      return; // No game data to import
+    }
+
+    var builder = DataStoreDto.newBuilder();
+    JsonFormat.parser()
+        .merge(new InputStreamReader(packedFile.getFileAsInputStream(GAME_DATA_FILE)), builder);
+    var dataStoreDto = builder.build();
+
+    try {
+      var dataStore = new DataStoreManager().getDefaultDataStore();
+      new GameDataImporter(dataStore).importData(dataStoreDto);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private static void saveGameData(PackedFile packedFile) throws IOException {
+    // Remove all the game data from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(GAME_DATA_DIR) && !path.equals(GAME_DATA_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    try {
+      DataStoreManager dataStoreManager = new DataStoreManager();
+      DataStoreDto dto = dataStoreManager.toDto().get();
+      packedFile.putFile(
+          GAME_DATA_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+
+      Set<MD5Key> assets = dataStoreManager.getAssets().get();
+      saveAssets(dataStoreManager.getAssets().get(), packedFile);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
     }
   }
 

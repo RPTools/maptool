@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -37,7 +39,9 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -503,22 +507,40 @@ public class TokenPropertyFunctions extends AbstractFunction {
      */
     if (functionName.equalsIgnoreCase("getLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String propertyName = parameters.get(0).toString();
       String location;
       if (parameters.size() > 1) {
         location = parameters.get(1).toString();
       } else {
         location = MapTool.getParser().getMacroSource();
       }
-      Token token = MapTool.getParser().getTokenMacroLib(location);
-      Object val = token.getProperty(parameters.get(0).toString());
 
-      // Attempt to convert to a number ...
-      try {
-        val = new BigDecimal(val.toString());
-      } catch (Exception e) {
-        // Ignore, use previous value of "val"
+      String libName;
+      if (location.toLowerCase().startsWith("lib:")) {
+        libName = location.substring(4);
+      } else {
+        libName = location;
       }
-      return val == null ? "" : val;
+
+      try {
+        var library =
+            new LibraryManager()
+                .getLibrary(libName)
+                .orElseThrow(
+                    () ->
+                        new ParserException(
+                            I18N.getText(
+                                "macro.function.tokenProperty.unknownLibToken",
+                                functionName,
+                                libName)));
+        return library
+            .getLibraryData()
+            .thenCompose(libData -> libData.getValue(propertyName))
+            .thenApply(data -> new MTScriptDataConversion().convertToMTScriptType(data))
+            .get();
+      } catch (ExecutionException | InterruptedException e) {
+        throw new ParserException(e.getCause());
+      }
     }
 
     /*
@@ -535,9 +557,30 @@ public class TokenPropertyFunctions extends AbstractFunction {
       } else {
         location = MapTool.getParser().getMacroSource();
       }
-      Token token = MapTool.getParser().getTokenMacroLib(location);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setProperty, property, value);
-      return "";
+
+      String libName;
+      if (location.toLowerCase().startsWith("lib:")) {
+        libName = location.substring(4);
+      } else {
+        libName = location;
+      }
+
+      try {
+        var library =
+            new LibraryManager()
+                .getLibrary(libName)
+                .orElseThrow(
+                    () ->
+                        new ParserException(
+                            I18N.getText(
+                                "macro.function.tokenProperty.unknownLibToken",
+                                functionName,
+                                libName)));
+        library.getLibraryData().thenCompose(libData -> libData.setStringData(property, value));
+        return "";
+      } catch (ExecutionException | InterruptedException e) {
+        throw new ParserException(e.getCause());
+      }
     }
 
     /*
@@ -554,13 +597,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
       } else {
         location = MapTool.getParser().getMacroSource();
       }
-      Token token = MapTool.getParser().getTokenMacroLib(location);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.tokenProperty.unknownLibToken", functionName, location));
+
+      String libName;
+      if (location.toLowerCase().startsWith("lib:")) {
+        libName = location.substring(4);
+      } else {
+        libName = location;
       }
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      return getPropertyNames(token, delim, ".*", false);
+      return getMatchingLibProperties(libName, delim, ".*", functionName);
     }
 
     /*
@@ -578,13 +623,16 @@ public class TokenPropertyFunctions extends AbstractFunction {
       } else {
         location = MapTool.getParser().getMacroSource();
       }
-      Token token = MapTool.getParser().getTokenMacroLib(location);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.tokenProperty.unknownLibToken", functionName, location));
+
+      String libName;
+      if (location.toLowerCase().startsWith("lib:")) {
+        libName = location.substring(4);
+      } else {
+        libName = location;
       }
+
       String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
-      return getPropertyNames(token, delim, pattern, false);
+      return getMatchingLibProperties(libName, delim, pattern, functionName);
     }
 
     /*
@@ -1163,6 +1211,50 @@ public class TokenPropertyFunctions extends AbstractFunction {
       } else {
         return StringFunctions.getInstance().join(namesList, delim);
       }
+    }
+  }
+
+  /**
+   * Returns the matching library property names for the specified library.
+   *
+   * @param libName the name of the library to get the property names for.
+   * @param delim the list delimiter, or "json" for a json array.
+   * @param pattern the pattern to match against the property names.
+   * @param functionName the name of the MTS function calling this method.
+   * @return the list of matching property names.
+   * @throws ParserException if the library name is invalid, or another error occurs.
+   */
+  private Object getMatchingLibProperties(
+      String libName, String delim, String pattern, String functionName) throws ParserException {
+    try {
+      var library =
+          new LibraryManager()
+              .getLibrary(libName)
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText(
+                              "macro.function.tokenProperty.unknownLibToken",
+                              functionName,
+                              libName)));
+      return library
+          .getLibraryData()
+          .thenCompose(LibraryData::getAllKeys)
+          .thenApply(
+              keys -> {
+                if (delim.equalsIgnoreCase("json")) {
+                  var jarr = new JsonArray();
+                  keys.stream().filter(k -> k.matches(pattern)).forEach(jarr::add);
+                  return jarr;
+                } else {
+                  return keys.stream()
+                      .filter(k -> k.matches(pattern))
+                      .collect(Collectors.joining(delim));
+                }
+              })
+          .get();
+    } catch (ExecutionException | InterruptedException e) {
+      throw new ParserException(e.getCause());
     }
   }
 

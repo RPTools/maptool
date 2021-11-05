@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.framework.dropinlibrary;
+package net.rptools.maptool.model.library.addon;
 
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
