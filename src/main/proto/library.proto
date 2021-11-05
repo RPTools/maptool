@@ -38,3 +38,11 @@ message AddOnLibraryListDto {
   repeated AddOnLibraryEntryDto libraries = 1;
 }
 
+message AddOnLibraryEventsDto {
+  message AddOnLibraryEventDto {
+    string name = 1;
+    string mts = 2;
+    string js = 3;
+  }
+  repeated AddOnLibraryEventDto events = 1;
+}

@@ -22,7 +22,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 
-/** Intererface for a library data object. */
+/** Interface for a library data object. */
 public interface LibraryData {
 
   /**
