@@ -32,6 +32,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -49,7 +50,10 @@ public class AddOnLibraryImporter {
   private static final String CONTENT_DIRECTORY = "library/";
 
   /** The name of the file with the macro script function properties. */
-  private static final String MACROSCRIPT_PROPERTY_FILES = "mts_properties.json";
+  private static final String MACROSCRIPT_PROPERTY_FILE = "mts_properties.json";
+
+  /** The name of the file with event properties. */
+  private static final String EVENT_PROPERTY_FILE = "events.json";
 
   /**
    * Returns the {@link FileFilter} for add on library files.
@@ -118,12 +122,22 @@ public class AddOnLibraryImporter {
       }
       var builder = AddOnLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
+
+      // MT MacroScript properties
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
       var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
-      ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILES);
+      ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILE);
       if (mtsPropsZipEntry != null) {
         JsonFormat.parser()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
+      }
+
+      // Event properties
+      var eventPropBuilder = AddOnLibraryEventsDto.newBuilder();
+      ZipEntry eventsZipEntry = zip.getEntry(EVENT_PROPERTY_FILE);
+      if (eventsZipEntry != null) {
+        JsonFormat.parser()
+            .merge();
       }
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
@@ -166,7 +180,7 @@ public class AddOnLibraryImporter {
   }
 
   /**
-   * Adds the {@lik Asset} to the {@link AssetManager} if it does not already exist.
+   * Adds the {@link Asset} to the {@link AssetManager} if it does not already exist.
    *
    * @param asset the {@link Asset} to add.
    */
