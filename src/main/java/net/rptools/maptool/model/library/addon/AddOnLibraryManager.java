@@ -68,17 +68,17 @@ public class AddOnLibraryManager {
    * Registers the specified add-on library.
    *
    * @param library The add-on library to register.
-   * @throws ExecutionException if there is an error fetching the namespace for the library.
-   * @throws InterruptedException if there is an error fetching the namespace for the library.
    * @throws IllegalStateException if there is already a add-on library with the same namespace.
    */
-  public void registerLibrary(AddOnLibrary library)
-      throws ExecutionException, InterruptedException {
-    String namespace = library.getNamespace().get().toLowerCase();
+  public void registerLibrary(AddOnLibrary library) {
+    String namespace = library.getNamespace().join().toLowerCase();
+
     var registeredLib = namespaceLibraryMap.computeIfAbsent(namespace, k -> library);
     if (registeredLib != library) {
       throw new IllegalStateException("Library is already registered");
     }
+
+    library.initialize();
   }
 
   /**

@@ -45,4 +45,5 @@ message AddOnLibraryEventsDto {
     string js = 3;
   }
   repeated Events events = 1;
+  repeated Events legacy_events = 2;
 }

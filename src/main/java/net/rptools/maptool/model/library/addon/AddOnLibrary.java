@@ -28,9 +28,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -45,10 +45,17 @@ import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */
 public class AddOnLibrary implements Library {
+
+  /** The name of the event for first time initialization. */
+  private static final String FIRST_INIT_EVENT = "onFirstInit";
+
+  /** The name of the event for initialization. */
+  private static final String INIT_EVENT = "onInit";
 
   /** Record used to store information about the MacrScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
@@ -104,6 +111,9 @@ public class AddOnLibrary implements Library {
   /** The mapping between MTScript function paths and legacy events. */
   private final Map<String, String> legacyEventNameMap = new HashMap<>();
 
+  /** The mapping between MTScript function paths and non legacy events. */
+  private final Map<String, String> eventNameMap = new HashMap<>();
+
   /** The ID of the asset for the whole of the add-on Library. */
   private final MD5Key assetKey;
 
@@ -153,6 +163,10 @@ public class AddOnLibrary implements Library {
 
     eventsDto.getEventsList().stream()
         .filter(e -> !e.getMts().isEmpty())
+        .forEach(e -> eventNameMap.put(e.getName(), e.getMts()));
+
+    eventsDto.getLegacyEventsList().stream()
+        .filter(e -> !e.getMts().isEmpty())
         .forEach(e -> legacyEventNameMap.put(e.getName(), e.getMts()));
 
     for (var entry : this.pathAssetMap.entrySet()) {
@@ -193,13 +207,8 @@ public class AddOnLibrary implements Library {
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
-    var addOn = new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
-    try {
-      addOn.getLibraryData().thenApply(ld -> ((AddOnLibraryData) ld).initialize()).get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new CompletionException(e.getCause());
-    }
-    return addOn;
+
+    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
   }
 
   @Override
@@ -287,7 +296,8 @@ public class AddOnLibrary implements Library {
 
   @Override
   public CompletableFuture<LibraryData> getLibraryData() {
-    return CompletableFuture.completedFuture(new AddOnLibraryData(this, this.namespace));
+    return CompletableFuture.completedFuture(
+        new AddOnLibraryData(this, this.namespace.toLowerCase()));
   }
 
   @Override
@@ -415,5 +425,44 @@ public class AddOnLibrary implements Library {
    */
   public Set<String> getLegacyEvents() {
     return legacyEventNameMap.keySet();
+  }
+
+  /** Run first time initialization of the add-on library. */
+  void initialize() {
+    getLibraryData()
+        .thenAccept(
+            d -> {
+              var data = (AddOnLibraryData) d;
+              data.initialize()
+                  .thenAccept(
+                      wasInit -> {
+                        if (wasInit) {
+                          if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
+                            callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
+                          }
+                        }
+
+                        if (eventNameMap.containsKey(INIT_EVENT)) {
+                          callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
+                        }
+                      });
+            })
+        .join();
+  }
+
+  /**
+   * Call the specified function MacroScript function from the add-on library.
+   *
+   * @param name the name of the function MacroScript function to call.
+   * @return a CompletableFuture that completes when the function MacroScript function has finished
+   */
+  private CompletableFuture<Void> callMTSFunction(String name) {
+    return new ThreadExecutionHelper<Void>()
+        .runOnSwingThread(
+            () -> {
+              var resolver = new MapToolVariableResolver(null);
+              MapTool.getParser().runMacro(resolver, null, name + "@" + namespace, null);
+              return null;
+            });
   }
 }
