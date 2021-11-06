@@ -26,9 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
@@ -346,18 +344,14 @@ public class MemoryDataStore implements DataStore {
   public CompletableFuture<GameDataDto> toDto(String type, String namespace) {
     return CompletableFuture.supplyAsync(
         () -> {
-          try {
-            var builder = GameDataDto.newBuilder();
-            builder.setType(type);
-            builder.setNamespace(namespace);
-            for (var data : getProperties(type, namespace).get()) {
-              var dataDto = gameValueToDto(data);
-              builder.addValues(dataDto);
-            }
-            return builder.build();
-          } catch (InterruptedException | ExecutionException e) {
-            throw new CompletionException(e.getCause());
+          var builder = GameDataDto.newBuilder();
+          builder.setType(type);
+          builder.setNamespace(namespace);
+          for (var data : getProperties(type, namespace).join()) {
+            var dataDto = gameValueToDto(data);
+            builder.addValues(dataDto);
           }
+          return builder.build();
         });
   }
 

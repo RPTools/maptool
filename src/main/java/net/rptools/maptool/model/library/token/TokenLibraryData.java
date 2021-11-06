@@ -19,8 +19,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
@@ -55,11 +53,7 @@ public class TokenLibraryData implements LibraryData {
     return new ThreadExecutionHelper<Set<String>>()
         .runOnSwingThread(
             () -> {
-              try {
-                return libraryToken.getToken().get().getPropertyNames();
-              } catch (ExecutionException | InterruptedException e) {
-                throw new CompletionException(e.getCause());
-              }
+              return libraryToken.getToken().join().getPropertyNames();
             });
   }
 
@@ -70,33 +64,29 @@ public class TokenLibraryData implements LibraryData {
    * @return The value for the given key.
    */
   private DataValue getData(String key) {
-    try {
-      var val = libraryToken.getToken().get().getProperty(key);
-      if (val == null) {
-        return DataValueFactory.undefined(key);
-      } else if (val instanceof Number n) {
-        if (n.intValue() == n.doubleValue()) {
-          return DataValueFactory.fromLong(key, n.longValue());
-        } else {
-          return DataValueFactory.fromDouble(key, n.doubleValue());
-        }
-      } else if (val instanceof Boolean b) {
-        return DataValueFactory.fromBoolean(key, b);
-      } else if (val instanceof String s) {
-        if (s.trim().startsWith("{") || s.startsWith("[")) {
-          var jsonElement = JsonParser.parseString(s);
-          if (jsonElement.isJsonArray()) {
-            return DataValueFactory.fromJsonArray(key, jsonElement.getAsJsonArray());
-          } else if (jsonElement.isJsonObject()) {
-            return DataValueFactory.fromJsonObject(key, jsonElement.getAsJsonObject());
-          }
-        }
-        return DataValueFactory.fromString(key, s);
+    var val = libraryToken.getToken().join().getProperty(key);
+    if (val == null) {
+      return DataValueFactory.undefined(key);
+    } else if (val instanceof Number n) {
+      if (n.intValue() == n.doubleValue()) {
+        return DataValueFactory.fromLong(key, n.longValue());
       } else {
-        return DataValueFactory.fromString(key, val.toString());
+        return DataValueFactory.fromDouble(key, n.doubleValue());
       }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new CompletionException(e.getCause());
+    } else if (val instanceof Boolean b) {
+      return DataValueFactory.fromBoolean(key, b);
+    } else if (val instanceof String s) {
+      if (s.trim().startsWith("{") || s.startsWith("[")) {
+        var jsonElement = JsonParser.parseString(s);
+        if (jsonElement.isJsonArray()) {
+          return DataValueFactory.fromJsonArray(key, jsonElement.getAsJsonArray());
+        } else if (jsonElement.isJsonObject()) {
+          return DataValueFactory.fromJsonObject(key, jsonElement.getAsJsonObject());
+        }
+      }
+      return DataValueFactory.fromString(key, s);
+    } else {
+      return DataValueFactory.fromString(key, val.toString());
     }
   }
 

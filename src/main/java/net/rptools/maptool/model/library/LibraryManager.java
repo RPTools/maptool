@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
@@ -275,22 +274,18 @@ public class LibraryManager {
   public CompletableFuture<List<Library>> getLegacyEventTargets(String eventName) {
     return CompletableFuture.supplyAsync(
         () -> {
-          try {
-            var addons = addOnLibraryManager.getLegacyEventTargets(eventName).get();
-            var tokens = libraryTokenManager.getLegacyEventTargets(eventName).get();
-            var libs = new HashSet<Library>(addons);
-            var addonLibNamespaces =
-                addons.stream().map(Library::getNamespace).collect(Collectors.toSet());
-            // Only add lib:tokens if there are no addon libraries with the same namespace
-            for (var token : tokens) {
-              if (!addonLibNamespaces.contains(token.getNamespace())) {
-                libs.add(token);
-              }
+          var addons = addOnLibraryManager.getLegacyEventTargets(eventName).join();
+          var tokens = libraryTokenManager.getLegacyEventTargets(eventName).join();
+          var libs = new HashSet<Library>(addons);
+          var addonLibNamespaces =
+              addons.stream().map(Library::getNamespace).collect(Collectors.toSet());
+          // Only add lib:tokens if there are no addon libraries with the same namespace
+          for (var token : tokens) {
+            if (!addonLibNamespaces.contains(token.getNamespace())) {
+              libs.add(token);
             }
-            return new ArrayList<>(libs);
-          } catch (InterruptedException | ExecutionException e) {
-            throw new CompletionException(e.getCause());
           }
+          return new ArrayList<>(libs);
         });
   }
 }

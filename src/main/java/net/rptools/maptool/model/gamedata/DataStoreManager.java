@@ -16,8 +16,6 @@ package net.rptools.maptool.model.gamedata;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 
@@ -65,14 +63,10 @@ public class DataStoreManager {
         () -> {
           var builder = DataStoreDto.newBuilder();
           builder.setDataStoreType(MEMORY_DATA_STORE_TYPE_NAME);
-          try {
-            for (String propertyType : memoryDataStore.getPropertyTypes().get()) {
-              for (String namespace : memoryDataStore.getPropertyNamespaces(propertyType).get()) {
-                memoryDataStore.toDto(propertyType, namespace).thenAccept(builder::addData).get();
-              }
+          for (String propertyType : memoryDataStore.getPropertyTypes().join()) {
+            for (String namespace : memoryDataStore.getPropertyNamespaces(propertyType).join()) {
+              memoryDataStore.toDto(propertyType, namespace).thenAccept(builder::addData).join();
             }
-          } catch (InterruptedException | ExecutionException e) {
-            throw new CompletionException(e.getCause());
           }
           return builder.build();
         });

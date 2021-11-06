@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
@@ -135,19 +133,15 @@ public class AddOnLibraryManager {
           var dto = AddOnLibraryListDto.newBuilder();
           for (var library : namespaceLibraryMap.values()) {
             var detailDto = AddOnLibraryDto.newBuilder();
-            try {
-              detailDto.setName(library.getName().get());
-              detailDto.setVersion(library.getVersion().get());
-              detailDto.setWebsite(library.getWebsite().get());
-              detailDto.setGitUrl(library.getGitUrl().get());
-              detailDto.addAllAuthors(Arrays.asList(library.getAuthors().get()));
-              detailDto.setLicense(library.getLicense().get());
-              detailDto.setNamespace(library.getNamespace().get());
-              detailDto.setDescription(library.getDescription().get());
-              detailDto.setShortDescription(library.getShortDescription().get());
-            } catch (InterruptedException | ExecutionException e) {
-              throw new CompletionException(e);
-            }
+            detailDto.setName(library.getName().join());
+            detailDto.setVersion(library.getVersion().join());
+            detailDto.setWebsite(library.getWebsite().join());
+            detailDto.setGitUrl(library.getGitUrl().join());
+            detailDto.addAllAuthors(Arrays.asList(library.getAuthors().join()));
+            detailDto.setLicense(library.getLicense().join());
+            detailDto.setNamespace(library.getNamespace().join());
+            detailDto.setDescription(library.getDescription().join());
+            detailDto.setShortDescription(library.getShortDescription().join());
             var campDto = AddOnLibraryEntryDto.newBuilder();
             campDto.setDetails(detailDto);
             campDto.setMd5Hash(library.getAssetKey().toString());
