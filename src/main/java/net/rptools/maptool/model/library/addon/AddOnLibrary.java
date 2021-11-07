@@ -461,7 +461,7 @@ public class AddOnLibrary implements Library {
         .runOnSwingThread(
             () -> {
               var resolver = new MapToolVariableResolver(null);
-              MapTool.getParser().runMacro(resolver, null, name + "@" + namespace, null);
+              MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
               return null;
             });
   }

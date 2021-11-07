@@ -645,7 +645,7 @@ public class InitiativeList implements Serializable {
     try {
       var libs =
           new LibraryManager()
-              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK)
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK)
               .get();
       boolean isVetoed = false;
       if (!libs.isEmpty()) {
@@ -655,12 +655,11 @@ public class InitiativeList implements Serializable {
         args.addProperty("direction", direction.toString());
         String argStr = args.toString();
         for (Library handler : libs) {
-          String libraryNamespace = null;
           try {
-            libraryNamespace = handler.getNamespace().get();
+            String libraryNamespace = handler.getNamespace().get();
             boolean thisVote =
                 EventMacroUtil.pollEventHandlerForVeto(
-                    ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
+                    ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
                     libraryNamespace,
                     argStr,
                     null,
@@ -695,23 +694,35 @@ public class InitiativeList implements Serializable {
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
-    List<Token> libTokens =
-        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK);
-    if (!libTokens.isEmpty()) {
-      JsonObject args = new JsonObject();
-      args.add("old", getInfoForOffset(oldOffset, oldRound));
-      args.add("new", getInfoForOffset(newOffset, newRound));
-      args.addProperty("direction", direction.toString());
-      String argStr = args.toString();
-      String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
-      for (Token handler : libTokens) {
-        EventMacroUtil.callEventHandler(
-            ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
-            prefix + handler.getName(),
-            argStr,
-            null,
-            Collections.emptyMap());
+    try {
+      var libs =
+          new LibraryManager()
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK)
+              .get();
+      if (!libs.isEmpty()) {
+        JsonObject args = new JsonObject();
+        args.add("old", getInfoForOffset(oldOffset, oldRound));
+        args.add("new", getInfoForOffset(newOffset, newRound));
+        args.addProperty("direction", direction.toString());
+        String argStr = args.toString();
+        String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
+        for (Library handler : libs) {
+          try {
+            String libraryNamespace = handler.getNamespace().get();
+            EventMacroUtil.callEventHandler(
+                ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
+                libraryNamespace,
+                argStr,
+                null,
+                Collections.emptyMap());
+          } catch (InterruptedException | ExecutionException e) {
+            // Should not be possible
+            throw new AssertionError("Error retrieving library namespace");
+          }
+        }
       }
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
     }
   }
 

@@ -211,7 +211,7 @@ public class EventMacroUtil {
                       new ParserException(
                           I18N.getText(
                               "library.error.noEventHandler", eventName, libraryNamespace)));
-      String macroTarget = eventTarget + "@" + libraryNamespace;
+      String macroTarget = eventTarget + "@lib:" + libraryNamespace;
 
       String resultVal =
           MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);

@@ -20,12 +20,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -76,8 +78,32 @@ class LibraryToken implements Library {
   /** The id of the library token. */
   private final GUID id;
 
+  private final String name;
+
+  private final String namespace;
+
+  private final String version;
+
+  private final List<String> authors;
+
+  private final String website;
+
+  private final String gitUrl;
+
+  private final String license;
+
+  private final String description;
+
+  private final String shortDescription;
+
+  private final boolean allowsUriAccess;
+
+  private final Set<String> propertyNames;
+
+  private final Set<String> macroNames;
+
   /**
-   * Does LibraryToken handles libraries with this path. This does not check that the library exists
+   * Does LibraryToken handle libraries with this path. This does not check that the library exists
    * instead performs a less expensive check to see if its a path it would manage.
    *
    * @param path the path for the library (can be full path or just part of path).
@@ -94,20 +120,40 @@ class LibraryToken implements Library {
   /**
    * Creates a new {@code LibraryToken} for the lib:token id.
    *
-   * @param id the id of the lib:token.
+   * @note this must be run on the Swing Thread.
+   * @param token the token for the lib:token.
    */
-  LibraryToken(GUID id) {
-    this.id = id;
+  LibraryToken(Token token) {
+    id = token.getId();
+    name = token.getName();
+    namespace = token.getName().substring(4);
+    version =
+        Objects.requireNonNullElse(
+                token.getProperty(LIB_VERSION_PROPERTY_NAME), LIB_VERSION_UNKNOWN)
+            .toString();
+    website =
+        Objects.requireNonNullElse(token.getProperty(LIB_WEBSITE_PROPERTY_NAME), "").toString();
+    gitUrl = Objects.requireNonNullElse(token.getProperty(LIB_GITURL_PROPERTY_NAME), "").toString();
+    license =
+        Objects.requireNonNullElse(token.getProperty(LIB_LICENSE_PROPERTY_NAME), "").toString();
+    description =
+        Objects.requireNonNullElse(token.getProperty(LIB_DESCRIPTION_PROPERTY_NAME), "").toString();
+    shortDescription =
+        Objects.requireNonNullElse(token.getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME), "")
+            .toString();
+    authors =
+        Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
+            .map(String::trim)
+            .toList();
+    allowsUriAccess = token.getAllowURIAccess();
+
+    propertyNames = new HashSet<>(token.getPropertyNames());
+    macroNames = new HashSet<>(token.getMacroNames(false));
   }
 
   @Override
   public CompletableFuture<String> getVersion() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(
-            () -> {
-              String version = getProperty(LIB_VERSION_PROPERTY_NAME, LIB_VERSION_UNKNOWN);
-              return version.isEmpty() ? LIB_VERSION_UNKNOWN : version;
-            });
+    return CompletableFuture.completedFuture(version);
   }
 
   @Override
@@ -168,84 +214,64 @@ class LibraryToken implements Library {
 
   @Override
   public CompletableFuture<String> getWebsite() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_WEBSITE_PROPERTY_NAME, ""));
+    return CompletableFuture.completedFuture(website);
   }
 
   @Override
   public CompletableFuture<String> getGitUrl() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_GITURL_PROPERTY_NAME, ""));
+    return CompletableFuture.completedFuture(gitUrl);
   }
 
   @Override
   public CompletableFuture<String[]> getAuthors() {
-    return new ThreadExecutionHelper<String[]>()
-        .runOnSwingThread(
-            () ->
-                Arrays.stream(getProperty(LIB_AUTHORS_PROPERTY_NAME, "").split(","))
-                    .map(String::trim)
-                    .toArray(String[]::new));
+    return CompletableFuture.completedFuture(authors.toArray(new String[0]));
   }
 
   @Override
   public CompletableFuture<String> getLicense() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_LICENSE_PROPERTY_NAME, ""));
+    return CompletableFuture.completedFuture(license);
   }
 
   @Override
   public CompletableFuture<String> getNamespace() {
-    // For LibTokens the namespace is just the name without the lib:
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> findLibrary(id).getName().substring(4));
+    return CompletableFuture.completedFuture(namespace);
   }
 
   @Override
   public CompletableFuture<String> getName() {
-    return new ThreadExecutionHelper<String>().runOnSwingThread(() -> findLibrary(id).getName());
+    return CompletableFuture.completedFuture(name);
   }
 
   @Override
   public CompletableFuture<String> getDescription() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_DESCRIPTION_PROPERTY_NAME, ""));
+    return CompletableFuture.completedFuture(description);
   }
 
   @Override
   public CompletableFuture<String> getShortDescription() {
-    return new ThreadExecutionHelper<String>()
-        .runOnSwingThread(() -> getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, ""));
+    return CompletableFuture.completedFuture(shortDescription);
   }
 
   @Override
   public CompletableFuture<Boolean> allowsUriAccess() {
-    return new ThreadExecutionHelper<Boolean>()
-        .runOnSwingThread((() -> findLibrary(id).getAllowURIAccess()));
+    return CompletableFuture.completedFuture(allowsUriAccess);
   }
 
   @Override
   public CompletableFuture<LibraryInfo> getLibraryInfo() {
-    return new ThreadExecutionHelper<LibraryInfo>()
-        .runOnSwingThread(
-            () -> {
-              String notSet = I18N.getText("library.property.value.notSpecified");
-              Token library = findLibrary(id);
-              String authorsString = getProperty(LIB_AUTHORS_PROPERTY_NAME, notSet);
-              var authors =
-                  Arrays.stream(authorsString.split(",")).map(String::trim).toArray(String[]::new);
-              return new LibraryInfo(
-                  library.getName(),
-                  library.getName().substring(4),
-                  getProperty(LIB_VERSION_PROPERTY_NAME, notSet),
-                  getProperty(LIB_WEBSITE_PROPERTY_NAME, notSet),
-                  getProperty(LIB_GITURL_PROPERTY_NAME, notSet),
-                  authors,
-                  getProperty(LIB_LICENSE_PROPERTY_NAME, notSet),
-                  getProperty(LIB_DESCRIPTION_PROPERTY_NAME, notSet),
-                  getProperty(LIB_SHORT_DESCRIPTION_PROPERTY_NAME, notSet),
-                  library.getAllowURIAccess());
-            });
+    String notSet = I18N.getText("library.property.value.notSpecified");
+    return CompletableFuture.completedFuture(
+        new LibraryInfo(
+            name,
+            namespace,
+            version.isEmpty() ? notSet : version,
+            website.isEmpty() ? notSet : website,
+            gitUrl.isEmpty() ? notSet : gitUrl,
+            authors.size() == 0 ? new String[] {notSet} : authors.toArray(new String[0]),
+            license.isEmpty() ? notSet : license,
+            description.isEmpty() ? notSet : description,
+            shortDescription.isEmpty() ? notSet : shortDescription,
+            allowsUriAccess));
   }
 
   @Override
@@ -281,19 +307,13 @@ class LibraryToken implements Library {
 
   @Override
   public CompletableFuture<List<String>> getAllFiles() {
-    return new ThreadExecutionHelper<List<String>>()
-        .runOnSwingThread(
-            () -> {
-              Token library = findLibrary(id);
-              List<String> files =
-                  new ArrayList<>(
-                      library.getMacroList(false).stream()
-                          .map(p -> "macro/" + p.getLabel())
-                          .toList());
-              files.addAll(library.getPropertyNames().stream().map(p -> "property/" + p).toList());
-
-              return files;
-            });
+    return CompletableFuture.supplyAsync(
+        () -> {
+          return Stream.concat(
+                  macroNames.stream().map(name -> "macro/" + name),
+                  propertyNames.stream().map(name -> "property/" + name))
+              .toList();
+        });
   }
 
   @Override
@@ -417,5 +437,25 @@ class LibraryToken implements Library {
    */
   CompletableFuture<Token> getToken() {
     return new ThreadExecutionHelper<Token>().runOnSwingThread(() -> findLibrary(id));
+  }
+
+  /**
+   * Returns the id of the library token.
+   *
+   * @note This method is thread safe.
+   * @return returns the id of the library token.
+   */
+  GUID getId() {
+    return id;
+  }
+
+  /**
+   * Checks to see if the library token contains the specified macro.
+   *
+   * @param name the name of the macro.
+   * @return true if the library token contains the specified macro.
+   */
+  boolean hasMacro(String name) {
+    return macroNames.contains(name);
   }
 }

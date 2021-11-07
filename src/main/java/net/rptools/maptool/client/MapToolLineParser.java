@@ -1214,7 +1214,7 @@ public class MapToolLineParser {
         var macroInfo = library.getMTScriptMacroInfo(macroName).get();
         if (macroInfo.isEmpty()) {
           // if the macro source is the same as the location then check private macros.
-          if (macroLocation.equalsIgnoreCase(getMacroSource())) {
+          if (contextStackEmpty() || macroLocation.equalsIgnoreCase(getMacroSource())) {
             macroInfo = library.getPrivateMacroInfo(macroName).get();
           }
           if (macroInfo.isEmpty()) {

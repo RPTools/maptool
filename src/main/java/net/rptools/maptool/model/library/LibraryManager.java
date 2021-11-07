@@ -63,6 +63,10 @@ public class LibraryManager {
   /** Library Tokens. */
   private static final LibraryTokenManager libraryTokenManager = new LibraryTokenManager();
 
+  static {
+    libraryTokenManager.init();
+  }
+
   /**
    * Checks to see if this library name used a reserved prefix.
    *

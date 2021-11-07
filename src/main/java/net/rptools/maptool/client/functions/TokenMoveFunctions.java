@@ -464,6 +464,7 @@ public class TokenMoveFunctions extends AbstractFunction {
           I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
           e.getCause());
     }
+    System.out.println("TODO: CDW: deniedTokens: " + deniedTokens);
     return deniedTokens;
   }
 
