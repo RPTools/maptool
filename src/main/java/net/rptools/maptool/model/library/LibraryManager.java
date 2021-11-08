@@ -261,6 +261,12 @@ public class LibraryManager {
     return addOnLibraryManager.toDto();
   }
 
+  /** Removes all libraries from the library manager. */
+  public void removeAllLibraries() {
+    removeAddOnLibraries();
+    libraryTokenManager.clearLibraries();
+  }
+
   /** Removes all the add-on in libraries. */
   public void removeAddOnLibraries() {
     addOnLibraryManager.removeAllLibraries();

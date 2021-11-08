@@ -44,16 +44,16 @@ public class AddOnLibraryImporter {
   public static final String DROP_IN_LIBRARY_EXTENSION = ".mtlib";
 
   /** The name of the add-on library config file. */
-  private static final String LIBRARY_INFO_FILE = "library.json";
+  public static final String LIBRARY_INFO_FILE = "library.json";
 
   /** the directory where all the content files in the library live. */
-  private static final String CONTENT_DIRECTORY = "library/";
+  public static final String CONTENT_DIRECTORY = "library/";
 
   /** The name of the file with the macro script function properties. */
-  private static final String MACROSCRIPT_PROPERTY_FILE = "mts_properties.json";
+  public static final String MACROSCRIPT_PROPERTY_FILE = "mts_properties.json";
 
   /** The name of the file with event properties. */
-  private static final String EVENT_PROPERTY_FILE = "events.json";
+  public static final String EVENT_PROPERTY_FILE = "events.json";
 
   /**
    * Returns the {@link FileFilter} for add on library files.

@@ -77,6 +77,11 @@ public class LibraryTokenManager {
   /** Class to listen to token changes. */
   private TokenEventListener tokenEventListener = new TokenEventListener();
 
+  /** Removes all of the library tokens from the manager. */
+  public void clearLibraries() {
+    libraryTokens.clear();
+  }
+
   private class TokenEventListener {
     @Subscribe
     public void tokensAdded(TokensAddedEvent event) {
@@ -195,7 +200,6 @@ public class LibraryTokenManager {
     return new ThreadExecutionHelper<List<Library>>()
         .runOnSwingThread(
             () -> {
-              System.out.println("TODO: CDW: here!!");
               List<Library> tokenList = new ArrayList<>();
               for (var zone : MapTool.getCampaign().getZones()) {
                 tokenList.addAll(

@@ -464,7 +464,6 @@ public class TokenMoveFunctions extends AbstractFunction {
           I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
           e.getCause());
     }
-    System.out.println("TODO: CDW: deniedTokens: " + deniedTokens);
     return deniedTokens;
   }
 
@@ -573,8 +572,8 @@ public class TokenMoveFunctions extends AbstractFunction {
           new LibraryManager()
               .getLegacyEventTargets(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK)
               .get();
-      String libraryNamespace = libraries.get(0).getNamespace().get();
       if (!libraries.isEmpty()) {
+        String libraryNamespace = libraries.get(0).getNamespace().get();
         JsonArray json = new JsonArray();
         for (GUID tokenGuid : filteredTokens) {
           json.add(tokenGuid.toString());
