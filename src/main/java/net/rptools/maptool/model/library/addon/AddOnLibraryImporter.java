@@ -76,7 +76,7 @@ public class AddOnLibraryImporter {
   }
 
   /**
-   * Returns if this filename is a valid filename for a add-on library.
+   * Returns if this filename is a valid filename for an add-on library.
    *
    * @param fileName The name of the file to check.
    * @return {@code true} if this is a valid add-on library file name.

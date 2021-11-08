@@ -60,16 +60,15 @@ public class LibTokenConverter {
     libraryBuilder.setNamespace(libraryToken.getNamespace().join());
     libraryBuilder.setAllowsUriAccess(token.getAllowURIAccess());
 
-    var mtsScriptPropBuilder = MTScriptPropertiesDto.newBuilder();
-
-    var eventsBuilder = AddOnLibraryEventsDto.newBuilder();
-
     Path contentPath = directory.resolve(AddOnLibraryImporter.CONTENT_DIRECTORY);
+    Path libraryJsonPath = directory.resolve(AddOnLibraryImporter.LIBRARY_INFO_FILE);
     Path mtsPropertyPath = directory.resolve(AddOnLibraryImporter.MACROSCRIPT_PROPERTY_FILE);
     Path eventPath = directory.resolve(AddOnLibraryImporter.EVENT_PROPERTY_FILE);
     Path mtsPublicPath = contentPath.resolve("mtscript").resolve("public");
     Path publicPath = contentPath.resolve("public");
-    Path propertiesPath = directory.resolve("exported-properties");
+    Path propertiesPath = directory.resolve("property");
+    Path macroDetails = directory.resolve("macro_script_map.txt ");
+    Path propertyDetails = propertiesPath.resolve("prop_file_map.txt");
 
     mtsPublicPath.toFile().mkdirs();
     publicPath.toFile().mkdirs();
@@ -77,10 +76,8 @@ public class LibTokenConverter {
     var macroScriptNameMap = new HashMap<String, String>();
     var macroDataMap = new HashMap<String, String>();
     var macroAutoExecMap = new HashMap<String, Boolean>();
-    var eventMap = new HashMap<String, String>();
+    var eventNameMap = new HashMap<String, String>();
     var legacyEventNameMap = new HashMap<String, String>();
-    var propertyFilenameMap = new HashMap<String, String>();
-    var propertyDataMap = new HashMap<String, String>();
     token
         .getMacroPropertiesMap(false)
         .forEach(
@@ -96,7 +93,7 @@ public class LibTokenConverter {
                 }
                 case "onCampaignLoad" -> {
                   macroScriptNameMap.put(macroName, macroName + ".mts");
-                  eventMap.put(macroName, macroName);
+                  eventNameMap.put(macroName, macroName);
                 }
                 default -> {
                   String fileName = "macro_" + (fileCounter++) + ".mts";
@@ -107,22 +104,107 @@ public class LibTokenConverter {
               macroDataMap.put(macroName, value.getCommand());
             });
 
+    var propertyFilenameMap = new HashMap<String, String>();
+    var propertyDataMap = new HashMap<String, String>();
     token
         .getPropertyNamesRaw()
         .forEach(
             propName -> {
               String fileName = "prop_" + (fileCounter++) + ".txt";
               propertyFilenameMap.put(propName, fileName);
-              // String
+              propertyDataMap.put(
+                  propName, Objects.requireNonNullElse(token.getProperty(propName), "").toString());
             });
 
-    String libraryJsonFile = AddOnLibraryImporter.LIBRARY_INFO_FILE;
-    try (var writer =
-        new BufferedWriter(new FileWriter(directory.resolve(libraryJsonFile).toFile()))) {
+    var eventsBuilder = AddOnLibraryEventsDto.newBuilder();
+    legacyEventNameMap.forEach(
+        (key, value) -> {
+          var eventBuilder = AddOnLibraryEventsDto.Events.newBuilder();
+          eventBuilder.setName(key);
+          eventBuilder.setMts(key);
+          eventsBuilder.addLegacyEvents(eventBuilder);
+        });
+
+    eventNameMap.forEach(
+        (key, value) -> {
+          var eventBuilder = AddOnLibraryEventsDto.Events.newBuilder();
+          eventBuilder.setName(key);
+          eventBuilder.setMts(key);
+          eventsBuilder.addEvents(eventBuilder);
+        });
+
+    var mtsScriptPropBuilder = MTScriptPropertiesDto.newBuilder();
+    macroScriptNameMap.forEach(
+        (key, value) -> {
+          var propertyBuilder = MTScriptPropertiesDto.Property.newBuilder();
+          propertyBuilder.setFilename("public/" + value);
+          propertyBuilder.setAutoExecute(macroAutoExecMap.get(key));
+          mtsScriptPropBuilder.addProperties(propertyBuilder);
+        });
+
+    try (var writer = new BufferedWriter(new FileWriter(libraryJsonPath.toFile()))) {
       writer.write(
           JsonFormat.printer().includingDefaultValueFields().print(libraryBuilder.build()));
     } catch (IOException e) {
-      MapTool.showError(I18N.getText("library.export.errorWriting", libraryJsonFile), e);
+      MapTool.showError(I18N.getText("library.export.errorWriting", libraryJsonPath), e);
+      return;
+    }
+
+    try (var writer = new BufferedWriter(new FileWriter(mtsPropertyPath.toFile()))) {
+      writer.write(JsonFormat.printer().print(mtsScriptPropBuilder.build()));
+    } catch (IOException e) {
+      MapTool.showError(I18N.getText("library.export.errorWriting", mtsPropertyPath), e);
+      return;
+    }
+
+    try (var writer = new BufferedWriter(new FileWriter(eventPath.toFile()))) {
+      writer.write(JsonFormat.printer().print(eventsBuilder.build()));
+    } catch (IOException e) {
+      MapTool.showError(I18N.getText("library.export.errorWriting", eventPath), e);
+      return;
+    }
+
+    mtsPublicPath.toFile().mkdirs();
+    macroDataMap.forEach(
+        (key, value) -> {
+          String filename = macroScriptNameMap.get(key);
+          try (var writer =
+              new BufferedWriter(new FileWriter(mtsPublicPath.resolve(filename).toFile()))) {
+            writer.write(value);
+          } catch (IOException e) {
+            MapTool.showError(I18N.getText("library.export.errorWriting", filename), e);
+            return;
+          }
+        });
+
+    propertiesPath.toFile().mkdirs();
+    propertyDataMap.forEach(
+        (key, value) -> {
+          String filename = propertyFilenameMap.get(key);
+          try (var writer =
+              new BufferedWriter(new FileWriter(propertiesPath.resolve(filename).toFile()))) {
+            writer.write(value);
+          } catch (IOException e) {
+            MapTool.showError(I18N.getText("library.export.errorWriting", filename), e);
+            return;
+          }
+        });
+
+    try (var writer = new BufferedWriter(new FileWriter(macroDetails.toFile()))) {
+      for (var entry : macroScriptNameMap.entrySet()) {
+        writer.write(entry.getValue() + " => " + entry.getKey() + "\n");
+      }
+    } catch (IOException e) {
+      MapTool.showError(I18N.getText("library.export.errorWriting", macroDetails), e);
+      return;
+    }
+
+    try (var writer = new BufferedWriter(new FileWriter(propertyDetails.toFile()))) {
+      for (var entry : propertyFilenameMap.entrySet()) {
+        writer.write(entry.getValue() + " => " + entry.getKey() + "\n");
+      }
+    } catch (IOException e) {
+      MapTool.showError(I18N.getText("library.export.errorWriting", propertyDetails), e);
       return;
     }
 
