@@ -14,12 +14,18 @@
  */
 package net.rptools.maptool.model.library.token;
 
+import com.google.common.eventbus.Subscribe;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -27,6 +33,9 @@ import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
+import net.rptools.maptool.model.tokens.TokensAddedEvent;
+import net.rptools.maptool.model.tokens.TokensChangedEvent;
+import net.rptools.maptool.model.tokens.TokensRemovedEvent;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -62,6 +71,98 @@ public class LibraryTokenManager {
   /** The version number to return if the lin:token version is unknown. */
   private static final String LIB_VERSION_UNKNOWN = "unknown";
 
+  /** Map of library token names to library tokens. */
+  private final Map<String, LibraryToken> libraryTokens = new ConcurrentHashMap<>();
+
+  /** Class to listen to token changes. */
+  private TokenEventListener tokenEventListener = new TokenEventListener();
+
+  /** Removes all of the library tokens from the manager. */
+  public void clearLibraries() {
+    libraryTokens.clear();
+  }
+
+  private class TokenEventListener {
+    @Subscribe
+    public void tokensAdded(TokensAddedEvent event) {
+      SwingUtilities.invokeLater(
+          () -> {
+            addTokens(
+                event.tokenNameMap().values().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(LibraryToken::new)
+                    .toList());
+          });
+    }
+
+    @Subscribe
+    public void tokenRemoved(TokensRemovedEvent event) {
+      SwingUtilities.invokeLater(
+          () -> {
+            removeTokens(
+                event.tokenNameMap().values().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(LibraryToken::new)
+                    .toList());
+          });
+    }
+
+    @Subscribe
+    public void tokenChanged(TokensChangedEvent event) {
+      SwingUtilities.invokeLater(
+          () -> {
+            changeTokens(
+                event.tokens().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(LibraryToken::new)
+                    .toList());
+          });
+    }
+  }
+
+  private void addTokens(Collection<LibraryToken> libs) {
+    libs.forEach(
+        l -> {
+          String name = l.getName().join();
+          if (name.length() > 4 && name.toLowerCase().startsWith("lib:")) {
+            String namespace = l.getNamespace().join();
+            libraryTokens.put(namespace, l);
+          }
+        });
+  }
+
+  private void removeTokens(Collection<LibraryToken> libs) {
+    libs.forEach(
+        l -> {
+          String namespace = l.getNamespace().join();
+          libraryTokens.remove(namespace);
+        });
+  }
+
+  private void changeTokens(Collection<LibraryToken> libs) {
+    libs.forEach(
+        l -> {
+          // name may have changed so we need to search by id
+          GUID id = l.getId();
+          var old = libraryTokens.values().stream().filter(l2 -> id.equals(l2.getId())).findFirst();
+          old.ifPresent(libraryToken -> removeTokens(List.of(libraryToken)));
+          addTokens(List.of(l));
+        });
+  }
+
+  public void init() {
+    SwingUtilities.invokeLater(
+        () -> {
+          var tokens = new ArrayList<Token>();
+          for (var zone : MapTool.getCampaign().getZones()) {
+            tokens.addAll(
+                zone.getTokensFiltered(f -> f.getName().toLowerCase().startsWith("lib:")));
+          }
+          addTokens(tokens.stream().map(LibraryToken::new).toList());
+          new MapToolEventBus().getMainEventBus().register(tokenEventListener);
+        });
+  }
+
   /**
    * Does LibraryToken handle libraries with this path. This does not check that the library exists
    * instead performs a less expensive check to see if its a path it would manage.
@@ -83,6 +184,19 @@ public class LibraryTokenManager {
    * @return list of library tokens
    */
   public CompletableFuture<List<Library>> getLibraries() {
+    return getMatchingLibraryList(null, null);
+  }
+
+  /**
+   * Returns a list of the library tokens filtered by those that have a given property and macro
+   * name. if either the property or macro name is null then it will match all tokens for that
+   * filter.
+   *
+   * @param property the name of the property to match or null to ignore
+   * @param macro the name of the macro to match or null to ignore
+   * @return list of library tokens that match the filters.
+   */
+  private CompletableFuture<List<Library>> getMatchingLibraryList(String property, String macro) {
     return new ThreadExecutionHelper<List<Library>>()
         .runOnSwingThread(
             () -> {
@@ -92,7 +206,9 @@ public class LibraryTokenManager {
                     zone
                         .getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"))
                         .stream()
-                        .map(t -> new LibraryToken(t.getId()))
+                        .filter(t -> property == null || t.getProperty(property) != null)
+                        .filter(t -> macro == null || t.getMacro(macro, false) != null)
+                        .map(LibraryToken::new)
                         .toList());
               }
               return tokenList;
@@ -113,7 +229,7 @@ public class LibraryTokenManager {
               if (tokenList.isEmpty()) {
                 return null;
               } else {
-                return new LibraryToken(tokenList.get(0).getId());
+                return new LibraryToken(tokenList.get(0));
               }
             });
   }
@@ -145,7 +261,7 @@ public class LibraryTokenManager {
     if (tokenList.size() > 0) {
       Optional<Token> token = tokenList.stream().filter(Token::getAllowURIAccess).findFirst();
       if (token.isPresent()) {
-        return new LibraryToken(token.get().getId());
+        return new LibraryToken(token.get());
       } else { // There are some tokens but none with "Allow URI Access"
         throw new LibraryNotValidException(
             Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
@@ -185,5 +301,18 @@ public class LibraryTokenManager {
 
     throw new LibraryNotValidException(
         Reason.MISSING_LIBRARY, I18N.getText("library.error.libtoken.missing"));
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<List<Library>> getLegacyEventTargets(String eventName) {
+    var libs =
+        new ArrayList<Library>(
+            libraryTokens.values().stream().filter(l -> l.hasMacro(eventName)).toList());
+    return CompletableFuture.completedFuture(libs);
   }
 }

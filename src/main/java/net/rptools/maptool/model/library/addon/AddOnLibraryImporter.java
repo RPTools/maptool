@@ -32,6 +32,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -43,13 +44,16 @@ public class AddOnLibraryImporter {
   public static final String DROP_IN_LIBRARY_EXTENSION = ".mtlib";
 
   /** The name of the add-on library config file. */
-  private static final String LIBRARY_INFO_FILE = "library.json";
+  public static final String LIBRARY_INFO_FILE = "library.json";
 
   /** the directory where all the content files in the library live. */
-  private static final String CONTENT_DIRECTORY = "library/";
+  public static final String CONTENT_DIRECTORY = "library/";
 
   /** The name of the file with the macro script function properties. */
-  private static final String MACROSCRIPT_PROPERTY_FILES = "mts_properties.json";
+  public static final String MACROSCRIPT_PROPERTY_FILE = "mts_properties.json";
+
+  /** The name of the file with event properties. */
+  public static final String EVENT_PROPERTY_FILE = "events.json";
 
   /**
    * Returns the {@link FileFilter} for add on library files.
@@ -72,7 +76,7 @@ public class AddOnLibraryImporter {
   }
 
   /**
-   * Returns if this filename is a valid filename for a add-on library.
+   * Returns if this filename is a valid filename for an add-on library.
    *
    * @param fileName The name of the file to check.
    * @return {@code true} if this is a valid add-on library file name.
@@ -118,12 +122,22 @@ public class AddOnLibraryImporter {
       }
       var builder = AddOnLibraryDto.newBuilder();
       JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
+
+      // MT MacroScript properties
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
       var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
-      ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILES);
+      ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILE);
       if (mtsPropsZipEntry != null) {
         JsonFormat.parser()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
+      }
+
+      // Event properties
+      var eventPropBuilder = AddOnLibraryEventsDto.newBuilder();
+      ZipEntry eventsZipEntry = zip.getEntry(EVENT_PROPERTY_FILE);
+      if (eventsZipEntry != null) {
+        JsonFormat.parser()
+            .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
@@ -131,7 +145,11 @@ public class AddOnLibraryImporter {
       addAsset(asset);
 
       return AddOnLibrary.fromDto(
-          asset.getMD5Key(), addOnLib, mtsPropBuilder.build(), pathAssetMap);
+          asset.getMD5Key(),
+          addOnLib,
+          mtsPropBuilder.build(),
+          eventPropBuilder.build(),
+          pathAssetMap);
     }
   }
 
@@ -166,7 +184,7 @@ public class AddOnLibraryImporter {
   }
 
   /**
-   * Adds the {@lik Asset} to the {@link AssetManager} if it does not already exist.
+   * Adds the {@link Asset} to the {@link AssetManager} if it does not already exist.
    *
    * @param asset the {@link Asset} to add.
    */

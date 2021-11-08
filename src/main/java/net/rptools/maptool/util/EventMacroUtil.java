@@ -16,12 +16,15 @@ package net.rptools.maptool.util;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
@@ -92,7 +95,8 @@ public class EventMacroUtil {
    * by setting the specified vetoVariable to 1. Any other value (or any errors encountered during
    * execution) are interpreted as allowing the event to continue.
    *
-   * @param macroTarget the fully-qualified macro name
+   * @param eventName the name of the event being run
+   * @param libraryNamespace the namespace of the library containing the event handler
    * @param args the argument string to pass
    * @param tokenInContext token to set as current, if any
    * @param vetoVariable the specific variable to check for a veto
@@ -100,7 +104,8 @@ public class EventMacroUtil {
    * @return true if the handler vetoed the event, false otherwise
    */
   public static boolean pollEventHandlerForVeto(
-      final String macroTarget,
+      final String eventName,
+      final String libraryNamespace,
       final String args,
       final Token tokenInContext,
       final String vetoVariable,
@@ -112,7 +117,7 @@ public class EventMacroUtil {
     boolean isVetoed = false;
     try {
       MapToolVariableResolver resolver =
-          callEventHandler(macroTarget, args, tokenInContext, varsToInitialize);
+          callEventHandler(eventName, libraryNamespace, args, tokenInContext, varsToInitialize);
       BigDecimal vetoValue = BigDecimal.ZERO;
       if (resolver.getVariable(vetoVariable) instanceof BigDecimal) {
         vetoValue = (BigDecimal) resolver.getVariable(vetoVariable);
@@ -120,9 +125,18 @@ public class EventMacroUtil {
       isVetoed = (vetoValue != null && vetoValue.intValue() == 1);
     } catch (ParserException e) {
       MapTool.addLocalMessage(
-          "Event continuing after error parsing vote from " + macroTarget + ": " + e.getMessage());
+          I18N.getText(
+              "library.error.errorParsingVotableEvent",
+              eventName,
+              libraryNamespace,
+              e.getMessage()));
       LOGGER.debug(
-          "Error parsing vote, defaulting to 'allow' from {}: {}", macroTarget, e.getMessage(), e);
+          I18N.getText(
+              "library.error.errorParsingVotableEvent",
+              eventName,
+              libraryNamespace,
+              e.getMessage()),
+          e);
     }
     return isVetoed;
   }
@@ -132,20 +146,23 @@ public class EventMacroUtil {
    * resolver instance that can be checked for any particular outputs.
    *
    * <p>Called macros will output to chat as normal - to suppress, see {@link
-   * #callEventHandler(String, String, Token, Map, boolean)}
+   * #callEventHandler(String, String, String, Token, Map, boolean)}
    *
-   * @param macroTarget the fully-qualified macro name
+   * @param eventName the name of the event being run
+   * @param libraryNamespace the namespace of the library containing the event handler
    * @param args the argument string to pass
    * @param tokenInContext token to set as current, if any
    * @param varsToSet any variables that should be initialized in the macro scope
    * @return the variable resolver containing the resulting variable states
    */
   public static MapToolVariableResolver callEventHandler(
-      final String macroTarget,
+      final String eventName,
+      final String libraryNamespace,
       final String args,
       final Token tokenInContext,
       Map<String, Object> varsToSet) {
-    return callEventHandler(macroTarget, args, tokenInContext, varsToSet, false);
+
+    return callEventHandler(eventName, libraryNamespace, args, tokenInContext, varsToSet, false);
   }
 
   /**
@@ -154,7 +171,8 @@ public class EventMacroUtil {
    *
    * <p>Optionally suppresses chat output.
    *
-   * @param macroTarget the fully-qualified macro name
+   * @param eventName the name of the event being run
+   * @param libraryNamespace the namespace of the library containing the event handler
    * @param args the argument string to pass
    * @param tokenInContext token to set as current, if any
    * @param varsToSet any variables that should be initialized in the macro scope
@@ -162,17 +180,39 @@ public class EventMacroUtil {
    * @return the variable resolver containing the resulting variable states
    */
   public static MapToolVariableResolver callEventHandler(
-      final String macroTarget,
+      final String eventName,
+      final String libraryNamespace,
       final String args,
       final Token tokenInContext,
       Map<String, Object> varsToSet,
       boolean suppressChatOutput) {
-    if (varsToSet == null) varsToSet = Collections.emptyMap();
+    if (varsToSet == null) {
+      varsToSet = Collections.emptyMap();
+    }
     MapToolVariableResolver newResolver = new MapToolVariableResolver(tokenInContext);
     try {
       for (Map.Entry<String, Object> entry : varsToSet.entrySet()) {
         newResolver.setVariable(entry.getKey(), entry.getValue());
       }
+
+      var library =
+          new LibraryManager()
+              .getLibrary(libraryNamespace)
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText("library.error.notFound", libraryNamespace)));
+      var eventTarget =
+          library
+              .getLegacyEventHandlerName(eventName)
+              .get()
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText(
+                              "library.error.noEventHandler", eventName, libraryNamespace)));
+      String macroTarget = eventTarget + "@lib:" + libraryNamespace;
+
       String resultVal =
           MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);
       if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
@@ -182,10 +222,14 @@ public class EventMacroUtil {
       }
     } catch (AbortFunctionException afe) {
       // Do nothing
-    } catch (ParserException e) {
+    } catch (ParserException | ExecutionException | InterruptedException e) {
       MapTool.addLocalMessage(
-          "Event continuing after error running " + macroTarget + ": " + e.getMessage());
-      LOGGER.debug("error running {}: {}", macroTarget, e.getMessage(), e);
+          I18N.getText(
+              "library.error.errorRunningEvent", eventName, libraryNamespace, e.getMessage()));
+      LOGGER.debug(
+          I18N.getText(
+              "library.error.errorRunningEvent", eventName, libraryNamespace, e.getMessage()),
+          e);
     }
     return newResolver;
   }

@@ -39,10 +39,11 @@ message AddOnLibraryListDto {
 }
 
 message AddOnLibraryEventsDto {
-  message AddOnLibraryEventDto {
+  message Events {
     string name = 1;
     string mts = 2;
     string js = 3;
   }
-  repeated AddOnLibraryEventDto events = 1;
+  repeated Events events = 1;
+  repeated Events legacy_events = 2;
 }

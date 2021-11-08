@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.data.LibraryData;
 
 /** Interface for classes that represents a framework library. */
@@ -162,4 +163,20 @@ public interface Library {
    * @return the data for the library.
    */
   CompletableFuture<LibraryData> getLibraryData();
+
+  /**
+   * Returns the name of the MT script to execute for the legacy event.
+   *
+   * @param eventName The name of the event.
+   * @return the name of the MT script to execute for the legacy event.
+   */
+  CompletableFuture<Optional<String>> getLegacyEventHandlerName(String eventName);
+
+  /**
+   * Returns the token associated with this library. This will only return a token for legacy
+   * libraries.
+   *
+   * @return the token associated with this library.
+   */
+  CompletableFuture<Optional<Token>> getAssociatedToken();
 }

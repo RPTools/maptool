@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -66,17 +66,17 @@ public class AddOnLibraryManager {
    * Registers the specified add-on library.
    *
    * @param library The add-on library to register.
-   * @throws ExecutionException if there is an error fetching the namespace for the library.
-   * @throws InterruptedException if there is an error fetching the namespace for the library.
    * @throws IllegalStateException if there is already a add-on library with the same namespace.
    */
-  public void registerLibrary(AddOnLibrary library)
-      throws ExecutionException, InterruptedException {
-    String namespace = library.getNamespace().get().toLowerCase();
+  public void registerLibrary(AddOnLibrary library) {
+    String namespace = library.getNamespace().join().toLowerCase();
+
     var registeredLib = namespaceLibraryMap.computeIfAbsent(namespace, k -> library);
     if (registeredLib != library) {
       throw new IllegalStateException("Library is already registered");
     }
+
+    library.initialize();
   }
 
   /**
@@ -133,19 +133,15 @@ public class AddOnLibraryManager {
           var dto = AddOnLibraryListDto.newBuilder();
           for (var library : namespaceLibraryMap.values()) {
             var detailDto = AddOnLibraryDto.newBuilder();
-            try {
-              detailDto.setName(library.getName().get());
-              detailDto.setVersion(library.getVersion().get());
-              detailDto.setWebsite(library.getWebsite().get());
-              detailDto.setGitUrl(library.getGitUrl().get());
-              detailDto.addAllAuthors(Arrays.asList(library.getAuthors().get()));
-              detailDto.setLicense(library.getLicense().get());
-              detailDto.setNamespace(library.getNamespace().get());
-              detailDto.setDescription(library.getDescription().get());
-              detailDto.setShortDescription(library.getShortDescription().get());
-            } catch (InterruptedException | ExecutionException e) {
-              throw new CompletionException(e);
-            }
+            detailDto.setName(library.getName().join());
+            detailDto.setVersion(library.getVersion().join());
+            detailDto.setWebsite(library.getWebsite().join());
+            detailDto.setGitUrl(library.getGitUrl().join());
+            detailDto.addAllAuthors(Arrays.asList(library.getAuthors().join()));
+            detailDto.setLicense(library.getLicense().join());
+            detailDto.setNamespace(library.getNamespace().join());
+            detailDto.setDescription(library.getDescription().join());
+            detailDto.setShortDescription(library.getShortDescription().join());
             var campDto = AddOnLibraryEntryDto.newBuilder();
             campDto.setDetails(detailDto);
             campDto.setMd5Hash(library.getAssetKey().toString());
@@ -158,5 +154,19 @@ public class AddOnLibraryManager {
   /** Remove all the add-on libraries. */
   public void removeAllLibraries() {
     namespaceLibraryMap.clear();
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<Set<Library>> getLegacyEventTargets(String eventName) {
+    return CompletableFuture.supplyAsync(
+        () ->
+            namespaceLibraryMap.values().stream()
+                .filter(l -> l.getLegacyEvents().contains(eventName))
+                .collect(Collectors.toSet()));
   }
 }

@@ -16,11 +16,13 @@ package net.rptools.maptool.model.library;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
@@ -60,6 +62,10 @@ public class LibraryManager {
 
   /** Library Tokens. */
   private static final LibraryTokenManager libraryTokenManager = new LibraryTokenManager();
+
+  static {
+    libraryTokenManager.init();
+  }
 
   /**
    * Checks to see if this library name used a reserved prefix.
@@ -255,11 +261,41 @@ public class LibraryManager {
     return addOnLibraryManager.toDto();
   }
 
+  /** Removes all libraries from the library manager. */
+  public void removeAllLibraries() {
+    removeAddOnLibraries();
+    libraryTokenManager.clearLibraries();
+  }
+
   /** Removes all the add-on in libraries. */
   public void removeAddOnLibraries() {
     addOnLibraryManager.removeAllLibraries();
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
+  }
+
+  /**
+   * Returns the list of tokens that have handlers for the specified legacy token events.
+   *
+   * @param eventName the name of the event to match.
+   * @return the list of tokens that have handlers for the specified legacy token events.
+   */
+  public CompletableFuture<List<Library>> getLegacyEventTargets(String eventName) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          var addons = addOnLibraryManager.getLegacyEventTargets(eventName).join();
+          var tokens = libraryTokenManager.getLegacyEventTargets(eventName).join();
+          var libs = new HashSet<Library>(addons);
+          var addonLibNamespaces =
+              addons.stream().map(Library::getNamespace).collect(Collectors.toSet());
+          // Only add lib:tokens if there are no addon libraries with the same namespace
+          for (var token : tokens) {
+            if (!addonLibNamespaces.contains(token.getNamespace())) {
+              libs.add(token);
+            }
+          }
+          return new ArrayList<>(libs);
+        });
   }
 }

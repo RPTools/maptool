@@ -35,7 +35,7 @@ public class AddOnLibraryData implements LibraryData {
   /** The AddOnLibrary this data is for. */
   private final AddOnLibrary addOnLibrary;
 
-  /** The name space for this library. */
+  /** The name space for the data this library. */
   private final String dataNameSpace;
 
   /**
@@ -134,10 +134,20 @@ public class AddOnLibraryData implements LibraryData {
    * Initializes the data for this library, only needs to be called once but safe to call multiple
    * times.
    *
-   * @return a CompletableFuture that completes when the data is initialized.
+   * @return a CompletableFuture that completes with {@code true} if the data was initialized,
+   *     {@code false} if nothing was done as the data was already initialized.
    */
-  CompletableFuture<Void> initialize() {
+  CompletableFuture<Boolean> initialize() {
     var ds = new DataStoreManager().getDefaultDataStore();
-    return ds.createNamespace(DATA_TYPE, dataNameSpace);
+    return ds.hasPropertyNamespace(DATA_TYPE, dataNameSpace)
+        .thenApply(
+            has -> {
+              if (!has) {
+                ds.createNamespace(DATA_TYPE, dataNameSpace);
+                return true;
+              } else {
+                return false;
+              }
+            });
   }
 }
