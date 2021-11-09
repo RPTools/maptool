@@ -588,11 +588,11 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     if (isEraser) {
       renderer.getZone().removeTopology(area);
       MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyTypes());
     } else {
       renderer.getZone().addTopology(area);
       MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyTypes());
     }
     renderer.repaint();
   }

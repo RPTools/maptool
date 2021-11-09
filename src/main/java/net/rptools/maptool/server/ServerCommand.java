@@ -118,16 +118,16 @@ public interface ServerCommand {
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public default void addTopology(GUID zoneGUID, Area area, Zone.TopologyMode topologyMode) {
-    for (var topologyType : topologyMode) {
+  public default void addTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+    for (var topologyType : topologyTypes) {
       addTopology(zoneGUID, area, topologyType);
     }
   }
 
   public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
 
-  public default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyMode topologyMode) {
-    for (var topologyType : topologyMode) {
+  public default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+    for (var topologyType : topologyTypes) {
       removeTopology(zoneGUID, area, topologyType);
     }
   }

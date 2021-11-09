@@ -157,10 +157,10 @@ public class Zone extends BaseModel {
     MBL;
   }
 
-  public static final class TopologyMode implements Iterable<TopologyType> {
+  public static final class TopologyTypeSet implements Iterable<TopologyType> {
     private final Set<TopologyType> topologyTypes;
 
-    public static TopologyMode valueOf(String value) {
+    public static TopologyTypeSet valueOf(String value) {
       List<TopologyType> topologyTypes = new ArrayList<>();
       for (var topologyType : TopologyType.values()) {
         var topologyTypeName = topologyType.toString();
@@ -169,10 +169,10 @@ public class Zone extends BaseModel {
         }
       }
 
-      return new TopologyMode(topologyTypes.toArray(TopologyType[]::new));
+      return new TopologyTypeSet(topologyTypes.toArray(TopologyType[]::new));
     }
 
-    public TopologyMode(TopologyType... types) {
+    public TopologyTypeSet(TopologyType... types) {
       // I would prefer using an enum set, but Hessian can't handle it properly.
       topologyTypes = new HashSet<>();
       topologyTypes.addAll(Arrays.asList(types));
@@ -182,15 +182,15 @@ public class Zone extends BaseModel {
       return topologyTypes.contains(type);
     }
 
-    public TopologyMode with(TopologyType type) {
-      var newMode = new TopologyMode();
+    public TopologyTypeSet with(TopologyType type) {
+      var newMode = new TopologyTypeSet();
       newMode.topologyTypes.addAll(this.topologyTypes);
       newMode.topologyTypes.add(type);
       return newMode;
     }
 
-    public TopologyMode without(TopologyType type) {
-      var newMode = new TopologyMode();
+    public TopologyTypeSet without(TopologyType type) {
+      var newMode = new TopologyTypeSet();
       newMode.topologyTypes.addAll(this.topologyTypes);
       newMode.topologyTypes.remove(type);
       return newMode;
@@ -232,7 +232,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private TopologyMode topologyMode = null; // get default from AppPreferences
+  private TopologyTypeSet topologyTypes = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -530,7 +530,7 @@ public class Zone extends BaseModel {
     pitVbl = (Area) zone.pitVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
-    topologyMode = zone.topologyMode;
+    topologyTypes = zone.topologyTypes;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -841,7 +841,7 @@ public class Zone extends BaseModel {
   }
 
   public void addTopology(Area area) {
-    for (var topologyType : getTopologyMode()) {
+    for (var topologyType : getTopologyTypes()) {
       addTopology(area, topologyType);
     }
   }
@@ -866,7 +866,7 @@ public class Zone extends BaseModel {
   }
 
   public void removeTopology(Area area) {
-    for (var topologyType : getTopologyMode()) {
+    for (var topologyType : getTopologyTypes()) {
       removeTopology(area, topologyType);
     }
   }
@@ -1191,16 +1191,16 @@ public class Zone extends BaseModel {
     this.aStarRounding = aStarRounding;
   }
 
-  public TopologyMode getTopologyMode() {
-    if (topologyMode == null) {
-      topologyMode = AppPreferences.getTopologyDrawingMode();
+  public TopologyTypeSet getTopologyTypes() {
+    if (topologyTypes == null) {
+      topologyTypes = AppPreferences.getTopologyTypes();
     }
 
-    return topologyMode;
+    return topologyTypes;
   }
 
-  public void setTopologyMode(TopologyMode topologyMode) {
-    this.topologyMode = topologyMode;
+  public void setTopologyTypes(TopologyTypeSet topologyTypes) {
+    this.topologyTypes = topologyTypes;
   }
 
   public int getLargestZOrder() {
