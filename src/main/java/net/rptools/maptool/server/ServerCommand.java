@@ -56,7 +56,6 @@ public interface ServerCommand {
     setZoneGridSize,
     message,
     execLink,
-    execFunction,
     undoDraw,
     showPointer,
     movePointer,
@@ -66,7 +65,6 @@ public interface ServerCommand {
     toggleTokenMoveWaypoint,
     updateTokenMove,
     setZoneVisibility,
-    enforceZoneView,
     setZoneHasFoW,
     exposeFoW,
     hideFoW,
@@ -74,7 +72,6 @@ public interface ServerCommand {
     putLabel,
     removeLabel,
     sendTokensToBack,
-    enforceZone,
     setServerPolicy,
     removeTopology,
     renameZone,
@@ -88,7 +85,6 @@ public interface ServerCommand {
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental
-    enforceNotification, // Override toggle button to show typing notifications
     exposePCArea,
     setBoard,
     updateExposedAreaMeta,

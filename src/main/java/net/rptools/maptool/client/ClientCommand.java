@@ -35,7 +35,6 @@ public class ClientCommand {
     playerConnected,
     playerDisconnected,
     message,
-    execFunction,
     execLink,
     undoDraw,
     showPointer,
@@ -45,14 +44,12 @@ public class ClientCommand {
     stopTokenMove,
     toggleTokenMoveWaypoint,
     updateTokenMove,
-    enforceZoneView,
     setZoneHasFoW,
     exposeFoW,
     hideFoW,
     setFoW,
     putLabel,
     removeLabel,
-    enforceZone,
     setServerPolicy,
     removeTopology,
     renameZone,
@@ -65,7 +62,6 @@ public class ClientCommand {
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental chat notification
-    enforceNotification, // enforces notification of typing in the chat window
     exposePCArea,
     setBoard,
     updateExposedAreaMeta,

@@ -205,3 +205,11 @@ message HeroLabDataDto {
   string portfolio_path = 12;
   map<string, string> hero_image_assets = 13;
 }
+
+message ScriptTypeDto {
+  oneof type {
+    double double_val = 1;
+    string string_val = 2;
+    string json_val = 3;
+  }
+}

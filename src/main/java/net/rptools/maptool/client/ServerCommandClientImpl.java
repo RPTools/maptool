@@ -134,7 +134,15 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
-    makeServerCall(COMMAND.enforceZoneView, zoneGUID, x, y, scale, width, height);
+    var msg =
+        EnforceZoneViewMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setX(x)
+            .setY(y)
+            .setScale(scale)
+            .setGmWidth(width)
+            .setGmHeight(height);
+    makeServerCall(Message.newBuilder().setEnforceZoneViewMsg(msg).build());
   }
 
   public void restoreZoneView(GUID zoneGUID) {
@@ -252,7 +260,14 @@ public class ServerCommandClientImpl implements ServerCommand {
     ExecFunction.receiveExecFunction(target, source, functionName, args);
 
     if (ExecFunction.isMessageGlobal(target, source)) {
-      makeServerCall(COMMAND.execFunction, target, source, functionName, args);
+      var msg =
+          ExecFunctionMsg.newBuilder()
+              .setTarget(target)
+              .setSource(source)
+              .setFunctionName(functionName)
+              .addAllArgument(Mapper.mapToScriptTypeDto(args));
+
+      makeServerCall(Message.newBuilder().setExecFunctionMsg(msg).build());
     }
   }
 
@@ -278,8 +293,9 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void enforceNotification(Boolean enforce) {
-    // MapTool.showInformation(enforce.toString());
-    makeServerCall(COMMAND.enforceNotification, enforce);
+    var msg = EnforceNotificationMsg.newBuilder().setEnforce(enforce);
+
+    makeServerCall(Message.newBuilder().setEnforceNotificationMsg(msg).build());
   }
 
   public void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
@@ -348,7 +364,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void enforceZone(GUID zoneGUID) {
-    makeServerCall(COMMAND.enforceZone, zoneGUID);
+    var msg = EnforceZoneMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    makeServerCall(Message.newBuilder().setEnforceZoneMsg(msg).build());
   }
 
   public void setServerPolicy(ServerPolicy policy) {

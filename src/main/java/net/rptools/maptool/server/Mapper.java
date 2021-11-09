@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.server;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import java.awt.*;
@@ -24,6 +26,8 @@ import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
@@ -1229,6 +1233,46 @@ public class Mapper {
     path.getWayPointList()
         .forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
 
+    return dto.build();
+  }
+
+  public static List<Object> map(List<ScriptTypeDto> argumentList) {
+    return argumentList.stream().map(Mapper::map).collect(Collectors.toList());
+  }
+
+  public static Object map(ScriptTypeDto dto) {
+    switch (dto.getTypeCase()) {
+      case STRING_VAL -> {
+        return dto.getStringVal();
+      }
+      case DOUBLE_VAL -> {
+        return BigDecimal.valueOf(dto.getDoubleVal());
+      }
+      case JSON_VAL -> {
+        return new JsonParser().parse(dto.getJsonVal());
+      }
+      default -> {
+        log.warn("Unexpected type case:" + dto.getTypeCase());
+        return "";
+      }
+    }
+  }
+
+  public static List<ScriptTypeDto> mapToScriptTypeDto(List<Object> args) {
+    return args.stream().map(Mapper::mapToScriptTypeDto).collect(Collectors.toList());
+  }
+
+  public static ScriptTypeDto mapToScriptTypeDto(Object o) {
+    var dto = ScriptTypeDto.newBuilder();
+    if (o instanceof String stringValue) {
+      dto.setStringVal(stringValue);
+    } else if (o instanceof BigDecimal decimalValue) {
+      dto.setDoubleVal(decimalValue.doubleValue());
+    } else if (o instanceof JsonElement json) {
+      dto.setJsonVal(json.toString());
+    } else {
+      log.warn("Unexpected type to convert to ScriptTypeDto: " + o.getClass());
+    }
     return dto.build();
   }
 }

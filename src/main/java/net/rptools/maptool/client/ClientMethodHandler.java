@@ -94,12 +94,71 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case DRAW_MSG -> handle(msg.getDrawMsg());
         case EDIT_TOKEN_MSG -> handle(msg.getEditTokenMsg());
         case PUT_TOKEN_MSG -> handle(msg.getPutTokenMsg());
+        case ENFORCE_NOTIFICATION_MSG -> handle(msg.getEnforceNotificationMsg());
+        case ENFORCE_ZONE_MSG -> handle(msg.getEnforceZoneMsg());
+        case ENFORCE_ZONE_VIEW_MSG -> handle(msg.getEnforceZoneViewMsg());
+        case EXEC_FUNCTION_MSG -> handle(msg.getExecFunctionMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ExecFunctionMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          ExecFunction.receiveExecFunction(
+              msg.getTarget(),
+              msg.getSource(),
+              msg.getFunctionName(),
+              Mapper.map(msg.getArgumentList()));
+        });
+  }
+
+  private void handle(EnforceZoneViewMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          int x = msg.getX();
+          int y = msg.getY();
+          double scale = msg.getScale();
+          int gmWidth = msg.getGmWidth();
+          int gmHeight = msg.getGmHeight();
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          if (renderer == null) {
+            return;
+          }
+          if (AppPreferences.getFitGMView()) {
+            renderer.enforceView(x, y, scale, gmWidth, gmHeight);
+          } else {
+            renderer.setScale(scale);
+            renderer.centerOn(new ZonePoint(x, y));
+          }
+        });
+  }
+
+  private void handle(EnforceZoneMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+
+          if (renderer != null
+              && renderer != MapTool.getFrame().getCurrentZoneRenderer()
+              && (renderer.getZone().isVisible() || MapTool.getPlayer().isGM())) {
+            MapTool.getFrame().setCurrentZoneRenderer(renderer);
+          }
+        });
+  }
+
+  private void handle(EnforceNotificationMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.getFrame().getCommandPanel().disableNotifyButton(msg.getEnforce());
+        });
   }
 
   private void handle(PutTokenMsg putTokenMsg) {
@@ -276,19 +335,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           Token token;
           Set<GUID> selectedToks = null;
           List<GUID> tokenGUIDs;
+          ZoneRenderer renderer;
 
           switch (cmd) {
-            case enforceZone:
-              zoneGUID = (GUID) parameters[0];
-              ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-
-              if (renderer != null
-                  && renderer != MapTool.getFrame().getCurrentZoneRenderer()
-                  && (renderer.getZone().isVisible() || MapTool.getPlayer().isGM())) {
-                MapTool.getFrame().setCurrentZoneRenderer(renderer);
-              }
-              return;
-
             case setZoneHasFoW:
               zoneGUID = (GUID) parameters[0];
               boolean hasFog = (Boolean) parameters[1];
@@ -412,26 +461,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case enforceZoneView:
-              zoneGUID = (GUID) parameters[0];
-              int x = (Integer) parameters[1];
-              int y = (Integer) parameters[2];
-              double scale = (Double) parameters[3];
-              int gmWidth = (Integer) parameters[4];
-              int gmHeight = (Integer) parameters[5];
-
-              renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-              if (renderer == null) {
-                return;
-              }
-              if (AppPreferences.getFitGMView()) {
-                renderer.enforceView(x, y, scale, gmWidth, gmHeight);
-              } else {
-                renderer.setScale(scale);
-                renderer.centerOn(new ZonePoint(x, y));
-              }
-              return;
-
             case restoreZoneView:
               zoneGUID = (GUID) parameters[0];
               MapTool.getFrame().getZoneRenderer(zoneGUID).restoreView();
@@ -513,14 +542,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.addServerMessage(message);
               return;
 
-            case execFunction:
-              ExecFunction.receiveExecFunction(
-                  (String) parameters[0],
-                  (String) parameters[1],
-                  (String) parameters[2],
-                  (List<Object>) parameters[3]);
-              return;
-
             case execLink:
               MacroLinkFunction.receiveExecLink(
                   (String) parameters[0], (String) parameters[1], (String) parameters[2]);
@@ -560,8 +581,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               zoneGUID = (GUID) parameters[0];
               keyToken = (GUID) parameters[1];
 
-              x = (Integer) parameters[2];
-              y = (Integer) parameters[3];
+              int x = (Integer) parameters[2];
+              int y = (Integer) parameters[3];
 
               renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
               renderer.updateMoveSelectionSet(keyToken, new ZonePoint(x, y));
@@ -760,11 +781,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                     MapTool.getFrame().getZoneRenderer((GUID) parameters[0]);
                 FogUtil.exposePCArea(currentRenderer1);
               }
-              return;
-
-            case enforceNotification:
-              Boolean enforce = (Boolean) parameters[0];
-              MapTool.getFrame().getCommandPanel().disableNotifyButton(enforce);
               return;
 
             case updateExposedAreaMeta:

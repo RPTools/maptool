@@ -23,6 +23,10 @@ message Message {
     ClearExposedAreaMsg clear_exposed_area_msg = 6;
     DrawMsg draw_msg = 7;
     EditTokenMsg edit_token_msg = 8;
+    EnforceNotificationMsg enforce_notification_msg = 9;
+    EnforceZoneMsg enforce_zone_msg = 10;
+    EnforceZoneViewMsg enforce_zone_view_msg = 11;
+    ExecFunctionMsg exec_function_msg = 12;
     PutTokenMsg put_token_msg = 23;
   }
 }

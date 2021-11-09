@@ -59,3 +59,27 @@ message PutTokenMsg {
   string zone_guid = 1;
   TokenDto token = 2;
 }
+
+message EnforceNotificationMsg {
+  bool enforce = 1;
+}
+
+message EnforceZoneMsg {
+  string zone_guid = 1;
+}
+
+message EnforceZoneViewMsg {
+  string zone_guid = 1;
+  int32 x = 2;
+  int32 y = 3;
+  double scale = 4;
+  int32 gm_width = 5;
+  int32 gm_height = 6;
+}
+
+message ExecFunctionMsg {
+  string target = 1;
+  string source = 2;
+  string function_name = 3;
+  repeated ScriptTypeDto argument = 4;
+}

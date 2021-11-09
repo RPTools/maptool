@@ -113,6 +113,16 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(id, msg.getPutTokenMsg());
           sendToClients(id, msg);
         }
+        case ENFORCE_NOTIFICATION_MSG -> {
+          sendToClients(id, msg);
+        }
+        case ENFORCE_ZONE_MSG -> {
+          sendToClients(id, msg);
+        }
+        case ENFORCE_ZONE_VIEW_MSG -> {
+          sendToClients(id, msg);
+        }
+        case EXEC_FUNCTION_MSG -> sendToClients(id, msg);
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -205,15 +215,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case updateDrawing:
           updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
           break;
-        case enforceZoneView:
-          enforceZoneView(
-              context.getGUID(0),
-              context.getInt(1),
-              context.getInt(2),
-              context.getDouble(3),
-              context.getInt(4),
-              context.getInt(5));
-          break;
         case restoreZoneView:
           restoreZoneView(context.getGUID(0));
           break;
@@ -238,18 +239,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case setLiveTypingLabel:
           setLiveTypingLabel(context.getString(0), context.getBool(1));
           break;
-        case enforceNotification:
-          enforceNotification(context.getBool(0));
-          break;
         case message:
           message((TextMessage) context.get(0));
-          break;
-        case execFunction:
-          execFunction(
-              (String) context.get(0),
-              (String) context.get(1),
-              (String) context.get(2),
-              (List<Object>) context.get(3));
           break;
         case execLink:
           execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
@@ -329,9 +320,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case updateTokenMove:
           updateTokenMove(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
-          break;
-        case enforceZone:
-          enforceZone(context.getGUID(0));
           break;
         case setServerPolicy:
           setServerPolicy((ServerPolicy) context.get(0));
@@ -474,10 +462,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     // Nothing to do yet
   }
 
-  private void enforceZone(GUID zoneGUID) {
-    forwardToClients();
-  }
-
   private void updateCampaign(CampaignProperties properties) {
     server.getCampaign().replaceCampaignProperties(properties);
     forwardToClients();
@@ -520,10 +504,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
             ClientCommand.COMMAND.updateDrawing.name(), RPCContext.getCurrent().parameters);
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.updateDrawable(drawnElement, pen);
-  }
-
-  private void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
-    forwardToClients();
   }
 
   public void restoreZoneView(GUID zoneGUID) {
@@ -821,10 +801,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void setLiveTypingLabel(String label, boolean show) {
-    forwardToClients();
-  }
-
-  private void enforceNotification(Boolean enforce) {
     forwardToClients();
   }
 
