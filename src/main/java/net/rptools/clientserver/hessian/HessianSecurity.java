@@ -37,12 +37,14 @@ public class HessianSecurity {
     allow.add("java.lang.String");
 
     allow.add("java.awt.geom.*");
+    allow.add("java.awt.Point");
     allow.add("sun.awt.geom.*");
     allow.add("java.awt.BasicStroke");
 
     allow.add("net.rptools.maptool.client.walker.*");
     allow.add("net.rptools.maptool.common.*");
     allow.add("net.rptools.maptool.model.*");
+    allow.add("net.rptools.maptool.client.ui.*");
 
     allow.add("net.rptools.lib.MD5Key");
 
