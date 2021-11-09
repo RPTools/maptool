@@ -48,7 +48,6 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -536,10 +535,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case addTopology:
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
-              TopologyMode topologyMode = (TopologyMode) parameters[2];
+              var topologyType = (Zone.TopologyType) parameters[2];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addTopology(area, topologyMode);
+              zone.addTopology(area, topologyType);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;
@@ -547,10 +546,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case removeTopology:
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
-              topologyMode = (TopologyMode) parameters[2];
+              topologyType = (Zone.TopologyType) parameters[2];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.removeTopology(area, topologyMode);
+              zone.removeTopology(area, topologyType);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;

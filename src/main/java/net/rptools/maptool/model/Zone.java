@@ -19,6 +19,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
+import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -149,24 +150,60 @@ public class Zone extends BaseModel {
     }
   }
 
-  // Control what topology layer(s) to add/get drawing to/from
-  public enum TopologyMode {
-    VBL,
-    MBL,
-    TERRAIN_VBL,
-    COMBINED,
-    COMBINED_TERRAIN_VBL;
+  public enum TopologyType {
+    WALL_VBL,
+    HILL_VBL,
+    PIT_VBL,
+    MBL;
+  }
 
-    public boolean isRegularVbl() {
-      return this == VBL || this == COMBINED;
+  public static final class TopologyMode implements Iterable<TopologyType> {
+    private final Set<TopologyType> topologyTypes;
+
+    public static TopologyMode valueOf(String value) {
+      List<TopologyType> topologyTypes = new ArrayList<>();
+      for (var topologyType : TopologyType.values()) {
+        var topologyTypeName = topologyType.toString();
+        if (value.contains(topologyTypeName)) {
+          topologyTypes.add(topologyType);
+        }
+      }
+
+      return new TopologyMode(topologyTypes.toArray(TopologyType[]::new));
     }
 
-    public boolean isTerrainVbl() {
-      return this == TERRAIN_VBL || this == COMBINED_TERRAIN_VBL;
+    public TopologyMode(TopologyType... types) {
+      // I would prefer using an enum set, but Hessian can't handle it properly.
+      topologyTypes = new HashSet<>();
+      topologyTypes.addAll(Arrays.asList(types));
     }
 
-    public boolean isMbl() {
-      return this == MBL || this == COMBINED || this == COMBINED_TERRAIN_VBL;
+    public boolean contains(TopologyType type) {
+      return topologyTypes.contains(type);
+    }
+
+    public TopologyMode with(TopologyType type) {
+      var newMode = new TopologyMode();
+      newMode.topologyTypes.addAll(this.topologyTypes);
+      newMode.topologyTypes.add(type);
+      return newMode;
+    }
+
+    public TopologyMode without(TopologyType type) {
+      var newMode = new TopologyMode();
+      newMode.topologyTypes.addAll(this.topologyTypes);
+      newMode.topologyTypes.remove(type);
+      return newMode;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<TopologyType> iterator() {
+      return topologyTypes.iterator();
+    }
+
+    public String toString() {
+      return topologyTypes.toString();
     }
   }
 
@@ -223,7 +260,8 @@ public class Zone extends BaseModel {
   /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
 
-  private Area terrainVbl = new Area();
+  private Area hillVbl = new Area();
+  private Area pitVbl = new Area();
 
   // New topology to hold Movement Blocking Only
   private Area topologyTerrain = new Area();
@@ -488,7 +526,8 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
-    terrainVbl = (Area) zone.terrainVbl.clone();
+    hillVbl = (Area) zone.hillVbl.clone();
+    pitVbl = (Area) zone.pitVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
     topologyMode = zone.topologyMode;
@@ -786,48 +825,50 @@ public class Zone extends BaseModel {
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
-   * @param topologyMode the mode of the topology
+   * @param topologyType the type of the topology
    */
-  public void addTopology(Area area, TopologyMode topologyMode) {
-    if (topologyMode.isRegularVbl()) {
-      getTopology().add(area);
-    }
-    if (topologyMode.isTerrainVbl()) {
-      getTerrainVbl().add(area);
-    }
-    if (topologyMode.isMbl()) {
-      getTopologyTerrain().add(area);
-    }
+  public void addTopology(Area area, TopologyType topologyType) {
+    var topology =
+        switch (topologyType) {
+          case WALL_VBL -> getTopology();
+          case HILL_VBL -> getHillVbl();
+          case PIT_VBL -> getPitVbl();
+          case MBL -> getTopologyTerrain();
+        };
+    topology.add(area);
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void addTopology(Area area) {
-    addTopology(area, getTopologyMode());
+    for (var topologyType : getTopologyMode()) {
+      addTopology(area, topologyType);
+    }
   }
 
   /**
    * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
-   * @param topologyMode the mode of the topology
+   * @param topologyType the type of the topology
    */
-  public void removeTopology(Area area, TopologyMode topologyMode) {
-    if (topologyMode.isRegularVbl()) {
-      getTopology().subtract(area);
-    }
-    if (topologyMode.isTerrainVbl()) {
-      getTerrainVbl().subtract(area);
-    }
-    if (topologyMode.isMbl()) {
-      getTopologyTerrain().subtract(area);
-    }
+  public void removeTopology(Area area, TopologyType topologyType) {
+    var topology =
+        switch (topologyType) {
+          case WALL_VBL -> getTopology();
+          case HILL_VBL -> getHillVbl();
+          case PIT_VBL -> getPitVbl();
+          case MBL -> getTopologyTerrain();
+        };
+    topology.subtract(area);
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void removeTopology(Area area) {
-    removeTopology(area, getTopologyMode());
+    for (var topologyType : getTopologyMode()) {
+      removeTopology(area, topologyType);
+    }
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
@@ -840,8 +881,12 @@ public class Zone extends BaseModel {
     return topology;
   }
 
-  public Area getTerrainVbl() {
-    return terrainVbl;
+  public Area getHillVbl() {
+    return hillVbl;
+  }
+
+  public Area getPitVbl() {
+    return pitVbl;
   }
 
   /** @return the terrain topology of the zone */
@@ -2019,8 +2064,11 @@ public class Zone extends BaseModel {
       undo = new UndoPerZone(this);
     }
 
-    if (terrainVbl == null) {
-      terrainVbl = new Area();
+    if (hillVbl == null) {
+      hillVbl = new Area();
+    }
+    if (pitVbl == null) {
+      pitVbl = new Area();
     }
     // Movement Blocking Layer
     if (topologyTerrain == null) {
