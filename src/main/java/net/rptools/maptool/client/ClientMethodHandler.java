@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
@@ -98,12 +99,41 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case ENFORCE_ZONE_MSG -> handle(msg.getEnforceZoneMsg());
         case ENFORCE_ZONE_VIEW_MSG -> handle(msg.getEnforceZoneViewMsg());
         case EXEC_FUNCTION_MSG -> handle(msg.getExecFunctionMsg());
+        case EXEC_LINK_MSG -> handle(msg.getExecLinkMsg());
+        case EXPOSE_FOW_MSG -> handle(msg.getExposeFowMsg());
+        case EXPOSE_PC_AREA_MSG -> handle(msg.getExposePcAreaMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(ExposePcAreaMsg msg) {
+    EventQueue.invokeLater(() -> {
+      var zoneGuid = GUID.valueOf(msg.getZoneGuid());
+      var renderer = MapTool.getFrame().getZoneRenderer(zoneGuid);
+      FogUtil.exposePCArea(renderer);
+    });
+  }
+
+  private void handle(ExposeFowMsg msg) {
+    EventQueue.invokeLater(() -> {
+        var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+        Area area = Mapper.map(msg.getArea());
+        var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+        var zone = MapTool.getCampaign().getZone(zoneGUID);
+        zone.exposeArea(area, selectedToks);
+        MapTool.getFrame().refresh();
+    });
+  }
+
+  private void handle(ExecLinkMsg msg) {
+    EventQueue.invokeLater(() -> {
+      MacroLinkFunction.receiveExecLink(
+          msg.getLink(), msg.getTarget(), msg.getSource());
+    });
   }
 
   private void handle(ExecFunctionMsg msg) {
@@ -349,21 +379,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case exposeFoW:
-              zoneGUID = (GUID) parameters[0];
-              Area area = (Area) parameters[1];
-
-              if (parameters.length > 2 && parameters[2] != null) {
-                selectedToks = (Set<GUID>) parameters[2];
-              }
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.exposeArea(area, selectedToks);
-              MapTool.getFrame().refresh();
-              return;
-
             case setFoW:
               zoneGUID = (GUID) parameters[0];
-              area = (Area) parameters[1];
+              var area = (Area) parameters[1];
 
               if (parameters.length > 2 && parameters[2] != null) {
                 selectedToks = (Set<GUID>) parameters[2];
@@ -542,10 +560,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.addServerMessage(message);
               return;
 
-            case execLink:
-              MacroLinkFunction.receiveExecLink(
-                  (String) parameters[0], (String) parameters[1], (String) parameters[2]);
-              return;
 
             case showPointer:
               MapTool.getFrame()
@@ -774,14 +788,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                     .removeChatTyper(parameters[0].toString());
                 return;
               }
-
-            case exposePCArea:
-              if (parameters[0] != null && parameters[0] instanceof GUID) {
-                ZoneRenderer currentRenderer1 =
-                    MapTool.getFrame().getZoneRenderer((GUID) parameters[0]);
-                FogUtil.exposePCArea(currentRenderer1);
-              }
-              return;
 
             case updateExposedAreaMeta:
               zoneGUID = (GUID) parameters[0];

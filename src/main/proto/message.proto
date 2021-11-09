@@ -27,6 +27,9 @@ message Message {
     EnforceZoneMsg enforce_zone_msg = 10;
     EnforceZoneViewMsg enforce_zone_view_msg = 11;
     ExecFunctionMsg exec_function_msg = 12;
+    ExecLinkMsg exec_link_msg = 13;
+    ExposeFowMsg expose_fow_msg = 14;
+    ExposePcAreaMsg expose_pc_area_msg = 15;
     PutTokenMsg put_token_msg = 23;
   }
 }

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -276,7 +278,8 @@ public class ServerCommandClientImpl implements ServerCommand {
     MacroLinkFunction.receiveExecLink(link, target, source); // receive locally right away
 
     if (ExecFunction.isMessageGlobal(target, source)) {
-      makeServerCall(COMMAND.execLink, link, target, source);
+      var msg = ExecLinkMsg.newBuilder().setTarget(target).setSource(source).setLink(link);
+      makeServerCall(Message.newBuilder().setExecLinkMsg(msg).build());
     }
   }
 
@@ -294,7 +297,6 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void enforceNotification(Boolean enforce) {
     var msg = EnforceNotificationMsg.newBuilder().setEnforce(enforce);
-
     makeServerCall(Message.newBuilder().setEnforceNotificationMsg(msg).build());
   }
 
@@ -331,13 +333,17 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void exposePCArea(GUID zoneGUID) {
-    makeServerCall(COMMAND.exposePCArea, zoneGUID);
+    var msg = ExposePcAreaMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    makeServerCall(Message.newBuilder().setExposePcAreaMsg(msg).build());
   }
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     // Expose locally right away.
     MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
-    makeServerCall(COMMAND.exposeFoW, zoneGUID, area, selectedToks);
+    var msg = ExposeFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
+        .setArea(Mapper.map(area));
+    msg.addAllTokenGuid(selectedToks.stream().map(g -> g.toString()).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setExposeFowMsg(msg).build());
   }
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {

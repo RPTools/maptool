@@ -83,3 +83,19 @@ message ExecFunctionMsg {
   string function_name = 3;
   repeated ScriptTypeDto argument = 4;
 }
+
+message ExecLinkMsg {
+  string link = 1;
+  string target = 2;
+  string source = 3;
+}
+
+message ExposeFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string token_guid = 3;
+}
+
+message ExposePcAreaMsg {
+  string zone_guid = 1;
+}

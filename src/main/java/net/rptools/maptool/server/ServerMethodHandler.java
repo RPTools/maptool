@@ -83,16 +83,12 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getAddTopologyMsg());
           sendToClients(id, msg);
         }
-        case BRING_TOKENS_TO_FRONT_MSG -> {
-          handle(msg.getBringTokensToFrontMsg());
-        }
+        case BRING_TOKENS_TO_FRONT_MSG -> handle(msg.getBringTokensToFrontMsg());
         case BOOT_PLAYER_MSG -> {
           handle(msg.getBootPlayerMsg());
           sendToClients(id, msg);
         }
-        case CHANGE_ZONE_DISPLAY_NAME_MSG -> {
-          handle(msg.getChangeZoneDisplayNameMsg(), msg);
-        }
+        case CHANGE_ZONE_DISPLAY_NAME_MSG -> handle(msg.getChangeZoneDisplayNameMsg(), msg);
         case CLEAR_ALL_DRAWINGS_MSG -> {
           handle(msg.getClearAllDrawingsMsg());
           sendToAllClients(msg);
@@ -113,16 +109,19 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(id, msg.getPutTokenMsg());
           sendToClients(id, msg);
         }
-        case ENFORCE_NOTIFICATION_MSG -> {
-          sendToClients(id, msg);
-        }
-        case ENFORCE_ZONE_MSG -> {
-          sendToClients(id, msg);
-        }
-        case ENFORCE_ZONE_VIEW_MSG -> {
+        case ENFORCE_NOTIFICATION_MSG -> sendToClients(id, msg);
+        case ENFORCE_ZONE_MSG -> sendToClients(id, msg);
+        case ENFORCE_ZONE_VIEW_MSG -> sendToClients(id, msg);
+        case EXEC_LINK_MSG -> sendToClients(id, msg);
+        case EXPOSE_FOW_MSG -> {
+          handle(msg.getExposeFowMsg());
           sendToClients(id, msg);
         }
         case EXEC_FUNCTION_MSG -> sendToClients(id, msg);
+        case EXPOSE_PC_AREA_MSG -> {
+          handle(msg.getExposePcAreaMsg());
+          sendToAllClients(msg);
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -132,6 +131,20 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(ExposePcAreaMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+    FogUtil.exposePCArea(renderer);
+  }
+
+  private void handle(ExposeFowMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    Area area = Mapper.map(msg.getArea());
+    var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+    zone.exposeArea(area, selectedToks);
   }
 
   private void handle(String clientId, PutTokenMsg putTokenMsg) {
@@ -218,9 +231,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case restoreZoneView:
           restoreZoneView(context.getGUID(0));
           break;
-        case exposeFoW:
-          exposeFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
-          break;
         case getAsset:
           getAsset((MD5Key) context.get(0));
           break;
@@ -241,9 +251,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case message:
           message((TextMessage) context.get(0));
-          break;
-        case execLink:
-          execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
           break;
         case putAsset:
           putAsset((Asset) context.get(0));
@@ -367,9 +374,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           setTokenLocation(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
           break;
-        case exposePCArea:
-          exposePCArea(context.getGUID(0));
-          break;
         case updateExposedAreaMeta:
           updateExposedAreaMeta(
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
@@ -411,8 +415,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   private void forwardToAllClients() {
     server
         .getConnection()
-        .broadcastCallMethod(
-            new String[] {}, RPCContext.getCurrent().method, RPCContext.getCurrent().parameters);
+        .broadcastCallMethod(RPCContext.getCurrent().method, RPCContext.getCurrent().parameters);
   }
 
   /**
@@ -508,21 +511,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   public void restoreZoneView(GUID zoneGUID) {
     forwardToClients();
-  }
-
-  private void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.exposeArea(area, selectedToks);
-    forwardToClients();
-  }
-
-  private void exposePCArea(GUID zoneGUID) {
-    ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-    FogUtil.exposePCArea(renderer);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.exposePCArea.name(), RPCContext.getCurrent().parameters);
   }
 
   private void getAsset(MD5Key assetID) {
@@ -628,14 +616,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void message(TextMessage message) {
-    forwardToClients();
-  }
-
-  private void execFunction(String target, String source, String functionName, List<Object> args) {
-    forwardToClients();
-  }
-
-  private void execLink(String link, String target, String source) {
     forwardToClients();
   }
 

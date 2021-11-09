@@ -55,7 +55,6 @@ public interface ServerCommand {
     updateDrawing,
     setZoneGridSize,
     message,
-    execLink,
     undoDraw,
     showPointer,
     movePointer,
@@ -66,7 +65,6 @@ public interface ServerCommand {
     updateTokenMove,
     setZoneVisibility,
     setZoneHasFoW,
-    exposeFoW,
     hideFoW,
     setFoW,
     putLabel,
@@ -85,7 +83,6 @@ public interface ServerCommand {
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental
-    exposePCArea,
     setBoard,
     updateExposedAreaMeta,
     clearExposedArea,
