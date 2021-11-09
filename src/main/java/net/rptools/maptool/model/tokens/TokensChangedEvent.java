@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model.tokens;
 
-import java.util.List;
-import net.rptools.maptool.model.Token;
+import java.util.Set;
 
-public record TokensChangedEvent(List<Token> tokens) {}
+public record TokensChangedEvent(Set<TokenInfo> info) {}

@@ -36,6 +36,7 @@ public class HessianSecurity {
     allow.add("java.lang.Short");
     allow.add("java.lang.String");
 
+    allow.add("java.awt.*");
     allow.add("java.awt.geom.*");
     allow.add("java.awt.Point");
     allow.add("sun.awt.geom.*");

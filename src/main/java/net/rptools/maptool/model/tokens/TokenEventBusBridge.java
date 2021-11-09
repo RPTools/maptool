@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.tokens;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
@@ -44,16 +45,20 @@ public class TokenEventBusBridge implements AppEventListener {
         && appEvent.getNewValue() instanceof Zone zone) {
       addTokenChangeListener(zone);
       // Now we have fire off adding the tokens in the zone
-      var tokenMap =
-          zone.getTokens().stream().collect(Collectors.toMap(Token::getName, token -> token));
-      new MapToolEventBus().getMainEventBus().post(new TokensAddedEvent(tokenMap));
+      var tokens =
+          zone.getTokens().stream()
+              .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+              .collect(Collectors.toSet());
+      new MapToolEventBus().getMainEventBus().post(new TokensAddedEvent(tokens));
     } else if (appEvent.getId().equals(ZoneEvent.Removed)
         && appEvent.getOldValue() instanceof Zone zone) {
       removeTokenChangeListener(zone);
       // Now we have fire off removing tokens that are in the zone
-      var tokenMap =
-          zone.getTokens().stream().collect(Collectors.toMap(Token::getName, token -> token));
-      new MapToolEventBus().getMainEventBus().post(new TokensRemovedEvent(tokenMap));
+      var tokens =
+          zone.getTokens().stream()
+              .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+              .collect(Collectors.toSet());
+      new MapToolEventBus().getMainEventBus().post(new TokensRemovedEvent(tokens));
     }
   }
 
@@ -70,8 +75,11 @@ public class TokenEventBusBridge implements AppEventListener {
               } else if (event.getArg() instanceof List<?> lt) {
                 tokenList.addAll((List<Token>) lt);
               }
-              var tokenMap = tokenList.stream().collect(Collectors.toMap(Token::getName, t -> t));
-              var added = new TokensAddedEvent(tokenMap);
+              var tokens =
+                  tokenList.stream()
+                      .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+                      .collect(Collectors.toSet());
+              var added = new TokensAddedEvent(tokens);
               new MapToolEventBus().getMainEventBus().post(added);
             });
       } else if (event.eventType == Event.TOKEN_REMOVED) {
@@ -83,20 +91,27 @@ public class TokenEventBusBridge implements AppEventListener {
               } else if (event.getArg() instanceof List<?> lt) {
                 tokenList.addAll((List<Token>) lt);
               }
-              var tokenMap = tokenList.stream().collect(Collectors.toMap(Token::getName, t -> t));
-              var removed = new TokensRemovedEvent(tokenMap);
+              var tokens =
+                  tokenList.stream()
+                      .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+                      .collect(Collectors.toSet());
+              var removed = new TokensRemovedEvent(tokens);
               new MapToolEventBus().getMainEventBus().post(removed);
             });
       } else if (event.eventType == Event.TOKEN_CHANGED || event.eventType == Event.TOKEN_EDITED) {
         SwingUtilities.invokeLater(
             () -> {
-              List<Token> tokenList = new ArrayList<>();
+              var tokens = new HashSet<TokenInfo>();
               if (event.getArg() instanceof Token t) {
-                tokenList.add(t);
+                tokens.add(new TokenInfo(t.getName(), t.getId(), t));
               } else if (event.getArg() instanceof List<?> lt) {
-                tokenList.addAll((List<Token>) lt);
+                tokens.addAll(
+                    lt.stream()
+                        .map(token -> ((Token) token))
+                        .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+                        .collect(Collectors.toSet()));
               }
-              new MapToolEventBus().getMainEventBus().post(new TokensChangedEvent(tokenList));
+              new MapToolEventBus().getMainEventBus().post(new TokensChangedEvent(tokens));
             });
       }
     }

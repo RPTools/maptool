@@ -14,8 +14,7 @@
  */
 package net.rptools.maptool.model.tokens;
 
-import java.util.Map;
-import net.rptools.maptool.model.Token;
+import java.util.Set;
 
 /** Event fired when a token is added to a map. */
-public record TokensAddedEvent(Map<String, Token> tokenNameMap) {}
+public record TokensAddedEvent(Set<TokenInfo> info) {}

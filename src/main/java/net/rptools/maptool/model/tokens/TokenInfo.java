@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.tokens;
 
-import java.util.Set;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Token;
 
-public record TokensRemovedEvent(Set<TokenInfo> info) {}
+public record TokenInfo(String name, GUID id, Token token) {}

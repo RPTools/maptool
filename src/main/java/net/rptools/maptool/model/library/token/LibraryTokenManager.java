@@ -88,9 +88,9 @@ public class LibraryTokenManager {
       SwingUtilities.invokeLater(
           () -> {
             addTokens(
-                event.tokenNameMap().values().stream()
-                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
-                    .map(LibraryToken::new)
+                event.info().stream()
+                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
+                    .map(t -> new LibraryToken(t.token()))
                     .toList());
           });
     }
@@ -100,9 +100,9 @@ public class LibraryTokenManager {
       SwingUtilities.invokeLater(
           () -> {
             removeTokens(
-                event.tokenNameMap().values().stream()
-                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
-                    .map(LibraryToken::new)
+                event.info().stream()
+                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
+                    .map(t -> new LibraryToken(t.token()))
                     .toList());
           });
     }
@@ -112,9 +112,9 @@ public class LibraryTokenManager {
       SwingUtilities.invokeLater(
           () -> {
             changeTokens(
-                event.tokens().stream()
-                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
-                    .map(LibraryToken::new)
+                event.info().stream()
+                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
+                    .map(t -> new LibraryToken(t.token()))
                     .toList());
           });
     }
