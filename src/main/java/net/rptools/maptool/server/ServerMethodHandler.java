@@ -45,7 +45,6 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -239,10 +238,12 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           setServerPolicy((ServerPolicy) context.get(0));
           break;
         case addTopology:
-          addTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
+          addTopology(
+              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
           break;
         case removeTopology:
-          removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
+          removeTopology(
+              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -855,15 +856,15 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     MapTool.getFrame().getToolbox().updateTools();
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode);
+    zone.addTopology(area, topologyType);
     forwardToClients();
   }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area, topologyMode);
+    zone.removeTopology(area, topologyType);
     forwardToClients();
   }
 

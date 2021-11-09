@@ -30,7 +30,6 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -129,9 +128,21 @@ public interface ServerCommand {
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  public default void addTopology(GUID zoneGUID, Area area, Zone.TopologyMode topologyMode) {
+    for (var topologyType : topologyMode) {
+      addTopology(zoneGUID, area, topologyType);
+    }
+  }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
+
+  public default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyMode topologyMode) {
+    for (var topologyType : topologyMode) {
+      removeTopology(zoneGUID, area, topologyType);
+    }
+  }
+
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 

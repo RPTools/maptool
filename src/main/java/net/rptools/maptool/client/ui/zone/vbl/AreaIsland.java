@@ -31,7 +31,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 public class AreaIsland implements AreaContainer {
 
   private AreaMeta meta;
-  private boolean isTerrainVbl;
   private AreaOcean parentOcean;
   private Set<AreaOcean> oceanSet = new HashSet<AreaOcean>();
 
@@ -40,16 +39,10 @@ public class AreaIsland implements AreaContainer {
    *
    * @param meta The boundary of the island. Must be a hole.
    */
-  public AreaIsland(AreaMeta meta, boolean isTerrainVbl) {
+  public AreaIsland(AreaMeta meta) {
     assert !meta.isHole();
     this.meta = meta;
-    this.isTerrainVbl = isTerrainVbl;
     this.parentOcean = null;
-  }
-
-  /** @return true if this island represents terrain VBL. */
-  public boolean isTerrain() {
-    return isTerrainVbl;
   }
 
   public AreaOcean getParentOcean() {
