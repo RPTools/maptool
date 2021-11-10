@@ -122,6 +122,17 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getExposePcAreaMsg());
           sendToAllClients(msg);
         }
+        case GET_ASSET_MSG -> handle(msg.getGetAssetMsg());
+        case GET_ZONE_MSG -> handle(msg.getGetZoneMsg());
+        case HEARTBEAT_MSG -> {/* nothing yet */}
+        case HIDE_FOW_MSG -> {
+          handle(msg.getHideFowMsg());
+          sendToAllClients(msg);
+        }
+        case HIDE_POINTER_MSG -> sendToAllClients(msg);
+        case MESSAGE_MSG -> sendToClients(id, msg);
+        case MOVE_POINTER_MSG -> sendToAllClients(msg);
+
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -131,6 +142,23 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(HideFowMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var area = Mapper.map(msg.getArea());
+    var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.hideArea(area, selectedToks);
+  }
+
+  private void handle(GetZoneMsg msg) {
+    getZone(GUID.valueOf(msg.getZoneGuid()));
+  }
+
+  private void handle(GetAssetMsg msg) {
+    getAsset(new MD5Key(msg.getAssetId()));
   }
 
   private void handle(ExposePcAreaMsg msg) {
@@ -231,26 +259,11 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case restoreZoneView:
           restoreZoneView(context.getGUID(0));
           break;
-        case getAsset:
-          getAsset((MD5Key) context.get(0));
-          break;
-        case getZone:
-          getZone(context.getGUID(0));
-          break;
-        case hideFoW:
-          hideFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
-          break;
         case setFoW:
           setFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
           break;
-        case hidePointer:
-          hidePointer(context.getString(0));
-          break;
         case setLiveTypingLabel:
           setLiveTypingLabel(context.getString(0), context.getBool(1));
-          break;
-        case message:
-          message((TextMessage) context.get(0));
           break;
         case putAsset:
           putAsset((Asset) context.get(0));
@@ -337,14 +350,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
           break;
-        case heartbeat:
-          heartbeat(context.getString(0));
-          break;
         case updateCampaign:
           updateCampaign((CampaignProperties) context.get(0));
-          break;
-        case movePointer:
-          movePointer(context.getString(0), context.getInt(1), context.getInt(2));
           break;
         case updateInitiative:
           updateInitiative((InitiativeList) context.get(0), (Boolean) context.get(1));
@@ -461,10 +468,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
             ClientCommand.COMMAND.setUseVision.name(), RPCContext.getCurrent().parameters);
   }
 
-  private void heartbeat(String data) {
-    // Nothing to do yet
-  }
-
   private void updateCampaign(CampaignProperties properties) {
     server.getCampaign().replaceCampaignProperties(properties);
     forwardToClients();
@@ -552,15 +555,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
             server.getCampaign().getZone(zoneGUID));
   }
 
-  private void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.hideArea(area, selectedToks);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.hideFoW.name(), RPCContext.getCurrent().parameters);
-  }
-
   private void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setFogArea(area, selectedToks);
@@ -568,14 +562,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         .getConnection()
         .broadcastCallMethod(
             ClientCommand.COMMAND.setFoW.name(), RPCContext.getCurrent().parameters);
-  }
-
-  private void hidePointer(String player) {
-    forwardToAllClients();
-  }
-
-  private void movePointer(String player, int x, int y) {
-    forwardToAllClients();
   }
 
   private void updateInitiative(InitiativeList list, Boolean ownerPermission) {

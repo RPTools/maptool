@@ -99,3 +99,35 @@ message ExposeFowMsg {
 message ExposePcAreaMsg {
   string zone_guid = 1;
 }
+
+message GetAssetMsg {
+  string asset_id = 1;
+}
+
+message GetZoneMsg {
+  string zone_guid = 1;
+}
+
+message HeartbeatMsg {
+  string data = 1;
+}
+
+message HideFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string token_guid = 3;
+}
+
+message HidePointerMsg {
+  string player = 1;
+}
+
+message MessageMsg {
+  TextMessageDto message = 1;
+}
+
+message MovePointerMsg {
+  string player = 1;
+  int32 x = 2;
+  int32 y = 3;
+}

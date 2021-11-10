@@ -213,3 +213,11 @@ message ScriptTypeDto {
     string json_val = 3;
   }
 }
+
+message TextMessageDto {
+  int32 channel = 1;
+  string target = 2;
+  string message = 3;
+  string source = 4;
+  repeated string transform = 5;
+}

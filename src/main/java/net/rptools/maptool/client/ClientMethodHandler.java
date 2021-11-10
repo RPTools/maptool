@@ -102,12 +102,55 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case EXEC_LINK_MSG -> handle(msg.getExecLinkMsg());
         case EXPOSE_FOW_MSG -> handle(msg.getExposeFowMsg());
         case EXPOSE_PC_AREA_MSG -> handle(msg.getExposePcAreaMsg());
+        case HIDE_FOW_MSG -> handle(msg.getHideFowMsg());
+        case HIDE_POINTER_MSG -> handle(msg.getHidePointerMsg());
+        case MESSAGE_MSG -> handle(msg.getMessageMsg());
+        case MOVE_POINTER_MSG -> handle(msg.getMovePointerMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(MovePointerMsg msg) {
+    EventQueue.invokeLater(() -> {
+      Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(msg.getPlayer());
+      if (pointer == null) {
+        return;
+      }
+      pointer.setX(msg.getX());
+      pointer.setY(msg.getY());
+
+      MapTool.getFrame().refresh();
+    });
+  }
+
+  private void handle(MessageMsg msg) {
+    EventQueue.invokeLater(() -> {
+      TextMessage message = Mapper.map(msg.getMessage());
+      MapTool.addServerMessage(message);
+    });
+  }
+
+  private void handle(HidePointerMsg msg) {
+    EventQueue.invokeLater(() -> {
+      MapTool.getFrame().getPointerOverlay().removePointer(msg.getPlayer());
+      MapTool.getFrame().refresh();
+    });
+  }
+
+  private void handle(HideFowMsg msg) {
+    EventQueue.invokeLater(() -> {
+      var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+      var area = Mapper.map(msg.getArea());
+      var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+
+      var zone = MapTool.getCampaign().getZone(zoneGUID);
+      zone.hideArea(area, selectedToks);
+      MapTool.getFrame().refresh();
+    });
   }
 
   private void handle(ExposePcAreaMsg msg) {
@@ -391,18 +434,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case hideFoW:
-              zoneGUID = (GUID) parameters[0];
-              area = (Area) parameters[1];
-
-              if (parameters.length > 2 && parameters[2] != null) {
-                selectedToks = (Set<GUID>) parameters[2];
-              }
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.hideArea(area, selectedToks);
-              MapTool.getFrame().refresh();
-              return;
-
             case setCampaign:
               Campaign campaign = (Campaign) parameters[0];
               MapTool.setCampaign(campaign);
@@ -555,21 +586,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case message:
-              TextMessage message = (TextMessage) parameters[0];
-              MapTool.addServerMessage(message);
-              return;
-
 
             case showPointer:
               MapTool.getFrame()
                   .getPointerOverlay()
                   .addPointer((String) parameters[0], (Pointer) parameters[1]);
-              MapTool.getFrame().refresh();
-              return;
-
-            case hidePointer:
-              MapTool.getFrame().getPointerOverlay().removePointer((String) parameters[0]);
               MapTool.getFrame().refresh();
               return;
 
@@ -688,21 +709,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
               ip.updateView();
               MapTool.getFrame().getLookupTablePanel().updateView();
-              return;
-
-            case movePointer:
-              String player = (String) parameters[0];
-              x = (Integer) parameters[1];
-              y = (Integer) parameters[2];
-
-              Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(player);
-              if (pointer == null) {
-                return;
-              }
-              pointer.setX(x);
-              pointer.setY(y);
-
-              MapTool.getFrame().refresh();
               return;
 
             case updateInitiative:

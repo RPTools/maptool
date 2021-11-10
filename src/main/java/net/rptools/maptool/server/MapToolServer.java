@@ -295,7 +295,7 @@ public class MapToolServer {
             Thread.sleep(500);
           }
         } catch (Exception e) {
-          log.info("Couldn't retrieve AssetChunk for " + entryForException.getKey(), e);
+          log.warn("Couldn't retrieve AssetChunk for " + entryForException.getKey(), e);
           // keep on going
         }
       }

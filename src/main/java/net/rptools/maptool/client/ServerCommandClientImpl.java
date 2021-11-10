@@ -66,11 +66,14 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void heartbeat(String data) {
-    makeServerCall(COMMAND.heartbeat, data);
+    var msg = HeartbeatMsg.newBuilder().setData(data);
+    makeServerCall(Message.newBuilder().setHeartbeatMsg(msg).build());
   }
 
   public void movePointer(String player, int x, int y) {
-    makeServerCall(COMMAND.movePointer, player, x, y);
+    var msg = MovePointerMsg.newBuilder().setPlayer(player).setX(x)
+            .setY(y);
+    makeServerCall(Message.newBuilder().setMovePointerMsg(msg).build());
   }
 
   public void bootPlayer(String player) {
@@ -102,7 +105,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void getZone(GUID zoneGUID) {
-    makeServerCall(COMMAND.getZone, zoneGUID);
+    var msg = GetZoneMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    makeServerCall(Message.newBuilder().setGetZoneMsg(msg).build());
   }
 
   public void putZone(Zone zone) {
@@ -128,7 +132,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void getAsset(MD5Key assetID) {
-    makeServerCall(COMMAND.getAsset, assetID);
+    var msg = GetAssetMsg.newBuilder().setAssetId(assetID.toString());
+    makeServerCall(Message.newBuilder().setGetAssetMsg(msg).build());
   }
 
   public void removeAsset(MD5Key assetID) {
@@ -253,7 +258,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void message(TextMessage message) {
-    makeServerCall(COMMAND.message, message);
+    var msg = MessageMsg.newBuilder().setMessage(Mapper.map(message));
+    makeServerCall(Message.newBuilder().setMessageMsg(msg).build());
   }
 
   @Override
@@ -288,7 +294,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void hidePointer(String player) {
-    makeServerCall(COMMAND.hidePointer, player);
+    var msg = HidePointerMsg.newBuilder().setPlayer(player);
+    makeServerCall(Message.newBuilder().setHidePointerMsg(msg).build());
   }
 
   public void setLiveTypingLabel(String label, boolean show) {
@@ -351,7 +358,10 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    makeServerCall(COMMAND.hideFoW, zoneGUID, area, selectedToks);
+    var msg = HideFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
+            .setArea(Mapper.map(area));
+    msg.addAllTokenGuid(selectedToks.stream().map(g -> g.toString()).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setHideFowMsg(msg).build());
   }
 
   public void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {

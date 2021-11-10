@@ -1275,4 +1275,15 @@ public class Mapper {
     }
     return dto.build();
   }
+
+  public static TextMessage map(TextMessageDto dto) {
+    return new TextMessage(dto.getChannel(), dto.getTarget(),
+        dto.getSource(), dto.getMessage(), dto.getTransformList());
+  }
+
+  public static TextMessageDto map(TextMessage message) {
+    return TextMessageDto.newBuilder().setChannel(message.getChannel()).setTarget(message.getTarget())
+        .setSource(message.getSource()).setMessage(message.getMessage())
+        .addAllTransform(message.getTransformHistory()).build();
+  }
 }
