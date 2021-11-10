@@ -49,7 +49,7 @@ public class AreaTreeInspector extends JPanel {
     area.subtract(new Area(new Rectangle(650, 200, 75, 100)));
     area.add(new Area(new Rectangle(525, 225, 50, 50)));
 
-    tree = new AreaTree(area, false);
+    tree = new AreaTree(area);
 
     addMouseMotionListener(
         new MouseMotionAdapter() {

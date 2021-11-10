@@ -15,7 +15,11 @@
 package net.rptools.maptool.server;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import java.awt.geom.Area;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
@@ -27,6 +31,7 @@ import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -42,13 +47,16 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.server.proto.*;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
 import org.apache.tika.utils.ExceptionUtils;
@@ -345,8 +353,13 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case setServerPolicy:
           setServerPolicy((ServerPolicy) context.get(0));
           break;
+        case addTopology:
+          addTopology(
+              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
+          break;
         case removeTopology:
-          removeTopology(context.getGUID(0), (Area) context.get(1), (TopologyMode) context.get(2));
+          removeTopology(
+              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
           break;
         case renameZone:
           renameZone(context.getGUID(0), context.getString(1));
@@ -394,6 +407,47 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case removeAllAddOnLibraries:
           removeAllAddOnLibraries();
+          break;
+        case updateDataStore:
+          var storeBuilder = DataStoreDto.newBuilder();
+          try {
+            JsonFormat.parser()
+                .merge(
+                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                    storeBuilder);
+            var dataStoreDto = storeBuilder.build();
+            updateDataStore(dataStoreDto);
+          } catch (IOException e) {
+            log.error(I18N.getText("data.error.sendingUpdate"), e);
+          }
+          break;
+        case updateDataNamespace:
+          var namespaceBuilder = GameDataDto.newBuilder();
+          try {
+            JsonFormat.parser()
+                .merge(
+                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                    namespaceBuilder);
+            var dataNamespaceDto = namespaceBuilder.build();
+            updateDataNamespace(dataNamespaceDto);
+          } catch (IOException e) {
+            log.error(I18N.getText("data.error.sendingUpdate"), e);
+          }
+          break;
+        case updateData:
+          String type = (String) parameters[0];
+          String namespace = (String) parameters[1];
+          var dataBuilder = GameDataValueDto.newBuilder();
+          try {
+            JsonFormat.parser()
+                .merge(
+                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
+                    dataBuilder);
+            var dataDto = dataBuilder.build();
+            updateData((String) context.get(0), (String) context.get(1), dataDto);
+          } catch (IOException e) {
+            log.error(I18N.getText("data.error.sendingUpdate"), e);
+          }
           break;
       }
     } finally {
@@ -815,8 +869,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area, topologyMode);
+    zone.addTopology(area, topologyType);
+    forwardToClients();
+  }
+
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeTopology(area, topologyType);
     forwardToClients();
   }
 
@@ -864,6 +925,36 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void removeAllAddOnLibraries() {
+    forwardToClients();
+  }
+
+  @Override
+  public void updateDataStore(DataStoreDto dataStore) {
+    forwardToClients();
+  }
+
+  @Override
+  public void updateDataNamespace(GameDataDto gameData) {
+    forwardToClients();
+  }
+
+  @Override
+  public void updateData(String type, String namespace, GameDataValueDto gameData) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeDataStore() {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeDataNamespace(String type, String namespace) {
+    forwardToClients();
+  }
+
+  @Override
+  public void removeData(String type, String namespace, String name) {
     forwardToClients();
   }
 

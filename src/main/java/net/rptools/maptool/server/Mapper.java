@@ -81,7 +81,7 @@ public class Mapper {
     destination.setMovementMetric(WalkerMetricDto.valueOf(source.getMovementMetric().name()));
     destination.setUsingAstarPathfinding(source.isUsingAstarPathfinding());
     destination.setVblBlocksMove(source.getVblBlocksMove());
-    destination.setHideMapSelectUi(source.hiddenMapSelectUI());
+    destination.setHideMapSelectUi(source.getMapSelectUIHidden());
     return destination.build();
   }
 

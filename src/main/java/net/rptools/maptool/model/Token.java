@@ -490,6 +490,7 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     speechName = token.speechName;
+    allowURIAccess = token.allowURIAccess;
   }
 
   public Token() {

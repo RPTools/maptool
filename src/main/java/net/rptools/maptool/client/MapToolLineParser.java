@@ -33,7 +33,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
@@ -1214,7 +1214,7 @@ public class MapToolLineParser {
         var macroInfo = library.getMTScriptMacroInfo(macroName).get();
         if (macroInfo.isEmpty()) {
           // if the macro source is the same as the location then check private macros.
-          if (macroLocation.equalsIgnoreCase(getMacroSource())) {
+          if (contextStackEmpty() || macroLocation.equalsIgnoreCase(getMacroSource())) {
             macroInfo = library.getPrivateMacroInfo(macroName).get();
           }
           if (macroInfo.isEmpty()) {

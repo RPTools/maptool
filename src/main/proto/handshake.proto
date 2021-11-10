@@ -8,6 +8,7 @@ option java_outer_classname = "HandshakeProtos";
 
 import "library.proto";
 import "data_transfer_objects.proto";
+import "gamedata.proto";
 
 /*
  * For easier differentiation between protobuf classes and "normal" classes
@@ -47,6 +48,7 @@ message ConnectionSuccessfulMsg {
   RoleDto role_dto = 1;
   ServerPolicyDto server_policy_dto = 2;
   AddOnLibraryListDto add_on_library_list_dto = 3;
+  DataStoreDto game_data_dto = 4;
 }
 
 message PlayerBlockedMsg {
