@@ -41,21 +41,19 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
-import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
 import org.apache.tika.utils.ExceptionUtils;
@@ -112,10 +110,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(id, msg.getEditTokenMsg());
           sendToClients(id, msg);
         }
-        case PUT_TOKEN_MSG -> {
-          handle(id, msg.getPutTokenMsg());
-          sendToClients(id, msg);
-        }
         case ENFORCE_NOTIFICATION_MSG -> sendToClients(id, msg);
         case ENFORCE_ZONE_MSG -> sendToClients(id, msg);
         case ENFORCE_ZONE_VIEW_MSG -> sendToClients(id, msg);
@@ -130,8 +124,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           sendToAllClients(msg);
         }
         case GET_ASSET_MSG -> handle(id, msg.getGetAssetMsg());
-        case GET_ZONE_MSG -> handle(msg.getGetZoneMsg());
-        case HEARTBEAT_MSG -> {/* nothing yet */}
+        case GET_ZONE_MSG -> handle(id, msg.getGetZoneMsg());
+        case HEARTBEAT_MSG -> {
+          /* nothing yet */
+        }
         case HIDE_FOW_MSG -> {
           handle(msg.getHideFowMsg());
           sendToAllClients(msg);
@@ -140,6 +136,18 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case MESSAGE_MSG -> sendToClients(id, msg);
         case MOVE_POINTER_MSG -> sendToAllClients(msg);
         case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
+        case PUT_LABEL_MSG -> {
+          handle(msg.getPutLabelMsg());
+          sendToClients(id, msg);
+        }
+        case PUT_TOKEN_MSG -> {
+          handle(id, msg.getPutTokenMsg());
+          sendToClients(id, msg);
+        }
+        case PUT_ZONE_MSG -> {
+          handle(msg.getPutZoneMsg());
+          sendToClients(id, msg);
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -151,6 +159,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
+  private void handle(PutZoneMsg msg) {
+    server.getCampaign().putZone(Mapper.map(msg.getZone()));
+  }
+
+  private void handle(PutLabelMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.putLabel(Mapper.map(msg.getLabel()));
+  }
+
   private void handle(PutAssetMsg msg) {
     AssetManager.putAsset(Mapper.map(msg.getAsset()));
   }
@@ -158,14 +175,15 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   private void handle(HideFowMsg msg) {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
     var area = Mapper.map(msg.getArea());
-    var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+    var selectedToks =
+        msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.hideArea(area, selectedToks);
   }
 
-  private void handle(GetZoneMsg msg) {
-    getZone(GUID.valueOf(msg.getZoneGuid()));
+  private void handle(String id, GetZoneMsg msg) {
+    getZone(id, GUID.valueOf(msg.getZoneGuid()));
   }
 
   private void handle(String id, GetAssetMsg msg) {
@@ -182,7 +200,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Area area = Mapper.map(msg.getArea());
-    var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+    var selectedToks =
+        msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
     zone.exposeArea(area, selectedToks);
   }
 
@@ -276,16 +295,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case setLiveTypingLabel:
           setLiveTypingLabel(context.getString(0), context.getBool(1));
           break;
-        case putLabel:
-          putLabel(context.getGUID(0), (Label) context.get(1));
-          break;
         case updateTokenProperty:
           Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case putZone:
-          putZone((Zone) context.get(0));
           break;
         case removeZone:
           removeZone(context.getGUID(0));
@@ -476,27 +489,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   /**
-   * Broadcast a method to all clients excluding one client
-   *
-   * @param exclude the client to exclude
-   * @param method the method to send
-   * @param parameters an array of parameters related to the method
-   */
-  private void broadcastToClients(String exclude, String method, Object... parameters) {
-    server.getConnection().broadcastCallMethod(new String[] {exclude}, method, parameters);
-  }
-
-  /**
-   * Broadcast a method to all clients
-   *
-   * @param method the method to send
-   * @param parameters an array of parameters related to the method
-   */
-  private void broadcastToAllClients(String method, Object... parameters) {
-    server.getConnection().broadcastCallMethod(new String[] {}, method, parameters);
-  }
-
-  /**
    * Broadcast a method to a single client
    *
    * @param client the client to send the method to
@@ -591,18 +583,14 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // image instead of blowing up
       Asset asset = Asset.createBrokenImageAsset(assetID);
       var msg = PutAssetMsg.newBuilder().setAsset(Mapper.map(asset));
-      server
-          .getConnection().sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
+      server.getConnection().sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
     }
   }
 
-  private void getZone(GUID zoneGUID) {
-    server
-        .getConnection()
-        .callMethod(
-            RPCContext.getCurrent().id,
-            ClientCommand.COMMAND.putZone.name(),
-            server.getCampaign().getZone(zoneGUID));
+  private void getZone(String id, GUID zoneGUID) {
+    var zone = server.getCampaign().getZone(zoneGUID);
+    var msg = PutZoneMsg.newBuilder().setZone(Mapper.map(zone));
+    server.getConnection().sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
   }
 
   private void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
@@ -651,16 +639,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void message(TextMessage message) {
-    forwardToClients();
-  }
-
-  private void putLabel(GUID zoneGUID, Label label) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.putLabel(label);
-    forwardToClients();
-  }
-
   private void putToken(String clientId, GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -681,11 +659,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       };
       broadcastToClient(clientId, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
-  }
-
-  private void putZone(Zone zone) {
-    server.getCampaign().putZone(zone);
-    forwardToClients();
   }
 
   private void removeAsset(MD5Key assetID) {

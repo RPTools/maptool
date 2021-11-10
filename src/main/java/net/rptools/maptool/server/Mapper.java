@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.drawing.Rectangle;
 import net.rptools.maptool.model.player.Player;
@@ -1278,14 +1279,22 @@ public class Mapper {
   }
 
   public static TextMessage map(TextMessageDto dto) {
-    return new TextMessage(dto.getChannel(), dto.getTarget(),
-        dto.getSource(), dto.getMessage(), dto.getTransformList());
+    return new TextMessage(
+        dto.getChannel(),
+        dto.getTarget(),
+        dto.getSource(),
+        dto.getMessage(),
+        dto.getTransformList());
   }
 
   public static TextMessageDto map(TextMessage message) {
-    return TextMessageDto.newBuilder().setChannel(message.getChannel()).setTarget(message.getTarget())
-        .setSource(message.getSource()).setMessage(message.getMessage())
-        .addAllTransform(message.getTransformHistory()).build();
+    return TextMessageDto.newBuilder()
+        .setChannel(message.getChannel())
+        .setTarget(message.getTarget())
+        .setSource(message.getSource())
+        .setMessage(message.getMessage())
+        .addAllTransform(message.getTransformHistory())
+        .build();
   }
 
   public static Player map(PlayerDto dto) {
@@ -1296,16 +1305,55 @@ public class Mapper {
   }
 
   public static PlayerDto map(Player player) {
-    return PlayerDto.newBuilder().setName(player.getName()).setRole(player.getRole().name()).build();
+    return PlayerDto.newBuilder()
+        .setName(player.getName())
+        .setRole(player.getRole().name())
+        .build();
   }
 
   public static Asset map(AssetDto dto) {
-    return new Asset(new MD5Key(dto.getMd5Key()), dto.getName(),
-        dto.getExtension(), Asset.Type.valueOf(dto.getType().name()));
+    return new Asset(
+        new MD5Key(dto.getMd5Key()),
+        dto.getName(),
+        dto.getExtension(),
+        Asset.Type.valueOf(dto.getType().name()));
   }
 
   public static AssetDto map(Asset asset) {
-    return AssetDto.newBuilder().setMd5Key(asset.getMD5Key().toString()).setName(asset.getName())
-        .setExtension(asset.getExtension()).setType(AssetDtoType.valueOf(asset.getType().name())).build();
+    return AssetDto.newBuilder()
+        .setMd5Key(asset.getMD5Key().toString())
+        .setName(asset.getName())
+        .setExtension(asset.getExtension())
+        .setType(AssetDtoType.valueOf(asset.getType().name()))
+        .build();
+  }
+
+  public static Label map(LabelDto dto) {
+    return new Label(
+        GUID.valueOf(dto.getId()),
+        dto.getLabel(),
+        dto.getX(),
+        dto.getY(),
+        dto.getShowBackground(),
+        dto.getForegroundColor());
+  }
+
+  public static LabelDto map(Label label) {
+    return LabelDto.newBuilder()
+        .setId(label.getId().toString())
+        .setLabel(label.getLabel())
+        .setX(label.getX())
+        .setY(label.getY())
+        .setShowBackground(label.isShowBackground())
+        .setForegroundColor(label.getForegroundColorValue())
+        .build();
+  }
+
+  public static Zone map(ZoneDto zone) {
+    return null;
+  }
+
+  public static ZoneDto map(Zone zone) {
+    return null;
   }
 }

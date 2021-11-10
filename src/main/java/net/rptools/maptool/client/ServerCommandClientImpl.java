@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -45,11 +44,11 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -76,8 +75,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void movePointer(String player, int x, int y) {
-    var msg = MovePointerMsg.newBuilder().setPlayer(player).setX(x)
-            .setY(y);
+    var msg = MovePointerMsg.newBuilder().setPlayer(player).setX(x).setY(y);
     makeServerCall(Message.newBuilder().setMovePointerMsg(msg).build());
   }
 
@@ -115,7 +113,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putZone(Zone zone) {
-    makeServerCall(COMMAND.putZone, zone);
+    var msg = PutZoneMsg.newBuilder().setZone(Mapper.map(zone));
+    makeServerCall(Message.newBuilder().setPutZoneMsg(msg).build());
   }
 
   public void removeZone(GUID zoneGUID) {
@@ -223,7 +222,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
-    makeServerCall(COMMAND.putLabel, zoneGUID, label);
+    var msg = PutLabelMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setLabel(Mapper.map(label));
+    makeServerCall(Message.newBuilder().setPutLabelMsg(msg).build());
   }
 
   public void removeLabel(GUID zoneGUID, GUID labelGUID) {
@@ -353,8 +353,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     // Expose locally right away.
     MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
-    var msg = ExposeFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
-        .setArea(Mapper.map(area));
+    var msg = ExposeFowMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setArea(Mapper.map(area));
     msg.addAllTokenGuid(selectedToks.stream().map(g -> g.toString()).collect(Collectors.toList()));
     makeServerCall(Message.newBuilder().setExposeFowMsg(msg).build());
   }
@@ -364,8 +363,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    var msg = HideFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
-            .setArea(Mapper.map(area));
+    var msg = HideFowMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setArea(Mapper.map(area));
     msg.addAllTokenGuid(selectedToks.stream().map(g -> g.toString()).collect(Collectors.toList()));
     makeServerCall(Message.newBuilder().setHideFowMsg(msg).build());
   }

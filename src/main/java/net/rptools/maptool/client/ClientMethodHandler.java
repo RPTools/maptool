@@ -24,8 +24,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
@@ -66,7 +66,6 @@ import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -117,12 +116,39 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case PLAYER_CONNECTED_MSG -> handle(msg.getPlayerConnectedMsg());
         case PLAYER_DISCONNECTED_MSG -> handle(msg.getPlayerDisconnectedMsg());
         case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
+        case PUT_LABEL_MSG -> handle(msg.getPutLabelMsg());
+        case PUT_ZONE_MSG -> handle(msg.getPutZoneMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(PutZoneMsg msg) {
+    Zone zone = Mapper.map(msg.getZone());
+    MapTool.getCampaign().putZone(zone);
+
+    // TODO: combine this with MapTool.addZone()
+    var renderer = ZoneRendererFactory.newRenderer(zone);
+    MapTool.getFrame().addZoneRenderer(renderer);
+    if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
+      MapTool.getFrame().setCurrentZoneRenderer(renderer);
+    }
+    MapTool.getEventDispatcher()
+        .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+  }
+
+  private void handle(PutLabelMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          Label label = Mapper.map(msg.getLabel());
+          zone.putLabel(label);
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(PutAssetMsg msg) {
@@ -132,82 +158,92 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   }
 
   private void handle(PlayerDisconnectedMsg msg) {
-    EventQueue.invokeLater(() -> {
-      MapTool.removePlayer(Mapper.map(msg.getPlayer()));
-      MapTool.getFrame().refresh();
-    });
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.removePlayer(Mapper.map(msg.getPlayer()));
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(PlayerConnectedMsg msg) {
-    EventQueue.invokeLater(() -> {
-      MapTool.addPlayer(Mapper.map(msg.getPlayer()));
-      MapTool.getFrame().refresh();
-    });
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.addPlayer(Mapper.map(msg.getPlayer()));
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(MovePointerMsg msg) {
-    EventQueue.invokeLater(() -> {
-      Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(msg.getPlayer());
-      if (pointer == null) {
-        return;
-      }
-      pointer.setX(msg.getX());
-      pointer.setY(msg.getY());
+    EventQueue.invokeLater(
+        () -> {
+          Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(msg.getPlayer());
+          if (pointer == null) {
+            return;
+          }
+          pointer.setX(msg.getX());
+          pointer.setY(msg.getY());
 
-      MapTool.getFrame().refresh();
-    });
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(MessageMsg msg) {
-    EventQueue.invokeLater(() -> {
-      TextMessage message = Mapper.map(msg.getMessage());
-      MapTool.addServerMessage(message);
-    });
+    EventQueue.invokeLater(
+        () -> {
+          TextMessage message = Mapper.map(msg.getMessage());
+          MapTool.addServerMessage(message);
+        });
   }
 
   private void handle(HidePointerMsg msg) {
-    EventQueue.invokeLater(() -> {
-      MapTool.getFrame().getPointerOverlay().removePointer(msg.getPlayer());
-      MapTool.getFrame().refresh();
-    });
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.getFrame().getPointerOverlay().removePointer(msg.getPlayer());
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(HideFowMsg msg) {
-    EventQueue.invokeLater(() -> {
-      var zoneGUID = GUID.valueOf(msg.getZoneGuid());
-      var area = Mapper.map(msg.getArea());
-      var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var area = Mapper.map(msg.getArea());
+          var selectedToks =
+              msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
-      var zone = MapTool.getCampaign().getZone(zoneGUID);
-      zone.hideArea(area, selectedToks);
-      MapTool.getFrame().refresh();
-    });
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.hideArea(area, selectedToks);
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(ExposePcAreaMsg msg) {
-    EventQueue.invokeLater(() -> {
-      var zoneGuid = GUID.valueOf(msg.getZoneGuid());
-      var renderer = MapTool.getFrame().getZoneRenderer(zoneGuid);
-      FogUtil.exposePCArea(renderer);
-    });
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGuid = GUID.valueOf(msg.getZoneGuid());
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGuid);
+          FogUtil.exposePCArea(renderer);
+        });
   }
 
   private void handle(ExposeFowMsg msg) {
-    EventQueue.invokeLater(() -> {
-        var zoneGUID = GUID.valueOf(msg.getZoneGuid());
-        Area area = Mapper.map(msg.getArea());
-        var selectedToks = msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
-        var zone = MapTool.getCampaign().getZone(zoneGUID);
-        zone.exposeArea(area, selectedToks);
-        MapTool.getFrame().refresh();
-    });
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          Area area = Mapper.map(msg.getArea());
+          var selectedToks =
+              msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.exposeArea(area, selectedToks);
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(ExecLinkMsg msg) {
-    EventQueue.invokeLater(() -> {
-      MacroLinkFunction.receiveExecLink(
-          msg.getLink(), msg.getTarget(), msg.getSource());
-    });
+    EventQueue.invokeLater(
+        () -> {
+          MacroLinkFunction.receiveExecLink(msg.getLink(), msg.getTarget(), msg.getSource());
+        });
   }
 
   private void handle(ExecFunctionMsg msg) {
@@ -554,32 +590,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().setTitle();
               return;
 
-            case putZone:
-              zone = (Zone) parameters[0];
-              MapTool.getCampaign().putZone(zone);
-
-              // TODO: combine this with MapTool.addZone()
-              renderer = ZoneRendererFactory.newRenderer(zone);
-              MapTool.getFrame().addZoneRenderer(renderer);
-              if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
-                MapTool.getFrame().setCurrentZoneRenderer(renderer);
-              }
-              MapTool.getEventDispatcher()
-                  .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
-              return;
-
             case removeZone:
               zoneGUID = (GUID) parameters[0];
               MapTool.getCampaign().removeZone(zoneGUID);
               MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
-              return;
-
-            case putLabel:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              Label label = (Label) parameters[1];
-              zone.putLabel(label);
-              MapTool.getFrame().refresh();
               return;
 
             case updateTokenProperty: // get token and update its property

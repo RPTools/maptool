@@ -23,6 +23,16 @@ public class Label {
   private boolean showBackground;
   private int foregroundColor;
 
+  // for serialisation
+  public Label(GUID id, String label, int x, int y, boolean showBackground, int foregroundColor) {
+    this.id = id;
+    this.label = label;
+    this.x = x;
+    this.y = y;
+    this.showBackground = showBackground;
+    this.foregroundColor = foregroundColor;
+  }
+
   public Label() {
     this("");
   }
@@ -81,6 +91,10 @@ public class Label {
 
   public Color getForegroundColor() {
     return new Color(foregroundColor);
+  }
+
+  public int getForegroundColorValue() {
+    return foregroundColor;
   }
 
   public void setForegroundColor(Color foregroundColor) {

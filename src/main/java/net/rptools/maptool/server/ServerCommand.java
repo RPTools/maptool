@@ -45,7 +45,6 @@ public interface ServerCommand {
     // @formatter:off
     setCampaign,
     setCampaignName,
-    putZone,
     removeZone,
     removeAsset,
     removeToken,
@@ -62,7 +61,6 @@ public interface ServerCommand {
     setZoneVisibility,
     setZoneHasFoW,
     setFoW,
-    putLabel,
     removeLabel,
     sendTokensToBack,
     setServerPolicy,

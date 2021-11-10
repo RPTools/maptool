@@ -98,11 +98,16 @@ public class MapToolServerConnection
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
     for (Player player : playerMap.values()) {
       var msg = PlayerConnectedMsg.newBuilder().setPlayer(Mapper.map(player));
-      server.getConnection().sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
+      server
+          .getConnection()
+          .sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
-    var msg = PlayerConnectedMsg.newBuilder()
-        .setPlayer(Mapper.map( connectedPlayer.getTransferablePlayer()));
-    server.getConnection().broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+    var msg =
+        PlayerConnectedMsg.newBuilder()
+            .setPlayer(Mapper.map(connectedPlayer.getTransferablePlayer()));
+    server
+        .getConnection()
+        .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
 
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
@@ -117,7 +122,8 @@ public class MapToolServerConnection
     var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
     var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(Mapper.map(player));
     server
-        .getConnection().broadcastMessage(
+        .getConnection()
+        .broadcastMessage(
             new String[] {conn.getId()},
             Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     playerMap.remove(conn.getId().toUpperCase());

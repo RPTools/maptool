@@ -40,6 +40,8 @@ message Message {
     PlayerConnectedMsg player_connected_msg = 23;
     PlayerDisconnectedMsg player_disconnected_msg = 24;
     PutAssetMsg put_asset_msg = 25;
+    PutLabelMsg put_label_msg = 26;
     PutTokenMsg put_token_msg = 27;
+    PutZoneMsg put_zone_msg = 28;
   }
 }

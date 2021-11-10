@@ -250,3 +250,112 @@ message AssetDto {
   string extension = 3;
   AssetDtoType type = 4;
 }
+
+message LabelDto {
+  string id = 1;
+  string label = 2;
+  int32 x = 3;
+  int32 y = 4;
+  bool show_background = 5;
+  int32 foreground_color = 6;
+}
+
+message ZoneDto {
+  enum TokenSelectionDto {
+    PC = 0;
+    NPC = 1;
+    ALL = 2;
+    GM = 3;
+  }
+  enum VisionTypeDto {
+    OFF = 0;
+    DAY = 1;
+    NIGHT = 2;
+  }
+  enum AStarRoundingOptionsDto {
+    NONE = 0;
+    CELL_UNIT = 1;
+    INTEGER = 2;
+  }
+  int64 creation_time = 1;
+  string id = 2;
+  GridDto grid = 3;
+  int32 grid_color = 4;
+  float image_scale_x = 5;
+  float image_scale_y = 6;
+  int32 token_vision_distance = 7;
+  double units_per_cell = 8;
+  AStarRoundingOptionsDto a_star_rounding = 9;
+  repeated TopologyTypeDto topologyTypes = 10;
+  repeated DrawnElementDto drawables = 11;
+  repeated DrawnElementDto gm_drawables = 12;
+  repeated DrawnElementDto object_drawables = 13;
+  repeated DrawnElementDto background_drawables = 14;
+  repeated LabelDto labels = 15;
+  repeated TokenDto tokens = 16;
+  map<string, AreaDto> exposed_area_meta = 17;
+  InitiativeListDto initiative = 18;
+  AssetDto exposed_area = 19;
+  bool has_fog = 20;
+  DrawablePaintDto fog_paint = 21;
+  AreaDto topology = 22;
+  AreaDto hill_vbl = 23;
+  AreaDto pit_vbl = 24;
+  AreaDto topology_terrain = 25;
+  DrawablePaintDto background_paint = 26;
+  string map_asset = 27;
+  IntPointDto boardPosition = 28;
+  bool draw_board = 29;
+  bool boardChanged = 30;
+  string name = 31;
+  string player_alias = 32;
+  bool is_visible = 33;
+  VisionTypeDto vision_type = 34;
+  TokenSelectionDto token_selection = 35;
+  int32 height = 36;
+  int32 width = 37;
+}
+
+message InitiativeListDto {
+  repeated TokenInitiativeDto tokens = 1;
+  int32 current = 2;
+  int32 round = 3;
+  string zone_id = 4;
+  bool hide_npc = 5;
+}
+
+message TokenInitiativeDto {
+  string token_id = 1;
+  bool holding = 2;
+  string state = 3;
+}
+
+message GridDto {
+  int32 offset_x = 1;
+  int32 offset_y = 2;
+  int32 size = 3;
+  string zone_id = 4;
+  AreaDto cell_shape = 5;
+  oneof type {
+    SquareGridDto square_grid = 6;
+    GridlessGridDto gridless_grid = 7;
+    HexGridDto hexgrid = 8;
+    IsometricGridDto isometric_grid = 9;
+  }
+}
+
+message SquareGridDto {}
+message GridlessGridDto {}
+message IsometricGridDto {}
+message HexGridDto {
+  bool vertical = 1;
+  double hex_ratio = 2;
+  double edge_projection = 3;
+  double minor_radius = 4;
+  double edge_length = 5;
+  double scaled_edge_projection = 6;
+  double scaled_minor_radius = 7;
+  double scaled_edge_length = 8;
+  double last_scale = 9;
+  IntPointDto cellOffset = 10;
+}

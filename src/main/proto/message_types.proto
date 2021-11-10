@@ -143,3 +143,12 @@ message PlayerDisconnectedMsg {
 message PutAssetMsg {
   AssetDto asset = 1;
 }
+
+message PutLabelMsg {
+  string zone_guid = 1;
+  LabelDto label = 2;
+}
+
+message PutZoneMsg {
+  ZoneDto zone = 1;
+}
