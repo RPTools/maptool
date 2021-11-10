@@ -1579,7 +1579,7 @@ public class MapToolFrame extends DefaultDockableHolder
           .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
-      TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyMode());
+      TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyTypes());
     }
     AppActions.updateActions();
     repaint();
