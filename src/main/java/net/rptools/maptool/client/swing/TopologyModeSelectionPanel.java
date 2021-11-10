@@ -51,27 +51,27 @@ public class TopologyModeSelectionPanel extends JToolBar {
     modeButtons = new EnumMap<>(Zone.TopologyType.class);
 
     try {
-      var initialMode = AppPreferences.getTopologyDrawingMode();
+      var initiallySelectedTypes = AppPreferences.getTopologyTypes();
       createAndAddModeButton(
           Zone.TopologyType.WALL_VBL,
           "net/rptools/maptool/client/image/tool/wall-vbl-only.png",
           "tools.topology_mode_selection.vbl.tooltip",
-          initialMode);
+          initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.HILL_VBL,
           "net/rptools/maptool/client/image/tool/hill-vbl-only.png",
           "tools.topology_mode_selection.hill_vbl.tooltip",
-          initialMode);
+          initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.PIT_VBL,
           "net/rptools/maptool/client/image/tool/pit-vbl-only.png",
           "tools.topology_mode_selection.pit_vbl.tooltip",
-          initialMode);
+          initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.MBL,
           "net/rptools/maptool/client/image/tool/mbl-only.png",
           "tools.topology_mode_selection.mbl.tooltip",
-          initialMode);
+          initiallySelectedTypes);
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -80,11 +80,14 @@ public class TopologyModeSelectionPanel extends JToolBar {
   }
 
   private void createAndAddModeButton(
-      Zone.TopologyType type, String imageFile, String toolTipKey, Zone.TopologyMode initialMode)
+      Zone.TopologyType type,
+      String imageFile,
+      String toolTipKey,
+      Zone.TopologyTypeSet initiallySelectedTypes)
       throws IOException {
     final var button = new JToggleButton(new ImageIcon(ImageUtil.getImage(imageFile)));
     button.setToolTipText(I18N.getText(toolTipKey));
-    button.setSelected(initialMode.contains(type));
+    button.setSelected(initiallySelectedTypes.contains(type));
     this.add(button);
     modeButtons.put(type, button);
     button.addChangeListener(
@@ -94,7 +97,7 @@ public class TopologyModeSelectionPanel extends JToolBar {
             ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
             if (zr != null) {
               var zone = zr.getZone();
-              var mode = zone.getTopologyMode();
+              var mode = zone.getTopologyTypes();
               if (button.isSelected()) {
                 mode = mode.with(type);
               } else {
@@ -107,24 +110,24 @@ public class TopologyModeSelectionPanel extends JToolBar {
         });
   }
 
-  public void setMode(Zone.TopologyMode topologyMode) {
-    AppPreferences.setTopologyDrawingMode(topologyMode);
-    if (topologyMode == null) {
-      topologyMode = AppPreferences.getTopologyDrawingMode();
+  public void setMode(Zone.TopologyTypeSet topologyTypes) {
+    AppPreferences.setTopologyTypes(topologyTypes);
+    if (topologyTypes == null) {
+      topologyTypes = AppPreferences.getTopologyTypes();
     }
 
     for (final var entry : modeButtons.entrySet()) {
       final var topologyType = entry.getKey();
       final var button = entry.getValue();
 
-      button.setSelected(topologyMode.contains(topologyType));
+      button.setSelected(topologyTypes.contains(topologyType));
     }
 
     // Since setting selection also triggers change listeners, we need this work even early on.
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     // Check if there is a map. Fix #1605
     if (zr != null) {
-      zr.getZone().setTopologyMode(topologyMode);
+      zr.getZone().setTopologyTypes(topologyTypes);
     }
   }
 }
