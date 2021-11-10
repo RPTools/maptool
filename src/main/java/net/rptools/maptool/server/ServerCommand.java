@@ -45,7 +45,6 @@ public interface ServerCommand {
     setCampaignName,
     putZone,
     removeZone,
-    putAsset,
     removeAsset,
     removeToken,
     removeTokens,

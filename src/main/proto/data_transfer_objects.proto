@@ -221,3 +221,31 @@ message TextMessageDto {
   string source = 4;
   repeated string transform = 5;
 }
+
+message PlayerDto {
+  string name = 1;
+  string role = 2;
+}
+
+enum AssetDtoType {
+  IMAGE = 0;
+  AUDIO = 1;
+  HTML = 2;
+  DATA = 3;
+  MARKDOWN = 4;
+  JAVASCRIPT = 5;
+  CSS = 6;
+  TEXT = 7;
+  JSON = 8;
+  XML = 9;
+  PDF = 10;
+  MTLIB = 11;
+  INVAlID = 12;
+}
+
+message AssetDto {
+  string md5_key = 1;
+  string name = 2;
+  string extension = 3;
+  AssetDtoType type = 4;
+}

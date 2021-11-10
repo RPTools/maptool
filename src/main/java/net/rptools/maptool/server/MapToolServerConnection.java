@@ -25,6 +25,9 @@ import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.PlayerConnectedMsg;
+import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -94,17 +97,13 @@ public class MapToolServerConnection
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
     for (Player player : playerMap.values()) {
-      server
-          .getConnection()
-          .callMethod(
-              conn.getId(),
-              ClientCommand.COMMAND.playerConnected.name(),
-              player.getTransferablePlayer());
+      var msg = PlayerConnectedMsg.newBuilder().setPlayer(Mapper.map(player));
+      server.getConnection().sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
+    var msg = PlayerConnectedMsg.newBuilder()
+        .setPlayer(Mapper.map( connectedPlayer.getTransferablePlayer()));
+    server.getConnection().broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+
     // if (!server.isHostId(player.getName())) {
     // Don't bother sending the campaign file if we're hosting it ourselves
     server
@@ -115,12 +114,12 @@ public class MapToolServerConnection
 
   public void connectionRemoved(ClientConnection conn) {
     server.releaseClientConnection(conn.getId());
+    var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
+    var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(Mapper.map(player));
     server
-        .getConnection()
-        .broadcastCallMethod(
+        .getConnection().broadcastMessage(
             new String[] {conn.getId()},
-            ClientCommand.COMMAND.playerDisconnected.name(),
-            playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
+            Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     playerMap.remove(conn.getId().toUpperCase());
   }
 
@@ -150,6 +149,18 @@ public class MapToolServerConnection
 
   public void broadcastMessage(String[] exclude, byte[] message) {
     connection.broadcastMessage(exclude, message);
+  }
+
+  public void sendMessage(String id, Message message) {
+    connection.sendMessage(id, message.toByteArray());
+  }
+
+  public void broadcastMessage(Message message) {
+    connection.broadcastMessage(message.toByteArray());
+  }
+
+  public void broadcastMessage(String[] exclude, Message message) {
+    connection.broadcastMessage(exclude, message.toByteArray());
   }
 
   public void open() throws IOException {

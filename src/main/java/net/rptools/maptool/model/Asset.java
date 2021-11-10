@@ -468,6 +468,16 @@ public final class Asset {
     }
   }
 
+  // for serialisation
+  public Asset(MD5Key key, String name, String extension, Type type) {
+    this.md5Key = key;
+    this.name = name;
+    this.extension = extension;
+    this.type = type;
+    data = new byte[0];
+    dataAsString = "";
+  }
+
   /**
    * Returns the MD5 Sum of the {@code Asset}.
    *

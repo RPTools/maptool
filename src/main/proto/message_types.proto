@@ -131,3 +131,15 @@ message MovePointerMsg {
   int32 x = 2;
   int32 y = 3;
 }
+
+message PlayerConnectedMsg {
+  PlayerDto player = 1;
+}
+
+message PlayerDisconnectedMsg {
+  PlayerDto player = 1;
+}
+
+message PutAssetMsg {
+  AssetDto asset = 1;
+}

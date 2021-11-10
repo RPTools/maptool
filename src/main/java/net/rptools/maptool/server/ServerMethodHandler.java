@@ -122,7 +122,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getExposePcAreaMsg());
           sendToAllClients(msg);
         }
-        case GET_ASSET_MSG -> handle(msg.getGetAssetMsg());
+        case GET_ASSET_MSG -> handle(id, msg.getGetAssetMsg());
         case GET_ZONE_MSG -> handle(msg.getGetZoneMsg());
         case HEARTBEAT_MSG -> {/* nothing yet */}
         case HIDE_FOW_MSG -> {
@@ -132,7 +132,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case HIDE_POINTER_MSG -> sendToAllClients(msg);
         case MESSAGE_MSG -> sendToClients(id, msg);
         case MOVE_POINTER_MSG -> sendToAllClients(msg);
-
+        case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -142,6 +142,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(PutAssetMsg msg) {
+    AssetManager.putAsset(Mapper.map(msg.getAsset()));
   }
 
   private void handle(HideFowMsg msg) {
@@ -157,8 +161,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     getZone(GUID.valueOf(msg.getZoneGuid()));
   }
 
-  private void handle(GetAssetMsg msg) {
-    getAsset(new MD5Key(msg.getAssetId()));
+  private void handle(String id, GetAssetMsg msg) {
+    getAsset(id, new MD5Key(msg.getAssetId()));
   }
 
   private void handle(ExposePcAreaMsg msg) {
@@ -264,9 +268,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case setLiveTypingLabel:
           setLiveTypingLabel(context.getString(0), context.getBool(1));
-          break;
-        case putAsset:
-          putAsset((Asset) context.get(0));
           break;
         case putLabel:
           putLabel(context.getGUID(0), (Label) context.get(1));
@@ -516,7 +517,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToClients();
   }
 
-  private void getAsset(MD5Key assetID) {
+  private void getAsset(String id, MD5Key assetID) {
     if (assetID == null) {
       return;
     }
@@ -540,9 +541,9 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // showing a broken
       // image instead of blowing up
       Asset asset = Asset.createBrokenImageAsset(assetID);
+      var msg = PutAssetMsg.newBuilder().setAsset(Mapper.map(asset));
       server
-          .getConnection()
-          .callMethod(RPCContext.getCurrent().id, ClientCommand.COMMAND.putAsset.name(), asset);
+          .getConnection().sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
     }
   }
 
@@ -603,10 +604,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   private void message(TextMessage message) {
     forwardToClients();
-  }
-
-  private void putAsset(Asset asset) {
-    AssetManager.putAsset(asset);
   }
 
   private void putLabel(GUID zoneGUID, Label label) {

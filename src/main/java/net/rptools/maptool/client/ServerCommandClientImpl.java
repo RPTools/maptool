@@ -128,7 +128,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putAsset(Asset asset) {
-    makeServerCall(COMMAND.putAsset, asset);
+    var msg = PutAssetMsg.newBuilder().setAsset(Mapper.map(asset));
+    makeServerCall(Message.newBuilder().setPutAssetMsg(msg).build());
   }
 
   public void getAsset(MD5Key assetID) {

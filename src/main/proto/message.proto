@@ -37,6 +37,9 @@ message Message {
     HidePointerMsg hide_pointer_msg = 20;
     MessageMsg message_msg = 21;
     MovePointerMsg move_pointer_msg = 22;
+    PlayerConnectedMsg player_connected_msg = 23;
+    PlayerDisconnectedMsg player_disconnected_msg = 24;
+    PutAssetMsg put_asset_msg = 25;
     PutTokenMsg put_token_msg = 27;
   }
 }

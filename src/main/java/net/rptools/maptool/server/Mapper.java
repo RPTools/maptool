@@ -33,6 +33,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.drawing.Rectangle;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.*;
 import org.apache.logging.log4j.LogManager;
@@ -1285,5 +1286,26 @@ public class Mapper {
     return TextMessageDto.newBuilder().setChannel(message.getChannel()).setTarget(message.getTarget())
         .setSource(message.getSource()).setMessage(message.getMessage())
         .addAllTransform(message.getTransformHistory()).build();
+  }
+
+  public static Player map(PlayerDto dto) {
+    var player = new Player();
+    player.setName(dto.getName());
+    player.setRole(Player.Role.valueOf(dto.getRole()));
+    return player;
+  }
+
+  public static PlayerDto map(Player player) {
+    return PlayerDto.newBuilder().setName(player.getName()).setRole(player.getRole().name()).build();
+  }
+
+  public static Asset map(AssetDto dto) {
+    return new Asset(new MD5Key(dto.getMd5Key()), dto.getName(),
+        dto.getExtension(), Asset.Type.valueOf(dto.getType().name()));
+  }
+
+  public static AssetDto map(Asset asset) {
+    return AssetDto.newBuilder().setMd5Key(asset.getMD5Key().toString()).setName(asset.getName())
+        .setExtension(asset.getExtension()).setType(AssetDtoType.valueOf(asset.getType().name())).build();
   }
 }

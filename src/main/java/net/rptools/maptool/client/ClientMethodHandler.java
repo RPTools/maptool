@@ -106,12 +106,35 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case HIDE_POINTER_MSG -> handle(msg.getHidePointerMsg());
         case MESSAGE_MSG -> handle(msg.getMessageMsg());
         case MOVE_POINTER_MSG -> handle(msg.getMovePointerMsg());
+        case PLAYER_CONNECTED_MSG -> handle(msg.getPlayerConnectedMsg());
+        case PLAYER_DISCONNECTED_MSG -> handle(msg.getPlayerDisconnectedMsg());
+        case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(PutAssetMsg msg) {
+    AssetManager.putAsset(Mapper.map(msg.getAsset()));
+    MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
+    MapTool.getFrame().refresh();
+  }
+
+  private void handle(PlayerDisconnectedMsg msg) {
+    EventQueue.invokeLater(() -> {
+      MapTool.removePlayer(Mapper.map(msg.getPlayer()));
+      MapTool.getFrame().refresh();
+    });
+  }
+
+  private void handle(PlayerConnectedMsg msg) {
+    EventQueue.invokeLater(() -> {
+      MapTool.addPlayer(Mapper.map(msg.getPlayer()));
+      MapTool.getFrame().refresh();
+    });
   }
 
   private void handle(MovePointerMsg msg) {
@@ -338,12 +361,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
     switch (cmd) {
-      case putAsset:
-        AssetManager.putAsset((Asset) parameters[0]);
-        MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
-        MapTool.getFrame().refresh();
-        return;
-
       case removeAsset:
         return;
 
@@ -575,17 +592,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
               MapTool.getFrame().refresh();
               return;
-
-            case playerConnected:
-              MapTool.addPlayer((Player) parameters[0]);
-              MapTool.getFrame().refresh();
-              return;
-
-            case playerDisconnected:
-              MapTool.removePlayer((Player) parameters[0]);
-              MapTool.getFrame().refresh();
-              return;
-
 
             case showPointer:
               MapTool.getFrame()
