@@ -81,7 +81,13 @@ public class ClientCommand {
     restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     addAddOnLibrary,
     removeAllAddOnLibraries,
-    removeAddOnLibrary
+    removeAddOnLibrary,
+    updateDataStore,
+    updateData,
+    updateDataNamespace,
+    removeDataStore,
+    removeDataNamespace,
+    removeData
     // scale a player's view
     // @formatter:on
   };
