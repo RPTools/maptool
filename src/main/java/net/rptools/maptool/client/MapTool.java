@@ -1366,7 +1366,7 @@ public class MapTool {
     MapTool.getFrame()
         .getCurrentZoneRenderer()
         .getZone()
-        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+        .setTopologyTypes(AppPreferences.getTopologyTypes());
   }
 
   /**
