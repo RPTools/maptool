@@ -44,10 +44,11 @@ enum RoleDto {
   GM = 1;
 }
 
-enum TopologyModeDto {
-    VBL = 0;
-    MBL = 1;
-    COMBINED = 2;
+enum TopologyTypeDto {
+  WALL_VBL = 0;
+  HILL_VBL = 1;
+  PIT_VBL = 2;
+  MBL = 3;
 }
 
 // for token size_map

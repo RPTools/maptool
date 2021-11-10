@@ -342,10 +342,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   private void handle(AddTopologyMsg addTopologyMsg) {
     var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
     var area = Mapper.map(addTopologyMsg.getArea());
-    TopologyMode topologyMode = TopologyMode.valueOf(addTopologyMsg.getMode().name());
+    var topologyType = Zone.TopologyType.valueOf(addTopologyMsg.getType().name());
 
     var zone = MapTool.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode);
+    zone.addTopology(area, topologyType);
 
     MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
   }
@@ -762,17 +762,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               ServerPolicy policy = (ServerPolicy) parameters[0];
               MapTool.setServerPolicy(policy);
               MapTool.getFrame().getToolbox().updateTools();
-              return;
-
-            case addTopology:
-              zoneGUID = (GUID) parameters[0];
-              area = (Area) parameters[1];
-              var topologyType = (Zone.TopologyType) parameters[2];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addTopology(area, topologyType);
-
-              MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;
 
             case removeTopology:

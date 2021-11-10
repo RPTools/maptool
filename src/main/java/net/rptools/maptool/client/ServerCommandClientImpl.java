@@ -45,7 +45,6 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
@@ -332,11 +331,11 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
     var msg =
         AddTopologyMsg.newBuilder()
             .setZoneGuid(zoneGUID.toString())
-            .setMode(TopologyModeDto.valueOf(topologyMode.name()))
+            .setType(TopologyTypeDto.valueOf(topologyType.name()))
             .setArea(Mapper.map(area));
 
     makeServerCall(Message.newBuilder().setAddTopologyMsg(msg).build());

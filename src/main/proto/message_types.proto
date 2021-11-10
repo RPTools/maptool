@@ -17,7 +17,7 @@ import "drawing_dto.proto";
 message AddTopologyMsg {
   string zone_guid = 1;
   AreaDto area = 2;
-  TopologyModeDto mode = 3;
+  TopologyTypeDto type = 3;
 }
 
 message BootPlayerMsg {

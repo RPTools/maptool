@@ -51,7 +51,6 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
@@ -245,9 +244,9 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   private void handle(AddTopologyMsg addTopologyMsg) {
     var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
     var area = Mapper.map(addTopologyMsg.getArea());
-    var topologyMode = TopologyMode.valueOf(addTopologyMsg.getMode().name());
+    var topologyType = Zone.TopologyType.valueOf(addTopologyMsg.getType().name());
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyMode);
+    zone.addTopology(area, topologyType);
   }
 
   private void handle(BootPlayerMsg bootPlayerMsg) {
@@ -352,10 +351,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case setServerPolicy:
           setServerPolicy((ServerPolicy) context.get(0));
-          break;
-        case addTopology:
-          addTopology(
-              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
           break;
         case removeTopology:
           removeTopology(
@@ -868,14 +863,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     MapTool.getFrame().getToolbox().updateTools();
   }
 
-  private void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyType);
-    forwardToClients();
-  }
-
-  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+  private void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeTopology(area, topologyType);
     forwardToClients();
@@ -928,33 +916,27 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToClients();
   }
 
-  @Override
-  public void updateDataStore(DataStoreDto dataStore) {
+  private void updateDataStore(DataStoreDto dataStore) {
     forwardToClients();
   }
 
-  @Override
-  public void updateDataNamespace(GameDataDto gameData) {
+  private void updateDataNamespace(GameDataDto gameData) {
     forwardToClients();
   }
 
-  @Override
-  public void updateData(String type, String namespace, GameDataValueDto gameData) {
+  private void updateData(String type, String namespace, GameDataValueDto gameData) {
     forwardToClients();
   }
 
-  @Override
-  public void removeDataStore() {
+  private void removeDataStore() {
     forwardToClients();
   }
 
-  @Override
-  public void removeDataNamespace(String type, String namespace) {
+  private void removeDataNamespace(String type, String namespace) {
     forwardToClients();
   }
 
-  @Override
-  public void removeData(String type, String namespace, String name) {
+  private void removeData(String type, String namespace, String name) {
     forwardToClients();
   }
 

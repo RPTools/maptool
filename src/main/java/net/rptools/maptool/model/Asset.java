@@ -496,7 +496,8 @@ public final class Asset {
     this.extension = extension;
     this.type = type;
     data = new byte[0];
-    dataAsString = "";
+    dataAsString = null;
+    json = null;
   }
 
   /**
