@@ -236,14 +236,11 @@ public class LibraryManager {
    *
    * @param namespace the namespace of the library to return.
    * @return the library.
-   * @throws ExecutionException if an error occurs while extracting information about the library.
-   * @throws InterruptedException if an error occurs while extracting information about the library.
    */
-  public Optional<Library> getLibrary(String namespace)
-      throws ExecutionException, InterruptedException {
+  public Optional<Library> getLibrary(String namespace) {
     var lib = addOnLibraryManager.getLibrary(namespace);
     if (lib == null) {
-      lib = libraryTokenManager.getLibrary(namespace).get();
+      lib = libraryTokenManager.getLibrary(namespace).join();
     }
 
     if (lib == null) {
