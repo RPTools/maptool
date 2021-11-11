@@ -120,6 +120,60 @@ public class AddOnLibraryData implements LibraryData {
     return setData(DataValueFactory.fromAsset(name, value));
   }
 
+  @Override
+  public boolean supportsStaticData() {
+    return true;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasStaticData(String path) {
+    return addOnLibrary
+        .allowsUriAccess()
+        .thenApply(
+            allow -> {
+              if (!allow) {
+                return false;
+              } else {
+                return getStaticData(path).thenApply(p -> !p.isUndefined()).join();
+              }
+            });
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasPublicStaticData(String path) {
+    if (!path.replaceFirst("^/", "").startsWith("public/")) {
+      return CompletableFuture.completedFuture(false);
+    }
+    return addOnLibrary
+        .allowsUriAccess()
+        .thenApply(
+            allow -> {
+              if (!allow) {
+                return false;
+              } else {
+                return hasStaticData(path).join();
+              }
+            });
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getStaticData(String path) {
+    return addOnLibrary.readFile(path);
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getPublicStaticData(String path) {
+    return hasPublicStaticData(path)
+        .thenApply(
+            has -> {
+              if (has) {
+                return getStaticData(path).join();
+              } else {
+                return DataValueFactory.undefined(path);
+              }
+            });
+  }
+
   /**
    * Returns the data value for the given key.
    *

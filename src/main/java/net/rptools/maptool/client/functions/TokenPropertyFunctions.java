@@ -565,22 +565,18 @@ public class TokenPropertyFunctions extends AbstractFunction {
         libName = location;
       }
 
-      try {
-        var library =
-            new LibraryManager()
-                .getLibrary(libName)
-                .orElseThrow(
-                    () ->
-                        new ParserException(
-                            I18N.getText(
-                                "macro.function.tokenProperty.unknownLibToken",
-                                functionName,
-                                libName)));
-        library.getLibraryData().thenCompose(libData -> libData.setStringData(property, value));
-        return "";
-      } catch (ExecutionException | InterruptedException e) {
-        throw new ParserException(e.getCause());
-      }
+      var library =
+          new LibraryManager()
+              .getLibrary(libName)
+              .orElseThrow(
+                  () ->
+                      new ParserException(
+                          I18N.getText(
+                              "macro.function.tokenProperty.unknownLibToken",
+                              functionName,
+                              libName)));
+      library.getLibraryData().thenCompose(libData -> libData.setStringData(property, value));
+      return "";
     }
 
     /*

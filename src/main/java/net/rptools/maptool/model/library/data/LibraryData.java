@@ -133,4 +133,44 @@ public interface LibraryData {
    * @return a future that completes when the data value is set
    */
   CompletableFuture<Void> setAssetData(String name, Asset value);
+
+  /**
+   * Returns if this library supports storing of static data.
+   *
+   * @return {@code true} if this library supports storing of static data, {@code false} otherwise.
+   */
+  boolean supportsStaticData();
+
+  /**
+   * Does the library have the specified static data.
+   *
+   * @param path the path of the static data to check for.
+   * @return {@code true} if the library has the specified static data, {@code false} otherwise.
+   */
+  CompletableFuture<Boolean> hasStaticData(String path);
+
+  /**
+   * Does the library have the specified public static data.
+   *
+   * @param path the path of the public static data to check for.
+   * @return {@code true} if the library has the specified public static data, {@code false}
+   *     otherwise.
+   */
+  CompletableFuture<Boolean> hasPublicStaticData(String path);
+
+  /**
+   * Returns the static data value of the specified path.
+   *
+   * @param path the path of the static data to get.
+   * @return the static data value of the specified path.
+   */
+  CompletableFuture<DataValue> getStaticData(String path);
+
+  /**
+   * Returns the public static data value of the specified path.
+   *
+   * @param path the path of the public static data to get.
+   * @return the public static data value of the specified path.
+   */
+  CompletableFuture<DataValue> getPublicStaticData(String path);
 }

@@ -1541,7 +1541,7 @@ public class MapToolLineParser {
    * @return the current context.
    */
   public MapToolMacroContext getContext() {
-    return contextStack.peek();
+    return contextStack.size() > 0 ? contextStack.peek() : null;
   }
 
   /**

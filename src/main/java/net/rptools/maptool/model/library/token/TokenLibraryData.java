@@ -155,4 +155,29 @@ public class TokenLibraryData implements LibraryData {
   public CompletableFuture<Void> setAssetData(String name, Asset value) {
     return setData(DataValueFactory.fromAsset(name, value));
   }
+
+  @Override
+  public boolean supportsStaticData() {
+    return false;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasStaticData(String path) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasPublicStaticData(String path) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getStaticData(String path) {
+    return CompletableFuture.completedFuture(DataValueFactory.undefined(path));
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getPublicStaticData(String path) {
+    return CompletableFuture.completedFuture(DataValueFactory.undefined(path));
+  }
 }

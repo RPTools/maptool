@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.data.LibraryData;
 
@@ -179,4 +180,13 @@ public interface Library {
    * @return the token associated with this library.
    */
   CompletableFuture<Optional<Token>> getAssociatedToken();
+
+  /**
+   * Returns if the context is able to access the private values in the library.
+   *
+   * @param context the current MTScript context to check.
+   * @param namespace the namespace of the library.
+   * @return if the context is able to access the private values in the library.
+   */
+  boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace);
 }

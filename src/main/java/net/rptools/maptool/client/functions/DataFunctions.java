@@ -26,6 +26,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.gamedata.DataStore;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
+import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -48,7 +51,8 @@ public class DataFunctions extends AbstractFunction {
         "data.listData",
         "data.clearData",
         "data.clearNamespace",
-        "data.clearAllData");
+        "data.clearAllData",
+        "data.getStaticData");
   }
 
   @Override
@@ -180,6 +184,24 @@ public class DataFunctions extends AbstractFunction {
           String name = parameters.get(2).toString();
           new DataStoreManager().getDefaultDataStore().removeProperty(type, namespace, name).get();
           return "";
+        }
+        case "data.getstaticdata" -> {
+          FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+          String namespace = parameters.get(0).toString();
+          String path = parameters.get(1).toString();
+          var context = MapTool.getParser().getContext();
+          var libOpt = new LibraryManager().getLibrary(namespace);
+          var lib =
+              libOpt.orElseThrow(
+                  () -> new ParserException(I18N.getText("library.error.notFound", namespace)));
+          DataValue dataValue;
+          if (lib.canMTScriptAccessPrivate(context, namespace)) {
+            dataValue = lib.getLibraryData().thenCompose(data -> data.getStaticData(path)).join();
+          } else {
+            dataValue =
+                lib.getLibraryData().thenCompose(data -> data.getPublicStaticData(path)).join();
+          }
+          return new MTScriptDataConversion().convertToMTScriptDereferenceType(dataValue);
         }
         default -> throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));

@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -330,6 +331,11 @@ class LibraryToken implements Library {
   @Override
   public CompletableFuture<Optional<Token>> getAssociatedToken() {
     return getToken().thenApply(Optional::of);
+  }
+
+  @Override
+  public boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace) {
+    return false; // Library Tokens don't have private data
   }
 
   /**
