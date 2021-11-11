@@ -15,10 +15,20 @@
 package net.rptools.maptool.model.gamedata;
 
 import java.math.BigDecimal;
+import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
 
+/** Class for converting between GameData and MT Macro Script types. */
 public class MTScriptDataConversion {
 
+  /**
+   * Converts a DataValue to a MT Script type. For Asset DataValues the asset handle is returned. If
+   * you want to return the actual contents of an Asset DataValue use {@link
+   * #convertToMTScriptDereferenceType(DataValue)}
+   *
+   * @param value The DataValue to convert.
+   * @return The converted value.
+   */
   public Object convertToMTScriptType(DataValue value) {
     if (value == null || value.isUndefined()) {
       return "";
@@ -34,5 +44,25 @@ public class MTScriptDataConversion {
       case ASSET -> "asset://" + value.asAsset().getMD5Key();
       case UNDEFINED -> "";
     };
+  }
+
+  /**
+   * Converts a DataType to a MT Script type fetching the contents of an Asset and returning that
+   * instead of just and asset handle where it makes sense. If the asset is a type that can not be
+   * handled in MTScript then the asset handle will be returned.
+   *
+   * @param value The DataValue to convert.
+   * @return The converted value.
+   */
+  public Object convertToMTScriptDereferenceType(DataValue value) {
+    if (value != null && value.getDataType() == DataType.ASSET) {
+      return switch (value.asAsset().getType()) {
+        case HTML, TEXT, MARKDOWN, CSS, JAVASCRIPT, XML -> value.asAsset().getDataAsString();
+        case JSON -> value.asAsset().getDataAsJson();
+        default -> convertToMTScriptType(value);
+      };
+    } else {
+      return convertToMTScriptType(value);
+    }
   }
 }
