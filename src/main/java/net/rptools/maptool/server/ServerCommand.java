@@ -30,13 +30,15 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.framework.dropinlibrary.TransferableAddOnLibrary;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 
 public interface ServerCommand {
   public enum COMMAND {
@@ -104,7 +106,14 @@ public interface ServerCommand {
     restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     removeAddOnLibrary,
     removeAllAddOnLibraries,
-    addAddOnLibrary
+    addAddOnLibrary,
+    updateDataStore,
+    updateData,
+    updateDataNamespace,
+    removeDataStore,
+    removeDataNamespace,
+    removeData
+
     // scale a player's view
     // @formatter:on
   };
@@ -119,9 +128,21 @@ public interface ServerCommand {
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  public default void addTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+    for (var topologyType : topologyTypes) {
+      addTopology(zoneGUID, area, topologyType);
+    }
+  }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode);
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
+
+  public default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+    for (var topologyType : topologyTypes) {
+      removeTopology(zoneGUID, area, topologyType);
+    }
+  }
+
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 
@@ -249,4 +270,16 @@ public interface ServerCommand {
   public void removeAddOnLibrary(List<String> namespaces);
 
   public void removeAllAddOnLibraries();
+
+  void updateDataStore(DataStoreDto dataStore);
+
+  void updateDataNamespace(GameDataDto gameData);
+
+  void updateData(String type, String namespace, GameDataValueDto gameData);
+
+  void removeDataStore();
+
+  void removeDataNamespace(String type, String namespace);
+
+  void removeData(String type, String namespace, String name);
 }

@@ -180,17 +180,16 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
-   * @param topologyMode Determines which topology (VBL, terrain VBL, MBL) to modify.
-   * @return the untouched area if the renderer is null, and null otherwise
+   * @param topologyType Determines which topology (Wall VBL, Hill VBL, MBL) to modify.
    */
   public static void renderTopology(
-      ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyMode topologyMode) {
+      ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyType topologyType) {
     if (erase) {
-      renderer.getZone().removeTopology(area, topologyMode);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyMode);
+      renderer.getZone().removeTopology(area, topologyType);
+      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area, topologyType);
     } else {
-      renderer.getZone().addTopology(area, topologyMode);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyMode);
+      renderer.getZone().addTopology(area, topologyType);
+      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area, topologyType);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
