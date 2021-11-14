@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
@@ -229,6 +230,26 @@ public class LibraryManager {
     } else {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Returns the library with the specified namespace. This version of the method can be used to map
+   * "@this" to the current library a MTScript macro is running from.
+   *
+   * @param namespace the namespace of the library to get.
+   * @param context the context to use when mapping "@this" to the current library.
+   * @return the library with the specified namespace.
+   */
+  public Optional<Library> getLibraryForMTScriptCall(
+      String namespace, MapToolMacroContext context) {
+    String ns = namespace;
+    if ("@this".equalsIgnoreCase(namespace)) {
+      if (context == null || context.getSource() == null || context.getSource().isEmpty()) {
+        return Optional.empty();
+      }
+      ns = context.getSource().replaceFirst("(?i)^lib:", "");
+    }
+    return getLibrary(ns);
   }
 
   /**

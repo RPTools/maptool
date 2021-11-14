@@ -315,7 +315,7 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
-  public boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace) {
+  public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
     String source = context.getSource().replaceFirst("(?i)^lib:", "");
     return context == null || source.equalsIgnoreCase(namespace);
   }

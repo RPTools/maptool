@@ -185,8 +185,7 @@ public interface Library {
    * Returns if the context is able to access the private values in the library.
    *
    * @param context the current MTScript context to check.
-   * @param namespace the namespace of the library.
    * @return if the context is able to access the private values in the library.
    */
-  boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace);
+  boolean canMTScriptAccessPrivate(MapToolMacroContext context);
 }
