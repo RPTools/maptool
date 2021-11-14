@@ -119,6 +119,16 @@ class LibraryToken implements Library {
   }
 
   /**
+   * Returns the namespace for a lib token.
+   *
+   * @param name the name of the lib token.
+   * @return the namespace for the lib token.
+   */
+  static String namespaceForName(String name) {
+    return name.substring(4);
+  }
+
+  /**
    * Creates a new {@code LibraryToken} for the lib:token id.
    *
    * @note this must be run on the Swing Thread.
@@ -127,7 +137,7 @@ class LibraryToken implements Library {
   LibraryToken(Token token) {
     id = token.getId();
     name = token.getName();
-    namespace = token.getName().substring(4);
+    namespace = namespaceForName(token.getName());
     version =
         Objects.requireNonNullElse(
                 token.getProperty(LIB_VERSION_PROPERTY_NAME), LIB_VERSION_UNKNOWN)
