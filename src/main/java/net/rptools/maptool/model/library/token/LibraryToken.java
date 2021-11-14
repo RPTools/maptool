@@ -344,7 +344,7 @@ class LibraryToken implements Library {
   }
 
   @Override
-  public boolean canMTScriptAccessPrivate(MapToolMacroContext context, String namespace) {
+  public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
     return false; // Library Tokens don't have private data
   }
 
