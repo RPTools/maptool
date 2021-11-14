@@ -456,6 +456,8 @@ dependencies {
 
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.14.3'
+
+    implementation 'com.google.guava:guava:31.0.1-jre'
 }
 
 

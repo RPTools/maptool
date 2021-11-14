@@ -173,10 +173,13 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       if (MapTool.getServerPolicy().getVblBlocksMove()) {
         var vbl =
             MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
-        var terrainVbl =
-            MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTerrainVblTree().getArea();
+        var hillVbl =
+            MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getHillVblTree().getArea();
+        var pitVbl =
+            MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getPitVblTree().getArea();
         newVbl.add(vbl);
-        newVbl.add(terrainVbl);
+        newVbl.add(hillVbl);
+        newVbl.add(pitVbl);
 
         if (tokenVBL != null) {
           newVbl.subtract(tokenVBL);

@@ -34,9 +34,10 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
+import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -243,12 +244,29 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
    */
   public void handleCampaignLoadMacroEvent() {
     userDefinedFunctions.clear();
-    List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_LOAD_CAMPAIGN_CALLBACK);
-    String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
-    for (Token handler : libTokens) {
-      EventMacroUtil.callEventHandler(
-          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
-    }
+    new LibraryManager()
+        .getLegacyEventTargets(ON_LOAD_CAMPAIGN_CALLBACK)
+        .thenApply(
+            libs -> {
+              new ThreadExecutionHelper<Void>()
+                  .runOnSwingThread(
+                      () -> {
+                        for (Library lib : libs) {
+                          var token = lib.getAssociatedToken().get();
+                          if (token.isPresent()) { // only supported for lib tokens
+                            EventMacroUtil.callEventHandler(
+                                ON_LOAD_CAMPAIGN_CALLBACK,
+                                lib.getNamespace().get(),
+                                "",
+                                token.get(),
+                                Collections.emptyMap(),
+                                true);
+                          }
+                        }
+                        return null;
+                      });
+              return null;
+            });
   }
 
   /**

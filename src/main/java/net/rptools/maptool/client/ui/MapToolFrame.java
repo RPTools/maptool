@@ -49,6 +49,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
+import net.rptools.maptool.client.MapTool.ZoneEvent;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -95,6 +96,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -454,6 +456,10 @@ public class MapToolFrame extends DefaultDockableHolder
     else registerForMacOSXEvents();
 
     MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+
+    // Add the Event Dispatcher to EventBus bridging classes
+    MapTool.getEventDispatcher()
+        .addListener(TokenEventBusBridge.getInstance(), ZoneEvent.Added, ZoneEvent.Removed);
 
     restorePreferences();
     updateKeyStrokes();
@@ -1579,7 +1585,7 @@ public class MapToolFrame extends DefaultDockableHolder
           .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
-      TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyMode());
+      TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyTypes());
     }
     AppActions.updateActions();
     repaint();

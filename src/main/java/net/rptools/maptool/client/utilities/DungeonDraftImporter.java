@@ -39,7 +39,6 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.ZoneFactory;
 import org.apache.commons.io.FilenameUtils;
 
@@ -200,8 +199,8 @@ public class DungeonDraftImporter {
                     WALL_VBL_STROKE.createStrokedShape(
                         getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
             if (finalDo_transform) vblArea.transform(at);
-            zone.addTopology(vblArea, TopologyMode.VBL);
-            zone.addTopology(vblArea, TopologyMode.MBL);
+            zone.addTopology(vblArea, Zone.TopologyType.WALL_VBL);
+            zone.addTopology(vblArea, Zone.TopologyType.MBL);
           });
     }
 
@@ -212,7 +211,7 @@ public class DungeonDraftImporter {
           v -> {
             Area vblArea = new Area(getVBLPath(v.getAsJsonArray(), pixelsPerCell));
             if (finalDo_transform) vblArea.transform(at);
-            zone.addTopology(vblArea, TopologyMode.TERRAIN_VBL);
+            zone.addTopology(vblArea, Zone.TopologyType.HILL_VBL);
           });
     }
 
@@ -235,8 +234,8 @@ public class DungeonDraftImporter {
               Area vblArea =
                   new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
               if (finalDo_transform) vblArea.transform(at);
-              zone.addTopology(vblArea, TopologyMode.COMBINED);
-              zone.addTopology(vblArea, TopologyMode.MBL);
+              zone.addTopology(vblArea, Zone.TopologyType.WALL_VBL);
+              zone.addTopology(vblArea, Zone.TopologyType.MBL);
             }
           });
     }

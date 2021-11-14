@@ -62,8 +62,10 @@ public class ZoneView implements ModelChangeListener {
 
   /** The digested topology of the map VBL, and possibly tokens VBL. */
   private AreaTree topologyTree;
-  /** The digested topology of the map terrain VBL, and possibly tokens VBL. */
-  private AreaTree terrainVblTree;
+  /** The digested topology of the map hill VBL, and possibly tokens VBL. */
+  private AreaTree hillVblTree;
+  /** The digested topology of the map pit VBL, and possibly tokens VBL. */
+  private AreaTree pitVblTree;
   /** The VBL area of the zone VBL and the tokens VBL. */
   private Area tokenTopology;
 
@@ -127,28 +129,44 @@ public class ZoneView implements ModelChangeListener {
         tokenTopology.add(vblToken.getTransformedVBL());
       }
 
-      topologyTree = new AreaTree(tokenTopology, false);
+      topologyTree = new AreaTree(tokenTopology);
     } else if (topologyTree == null) {
-      topologyTree = new AreaTree(zone.getTopology(), false);
+      topologyTree = new AreaTree(zone.getTopology());
     }
 
     return topologyTree;
   }
 
   /**
-   * Get the terrain VBL tree.
+   * Get the hill VBL tree.
    *
-   * <p>The tree is "cached" and should only regenerate when `terrainVblTree` is null, which should
+   * <p>The tree is "cached" and should only regenerate when `hillVblTree` is null, which should
    * happen on flush calls.
    *
-   * @return the terrain VBL tree.
+   * @return the hill VBL tree.
    */
-  public synchronized AreaTree getTerrainVblTree() {
-    if (terrainVblTree == null) {
-      terrainVblTree = new AreaTree(zone.getTerrainVbl(), true);
+  public synchronized AreaTree getHillVblTree() {
+    if (hillVblTree == null) {
+      hillVblTree = new AreaTree(zone.getHillVbl());
     }
 
-    return terrainVblTree;
+    return hillVblTree;
+  }
+
+  /**
+   * Get the pit VBL tree.
+   *
+   * <p>The tree is "cached" and should only regenerate when `pitVblTree` is null, which should
+   * happen on flush calls.
+   *
+   * @return the pit VBL tree.
+   */
+  public synchronized AreaTree getPitVblTree() {
+    if (pitVblTree == null) {
+      pitVblTree = new AreaTree(zone.getPitVbl());
+    }
+
+    return pitVblTree;
   }
 
   /**
@@ -264,7 +282,7 @@ public class ZoneView implements ModelChangeListener {
     }
     Area visibleArea =
         FogUtil.calculateVisibility(
-            p.x, p.y, lightSourceArea, getTopologyTree(), getTerrainVblTree());
+            p.x, p.y, lightSourceArea, getTopologyTree(), getHillVblTree(), getPitVblTree());
 
     if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
       addLightSourceToCache(
@@ -375,7 +393,7 @@ public class ZoneView implements ModelChangeListener {
       Area visibleArea = sight.getVisionShape(token, zone);
       tokenVisibleArea =
           FogUtil.calculateVisibility(
-              p.x, p.y, visibleArea, getTopologyTree(), getTerrainVblTree());
+              p.x, p.y, visibleArea, getTopologyTree(), getHillVblTree(), getPitVblTree());
 
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
@@ -573,7 +591,12 @@ public class ZoneView implements ModelChangeListener {
             Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
             Area visibleArea =
                 FogUtil.calculateVisibility(
-                    p.x, p.y, lightSourceArea, getTopologyTree(), getTerrainVblTree());
+                    p.x,
+                    p.y,
+                    lightSourceArea,
+                    getTopologyTree(),
+                    getHillVblTree(),
+                    getPitVblTree());
             if (visibleArea == null) {
               continue;
             }
@@ -826,7 +849,8 @@ public class ZoneView implements ModelChangeListener {
         personalDrawableLightCache.clear();
         visibleAreaMap.clear();
         topologyTree = null;
-        terrainVblTree = null;
+        hillVblTree = null;
+        pitVblTree = null;
         tokenTopology = null;
         tokenVisibleAreaCache.clear();
 
