@@ -19,6 +19,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -40,6 +41,8 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.ZoneDto;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -2131,5 +2134,59 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+  public static Zone fromDto(ZoneDto dto) {
+    var zone = new Zone();
+    zone.creationTime = dto.getCreationTime();
+    zone.id = GUID.valueOf(dto.getId());
+    zone.grid = Grid.fromDto(dto.getGrid());
+    zone.gridColor = dto.getGridColor();
+    zone.imageScaleX = dto.getImageScaleX();
+    zone.imageScaleY = dto.getImageScaleY();
+    zone.tokenVisionDistance = dto.getTokenVisionDistance();
+    zone.unitsPerCell = dto.getUnitsPerCell();
+    zone.aStarRounding = AStarRoundingOptions.valueOf(dto.getAStarRounding().name());
+    zone.topologyTypes = new TopologyTypeSet();
+    zone.topologyTypes.topologyTypes.addAll(dto.getTopologyTypesList().stream()
+        .map(t -> TopologyType.valueOf(t.name())).collect(Collectors.toList()));
+    zone.drawables = dto.getDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
+    zone.gmDrawables = dto.getGmDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
+    zone.objectDrawables = dto.getObjectDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
+    zone.backgroundDrawables = dto.getBackgroundDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
+    dto.getLabelsList().stream().map(d -> Label.fromDto(d)).forEach(l -> zone.labels.put(l.getId(), l));
+    dto.getTokensList().stream().map(t -> Token.fromDto(t)).forEach(t -> {
+      zone.tokenMap.put(t.getId(), t);
+      zone.tokenOrderedList.add(t);
+    });
+    zone.tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
+    dto.getExposedAreaMetaMap().forEach((id, area) ->
+        zone.exposedAreaMeta.put(GUID.valueOf(id), new ExposedAreaMetaData(Mapper.map(area))));
+    zone.initiativeList =  InitiativeList.fromDto(dto.getInitiative());
+    zone.exposedArea = Mapper.map(dto.getExposedArea());
+    zone.hasFog = dto.getHasFog();
+    zone.fogPaint = DrawablePaint.fromDto(dto.getFogPaint());
+    zone.topology = Mapper.map(dto.getTopology());
+    zone.hillVbl = Mapper.map(dto.getHillVbl());
+    zone.pitVbl = Mapper.map(dto.getPitVbl());
+    zone.topologyTerrain = Mapper.map(dto.getTopologyTerrain());
+    zone.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundPaint());
+    zone.mapAsset = new MD5Key(dto.getMapAsset());
+    zone.boardPosition.x = dto.getBoardPosition().getX();
+    zone.boardPosition.y = dto.getBoardPosition().getY();
+    zone.drawBoard = dto.getDrawBoard();
+    zone.boardChanged = dto.getBoardChanged();
+    zone.name = dto.getName();
+    zone.playerAlias = dto.getPlayerAlias();
+    zone.isVisible = dto.getIsVisible();
+    zone.visionType = VisionType.valueOf(dto.getVisionType().name());
+    zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
+    zone.height = dto.getHeight();
+    zone.width = dto.getWidth();
+    return zone;
+  }
+
+  public ZoneDto toDto() {
+    return null;
   }
 }

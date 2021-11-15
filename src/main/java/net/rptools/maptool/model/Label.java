@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.LabelDto;
+
 import java.awt.Color;
 
 public class Label {
@@ -99,5 +102,26 @@ public class Label {
 
   public void setForegroundColor(Color foregroundColor) {
     this.foregroundColor = foregroundColor.getRGB();
+  }
+
+  public static Label fromDto(LabelDto dto) {
+    return new Label(
+        GUID.valueOf(dto.getId()),
+        dto.getLabel(),
+        dto.getX(),
+        dto.getY(),
+        dto.getShowBackground(),
+        dto.getForegroundColor());
+  }
+
+  public LabelDto toDto() {
+    return LabelDto.newBuilder()
+        .setId(getId().toString())
+        .setLabel(getLabel())
+        .setX(getX())
+        .setY(getY())
+        .setShowBackground(isShowBackground())
+        .setForegroundColor(getForegroundColorValue())
+        .build();
   }
 }

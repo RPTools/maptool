@@ -20,9 +20,14 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /**
  * The blast template draws a square for DnD 4e
@@ -173,5 +178,22 @@ public class BlastTemplate extends ConeTemplate {
 
   public int getOffsetY() {
     return offsetY;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = BlastTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(Mapper.map(getVertex()))
+        .setDirection(getDirection().name())
+        .setOffsetX(getOffsetX())
+        .setOffsetY(getOffsetY());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setBlastTemplate(dto).build();
   }
 }

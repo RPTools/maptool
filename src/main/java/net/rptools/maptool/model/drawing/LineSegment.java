@@ -22,7 +22,12 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
 
 /** @author drice */
 public class LineSegment extends AbstractDrawing {
@@ -62,6 +67,20 @@ public class LineSegment extends AbstractDrawing {
       area = createLineArea();
     }
     return area;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = LineSegmentDrawableDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setWidth(getWidth())
+        .setSquareCap(isSquareCap());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    getPoints().forEach(p -> dto.addPoints(Mapper.map(p)));
+    return DrawableDto.newBuilder().setLineSegment(dto).build();
   }
 
   private Area createLineArea() {

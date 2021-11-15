@@ -33,9 +33,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -48,6 +52,9 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
+import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
@@ -2790,5 +2797,317 @@ public class Token extends BaseModel implements Cloneable {
       zone.tokenPanelChanged(this);
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+  }
+
+  public static Token fromDto(TokenDto dto) {
+    var token = new Token();
+    token.setId(GUID.valueOf(dto.getId()));
+    token.setBeingImpersonated(dto.getBeingImpersonated());
+    if (dto.hasExposedAreaGuid())
+      token.setExposedAreaGUID(GUID.valueOf(dto.getExposedAreaGuid().getValue()));
+    else token.setExposedAreaGUID(null);
+
+    var assetMap = dto.getImageAssetMapMap();
+    var tokenAssetMap = token.getImageAssetMap();
+    for (var key : assetMap.keySet()) {
+      var nullKey = key == "" ? null : key;
+      tokenAssetMap.put(nullKey, new MD5Key(assetMap.get(key)));
+    }
+
+    if (dto.hasCurrentImageAsset()) token.setImageAsset(dto.getCurrentImageAsset().getValue());
+    else token.setImageAsset(null);
+    token.setX(dto.getLastX());
+    token.setX(dto.getX());
+    token.setY(dto.getLastY());
+    token.setY(dto.getY());
+    token.setZOrder(dto.getZ());
+    token.setAnchor(dto.getAnchorX(), dto.getAnchorY());
+    token.setSizeScale(dto.getSizeScale());
+    if (dto.hasLastPath()) token.setLastPath(Path.fromDto(dto.getLastPath()));
+    else token.setLastPath(null);
+    token.setSnapToScale(dto.getSnapToScale());
+    // this is only to set sizes flipped an nonflipped
+    token.setFlippedIso(false);
+    token.setWidth(dto.getWidth());
+    token.setHeight(dto.getHeight());
+    token.setFlippedIso(true);
+    token.setWidth(dto.getIsoWidth());
+    token.setHeight(dto.getIsoHeight());
+    token.setScaleX(dto.getScaleX());
+    token.setScaleY(dto.getScaleY());
+
+    var tokenSizeMap = token.getSizeMap();
+    var dtoSizeMap = dto.getSizeMapMap();
+    for (var key : dtoSizeMap.keySet()) {
+      switch (key) {
+        case 0 -> {
+          tokenSizeMap.put(SquareGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 1 -> {
+          tokenSizeMap.put(GridlessGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 2 -> {
+          tokenSizeMap.put(HexGridVertical.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 3 -> {
+          tokenSizeMap.put(HexGridHorizontal.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        case 4 -> {
+          tokenSizeMap.put(IsometricGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
+        }
+        default -> {
+          log.warn("unknown grid in tokensizemap: " + key);
+        }
+      }
+    }
+    token.setSnapToGrid(dto.getSnapToGrid());
+    token.setVisible(dto.getIsVisible());
+    token.setVisibleOnlyToOwner(dto.getVisibleOnlyToOwner());
+    token.setColorSensitivity(dto.getVblColorSensitivity());
+    token.setAlwaysVisibleTolerance(dto.getAlwaysVisibleTolerance());
+    token.setIsAlwaysVisible(dto.getIsAlwaysVisible());
+    if (dto.hasVbl()) token.setVBL(Mapper.map(dto.getVbl()));
+    else token.setVBL(null);
+    token.setName(dto.getName());
+    dto.getOwnerListList().forEach(owner -> token.addOwner(owner));
+    token.setOwnerType(dto.getOwnerType());
+    token.setShape(Token.TokenShape.valueOf(dto.getTokenShape()));
+    token.setType(Token.Type.valueOf(dto.getTokenType()));
+    token.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    token.setPropertyType(dto.getPropertyType());
+    if (dto.hasFacing()) token.setFacing(dto.getFacing().getValue());
+    else token.setFacing(null);
+
+    if (dto.hasHaloColor()) token.setHaloColor(new Color(dto.getHaloColor().getValue(), true));
+    else token.setHaloColor(null);
+
+    if (dto.hasVisionOverlayColor())
+      token.setVisionOverlayColor(new Color(dto.getVisionOverlayColor().getValue(), true));
+    else token.setVisionOverlayColor(null);
+
+    token.setTokenOpacity(dto.getTokenOpacity());
+    token.setSpeechName(dto.getSpeechName());
+    token.setTerrainModifier(dto.getTerrainModifier());
+    token.setTerrainModifierOperation(
+        Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name()));
+
+    var ignoredSet = new HashSet<Token.TerrainModifierOperation>();
+    for (var value : dto.getTerrainModifiersIgnoredList())
+      ignoredSet.add(Token.TerrainModifierOperation.valueOf(value.name()));
+    token.setTerrainModifiersIgnored(ignoredSet);
+
+    token.setFlippedX(dto.getIsFlippedX());
+    token.setFlippedY(dto.getIsFlippedY());
+    token.setFlippedIso(dto.getIsFlippedIso());
+    if (dto.hasCharsheetImage())
+      token.setCharsheetImage(new MD5Key(dto.getCharsheetImage().getValue()));
+    else token.setCharsheetImage(null);
+
+    if (dto.hasPortraitImage())
+      token.setPortraitImage(new MD5Key(dto.getPortraitImage().getValue()));
+    else token.setPortraitImage(null);
+
+    var lightSources = token.getLightSourcesModifiable();
+    for (var light : dto.getLightSourcesList()) lightSources.add(AttachedLightSource.fromDto(light));
+
+    if (dto.hasSightType()) token.setSightType(dto.getSightType().getValue());
+    else token.setSightType(null);
+    token.setHasSight(dto.getHasSight());
+    token.setHasImageTable(dto.getHasImageTable());
+    if (dto.hasImageTableName()) token.setImageTableName(dto.getImageTableName().getValue());
+    else token.setImageTableName(null);
+    if (dto.hasLabel()) token.setLabel(dto.getLabel().getValue());
+    else token.setLabel(null);
+    if (dto.hasNotes()) token.setNotes(dto.getNotes().getValue());
+    else token.setNotes(null);
+    if (dto.hasGmNotes()) token.setGMNotes(dto.getGmNotes().getValue());
+    else token.setGMNotes(null);
+    if (dto.hasGmName()) token.setGMName(dto.getGmName().getValue());
+    else token.setGMName(null);
+
+    var dtoStateMap = dto.getStateMap();
+    for (var key : dtoStateMap.keySet()) {
+      var stateDto = dtoStateMap.get(key);
+      switch (stateDto.getStateTypeCase()) {
+        case BOOL_VALUE -> {
+          var value = stateDto.getBoolValue();
+          token.setState(key, value ? Boolean.TRUE : null);
+        }
+        case DOUBLE_VALUE -> {
+          token.setState(key, new BigDecimal(stateDto.getDoubleValue()));
+        }
+        default -> {
+          log.warn("unknown state type:" + stateDto.getStateTypeCase());
+        }
+      }
+    }
+
+    var dtoProperties = dto.getPropertiesMap();
+    for (var key : dtoProperties.keySet()) {
+      var proptertyDto = dtoProperties.get(key);
+      switch (proptertyDto.getPropertyTypeCase()) {
+        case STRING_VALUE -> {
+          var value = proptertyDto.getStringValue();
+          token.setProperty(key, value);
+        }
+        case DOUBLE_VALUE -> {
+          token.setProperty(key, new BigDecimal(proptertyDto.getDoubleValue()));
+        }
+        default -> {
+          log.warn("unknown token property type:" + proptertyDto.getPropertyTypeCase());
+        }
+      }
+    }
+
+    var dtoMacros = dto.getMacroPropertiesMap();
+    var tokenMacros = token.getMacroPropertiesMap(false);
+    for (var key : dtoMacros.keySet()) tokenMacros.put(key, MacroButtonProperties.fromDto(dtoMacros.get(key)));
+
+    token.setSpeechMap(dto.getSpeechMap());
+    if (dto.hasHeroLabData()) token.setHeroLabData(HeroLabData.fromDto(dto.getHeroLabData()));
+    else token.setHeroLabData(null);
+    token.setAllowURIAccess(dto.getAllowUriAccess());
+    return token;
+  }
+
+  public TokenDto toDto() {
+    var token = this;
+    var dto = TokenDto.newBuilder();
+    dto.setId(token.getId().toString());
+    dto.setBeingImpersonated(token.isBeingImpersonated());
+
+    if (token.getExposedAreaGUID() != null)
+      dto.setExposedAreaGuid(StringValue.of(token.getExposedAreaGUID().toString()));
+
+    var assetMap = token.getImageAssetMap();
+    for (var key : assetMap.keySet()) {
+      var notNullKey = key == null ? "" : key;
+      dto.putImageAssetMap(notNullKey, assetMap.get(key).toString());
+    }
+
+    if (token.getImageAsset() != null)
+      dto.setCurrentImageAsset(StringValue.of(token.getImageAsset()));
+    dto.setLastX(token.getLastX());
+    dto.setX(token.getX());
+    dto.setLastY(token.getLastY());
+    dto.setY(token.getY());
+    dto.setZ(token.getZOrder());
+    dto.setAnchorX(token.getAnchorX());
+    dto.setAnchorY(token.getAnchorY());
+    dto.setSizeScale(token.getSizeScale());
+    var lastPath = token.getLastPath();
+    if (lastPath != null) dto.setLastPath(lastPath.toDto());
+    dto.setSnapToScale(token.isSnapToScale());
+    dto.setWidth(token.getNormalWidth());
+    dto.setHeight(token.getNormalHeight());
+    dto.setIsoHeight(token.getIsoWidth());
+    dto.setIsoHeight(token.getIsoHeight());
+    dto.setScaleX(token.getScaleX());
+    dto.setScaleY(token.getScaleY());
+
+    var tokenSizeMap = token.getSizeMap();
+    for (var key : tokenSizeMap.keySet()) {
+      if (SquareGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(0, tokenSizeMap.get(key).toString());
+      } else if (GridlessGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(1, tokenSizeMap.get(key).toString());
+      } else if (HexGridVertical.class.equals(key.getClass())) {
+        dto.putSizeMap(2, tokenSizeMap.get(key).toString());
+      } else if (HexGridHorizontal.class.equals(key.getClass())) {
+        dto.putSizeMap(3, tokenSizeMap.get(key).toString());
+      } else if (IsometricGrid.class.equals(key.getClass())) {
+        dto.putSizeMap(4, tokenSizeMap.get(key).toString());
+      } else {
+        log.warn("unknown grid in tokensizemap: " + key);
+      }
+    }
+    dto.setSnapToGrid(token.isSnapToGrid());
+    dto.setIsVisible(token.isVisible());
+    dto.setVisibleOnlyToOwner(token.isVisibleOnlyToOwner());
+    dto.setVblColorSensitivity(token.getColorSensitivity());
+    dto.setAlwaysVisibleTolerance(token.getAlwaysVisibleTolerance());
+    dto.setIsAlwaysVisible(token.isAlwaysVisible());
+    if (token.getVBL() != null) dto.setVbl(Mapper.map(token.getVBL()));
+    dto.setName(token.getName());
+    token.getOwners().forEach(owner -> dto.addOwnerList(owner));
+    dto.setOwnerType(token.getOwnerType());
+    dto.setTokenShape(token.getShape().name());
+    dto.setTokenType(token.getType().name());
+    dto.setLayer(token.getLayer().name());
+    dto.setPropertyType(token.getPropertyType());
+    if (token.getFacing() != null) dto.setFacing(Int32Value.of(token.getFacing()));
+
+    if (token.getHaloColor() != null)
+      dto.setHaloColor(Int32Value.of(token.getHaloColor().getRGB()));
+    if (token.getVisionOverlayColor() != null)
+      dto.setVisionOverlayColor(Int32Value.of(token.getVisionOverlayColor().getRGB()));
+    dto.setTokenOpacity(token.getTokenOpacity());
+    dto.setSpeechName(token.getSpeechName());
+    dto.setTerrainModifier(token.getTerrainModifier());
+    dto.setTerrainModifierOperation(
+        TerrainModifierOperationDto.valueOf(token.getTerrainModifierOperation().name()));
+
+    for (var value : token.getTerrainModifiersIgnored())
+      dto.addTerrainModifiersIgnored(TerrainModifierOperationDto.valueOf(value.name()));
+
+    dto.setIsFlippedX(token.isFlippedX());
+    dto.setIsFlippedY(token.isFlippedY());
+    dto.setIsFlippedIso(token.isFlippedIso());
+
+    if (token.getCharsheetImage() != null)
+      dto.setCharsheetImage(StringValue.of(token.getCharsheetImage().toString()));
+    if (token.getPortraitImage() != null)
+      dto.setPortraitImage(StringValue.of(token.getPortraitImage().toString()));
+
+    for (var light : token.getLightSourcesModifiable()) dto.addLightSources(light.toDto());
+
+    if (token.getSightType() != null) dto.setSightType(StringValue.of(token.getSightType()));
+    dto.setHasSight(token.getHasSight());
+    dto.setHasImageTable(token.getHasImageTable());
+    if (token.getImageTableName() != null)
+      dto.setImageTableName(StringValue.of(token.getImageTableName()));
+
+    if (token.getLabel() != null) dto.setLabel(StringValue.of(token.getLabel()));
+
+    if (token.getNotes() != null) dto.setNotes(StringValue.of(token.getNotes()));
+
+    if (token.getGMNotes() != null) dto.setGmNotes(StringValue.of(token.getGMNotes()));
+
+    if (token.getGMName() != null) dto.setGmName(StringValue.of(token.getGMName()));
+
+    for (var key : token.getStatePropertyNames()) {
+      var state = token.getState(key);
+      if (Boolean.class.equals(state.getClass())) {
+        var value = (boolean) state;
+        dto.putState(key, TokenDto.State.newBuilder().setBoolValue(value).build());
+      } else if (BigDecimal.class.equals(state.getClass())) {
+        var value = ((BigDecimal) state).doubleValue();
+        token.setState(key, TokenDto.State.newBuilder().setDoubleValue(value).build());
+      } else {
+        log.warn("unknown state type:" + state.getClass());
+      }
+    }
+
+    for (var key : token.getPropertyNamesRaw()) {
+      var property = token.getProperty(key);
+      if (String.class.equals(property.getClass())) {
+        var value = (String) property;
+        dto.putProperties(key, TokenDto.Property.newBuilder().setStringValue(value).build());
+      } else if (BigDecimal.class.equals(property.getClass())) {
+        var value = ((BigDecimal) property).doubleValue();
+        dto.putProperties(key, TokenDto.Property.newBuilder().setDoubleValue(value).build());
+      } else {
+        log.warn("unknown token property type:" + property.getClass());
+      }
+    }
+
+    var tokenMacros = token.getMacroPropertiesMap(false);
+    for (var key : tokenMacros.keySet()) dto.putMacroProperties(key, tokenMacros.get(key).toDto());
+
+    dto.putAllSpeech(token.getSpeechMap());
+    var heroLabData = token.getHeroLabData();
+    if (heroLabData != null) dto.setHeroLabData(heroLabData.toDto());
+    dto.setAllowUriAccess(token.getAllowURIAccess());
+    return dto.build();
   }
 }

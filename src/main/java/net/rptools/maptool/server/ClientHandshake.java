@@ -215,8 +215,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-    var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
+      throws IOException {
+    var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     MapTool.getFrame()
         .getToolbarPanel()

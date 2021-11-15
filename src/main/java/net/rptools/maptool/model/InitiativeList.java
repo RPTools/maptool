@@ -27,6 +27,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.server.proto.InitiativeListDto;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -749,6 +750,11 @@ public class InitiativeList implements Serializable {
     info.addProperty("holding", isHolding ? 1 : 0);
     info.addProperty("token", offset != -1 ? getToken(offset).getId().toString() : "");
     return info;
+  }
+
+  public static InitiativeList fromDto(InitiativeListDto dto) {
+    //TODO
+    return null;
   }
 
   /** Types of initiative changes - intended for use with initiative event macros. */

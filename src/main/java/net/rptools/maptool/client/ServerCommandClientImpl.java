@@ -113,7 +113,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putZone(Zone zone) {
-    var msg = PutZoneMsg.newBuilder().setZone(Mapper.map(zone));
+    var msg = PutZoneMsg.newBuilder().setZone(zone.toDto());
     makeServerCall(Message.newBuilder().setPutZoneMsg(msg).build());
   }
 
@@ -132,7 +132,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putAsset(Asset asset) {
-    var msg = PutAssetMsg.newBuilder().setAsset(Mapper.map(asset));
+    var msg = PutAssetMsg.newBuilder().setAsset(asset.toDto());
     makeServerCall(Message.newBuilder().setPutAssetMsg(msg).build());
   }
 
@@ -164,7 +164,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void editToken(GUID zoneGUID, Token token) {
     MapTool.getCampaign().getZone(zoneGUID).editToken(token);
     var msg =
-        EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+        EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
     makeServerCall(Message.newBuilder().setEditTokenMsg(msg).build());
   }
 
@@ -173,7 +173,7 @@ public class ServerCommandClientImpl implements ServerCommand {
     // after changing the token. But they don't tell the zone about it so classes
     // waiting for the zone change event don't get it.
     MapTool.getCampaign().getZone(zoneGUID).putToken(token);
-    var msg = PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+    var msg = PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
     makeServerCall(Message.newBuilder().setPutTokenMsg(msg).build());
   }
 
@@ -222,7 +222,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
-    var msg = PutLabelMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setLabel(Mapper.map(label));
+    var msg = PutLabelMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setLabel(label.toDto());
     makeServerCall(Message.newBuilder().setPutLabelMsg(msg).build());
   }
 
@@ -234,8 +234,8 @@ public class ServerCommandClientImpl implements ServerCommand {
     var msg =
         DrawMsg.newBuilder()
             .setZoneGuid(zoneGUID.toString())
-            .setPen(Mapper.map(pen))
-            .setDrawable(Mapper.map(drawable));
+            .setPen(pen.toDto())
+            .setDrawable(drawable.toDto());
 
     makeServerCall(Message.newBuilder().setDrawMsg(msg).build());
   }
@@ -264,7 +264,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void message(TextMessage message) {
-    var msg = MessageMsg.newBuilder().setMessage(Mapper.map(message));
+    var msg = MessageMsg.newBuilder().setMessage(message.toDto());
     makeServerCall(Message.newBuilder().setMessageMsg(msg).build());
   }
 

@@ -23,12 +23,17 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineTemplateDto;
 
 /**
  * A drawing tool that will draw a line template between 2 vertices.
@@ -463,5 +468,23 @@ public class LineTemplate extends AbstractTemplate {
       result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = LineTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(Mapper.map(getVertex()))
+        .setQuadrant(getQuadrant().name())
+        .setMouseSlopeGreater(isMouseSlopeGreater())
+        .setPathVertex(Mapper.map(getPathVertex()))
+        .setDoubleWide(isDoubleWide());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setLineTemplate(dto).build();
   }
 }

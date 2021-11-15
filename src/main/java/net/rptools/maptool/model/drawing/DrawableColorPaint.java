@@ -14,6 +14,10 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
+import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
+import net.rptools.maptool.server.proto.drawing.DrawableTexturePaintDto;
+
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.ImageObserver;
@@ -54,5 +58,14 @@ public class DrawableColorPaint extends DrawablePaint implements Serializable {
   @Override
   public Paint getPaint(int offsetX, int offsetY, double scale, ImageObserver... observer) {
     return getPaint();
+  }
+
+  @Override
+  public DrawablePaintDto toDto() {
+    {
+      var dto = DrawablePaintDto.newBuilder();
+      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(getColor()))
+          .build();
+    }
   }
 }

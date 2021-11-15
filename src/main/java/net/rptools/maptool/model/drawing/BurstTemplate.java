@@ -20,9 +20,15 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+
 
 /**
  * Create and paint a donut burst
@@ -130,5 +136,19 @@ public class BurstTemplate extends RadiusTemplate {
   @Override
   public Area getArea() {
     return renderer.getArea();
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = BurstTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(Mapper.map(getVertex()));
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setBurstTemplate(dto).build();
   }
 }

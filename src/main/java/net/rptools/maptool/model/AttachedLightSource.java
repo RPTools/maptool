@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.server.proto.AttachedLightSourceDto;
+
 public class AttachedLightSource {
 
   private GUID lightSourceId;
@@ -39,5 +41,16 @@ public class AttachedLightSource {
 
   public GUID getLightSourceId() {
     return lightSourceId;
+  }
+
+  public static AttachedLightSource fromDto(AttachedLightSourceDto dto) {
+    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()), dto.getDirection());
+  }
+
+  public AttachedLightSourceDto toDto() {
+    var dto = AttachedLightSourceDto.newBuilder();
+    dto.setLightSourceId(getLightSourceId().toString());
+    dto.setDirection(getDirection().name());
+    return dto.build();
   }
 }

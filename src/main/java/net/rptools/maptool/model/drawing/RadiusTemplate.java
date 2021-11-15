@@ -19,10 +19,15 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.RadiusTemplateDto;
 
 /**
  * The radius template draws a highlight over all the squares effected from a specific spine.
@@ -163,5 +168,19 @@ public class RadiusTemplate extends AbstractTemplate {
       }
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = RadiusTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(Mapper.map(getVertex()));
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setRadiusTemplate(dto).build();
   }
 }

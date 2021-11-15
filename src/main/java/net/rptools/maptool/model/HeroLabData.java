@@ -36,6 +36,7 @@ import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.server.proto.HeroLabDataDto;
 
 /**
  * @author Jamz
@@ -532,5 +533,42 @@ public class HeroLabData {
 
   public void setHeroLabStatblockAssetID(MD5Key statblockAssetID) {
     heroLabStatblockAssetID = statblockAssetID;
+  }
+
+  public static HeroLabData fromDto(HeroLabDataDto dto) {
+    var data = new HeroLabData(dto.getName());
+    data.setHeroLabStatblockAssetID(new MD5Key(dto.getHeroLabStatblockAssetId()));
+    data.setSummary(dto.getSummary());
+    data.setPlayerName(dto.getPlayerName());
+    data.setGameSystem(dto.getGameSystem());
+    data.setHeroLabIndex(dto.getHeroLabIndex());
+    data.setMinionMasterIndex(dto.getMinionMasterIndex());
+    data.setMinionMasterName(dto.getMinionMasterName());
+    data.setAlly(dto.getIsAlly());
+    data.setDirty(dto.getIsDirty());
+    data.setMinion(dto.getIsMinion());
+    data.setPortfolioPath(dto.getPortfolioPath());
+    var assets = data.getAssetMap();
+    dto.getHeroImageAssetsMap().forEach((key, value) -> assets.put(key, new MD5Key(value)));
+    return data;
+  }
+
+  public HeroLabDataDto toDto() {
+    var data = this;
+    var dto = HeroLabDataDto.newBuilder();
+    dto.setHeroLabStatblockAssetId(data.getHeroLabStatblockAssetID().toString());
+    dto.setName(data.getName());
+    dto.setSummary(data.getSummary());
+    dto.setPlayerName(data.getPlayerName());
+    dto.setGameSystem(data.getGameSystem());
+    dto.setHeroLabIndex(data.getHeroLabIndex());
+    dto.setMinionMasterIndex(data.getMinionMasterIndex());
+    dto.setMinionMasterName(data.getMinionMasterName());
+    dto.setIsAlly(data.isAlly());
+    dto.setIsDirty(data.isDirty());
+    dto.setIsMinion(data.isMinion());
+    dto.setPortfolioPath(data.getPortfolioPath());
+    data.getAssetMap().forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+    return dto.build();
   }
 }

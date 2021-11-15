@@ -19,9 +19,14 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import javax.swing.CellRendererPane;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
 
 /**
  * @author jgorrell
@@ -98,5 +103,19 @@ public class DrawnLabel extends AbstractDrawing {
   public Area getArea() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = DrawnLabelDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setBounds(Mapper.map(getBounds()))
+        .setText(getText())
+        .setFont(getFont());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setDrawnLabel(dto).build();
   }
 }

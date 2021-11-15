@@ -97,14 +97,14 @@ public class MapToolServerConnection
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
     for (Player player : playerMap.values()) {
-      var msg = PlayerConnectedMsg.newBuilder().setPlayer(Mapper.map(player));
+      var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.toDto());
       server
           .getConnection()
           .sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
     var msg =
         PlayerConnectedMsg.newBuilder()
-            .setPlayer(Mapper.map(connectedPlayer.getTransferablePlayer()));
+            .setPlayer(connectedPlayer.getTransferablePlayer().toDto());
     server
         .getConnection()
         .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
@@ -120,7 +120,7 @@ public class MapToolServerConnection
   public void connectionRemoved(ClientConnection conn) {
     server.releaseClientConnection(conn.getId());
     var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
-    var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(Mapper.map(player));
+    var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(player.toDto());
     server
         .getConnection()
         .broadcastMessage(

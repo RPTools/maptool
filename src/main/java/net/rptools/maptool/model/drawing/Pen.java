@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import net.rptools.maptool.server.proto.drawing.PenDto;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 
@@ -148,5 +150,32 @@ public class Pen {
 
   public int getBackgroundColor() {
     return backgroundColor;
+  }
+
+  public static Pen fromDto(PenDto dto) {
+    var pen = new Pen();
+    pen.setEraser(dto.getEraser());
+    pen.setForegroundMode(dto.getForegroundModeValue());
+    pen.setBackgroundMode(dto.getBackgroundModeValue());
+    pen.setThickness(dto.getThickness());
+    pen.setOpacity(dto.getOpacity());
+    pen.setSquareCap(dto.getSquareCap());
+    pen.setPaint(DrawablePaint.fromDto(dto.getForegroundColor()));
+    pen.setBackgroundPaint(DrawablePaint.fromDto(dto.getBackgroundColor()));
+    return pen;
+  }
+
+  public PenDto toDto() {
+    var pen = this;
+    return PenDto.newBuilder()
+        .setEraser(pen.isEraser())
+        .setForegroundMode(PenDto.mode.forNumber(pen.getForegroundMode()))
+        .setBackgroundMode(PenDto.mode.forNumber(pen.getBackgroundMode()))
+        .setThickness(pen.getThickness())
+        .setOpacity(pen.getOpacity())
+        .setSquareCap(pen.getSquareCap())
+        .setForegroundColor(pen.getPaint().toDto())
+        .setBackgroundColor(pen.getBackgroundPaint().toDto())
+        .build();
   }
 }

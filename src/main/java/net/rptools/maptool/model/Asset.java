@@ -33,6 +33,8 @@ import javax.imageio.stream.ImageInputStream;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.AssetDto;
+import net.rptools.maptool.server.proto.AssetDtoType;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -714,5 +716,22 @@ public final class Asset {
    */
   public static MediaType getMediaType(URL url) throws IOException {
     return getMediaType(url.getFile(), TikaInputStream.get(url));
+  }
+
+  public static Asset fromDto(AssetDto dto) {
+    return new Asset(
+        new MD5Key(dto.getMd5Key()),
+        dto.getName(),
+        dto.getExtension(),
+        Asset.Type.valueOf(dto.getType().name()));
+  }
+
+  public AssetDto toDto() {
+    return AssetDto.newBuilder()
+        .setMd5Key(getMD5Key().toString())
+        .setName(getName())
+        .setExtension(getExtension())
+        .setType(AssetDtoType.valueOf(getType().name()))
+        .build();
   }
 }

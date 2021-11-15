@@ -295,7 +295,7 @@ message ZoneDto {
   repeated TokenDto tokens = 16;
   map<string, AreaDto> exposed_area_meta = 17;
   InitiativeListDto initiative = 18;
-  AssetDto exposed_area = 19;
+  AreaDto exposed_area = 19;
   bool has_fog = 20;
   DrawablePaintDto fog_paint = 21;
   AreaDto topology = 22;

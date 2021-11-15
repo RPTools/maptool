@@ -24,6 +24,8 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.server.proto.ServerPolicyDto;
+import net.rptools.maptool.server.proto.WalkerMetricDto;
 
 public class ServerPolicy {
   private boolean strictTokenMovement;
@@ -282,5 +284,47 @@ public class ServerPolicy {
     sinfo.addProperty("server name", prefs.getRPToolsName());
     sinfo.addProperty("port number", prefs.getPort());
     return sinfo;
+  }
+
+  public static ServerPolicy fromDto(ServerPolicyDto source) {
+    var destination = new ServerPolicy();
+    destination.setUseStrictTokenManagement(source.getUseStrictTokenManagement());
+    destination.setIsMovementLocked(source.getIsMovementLocked());
+    destination.setIsTokenEditorLocked(source.getIsTokenEditorLocked());
+    destination.setPlayersCanRevealVision(source.getPlayersCanRevealVision());
+    destination.setGmRevealsVisionForUnownedTokens(source.getGmRevealsVisionForUnownedTokens());
+    destination.setUseIndividualViews(source.getUseIndividualViews());
+    destination.setRestrictedImpersonation(source.getRestrictedImpersonation());
+    destination.setPlayersReceiveCampaignMacros(source.getPlayersReceiveCampaignMacros());
+    destination.setUseToolTipsForDefaultRollFormat(source.getUseToolTipsForDefaultRollFormat());
+    destination.setUseIndividualFOW(source.getUseIndividualFOW());
+    destination.setAutoRevealOnMovement(source.getIsAutoRevealOnMovement());
+    destination.setIncludeOwnedNPCs(source.getIncludeOwnedNPCs());
+    destination.setMovementMetric(WalkerMetric.valueOf(source.getMovementMetric().name()));
+    destination.setUsingAstarPathfinding(source.getUsingAstarPathfinding());
+    destination.setVblBlocksMove(source.getVblBlocksMove());
+    destination.setHiddenMapSelectUI(source.getHideMapSelectUi());
+    return destination;
+  }
+
+  public ServerPolicyDto toDto() {
+    var destination = ServerPolicyDto.newBuilder();
+    destination.setUseStrictTokenManagement(this.useStrictTokenManagement());
+    destination.setIsMovementLocked(this.isMovementLocked());
+    destination.setIsTokenEditorLocked(this.isTokenEditorLocked());
+    destination.setPlayersCanRevealVision(this.getPlayersCanRevealVision());
+    destination.setGmRevealsVisionForUnownedTokens(this.getGmRevealsVisionForUnownedTokens());
+    destination.setUseIndividualViews(this.isUseIndividualViews());
+    destination.setRestrictedImpersonation(this.isRestrictedImpersonation());
+    destination.setPlayersReceiveCampaignMacros(this.playersReceiveCampaignMacros());
+    destination.setUseToolTipsForDefaultRollFormat(this.getUseToolTipsForDefaultRollFormat());
+    destination.setUseIndividualFOW(this.isUseIndividualFOW());
+    destination.setIsAutoRevealOnMovement(this.isAutoRevealOnMovement());
+    destination.setIncludeOwnedNPCs(this.isIncludeOwnedNPCs());
+    destination.setMovementMetric(WalkerMetricDto.valueOf(this.getMovementMetric().name()));
+    destination.setUsingAstarPathfinding(this.isUsingAstarPathfinding());
+    destination.setVblBlocksMove(this.getVblBlocksMove());
+    destination.setHideMapSelectUi(this.getMapSelectUIHidden());
+    return destination.build();
   }
 }

@@ -66,6 +66,7 @@ import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -127,7 +128,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   }
 
   private void handle(PutZoneMsg msg) {
-    Zone zone = Mapper.map(msg.getZone());
+    Zone zone = Zone.fromDto(msg.getZone());
     MapTool.getCampaign().putZone(zone);
 
     // TODO: combine this with MapTool.addZone()
@@ -145,14 +146,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          Label label = Mapper.map(msg.getLabel());
+          Label label = Label.fromDto(msg.getLabel());
           zone.putLabel(label);
           MapTool.getFrame().refresh();
         });
   }
 
   private void handle(PutAssetMsg msg) {
-    AssetManager.putAsset(Mapper.map(msg.getAsset()));
+    AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
     MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
     MapTool.getFrame().refresh();
   }
@@ -160,7 +161,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   private void handle(PlayerDisconnectedMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          MapTool.removePlayer(Mapper.map(msg.getPlayer()));
+          MapTool.removePlayer(Player.fromDto(msg.getPlayer()));
           MapTool.getFrame().refresh();
         });
   }
@@ -168,7 +169,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   private void handle(PlayerConnectedMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          MapTool.addPlayer(Mapper.map(msg.getPlayer()));
+          MapTool.addPlayer(Player.fromDto(msg.getPlayer()));
           MapTool.getFrame().refresh();
         });
   }
@@ -190,7 +191,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
   private void handle(MessageMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          TextMessage message = Mapper.map(msg.getMessage());
+          TextMessage message = TextMessage.fromDto(msg.getMessage());
           MapTool.addServerMessage(message);
         });
   }
@@ -306,7 +307,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(putTokenMsg.getZoneGuid());
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          var token = Mapper.map(putTokenMsg.getToken());
+          var token = Token.fromDto(putTokenMsg.getToken());
           zone.putToken(token);
           MapTool.getFrame().refresh();
         });
@@ -317,7 +318,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(editTokenMsg.getZoneGuid());
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          var token = Mapper.map(editTokenMsg.getToken());
+          var token = Token.fromDto(editTokenMsg.getToken());
           zone.editToken(token);
           MapTool.getFrame().refresh();
         });
@@ -327,8 +328,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     EventQueue.invokeLater(
         () -> {
           var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
-          Pen pen = Mapper.map(drawMsg.getPen());
-          Drawable drawable = Mapper.map(drawMsg.getDrawable());
+          Pen pen = Pen.fromDto(drawMsg.getPen());
+          Drawable drawable = Drawable.fromDto(drawMsg.getDrawable());
 
           var zone = MapTool.getCampaign().getZone(zoneGuid);
           zone.addDrawable(new DrawnElement(drawable, pen));

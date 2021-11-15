@@ -18,7 +18,11 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.DrawablesGroupDto;
 
 /**
  * @author Jagged
@@ -76,6 +80,17 @@ public class DrawablesGroup extends AbstractDrawing {
       }
     }
     return area;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = DrawablesGroupDto.newBuilder();
+    dto.setId(getId().toString()).setLayer(getLayer().name());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    getDrawableList().forEach(d -> dto.addDrawnElements(d.toDto()));
+    return DrawableDto.newBuilder().setDrawablesGroup(dto).build();
   }
 
   @Override

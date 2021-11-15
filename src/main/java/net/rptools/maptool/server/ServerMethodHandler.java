@@ -32,21 +32,10 @@ import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.InitiativeList;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
@@ -160,16 +149,16 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void handle(PutZoneMsg msg) {
-    server.getCampaign().putZone(Mapper.map(msg.getZone()));
+    server.getCampaign().putZone(Zone.fromDto(msg.getZone()));
   }
 
   private void handle(PutLabelMsg msg) {
     Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-    zone.putLabel(Mapper.map(msg.getLabel()));
+    zone.putLabel(Label.fromDto(msg.getLabel()));
   }
 
   private void handle(PutAssetMsg msg) {
-    AssetManager.putAsset(Mapper.map(msg.getAsset()));
+    AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
   }
 
   private void handle(HideFowMsg msg) {
@@ -207,20 +196,20 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   private void handle(String clientId, PutTokenMsg putTokenMsg) {
     var zoneGUID = GUID.valueOf(putTokenMsg.getZoneGuid());
-    var token = Mapper.map(putTokenMsg.getToken());
+    var token = Token.fromDto(putTokenMsg.getToken());
     putToken(clientId, zoneGUID, token);
   }
 
   private void handle(String clientId, EditTokenMsg editTokenMsg) {
     var zoneGUID = GUID.valueOf(editTokenMsg.getZoneGuid());
-    var token = Mapper.map(editTokenMsg.getToken());
+    var token = Token.fromDto(editTokenMsg.getToken());
     putToken(clientId, zoneGUID, token);
   }
 
   private void handle(DrawMsg drawMsg) {
     var zoneGuid = GUID.valueOf(drawMsg.getZoneGuid());
-    var pen = Mapper.map(drawMsg.getPen());
-    var drawable = Mapper.map(drawMsg.getDrawable());
+    var pen = Pen.fromDto(drawMsg.getPen());
+    var drawable = Drawable.fromDto(drawMsg.getDrawable());
     Zone zone = server.getCampaign().getZone(zoneGuid);
     zone.addDrawable(new DrawnElement(drawable, pen));
   }
@@ -538,7 +527,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // Broadcast
       for (Token token : tokenList) {
         var putTokenMsg =
-            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
         sendToAllClients(Message.newBuilder().setPutTokenMsg(putTokenMsg).build());
       }
       zone.sortZOrder(); // update new ZOrder on server zone
@@ -582,14 +571,14 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // showing a broken
       // image instead of blowing up
       Asset asset = Asset.createBrokenImageAsset(assetID);
-      var msg = PutAssetMsg.newBuilder().setAsset(Mapper.map(asset));
+      var msg = PutAssetMsg.newBuilder().setAsset(asset.toDto());
       server.getConnection().sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
     }
   }
 
   private void getZone(String id, GUID zoneGUID) {
     var zone = server.getCampaign().getZone(zoneGUID);
-    var msg = PutZoneMsg.newBuilder().setZone(Mapper.map(zone));
+    var msg = PutZoneMsg.newBuilder().setZone(zone.toDto());
     server.getConnection().sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
   }
 
@@ -732,7 +721,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       // Broadcast
       for (Token token : tokenList) {
         var putTokenMsg =
-            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(Mapper.map(token));
+            PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
         sendToAllClients(Message.newBuilder().setPutTokenMsg(putTokenMsg).build());
       }
       zone.sortZOrder(); // update new ZOrder on server zone

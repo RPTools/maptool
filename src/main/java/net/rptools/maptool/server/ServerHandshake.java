@@ -227,11 +227,10 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   private void sendConnectionSuccessful() throws ExecutionException, InterruptedException {
     var server = MapTool.getServer();
-    var policy = Mapper.map(server.getPolicy());
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
-            .setServerPolicyDto(policy)
+            .setServerPolicyDto(server.getPolicy().toDto())
             .setGameDataDto(new DataStoreManager().toDto().get())
             .setAddOnLibraryListDto(new LibraryManager().addOnLibrariesToDto().get());
     var handshakeMsg =

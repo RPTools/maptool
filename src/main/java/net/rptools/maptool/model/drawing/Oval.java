@@ -17,7 +17,12 @@ package net.rptools.maptool.model.drawing;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.OvalDrawableDto;
 
 /** An oval. */
 public class Oval extends Rectangle {
@@ -62,4 +67,17 @@ public class Oval extends Rectangle {
     java.awt.Rectangle r = getBounds();
     return new Area(new Ellipse2D.Double(r.x, r.y, r.width, r.height));
   }
+
+  public DrawableDto toDto() {
+    var dto =
+        OvalDrawableDto.newBuilder()
+            .setId(getId().toString())
+            .setStartPoint(Mapper.map(getStartPoint()))
+            .setEndPoint(Mapper.map(getEndPoint()));
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setOvalDrawable(dto).build();
+  }
+
 }

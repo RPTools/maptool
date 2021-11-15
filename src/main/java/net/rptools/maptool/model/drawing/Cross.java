@@ -18,7 +18,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
+
+import com.google.protobuf.StringValue;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.CrossDrawableDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /** An Cross */
 public class Cross extends AbstractDrawing {
@@ -39,6 +44,20 @@ public class Cross extends AbstractDrawing {
 
   public Area getArea() {
     return new Area(getBounds());
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto =
+        CrossDrawableDto.newBuilder()
+            .setId(getId().toString())
+            .setLayer(getLayer().name())
+            .setStartPoint(Mapper.map(getStartPoint()))
+            .setEndPoint(Mapper.map(getEndPoint()));
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setCrossDrawable(dto).build();
   }
 
   /*

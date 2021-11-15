@@ -44,6 +44,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,6 +85,11 @@ public abstract class Grid implements Cloneable {
   public Grid(Grid grid) {
     setSize(grid.getSize());
     setOffset(grid.offsetX, grid.offsetY);
+  }
+
+  public static Grid fromDto(GridDto grid) {
+    //TODO
+    return null;
   }
 
   protected synchronized Map<Integer, Area> getGridShapeCache() {
