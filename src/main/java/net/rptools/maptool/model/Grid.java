@@ -928,6 +928,8 @@ public abstract class Grid implements Cloneable {
     return getGridShapeCache().get(gridRadius).createTransformedArea(at);
   }
 
+  public abstract GridDto toDto();
+
   static class DirectionCalculator {
 
     private static final int NW = 1;

@@ -21,6 +21,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -28,6 +29,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.server.proto.InitiativeListDto;
+import net.rptools.maptool.server.proto.TokenInitiativeDto;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,6 +113,7 @@ public class InitiativeList implements Serializable {
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
+  private InitiativeList() {}
   /**
    * Create an initiative list for a zone.
    *
@@ -753,8 +756,31 @@ public class InitiativeList implements Serializable {
   }
 
   public static InitiativeList fromDto(InitiativeListDto dto) {
-    //TODO
-    return null;
+    var initiativeList = new InitiativeList();
+    initiativeList.current = dto.getCurrent();
+    initiativeList.round = dto.getRound();
+    initiativeList.zoneId = GUID.valueOf(dto.getZoneId());
+    initiativeList.hideNPC = dto.getHideNpc();
+    initiativeList.tokens = dto.getTokensList().stream().map(t -> initiativeList.fromDto(t)).collect(Collectors.toList());
+    return initiativeList;
+  }
+
+  public InitiativeListDto toDto() {
+    var dto = InitiativeListDto.newBuilder();
+    dto.setCurrent(current);
+    dto.setRound(round);
+    dto.setZoneId(zoneId.toString());
+    dto.setHideNpc(hideNPC);
+    dto.addAllTokens(tokens.stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    return dto.build();
+  }
+
+  public TokenInitiative fromDto(TokenInitiativeDto dto) {
+    var initiative = new TokenInitiative();
+    initiative.holding = dto.getHolding();
+    initiative.id = GUID.valueOf(dto.getTokenId());
+    initiative.state = dto.getState();
+    return initiative;
   }
 
   /** Types of initiative changes - intended for use with initiative event macros. */
@@ -803,6 +829,8 @@ public class InitiativeList implements Serializable {
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
+
+    private TokenInitiative() {}
 
     /**
      * Create the token initiative for the passed token.
@@ -918,6 +946,14 @@ public class InitiativeList implements Serializable {
       state = aState;
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), old, isHolding);
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), oldState, aState);
+    }
+
+    public TokenInitiativeDto toDto() {
+      var dto = TokenInitiativeDto.newBuilder();
+      dto.setHolding(holding);
+      dto.setTokenId(id.toString());
+      dto.setState(state);
+      return dto.build();
     }
   }
 }

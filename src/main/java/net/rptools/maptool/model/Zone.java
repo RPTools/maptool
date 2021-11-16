@@ -42,7 +42,9 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
+import net.rptools.maptool.server.proto.drawing.IntPointDto;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -2187,6 +2189,46 @@ public class Zone extends BaseModel {
   }
 
   public ZoneDto toDto() {
-    return null;
+    var dto = ZoneDto.newBuilder();
+    dto.setCreationTime(creationTime);
+    dto.setId(id.toString());
+    dto.setGrid(grid.toDto());
+    dto.setGridColor(gridColor);
+    dto.setImageScaleX(imageScaleX);
+    dto.setImageScaleY(imageScaleY);
+    dto.setTokenVisionDistance(tokenVisionDistance);
+    dto.setUnitsPerCell(unitsPerCell);
+    dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
+    dto.addAllTopologyTypes(topologyTypes.topologyTypes.stream()
+        .map(t -> TopologyTypeDto.valueOf(t.name())).collect(Collectors.toList()));
+
+    dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
+    dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    exposedAreaMeta.forEach((id, area) -> dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory())));
+    dto.setInitiative(initiativeList.toDto());
+    dto.setExposedArea(Mapper.map(exposedArea));
+    dto.setHasFog(hasFog);
+    dto.setFogPaint(fogPaint.toDto());
+    dto.setTopology(Mapper.map(topology));
+    dto.setHillVbl(Mapper.map(hillVbl));
+    dto.setPitVbl(Mapper.map(pitVbl));
+    dto.setTopologyTerrain(Mapper.map(topologyTerrain));
+    dto.setBackgroundPaint(backgroundPaint.toDto());
+    dto.setMapAsset(mapAsset.toString());
+    dto.setBoardPosition(Mapper.map(boardPosition));
+    dto.setDrawBoard(drawBoard);
+    dto.setBoardChanged(boardChanged);
+    dto.setName(name);
+    dto.setPlayerAlias(playerAlias);
+    dto.setIsVisible(isVisible);
+    dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
+    dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
+    dto.setHeight(height);
+    dto.setWidth(width);
+    return dto.build();
   }
 }
