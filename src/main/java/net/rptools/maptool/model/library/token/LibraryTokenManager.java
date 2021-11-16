@@ -102,7 +102,7 @@ public class LibraryTokenManager {
             removeTokens(
                 event.info().stream()
                     .filter(t -> t.name().toLowerCase().startsWith("lib:"))
-                    .map(t -> new LibraryToken(t.token()))
+                    .map(t -> LibraryToken.namespaceForName(t.name()))
                     .toList());
           });
     }
@@ -131,12 +131,8 @@ public class LibraryTokenManager {
         });
   }
 
-  private void removeTokens(Collection<LibraryToken> libs) {
-    libs.forEach(
-        l -> {
-          String namespace = l.getNamespace().join();
-          libraryTokens.remove(namespace);
-        });
+  private void removeTokens(Collection<String> namespaces) {
+    namespaces.forEach(libraryTokens::remove);
   }
 
   private void changeTokens(Collection<LibraryToken> libs) {
@@ -145,7 +141,7 @@ public class LibraryTokenManager {
           // name may have changed so we need to search by id
           GUID id = l.getId();
           var old = libraryTokens.values().stream().filter(l2 -> id.equals(l2.getId())).findFirst();
-          old.ifPresent(libraryToken -> removeTokens(List.of(libraryToken)));
+          old.ifPresent(libraryToken -> removeTokens(List.of(libraryToken.getNamespace().join())));
           addTokens(List.of(l));
         });
   }
