@@ -190,12 +190,12 @@ public class DataFunctions extends AbstractFunction {
           String namespace = parameters.get(0).toString();
           String path = parameters.get(1).toString();
           var context = MapTool.getParser().getContext();
-          var libOpt = new LibraryManager().getLibrary(namespace);
+          var libOpt = new LibraryManager().getLibraryForMTScriptCall(namespace, context);
           var lib =
               libOpt.orElseThrow(
                   () -> new ParserException(I18N.getText("library.error.notFound", namespace)));
           DataValue dataValue;
-          if (lib.canMTScriptAccessPrivate(context, namespace)) {
+          if (lib.canMTScriptAccessPrivate(context)) {
             dataValue = lib.getLibraryData().thenCompose(data -> data.getStaticData(path)).join();
           } else {
             dataValue =
