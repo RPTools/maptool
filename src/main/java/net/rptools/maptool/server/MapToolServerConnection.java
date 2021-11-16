@@ -103,8 +103,7 @@ public class MapToolServerConnection
           .sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
     var msg =
-        PlayerConnectedMsg.newBuilder()
-            .setPlayer(connectedPlayer.getTransferablePlayer().toDto());
+        PlayerConnectedMsg.newBuilder().setPlayer(connectedPlayer.getTransferablePlayer().toDto());
     server
         .getConnection()
         .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());

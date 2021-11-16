@@ -761,7 +761,10 @@ public class InitiativeList implements Serializable {
     initiativeList.round = dto.getRound();
     initiativeList.zoneId = GUID.valueOf(dto.getZoneId());
     initiativeList.hideNPC = dto.getHideNpc();
-    initiativeList.tokens = dto.getTokensList().stream().map(t -> initiativeList.fromDto(t)).collect(Collectors.toList());
+    initiativeList.tokens =
+        dto.getTokensList().stream()
+            .map(t -> initiativeList.fromDto(t))
+            .collect(Collectors.toList());
     return initiativeList;
   }
 

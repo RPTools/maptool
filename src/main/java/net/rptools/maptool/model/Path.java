@@ -274,7 +274,6 @@ public class Path<T extends AbstractPoint> {
       dto.getWaypointsList().forEach(p -> path.addWayPoint(new ZonePoint(p.getX(), p.getY())));
       return path;
     }
-
   }
 
   public PathDto toDto() {
@@ -287,8 +286,7 @@ public class Path<T extends AbstractPoint> {
     else dto.setPointType(PathDto.PointType.ZONE_POINT);
 
     cellPath.forEach(p -> dto.addCells(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
-    getWayPointList()
-        .forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+    getWayPointList().forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
 
     return dto.build();
   }

@@ -14,14 +14,12 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
-import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
-import net.rptools.maptool.server.proto.drawing.DrawableTexturePaintDto;
-
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.ImageObserver;
 import java.io.Serializable;
+import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
+import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 
 public class DrawableColorPaint extends DrawablePaint implements Serializable {
   private int color;
@@ -64,8 +62,7 @@ public class DrawableColorPaint extends DrawablePaint implements Serializable {
   public DrawablePaintDto toDto() {
     {
       var dto = DrawablePaintDto.newBuilder();
-      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(getColor()))
-          .build();
+      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(getColor())).build();
     }
   }
 }

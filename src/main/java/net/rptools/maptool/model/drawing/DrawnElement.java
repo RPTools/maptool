@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawnElementDto;
 
 /** */

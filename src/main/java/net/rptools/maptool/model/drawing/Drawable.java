@@ -17,16 +17,13 @@ package net.rptools.maptool.model.drawing;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.util.ArrayList;
-
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
-import net.rptools.maptool.server.proto.drawing.DrawnElementDto;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /** @author drice */
 public interface Drawable {
@@ -94,7 +91,8 @@ public interface Drawable {
         var dto = drawableDto.getDrawnLabel();
         var id = GUID.valueOf(dto.getId());
         var bounds = dto.getBounds();
-        var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
+        var drawable =
+            new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
         if (dto.hasName()) drawable.setName(dto.getName().getValue());
         drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
         return drawable;
@@ -239,7 +237,8 @@ public interface Drawable {
         return drawable;
       }
       default -> {
-        LogManager.getLogger(Drawable.class).warn("unknown DrawableDto type: " + drawableDto.getDrawableTypeCase());
+        LogManager.getLogger(Drawable.class)
+            .warn("unknown DrawableDto type: " + drawableDto.getDrawableTypeCase());
         return null;
       }
     }

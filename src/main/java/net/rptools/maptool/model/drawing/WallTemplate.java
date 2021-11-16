@@ -14,9 +14,8 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import java.util.List;
-
 import com.google.protobuf.StringValue;
+import java.util.List;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;

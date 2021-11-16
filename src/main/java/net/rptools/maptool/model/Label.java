@@ -14,10 +14,8 @@
  */
 package net.rptools.maptool.model;
 
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.LabelDto;
-
 import java.awt.Color;
+import net.rptools.maptool.server.proto.LabelDto;
 
 public class Label {
   private final GUID id;

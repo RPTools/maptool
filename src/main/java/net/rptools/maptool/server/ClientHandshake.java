@@ -214,8 +214,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
     currentState = State.AwaitingConnectionSuccessful;
   }
 
-  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
-      throws IOException {
+  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg) throws IOException {
     var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     MapTool.getFrame()

@@ -198,7 +198,7 @@ public class TextMessage {
     return channel == Channel.WHISPER;
   }
 
-  public static TextMessage fromDto(TextMessageDto dto){
+  public static TextMessage fromDto(TextMessageDto dto) {
     return new TextMessage(
         dto.getChannel(),
         dto.getTarget(),

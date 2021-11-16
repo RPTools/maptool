@@ -19,6 +19,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -37,9 +39,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -2908,7 +2907,8 @@ public class Token extends BaseModel implements Cloneable {
     else token.setPortraitImage(null);
 
     var lightSources = token.getLightSourcesModifiable();
-    for (var light : dto.getLightSourcesList()) lightSources.add(AttachedLightSource.fromDto(light));
+    for (var light : dto.getLightSourcesList())
+      lightSources.add(AttachedLightSource.fromDto(light));
 
     if (dto.hasSightType()) token.setSightType(dto.getSightType().getValue());
     else token.setSightType(null);
@@ -2961,7 +2961,8 @@ public class Token extends BaseModel implements Cloneable {
 
     var dtoMacros = dto.getMacroPropertiesMap();
     var tokenMacros = token.getMacroPropertiesMap(false);
-    for (var key : dtoMacros.keySet()) tokenMacros.put(key, MacroButtonProperties.fromDto(dtoMacros.get(key)));
+    for (var key : dtoMacros.keySet())
+      tokenMacros.put(key, MacroButtonProperties.fromDto(dtoMacros.get(key)));
 
     token.setSpeechMap(dto.getSpeechMap());
     if (dto.hasHeroLabData()) token.setHeroLabData(HeroLabData.fromDto(dto.getHeroLabData()));

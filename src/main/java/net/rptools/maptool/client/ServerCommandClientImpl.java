@@ -163,8 +163,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void editToken(GUID zoneGUID, Token token) {
     MapTool.getCampaign().getZone(zoneGUID).editToken(token);
-    var msg =
-        EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
+    var msg = EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
     makeServerCall(Message.newBuilder().setEditTokenMsg(msg).build());
   }
 

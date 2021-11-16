@@ -14,13 +14,12 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import javax.swing.CellRendererPane;
-
-import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
 import net.rptools.maptool.model.GUID;

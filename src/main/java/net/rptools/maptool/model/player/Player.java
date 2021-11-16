@@ -118,10 +118,6 @@ public class Player {
   }
 
   public PlayerDto toDto() {
-    return PlayerDto.newBuilder()
-        .setName(getName())
-        .setRole(getRole().name())
-        .build();
+    return PlayerDto.newBuilder().setName(getName()).setRole(getRole().name()).build();
   }
 }
-

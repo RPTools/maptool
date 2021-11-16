@@ -19,14 +19,10 @@ import java.awt.Paint;
 import java.awt.TexturePaint;
 import java.awt.image.ImageObserver;
 import java.io.Serializable;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
 import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
-import net.rptools.maptool.server.proto.drawing.DrawableTexturePaintDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

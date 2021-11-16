@@ -44,7 +44,6 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
-import net.rptools.maptool.server.proto.drawing.IntPointDto;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -2150,21 +2149,43 @@ public class Zone extends BaseModel {
     zone.unitsPerCell = dto.getUnitsPerCell();
     zone.aStarRounding = AStarRoundingOptions.valueOf(dto.getAStarRounding().name());
     zone.topologyTypes = new TopologyTypeSet();
-    zone.topologyTypes.topologyTypes.addAll(dto.getTopologyTypesList().stream()
-        .map(t -> TopologyType.valueOf(t.name())).collect(Collectors.toList()));
-    zone.drawables = dto.getDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
-    zone.gmDrawables = dto.getGmDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
-    zone.objectDrawables = dto.getObjectDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
-    zone.backgroundDrawables = dto.getBackgroundDrawablesList().stream().map(d -> DrawnElement.fromDto(d)).collect(Collectors.toList());
-    dto.getLabelsList().stream().map(d -> Label.fromDto(d)).forEach(l -> zone.labels.put(l.getId(), l));
-    dto.getTokensList().stream().map(t -> Token.fromDto(t)).forEach(t -> {
-      zone.tokenMap.put(t.getId(), t);
-      zone.tokenOrderedList.add(t);
-    });
+    zone.topologyTypes.topologyTypes.addAll(
+        dto.getTopologyTypesList().stream()
+            .map(t -> TopologyType.valueOf(t.name()))
+            .collect(Collectors.toList()));
+    zone.drawables =
+        dto.getDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.gmDrawables =
+        dto.getGmDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.objectDrawables =
+        dto.getObjectDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.backgroundDrawables =
+        dto.getBackgroundDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    dto.getLabelsList().stream()
+        .map(d -> Label.fromDto(d))
+        .forEach(l -> zone.labels.put(l.getId(), l));
+    dto.getTokensList().stream()
+        .map(t -> Token.fromDto(t))
+        .forEach(
+            t -> {
+              zone.tokenMap.put(t.getId(), t);
+              zone.tokenOrderedList.add(t);
+            });
     zone.tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
-    dto.getExposedAreaMetaMap().forEach((id, area) ->
-        zone.exposedAreaMeta.put(GUID.valueOf(id), new ExposedAreaMetaData(Mapper.map(area))));
-    zone.initiativeList =  InitiativeList.fromDto(dto.getInitiative());
+    dto.getExposedAreaMetaMap()
+        .forEach(
+            (id, area) ->
+                zone.exposedAreaMeta.put(
+                    GUID.valueOf(id), new ExposedAreaMetaData(Mapper.map(area))));
+    zone.initiativeList = InitiativeList.fromDto(dto.getInitiative());
     zone.exposedArea = Mapper.map(dto.getExposedArea());
     zone.hasFog = dto.getHasFog();
     zone.fogPaint = DrawablePaint.fromDto(dto.getFogPaint());
@@ -2199,16 +2220,21 @@ public class Zone extends BaseModel {
     dto.setTokenVisionDistance(tokenVisionDistance);
     dto.setUnitsPerCell(unitsPerCell);
     dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
-    dto.addAllTopologyTypes(topologyTypes.topologyTypes.stream()
-        .map(t -> TopologyTypeDto.valueOf(t.name())).collect(Collectors.toList()));
+    dto.addAllTopologyTypes(
+        topologyTypes.topologyTypes.stream()
+            .map(t -> TopologyTypeDto.valueOf(t.name()))
+            .collect(Collectors.toList()));
 
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(
+        backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
-    exposedAreaMeta.forEach((id, area) -> dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory())));
+    exposedAreaMeta.forEach(
+        (id, area) ->
+            dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory())));
     dto.setInitiative(initiativeList.toDto());
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);

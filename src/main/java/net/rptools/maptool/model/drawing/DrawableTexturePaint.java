@@ -23,7 +23,6 @@ import java.io.Serializable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
 import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 import net.rptools.maptool.server.proto.drawing.DrawableTexturePaintDto;
 import net.rptools.maptool.util.ImageManager;
@@ -79,12 +78,10 @@ public class DrawableTexturePaint extends DrawablePaint implements Serializable 
 
   @Override
   public DrawablePaintDto toDto() {
-      var dto = DrawablePaintDto.newBuilder();
-      var textureDto =
-            DrawableTexturePaintDto.newBuilder()
-                .setAssetId(assetId.toString())
-                .setScale(scale);
-        return dto.setTexturePaint(textureDto).build();
+    var dto = DrawablePaintDto.newBuilder();
+    var textureDto =
+        DrawableTexturePaintDto.newBuilder().setAssetId(assetId.toString()).setScale(scale);
+    return dto.setTexturePaint(textureDto).build();
   }
 
   @Override

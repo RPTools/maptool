@@ -14,21 +14,19 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
-
-import com.google.protobuf.StringValue;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
-
 
 /**
  * Create and paint a donut burst

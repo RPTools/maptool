@@ -88,7 +88,7 @@ public abstract class Grid implements Cloneable {
   }
 
   public static Grid fromDto(GridDto grid) {
-    //TODO
+    // TODO
     return null;
   }
 

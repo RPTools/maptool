@@ -14,10 +14,9 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import net.rptools.maptool.server.proto.drawing.PenDto;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
+import net.rptools.maptool.server.proto.drawing.PenDto;
 
 /**
  * The color and thickness to draw a {@link Drawable}with. Also used to erase by drawing {@link

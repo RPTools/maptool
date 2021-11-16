@@ -16,25 +16,16 @@ package net.rptools.maptool.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.drawing.*;
-import net.rptools.maptool.model.drawing.Rectangle;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.*;
 import org.apache.logging.log4j.LogManager;
@@ -209,6 +200,7 @@ public class Mapper {
   public static IntPointDto map(CellPoint point) {
     return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
   }
+
   public static IntPointDto map(ZonePoint point) {
     return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
   }
