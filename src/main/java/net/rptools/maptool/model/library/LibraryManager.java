@@ -27,6 +27,7 @@ import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryData;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -279,18 +280,60 @@ public class LibraryManager {
     return addOnLibraryManager.toDto();
   }
 
-  /** Removes all libraries from the library manager. */
-  public void removeAllLibraries() {
-    removeAddOnLibraries();
+  /** de-registers all libraries from the library manager. */
+  public void deregisterAllLibraries() {
+    deregisterAddOnLibraries();
     libraryTokenManager.clearLibraries();
   }
 
-  /** Removes all the add-on in libraries. */
-  public void removeAddOnLibraries() {
+  /** de-registers all the add-on in libraries. */
+  public void deregisterAddOnLibraries() {
     addOnLibraryManager.removeAllLibraries();
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
+  }
+
+  /**
+   * Removes an add on library from the library manager. The difference between this method and
+   * {@link #deregisterAddOnLibrary(String)} (String)} is that this method will flag the library as
+   * needing initialization next time it is added.
+   *
+   * @param namespace the namespace of the library to remove.
+   */
+  public void removeAddOnLibrary(String namespace) {
+    var library = addOnLibraryManager.getLibrary(namespace);
+    if (library != null) {
+      library
+          .getLibraryData()
+          .thenAccept(
+              data -> {
+                if (data instanceof AddOnLibraryData ald) {
+                  ald.setNeedsToBeInitialized(true);
+                }
+              })
+          .join();
+      deregisterAddOnLibrary(namespace);
+    }
+  }
+
+  /**
+   * Removes all add-on libraries from the library manager. The difference between this method and
+   * {@link #deregisterAddOnLibraries()} is that this method will flag the libraries as needing
+   * initialization next time they are added.
+   */
+  public void removeAddOnLibraries() {
+    for (var lib : addOnLibraryManager.getLibraries()) {
+      lib.getLibraryData()
+          .thenAccept(
+              data -> {
+                if (data instanceof AddOnLibraryData ald) {
+                  ald.setNeedsToBeInitialized(true);
+                }
+              })
+          .join();
+    }
+    deregisterAddOnLibraries();
   }
 
   /**

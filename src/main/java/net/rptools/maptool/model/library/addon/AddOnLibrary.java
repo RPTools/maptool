@@ -443,17 +443,21 @@ public class AddOnLibrary implements Library {
             d -> {
               var data = (AddOnLibraryData) d;
               data.initialize()
-                  .thenAccept(
-                      wasInit -> {
-                        if (wasInit) {
-                          if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
-                            callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
-                          }
-                        }
-
-                        if (eventNameMap.containsKey(INIT_EVENT)) {
-                          callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
-                        }
+                  .thenRun(
+                      () -> {
+                        data.needsInitialization()
+                            .thenAccept(
+                                needInit -> {
+                                  if (needInit) {
+                                    if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
+                                      callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
+                                      data.setNeedsToBeInitialized(false).join();
+                                    }
+                                  }
+                                  if (eventNameMap.containsKey(INIT_EVENT)) {
+                                    callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
+                                  }
+                                });
                       });
             })
         .join();

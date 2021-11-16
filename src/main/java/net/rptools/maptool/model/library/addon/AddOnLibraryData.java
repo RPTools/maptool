@@ -38,6 +38,9 @@ public class AddOnLibraryData implements LibraryData {
   /** The name space for the data this library. */
   private final String dataNameSpace;
 
+  /** If the library needs initialization. */
+  private static final String NEEDS_INIT_KEY = "internal:needsInit";
+
   /**
    * Creates a new AddOnLibraryData.
    *
@@ -188,20 +191,47 @@ public class AddOnLibraryData implements LibraryData {
    * Initializes the data for this library, only needs to be called once but safe to call multiple
    * times.
    *
-   * @return a CompletableFuture that completes with {@code true} if the data was initialized,
-   *     {@code false} if nothing was done as the data was already initialized.
+   * @return A future that completes when the data is initialized.
    */
-  CompletableFuture<Boolean> initialize() {
+  CompletableFuture<Void> initialize() {
     var ds = new DataStoreManager().getDefaultDataStore();
     return ds.hasPropertyNamespace(DATA_TYPE, dataNameSpace)
         .thenApply(
             has -> {
               if (!has) {
                 ds.createNamespace(DATA_TYPE, dataNameSpace);
-                return true;
+                ds.setProperty(
+                        DATA_TYPE,
+                        dataNameSpace,
+                        DataValueFactory.fromBoolean(NEEDS_INIT_KEY, true))
+                    .join();
               } else {
-                return false;
+                if (!ds.hasProperty(DATA_TYPE, dataNameSpace, NEEDS_INIT_KEY).join()) {
+                  ds.setProperty(
+                          DATA_TYPE,
+                          dataNameSpace,
+                          DataValueFactory.fromBoolean(NEEDS_INIT_KEY, false))
+                      .join();
+                }
               }
+              return null;
             });
+  }
+
+  CompletableFuture<Boolean> needsInitialization() {
+    return new DataStoreManager()
+        .getDefaultDataStore()
+        .getProperty(DATA_TYPE, dataNameSpace, NEEDS_INIT_KEY)
+        .thenApply(DataValue::asBoolean);
+  }
+
+  public CompletableFuture<Void> setNeedsToBeInitialized(boolean needsToBeInitialized) {
+    return new DataStoreManager()
+        .getDefaultDataStore()
+        .setProperty(
+            DATA_TYPE,
+            dataNameSpace,
+            DataValueFactory.fromBoolean(NEEDS_INIT_KEY, needsToBeInitialized))
+        .thenApply(v -> null);
   }
 }
