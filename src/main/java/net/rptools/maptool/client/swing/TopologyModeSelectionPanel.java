@@ -55,21 +55,25 @@ public class TopologyModeSelectionPanel extends JToolBar {
       createAndAddModeButton(
           Zone.TopologyType.WALL_VBL,
           "net/rptools/maptool/client/image/tool/wall-vbl-only.png",
+          "net/rptools/maptool/client/image/tool/wall-vbl-only-off.png",
           "tools.topology_mode_selection.vbl.tooltip",
           initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.HILL_VBL,
           "net/rptools/maptool/client/image/tool/hill-vbl-only.png",
+          "net/rptools/maptool/client/image/tool/hill-vbl-only-off.png",
           "tools.topology_mode_selection.hill_vbl.tooltip",
           initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.PIT_VBL,
           "net/rptools/maptool/client/image/tool/pit-vbl-only.png",
+          "net/rptools/maptool/client/image/tool/pit-vbl-only-off.png",
           "tools.topology_mode_selection.pit_vbl.tooltip",
           initiallySelectedTypes);
       createAndAddModeButton(
           Zone.TopologyType.MBL,
           "net/rptools/maptool/client/image/tool/mbl-only.png",
+          "net/rptools/maptool/client/image/tool/mbl-only-off.png",
           "tools.topology_mode_selection.mbl.tooltip",
           initiallySelectedTypes);
     } catch (IOException ioe) {
@@ -81,12 +85,16 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
   private void createAndAddModeButton(
       Zone.TopologyType type,
-      String imageFile,
+      String imageFileOn,
+      String imageFileOff,
       String toolTipKey,
       Zone.TopologyTypeSet initiallySelectedTypes)
       throws IOException {
-    final var button = new JToggleButton(new ImageIcon(ImageUtil.getImage(imageFile)));
+    final var button = new JToggleButton();
+    if (imageFileOff != null && !imageFileOff.isEmpty())
+      button.setIcon(new ImageIcon(ImageUtil.getImage(imageFileOff)));
     button.setToolTipText(I18N.getText(toolTipKey));
+    button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(imageFileOn)));
     button.setSelected(initiallySelectedTypes.contains(type));
     this.add(button);
     modeButtons.put(type, button);
