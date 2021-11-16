@@ -1294,7 +1294,7 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
-          Player selectedPlayer = (Player) panel.getSelectedValue();
+          Player selectedPlayer = panel.getSelectedPlayer();
 
           if (selectedPlayer == null) {
             MapTool.showError("msg.error.mustSelectPlayerFirst");
@@ -1330,7 +1330,7 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
-          Player selectedPlayer = (Player) panel.getSelectedValue();
+          Player selectedPlayer = panel.getSelectedPlayer();
 
           if (selectedPlayer == null) {
             MapTool.showError("msg.error.mustSelectPlayerFirst");

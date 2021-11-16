@@ -14,15 +14,26 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.MouseListener;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.PlayerListModel;
+import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 
 /**
  * Implements the contents of the Window {@code ->} Connections status panel. Previously this class
@@ -37,13 +48,53 @@ import net.rptools.maptool.client.PlayerListModel;
  *   <li>others?
  * </ul>
  */
-public class ClientConnectionPanel extends JList {
+public class ClientConnectionPanel extends JPanel {
+  private final JList<Player> list = new JList<>();
+  private final JTabbedPane tabbedPane = new JTabbedPane();
+
+  private final JPanel connectedPanel = new JPanel();
+  private final JPanel pendingPannel = new JPanel();
+
+  private class PendingPlayerRenderer extends JPanel
+      implements ListCellRenderer<PlayerAwaitingApproval> {
+
+    @Override
+    public Component getListCellRendererComponent(
+        JList<? extends PlayerAwaitingApproval> list,
+        PlayerAwaitingApproval value,
+        int index,
+        boolean isSelected,
+        boolean cellHasFocus) {
+      JPanel panel = new JPanel(new BorderLayout());
+      JPanel playerPanel = new JPanel(new FlowLayout());
+      playerPanel.add(new JLabel(value.name()));
+      playerPanel.add(new JLabel(value.pin()));
+      JPanel buttonPanel = new JPanel(new FlowLayout());
+      JButton cancelButton = new JButton("Cancel");
+      JButton approveButton = new JButton("Approve");
+      buttonPanel.add(cancelButton);
+      buttonPanel.add(approveButton);
+      panel.add(playerPanel, BorderLayout.CENTER);
+      panel.add(buttonPanel, BorderLayout.SOUTH);
+      return panel;
+    }
+  }
+
   public ClientConnectionPanel() {
-    setModel(new PlayerListModel(MapTool.getPlayerList()));
-    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    setLayout(new BorderLayout());
+    add(tabbedPane, BorderLayout.CENTER);
+    list.setModel(new PlayerListModel(MapTool.getPlayerList()));
+    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     // setCellRenderer(new DefaultListCellRenderer());
 
-    addMouseListener(createPopupListener());
+    list.addMouseListener(createPopupListener());
+
+    connectedPanel.setLayout(new BorderLayout());
+    connectedPanel.add(new JScrollPane(list), BorderLayout.CENTER);
+
+    tabbedPane.add("Connected", connectedPanel);
+
+    tabbedPane.add("Pending", pendingPannel);
   }
 
   private MouseListener createPopupListener() {
@@ -56,5 +107,9 @@ public class ClientConnectionPanel extends JList {
     menu.add(new JMenuItem(AppActions.BOOT_CONNECTED_PLAYER));
     menu.add(new JMenuItem(AppActions.WHISPER_PLAYER));
     return menu;
+  }
+
+  public Player getSelectedPlayer() {
+    return list.getSelectedValue();
   }
 }

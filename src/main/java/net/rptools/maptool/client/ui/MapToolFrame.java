@@ -638,9 +638,7 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
-            MTFrame.CONNECTIONS,
-            new JScrollPane(connectionPanel),
-            new ImageIcon(AppStyle.connectionsImage)));
+            MTFrame.CONNECTIONS, connectionPanel, new ImageIcon(AppStyle.connectionsImage)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(
