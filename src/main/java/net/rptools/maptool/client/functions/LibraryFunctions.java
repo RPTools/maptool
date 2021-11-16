@@ -93,7 +93,7 @@ public class LibraryFunctions extends AbstractFunction {
           FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
           String namespace = parameters.get(0).toString();
-          new LibraryManager().deregisterAddOnLibrary(namespace);
+          new LibraryManager().removeAddOnLibrary(namespace);
           return "";
         }
 

@@ -29,7 +29,7 @@ public class CampaignManager {
    * campaign is about to be loaded, sent from the server, or a new campaign is created.
    */
   public void clearCampaignData() {
-    new LibraryManager().removeAllLibraries();
+    new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
   }
 }
