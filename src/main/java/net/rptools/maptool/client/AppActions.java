@@ -2216,16 +2216,9 @@ public class AppActions {
                 policy.setUseIndividualViews(serverProps.getUseIndividualViews());
                 policy.setPlayersReceiveCampaignMacros(
                     serverProps.getPlayersReceiveCampaignMacros());
-                policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
-                policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
                 policy.setHiddenMapSelectUI(serverProps.getMapSelectUIHidden());
-                policy.setIsMovementLocked(serverProps.getPlayerLibraryLock());
-                if (serverProps.getLockTokenEditOnStart()) {
-                  policy.setIsTokenEditorLocked(true);
-                }
-                if (serverProps.getLockPlayerMovementOnStart()) {
-                  policy.setIsMovementLocked(true);
-                }
+                policy.setIsTokenEditorLocked(serverProps.getLockTokenEditOnStart());
+                policy.setIsMovementLocked(serverProps.getLockPlayerMovementOnStart());
                 policy.setDisablePlayerAssetPanel(serverProps.getPlayerLibraryLock());
 
                 // Tool Tips for unformatted inline rolls.
