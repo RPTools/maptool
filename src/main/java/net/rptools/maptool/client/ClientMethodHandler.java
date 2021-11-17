@@ -546,7 +546,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         return;
 
       case removeAllAddOnLibraries:
-        new LibraryManager().removeAddOnLibraries();
+        new LibraryManager().deregisterAddOnLibraries();
         return;
 
       case updateDataStore:

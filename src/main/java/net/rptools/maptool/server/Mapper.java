@@ -312,6 +312,26 @@ public class Mapper {
     }
   }
 
+  public static ServerPolicyDto map(ServerPolicy source) {
+    var destination = ServerPolicyDto.newBuilder();
+    destination.setUseStrictTokenManagement(source.useStrictTokenManagement());
+    destination.setIsMovementLocked(source.isMovementLocked());
+    destination.setIsTokenEditorLocked(source.isTokenEditorLocked());
+    destination.setPlayersCanRevealVision(source.getPlayersCanRevealVision());
+    destination.setGmRevealsVisionForUnownedTokens(source.getGmRevealsVisionForUnownedTokens());
+    destination.setUseIndividualViews(source.isUseIndividualViews());
+    destination.setRestrictedImpersonation(source.isRestrictedImpersonation());
+    destination.setPlayersReceiveCampaignMacros(source.playersReceiveCampaignMacros());
+    destination.setUseToolTipsForDefaultRollFormat(source.getUseToolTipsForDefaultRollFormat());
+    destination.setUseIndividualFOW(source.isUseIndividualFOW());
+    destination.setIsAutoRevealOnMovement(source.isAutoRevealOnMovement());
+    destination.setIncludeOwnedNPCs(source.isIncludeOwnedNPCs());
+    destination.setMovementMetric(WalkerMetricDto.valueOf(source.getMovementMetric().name()));
+    destination.setUsingAstarPathfinding(source.isUsingAstarPathfinding());
+    destination.setVblBlocksMove(source.getVblBlocksMove());
+    destination.setHideMapSelectUi(source.getMapSelectUIHidden());
+    destination.setLockPlayerLibrary(source.getDisablePlayerAssetPanel());
+    return destination.build();
   public static List<ScriptTypeDto> mapToScriptTypeDto(List<Object> args) {
     return args.stream().map(Mapper::mapToScriptTypeDto).collect(Collectors.toList());
   }

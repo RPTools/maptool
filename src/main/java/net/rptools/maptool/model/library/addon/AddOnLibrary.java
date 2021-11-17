@@ -30,12 +30,15 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryNotValidException;
@@ -312,6 +315,12 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
+    String source = context.getSource().replaceFirst("(?i)^lib:", "");
+    return context == null || source.equalsIgnoreCase(namespace);
+  }
+
+  @Override
   public CompletableFuture<String> getVersion() {
     return CompletableFuture.completedFuture(version);
   }
@@ -434,17 +443,21 @@ public class AddOnLibrary implements Library {
             d -> {
               var data = (AddOnLibraryData) d;
               data.initialize()
-                  .thenAccept(
-                      wasInit -> {
-                        if (wasInit) {
-                          if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
-                            callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
-                          }
-                        }
-
-                        if (eventNameMap.containsKey(INIT_EVENT)) {
-                          callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
-                        }
+                  .thenRun(
+                      () -> {
+                        data.needsInitialization()
+                            .thenAccept(
+                                needInit -> {
+                                  if (needInit) {
+                                    if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
+                                      callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
+                                      data.setNeedsToBeInitialized(false).join();
+                                    }
+                                  }
+                                  if (eventNameMap.containsKey(INIT_EVENT)) {
+                                    callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
+                                  }
+                                });
                       });
             })
         .join();
@@ -464,5 +477,18 @@ public class AddOnLibrary implements Library {
               MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
               return null;
             });
+  }
+
+  CompletableFuture<DataValue> readFile(String path) {
+    return CompletableFuture.supplyAsync(
+        () -> {
+          String filePath = path.replaceFirst("^/", "");
+          var val = pathAssetMap.get(filePath);
+          if (val == null) {
+            return DataValueFactory.undefined(path);
+          }
+          Asset asset = AssetManager.getAsset(val.getValue0());
+          return DataValueFactory.fromAsset(filePath, asset);
+        });
   }
 }

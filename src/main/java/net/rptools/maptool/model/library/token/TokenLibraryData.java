@@ -78,11 +78,25 @@ public class TokenLibraryData implements LibraryData {
     } else if (val instanceof String s) {
       if (s.trim().startsWith("{") || s.startsWith("[")) {
         var jsonElement = JsonParser.parseString(s);
-        if (jsonElement.isJsonArray()) {
-          return DataValueFactory.fromJsonArray(key, jsonElement.getAsJsonArray());
-        } else if (jsonElement.isJsonObject()) {
-          return DataValueFactory.fromJsonObject(key, jsonElement.getAsJsonObject());
+        try {
+          if (jsonElement.isJsonArray()) {
+            return DataValueFactory.fromJsonArray(key, jsonElement.getAsJsonArray());
+          } else if (jsonElement.isJsonObject()) {
+            return DataValueFactory.fromJsonObject(key, jsonElement.getAsJsonObject());
+          }
+        } catch (Exception e) {
+          // Do nothing if the json is invalid
         }
+      }
+      try {
+        double dval = Double.parseDouble(s.trim());
+        if (dval == (long) dval) {
+          return DataValueFactory.fromLong(key, (long) dval);
+        } else {
+          return DataValueFactory.fromDouble(key, dval);
+        }
+      } catch (NumberFormatException e) {
+        // Do nothing if can't be parsed as a number
       }
       return DataValueFactory.fromString(key, s);
     } else {
@@ -154,5 +168,30 @@ public class TokenLibraryData implements LibraryData {
   @Override
   public CompletableFuture<Void> setAssetData(String name, Asset value) {
     return setData(DataValueFactory.fromAsset(name, value));
+  }
+
+  @Override
+  public boolean supportsStaticData() {
+    return false;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasStaticData(String path) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasPublicStaticData(String path) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getStaticData(String path) {
+    return CompletableFuture.completedFuture(DataValueFactory.undefined(path));
+  }
+
+  @Override
+  public CompletableFuture<DataValue> getPublicStaticData(String path) {
+    return CompletableFuture.completedFuture(DataValueFactory.undefined(path));
   }
 }

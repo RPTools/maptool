@@ -79,7 +79,7 @@ public final class Asset {
     private final boolean stringType;
 
     /** Method uses to create an {@code Asset} of this type. */
-    private final BiFunction<String, byte[], Asset> factory;
+    private final transient BiFunction<String, byte[], Asset> factory;
 
     /** The default extension for this type. */
     private final String defaultExtension;

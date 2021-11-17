@@ -25,7 +25,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryData;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -232,18 +234,35 @@ public class LibraryManager {
   }
 
   /**
+   * Returns the library with the specified namespace. This version of the method can be used to map
+   * "@this" to the current library a MTScript macro is running from.
+   *
+   * @param namespace the namespace of the library to get.
+   * @param context the context to use when mapping "@this" to the current library.
+   * @return the library with the specified namespace.
+   */
+  public Optional<Library> getLibraryForMTScriptCall(
+      String namespace, MapToolMacroContext context) {
+    String ns = namespace;
+    if ("@this".equalsIgnoreCase(namespace)) {
+      if (context == null || context.getSource() == null || context.getSource().isEmpty()) {
+        return Optional.empty();
+      }
+      ns = context.getSource().replaceFirst("(?i)^lib:", "");
+    }
+    return getLibrary(ns);
+  }
+
+  /**
    * Returns the library for a given namespace.
    *
    * @param namespace the namespace of the library to return.
    * @return the library.
-   * @throws ExecutionException if an error occurs while extracting information about the library.
-   * @throws InterruptedException if an error occurs while extracting information about the library.
    */
-  public Optional<Library> getLibrary(String namespace)
-      throws ExecutionException, InterruptedException {
+  public Optional<Library> getLibrary(String namespace) {
     var lib = addOnLibraryManager.getLibrary(namespace);
     if (lib == null) {
-      lib = libraryTokenManager.getLibrary(namespace).get();
+      lib = libraryTokenManager.getLibrary(namespace).join();
     }
 
     if (lib == null) {
@@ -261,18 +280,60 @@ public class LibraryManager {
     return addOnLibraryManager.toDto();
   }
 
-  /** Removes all libraries from the library manager. */
-  public void removeAllLibraries() {
-    removeAddOnLibraries();
+  /** de-registers all libraries from the library manager. */
+  public void deregisterAllLibraries() {
+    deregisterAddOnLibraries();
     libraryTokenManager.clearLibraries();
   }
 
-  /** Removes all the add-on in libraries. */
-  public void removeAddOnLibraries() {
+  /** de-registers all the add-on in libraries. */
+  public void deregisterAddOnLibraries() {
     addOnLibraryManager.removeAllLibraries();
     if (MapTool.isHostingServer()) {
       MapTool.serverCommand().removeAllAddOnLibraries();
     }
+  }
+
+  /**
+   * Removes an add on library from the library manager. The difference between this method and
+   * {@link #deregisterAddOnLibrary(String)} (String)} is that this method will flag the library as
+   * needing initialization next time it is added.
+   *
+   * @param namespace the namespace of the library to remove.
+   */
+  public void removeAddOnLibrary(String namespace) {
+    var library = addOnLibraryManager.getLibrary(namespace);
+    if (library != null) {
+      library
+          .getLibraryData()
+          .thenAccept(
+              data -> {
+                if (data instanceof AddOnLibraryData ald) {
+                  ald.setNeedsToBeInitialized(true);
+                }
+              })
+          .join();
+      deregisterAddOnLibrary(namespace);
+    }
+  }
+
+  /**
+   * Removes all add-on libraries from the library manager. The difference between this method and
+   * {@link #deregisterAddOnLibraries()} is that this method will flag the libraries as needing
+   * initialization next time they are added.
+   */
+  public void removeAddOnLibraries() {
+    for (var lib : addOnLibraryManager.getLibraries()) {
+      lib.getLibraryData()
+          .thenAccept(
+              data -> {
+                if (data instanceof AddOnLibraryData ald) {
+                  ald.setNeedsToBeInitialized(true);
+                }
+              })
+          .join();
+    }
+    deregisterAddOnLibraries();
   }
 
   /**

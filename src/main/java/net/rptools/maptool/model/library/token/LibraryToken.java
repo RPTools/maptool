@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -118,6 +119,16 @@ class LibraryToken implements Library {
   }
 
   /**
+   * Returns the namespace for a lib token.
+   *
+   * @param name the name of the lib token.
+   * @return the namespace for the lib token.
+   */
+  static String namespaceForName(String name) {
+    return name.substring(4);
+  }
+
+  /**
    * Creates a new {@code LibraryToken} for the lib:token id.
    *
    * @note this must be run on the Swing Thread.
@@ -126,7 +137,7 @@ class LibraryToken implements Library {
   LibraryToken(Token token) {
     id = token.getId();
     name = token.getName();
-    namespace = token.getName().substring(4);
+    namespace = namespaceForName(token.getName());
     version =
         Objects.requireNonNullElse(
                 token.getProperty(LIB_VERSION_PROPERTY_NAME), LIB_VERSION_UNKNOWN)
@@ -330,6 +341,11 @@ class LibraryToken implements Library {
   @Override
   public CompletableFuture<Optional<Token>> getAssociatedToken() {
     return getToken().thenApply(Optional::of);
+  }
+
+  @Override
+  public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
+    return false; // Library Tokens don't have private data
   }
 
   /**

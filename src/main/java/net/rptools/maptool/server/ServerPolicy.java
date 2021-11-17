@@ -42,6 +42,7 @@ public class ServerPolicy {
   private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
   private WalkerMetric movementMetric;
   private boolean hidemapselectui;
+  private boolean disablePlayerAssetPanel;
 
   private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
   private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
@@ -220,6 +221,14 @@ public class ServerPolicy {
     this.vblBlocksMove = vblBlocksMove;
   }
 
+  public boolean getDisablePlayerAssetPanel() {
+    return disablePlayerAssetPanel;
+  }
+
+  public void setDisablePlayerAssetPanel(boolean flag) {
+    this.disablePlayerAssetPanel = flag;
+  }
+
   /**
    * Retrieves the server side preferences as a json object.
    *
@@ -253,6 +262,9 @@ public class ServerPolicy {
         playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "hide map select ui", getMapSelectUIHidden() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "disable player asset panel",
+        getDisablePlayerAssetPanel() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();

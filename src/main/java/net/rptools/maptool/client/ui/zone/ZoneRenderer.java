@@ -4753,13 +4753,15 @@ public class ZoneRenderer extends JComponent
    */
   @Override
   public void drop(DropTargetDropEvent dtde) {
-    ZonePoint zp =
-        new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
-            .convertToZone(this);
-    TransferableHelper th = (TransferableHelper) getTransferHandler();
-    List<Token> tokens = th.getTokens();
-    if (tokens != null && !tokens.isEmpty()) {
-      addTokens(tokens, zp, th.getConfigureTokens(), false);
+    if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().getDisablePlayerAssetPanel()) {
+      ZonePoint zp =
+          new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
+              .convertToZone(this);
+      TransferableHelper th = (TransferableHelper) getTransferHandler();
+      List<Token> tokens = th.getTokens();
+      if (tokens != null && !tokens.isEmpty()) {
+        addTokens(tokens, zp, th.getConfigureTokens(), false);
+      }
     }
   }
 

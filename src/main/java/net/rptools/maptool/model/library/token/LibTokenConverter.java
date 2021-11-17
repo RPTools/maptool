@@ -67,7 +67,7 @@ public class LibTokenConverter {
     Path mtsPublicPath = contentPath.resolve("mtscript").resolve("public");
     Path publicPath = contentPath.resolve("public");
     Path propertiesPath = directory.resolve("property");
-    Path macroDetails = directory.resolve("macro_script_map.txt ");
+    Path macroDetails = directory.resolve("macro_script_map.txt");
     Path propertyDetails = propertiesPath.resolve("prop_file_map.txt");
 
     mtsPublicPath.toFile().mkdirs();
