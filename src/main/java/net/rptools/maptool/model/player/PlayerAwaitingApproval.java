@@ -14,4 +14,4 @@
  */
 package net.rptools.maptool.model.player;
 
-public record PlayerAwaitingApproval(String name, String pin) {}
+public record PlayerAwaitingApproval(String name, String pin, Player.Role role) {}

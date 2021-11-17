@@ -15,10 +15,16 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -26,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
@@ -50,51 +55,119 @@ import net.rptools.maptool.model.player.PlayerAwaitingApproval;
  */
 public class ClientConnectionPanel extends JPanel {
   private final JList<Player> list = new JList<>();
-  private final JTabbedPane tabbedPane = new JTabbedPane();
 
-  private final JPanel connectedPanel = new JPanel();
-  private final JPanel pendingPannel = new JPanel();
+  private final List<PlayerAwaitingApproval> awaitingApprovalList;
 
-  private class PendingPlayerRenderer extends JPanel
-      implements ListCellRenderer<PlayerAwaitingApproval> {
+  private final DefaultListModel<PlayerAwaitingApproval> awaitingApprovalModel =
+      new DefaultListModel<>();
+
+  private static class PendingPlayers extends JPanel {
+
+    private final List<PlayerAwaitingApproval> awaitingApprovalList;
+    private final JPanel pendingPanel = new JPanel();
+
+    private PendingPlayers(List<PlayerAwaitingApproval> awaitingApprovalList) {
+      this.awaitingApprovalList = awaitingApprovalList;
+      setLayout(new BorderLayout());
+      pendingPanel.setLayout(new BoxLayout(pendingPanel, BoxLayout.Y_AXIS));
+      add(new JScrollPane(pendingPanel), BorderLayout.CENTER);
+    }
 
     @Override
-    public Component getListCellRendererComponent(
-        JList<? extends PlayerAwaitingApproval> list,
-        PlayerAwaitingApproval value,
-        int index,
-        boolean isSelected,
-        boolean cellHasFocus) {
-      JPanel panel = new JPanel(new BorderLayout());
-      JPanel playerPanel = new JPanel(new FlowLayout());
-      playerPanel.add(new JLabel(value.name()));
-      playerPanel.add(new JLabel(value.pin()));
-      JPanel buttonPanel = new JPanel(new FlowLayout());
-      JButton cancelButton = new JButton("Cancel");
-      JButton approveButton = new JButton("Approve");
-      buttonPanel.add(cancelButton);
-      buttonPanel.add(approveButton);
-      panel.add(playerPanel, BorderLayout.CENTER);
-      panel.add(buttonPanel, BorderLayout.SOUTH);
-      return panel;
+    public void repaint() {
+      if (awaitingApprovalList != null) {
+        for (PlayerAwaitingApproval player : awaitingApprovalList) {
+          JPanel panel = new JPanel();
+          panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+          JPanel playerPanel = new JPanel(new FlowLayout());
+          JLabel playerLabel = new JLabel(player.name());
+          Font font = playerLabel.getFont();
+          font = font.deriveFont(Font.BOLD).deriveFont(font.getSize() + 6.0f);
+          playerLabel.setFont(font);
+          JLabel pinLabel = new JLabel(player.pin());
+          pinLabel.setFont(font);
+          playerPanel.add(playerLabel);
+          playerPanel.add(pinLabel);
+          JPanel buttonPanel = new JPanel(new FlowLayout());
+          JButton cancelButton = new JButton("Cancel");
+          JButton approveButton = new JButton("Approve");
+          JCheckBox gmCheckBox = new JCheckBox("is GM?");
+          buttonPanel.add(cancelButton);
+          buttonPanel.add(approveButton);
+          buttonPanel.add(gmCheckBox);
+          panel.add(playerPanel);
+          panel.add(buttonPanel);
+          panel.setBorder(BorderFactory.createEmptyBorder(5, 1, 5, 1));
+          pendingPanel.add(panel);
+        }
+      }
     }
   }
 
   public ClientConnectionPanel() {
     setLayout(new BorderLayout());
+    JTabbedPane tabbedPane = new JTabbedPane();
     add(tabbedPane, BorderLayout.CENTER);
     list.setModel(new PlayerListModel(MapTool.getPlayerList()));
     list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    // setCellRenderer(new DefaultListCellRenderer());
 
     list.addMouseListener(createPopupListener());
 
+    JPanel connectedPanel = new JPanel();
     connectedPanel.setLayout(new BorderLayout());
     connectedPanel.add(new JScrollPane(list), BorderLayout.CENTER);
 
     tabbedPane.add("Connected", connectedPanel);
 
-    tabbedPane.add("Pending", pendingPannel);
+    awaitingApprovalList = new ArrayList<>();
+    tabbedPane.add("Pending", new PendingPlayers(awaitingApprovalList));
+
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
   }
 
   private MouseListener createPopupListener() {
@@ -111,5 +184,10 @@ public class ClientConnectionPanel extends JPanel {
 
   public Player getSelectedPlayer() {
     return list.getSelectedValue();
+  }
+
+  public void addAwaitingApproval(PlayerAwaitingApproval player) {
+    awaitingApprovalList.add(player);
+    repaint();
   }
 }
