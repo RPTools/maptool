@@ -45,10 +45,6 @@ public interface ServerCommand {
     // @formatter:off
     setCampaign,
     setCampaignName,
-    removeZone,
-    removeAsset,
-    removeToken,
-    removeTokens,
     updateTokenProperty,
     updateDrawing,
     setZoneGridSize,
@@ -61,11 +57,8 @@ public interface ServerCommand {
     setZoneVisibility,
     setZoneHasFoW,
     setFoW,
-    removeLabel,
     sendTokensToBack,
     setServerPolicy,
-    removeTopology,
-    renameZone,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,
@@ -78,7 +71,6 @@ public interface ServerCommand {
     setBoard,
     updateExposedAreaMeta,
     clearExposedArea,
-    restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     removeAddOnLibrary,
     removeAllAddOnLibraries,
     addAddOnLibrary,
@@ -88,8 +80,6 @@ public interface ServerCommand {
     removeDataStore,
     removeDataNamespace,
     removeData
-
-    // scale a player's view
     // @formatter:on
   }
 

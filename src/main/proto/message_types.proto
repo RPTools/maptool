@@ -152,3 +152,41 @@ message PutLabelMsg {
 message PutZoneMsg {
   ZoneDto zone = 1;
 }
+
+message RemoveAssetMsg {
+  string asset_id = 1;
+}
+
+message RemoveLabelMsg {
+  string zone_guid = 1;
+  string label_guid = 2;
+}
+
+message RemoveTokenMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+}
+
+message RemoveTokensMsg {
+  string zone_guid = 1;
+  repeated string token_guid = 2;
+}
+
+message RemoveTopologyMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  TopologyTypeDto type = 3;
+}
+
+message RemoveZoneMsg {
+  string zone_guid = 1;
+}
+
+message RenameZoneMsg {
+  string zone_guid = 1;
+  string name = 2;
+}
+
+message RestoreZoneViewMsg {
+  string zone_guid = 1;
+}

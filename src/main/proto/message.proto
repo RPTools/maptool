@@ -43,5 +43,13 @@ message Message {
     PutLabelMsg put_label_msg = 26;
     PutTokenMsg put_token_msg = 27;
     PutZoneMsg put_zone_msg = 28;
+    RemoveAssetMsg remove_asset_msg = 29;
+    RemoveLabelMsg remove_label_msg = 30;
+    RemoveTokenMsg remove_token_msg = 31;
+    RemoveTokensMsg remove_tokens_msg = 32;
+    RemoveTopologyMsg remove_topology_msg = 33;
+    RemoveZoneMsg remove_zone_msg = 34;
+    RenameZoneMsg rename_zone_msg = 35;
+    RestoreZoneViewMsg restore_zone_view_msg = 36;
   }
 }

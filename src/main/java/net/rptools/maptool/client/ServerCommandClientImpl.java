@@ -118,11 +118,13 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void removeZone(GUID zoneGUID) {
-    makeServerCall(COMMAND.removeZone, zoneGUID);
+    var msg = RemoveZoneMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    makeServerCall(Message.newBuilder().setRemoveZoneMsg(msg).build());
   }
 
   public void renameZone(GUID zoneGUID, String name) {
-    makeServerCall(COMMAND.renameZone, zoneGUID, name);
+    var msg = RenameZoneMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setName(name);
+    makeServerCall(Message.newBuilder().setRenameZoneMsg(msg).build());
   }
 
   public void changeZoneDispName(GUID zoneGUID, String name) {
@@ -142,7 +144,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void removeAsset(MD5Key assetID) {
-    makeServerCall(COMMAND.removeAsset, assetID);
+    var msg = RemoveAssetMsg.newBuilder().setAssetId(assetID.toString());
+    makeServerCall(Message.newBuilder().setRemoveAssetMsg(msg).build());
   }
 
   public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
@@ -158,7 +161,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void restoreZoneView(GUID zoneGUID) {
-    makeServerCall(COMMAND.restoreZoneView, zoneGUID);
+    var msg = RestoreZoneViewMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    makeServerCall(Message.newBuilder().setRestoreZoneViewMsg(msg).build());
   }
 
   public void editToken(GUID zoneGUID, Token token) {
@@ -180,14 +184,20 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
     // delete local token immediately
     MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
-    makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
+    var msg =
+        RemoveTokenMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setTokenGuid(tokenGUID.toString());
+    makeServerCall(Message.newBuilder().setRemoveTokenMsg(msg).build());
   }
 
   @Override
   public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
     // delete local tokens immediately
     MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
-    makeServerCall(COMMAND.removeTokens, zoneGUID, tokenGUIDs);
+    var msg = RemoveTokensMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    msg.addAllTokenGuid(tokenGUIDs.stream().map(t -> t.toString()).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setRemoveTokensMsg(msg).build());
   }
 
   /**
@@ -226,7 +236,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void removeLabel(GUID zoneGUID, GUID labelGUID) {
-    makeServerCall(COMMAND.removeLabel, zoneGUID, labelGUID);
+    var msg =
+        RemoveLabelMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setLabelGuid(labelGUID.toString());
+    makeServerCall(Message.newBuilder().setRemoveLabelMsg(msg).build());
   }
 
   public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
@@ -341,7 +355,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyType);
+    var msg =
+        RemoveTopologyMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setArea(Mapper.map(area))
+            .setType(TopologyTypeDto.valueOf(topologyType.name()));
+    makeServerCall(Message.newBuilder().setRemoveTopologyMsg(msg).build());
   }
 
   public void exposePCArea(GUID zoneGUID) {

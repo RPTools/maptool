@@ -21,11 +21,7 @@ public class ClientCommand {
     startAssetTransfer,
     updateAssetTransfer,
     setCampaign,
-    removeZone,
-    removeAsset,
     updateTokenProperty,
-    removeToken,
-    removeTokens,
     updateDrawing,
     setZoneGridSize,
     setZoneVisibility,
@@ -37,10 +33,7 @@ public class ClientCommand {
     updateTokenMove,
     setZoneHasFoW,
     setFoW,
-    removeLabel,
     setServerPolicy,
-    removeTopology,
-    renameZone,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,
@@ -53,7 +46,6 @@ public class ClientCommand {
     setBoard,
     updateExposedAreaMeta,
     setCampaignName,
-    restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
     addAddOnLibrary,
     removeAllAddOnLibraries,
     removeAddOnLibrary,
@@ -63,7 +55,6 @@ public class ClientCommand {
     removeDataStore,
     removeDataNamespace,
     removeData
-    // scale a player's view
     // @formatter:on
   };
 }

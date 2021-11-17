@@ -119,6 +119,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
         case PUT_LABEL_MSG -> handle(msg.getPutLabelMsg());
         case PUT_ZONE_MSG -> handle(msg.getPutZoneMsg());
+        case REMOVE_LABEL_MSG -> handle(msg.getRemoveLabelMsg());
+        case REMOVE_TOKEN_MSG -> handle(msg.getRemoveTokenMsg());
+        case REMOVE_TOKENS_MSG -> handle(msg.getRemoveTokensMsg());
+        case REMOVE_TOPOLOGY_MSG -> handle(msg.getRemoveTopologyMsg());
+        case REMOVE_ZONE_MSG -> handle(msg.getRemoveZoneMsg());
+        case RENAME_ZONE_MSG -> handle(msg.getRenameZoneMsg());
+        case RESTORE_ZONE_VIEW_MSG -> handle(msg.getRestoreZoneViewMsg());
+
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -127,18 +135,102 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void handle(PutZoneMsg msg) {
-    Zone zone = Zone.fromDto(msg.getZone());
-    MapTool.getCampaign().putZone(zone);
+  private void handle(RestoreZoneViewMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          MapTool.getFrame().getZoneRenderer(zoneGUID).restoreView();
+        });
+  }
 
-    // TODO: combine this with MapTool.addZone()
-    var renderer = ZoneRendererFactory.newRenderer(zone);
-    MapTool.getFrame().addZoneRenderer(renderer);
-    if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
-      MapTool.getFrame().setCurrentZoneRenderer(renderer);
-    }
-    MapTool.getEventDispatcher()
-        .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+  private void handle(RenameZoneMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          String name = msg.getName();
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setName(name);
+          }
+          MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+        });
+  }
+
+  private void handle(RemoveZoneMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          MapTool.getCampaign().removeZone(zoneGUID);
+          MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
+        });
+  }
+
+  private void handle(RemoveTopologyMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var area = Mapper.map(msg.getArea());
+          var topologyType = Zone.TopologyType.valueOf(msg.getType().name());
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.removeTopology(area, topologyType);
+
+          MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
+        });
+  }
+
+  private void handle(RemoveTokensMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var tokenGUIDs =
+              msg.getTokenGuidList().stream()
+                  .map(t -> GUID.valueOf(t))
+                  .collect(Collectors.toList());
+          zone.removeTokens(tokenGUIDs);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(RemoveTokenMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          zone.removeToken(tokenGUID);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(RemoveLabelMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          GUID labelGUID = GUID.valueOf(msg.getLabelGuid());
+          zone.removeLabel(labelGUID);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(PutZoneMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          Zone zone = Zone.fromDto(msg.getZone());
+          MapTool.getCampaign().putZone(zone);
+
+          // TODO: combine this with MapTool.addZone()
+          var renderer = ZoneRendererFactory.newRenderer(zone);
+          MapTool.getFrame().addZoneRenderer(renderer);
+          if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
+            MapTool.getFrame().setCurrentZoneRenderer(renderer);
+          }
+          MapTool.getEventDispatcher()
+              .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+        });
   }
 
   private void handle(PutLabelMsg msg) {
@@ -406,9 +498,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
     switch (cmd) {
-      case removeAsset:
-        return;
-
       case startAssetTransfer:
         AssetHeader header = (AssetHeader) parameters[0];
         MapTool.getAssetTransferManager()
@@ -591,12 +680,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().setTitle();
               return;
 
-            case removeZone:
-              zoneGUID = (GUID) parameters[0];
-              MapTool.getCampaign().removeZone(zoneGUID);
-              MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
-              return;
-
             case updateTokenProperty: // get token and update its property
               zoneGUID = (GUID) parameters[0];
               zone = MapTool.getCampaign().getZone(zoneGUID);
@@ -606,35 +689,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 Token.Update update = (Token.Update) parameters[2];
                 token.updateProperty(zone, update, (Object[]) parameters[3]);
               }
-              return;
-
-            case removeToken:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              tokenGUID = (GUID) parameters[1];
-              zone.removeToken(tokenGUID);
-              MapTool.getFrame().refresh();
-              return;
-
-            case removeTokens:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              tokenGUIDs = (List<GUID>) parameters[1];
-              zone.removeTokens(tokenGUIDs);
-              MapTool.getFrame().refresh();
-              return;
-
-            case removeLabel:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              GUID labelGUID = (GUID) parameters[1];
-              zone.removeLabel(labelGUID);
-              MapTool.getFrame().refresh();
-              return;
-
-            case restoreZoneView:
-              zoneGUID = (GUID) parameters[0];
-              MapTool.getFrame().getZoneRenderer(zoneGUID).restoreView();
               return;
 
             case updateDrawing:
@@ -777,28 +831,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               ServerPolicy policy = (ServerPolicy) parameters[0];
               MapTool.setServerPolicy(policy);
               MapTool.getFrame().getToolbox().updateTools();
-              return;
-
-            case removeTopology:
-              zoneGUID = (GUID) parameters[0];
-              area = (Area) parameters[1];
-              var topologyType = (Zone.TopologyType) parameters[2];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.removeTopology(area, topologyType);
-
-              MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
-              return;
-
-            case renameZone:
-              zoneGUID = (GUID) parameters[0];
-              String name = (String) parameters[1];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              if (zone != null) {
-                zone.setName(name);
-              }
-              MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
               return;
 
             case updateCampaign:

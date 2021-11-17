@@ -137,6 +137,34 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getPutZoneMsg());
           sendToClients(id, msg);
         }
+        case REMOVE_ASSET_MSG -> {
+          handle(msg.getRemoveAssetMsg());
+        }
+        case REMOVE_LABEL_MSG -> {
+          handle(msg.getRemoveLabelMsg());
+          sendToAllClients(msg);
+        }
+        case REMOVE_TOKEN_MSG -> {
+          handle(msg.getRemoveTokenMsg());
+          sendToClients(id, msg);
+        }
+        case REMOVE_TOKENS_MSG -> {
+          handle(msg.getRemoveTokensMsg());
+          sendToClients(id, msg);
+        }
+        case REMOVE_TOPOLOGY_MSG -> {
+          handle(msg.getRemoveTopologyMsg());
+          sendToClients(id, msg);
+        }
+        case REMOVE_ZONE_MSG -> {
+          handle(msg.getRemoveZoneMsg());
+          sendToClients(id, msg);
+        }
+        case RENAME_ZONE_MSG -> {
+          handle(msg.getRenameZoneMsg());
+          sendToAllClients(msg);
+        }
+        case RESTORE_ZONE_VIEW_MSG -> sendToClients(id, msg);
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -146,6 +174,54 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(RenameZoneMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var name = msg.getName();
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    if (zone != null) {
+      zone.setName(name);
+    }
+  }
+
+  private void handle(RemoveZoneMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    server.getCampaign().removeZone(zoneGUID);
+  }
+
+  private void handle(RemoveTopologyMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var area = Mapper.map(msg.getArea());
+    var topologyType = Zone.TopologyType.valueOf(msg.getType().name());
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeTopology(area, topologyType);
+  }
+
+  private void handle(RemoveTokensMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var tokenGUIDs =
+        msg.getTokenGuidList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toList());
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeTokens(tokenGUIDs); // remove server tokens
+  }
+
+  private void handle(RemoveTokenMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+    var zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeToken(tokenGUID); // remove server tokens
+  }
+
+  private void handle(RemoveLabelMsg msg) {
+    var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var labelGUID = GUID.valueOf(msg.getLabelGuid());
+    var zone = server.getCampaign().getZone(zoneGUID);
+    zone.removeLabel(labelGUID);
+  }
+
+  private void handle(RemoveAssetMsg msg) {
+    AssetManager.removeAsset(new MD5Key(msg.getAssetId()));
   }
 
   private void handle(PutZoneMsg msg) {
@@ -275,9 +351,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case updateDrawing:
           updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
           break;
-        case restoreZoneView:
-          restoreZoneView(context.getGUID(0));
-          break;
         case setFoW:
           setFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
           break;
@@ -288,21 +361,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case removeZone:
-          removeZone(context.getGUID(0));
-          break;
-        case removeAsset:
-          removeAsset((MD5Key) context.get(0));
-          break;
-        case removeToken:
-          removeToken(context.getGUID(0), context.getGUID(1));
-          break;
-        case removeTokens:
-          removeTokens(context.getGUID(0), context.getGUIDs(1));
-          break;
-        case removeLabel:
-          removeLabel(context.getGUID(0), context.getGUID(1));
           break;
         case sendTokensToBack:
           sendTokensToBack(context.getGUID(0), (Set<GUID>) context.get(1));
@@ -353,13 +411,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case setServerPolicy:
           setServerPolicy((ServerPolicy) context.get(0));
-          break;
-        case removeTopology:
-          removeTopology(
-              context.getGUID(0), (Area) context.get(1), (Zone.TopologyType) context.get(2));
-          break;
-        case renameZone:
-          renameZone(context.getGUID(0), context.getString(1));
           break;
         case updateCampaign:
           updateCampaign((CampaignProperties) context.get(0));
@@ -620,14 +671,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     forwardToAllClients();
   }
 
-  private void renameZone(GUID zoneGUID, String name) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    if (zone != null) {
-      zone.setName(name);
-      forwardToAllClients();
-    }
-  }
-
   private void putToken(String clientId, GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
@@ -650,51 +693,12 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void removeAsset(MD5Key assetID) {
-    AssetManager.removeAsset(assetID);
-  }
-
-  private void removeLabel(GUID zoneGUID, GUID labelGUID) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeLabel(labelGUID);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.removeLabel.name(), RPCContext.getCurrent().parameters);
-  }
-
-  /**
-   * Removes the token from the server, and pass the command to all clients.
-   *
-   * @param zoneGUID the GUID of the zone where the token is
-   * @param tokenGUID the GUID of the token
-   */
-  private void removeToken(GUID zoneGUID, GUID tokenGUID) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeToken(tokenGUID); // remove server tokens
-    forwardToClients();
-  }
-
-  private void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTokens(tokenGUIDs); // remove server tokens
-    forwardToClients();
-  }
-
   private void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Token token = zone.getToken(tokenGUID);
     token.updateProperty(zone, update, parameters); // update server version of token
 
-    forwardToClients();
-  }
-
-  /** never actually called, but necessary to satisfy interface requirements */
-  private void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
-
-  private void removeZone(GUID zoneGUID) {
-    server.getCampaign().removeZone(zoneGUID);
     forwardToClients();
   }
 
@@ -823,12 +827,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     server.updateServerPolicy(policy); // updates the server policy, fixes #1648
     forwardToClients();
     MapTool.getFrame().getToolbox().updateTools();
-  }
-
-  private void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeTopology(area, topologyType);
-    forwardToClients();
   }
 
   private void updateCampaignMacros(List<MacroButtonProperties> properties) {
