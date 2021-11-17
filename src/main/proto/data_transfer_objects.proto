@@ -334,13 +334,12 @@ message GridDto {
   int32 offset_x = 1;
   int32 offset_y = 2;
   int32 size = 3;
-  string zone_id = 4;
-  AreaDto cell_shape = 5;
+  AreaDto cell_shape = 4;
   oneof type {
-    SquareGridDto square_grid = 6;
-    GridlessGridDto gridless_grid = 7;
-    HexGridDto hexgrid = 8;
-    IsometricGridDto isometric_grid = 9;
+    SquareGridDto square_grid = 5;
+    GridlessGridDto gridless_grid = 6;
+    HexGridDto hex_grid = 7;
+    IsometricGridDto isometric_grid = 8;
   }
 }
 

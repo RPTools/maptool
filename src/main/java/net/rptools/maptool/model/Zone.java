@@ -2142,6 +2142,7 @@ public class Zone extends BaseModel {
     zone.creationTime = dto.getCreationTime();
     zone.id = GUID.valueOf(dto.getId());
     zone.grid = Grid.fromDto(dto.getGrid());
+    zone.grid.setZone(zone);
     zone.gridColor = dto.getGridColor();
     zone.imageScaleX = dto.getImageScaleX();
     zone.imageScaleY = dto.getImageScaleY();

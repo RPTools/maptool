@@ -329,4 +329,8 @@ public class Mapper {
     }
     return dto.build();
   }
+
+  public static IntPointDto map(Dimension d) {
+    return IntPointDto.newBuilder().setY(d.width).setY(d.height).build();
+  }
 }
