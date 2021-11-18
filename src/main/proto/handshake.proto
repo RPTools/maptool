@@ -22,6 +22,8 @@ message HandshakeMsg {
     HandshakeResponseCodeMsg handshake_response_code_msg = 4; // Either
     ConnectionSuccessfulMsg connection_successful_msg = 5; // Server initiated
     PlayerBlockedMsg player_blocked_msg = 6; // Server initiated
+    UnknownPublicKeyMsg unknown_public_key_msg = 7; // Server initiated
+    PublicKeyUploadMsg public_key_upload_msg = 8; // Client initiated
   }
 }
 
@@ -50,6 +52,14 @@ message ConnectionSuccessfulMsg {
 
 message PlayerBlockedMsg {
   string reason = 1;
+}
+
+message UnknownPublicKeyMsg {
+  int32 pin = 1;
+}
+
+message PublicKeyUploadMsg {
+  string public_key = 1;
 }
 
 enum HandshakeResponseCodeMsg {
