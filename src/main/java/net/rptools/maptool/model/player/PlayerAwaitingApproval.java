@@ -14,4 +14,11 @@
  */
 package net.rptools.maptool.model.player;
 
-public record PlayerAwaitingApproval(String name, String pin, Player.Role role) {}
+import java.util.function.Consumer;
+
+public record PlayerAwaitingApproval(
+    String name,
+    int pin,
+    Player.Role role,
+    Consumer<PlayerAwaitingApproval> approveCallback,
+    Consumer<PlayerAwaitingApproval> denyCallback) {}

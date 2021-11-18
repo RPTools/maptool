@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.connections;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -32,12 +32,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.PlayerListModel;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 
 /**
@@ -60,6 +62,8 @@ public class ClientConnectionPanel extends JPanel {
 
   private final DefaultListModel<PlayerAwaitingApproval> awaitingApprovalModel =
       new DefaultListModel<>();
+
+  private final JTable awaitingApprovalTable = new JTable();
 
   private static class PendingPlayers extends JPanel {
 
@@ -84,7 +88,7 @@ public class ClientConnectionPanel extends JPanel {
           Font font = playerLabel.getFont();
           font = font.deriveFont(Font.BOLD).deriveFont(font.getSize() + 6.0f);
           playerLabel.setFont(font);
-          JLabel pinLabel = new JLabel(player.pin());
+          JLabel pinLabel = new JLabel(Integer.toString(player.pin()));
           pinLabel.setFont(font);
           playerPanel.add(playerLabel);
           playerPanel.add(pinLabel);
@@ -120,54 +124,40 @@ public class ClientConnectionPanel extends JPanel {
     tabbedPane.add("Connected", connectedPanel);
 
     awaitingApprovalList = new ArrayList<>();
-    tabbedPane.add("Pending", new PendingPlayers(awaitingApprovalList));
+    awaitingApprovalTable.setModel(new PlayerPendingApprovalTableModel(awaitingApprovalList));
+    awaitingApprovalTable.setDefaultRenderer(
+        PlayerAwaitingApproval.class, new PlayerPendingApprovalCellRenderer(this::updateRole));
+    awaitingApprovalTable.setRowHeight(100);
+    awaitingApprovalTable.setDefaultEditor(
+        PlayerAwaitingApproval.class, new PlayerPendingApprovalCellEditor(this::updateRole));
+    tabbedPane.add("Pending", new JScrollPane(awaitingApprovalTable));
+  }
 
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
-    addAwaitingApproval(new PlayerAwaitingApproval("Bob", "1234", Player.Role.PLAYER));
+  private void updateRole(PlayerAwaitingApproval player, Role role) {
+    for (int i = 0; i < awaitingApprovalList.size(); i++) {
+      var storedPlayer = awaitingApprovalList.get(i);
+      if (player.name().equals(storedPlayer.name())) {
+        if (role != storedPlayer.role()) {
+          System.out.println(
+              "Changing role for "
+                  + player.name()
+                  + " from "
+                  + storedPlayer.role()
+                  + " to "
+                  + role);
+          awaitingApprovalList.set(
+              i,
+              new PlayerAwaitingApproval(
+                  storedPlayer.name(),
+                  storedPlayer.pin(),
+                  role,
+                  storedPlayer.approveCallback(),
+                  storedPlayer.denyCallback()));
+        }
+        break;
+      }
+    }
+    awaitingApprovalTable.revalidate();
   }
 
   private MouseListener createPopupListener() {
