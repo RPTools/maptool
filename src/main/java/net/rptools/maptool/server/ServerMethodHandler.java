@@ -165,6 +165,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           sendToAllClients(msg);
         }
         case RESTORE_ZONE_VIEW_MSG -> sendToClients(id, msg);
+        case SEND_TOKENS_TO_BACK_MSG -> handle(msg.getSendTokensToBackMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -174,6 +175,12 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(SendTokensToBackMsg msg) {
+    var zoneGuid = GUID.valueOf(msg.getZoneGuid());
+    var tokens = msg.getTokenGuidsList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
+    sendTokensToBack(zoneGuid, tokens);
   }
 
   private void handle(RenameZoneMsg msg) {
@@ -361,9 +368,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case sendTokensToBack:
-          sendTokensToBack(context.getGUID(0), (Set<GUID>) context.get(1));
           break;
         case setCampaign:
           setCampaign((Campaign) context.get(0));

@@ -57,7 +57,6 @@ public interface ServerCommand {
     setZoneVisibility,
     setZoneHasFoW,
     setFoW,
-    sendTokensToBack,
     setServerPolicy,
     updateCampaign,
     updateInitiative,

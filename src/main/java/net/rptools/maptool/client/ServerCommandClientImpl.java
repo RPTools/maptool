@@ -398,7 +398,9 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenList) {
-    makeServerCall(COMMAND.sendTokensToBack, zoneGUID, tokenList);
+    var msg = SendTokensToBackMsg.newBuilder().setZoneGuid(zoneGUID.toString());
+    msg.addAllTokenGuids(tokenList.stream().map(g -> g.toString()).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setSendTokensToBackMsg(msg).build());
   }
 
   public void enforceZone(GUID zoneGUID) {

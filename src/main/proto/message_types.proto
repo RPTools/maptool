@@ -190,3 +190,8 @@ message RenameZoneMsg {
 message RestoreZoneViewMsg {
   string zone_guid = 1;
 }
+
+message SendTokensToBackMsg {
+  string zone_guid = 1;
+  repeated string token_guids = 2;
+}
