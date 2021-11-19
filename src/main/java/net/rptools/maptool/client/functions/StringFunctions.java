@@ -273,7 +273,7 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     if (functionName.equalsIgnoreCase("isNumber")) {
-      if (NumberUtils.isParsable(parameters.get(0).toString())) {
+      if (NumberUtils.isParsable(parameters.get(0).toString().trim())) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
