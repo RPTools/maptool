@@ -49,6 +49,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
+import net.rptools.maptool.client.MapTool.ZoneEvent;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -60,8 +61,8 @@ import net.rptools.maptool.client.swing.MemoryStatusBar;
 import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
+import net.rptools.maptool.client.swing.TopologyModeSelectionPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
-import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -95,6 +96,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -147,6 +149,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
+  private JButton fullsZoneButton;
   private JPanel fullScreenToolPanel;
   private final JPanel rendererBorderPanel;
   private final List<ZoneRenderer> zoneRendererList;
@@ -453,6 +456,10 @@ public class MapToolFrame extends DefaultDockableHolder
     else registerForMacOSXEvents();
 
     MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+
+    // Add the Event Dispatcher to EventBus bridging classes
+    MapTool.getEventDispatcher()
+        .addListener(TokenEventBusBridge.getInstance(), ZoneEvent.Added, ZoneEvent.Removed);
 
     restorePreferences();
     updateKeyStrokes();
@@ -1369,14 +1376,14 @@ public class MapToolFrame extends DefaultDockableHolder
           private void createZone(Asset asset) {
             Zone zone = ZoneFactory.createZone();
             zone.setName(asset.getName());
-            BufferedImage image = ImageManager.getImageAndWait(asset.getId());
+            BufferedImage image = ImageManager.getImageAndWait(asset.getMD5Key());
             if (image.getWidth() < 200 || image.getHeight() < 200) {
               zone.setBackgroundPaint(new DrawableTexturePaint(asset));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             } else {
-              zone.setMapAsset(asset.getId());
+              zone.setMapAsset(asset.getMD5Key());
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             }
             MapPropertiesDialog newMapDialog =
                 MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
@@ -1578,7 +1585,7 @@ public class MapToolFrame extends DefaultDockableHolder
           .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
-      DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
+      TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyTypes());
     }
     AppActions.updateActions();
     repaint();
@@ -1698,6 +1705,10 @@ public class MapToolFrame extends DefaultDockableHolder
     paintDrawingMeasurement = aPaintDrawingMeasurements;
   }
 
+  public JButton getFullsZoneButton() {
+    return fullsZoneButton;
+  }
+
   public void showFullScreen() {
     GraphicsConfiguration graphicsConfig = getGraphicsConfiguration();
     Rectangle bounds = graphicsConfig.getBounds();
@@ -1734,10 +1745,10 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenToolPanel.add(toolbarPanel.getTopologyButton());
 
     var btn = toolbarPanel.getPointerGroupButton();
-
-    var zoneButton = toolbarPanel.createZoneSelectionButton();
-    zoneButton.setBorder(btn.getBorder());
-    fullScreenToolPanel.add(zoneButton);
+    fullsZoneButton = toolbarPanel.createZoneSelectionButton();
+    fullsZoneButton.setBorder(btn.getBorder());
+    fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
+    fullScreenToolPanel.add(fullsZoneButton);
 
     var initiativeButton =
         new JButton(

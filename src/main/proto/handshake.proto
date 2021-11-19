@@ -6,6 +6,9 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "HandshakeProtos";
 
+import "library.proto";
+import "gamedata.proto";
+
 /*
  * For easier differentiation between protobuf classes and "normal" classes
  * protobuf classes end with "Dto" or "Msg".
@@ -41,6 +44,8 @@ message ClientAuthMsg {
 message ConnectionSuccessfulMsg {
   RoleDto role_dto = 1;
   ServerPolicyDto server_policy_dto = 2;
+  AddOnLibraryListDto add_on_library_list_dto = 3;
+  DataStoreDto game_data_dto = 4;
 }
 
 message PlayerBlockedMsg {
@@ -80,6 +85,8 @@ message ServerPolicyDto {
   WalkerMetricDto movement_metric = 13;
   bool using_astar_pathfinding = 14;
   bool vbl_blocks_move = 15;
+  bool hide_map_select_ui = 16;
+  bool lock_player_library = 17;
 }
 
 enum WalkerMetricDto {

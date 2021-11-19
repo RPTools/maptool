@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -44,6 +45,7 @@ import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -90,7 +92,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     boolean useDistancePerCell = true;
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
-    if (functionName.equals("getLastPath")) {
+    if (functionName.equalsIgnoreCase("getLastPath")) {
       BigDecimal val = null;
       if (parameters.size() == 1) {
         if (!(parameters.get(0) instanceof BigDecimal)) {
@@ -105,7 +107,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       List<Map<String, Integer>> pathPoints = getLastPathList(path, useDistancePerCell);
       return pathPointsToJSONArray(pathPoints);
     }
-    if (functionName.equals("movedOverPoints")) {
+    if (functionName.equalsIgnoreCase("movedOverPoints")) {
       // macro.function.general.noPerm
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -134,7 +136,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
       }
     }
-    if (functionName.equals("getMoveCount")) {
+    if (functionName.equalsIgnoreCase("getMoveCount")) {
       boolean useFractionOnly = false;
       boolean useTerrainModifiers = false;
 
@@ -159,7 +161,7 @@ public class TokenMoveFunctions extends AbstractFunction {
         return getMovement(tokenInContext, useFractionOnly, useTerrainModifiers);
       }
     }
-    if (functionName.equals("movedOverToken")) {
+    if (functionName.equalsIgnoreCase("movedOverToken")) {
       // macro.function.general.noPerm
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -433,22 +435,34 @@ public class TokenMoveFunctions extends AbstractFunction {
    */
   public static List<Token> callForIndividualTokenMoveVetoes(
       final Path<?> path, final List<Token> filteredTokens) {
-    Token libToken = EventMacroUtil.getEventMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
     List<Token> deniedTokens = new ArrayList<>();
-    if (libToken != null) {
-      final String macroTarget = ON_TOKEN_MOVE_COMPLETE_CALLBACK + "@" + libToken.getName();
-      List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
-      JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
-      String pathCoordinates = pathArr.toString();
-      Map<String, Object> varsToSet = new HashMap<>();
-      varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
+    try {
+      var libraries =
+          new LibraryManager().getLegacyEventTargets(ON_TOKEN_MOVE_COMPLETE_CALLBACK).get();
+      if (!libraries.isEmpty()) {
+        String libraryNamespace = libraries.get(0).getNamespace().get();
+        List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
+        JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
+        String pathCoordinates = pathArr.toString();
+        Map<String, Object> varsToSet = new HashMap<>();
+        varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
 
-      for (Token token : filteredTokens) {
-        boolean moveDenied =
-            EventMacroUtil.pollEventHandlerForVeto(
-                macroTarget, pathCoordinates, token, ON_TOKEN_MOVE_DENY_VARIABLE, varsToSet);
-        if (moveDenied) deniedTokens.add(token);
+        for (Token token : filteredTokens) {
+          boolean moveDenied =
+              EventMacroUtil.pollEventHandlerForVeto(
+                  ON_TOKEN_MOVE_COMPLETE_CALLBACK,
+                  libraryNamespace,
+                  pathCoordinates,
+                  token,
+                  ON_TOKEN_MOVE_DENY_VARIABLE,
+                  varsToSet);
+          if (moveDenied) deniedTokens.add(token);
+        }
       }
+    } catch (InterruptedException | ExecutionException e) {
+      log.error(
+          I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
+          e.getCause());
     }
     return deniedTokens;
   }
@@ -551,22 +565,34 @@ public class TokenMoveFunctions extends AbstractFunction {
    * @return true if the move has been vetoed, false otherwise
    */
   public static boolean callForMultiTokenMoveVeto(List<GUID> filteredTokens) {
-    Token token = EventMacroUtil.getEventMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
     boolean moveDenied = false;
-    if (token != null) {
-      JsonArray json = new JsonArray();
-      for (GUID tokenGuid : filteredTokens) {
-        json.add(tokenGuid.toString());
+    try {
+
+      var libraries =
+          new LibraryManager()
+              .getLegacyEventTargets(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK)
+              .get();
+      if (!libraries.isEmpty()) {
+        String libraryNamespace = libraries.get(0).getNamespace().get();
+        JsonArray json = new JsonArray();
+        for (GUID tokenGuid : filteredTokens) {
+          json.add(tokenGuid.toString());
+        }
+        Map<String, Object> varsToSet = new HashMap<>();
+        varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
+        moveDenied =
+            EventMacroUtil.pollEventHandlerForVeto(
+                ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK,
+                libraryNamespace,
+                json.toString(),
+                null,
+                ON_TOKEN_MOVE_DENY_VARIABLE,
+                varsToSet);
       }
-      Map<String, Object> varsToSet = new HashMap<>();
-      varsToSet.put(ON_TOKEN_MOVE_COUNT_VARIABLE, filteredTokens.size());
-      moveDenied =
-          EventMacroUtil.pollEventHandlerForVeto(
-              ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK + "@" + token.getName(),
-              json.toString(),
-              null,
-              ON_TOKEN_MOVE_DENY_VARIABLE,
-              varsToSet);
+    } catch (InterruptedException | ExecutionException e) {
+      log.error(
+          I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
+          e.getCause());
     }
     return moveDenied;
   }

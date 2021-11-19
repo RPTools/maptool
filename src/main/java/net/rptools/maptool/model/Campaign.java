@@ -406,7 +406,7 @@ public class Campaign {
   }
 
   public boolean containsAsset(Asset asset) {
-    return containsAsset(asset.getId());
+    return containsAsset(asset.getMD5Key());
   }
 
   public boolean containsAsset(MD5Key key) {

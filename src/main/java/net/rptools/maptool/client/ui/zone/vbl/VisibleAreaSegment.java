@@ -14,11 +14,8 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.jetbrains.annotations.NotNull;
@@ -27,81 +24,55 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
 public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
-  private static final GeometryFactory geometryFactory = new GeometryFactory();
-
+  private final GeometryFactory geometryFactory;
   private final Point2D origin;
-  private final List<AreaFace> faceList = new LinkedList<AreaFace>();
+  private final List<AreaFace> faceList;
 
-  private Point2D centerPoint;
-  private Geometry boundary = null;
+  private final Point2D centerPoint;
+  private final Geometry boundary;
 
-  public VisibleAreaSegment(Point2D origin) {
+  public VisibleAreaSegment(
+      GeometryFactory geometryFactory, Point2D origin, List<AreaFace> faceList) {
+    assert !faceList.isEmpty();
+
+    this.geometryFactory = geometryFactory;
     this.origin = origin;
+    this.faceList = new ArrayList<>(faceList);
+
+    this.boundary = getBoundaryPoints(faceList).getEnvelope();
+
+    var center = this.boundary.getEnvelopeInternal().centre();
+    centerPoint = new Point2D.Double(center.getX(), center.getY());
   }
 
-  public void addAtEnd(AreaFace face) {
-    faceList.add(face);
-  }
-
-  public void addAtFront(AreaFace face) {
-    faceList.add(0, face);
-  }
-
-  public long getDistanceFromOrigin() {
-    return (long) (getCenterPoint().distance(origin) * 1000);
-  }
-
-  public long getDistanceSqFromOrigin() {
-    return (long) getCenterPoint().distanceSq(origin);
-  }
-
-  public Point2D getCenterPoint() {
-    if (centerPoint == null) {
-      var center = getBoundingBox().getEnvelopeInternal().centre();
-      centerPoint = new Point2D.Double(center.getX(), center.getY());
-    }
-    return centerPoint;
-  }
-
-  public Area getArea() {
-    if (faceList.isEmpty()) {
-      return new Area();
-    }
-    List<Point2D> pathPoints = new LinkedList<Point2D>();
-
-    for (AreaFace face : faceList) {
-      // Initial point
-      if (pathPoints.size() == 0) {
-        pathPoints.add(face.getP1());
-        pathPoints.add(
-            0, GraphicsUtil.getProjectedPoint(origin, face.getP1(), Integer.MAX_VALUE / 2));
-      }
-      // Add to the path
-      pathPoints.add(face.getP2());
-      pathPoints.add(
-          0, GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2));
-    }
-
-    GeneralPath path = null;
-    for (Point2D p : pathPoints) {
-      if (path == null) {
-        path = new GeneralPath();
-        path.moveTo((float) p.getX(), (float) p.getY());
-        continue;
-      }
-      path.lineTo((float) p.getX(), (float) p.getY());
-    }
-    return new Area(path);
+  private long getDistanceSqFromOrigin() {
+    return (long) centerPoint.distanceSq(origin);
   }
 
   public Geometry getBoundingBox() {
-    if (boundary == null) {
-      boundary = getBoundaryPoints(faceList).getEnvelope();
-    }
     return boundary;
   }
 
-  private static Geometry getBoundaryPoints(List<AreaFace> faceList) {
+  public Geometry calculateVisionBlockedBySegment(int distance) {
+    final List<Coordinate> coordinates = new ArrayList<>();
+    for (final var face : faceList) {
+      if (coordinates.isEmpty()) {
+        coordinates.add(toCoordinate(face.getP1()));
+        coordinates.add(
+            0, toCoordinate(GraphicsUtil.getProjectedPoint(origin, face.getP1(), distance)));
+      }
+
+      coordinates.add(toCoordinate(face.getP2()));
+      coordinates.add(
+          0, toCoordinate(GraphicsUtil.getProjectedPoint(origin, face.getP2(), distance)));
+    }
+    // We need a closed ring.
+    coordinates.add(coordinates.get(0));
+
+    return geometryFactory.createPolygon(coordinates.toArray(Coordinate[]::new));
+  }
+
+  private Geometry getBoundaryPoints(List<AreaFace> faceList) {
     if (faceList.isEmpty()) {
       return geometryFactory.createMultiPoint();
     }
@@ -115,35 +86,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
       pathPoints[index++] = toCoordinate(face.getP2());
     }
     return geometryFactory.createMultiPointFromCoords(pathPoints);
-  }
-
-  public Geometry getGeometry() {
-    if (faceList.isEmpty()) {
-      return geometryFactory.createGeometryCollection();
-    }
-
-    List<Coordinate> pathPoints = new ArrayList<>();
-
-    for (AreaFace face : faceList) {
-      // Initial point
-      if (pathPoints.size() == 0) {
-        pathPoints.add(toCoordinate(face.getP1()));
-        pathPoints.add(
-            0,
-            toCoordinate(
-                GraphicsUtil.getProjectedPoint(origin, face.getP1(), Integer.MAX_VALUE / 2)));
-      }
-      // Add to the path
-      pathPoints.add(toCoordinate(face.getP2()));
-      pathPoints.add(
-          0,
-          toCoordinate(
-              GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2)));
-    }
-    // We need the ring to be closed.
-    pathPoints.add(pathPoints.get(0));
-
-    return geometryFactory.createPolygon(pathPoints.toArray(Coordinate[]::new));
   }
 
   private static Coordinate toCoordinate(Point2D point2D) {

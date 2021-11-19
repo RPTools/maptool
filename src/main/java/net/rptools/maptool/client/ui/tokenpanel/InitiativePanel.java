@@ -220,6 +220,8 @@ public class InitiativePanel extends JPanel
     TextlessButton(Action action) {
       setHideActionText(true);
       setAction(action);
+      getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
+      getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "none");
     }
   }
   /*---------------------------------------------------------------------------------------------

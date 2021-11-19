@@ -14,41 +14,60 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import org.locationtech.jts.geom.GeometryFactory;
 
+/**
+ * Represents a piece of solid topology.
+ *
+ * <p>An island can contain holes, known as oceans, and will itself belong to an ocean.
+ */
 public class AreaIsland implements AreaContainer {
 
   private AreaMeta meta;
+  private AreaOcean parentOcean;
   private Set<AreaOcean> oceanSet = new HashSet<AreaOcean>();
 
+  /**
+   * Creates a new island with a given boundary.
+   *
+   * @param meta The boundary of the island. Must be a hole.
+   */
   public AreaIsland(AreaMeta meta) {
+    assert !meta.isHole();
     this.meta = meta;
+    this.parentOcean = null;
   }
 
-  public Set<VisibleAreaSegment> getVisibleAreaSegments(Point2D origin) {
-
-    return meta.getVisibleAreas(origin);
+  public AreaOcean getParentOcean() {
+    return parentOcean;
   }
 
-  public AreaOcean getDeepestOceanAt(Point2D point) {
+  public void setParentOcean(AreaOcean parentOcean) {
+    this.parentOcean = parentOcean;
+  }
 
+  @Override
+  public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
     if (!meta.area.contains(point)) {
+      // Point not contained within this island, so nothing to return.
       return null;
     }
 
     for (AreaOcean ocean : oceanSet) {
-      AreaOcean deepOcean = ocean.getDeepestOceanAt(point);
-      if (deepOcean != null) {
-        return deepOcean;
+      AreaContainer deepContainer = ocean.getDeepestContainerAt(point);
+      if (deepContainer != null) {
+        return deepContainer;
       }
     }
 
-    // If we don't have an ocean that contains the point then
-    // the point is not technically in an ocean
-    return null;
+    return this;
   }
 
   public Set<AreaOcean> getOceans() {
@@ -63,5 +82,11 @@ public class AreaIsland implements AreaContainer {
   // AREA CONTAINER
   public Area getBounds() {
     return meta.area;
+  }
+
+  @Override
+  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
+      GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
+    return meta.getFacingSegments(geometryFactory, origin, !frontSegments);
   }
 }

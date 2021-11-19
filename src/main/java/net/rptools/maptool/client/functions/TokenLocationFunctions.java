@@ -85,7 +85,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
 
-    if (functionName.equals("getTokenX") || functionName.equals("getTokenY")) {
+    if (functionName.equalsIgnoreCase("getTokenX") || functionName.equalsIgnoreCase("getTokenY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       boolean useDistancePerCell =
           parameters.size() > 0
@@ -93,14 +93,15 @@ public class TokenLocationFunctions extends AbstractFunction {
               : true;
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       TokenLocation location = getTokenLocation(useDistancePerCell, token);
-      return BigDecimal.valueOf(functionName.equals("getTokenX") ? location.x : location.y);
+      return BigDecimal.valueOf(
+          functionName.equalsIgnoreCase("getTokenX") ? location.x : location.y);
     }
-    if (functionName.equals("getTokenDrawOrder")) {
+    if (functionName.equalsIgnoreCase("getTokenDrawOrder")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return BigDecimal.valueOf(token.getZOrder());
     }
-    if (functionName.equals("setTokenDrawOrder")) {
+    if (functionName.equalsIgnoreCase("setTokenDrawOrder")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int newZOrder = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
@@ -113,27 +114,27 @@ public class TokenLocationFunctions extends AbstractFunction {
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       return getTokenMap(identifier, delim);
     }
-    if (functionName.equals("getDistance")) {
+    if (functionName.equalsIgnoreCase("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
       return getDistance(resolver, parameters);
     }
-    if (functionName.equals("getDistanceToXY")) {
+    if (functionName.equalsIgnoreCase("getDistanceToXY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 6);
       return getDistanceToXY(resolver, parameters);
     }
-    if (functionName.equals("goto")) {
+    if (functionName.equalsIgnoreCase("goto")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       return gotoLoc(resolver, parameters);
     }
-    if (functionName.equals("moveToken")) {
+    if (functionName.equalsIgnoreCase("moveToken")) {
       FunctionUtil.checkNumberParam("moveToken", parameters, 2, 4);
       return moveToken(resolver, parameters);
     }
-    if (functionName.equals("moveTokenToMap")) {
+    if (functionName.equalsIgnoreCase("moveTokenToMap")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
       return tokenMoveMap(true, parameters);
     }
-    if (functionName.equals("moveTokenFromMap")) {
+    if (functionName.equalsIgnoreCase("moveTokenFromMap")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
       return tokenMoveMap(false, parameters);
     }

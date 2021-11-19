@@ -47,7 +47,7 @@ public class TokenGMNameFunction extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
-    if (functionName.equals("getGMName")) {
+    if (functionName.equalsIgnoreCase("getGMName")) {
       FunctionUtil.checkNumberParam("getGMName", args, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
       return getGMName(token);

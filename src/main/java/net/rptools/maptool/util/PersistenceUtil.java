@@ -15,6 +15,7 @@
 package net.rptools.maptool.util;
 
 import com.caucho.hessian.io.HessianInput;
+import com.google.protobuf.util.JsonFormat;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -53,6 +55,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -61,6 +64,14 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.campaign.CampaignManager;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -76,10 +87,19 @@ public class PersistenceUtil {
 
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
   public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; // $NON-NLS-1$
-  private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
+  private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$;
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
+  private static final String DROP_IN_LIBRARY_DIR = "libraries/";
 
-  private static final String CAMPAIGN_VERSION = "1.4.1";
+  private static final String DROP_IN_LIBRARY_LIST_FILE = DROP_IN_LIBRARY_DIR + "libraries.json";
+
+  private static final String DROP_IN_LIBRARY_ASSET_DIR = DROP_IN_LIBRARY_DIR + ASSET_DIR;
+
+  private static final String GAME_DATA_DIR = "data/";
+
+  private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
+
+  private static final String CAMPAIGN_VERSION = "1.11.0";
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -90,6 +110,8 @@ public class PersistenceUtil {
   // how to implement?)
   // 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89
   // compatible
+  // 1.11.0 Added add-on libraries, if loaded and saved with an older version then add-on
+  //        libraries will be removed.
 
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
   private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
@@ -291,6 +313,16 @@ public class PersistenceUtil {
       saveAssets(allAssetIds, pakFile);
       saveTimer.stop("Save assets");
 
+      // Store the Drop In Libraries.
+      saveTimer.start("Save Drop In Libraries");
+      saveAddOnLibraries(pakFile);
+      saveTimer.stop("Save Drop In Libraries");
+
+      // Store the Game Data
+      saveTimer.start("Save Game Data");
+      saveGameData(pakFile);
+      saveTimer.stop("Save Game Data");
+
       try {
         saveTimer.start("Set content");
 
@@ -437,6 +469,10 @@ public class PersistenceUtil {
         for (Zone zone : persistedCampaign.campaign.getZones()) {
           zone.optimize();
         }
+
+        new CampaignManager().clearCampaignData();
+        loadGameData(pakFile);
+        loadAddOnLibraries(pakFile);
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
@@ -632,7 +668,9 @@ public class PersistenceUtil {
         Asset asset = null;
         if (fixRequired) {
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset = new Asset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
+            asset =
+                Asset.createAssetDetectType(
+                    key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
           } catch (Exception e) {
@@ -640,7 +678,7 @@ public class PersistenceUtil {
           }
         } else {
           try {
-            asset = (Asset) pakFile.getFileObject(pathname); // XML deserialization
+            asset = pakFile.getAsset(pathname);
           } catch (Exception e) {
             // Do nothing. The asset will be 'null' and it'll be handled below.
             log.info("Exception while handling asset '" + pathname + "'", e);
@@ -659,12 +697,12 @@ public class PersistenceUtil {
         }
         // pre 1.3b52 campaign files stored the image data directly in the asset serialization.
         // New XStreamConverter creates empty byte[] for image.
-        if (asset.getImage() == null || asset.getImage().length < 4) {
-          String ext = asset.getImageExtension();
+        if (asset.getData() == null || asset.getData().length < 4) {
+          String ext = asset.getExtension();
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset.setImage(IOUtils.toByteArray(is));
+            asset = asset.setData(IOUtils.toByteArray(is), false);
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
             continue;
@@ -697,6 +735,101 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Loads the add-on libraries from the campaign file.
+   *
+   * @param packedFile the file to load from.
+   * @throws IOException if there is a problem reading the add-o library information.
+   */
+  private static void loadAddOnLibraries(PackedFile packedFile) throws IOException {
+    var libraryManager = new LibraryManager();
+    if (!packedFile.hasFile(DROP_IN_LIBRARY_LIST_FILE)) {
+      return; // No Libraries to import
+    }
+    var builder = AddOnLibraryListDto.newBuilder();
+    JsonFormat.parser()
+        .merge(
+            new InputStreamReader(packedFile.getFileAsInputStream(DROP_IN_LIBRARY_LIST_FILE)),
+            builder);
+    var listDto = builder.build();
+
+    for (var library : listDto.getLibrariesList()) {
+      String libraryData = DROP_IN_LIBRARY_ASSET_DIR + library.getMd5Hash();
+      byte[] bytes = packedFile.getFileAsInputStream(libraryData).readAllBytes();
+      String libraryNamespace = library.getDetails().getNamespace();
+      Asset asset = Type.MTLIB.getFactory().apply(libraryNamespace, bytes);
+      if (!AssetManager.hasAsset(asset)) {
+        AssetManager.putAsset(asset);
+      }
+      AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+      libraryManager.registerAddOnLibrary(addOnLibrary);
+    }
+  }
+
+  private static void saveAddOnLibraries(PackedFile packedFile) throws IOException {
+    // remove all drop-in libraries from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(DROP_IN_LIBRARY_ASSET_DIR) && !path.equals(DROP_IN_LIBRARY_ASSET_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    AddOnLibraryListDto dto = null;
+    try {
+      dto = new LibraryManager().addOnLibrariesToDto().get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+    packedFile.putFile(
+        DROP_IN_LIBRARY_LIST_FILE,
+        JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+
+    for (var ldto : dto.getLibrariesList()) {
+      Asset asset = AssetManager.getAsset(new MD5Key(ldto.getMd5Hash()));
+      packedFile.putFile(DROP_IN_LIBRARY_ASSET_DIR + asset.getMD5Key().toString(), asset.getData());
+    }
+  }
+
+  private static void loadGameData(PackedFile packedFile) throws IOException {
+
+    if (!packedFile.hasFile(GAME_DATA_FILE)) {
+      return; // No game data to import
+    }
+
+    var builder = DataStoreDto.newBuilder();
+    JsonFormat.parser()
+        .merge(new InputStreamReader(packedFile.getFileAsInputStream(GAME_DATA_FILE)), builder);
+    var dataStoreDto = builder.build();
+
+    try {
+      var dataStore = new DataStoreManager().getDefaultDataStore();
+      new GameDataImporter(dataStore).importData(dataStoreDto);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private static void saveGameData(PackedFile packedFile) throws IOException {
+    // Remove all the game data from the packed file first.
+    for (String path : packedFile.getPaths()) {
+      if (path.startsWith(GAME_DATA_DIR) && !path.equals(GAME_DATA_DIR)) {
+        packedFile.removeFile(path);
+      }
+    }
+
+    try {
+      DataStoreManager dataStoreManager = new DataStoreManager();
+      DataStoreDto dto = dataStoreManager.toDto().get();
+      packedFile.putFile(
+          GAME_DATA_FILE, JsonFormat.printer().print(dto).getBytes(StandardCharsets.UTF_8));
+
+      Set<MD5Key> assets = dataStoreManager.getAssets().get();
+      saveAssets(dataStoreManager.getAssets().get(), packedFile);
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
   private static void saveAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
@@ -715,8 +848,8 @@ public class PersistenceUtil {
         continue;
       }
 
-      String extension = asset.getImageExtension();
-      byte[] assetData = asset.getImage();
+      String extension = asset.getExtension();
+      byte[] assetData = asset.getData();
       // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
       // assetData.length);
 
@@ -1047,7 +1180,7 @@ public class PersistenceUtil {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
           ImageUtil.createCompatibleImage(
-              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
+              ImageUtil.bytesToImage(asset.getData(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

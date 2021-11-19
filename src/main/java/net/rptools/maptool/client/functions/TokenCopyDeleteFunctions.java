@@ -46,8 +46,12 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
   private static final String COPY_FUNC = "copyToken";
   private static final String REMOVE_FUNC = "removeToken";
 
+  private static final String CREATE_TOKEN_FUNC = "createToken";
+
+  private static final String CREATE_TOKENS_FUNC = "createTokens";
+
   private TokenCopyDeleteFunctions() {
-    super(1, 4, COPY_FUNC, REMOVE_FUNC);
+    super(1, 4, COPY_FUNC, REMOVE_FUNC, CREATE_TOKEN_FUNC, CREATE_TOKENS_FUNC);
   }
 
   public static TokenCopyDeleteFunctions getInstance() {
@@ -61,26 +65,80 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     FunctionUtil.blockUntrustedMacro(functionName);
     int psize = parameters.size();
 
-    if (functionName.equals(COPY_FUNC)) {
+    if (functionName.equalsIgnoreCase(COPY_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
       int nCopies = psize > 1 ? FunctionUtil.paramAsInteger(functionName, parameters, 1, false) : 1;
       JsonObject newVals;
-      if (psize > 3) newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
-      else newVals = new JsonObject();
+      if (psize > 3) {
+        newVals = FunctionUtil.paramAsJsonObject(functionName, parameters, 3);
+      } else {
+        newVals = new JsonObject();
+      }
 
       return copyTokens((MapToolVariableResolver) resolver, token, nCopies, newVals);
     }
 
-    if (functionName.equals(REMOVE_FUNC)) {
+    if (functionName.equalsIgnoreCase(REMOVE_FUNC)) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
       return deleteToken(token);
     }
 
+    if (functionName.equalsIgnoreCase(CREATE_TOKEN_FUNC)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      JsonObject vals = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      return createToken((MapToolVariableResolver) resolver, vals);
+    }
+
+    if (functionName.equalsIgnoreCase(CREATE_TOKENS_FUNC)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      JsonArray vals = FunctionUtil.paramAsJsonArray(functionName, parameters, 0);
+      var tokenIds = new JsonArray();
+      for (int i = 0; i < vals.size(); i++) {
+        tokenIds.add(
+            createToken((MapToolVariableResolver) resolver, vals.get(i).getAsJsonObject()));
+      }
+      return tokenIds;
+    }
+
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  private String createToken(MapToolVariableResolver resolver, JsonObject vals)
+      throws ParserException {
+
+    if (!vals.has("name")) {
+      throw new ParserException(I18N.getText("macro.function.tokenCopyDelete.noName"));
+    }
+    String name = vals.get("name").getAsString();
+
+    if (!vals.has("tokenImage")) {
+      throw new ParserException(I18N.getText("macro.function.tokenCopyDelete.noImage"));
+    }
+    String tokenImage = vals.get("tokenImage").getAsString();
+
+    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    List<Token> allTokens = zone.getTokens();
+    Token t = new Token(name, new MD5Key(tokenImage));
+
+    // Make sure the exposedAreaGUID stays unique
+    if (allTokens != null) {
+      for (Token tok : allTokens) {
+        GUID tea = tok.getExposedAreaGUID();
+        if (tea != null && tea.equals(t.getExposedAreaGUID())) {
+          t.setExposedAreaGUID(new GUID());
+        }
+      }
+    }
+    // setTokenValues() handles the naming of the new token and must be called even if
+    // nothing was passed for the updates parameter (newVals).
+    setTokenValues(t, vals, zone, resolver);
+
+    MapTool.serverCommand().putToken(zone.getId(), t);
+    return t.getId().toString();
   }
 
   /**

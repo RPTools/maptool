@@ -30,6 +30,8 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -200,7 +202,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(ClientAuthMsg clientAuthMessage)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
+          InterruptedException {
     byte[] response = clientAuthMessage.getChallengeResponse().toByteArray();
     if (handshakeChallenges.length > 1) {
       if (Arrays.compare(response, handshakeChallenges[GM_CHALLENGE].getExpectedResponse()) == 0) {
@@ -222,13 +225,15 @@ public class ServerHandshake implements Handshake, MessageHandler {
     sendConnectionSuccessful();
   }
 
-  private void sendConnectionSuccessful() {
+  private void sendConnectionSuccessful() throws ExecutionException, InterruptedException {
     var server = MapTool.getServer();
     var policy = Mapper.map(server.getPolicy());
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
-            .setServerPolicyDto(policy);
+            .setServerPolicyDto(policy)
+            .setGameDataDto(new DataStoreManager().toDto().get())
+            .setAddOnLibraryListDto(new LibraryManager().addOnLibrariesToDto().get());
     var handshakeMsg =
         HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
     sendMessage(handshakeMsg);

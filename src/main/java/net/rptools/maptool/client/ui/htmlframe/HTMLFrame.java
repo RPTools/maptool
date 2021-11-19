@@ -351,18 +351,31 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     if (frames.containsKey(name)) {
       HTMLFrame frame = frames.get(name);
       JsonObject frameProperties = new JsonObject();
+      DockContext dc = frame.getContext();
 
-      frameProperties.addProperty("width", frame.getWidth());
-      frameProperties.addProperty("height", frame.getHeight());
-      frameProperties.addProperty(
-          "temporary", FunctionUtil.getDecimalForBoolean(frame.getTemporary()));
       frameProperties.addProperty("title", frame.getTitle());
       frameProperties.addProperty("tabtitle", frame.getTabTitle());
+      frameProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(frame.isHTML5));
+      frameProperties.addProperty(
+          "temporary", FunctionUtil.getDecimalForBoolean(frame.getTemporary()));
       frameProperties.addProperty("visible", FunctionUtil.getDecimalForBoolean(frame.isVisible()));
       frameProperties.addProperty("docked", FunctionUtil.getDecimalForBoolean(frame.isDocked()));
       frameProperties.addProperty(
+          "floating",
+          FunctionUtil.getDecimalForBoolean(dc.isFloated())); // Always opposite of docked?
+      frameProperties.addProperty(
           "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
-      frameProperties.addProperty("html5", FunctionUtil.getDecimalForBoolean(frame.isHTML5));
+      frameProperties.addProperty("height", frame.getHeight());
+      frameProperties.addProperty("width", frame.getWidth());
+      // The x & y are screen coordinates.
+      frameProperties.addProperty("undocked_x", dc.getUndockedBounds().getX());
+      frameProperties.addProperty("undocked_y", dc.getUndockedBounds().getY());
+      frameProperties.addProperty("undocked_h", dc.getUndockedBounds().getHeight());
+      frameProperties.addProperty("undocked_w", dc.getUndockedBounds().getWidth());
+      // Many of the Frame/DockContext attributes shown in the JIDE javadocs don't seem to
+      // get updated.  Docked height never changes but docked width does and matches Frame
+      // width.  AutoHide Height/Width never change.
+
       Object frameValue = frame.getValue();
       if (frameValue == null) {
         frameValue = "";

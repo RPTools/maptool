@@ -45,12 +45,12 @@ public class DrawableTexturePaint extends DrawablePaint implements Serializable 
   }
 
   public DrawableTexturePaint(Asset asset) {
-    this(asset != null ? asset.getId() : null);
+    this(asset != null ? asset.getMD5Key() : null);
     this.asset = asset;
   }
 
   public DrawableTexturePaint(Asset asset, double scale) {
-    this(asset.getId(), 1);
+    this(asset.getMD5Key(), 1);
     this.asset = asset;
   }
 

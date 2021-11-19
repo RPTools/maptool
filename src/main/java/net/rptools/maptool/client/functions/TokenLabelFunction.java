@@ -61,7 +61,7 @@ public class TokenLabelFunction extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
-    if (functionName.equals("getLabel")) {
+    if (functionName.equalsIgnoreCase("getLabel")) {
       return getLabel((MapToolVariableResolver) resolver, args);
     } else if ("setLabel".equalsIgnoreCase(functionName)) {
       return setLabel((MapToolVariableResolver) resolver, args);

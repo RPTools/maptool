@@ -20,9 +20,11 @@ import net.rptools.clientserver.hessian.HessianUtils;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
+import org.apache.log4j.Logger;
 
 /** @author drice */
 public class MethodClientDecorator implements MethodClientConnection {
+  private static final Logger log = Logger.getLogger(MethodClientDecorator.class);
   private ClientConnection connection;
 
   public MethodClientDecorator(ClientConnection connection) {
@@ -30,7 +32,7 @@ public class MethodClientDecorator implements MethodClientConnection {
   }
 
   public void callMethod(String method, Object... parameters) {
-
+    log.debug(connection.getId() + ": will call " + method);
     byte[] message = HessianUtils.methodToBytesGZ(method, parameters);
     sendMessage(message);
   }

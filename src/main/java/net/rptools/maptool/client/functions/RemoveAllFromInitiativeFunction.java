@@ -63,7 +63,7 @@ public class RemoveAllFromInitiativeFunction extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
-    if (functionName.equals("removeAllFromInitiative")) {
+    if (functionName.equalsIgnoreCase("removeAllFromInitiative")) {
       count = list.getSize();
       list.clearModel();
     } else if ("removeAllNPCsFromInitiative".equalsIgnoreCase(functionName)

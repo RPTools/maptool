@@ -84,7 +84,7 @@ public class MapToolLineParserTest {
     // (line 182)
     assertMatches(
         "expanded roll shows ...if(1 == 1, 1, 0) = 1.",
-        parseLine("expanded roll shows [if(1 == 1, 1, 0)]", null, null));
+        parseLine("expanded roll shows [e: if(1 == 1, 1, 0)]", null, null));
 
     // branch type count loop
     assertEquals(

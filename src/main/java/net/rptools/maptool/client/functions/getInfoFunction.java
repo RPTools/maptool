@@ -17,20 +17,21 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
+import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -88,10 +89,12 @@ public class getInfoFunction extends AbstractFunction {
       return getMapInfo();
     } else if (infoType.equalsIgnoreCase("client")) {
       return getClientInfo();
-    } else if (infoType.equals("server")) {
+    } else if (infoType.equalsIgnoreCase("server")) {
       return getServerInfo();
-    } else if (infoType.equals("campaign")) {
+    } else if (infoType.equalsIgnoreCase("campaign")) {
       return getCampaignInfo();
+    } else if (infoType.equalsIgnoreCase("theme")) {
+      return getThemeInfo();
     } else if (infoType.equalsIgnoreCase("debug")) {
       return getDebugInfo();
     } else {
@@ -345,6 +348,7 @@ public class getInfoFunction extends AbstractFunction {
       JsonObject state = new JsonObject();
       state.addProperty("name", bto.getName());
       state.addProperty("type", bto.getClass().getSimpleName());
+      state.addProperty("group", group);
       state.addProperty("isShowGM", bto.isShowGM() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
@@ -353,6 +357,12 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
+      if (bto instanceof FlowColorDotTokenOverlay) {
+        state.addProperty("gridSize", ((FlowColorDotTokenOverlay) bto).getGrid());
+      }
+      if (bto instanceof CornerImageTokenOverlay) {
+        state.addProperty("corner", ((CornerImageTokenOverlay) bto).getCorner().name());
+      }
 
       sgroup.add(state);
       sinfo.add(group, sgroup);
@@ -407,6 +417,23 @@ public class getInfoFunction extends AbstractFunction {
     return cinfo;
   }
 
+  /**
+   * Get Theme Info
+   *
+   * @return JsonObject of theme information
+   */
+  private JsonObject getThemeInfo() {
+    JsonObject theme = new JsonObject();
+
+    // Currently, just the color info is returned.
+    for (Map.Entry<Object, Object> entry : UIManager.getDefaults().entrySet()) {
+      if (entry.getValue() instanceof Color) {
+        Color color = (Color) entry.getValue();
+        theme.addProperty((String) entry.getKey(), Integer.toHexString(color.getRGB()));
+      }
+    }
+    return theme;
+  }
   /**
    * Retrieves debug information
    *

@@ -50,7 +50,7 @@ public class TokenHaloFunction extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
 
-    if (functionName.equals("getHalo")) {
+    if (functionName.equalsIgnoreCase("getHalo")) {
       return getHalo((MapToolVariableResolver) resolver, args);
     } else if ("setHalo".equalsIgnoreCase(functionName)) {
       return setHalo((MapToolVariableResolver) resolver, args);

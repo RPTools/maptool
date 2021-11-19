@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.model.gamedata.proto";
+option java_outer_classname = "GameDataProtos";
+
+message GameDataValueDto {
+  string name = 1;
+  oneof value {
+    string json_value = 2;
+    bool boolean_value = 3;
+    int64 long_value = 4;
+    string string_value = 5;
+    string asset_value = 6;
+    double double_value = 7;
+    bool undefined_json_array_value = 8;
+    bool undefined_json_object_value = 9;
+    bool undefined_boolean_value = 10;
+    bool undefined_long_value = 11;
+    bool undefined_string_value = 12;
+    bool undefined_asset_value = 13;
+    bool undefined_double_value = 14;
+
+    bool undefined_value = 16;
+  }
+}
+
+message GameDataDto {
+  string type = 1;
+  string namespace = 2;
+  repeated GameDataValueDto values = 3;
+}
+
+message DataStoreDto {
+  string data_store_type = 1;
+  repeated GameDataDto data = 2;
+}
+
+
+
+

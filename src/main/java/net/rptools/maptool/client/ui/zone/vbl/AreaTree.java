@@ -40,13 +40,14 @@ public class AreaTree {
     digest(area);
   }
 
-  public AreaOcean getOceanAt(Point2D point) {
-    return theOcean.getDeepestOceanAt(point);
-  }
-
-  // Package level for testing purposes
-  AreaOcean getOcean() {
-    return theOcean;
+  /**
+   * Gets the most nested ocean or island that contains `point`.
+   *
+   * @param point
+   * @return
+   */
+  public AreaContainer getContainerAt(Point2D point) {
+    return theOcean.getDeepestContainerAt(point);
   }
 
   public Area getArea() {
@@ -99,6 +100,7 @@ public class AreaTree {
         continue;
       }
       island.addOcean(ocean);
+      ocean.setParentIsland(island);
     }
     // Now put each island into the containing ocean
     List<AreaIsland> globalIslandList = new ArrayList<AreaIsland>();
@@ -109,12 +111,14 @@ public class AreaTree {
         continue;
       }
       ocean.addIsland(island);
+      island.setParentOcean(ocean);
     }
 
     // Now we have our hierarchy, just hook up the global space
     theOcean = new AreaOcean(null);
     for (AreaIsland island : globalIslandList) {
       theOcean.addIsland(island);
+      island.setParentOcean(theOcean);
     }
   }
 

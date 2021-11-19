@@ -48,7 +48,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
       throws ParserException {
-    if (functionName.equals("getInitiativeRound")) {
+    if (functionName.equalsIgnoreCase("getInitiativeRound")) {
       return getInitiativeRound();
     } else if ("setInitiativeRound".equalsIgnoreCase(functionName)) {
       if (args.size() != 1)

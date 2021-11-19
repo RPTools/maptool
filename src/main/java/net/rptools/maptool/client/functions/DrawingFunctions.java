@@ -265,7 +265,7 @@ public class DrawingFunctions extends AbstractFunction {
           + Integer.toHexString(((DrawableColorPaint) drawablePaint).getColor()).substring(2);
     }
     if (drawablePaint instanceof DrawableTexturePaint) {
-      return "asset://" + ((DrawableTexturePaint) drawablePaint).getAsset().getId();
+      return "asset://" + ((DrawableTexturePaint) drawablePaint).getAsset().getMD5Key();
     }
     return "";
   }

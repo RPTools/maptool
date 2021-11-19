@@ -45,7 +45,7 @@ public class DefineMacroFunction extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("defineFunction")) {
+    if (functionName.equalsIgnoreCase("defineFunction")) {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
@@ -91,10 +91,10 @@ public class DefineMacroFunction extends AbstractFunction {
               parser, parameters.get(0).toString(), macro, ignoreOutput, newVariableContext);
       return I18N.getText(
           "macro.function.defineFunction.functionDefined", parameters.get(0).toString());
-    } else if (functionName.equals("oldFunction")) {
+    } else if (functionName.equalsIgnoreCase("oldFunction")) {
       return UserDefinedMacroFunctions.getInstance()
           .executeOldFunction(parser, resolver, parameters);
-    } else if (functionName.equals("getDefinedFunctions")) {
+    } else if (functionName.equalsIgnoreCase("getDefinedFunctions")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : "";
       boolean showFullLocations = false;

@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
+import org.apache.log4j.Logger;
 
 /**
  * @author drice
@@ -36,6 +38,7 @@ import net.rptools.clientserver.ActivityListener.State;
 public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
+  private static final Logger log = Logger.getLogger(AbstractConnection.class);
   protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();
   protected List<List<byte[]>> outQueueList = new LinkedList<List<byte[]>>();
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
@@ -52,6 +55,10 @@ public abstract class AbstractConnection implements Connection {
   }
 
   public final void dispatchMessage(String id, byte[] message) {
+    if (messageHandlers.size() == 0) {
+      log.warn("message received but not messageHandlers registered.");
+    }
+
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
     }
@@ -177,6 +184,38 @@ public abstract class AbstractConnection implements Connection {
     }
     notifyListeners(Direction.Inbound, State.Complete, length, length);
     return ret;
+  }
+
+  private ByteBuffer messageBuffer = null;
+
+  public final byte[] readMessage(ByteBuffer part) {
+    if (messageBuffer == null) {
+      int length = part.getInt();
+      notifyListeners(Direction.Inbound, State.Start, length, 0);
+
+      if (part.remaining() == length) {
+        var ret = new byte[length];
+        part.get(ret);
+        notifyListeners(Direction.Inbound, State.Complete, length, length);
+        return ret;
+      }
+
+      messageBuffer = ByteBuffer.allocate(length);
+    }
+
+    messageBuffer.put(part);
+    notifyListeners(
+        Direction.Inbound, State.Progress, messageBuffer.capacity(), messageBuffer.position());
+
+    if (messageBuffer.capacity() == messageBuffer.position()) {
+      notifyListeners(
+          Direction.Inbound, State.Complete, messageBuffer.capacity(), messageBuffer.capacity());
+      var ret = messageBuffer.array();
+      messageBuffer = null;
+      return ret;
+    }
+
+    return null;
   }
 
   public abstract String getError();

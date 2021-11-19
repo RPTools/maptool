@@ -22,6 +22,7 @@ import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool.model.campaign.CampaignManager;
 
 /** This class handles when the server inexplicably disconnects */
 public class ServerDisconnectHandler implements DisconnectHandler {
@@ -41,6 +42,9 @@ public class ServerDisconnectHandler implements DisconnectHandler {
 
       // hide map so player doesn't get a brief GM view
       MapTool.getFrame().setCurrentZoneRenderer(null);
+      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
+      MapTool.getFrame().getAssetPanel().enableAssets();
+      new CampaignManager().clearCampaignData();
 
       try {
         MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());

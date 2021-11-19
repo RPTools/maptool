@@ -1,0 +1,24 @@
+name: ZenHub Epic
+description: This template is for creating ZenHub Epics
+title: '[Epic]: '
+labels: 'epic'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a [ZenHub](https://www.zenhub.com/) Epic
+        See attached issues (via [ZenHub](https://www.zenhub.com/) or plug in)for further information
+  - type: textarea
+    attributes:
+      label: Summary of the Epic.
+      description: Add a summary of the Epic
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the Epic
+      description: A Description of the Epic
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Additional Context for the Epic

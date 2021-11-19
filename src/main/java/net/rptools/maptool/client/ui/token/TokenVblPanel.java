@@ -266,17 +266,13 @@ public class TokenVblPanel extends JPanel {
       AffineTransform atArea = AffineTransform.getTranslateInstance(x, y);
       atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
+      var baseColor = AppStyle.tokenTopologyColor;
       if (isHideTokenImage()) {
-        Color color =
-            new Color(
-                AppStyle.tokenTopologyColor.getRed(),
-                AppStyle.tokenTopologyColor.getGreen(),
-                AppStyle.tokenTopologyColor.getBlue(),
-                200);
+        Color color = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), 200);
 
         g2d.setColor(color);
       } else {
-        g2d.setColor(AppStyle.tokenTopologyColor.brighter());
+        g2d.setColor(baseColor.brighter());
       }
       g2d.fill(atArea.createTransformedShape(tokenVBL_optimized));
     }

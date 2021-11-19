@@ -45,6 +45,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useIndividualViews;
   private JCheckBox autoRevealOnMovement;
   private JCheckBox playersCanRevealVision;
+  private JCheckBox hideMapSelectUI;
+  private JCheckBox lockTokenEditOnStartup;
+  private JCheckBox lockPlayerMoveOnStartup;
+  private JCheckBox lockPlayerLibrary;
   private JButton generateGMPassword;
   private JButton generatePlayerPassword;
   private JTextField gmPassword;
@@ -74,6 +78,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
     usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
+    hideMapSelectUI = (JCheckBox) getComponent("@hideMapSelectUI");
+    lockTokenEditOnStartup = (JCheckBox) getComponent("@lockTokenEditOnStartup");
+    lockPlayerMoveOnStartup = (JCheckBox) getComponent("@lockPlayerMovementOnStartup");
+    lockPlayerLibrary = (JCheckBox) getComponent("@disablePlayerLibrary");
 
     getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
     getRoleCombo().setSelectedItem(prefs.getRole());
@@ -109,6 +117,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
           playerPassword.setEnabled(!passwordFile);
           gmPassword.setEnabled(!passwordFile);
         });
+    hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
+    lockTokenEditOnStartup.setSelected(prefs.getLockTokenEditOnStart());
+    lockPlayerMoveOnStartup.setSelected(prefs.getLockPlayerMovementOnStart());
+    lockPlayerLibrary.setSelected(prefs.getPlayerLibraryLock());
 
     movementMetricCombo = getMovementMetric();
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
@@ -233,6 +245,10 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
                 prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
+                prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
+                prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
+                prefs.setPlayerLibraryLock(lockPlayerLibrary.isSelected());
                 JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
                 AppState.setUseWebRTC(
                     useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());

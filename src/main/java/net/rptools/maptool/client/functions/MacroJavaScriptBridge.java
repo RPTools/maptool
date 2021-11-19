@@ -29,7 +29,7 @@ import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.framework.*;
+import net.rptools.maptool.model.library.*;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;

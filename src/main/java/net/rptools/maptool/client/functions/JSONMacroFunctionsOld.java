@@ -95,7 +95,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
-    if (functionName.equals("json.fromList")) {
+    if (functionName.equalsIgnoreCase("json.fromList")) {
       String delim = ",";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
@@ -103,7 +103,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return fromStrList(parameters.get(0).toString(), delim);
     }
 
-    if (functionName.equals("json.path.read")) {
+    if (functionName.equalsIgnoreCase("json.path.read")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
@@ -131,7 +131,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.path.add")) {
+    if (functionName.equalsIgnoreCase("json.path.add")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
@@ -147,7 +147,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.path.set")) {
+    if (functionName.equalsIgnoreCase("json.path.set")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
@@ -163,7 +163,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.path.put")) {
+    if (functionName.equalsIgnoreCase("json.path.put")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 4, 4);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
@@ -180,7 +180,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.path.delete")) {
+    if (functionName.equalsIgnoreCase("json.path.delete")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
@@ -193,7 +193,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.fromStrProp")) {
+    if (functionName.equalsIgnoreCase("json.fromStrProp")) {
       String delim = ";";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
@@ -243,7 +243,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return jsonNames;
     }
 
-    if (functionName.equals("json.set")) {
+    if (functionName.equalsIgnoreCase("json.set")) {
       if (parameters.size() < 3) {
         throw new ParserException(
             I18N.getText(
@@ -252,11 +252,11 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONSet(asJSON(parameters.get(0)), parameters);
     }
 
-    if (functionName.equals("json.length")) {
+    if (functionName.equalsIgnoreCase("json.length")) {
       return JSONLength(asJSON(parameters.get(0)));
     }
 
-    if (functionName.equals("json.fields")) {
+    if (functionName.equalsIgnoreCase("json.fields")) {
       String delim = ",";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
@@ -264,11 +264,11 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONFields(asJSON(parameters.get(0)), delim);
     }
 
-    if (functionName.equals("json.type")) {
+    if (functionName.equalsIgnoreCase("json.type")) {
       return getJSONObjectType(parameters.get(0)).toString();
     }
 
-    if (functionName.equals("json.toList")) {
+    if (functionName.equalsIgnoreCase("json.toList")) {
       String delim = ",";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
@@ -276,7 +276,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONToList(asJSON(parameters.get(0)), delim);
     }
 
-    if (functionName.equals("json.toStrProp")) {
+    if (functionName.equalsIgnoreCase("json.toStrProp")) {
       String delim = ";";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
@@ -284,7 +284,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONToStrProp(asJSON(parameters.get(0)), delim);
     }
 
-    if (functionName.equals("json.get")) {
+    if (functionName.equalsIgnoreCase("json.get")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -293,7 +293,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONGet(asJSON(parameters.get(0)), parameters.subList(1, parameters.size()));
     }
 
-    if (functionName.equals("json.append")) {
+    if (functionName.equalsIgnoreCase("json.append")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -302,7 +302,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONAppend(asJSON(parameters.get(0)), parameters);
     }
 
-    if (functionName.equals("json.remove")) {
+    if (functionName.equalsIgnoreCase("json.remove")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -311,7 +311,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONDelete(asJSON(parameters.get(0)), parameters.get(1).toString());
     }
 
-    if (functionName.equals("json.indent")) {
+    if (functionName.equalsIgnoreCase("json.indent")) {
       int indent = 4;
       if (parameters.size() > 1) {
         try {
@@ -323,7 +323,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONIndent(asJSON(parameters.get(0)), indent);
     }
 
-    if (functionName.equals("json.contains")) {
+    if (functionName.equalsIgnoreCase("json.contains")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -334,7 +334,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
           : BigDecimal.ZERO;
     }
 
-    if (functionName.equals("json.sort")) {
+    if (functionName.equalsIgnoreCase("json.sort")) {
       if (parameters.size() > 2) {
         List<String> fields = new ArrayList<String>(parameters.size() - 2);
         for (Object o : parameters.subList(2, parameters.size())) {
@@ -355,15 +355,15 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       }
     }
 
-    if (functionName.equals("json.shuffle")) {
+    if (functionName.equalsIgnoreCase("json.shuffle")) {
       return JSONShuffle(asJSON(parameters.get(0)));
     }
 
-    if (functionName.equals("json.reverse")) {
+    if (functionName.equalsIgnoreCase("json.reverse")) {
       return JSONReverse(asJSON(parameters.get(0)));
     }
 
-    if (functionName.equals("json.evaluate")) {
+    if (functionName.equalsIgnoreCase("json.evaluate")) {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
@@ -385,7 +385,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONEvaluate((MapToolVariableResolver) resolver, json);
     }
 
-    if (functionName.equals("json.isEmpty")) {
+    if (functionName.equalsIgnoreCase("json.isEmpty")) {
       Object j = asJSON(parameters.get(0));
       if (j instanceof JSONObject) {
         return ((JSONObject) j).isEmpty() ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -399,7 +399,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return BigDecimal.ZERO;
     }
 
-    if (functionName.equals("json.equals")) {
+    if (functionName.equalsIgnoreCase("json.equals")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -452,7 +452,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return BigDecimal.ZERO;
     }
 
-    if (functionName.equals("json.count")) {
+    if (functionName.equalsIgnoreCase("json.count")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -473,7 +473,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONCount(asJSON(parameters.get(0).toString()), parameters.get(1), start);
     }
 
-    if (functionName.equals("json.indexOf")) {
+    if (functionName.equalsIgnoreCase("json.indexOf")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -494,19 +494,19 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONIndexOf(asJSON(parameters.get(0).toString()), parameters.get(1), start);
     }
 
-    if (functionName.equals("json.merge")) {
+    if (functionName.equalsIgnoreCase("json.merge")) {
       return JSONMerge(parameters);
     }
 
-    if (functionName.equals("json.unique")) {
+    if (functionName.equalsIgnoreCase("json.unique")) {
       return JSONUnique(asJSON(parameters.get(0).toString()));
     }
 
-    if (functionName.equals("json.removeAll")) {
+    if (functionName.equalsIgnoreCase("json.removeAll")) {
       return JSONRemoveAll(parameters);
     }
 
-    if (functionName.equals("json.removeFirst")) {
+    if (functionName.equalsIgnoreCase("json.removeFirst")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -515,7 +515,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONRemoveFirst(parameters);
     }
 
-    if (functionName.equals("json.union")) {
+    if (functionName.equalsIgnoreCase("json.union")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -524,7 +524,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONUnion(parameters);
     }
 
-    if (functionName.equals("json.difference")) {
+    if (functionName.equalsIgnoreCase("json.difference")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -533,7 +533,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONDifference(parameters);
     }
 
-    if (functionName.equals("json.intersection")) {
+    if (functionName.equalsIgnoreCase("json.intersection")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -542,7 +542,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONIntersection(parameters);
     }
 
-    if (functionName.equals("json.isSubset")) {
+    if (functionName.equalsIgnoreCase("json.isSubset")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -551,7 +551,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONIsSubset(parameters);
     }
 
-    if (functionName.equals("json.rolls")) {
+    if (functionName.equalsIgnoreCase("json.rolls")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -564,7 +564,7 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       return JSONRolls(parameters);
     }
 
-    if (functionName.equals("json.objrolls")) {
+    if (functionName.equalsIgnoreCase("json.objrolls")) {
       if (parameters.size() != 3) {
         throw new ParserException(
             I18N.getText(

@@ -19,19 +19,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class AreaTreeInspector extends JPanel {
   private final AreaTree tree;
   private final Color[] colors = {Color.gray, Color.blue, Color.yellow, Color.orange, Color.cyan};
 
-  private Point2D point;
+  private Point point;
 
   public AreaTreeInspector() {
     Area area = new Area();
@@ -61,11 +63,12 @@ public class AreaTreeInspector extends JPanel {
 
   @Override
   protected void paintComponent(Graphics g) {
+    final var geometryFactory = new GeometryFactory();
+    final var shapeWriter = new ShapeWriter();
+
     Dimension size = getSize();
     g.setColor(Color.white);
     g.fillRect(0, 0, size.width, size.height);
-
-    AreaOcean ocean = tree.getOcean();
 
     // paintOcean((Graphics2D)g, ocean, 0);
 
@@ -75,16 +78,18 @@ public class AreaTreeInspector extends JPanel {
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
       g2d.setColor(Color.blue);
 
-      ocean = tree.getOceanAt(point);
-      if (ocean != null && ocean.getBounds() != null) {
-        g2d.fill(ocean.getBounds());
+      var container = tree.getContainerAt(point);
+      if (container != null && container.getBounds() != null) {
+        g2d.fill(container.getBounds());
       }
       g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .25f));
       g2d.setColor(Color.red);
 
-      if (ocean != null) {
-        for (VisibleAreaSegment segment : ocean.getVisibleAreaSegments(point)) {
-          Area area = segment.getArea();
+      if (container != null) {
+        for (VisibleAreaSegment segment :
+            container.getVisionBlockingBoundarySegements(geometryFactory, point, false)) {
+          var blockedVision = segment.calculateVisionBlockedBySegment(Integer.MAX_VALUE / 2);
+          Area area = new Area(shapeWriter.toShape(blockedVision));
           if (area != null) {
             g2d.fill(area);
           }

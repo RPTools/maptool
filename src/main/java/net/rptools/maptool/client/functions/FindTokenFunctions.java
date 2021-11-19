@@ -311,14 +311,14 @@ public class FindTokenFunctions extends AbstractFunction {
       throws ParserException {
     boolean nameOnly = false;
 
-    if (!functionName.equals("currentToken")
+    if (!functionName.equalsIgnoreCase("currentToken")
         && !functionName.startsWith("getImpersonated")
         && !functionName.startsWith("getVisible")
         && !functionName.startsWith("getSelected")
         && !MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
-    if (functionName.equals("findToken")) {
+    if (functionName.equalsIgnoreCase("findToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String mapName = parameters.size() > 1 ? parameters.get(1).toString() : null;
       return findTokenId(parameters.get(0).toString(), mapName);
@@ -328,7 +328,7 @@ public class FindTokenFunctions extends AbstractFunction {
     FindType findType;
     String findArgs = null;
     ZoneRenderer zoneRenderer = null;
-    if (functionName.equals("currentToken")) {
+    if (functionName.equalsIgnoreCase("currentToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.CURRENT;
     } else if (functionName.startsWith("getSelected")) {

@@ -96,10 +96,11 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
         if (isEraser(e)) {
           getZone().removeTopology(area);
           MapTool.serverCommand()
-              .removeTopology(getZone().getId(), area, getZone().getTopologyMode());
+              .removeTopology(getZone().getId(), area, getZone().getTopologyTypes());
         } else {
           getZone().addTopology(area);
-          MapTool.serverCommand().addTopology(getZone().getId(), area, getZone().getTopologyMode());
+          MapTool.serverCommand()
+              .addTopology(getZone().getId(), area, getZone().getTopologyTypes());
         }
         renderer.repaint();
         // TODO: send this to the server

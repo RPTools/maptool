@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.assetpanel;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -63,6 +61,8 @@ public class AssetPanel extends JComponent {
   private final AssetPanelModel assetPanelModel;
   private Timer updateFilterTimer;
   private JProgressBar imagePanelProgressBar;
+  private JLabel assetsDisabledWarning;
+  private JPanel topPane;
 
   public boolean isLimitReached() {
     return limitReached;
@@ -82,6 +82,14 @@ public class AssetPanel extends JComponent {
     this(controlName, model, JSplitPane.VERTICAL_SPLIT);
   }
 
+  public void disableAssets() {
+    ((CardLayout) (this.topPane.getLayout())).show(this.topPane, "DISABLED");
+  }
+
+  public void enableAssets() {
+    ((CardLayout) (this.topPane.getLayout())).show(this.topPane, "ENABLED");
+  }
+
   public AssetPanel(String controlName, AssetPanelModel model, int splitPaneDirection) {
     assetPanelModel = model;
     model.addImageUpdateObserver(this);
@@ -89,6 +97,11 @@ public class AssetPanel extends JComponent {
     assetTree = new AssetTree(this);
     createImagePanel();
 
+    assetsDisabledWarning = new JLabel();
+    assetsDisabledWarning.setText(I18N.getText("msg.info.assetsDisabled"));
+    this.topPane = new JPanel(new CardLayout());
+    JPanel disabledPane = new JPanel();
+    disabledPane.add(assetsDisabledWarning);
     JSplitPane splitPane = new JSplitPane(splitPaneDirection);
     splitPane.setContinuousLayout(true);
 
@@ -100,7 +113,9 @@ public class AssetPanel extends JComponent {
     new TreePreferences(AppConstants.APP_NAME, controlName, assetTree);
 
     setLayout(new GridLayout());
-    add(splitPane);
+    topPane.add(splitPane, "ENABLED");
+    topPane.add(disabledPane, "DISABLED");
+    add(topPane);
   }
 
   private void createImagePanel() {

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -34,6 +35,7 @@ import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -244,7 +246,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_LOAD_CAMPAIGN_CALLBACK);
     String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
     for (Token handler : libTokens) {
-      EventMacroUtil.callEventHandler(
+      EventMacroUtil.callEventHandlerOld(
           prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
     }
   }
@@ -376,17 +378,25 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       } else {
         // token macro
         try {
-          Token libToken = MapTool.getParser().getTokenMacroLib(macroLocation);
-          buttonProps = (libToken == null) ? null : libToken.getMacro(macroName, false);
-        } catch (ParserException e) {
+          var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
+          if (lib.isEmpty()) {
+            return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);
+          }
+          var library = lib.get();
+          var macroInfo = library.getMTScriptMacroInfo(macroName).get();
+          if (macroInfo.isEmpty()) {
+            return I18N.getText("msg.error.udf.tooltip.missingTarget", theDef.macroName);
+          }
+
+          return macroInfo.get().description();
+
+        } catch (ExecutionException | InterruptedException e) {
           // duplicate lib:token, not a Lib:token, not visible to player, etc.
           return I18N.getText(
               "msg.error.udf.tooltip.loading", theDef.macroName, e.getLocalizedMessage());
         }
       }
-      return (buttonProps == null)
-          ? I18N.getText("msg.error.udf.tooltip.missingTarget", theDef.macroName)
-          : buttonProps.getEvaluatedToolTip();
+      return I18N.getText("msg.error.udf.tooltip.missingTarget", theDef.macroName);
     } else {
       log.warn("Looking up tooltip for {}, but that UDF that doesn't exist?", functionName);
       return null;

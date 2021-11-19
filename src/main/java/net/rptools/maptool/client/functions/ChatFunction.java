@@ -56,7 +56,7 @@ public class ChatFunction extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
-    if (functionName.equals("broadcast")) {
+    if (functionName.equalsIgnoreCase("broadcast")) {
       return broadcast(resolver, parameters);
     } else {
       throw new ParserException("Unknown function: " + functionName);
