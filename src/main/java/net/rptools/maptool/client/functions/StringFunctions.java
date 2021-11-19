@@ -273,7 +273,13 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     if (functionName.equalsIgnoreCase("isNumber")) {
-      if (NumberUtils.isParsable(parameters.get(0).toString().trim())) {
+      String str = parameters.get(0).toString().trim();
+      // isParsable() returns false for leading + so stripping
+      // off the first one. Any extras will return false.
+      if (str.length() > 1 && str.charAt(0) == '+') {
+        str = str.substring(1);
+      }
+      if (NumberUtils.isParsable(str)) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
