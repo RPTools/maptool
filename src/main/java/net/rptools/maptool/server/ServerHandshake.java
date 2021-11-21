@@ -409,7 +409,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
     }
 
     if (playerDatabase.getAuthMethod(player) == AuthMethod.ASYMMETRIC_KEY) {
-      sendAsymmetricKeyAuthType();
+      var state = sendAsymmetricKeyAuthType();
+      setCurrentState(state);
     } else {
       handshakeChallenges = new HandshakeChallenge[2];
       if (playerDatabase.supportsRolePasswords()) {
@@ -417,8 +418,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
       } else {
         sendSharedPasswordAuthType();
       }
+      setCurrentState(State.AwaitingClientAuth);
     }
-    currentState = State.AwaitingClientAuth;
   }
 
   private void requestPublicKey(String playerName) {
@@ -499,6 +500,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   /**
    * Send the authentication type message when using asymmetric keys
    *
+   * @return the new state for the state machine.
    * @throws ExecutionException when there is an error fetching the public key.
    * @throws InterruptedException when there is an error fetching the public key.
    * @throws NoSuchPaddingException when there is an error during encryption.
@@ -507,20 +509,20 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws BadPaddingException when there is an error during encryption.
    * @throws InvalidKeyException when there is an error during encryption.
    */
-  private void sendAsymmetricKeyAuthType()
+  private State sendAsymmetricKeyAuthType()
       throws ExecutionException, InterruptedException, NoSuchPaddingException,
           IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
           InvalidKeyException {
     handshakeChallenges = new HandshakeChallenge[1];
-    CipherUtil cipherUtil = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
-    if (cipherUtil == null) {
+    if (!playerDatabase.hasPublicKey(player, playerPublicKeyMD5).join()) {
       if (useEasyConnect) {
         requestPublicKey(player.getName());
       } else {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY);
       }
-      return;
+      return State.AwaitingPublicKey;
     }
+    CipherUtil cipherUtil = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
     handshakeChallenges[0] =
         HandshakeChallenge.createChallenge(player.getName(), password, cipherUtil.getKey());
@@ -531,6 +533,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
     sendMessage(handshakeMsg);
+    return State.AwaitingClientAuth;
   }
 
   /**
