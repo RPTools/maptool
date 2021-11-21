@@ -196,10 +196,6 @@ public class AppPreferences {
   private static final String KEY_WEB_END_POINT_PORT = "webEndPointPort";
   private static final int DEFAULT_WEB_END_POINT = 654555;
 
-  private static final String KEY_USE_EASY_CONNECT = "useEasyConnect";
-
-  private static final boolean DEFAULT_USE_EASY_CONNECT = false;
-
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
   }
@@ -1289,14 +1285,6 @@ public class AppPreferences {
 
   public static int getWebEndPointPort() {
     return prefs.getInt(KEY_WEB_END_POINT_PORT, DEFAULT_WEB_END_POINT);
-  }
-
-  public static void setUseEasyConnect(boolean value) {
-    prefs.putBoolean(KEY_USE_EASY_CONNECT, value);
-  }
-
-  public static boolean getUseEasyConnect() {
-    return prefs.getBoolean(KEY_USE_EASY_CONNECT, DEFAULT_USE_EASY_CONNECT);
   }
 
   // Based off vision type enum in Zone.java, this could easily get tossed somewhere else if

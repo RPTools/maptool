@@ -22,10 +22,17 @@ import javax.swing.table.TableCellRenderer;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 
+/** Cell renderer for the {@link PlayerPendingApprovalTableModel}. */
 public class PlayerPendingApprovalCellRenderer implements TableCellRenderer {
 
+  /** The callback to call when the user changes the role. */
   private final BiConsumer<PlayerAwaitingApproval, Role> updateRole;
 
+  /**
+   * Creates a new {@link PlayerPendingApprovalCellRenderer}.
+   *
+   * @param updateRole the callback to call when the user changes the role.
+   */
   PlayerPendingApprovalCellRenderer(BiConsumer<PlayerAwaitingApproval, Role> updateRole) {
     this.updateRole = updateRole;
   }

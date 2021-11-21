@@ -23,6 +23,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
@@ -70,7 +71,7 @@ public class CellContents {
     pinPanel.add(pinLabel);
     pinPanel.add(Box.createHorizontalGlue());
     pinPanel.add(pin);
-    pin.setText(Integer.toString(player.pin()));
+    pin.setText(player.pin());
 
     // Role Panel
     JLabel roleLabel = new JLabel("Role");
@@ -96,9 +97,11 @@ public class CellContents {
     buttonPanel.setOpaque(false);
     buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
     JButton approveButton = new JButton("Approve");
+    approveButton.addActionListener(l -> player.approveCallback().accept(player));
     buttonPanel.add(approveButton);
     buttonPanel.add(Box.createHorizontalStrut(40));
     JButton denyButton = new JButton("Deny");
+    denyButton.addActionListener(l -> player.denyCallback().accept(player));
     buttonPanel.add(denyButton);
 
     gmCheckBox.addActionListener(
@@ -126,6 +129,7 @@ public class CellContents {
   }
 
   private void approve(PlayerAwaitingApproval player, Player.Role role) {
+    MapTool.getFrame().getConnectionPanel().removeAwaitingApproval(player.name());
     player
         .approveCallback()
         .accept(
@@ -133,11 +137,13 @@ public class CellContents {
                 player.name(),
                 player.pin(),
                 role,
+                player.publicKey(),
                 player.approveCallback(),
                 player.denyCallback()));
   }
 
   private void deny(PlayerAwaitingApproval player) {
+    MapTool.getFrame().getConnectionPanel().removeAwaitingApproval(player.name());
     player.denyCallback().accept(player);
   }
 }

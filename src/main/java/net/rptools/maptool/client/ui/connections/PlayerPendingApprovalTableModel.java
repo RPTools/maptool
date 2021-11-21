@@ -16,12 +16,20 @@ package net.rptools.maptool.client.ui.connections;
 
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 
-public class PlayerPendingApprovalTableModel extends AbstractTableModel {
+/** The Table Model for the Player Pending Approval Table. */
+class PlayerPendingApprovalTableModel extends AbstractTableModel {
 
+  /** The list of players awaiting approval. */
   private final List<PlayerAwaitingApproval> players;
 
+  /**
+   * Creates a new instance of the PlayerPendingApprovalTableModel.
+   *
+   * @param players the list of players awaiting approval.
+   */
   public PlayerPendingApprovalTableModel(List<PlayerAwaitingApproval> players) {
     this.players = players;
   }
@@ -49,5 +57,10 @@ public class PlayerPendingApprovalTableModel extends AbstractTableModel {
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return PlayerAwaitingApproval.class;
+  }
+
+  @Override
+  public String getColumnName(int columnIndex) {
+    return I18N.getString("pendingConnection.column.title");
   }
 }

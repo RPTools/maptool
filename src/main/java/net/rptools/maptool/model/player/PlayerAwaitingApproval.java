@@ -18,7 +18,8 @@ import java.util.function.Consumer;
 
 public record PlayerAwaitingApproval(
     String name,
-    int pin,
+    String pin,
     Player.Role role,
+    String publicKey,
     Consumer<PlayerAwaitingApproval> approveCallback,
     Consumer<PlayerAwaitingApproval> denyCallback) {}

@@ -23,10 +23,17 @@ import javax.swing.table.TableCellEditor;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 
+/** The cell editor for the player awaiting approval table. */
 public class PlayerPendingApprovalCellEditor extends AbstractCellEditor implements TableCellEditor {
 
+  /** Call back for when the user changes the role. */
   private final BiConsumer<PlayerAwaitingApproval, Role> updateRole;
 
+  /**
+   * Creates a new cell editor.
+   *
+   * @param updateRole the callback for when the user changes the role.
+   */
   PlayerPendingApprovalCellEditor(BiConsumer<PlayerAwaitingApproval, Role> updateRole) {
     this.updateRole = updateRole;
   }
