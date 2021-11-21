@@ -68,7 +68,6 @@ import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.ConnectionInfoDialog;
@@ -86,6 +85,7 @@ import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
+import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.FTPClient;
 import net.rptools.maptool.client.ui.io.FTPTransferObject;
@@ -1294,7 +1294,7 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
-          Player selectedPlayer = (Player) panel.getSelectedValue();
+          Player selectedPlayer = panel.getSelectedPlayer();
 
           if (selectedPlayer == null) {
             MapTool.showError("msg.error.mustSelectPlayerFirst");
@@ -1330,7 +1330,7 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
-          Player selectedPlayer = (Player) panel.getSelectedValue();
+          Player selectedPlayer = panel.getSelectedPlayer();
 
           if (selectedPlayer == null) {
             MapTool.showError("msg.error.mustSelectPlayerFirst");
@@ -2252,7 +2252,8 @@ public class AppActions {
                         playerPassword,
                         serverProps.getPort(),
                         serverProps.getRPToolsName(),
-                        "localhost");
+                        "localhost",
+                        serverProps.getUseEasyConnect());
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();

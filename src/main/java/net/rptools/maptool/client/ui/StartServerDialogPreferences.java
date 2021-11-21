@@ -44,6 +44,8 @@ public class StartServerDialogPreferences {
   private static final String KEY_WALKER_METRIC = "movementMetric";
   private static final String KEY_USE_INDIVIDUAL_FOW = "useIndividualFOW";
   private static final String KEY_AUTO_REVEAL_ON_MOVE = "autoRevealOnMovement";
+
+  private static final String KEY_USE_EASY_CONNECT = "useEasyConnect";
   private static final String KEY_USE_PASSWORD_FILE = "usePasswordFile";
   private static final String KEY_HIDE_MAP_SELECT_UI = "hideMapSelectUI";
   private static final String KEY_START_LOCKED_TOKEN_EDIT = "lockTokenEditOnStartup";
@@ -216,6 +218,14 @@ public class StartServerDialogPreferences {
 
   public void setUsePasswordFile(boolean flag) {
     prefs.putBoolean(KEY_USE_PASSWORD_FILE, flag);
+  }
+
+  public boolean getUseEasyConnect() {
+    return prefs.getBoolean(KEY_USE_EASY_CONNECT, false);
+  }
+
+  public void setUseEasyConnect(boolean flag) {
+    prefs.putBoolean(KEY_USE_EASY_CONNECT, flag);
   }
 
   public boolean getMapSelectUIHidden() {
