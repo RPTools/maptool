@@ -28,6 +28,7 @@ import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.server.proto.PlayerConnectedMsg;
 import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
+import net.rptools.maptool.server.proto.SetCampaignMsg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -108,12 +109,9 @@ public class MapToolServerConnection
         .getConnection()
         .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
 
-    // if (!server.isHostId(player.getName())) {
-    // Don't bother sending the campaign file if we're hosting it ourselves
+    var msg2 = SetCampaignMsg.newBuilder().setCampaign(server.getCampaign().toDto());
     server
-        .getConnection()
-        .callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
-    // }
+        .getConnection().sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
   public void connectionRemoved(ClientConnection conn) {

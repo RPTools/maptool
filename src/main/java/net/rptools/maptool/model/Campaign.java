@@ -38,6 +38,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -712,5 +713,13 @@ public class Campaign {
 
   public CampaignExportDialog getExportCampaignDialog() {
     return campaignExportDialog;
+  }
+
+  public static Campaign fromDto(CampaignDto dto) {
+    return null;
+  }
+
+  public CampaignDto toDto() {
+    return null;
   }
 }

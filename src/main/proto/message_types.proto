@@ -195,3 +195,13 @@ message SendTokensToBackMsg {
   string zone_guid = 1;
   repeated string token_guids = 2;
 }
+
+message SetBoardMsg {
+  string zone_guid = 1;
+  IntPointDto point = 2;
+  string asset_id = 3;
+}
+
+message SetCampaignMsg {
+  CampaignDto campaign = 1;
+}

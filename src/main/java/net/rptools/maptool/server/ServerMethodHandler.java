@@ -164,8 +164,13 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getRenameZoneMsg());
           sendToAllClients(msg);
         }
+        case SET_BOARD_MSG -> sendToClients(id, msg);
         case RESTORE_ZONE_VIEW_MSG -> sendToClients(id, msg);
         case SEND_TOKENS_TO_BACK_MSG -> handle(msg.getSendTokensToBackMsg());
+        case SET_CAMPAIGN_MSG -> {
+          handle(msg.getSetCampaignMsg());
+          sendToClients(id, msg);
+        }
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -175,6 +180,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(SetCampaignMsg msg) {
+    server.setCampaign(Campaign.fromDto(msg.getCampaign()));
   }
 
   private void handle(SendTokensToBackMsg msg) {
@@ -369,9 +378,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
           break;
-        case setCampaign:
-          setCampaign((Campaign) context.get(0));
-          break;
         case setCampaignName:
           setCampaignName((String) context.get(0));
           break;
@@ -432,10 +438,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case setVisionType:
           setVisionType(context.getGUID(0), (VisionType) context.get(1));
-          break;
-        case setBoard:
-          setBoard(
-              context.getGUID(0), (MD5Key) context.get(1), context.getInt(2), context.getInt(3));
           break;
         case updateCampaignMacros:
           updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
@@ -736,11 +738,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void setCampaign(Campaign campaign) {
-    server.setCampaign(campaign);
-    forwardToClients();
-  }
-
   private void setCampaignName(String name) {
     server.getCampaign().setName(name);
     forwardToClients();
@@ -844,10 +841,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
     MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
-    forwardToClients();
-  }
-
-  private void setBoard(GUID zoneGUID, MD5Key mapId, int x, int y) {
     forwardToClients();
   }
 

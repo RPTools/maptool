@@ -33,6 +33,220 @@ message ServerPolicyDto {
   bool lock_player_library = 17;
 }
 
+message CampaignDto {
+  string id = 1;
+  string name = 2;
+  bool has_used_fog_toolbar = 3;
+  CampaignPropertiesDto properties = 4;
+  LocationDto export_location = 5;
+  map<string, bool> export_settings = 6;
+  int32 macro_button_last_index = 7;
+  int32 gm_macro_button_last_index = 8;
+  repeated MacroButtonPropertiesDto macro_button_properties = 9;
+  repeated ZoneDto zones = 10;
+}
+
+message LookupTableDto {
+  repeated LookupEntryDto entries = 1;
+  string name = 2;
+  string default_roll = 3;
+  string table_image = 4;
+  bool visible = 5;
+  bool allow_lookup = 6;
+  bool pick_once = 7;
+}
+
+message LookupEntryDto {
+  int32 min = 1;
+  int32 max = 2;
+  bool picked = 3;
+  string value = 4;
+  string image_id = 55;
+}
+
+message LightSourceDto {
+  enum LightTypeDto {
+    NORMAL = 0;
+    AURA = 1;
+  }
+  repeated LightDto lights = 1;
+  string name = 2;
+  string id = 3;
+  LightTypeDto type = 4;
+  ShapeTypeDto shape_type = 5;
+  int32 lumens = 6;;
+  bool scale_with_token = 7;
+}
+
+enum ShapeTypeDto {
+    SQUARE = 0;
+    CIRCLE = 1;
+    CONE = 2;
+    HEX = 3;
+    GRID = 4;
+}
+
+message LightDto {
+  DrawablePaintDto paint = 1;
+  double facing_offset = 2;
+  double radius = 3;
+  double arc_angle = 4;
+  ShapeTypeDto shape = 5;
+  bool is_gm = 6;
+  bool owner_only = 7;
+}
+
+message LocationDto {
+  oneof LocationTyp {
+    LocalLocationDto local_location = 1;
+    FtpLocation ftp_location = 2;
+  }
+}
+
+message LocalLocationDto {
+  string local_file = 1;
+}
+
+message FtpLocation {
+  string user_name = 1;
+  string host_name = 2;
+  string path = 3;
+  bool binary = 4;
+}
+
+message CampaignPropertiesDto {
+  map<string, TokenPropertyListDto> token_types = 1;
+  string default_sight_type = 2;
+  repeated BooleanTokenOverlayDto token_states = 3;
+  repeated BarTokenOverlayDto token_bars = 4;
+  map<string, string> character_sheets = 5;
+  bool initiative_owner_permissions = 6;
+  bool initiative_movementLock = 7;
+  bool initiative_use_reverse_sort = 8;
+  bool initiative_panel_buttons_disabled = 9;
+  map<string, LightSourceListDto> light_sources = 10;
+  repeated string remote_repositories = 11;
+  repeated LookupTableDto lookup_tables = 12;
+  repeated SightTypeDto sight_types = 13;
+}
+
+message SightTypeDto {
+  string name = 1;
+  double multiplier = 2;
+  LightSourceDto personal_light_source = 3;
+  ShapeTypeDto shape = 4;
+  int32 arc = 5;
+  float distance = 6;
+  int32 offset = 7;
+  bool scale_with_token = 8;
+}
+
+message TokenPropertyDto {
+  string name = 1;
+  string short_name = 2;
+  bool high_priority = 3;
+  bool owner_only = 4;
+  bool gm_only = 5;
+  string default_value = 6;
+}
+
+message BarTokenOverlayDto {
+  enum SideDto {
+    TOP = 0;
+    BOTTOM = 1;
+    LEFT = 2;
+    RIGHT = 3;
+  }
+  enum BarTokenOverlayTypeDto {
+    MULTIPLE_IMAGE = 0;
+    SINGLE_IMAGE = 1;
+    DRAWN = 2;
+    TWO_TONE = 3;
+    TWO_IMAGES = 4;
+  }
+  string name = 1;
+  int32 order = 2;
+  string group = 3;
+  bool mouse_over = 4;
+  int32 opacity = 5;
+  bool show_gm = 6;
+  bool show_owner = 7;
+  bool show_others = 8;
+  int32 increments = 9;
+  SideDto side = 10;
+  repeated string asset_ids = 11;
+  int32 color = 12;
+  int32 bg_color = 13;
+  int32 thickness = 14;
+  BarTokenOverlayTypeDto type = 15;
+}
+
+enum QuadrantDto {
+  NORTH_EAST = 0;
+  NORTH_WEST = 1;
+  SOUTH_EAST = 2;
+  SOUTH_WEST = 3;
+}
+
+message BooleanTokenOverlayDto {
+  enum BooleanTokenOverlayTypeDto {
+    X = 0;
+    YIELD = 1;
+    O = 2;
+    COLOR_DOT = 3;
+    DIAMOND = 4;
+    TRIANGLE = 5;
+    CROSS = 6;
+    FLOW_COLOR_DOT = 7;
+    FLOW_DIAMOND = 8;
+    FLOW_COLOR_SQUARE = 9;
+    FLOW_YIELD = 10;
+    SHADED = 11;
+    IMAGE = 12;
+    FLOW_IMAGE = 13;
+    CORNER_IMAGE = 14;
+  }
+  string name = 1;
+  int32 order = 2;
+  string group = 3;
+  bool mouse_over = 4;
+  int32 opacity = 5;
+  bool show_gm = 6;
+  bool show_owner = 7;
+  bool show_others = 8;
+  int32 color = 9;
+  StrokeDto stroke = 10;
+  QuadrantDto quadrant = 11;
+  int32 grid_size = 12;
+  string asset_id = 13;
+  BooleanTokenOverlayTypeDto type = 14;
+}
+
+message StrokeDto {
+  enum CapDto {
+    CAP_BUTT = 0;
+    CAP_ROUND = 1;
+    CAP_SQUARE = 2;
+  }
+  enum JoinDto {
+    JOIN_MITER = 0;
+    JOIN_ROUND = 1;
+    JOIN_BEVEL = 2;
+  }
+  float width = 1;
+  CapDto cap = 2;
+  JoinDto join = 3;
+}
+
+message TokenPropertyListDto {
+  repeated TokenPropertyDto properties = 1;
+}
+
+message LightSourceListDto {
+  repeated LightSourceDto light_sources = 1;
+}
+
+
 enum WalkerMetricDto {
   NO_DIAGONALS = 0;
   MANHATTAN = 1;

@@ -52,5 +52,7 @@ message Message {
     RenameZoneMsg rename_zone_msg = 35;
     RestoreZoneViewMsg restore_zone_view_msg = 36;
     SendTokensToBackMsg send_tokens_to_back_msg = 37;
+    SetBoardMsg set_board_msg = 38;
+    SetCampaignMsg set_campaign_msg = 39;
   }
 }

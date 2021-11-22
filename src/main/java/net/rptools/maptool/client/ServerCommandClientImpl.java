@@ -53,6 +53,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
+import net.rptools.maptool.server.proto.drawing.IntPointDto;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -87,7 +88,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void setCampaign(Campaign campaign) {
     try {
       campaign.setBeingSerialized(true);
-      makeServerCall(COMMAND.setCampaign, campaign);
+      var msg = SetCampaignMsg.newBuilder().setCampaign(campaign.toDto());
+      makeServerCall(Message.newBuilder().setSetCampaignMsg(msg).build());
     } finally {
       campaign.setBeingSerialized(false);
     }
@@ -462,7 +464,9 @@ public class ServerCommandClientImpl implements ServerCommand {
     // there seem to be other ways to upload textures (?) (e.g. in MapToolUtil)
     putAsset(AssetManager.getAsset(mapAssetId));
     // Second, tell the client to change the zone's board info
-    makeServerCall(COMMAND.setBoard, zoneGUID, mapAssetId, x, y);
+    var msg = SetBoardMsg.newBuilder().setZoneGuid(zoneGUID.toString())
+            .setAssetId(mapAssetId.toString()).setPoint(IntPointDto.newBuilder().setY(x).setY(y));
+    makeServerCall(Message.newBuilder().setSetBoardMsg(msg).build());
   }
 
   /*

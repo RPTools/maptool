@@ -20,7 +20,6 @@ public class ClientCommand {
     // @formatter:off
     startAssetTransfer,
     updateAssetTransfer,
-    setCampaign,
     updateTokenProperty,
     updateDrawing,
     setZoneGridSize,
@@ -43,7 +42,6 @@ public class ClientCommand {
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental chat notification
-    setBoard,
     updateExposedAreaMeta,
     setCampaignName,
     addAddOnLibrary,

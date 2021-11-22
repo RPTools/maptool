@@ -126,13 +126,34 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case REMOVE_ZONE_MSG -> handle(msg.getRemoveZoneMsg());
         case RENAME_ZONE_MSG -> handle(msg.getRenameZoneMsg());
         case RESTORE_ZONE_VIEW_MSG -> handle(msg.getRestoreZoneViewMsg());
-
+        case SET_BOARD_MSG -> handle(msg.getSetBoardMsg());
+        case SET_CAMPAIGN_MSG -> handle(msg.getSetCampaignMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(SetCampaignMsg msg) {
+    Campaign campaign = Campaign.fromDto(msg.getCampaign());
+    MapTool.setCampaign(campaign);
+
+    // Hide the "Connecting" overlay
+    MapTool.getFrame().hideGlassPane();
+  }
+
+  private void handle(SetBoardMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+
+          Point boardXY = Mapper.map(msg.getPoint());
+          var assetId = new MD5Key(msg.getAssetId());
+          zone.setBoard(boardXY, assetId);
+        });
   }
 
   private void handle(RestoreZoneViewMsg msg) {
@@ -667,14 +688,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case setCampaign:
-              Campaign campaign = (Campaign) parameters[0];
-              MapTool.setCampaign(campaign);
-
-              // Hide the "Connecting" overlay
-              MapTool.getFrame().hideGlassPane();
-              return;
-
             case setCampaignName:
               MapTool.getCampaign().setName((String) parameters[0]);
               MapTool.getFrame().setTitle();
@@ -897,14 +910,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 }
                 MapTool.getFrame().refresh();
               }
-              return;
-
-            case setBoard:
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-
-              Point boardXY = new Point((Integer) parameters[2], (Integer) parameters[3]);
-              zone.setBoard(boardXY, (MD5Key) parameters[1]);
               return;
 
             case updateCampaignMacros:
