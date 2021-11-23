@@ -1,15 +1,66 @@
 class XMLHttpRequest {
     constructor() {
 	this._req = MapTool.makeXMLHttpRequest(this, window.location.href);
-	this.readyState = 0;
 	this.response = null;
-	this.responseText = null;
 	this.responseType = "text";
-	this.responseXML = null;
-	this.status = 0;
-	this.statusText = "";
+	this.onreadystatechange = function(){};
 	return this;
     }
+
+    get responseText() {
+	if (this.responseType == "text" || this.responseType == "") {
+	    return this.response;
+	}
+	throw new DOMException("Failed to read the 'responseText' property from 'XMLHttpRequest': The value is only accessible if the object's 'responseType' is '' or 'text'");
+    }
+
+    getStatus() {
+	return this._req.getStatus();
+    }
+
+    get statusText() {
+	let s = this._req.getStatus();
+	return s.substring(s.indexOf(' ') + 1);
+    }
+
+    get readyState() {
+	return this._req.getReadyState();
+    }
+
+    set responseType(typ) {
+	this._req.setResponseType(typ);
+    }
+
+    get responseType() {
+	return this._req.getResponseType();
+    }
+
+    _makeBlob(s) {
+	this.response = new Blob([s]);
+    }
+
+    _makeArrayBuffer(s) {
+	let buf = new ArrayBuffer(s.length * 2);
+	let bufView = new Uint16Array(buf);
+	for (let i = 0, len = s.length; i < len; i++) {
+	    bufView[i] = s.charCodeAt(i);
+	}
+	this.resposne = buf;
+    }
+
+    _makeDocument(s) {
+	let parser = new DOMParser();
+	this.response = parser.parseFromString(s, "text/html");
+    }
+
+    _makeJson(s) {
+	this.response = JSON.parse(s);
+    }
+
+    _makeText(s) {
+	this.response = s;
+    }
+    
     
     open(method, uri, ...rest) {
 	switch (rest.length) {
@@ -23,8 +74,11 @@ class XMLHttpRequest {
 	    break;
 	    
 	}
-	
 	this._req.open(method, uri, ...rest);
+    }
+
+    _warnAsync() {
+	console.log("WARNING: Synchronous XMLHttpRequests can negatively degrade the user experience and are discouraged!");
     }
 
     send(body) {
