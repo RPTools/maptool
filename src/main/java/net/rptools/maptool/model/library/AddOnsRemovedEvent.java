@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model.library;
 
-/** Library types */
-public enum LibraryType {
-  TOKEN,
-  ADD_ON
-}
+import java.util.Set;
+
+public record AddOnsRemovedEvent(Set<LibraryInfo> addOns) {}

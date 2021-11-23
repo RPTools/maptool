@@ -207,7 +207,7 @@ public class LibraryManager {
     List<Library> libraries =
         switch (libraryType) {
           case TOKEN -> libraryTokenManager.getLibraries().get();
-          case DROP_IN -> addOnLibraryManager.getLibraries();
+          case ADD_ON -> addOnLibraryManager.getLibraries();
         };
 
     var libInfo = new ArrayList<LibraryInfo>();

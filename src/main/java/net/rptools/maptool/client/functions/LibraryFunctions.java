@@ -59,7 +59,7 @@ public class LibraryFunctions extends AbstractFunction {
       switch (fName) {
         case "library.listaddonlibraries" -> {
           FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-          return librariesAsJson(libraryManager.getLibraries(LibraryType.DROP_IN));
+          return librariesAsJson(libraryManager.getLibraries(LibraryType.ADD_ON));
         }
         case "library.getinfo" -> {
           FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
