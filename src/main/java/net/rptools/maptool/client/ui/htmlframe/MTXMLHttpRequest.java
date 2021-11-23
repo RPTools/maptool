@@ -146,7 +146,7 @@ public class MTXMLHttpRequest {
         break;
     }
     readyState = 4;
-    this.ctx.call("onreadystatechange");
+    this.readyStateChanged();
   }
 
   public void abort() {
