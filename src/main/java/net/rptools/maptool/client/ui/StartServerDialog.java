@@ -54,6 +54,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JTextField gmPassword;
   private JTextField playerPassword;
   private JCheckBox usePasswordFile;
+  private JCheckBox useEasyConnect;
 
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
@@ -77,6 +78,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     generatePlayerPassword = (JButton) getComponent("@generatePlayerPassword");
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
+    useEasyConnect = (JCheckBox) getComponent("@useEasyConnect");
     usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
     hideMapSelectUI = (JCheckBox) getComponent("@hideMapSelectUI");
     lockTokenEditOnStartup = (JCheckBox) getComponent("@lockTokenEditOnStartup");
@@ -109,13 +111,25 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
         });
 
     boolean usePf = usePasswordFile.isSelected();
+    boolean useEC = useEasyConnect.isSelected();
     playerPassword.setEnabled(!usePf);
     gmPassword.setEnabled(!usePf);
+    usePasswordFile.setEnabled(!useEC);
     usePasswordFile.addItemListener(
         e -> {
           boolean passwordFile = usePasswordFile.isSelected();
           playerPassword.setEnabled(!passwordFile);
           gmPassword.setEnabled(!passwordFile);
+        });
+    useEasyConnect.addItemListener(
+        e -> {
+          boolean easyConnect = useEasyConnect.isSelected();
+          if (easyConnect) {
+            usePasswordFile.setSelected(true);
+            usePasswordFile.setEnabled(false);
+          } else {
+            usePasswordFile.setEnabled(true);
+          }
         });
     hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
     lockTokenEditOnStartup.setSelected(prefs.getLockTokenEditOnStart());
@@ -245,6 +259,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
                 prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                prefs.setUseEasyConnect(useEasyConnect.isSelected());
                 prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
                 prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
                 prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
