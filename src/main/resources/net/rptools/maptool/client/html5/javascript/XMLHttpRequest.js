@@ -105,3 +105,59 @@ class XMLHttpRequest {
     }
     
 }
+
+
+function fetch(target, optionObject) {
+    let request;
+    if (target instanceof Request) {
+	request = target;
+    }
+    else { // target is a URI, extra options are in the second argument
+	if (optionObject) {
+	    request = new Request(target, optionObject);
+	}
+	else {
+	    request = new Request(target);
+	}
+    }
+
+    let x = new XMLHttpRequest();
+    x.open(request.method, request.url);
+    for (let header of request.headers) {
+	x.setRequestHeader(header[0], header[1])
+    }
+    let body = request.text();
+
+    let _resolve;
+    let _reject;
+    let p = new Promise(
+	(resolve, reject)=> {
+	    _resolve = resolve;
+	    _reject = reject;
+	}
+    );
+
+    x.onreadystatechange = () => {
+	try {
+	    if (x.readyState == 4) {
+		let status = parseInt(x.getStatus().trim().split(' ')[0]);
+		let jheaders = {};
+		x._req._getResponseHeaders(jheaders);
+		_resolve(new Response(x.response, {status: status, statusText: x.statusText, headers: jheaders}));
+	    }
+	}
+	catch (e) {
+	    console.log("135: " + e)
+	    console.log(e.stack)
+	}
+    };
+    try {
+	x.send(body);
+    }
+    catch (e) {
+	_reject(e);
+    }
+    return p;
+
+
+}
