@@ -14,16 +14,24 @@
  */
 package net.rptools.maptool.model.library.url;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.util.threads.*;
 
 public class RequestHandler {
   public static String processRequest(
+  private static final Gson gson = new Gson();
+
       String method,
       URI uri,
       String _body,
@@ -38,24 +46,53 @@ public class RequestHandler {
         responseHeaders.put("Status", "0");
         return "";
       }
-      System.out.println("39");
       try {
         String result =
+        Instant instant = Instant.now();
+        String formattedTime =
+            DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(instant);
+        responseHeaders.put("Server", "Maptool Macro Server");
+        responseHeaders.put("Date", formattedTime);
+        responseHeaders.put("Content-Type", "text/html");
+        responseHeaders.put(":Status", "200 OK");
+
+        final MapToolVariableResolver resolver = new MapToolVariableResolver(null);
             new ThreadExecutionHelper<String>()
                 .runOnSwingThread(
                     () -> {
                       String macroName = uri.getSchemeSpecificPart();
 
-                      MapToolVariableResolver resolver = new MapToolVariableResolver(null);
-                      System.out.println("macroName: " + macroName);
+                      resolver.setVariable("macro.requestHeaders", gson.toJsonTree(requestHeaders));
+                      resolver.setVariable(
+                          "macro.responseHeaders", gson.toJsonTree(responseHeaders));
                       String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
-                      System.out.println("line: " + line);
                       return line;
                     })
                 .get();
-        responseHeaders.put("Status", "200");
-        System.out.println("line: " + result);
         return result;
+              try {
+                HashMap<String, String> returnedHeaders;
+                Object headerObj = resolver.getVariable("macro.responseHeaders");
+
+                if (headerObj instanceof JsonObject headerJson) {
+                  returnedHeaders =
+                      gson.fromJson(
+                          headerJson, new TypeToken<HashMap<String, String>>() {}.getType());
+                } else {
+                  String headerString = headerObj.toString();
+                  returnedHeaders =
+                      gson.fromJson(
+                          headerString, new TypeToken<HashMap<String, String>>() {}.getType());
+                }
+
+                responseHeaders.putAll(returnedHeaders);
+              } catch (Exception pe) {
+                responseHeaders.put(":Status", "500 Internal Exception (bad response header)");
+                return pe.toString();
+              }
+              return r;
+            });
+
       } catch (Exception e) {
         responseHeaders.put("Status", "500");
         return e.getMessage();
