@@ -25,29 +25,31 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.util.threads.*;
 
 public class RequestHandler {
-  public static String processRequest(
   private static final Gson gson = new Gson();
 
+  public static CompletableFuture<String> processRequest(
       String method,
       URI uri,
       String _body,
       HashMap<String, String> requestHeaders,
       HashMap<String, String> responseHeaders) {
+    CompletableFuture<String> c = new CompletableFuture<String>();
     String body = (_body != null) ? _body : "";
     String scheme = uri.getScheme();
 
     // macro: URIs can only use POST requests
     if (scheme.equalsIgnoreCase("macro")) {
       if (!("post".equalsIgnoreCase(method))) {
-        responseHeaders.put("Status", "0");
-        return "";
+        responseHeaders.put(":Status", "0");
+        c.complete("Only POST method can call macros");
+        return c;
       }
       try {
-        String result =
         Instant instant = Instant.now();
         String formattedTime =
             DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(instant);
@@ -57,6 +59,7 @@ public class RequestHandler {
         responseHeaders.put(":Status", "200 OK");
 
         final MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+        c =
             new ThreadExecutionHelper<String>()
                 .runOnSwingThread(
                     () -> {
@@ -67,9 +70,9 @@ public class RequestHandler {
                           "macro.responseHeaders", gson.toJsonTree(responseHeaders));
                       String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
                       return line;
-                    })
-                .get();
-        return result;
+                    });
+        c.thenApply(
+            (String r) -> {
               try {
                 HashMap<String, String> returnedHeaders;
                 Object headerObj = resolver.getVariable("macro.responseHeaders");
@@ -93,44 +96,52 @@ public class RequestHandler {
               return r;
             });
 
+        return c;
       } catch (Exception e) {
-        responseHeaders.put("Status", "500");
-        return e.getMessage();
+        responseHeaders.put(":Status", "500 Internal Exception");
+        c.complete(e.getMessage());
+        return c;
       }
     }
 
     InputStream stream = null;
     if (scheme.equalsIgnoreCase("lib")) {
       if (!("get".equalsIgnoreCase(method))) {
-        responseHeaders.put("Status", "0");
-        return "";
+        responseHeaders.put(":Status", "0");
+        c.complete("Only GET method can retrieve resources");
+        return c;
       }
 
       try {
         stream = new LibraryURLConnection(uri.toURL()).getInputStream();
       } catch (IOException ioe) {
-        responseHeaders.put("Status", "404");
-        return ioe.getMessage();
+        responseHeaders.put(":Status", "404 Not Found");
+        c.complete(ioe.getMessage());
+        return c;
       }
-      responseHeaders.put("Status", "200");
+      responseHeaders.put(":Status", "200");
       try {
-        return new String(stream.readAllBytes(), StandardCharsets.UTF_16);
+        c.complete(new String(stream.readAllBytes(), StandardCharsets.UTF_16));
+        return c;
       } catch (IOException e) {
-        responseHeaders.put("Status", "500");
-        return e.getMessage();
+        responseHeaders.put(":Status", "500 Internal Exception");
+        c.complete(e.getMessage());
+        return c;
       }
     }
 
     if (scheme.equalsIgnoreCase("asset")) {
       if (!("get".equalsIgnoreCase(method))) {
-        responseHeaders.put("Status", "0");
-        return "";
+        responseHeaders.put(":Status", "0");
+        c.complete("Only GET method can retrieve assets");
+        return c;
       }
       try {
         stream = new AssetURLStreamHandler.AssetURLConnection(uri.toURL()).getInputStream();
       } catch (IOException ioe) {
-        responseHeaders.put("Status", "404");
-        return ioe.getMessage();
+        responseHeaders.put(":Status", "404 Not Found");
+        c.complete(ioe.getMessage());
+        return c;
       }
       try {
         byte[] bytes = stream.readAllBytes();
@@ -139,14 +150,16 @@ public class RequestHandler {
           outBytes[i * 2] = 0;
           outBytes[i * 2 + 1] = bytes[i];
         }
-        responseHeaders.put("Status", "200");
-        return new String(outBytes, StandardCharsets.UTF_16);
+        responseHeaders.put(":Status", "200 OK");
+        c.complete(new String(outBytes, StandardCharsets.UTF_16));
+        return c;
       } catch (IOException e) {
-        responseHeaders.put("Status", "500");
-        return e.getMessage();
+        responseHeaders.put(":Status", "500 Internal Exception");
+        c.complete(e.getMessage());
+        return c;
       }
     }
-
-    return null;
+    c.complete(null);
+    return c;
   }
 }

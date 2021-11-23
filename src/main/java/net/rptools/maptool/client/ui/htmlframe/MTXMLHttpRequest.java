@@ -52,8 +52,6 @@ public class MTXMLHttpRequest {
 
   // Public methods
 
-  public void open(String method, String uri, boolean async, String user, String psw) {
-    if (async) {
   public void _getResponseHeaders(JSObject jheaders) {
 
     responseHeaders.forEach(
@@ -78,6 +76,7 @@ public class MTXMLHttpRequest {
     return this.responseType;
   }
 
+  public void open(String method, String uri, boolean async, String user, String psw) {
     this.uri = uri;
     this.method = method;
     this.async = async;
@@ -100,7 +99,54 @@ public class MTXMLHttpRequest {
     this.body = body;
     this.readyStateChanged();
 
-    this.processRequest();
+    CompletableFuture<String> d = this.processRequest();
+    if (!this.async) {
+      try {
+        this.recv(d.get());
+      } catch (Exception e) {
+        this.recv(e.getMessage());
+      }
+    } else {
+      d.thenApply(
+          (String result) -> {
+            new ThreadExecutionHelper<Void>()
+                .runOnJFXThread(
+                    () -> {
+                      this.recv(result);
+                      return null;
+                    });
+            return result;
+          });
+    }
+  }
+
+  public String getStatus() {
+    return this.status;
+  }
+
+  public void recv(String respBody) {
+    this.status = this.responseHeaders.remove(":Status");
+    switch (responseType) {
+      case "blob":
+        this.ctx.call("_makeBlob", respBody);
+        break;
+      case "arraybuffer":
+        this.ctx.call("_makeArrayBuffer", respBody);
+        break;
+      case "document":
+        this.ctx.call("_makeDocument", respBody);
+        break;
+      case "json":
+        this.ctx.call("_makeJson", respBody);
+        break;
+      case "":
+      case "text":
+      default:
+        this.ctx.call("_makeText", respBody);
+        break;
+    }
+    readyState = 4;
+    this.ctx.call("onreadystatechange");
   }
 
   public void abort() {
@@ -148,20 +194,17 @@ public class MTXMLHttpRequest {
     this.ctx.call("onreadystatechange");
   }
 
-  private void processRequest() {
-    System.out.println("0");
+  private CompletableFuture<String> processRequest() {
     URI _uri;
     try {
       _uri = new URI(this.href).resolve(this.uri);
     } catch (Exception e) {
-      return;
+      readyState = 0;
+      CompletableFuture c = new CompletableFuture<String>();
+      c.complete(e.getMessage());
+      return c;
     }
 
-    System.out.println("2");
-    this.ctx.setMember(
-        "response",
-        RequestHandler.processRequest(method, _uri, body, requestHeaders, responseHeaders));
-
-    System.out.println("1");
+    return RequestHandler.processRequest(method, _uri, body, requestHeaders, responseHeaders);
   }
 }
