@@ -17,9 +17,11 @@ package net.rptools.maptool.client.ui.htmlframe;
 import java.awt.*;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import javafx.scene.web.*;
 import javax.swing.*;
 import net.rptools.maptool.model.library.url.*;
+import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import netscape.javascript.*;
 import org.w3c.dom.*;
 import org.w3c.dom.html.*;
@@ -52,11 +54,22 @@ public class MTXMLHttpRequest {
 
   public void open(String method, String uri, boolean async, String user, String psw) {
     if (async) {
+  public void _getResponseHeaders(JSObject jheaders) {
+
+    responseHeaders.forEach(
+        (key, value) -> {
+          jheaders.setMember(key, value);
+        });
+  }
+
+  public int getReadyState() {
+    return readyState;
+  }
+
+  public void setResponseType(String typ) {
+    if (readyState > 1) {
       throw new JSException(
-          //  "Synchronous XMLHttpRequest on the main thread is denied because of its detrimental
-          // effects to the end user's experience. For more help, check
-          // https://xhr.spec.whatwg.org/.");
-          "Asynchronous XMLHttpRequests are not yet supported");
+          "Failed to set the 'responseType' property on 'XMLHttpRequest': The response type cannot be set if the object's state is LOADING or DONE");
     }
     this.responseType = typ;
   }
