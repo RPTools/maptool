@@ -38,10 +38,15 @@ public class MTXMLHttpRequest {
   private boolean async = false;
   private String user = null;
   private String psw = null;
+  private String responseType = "text";
+  private int readyState = 0;
+  private String status = null;
   private HashMap<String, String> requestHeaders = null;
 
   // Private state for the response side
   private HashMap<String, String> responseHeaders = null;
+
+  private static boolean warned = false;
 
   // Public methods
 
@@ -53,22 +58,32 @@ public class MTXMLHttpRequest {
           // https://xhr.spec.whatwg.org/.");
           "Asynchronous XMLHttpRequests are not yet supported");
     }
+    this.responseType = typ;
+  }
+
+  public String getResponseType() {
+    return this.responseType;
+  }
+
     this.uri = uri;
     this.method = method;
     this.async = async;
     this.user = user;
     this.psw = psw;
-    this.ctx.setMember("readyState", 1);
+    readyState = 1;
     this.readyStateChanged();
+    if (!async && !warned) {
+      this.ctx.call("_warnAsync");
+      warned = true;
+    }
   }
 
   public void send(String body) {
-    System.out.println("5");
-    if ((int) this.ctx.getMember("readyState") != 1) {
+    if (readyState != 1) {
       throw new JSException(
           "Failed to execute 'send' on 'XMLHttpRequest': The object's state must be OPENED");
     }
-    this.ctx.setMember("readyState", 2);
+    readyState = 2;
     this.body = body;
     this.readyStateChanged();
 
@@ -76,28 +91,26 @@ public class MTXMLHttpRequest {
   }
 
   public void abort() {
-    if ((int) this.ctx.getMember("readyState") > 1) {
-      this.ctx.setMember("readyState", 0);
+    if (readyState > 1) {
+      readyState = 0;
     }
   }
 
   public String getAllResponseHeaders() {
-    if ((int) this.ctx.getMember("readyState") != 4) {
+    if (readyState != 4) {
       return null;
     }
 
     ArrayList<String> lines = new ArrayList<>();
     for (Map.Entry<String, String> set : this.responseHeaders.entrySet()) {
-      System.out.println("4");
       lines.add(set.getKey() + ": " + set.getValue());
     }
     return String.join("\n", lines);
   }
 
   public String getResponseHeader(String name) {
-    if ((int) this.ctx.getMember("readyState") == 4) {
+    if (readyState == 4) {
       if (this.responseHeaders.containsKey(name)) {
-        System.out.println("3");
         return this.responseHeaders.get(name);
       }
     }
@@ -119,7 +132,6 @@ public class MTXMLHttpRequest {
   }
 
   private void readyStateChanged() {
-    System.out.println("141");
     this.ctx.call("onreadystatechange");
   }
 
