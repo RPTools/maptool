@@ -11,6 +11,7 @@ Feature release using OpenJDK 16
 
 ## Enhancements & Features
 
+- [#3200][i3200] New MapTool Easy Connect™ option for servers to allow players to submit their Public Key information at connectiong for approval by GM. 
 - [#3171][i3171] Extend `@this` behaviour to the data.getStaticData function.
 - [#3164][i3164] New macro function `data.getStaticData(namespace, path)` for accessing static data in Add-On libraries.
 - [#3103][i3103] Additional properties added to output of `getFrameProperties()`
@@ -61,6 +62,7 @@ Feature release using OpenJDK 16
 - [#233][i233] Users could inadvertently advance initiative with Spacebar or Enter keys. Fixed.
 
 ## Other
+- [#3204][i3204] Some i18n text strings reworked for new features. 
 - [#3100][i3100] Builds updated to use Adoptium JDK 16.0.2_7.
 - [#3062][i3062] Map -> Import Dungeondraft VTT... changed to Map -> Import Unversal VTT...
 - [#1348][i1348] Internal code work to support adding HTML, CSS, JavaScript, Audio, etc. in campaign files.
@@ -71,6 +73,8 @@ Feature release using OpenJDK 16
 [Change Log for 1.10.4](https://github.com/RPTools/maptool/blob/1.10.4/CHANGE_LOG.md)
 
 [i]: https://github.com/RPTools/maptool/issues/
+[i3200]: https://github.com/RPTools/maptool/issues/3200
+[i3204]: https://github.com/RPTools/maptool/issues/3204
 [i3191]: https://github.com/RPTools/maptool/issues/3191
 [i3183]: https://github.com/RPTools/maptool/issues/3183
 [i3176]: https://github.com/RPTools/maptool/issues/3176
