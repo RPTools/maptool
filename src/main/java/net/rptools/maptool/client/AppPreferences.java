@@ -40,6 +40,7 @@ public class AppPreferences {
   private static final String KEY_SAVE_TOKEN_DIR = "saveTokenDir";
   private static final String KEY_SAVE_MAP_DIR = "saveMapDir";
   private static final String KEY_LOAD_DIR = "loadDir";
+  private static final String KEY_ADD_ON_LOAD_DIR = "addOnLoadDir";
   private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
 
@@ -1014,6 +1015,15 @@ public class AppPreferences {
   public static File getLoadDir() {
     String filePath = prefs.get(KEY_LOAD_DIR, null);
     return filePath != null ? new File(filePath) : new File(File.separator);
+  }
+
+  public static File getAddOnLoadDir() {
+    String filePath = prefs.get(KEY_ADD_ON_LOAD_DIR, null);
+    return filePath != null ? new File(filePath) : getSaveDir();
+  }
+
+  public static void setAddOnLoadDir(File file) {
+    prefs.put(KEY_ADD_ON_LOAD_DIR, file.toString());
   }
 
   public static void addAssetRoot(File root) {
