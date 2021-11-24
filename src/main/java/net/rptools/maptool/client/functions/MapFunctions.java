@@ -69,6 +69,7 @@ public class MapFunctions extends AbstractFunction {
         return currentZR.getZone().getName();
       }
     } else if (functionName.equalsIgnoreCase("getMapDisplayName")) {
+      checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       if (parameters.size() == 0) {
         ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
@@ -81,9 +82,6 @@ public class MapFunctions extends AbstractFunction {
         List<ZoneRenderer> rendererList =
             new LinkedList<ZoneRenderer>(
                 MapTool.getFrame().getZoneRenderers()); // copied from ZoneSelectionPopup
-        if (!MapTool.getPlayer().isGM()) {
-          rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
-        }
         String searchMap = parameters.get(0).toString();
         String foundMap = null;
         for (int i = 0; i < rendererList.size(); i++) {
