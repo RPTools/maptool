@@ -13,6 +13,7 @@
       <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="addButton" mnemonicParsing="false" text="%library.dialog.button.add" />
+            <Button fx:id="removeLibButton" mnemonicParsing="false" text="%library.dialog.table.remove" />
             <Button fx:id="closeButton" mnemonicParsing="false" text="%library.dialog.button.close" />
          </children>
       </HBox>

@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.ui.addon;
 
 import com.google.common.eventbus.Subscribe;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
@@ -22,14 +24,18 @@ import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.javfx.AbstractSwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
@@ -40,6 +46,7 @@ import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryType;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,17 +70,22 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
   @FXML // fx:id="closeButton"
   private Button closeButton; // Value injected by FXMLLoader
 
+  @FXML // fx:id="removeLibButton"
+  private Button removeLibButton; // Value injected by FXMLLoader
+
   private final ObservableList<LibraryInfo> addOnList = FXCollections.observableArrayList();
 
   @FXML
   // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
     assert addButton != null
-        : "fx:id=\"addButton\" was not injected: check your FXML file 'AddOnLibraryDialog.fxml'.";
+        : "fx:id=\"addButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert addOnsTable != null
-        : "fx:id=\"addOnsTable\" was not injected: check your FXML file 'AddOnLibraryDialog.fxml'.";
+        : "fx:id=\"addOnsTable\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert closeButton != null
-        : "fx:id=\"closeButton\" was not injected: check your FXML file 'AddOnLibraryDialog.fxml'.";
+        : "fx:id=\"closeButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
+    assert removeLibButton != null
+        : "fx:id=\"removeLibButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
   }
 
   @Override
@@ -90,43 +102,72 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     namespaceCol.setCellValueFactory(
         lib -> new ReadOnlyObjectWrapper<>(lib.getValue().namespace()));
 
-    var deleteCol = new TableColumn<LibraryInfo, Void>();
-    var deleteCellFactory =
-        createButtonCellFactory(
-            I18N.getText("library.dialog.delete"),
-            lib -> {
-              SwingUtilities.invokeLater(
-                  () -> {
-                    if (MapTool.confirm("library.dialog.delete.confirm", lib.name())) {
-                      new LibraryManager().removeAddOnLibrary(lib.namespace());
-                    }
-                  });
-            });
-    deleteCol.setCellFactory(deleteCellFactory);
+    addOnsTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+    addOnsTable
+        .getSelectionModel()
+        .getSelectedItems()
+        .addListener(
+            (ListChangeListener<LibraryInfo>)
+                c -> {
+                  if (c.getList().size() > 0) {
+                    removeLibButton.setDisable(false);
+                  } else {
+                    removeLibButton.setDisable(true);
+                  }
+                });
+    addOnsTable.getColumns().addAll(nameCol, versionCol, namespaceCol);
 
-    var deleteDataCol = new TableColumn<LibraryInfo, Void>();
-    var deleteDataCellFactory =
-        createButtonCellFactory(
-            I18N.getText("library.dialog.deleteData"),
-            lib -> {
-              SwingUtilities.invokeLater(
-                  () -> {
-                    if (MapTool.confirm("library.dialog.deleteData.confirm", lib.name())) {
-                      new LibraryManager().removeAddOnLibrary(lib.namespace());
-                    }
-                  });
-            });
-    deleteDataCol.setCellFactory(deleteDataCellFactory);
+    removeLibButton.setOnAction(
+        a -> {
+          LibraryInfo lib = addOnsTable.getSelectionModel().getSelectedItems().get(0);
+          SwingUtilities.invokeLater(
+              () -> {
+                if (MapTool.confirm("library.dialog.delete.confirm", lib.name())) {
+                  new LibraryManager().removeAddOnLibrary(lib.namespace());
+                }
+              });
+        });
+    removeLibButton.setDisable(true);
 
-    addOnsTable.getColumns().addAll(nameCol, versionCol, namespaceCol, deleteCol, deleteDataCol);
+    closeButton.setOnAction(a -> performClose());
 
     try {
       addOnList.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
     } catch (ExecutionException | InterruptedException e) {
-      log.error("Error loading add-on libraries", e);
+      log.error("Error displaying add-on libraries", e);
     }
     new MapToolEventBus().getMainEventBus().register(this);
     addOnsTable.setItems(addOnList);
+
+    addButton.setOnAction(a -> addAddOnLibrary());
+  }
+
+  private void addAddOnLibrary() {
+    SwingUtilities.invokeLater(
+        () -> {
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File libFile = chooser.getSelectedFile();
+            try {
+              var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
+              var libraryManager = new LibraryManager();
+              String namespace = addOnLibrary.getNamespace().get();
+              if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
+                if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {
+                  return;
+                }
+                libraryManager.deregisterAddOnLibrary(namespace);
+              }
+              libraryManager.reregisterAddOnLibrary(addOnLibrary);
+            } catch (IOException | InterruptedException | ExecutionException e) {
+              MapTool.showError("library.import.ioError", e);
+            }
+          }
+        });
   }
 
   @Override

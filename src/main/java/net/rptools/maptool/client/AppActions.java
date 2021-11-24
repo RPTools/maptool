@@ -2965,8 +2965,8 @@ public class AppActions {
         }
       };
 
-  private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
-    MapPreviewFileChooser() {
+  public static class MapPreviewFileChooser extends PreviewPanelFileChooser {
+    public MapPreviewFileChooser() {
       super();
       addChoosableFileFilter(MapTool.getFrame().getMapFileFilter());
     }
