@@ -39,7 +39,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
     return new AssetURLConnection(u);
   }
 
-  private static class AssetURLConnection extends URLConnection {
+  public static class AssetURLConnection extends URLConnection {
 
     public AssetURLConnection(URL url) {
       super(url);

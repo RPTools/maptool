@@ -10,6 +10,9 @@ Feature release using OpenJDK 16
 - Long-time Java bug causing MapTool to hang when dropping images into Edit Token dialog fixed with new Java release.
 
 ## Enhancements & Features
+
+- [#3200][i3200] New MapTool Easy Connect™ option for servers to allow players to submit their Public Key information at connectiong for approval by GM. 
+- [#3171][i3171] Extend `@this` behaviour to the data.getStaticData function.
 - [#3164][i3164] New macro function `data.getStaticData(namespace, path)` for accessing static data in Add-On libraries.
 - [#3103][i3103] Additional properties added to output of `getFrameProperties()`
   - `tabtitle`, `html5`, `temporary`, `visible`, `docked`, `floating`, `autohide`, `undocked_x`, `undocked_y`, `undocked_h`, `undocked_w`
@@ -33,10 +36,18 @@ Feature release using OpenJDK 16
 - [#2431][i2431] New macro functions to show/hide Overlays:
   - `[r: setOverlayVisible(OverlayName, {1|0})]`
   - `[r: visible = isOverlayVisible(OverlayName)] // returns 1|0`
-- [#1348][i1348] Method for storing HTML / CSS/ JavaScript / Audio / etc in campaigns.
-- [#1346][i1346] Asset class expanded to support more than just images.
+- [#2001][i2001] New server options to disable Lock Player Movement & Lock Token Editor on Player clients.
+- [#1385][i1385] New macro functions to create tokens.
+  - `createToken(tokenValues)` to create a token from a JsonObject
+  - `createTokens(arrayofTokenValues)`  to create multiple tokens from a JsonArray of JsonObjects.
+- [#1104][i1104] New server option to disable Player access to Resource Library. 
  
 ## Bug Fixes
+- [#3191][i3191] `isNumber()` was returning false (0) for numeric strings with whitespace padding or a `+` sign. Fixed.
+- [#3183][i3183] Exporting lib:token as Add-On failing under Windows. Fixed.
+- [#3176][i3176] `getLibraryProperty()` not handling numeric values correctly. Fixed.
+- [#3175][i3175] Errors thrown when deleting lib:tokens. Fixed.
+- [#3174][i3174] `onCampaignLoad` not being called consistently for lib:tokens. Fixed.
 - [#3159][i3159] Allow URI Access fag was being reset on server start. Fixed.
 - [#3140][i3140] Unable to add/edit Bars if Type was localized. Fixed.
 - [#3114][i3114] MBL/VBL/TVBL misaligned on imported UVTT maps that were cropped during export. Fixed.
@@ -51,13 +62,26 @@ Feature release using OpenJDK 16
 - [#233][i233] Users could inadvertently advance initiative with Spacebar or Enter keys. Fixed.
 
 ## Other
+- [#3204][i3204] Some i18n text strings reworked for new features. 
 - [#3100][i3100] Builds updated to use Adoptium JDK 16.0.2_7.
 - [#3062][i3062] Map -> Import Dungeondraft VTT... changed to Map -> Import Unversal VTT...
+- [#1348][i1348] Internal code work to support adding HTML, CSS, JavaScript, Audio, etc. in campaign files.
 - [#1347][i1347] Several classes added to facilitate using JFX panels in Maptool.
+- [#1346][i1346] Internal code work to extend Asset class to support data other than images.
+
 
 [Change Log for 1.10.4](https://github.com/RPTools/maptool/blob/1.10.4/CHANGE_LOG.md)
 
 [i]: https://github.com/RPTools/maptool/issues/
+[i3200]: https://github.com/RPTools/maptool/issues/3200
+[i3204]: https://github.com/RPTools/maptool/issues/3204
+[i3191]: https://github.com/RPTools/maptool/issues/3191
+[i3183]: https://github.com/RPTools/maptool/issues/3183
+[i3176]: https://github.com/RPTools/maptool/issues/3176
+[i3175]: https://github.com/RPTools/maptool/issues/3175
+[i3174]: https://github.com/RPTools/maptool/issues/3174
+[i3171]: https://github.com/RPTools/maptool/issues/3171
+[i3170]: https://github.com/RPTools/maptool/issues/3170
 [i3164]: https://github.com/RPTools/maptool/issues/3164
 [i3159]: https://github.com/RPTools/maptool/issues/3159
 [i3140]: https://github.com/RPTools/maptool/issues/3140
@@ -75,6 +99,10 @@ Feature release using OpenJDK 16
 [i3061]: https://github.com/RPTools/maptool/issues/3061
 [i3057]: https://github.com/RPTools/maptool/issues/3057
 [i3013]: https://github.com/RPTools/maptool/issues/3013
+[i1385]: https://github.com/RPTools/maptool/issues/1385
+[i1348]: https://github.com/RPTools/maptool/issues/1348
+[i1347]: https://github.com/RPTools/maptool/issues/1347
+[i1346]: https://github.com/RPTools/maptool/issues/1346
 [i2984]: https://github.com/RPTools/maptool/issues/2984
 [i2982]: https://github.com/RPTools/maptool/issues/2982
 [i2935]: https://github.com/RPTools/maptool/issues/2935
@@ -82,9 +110,9 @@ Feature release using OpenJDK 16
 [i2777]: https://github.com/RPTools/maptool/issues/2777
 [i2755]: https://github.com/RPTools/maptool/issues/2755
 [i2431]: https://github.com/RPTools/maptool/issues/2431
-[i1348]: https://github.com/RPTools/maptool/issues/1348
-[i1347]: https://github.com/RPTools/maptool/issues/1347
-[i1346]: https://github.com/RPTools/maptool/issues/1346
+[i]: https://github.com/RPTools/maptool/issues/
+[i2001]: https://github.com/RPTools/maptool/issues/2001
+[i1104]: https://github.com/RPTools/maptool/issues/1104
 [i233]: https://github.com/RPTools/maptool/issues/233
 
 
