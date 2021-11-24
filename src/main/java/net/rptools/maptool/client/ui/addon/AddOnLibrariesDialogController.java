@@ -93,7 +93,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     var deleteCol = new TableColumn<LibraryInfo, Void>();
     var deleteCellFactory =
         createButtonCellFactory(
-            I18N.getText("library.dialog.delete"),
+            I18N.getText("library.dialog.button.delete"),
             lib -> {
               SwingUtilities.invokeLater(
                   () -> {
@@ -107,7 +107,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     var deleteDataCol = new TableColumn<LibraryInfo, Void>();
     var deleteDataCellFactory =
         createButtonCellFactory(
-            I18N.getText("library.dialog.deleteData"),
+            I18N.getText("library.dialog.button.deleteData"),
             lib -> {
               SwingUtilities.invokeLater(
                   () -> {
