@@ -72,6 +72,12 @@ public class AddOnLibrary implements Library {
   /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
+  /** The Asset for the library read me file. */
+  // private final String readMeFile;
+
+  /** The Asset for the library license file. */
+  // private final String licenseFile;
+
   /** The name of the add-on library. */
   private final String name;
 
@@ -318,6 +324,16 @@ public class AddOnLibrary implements Library {
   public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
     String source = context.getSource().replaceFirst("(?i)^lib:", "");
     return context == null || source.equalsIgnoreCase(namespace);
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getReadMeAsset() {
+    return null; // TODO: CDW
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getLicenseAsset() {
+    return null; // TODO: CDW
   }
 
   @Override

@@ -31,9 +31,8 @@ public abstract class AbstractSwingJavaFXDialogController implements SwingJavaFX
     eventHandlers.remove(handler);
   }
 
-  /** Call all the close handlers and close the dialog. */
+  /** Call all the close handlers, if overriding this function ensure the super call is made. */
   protected void performClose() {
     eventHandlers.forEach(e -> e.close(this));
-    close();
   }
 }
