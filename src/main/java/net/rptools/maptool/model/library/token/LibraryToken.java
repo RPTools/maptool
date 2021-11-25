@@ -283,7 +283,9 @@ class LibraryToken implements Library {
             license.isEmpty() ? notSet : license,
             description.isEmpty() ? notSet : description,
             shortDescription.isEmpty() ? notSet : shortDescription,
-            allowsUriAccess));
+            allowsUriAccess,
+            null,
+            null));
   }
 
   @Override

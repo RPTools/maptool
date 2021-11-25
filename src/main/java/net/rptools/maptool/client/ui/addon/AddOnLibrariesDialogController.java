@@ -18,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
@@ -37,12 +38,14 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.ViewAssetDialog;
 import net.rptools.maptool.client.ui.javfx.AbstractSwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
+import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryType;
@@ -73,9 +76,6 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
   @FXML // fx:id="removeLibButton"
   private Button removeLibButton; // Value injected by FXMLLoader
 
-  @FXML // fx:id="detailsButton"
-  private Button detailsButton; // Value injected by FXMLLoader
-
   @FXML // fx:id="labelName"
   private Label labelName; // Value injected by FXMLLoader
 
@@ -103,6 +103,10 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
   @FXML // fx:id="textAreaDescription"
   private TextArea textAreaDescription; // Value injected by FXMLLoader
 
+  @FXML private Button buttonViewLicenceFile;
+
+  @FXML private Button buttonViewReadMeFile;
+
   private final ObservableList<LibraryInfo> addOnList = FXCollections.observableArrayList();
 
   @FXML
@@ -116,8 +120,6 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
         : "fx:id=\"closeButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert removeLibButton != null
         : "fx:id=\"removeLibButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
-    assert detailsButton != null
-        : "fx:id=\"detailsButton\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert labelName != null
         : "fx:id=\"labelName\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert labelVersion != null
@@ -136,6 +138,10 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
         : "fx:id=\"labelLicense\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
     assert textAreaDescription != null
         : "fx:id=\"textAreaDescription\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
+    assert buttonViewLicenceFile != null
+        : "fx:id=\"buttonViewLicenceFile\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
+    assert buttonViewReadMeFile != null
+        : "fx:id=\"buttonViewReadMeFile\" was not injected: check your FXML file 'AddOnLibrariesDialog.fxml'.";
   }
 
   @Override
@@ -164,11 +170,9 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
                 c -> {
                   if (c.getList().size() > 0) {
                     removeLibButton.setDisable(false);
-                    detailsButton.setDisable(false);
                     showDetails(c.getList().get(0));
                   } else {
                     removeLibButton.setDisable(true);
-                    detailsButton.setDisable(true);
                     clearDetails();
                   }
                 });
@@ -188,10 +192,6 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
 
     closeButton.setOnAction(a -> performClose());
 
-    detailsButton.setDisable(true);
-    detailsButton.setOnAction(
-        a -> showDetails(addOnsTable.getSelectionModel().getSelectedItems().get(0)));
-
     clearDetails();
     try {
       addOnList.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
@@ -207,17 +207,74 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
         a -> {
           var link = linkWebsite.getText();
           if (link != null && !link.trim().isEmpty()) {
-            MapTool.showDocument(link.trim());
+            SwingUtilities.invokeLater(
+                () -> {
+                  String url;
+                  if (link.startsWith("http://") || link.startsWith("https://")) {
+                    url = link;
+                  } else {
+                    url = "https://" + link;
+                  }
+                  MapTool.showDocument(url);
+                });
           }
         });
 
-    linkWebsite.setOnMouseClicked(
+    linkGitURL.setOnMouseClicked(
         e -> {
           var link = linkGitURL.getText();
           if (link != null && !link.trim().isEmpty()) {
-            MapTool.showDocument(link.trim());
+            SwingUtilities.invokeLater(
+                () -> {
+                  String url;
+                  if (link.startsWith("http://") || link.startsWith("https://")) {
+                    url = link;
+                  } else {
+                    url = "https://" + link;
+                  }
+                  MapTool.showDocument(url);
+                });
           }
         });
+
+    buttonViewLicenceFile.setOnAction(
+        a -> {
+          var lib = addOnsTable.getSelectionModel().getSelectedItems().get(0);
+          viewLicenseFile(lib);
+        });
+    buttonViewReadMeFile.setOnAction(
+        a -> {
+          var lib = addOnsTable.getSelectionModel().getSelectedItems().get(0);
+          viewReadMeFile(lib);
+        });
+  }
+
+  private void viewLicenseFile(LibraryInfo libInfo) {
+    Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
+    if (lib.isPresent()) {
+      lib.get()
+          .getLicenseAsset()
+          .thenAccept(
+              a ->
+                  a.ifPresent(
+                      asset ->
+                          SwingUtilities.invokeLater(
+                              () -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
+    }
+  }
+
+  private void viewReadMeFile(LibraryInfo libInfo) {
+    Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
+    if (lib.isPresent()) {
+      lib.get()
+          .getReadMeAsset()
+          .thenAccept(
+              a ->
+                  a.ifPresent(
+                      asset ->
+                          SwingUtilities.invokeLater(
+                              () -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
+    }
   }
 
   private void clearDetails() {
@@ -230,6 +287,8 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     linkWebsite.setText("");
     labelLicense.setText("");
     textAreaDescription.setText("");
+    buttonViewLicenceFile.setDisable(true);
+    buttonViewReadMeFile.setDisable(true);
   }
 
   private void showDetails(LibraryInfo libraryInfo) {
@@ -242,6 +301,10 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     linkWebsite.setText(libraryInfo.website());
     labelLicense.setText(libraryInfo.license());
     textAreaDescription.setText(libraryInfo.description());
+    buttonViewLicenceFile.setDisable(
+        libraryInfo.licenseFile() == null || libraryInfo.licenseFile().isEmpty());
+    buttonViewReadMeFile.setDisable(
+        libraryInfo.readMeFile() == null || libraryInfo.readMeFile().isEmpty());
   }
 
   private void addAddOnLibrary() {

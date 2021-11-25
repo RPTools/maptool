@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogController">
    <center>
       <BorderPane prefHeight="720.0" prefWidth="640.0" BorderPane.alignment="CENTER">
          <center>
@@ -25,7 +25,7 @@
                <children>
                   <HBox>
                      <children>
-                        <Label text="%library.dialog.addon.name">
+                        <Label maxWidth="1.7976931348623157E308" text="%library.dialog.addon.name">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -33,7 +33,7 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelName">
+                        <Label fx:id="labelName" maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -46,7 +46,7 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelVersion">
+                        <Label fx:id="labelVersion" maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -59,14 +59,14 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelAuthors">
+                        <Label fx:id="labelAuthors" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </Label>
                      </children>
                   </HBox>
-                  <HBox>
+                  <HBox maxWidth="1.7976931348623157E308">
                      <children>
                         <Label text="%library.dialog.addon.namespace">
                            <padding>
@@ -76,7 +76,7 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelNamespace">
+                        <Label fx:id="labelNamespace" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -89,14 +89,14 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelShortDescription">
+                        <Label fx:id="labelShortDescription" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </Label>
                      </children>
                   </HBox>
-                  <HBox>
+                  <HBox maxWidth="1.7976931348623157E308">
                      <children>
                         <Label text="%library.dialog.addon.website">
                            <padding>
@@ -106,7 +106,7 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Hyperlink fx:id="linkWebsite" />
+                        <Hyperlink fx:id="linkWebsite" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                         <Label text="%library.dialog.addon.giturl">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -115,10 +115,10 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Hyperlink fx:id="linkGitURL" />
+                        <Hyperlink fx:id="linkGitURL" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                      </children>
                   </HBox>
-                  <HBox>
+                  <HBox maxWidth="1.7976931348623157E308">
                      <children>
                         <Label text="%library.dialog.addon.license">
                            <padding>
@@ -128,15 +128,15 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="labelLicense">
+                        <Label fx:id="labelLicense" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </Label>
-                        <Button fx:id="buttonViewLicencerFile" mnemonicParsing="false" text="%library.dialog.addon.licenseFile" />
+                        <Button fx:id="buttonViewLicenceFile" mnemonicParsing="false" text="%library.dialog.addon.licenseFile" />
                      </children>
                   </HBox>
-                  <HBox>
+                  <HBox maxWidth="1.7976931348623157E308">
                      <children>
                         <Label text="%library.dialog.addon.description">
                            <padding>
@@ -160,7 +160,6 @@
          <children>
             <Button fx:id="addButton" mnemonicParsing="false" text="%library.dialog.button.add" />
             <Button fx:id="removeLibButton" mnemonicParsing="false" text="%library.dialog.table.remove" />
-            <Button fx:id="detailsButton" mnemonicParsing="false" text="%library.dialog.button.details" />
             <Button fx:id="closeButton" mnemonicParsing="false" text="%library.dialog.button.close" />
          </children>
       </HBox>

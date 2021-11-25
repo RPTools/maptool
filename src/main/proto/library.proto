@@ -19,7 +19,7 @@ message AddOnLibraryDto {
   string short_description = 25;
   bool allowsUriAccess = 26;
   string license_file = 27;
-  string readme_file = 28;
+  string read_me_file = 28;
 }
 
 message MTScriptPropertiesDto {
