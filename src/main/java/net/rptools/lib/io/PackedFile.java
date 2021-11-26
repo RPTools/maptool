@@ -610,8 +610,8 @@ public class PackedFile implements AutoCloseable {
           }
         }
 
-        if (id == null || name == null || extension == null || type == null) {
-          log.error("Error reading asset, missing id, name, extension, or type.");
+        if (id == null || name == null || extension == null) {
+          log.error("Error reading asset, missing id, name, extension.");
           return null;
         }
 
