@@ -34,24 +34,43 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.JDialog;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 
+/**
+ * Creates a dialog that can be used to view an asset.
+ * Currently, only supports Plain Text, HTML, and Markdown.
+ */
 public class ViewAssetDialog {
+  /** The Swing Dialog to display the asset in. */
   private final JDialog dialog;
 
+  /** Embedded JavaFX panel used to display the asset. */
   private final JFXPanel jfxPanel;
 
+  /** The width of the dialog, */
   private final int width;
 
+  /** The height of the dialog, */
   private final int height;
 
+  /**
+   * Creates a new ViewAssetDialog.
+   * @param asset the asset to display.
+   * @param title the title of the dialog.
+   * @param width the width of the dialog.
+   * @param height the height of the dialog.
+   * @throws IllegalArgumentException if the asset type is not supported.
+   */
   public ViewAssetDialog(Asset asset, String title, int width, int height) {
     dialog = new JDialog(MapTool.getFrame(), title);
     dialog.setSize(width, height);
     this.width = width;
     this.height = height;
     jfxPanel = new JFXPanel();
+
+    dialog.getContentPane().add(jfxPanel);
 
     switch (asset.getType()) {
       case TEXT -> textDialog(asset);
@@ -69,6 +88,10 @@ public class ViewAssetDialog {
         });
   }
 
+  /**
+   * Creates a markdown control to display the asset.
+   * @param asset the asset to display.
+   */
   private void markdownDialog(Asset asset) {
     List<Extension> extensions =
         List.of(
@@ -94,10 +117,18 @@ public class ViewAssetDialog {
     htmlDialog(renderer.render(document));
   }
 
+  /**
+   * Creates a html control to display the asset.
+   * @param asset the asset to display.
+   */
   private void htmlDialog(Asset asset) {
     htmlDialog(asset.getDataAsString());
   }
 
+  /**
+   * Creates a html control to display a string.
+   * @param html the html to display.
+   */
   private void htmlDialog(String html) {
     Platform.runLater(
         () -> {
@@ -110,6 +141,10 @@ public class ViewAssetDialog {
         });
   }
 
+  /**
+   * Creates a text control to display the asset.
+   * @param asset the asset to display.
+   */
   private void textDialog(Asset asset) {
     Platform.runLater(
         () -> {
@@ -122,12 +157,19 @@ public class ViewAssetDialog {
         });
   }
 
+  /**
+   * Displays the dialog.
+   */
   public void show() {
+    SwingUtil.centerOver(dialog, dialog.getOwner());
     dialog.setVisible(true);
   }
 
+  /**
+   * Displays the dialog in a modal state.
+   */
   public void showModal() {
     dialog.setModal(true);
-    dialog.setVisible(true);
+    show();
   }
 }
