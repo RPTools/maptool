@@ -149,17 +149,21 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     addOnsTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     var nameCol = new TableColumn<LibraryInfo, String>(I18N.getText("library.dialog.addon.name"));
     nameCol.setCellValueFactory(lib -> new ReadOnlyObjectWrapper<>(lib.getValue().name()));
+    nameCol.prefWidthProperty().bind(addOnsTable.widthProperty().divide(4)); // w * 1/4
     var versionCol =
         new TableColumn<LibraryInfo, String>(I18N.getText("library.dialog.addon.version"));
     versionCol.setCellValueFactory(lib -> new ReadOnlyObjectWrapper<>(lib.getValue().version()));
+    versionCol.prefWidthProperty().bind(addOnsTable.widthProperty().divide(4)); // w * 1/4
     var namespaceCol =
         new TableColumn<LibraryInfo, String>(I18N.getText("library.dialog.addon.namespace"));
     namespaceCol.setCellValueFactory(
         lib -> new ReadOnlyObjectWrapper<>(lib.getValue().namespace()));
+    namespaceCol.prefWidthProperty().bind(addOnsTable.widthProperty().divide(4)); // w * 1/4
     var shortDescCol =
         new TableColumn<LibraryInfo, String>(I18N.getText("library.dialog.addon.shortDescription"));
     shortDescCol.setCellValueFactory(
         lib -> new ReadOnlyObjectWrapper<>(lib.getValue().shortDescription()));
+    shortDescCol.prefWidthProperty().bind(addOnsTable.widthProperty().divide(4)); // w * 1/4
 
     addOnsTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     addOnsTable
@@ -193,6 +197,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     closeButton.setOnAction(a -> performClose());
 
     clearDetails();
+    addOnsTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     try {
       addOnList.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
     } catch (ExecutionException | InterruptedException e) {
@@ -277,6 +282,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     }
   }
 
+  /** Clears the details of the library in the dialog. */
   private void clearDetails() {
     labelName.setText("");
     labelVersion.setText("");
@@ -291,6 +297,11 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
     buttonViewReadMeFile.setDisable(true);
   }
 
+  /**
+   * Updates the details of the library in the dialog.
+   *
+   * @param libraryInfo the library to display
+   */
   private void showDetails(LibraryInfo libraryInfo) {
     labelName.setText(libraryInfo.name());
     labelVersion.setText(libraryInfo.version());
@@ -307,6 +318,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
         libraryInfo.readMeFile() == null || libraryInfo.readMeFile().isEmpty());
   }
 
+  /** Handle adding of add-on library. */
   private void addAddOnLibrary() {
     SwingUtilities.invokeLater(
         () -> {
@@ -354,7 +366,6 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
               addOnList.add(addOn);
             }
           }
-          ;
         });
   }
 

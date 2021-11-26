@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
@@ -42,9 +41,7 @@ public class LibraryFunctions extends AbstractFunction {
         "library.listAddOnLibraries",
         "library.getInfo",
         "library.listTokenLibraries",
-        "library.getContents",
-        "library.removeAddOn",
-        "library.removeAllAddOns");
+        "library.getContents");
   }
 
   @Override
@@ -86,23 +83,6 @@ public class LibraryFunctions extends AbstractFunction {
           } else {
             return "";
           }
-        }
-
-        case "library.removeaddon" -> {
-          MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
-          FunctionUtil.blockUntrustedMacro(functionName);
-          FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
-          String namespace = parameters.get(0).toString();
-          new LibraryManager().removeAddOnLibrary(namespace);
-          return "";
-        }
-
-        case "library.removealladdons" -> {
-          MapTool.addLocalMessage(I18N.getText("msg.warning.prerelease.only", functionName));
-          FunctionUtil.blockUntrustedMacro(functionName);
-          FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
-          new LibraryManager().removeAddOnLibraries();
-          return "";
         }
 
         default -> throw new ParserException(

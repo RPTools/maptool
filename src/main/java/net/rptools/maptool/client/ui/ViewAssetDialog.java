@@ -39,8 +39,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 
 /**
- * Creates a dialog that can be used to view an asset.
- * Currently, only supports Plain Text, HTML, and Markdown.
+ * Creates a dialog that can be used to view an asset. Currently, only supports Plain Text, HTML,
+ * and Markdown.
  */
 public class ViewAssetDialog {
   /** The Swing Dialog to display the asset in. */
@@ -57,6 +57,7 @@ public class ViewAssetDialog {
 
   /**
    * Creates a new ViewAssetDialog.
+   *
    * @param asset the asset to display.
    * @param title the title of the dialog.
    * @param width the width of the dialog.
@@ -90,6 +91,7 @@ public class ViewAssetDialog {
 
   /**
    * Creates a markdown control to display the asset.
+   *
    * @param asset the asset to display.
    */
   private void markdownDialog(Asset asset) {
@@ -119,6 +121,7 @@ public class ViewAssetDialog {
 
   /**
    * Creates a html control to display the asset.
+   *
    * @param asset the asset to display.
    */
   private void htmlDialog(Asset asset) {
@@ -127,6 +130,7 @@ public class ViewAssetDialog {
 
   /**
    * Creates a html control to display a string.
+   *
    * @param html the html to display.
    */
   private void htmlDialog(String html) {
@@ -143,6 +147,7 @@ public class ViewAssetDialog {
 
   /**
    * Creates a text control to display the asset.
+   *
    * @param asset the asset to display.
    */
   private void textDialog(Asset asset) {
@@ -157,17 +162,13 @@ public class ViewAssetDialog {
         });
   }
 
-  /**
-   * Displays the dialog.
-   */
+  /** Displays the dialog. */
   public void show() {
     SwingUtil.centerOver(dialog, dialog.getOwner());
     dialog.setVisible(true);
   }
 
-  /**
-   * Displays the dialog in a modal state.
-   */
+  /** Displays the dialog in a modal state. */
   public void showModal() {
     dialog.setModal(true);
     show();
