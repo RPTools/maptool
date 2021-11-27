@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -282,7 +283,9 @@ class LibraryToken implements Library {
             license.isEmpty() ? notSet : license,
             description.isEmpty() ? notSet : description,
             shortDescription.isEmpty() ? notSet : shortDescription,
-            allowsUriAccess));
+            allowsUriAccess,
+            null,
+            null));
   }
 
   @Override
@@ -346,6 +349,18 @@ class LibraryToken implements Library {
   @Override
   public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
     return false; // Library Tokens don't have private data
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getReadMeAsset() {
+    // Lib:tokens don't support read me files.
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getLicenseAsset() {
+    // Lib:tokens don't support license files.
+    return CompletableFuture.completedFuture(Optional.empty());
   }
 
   /**
