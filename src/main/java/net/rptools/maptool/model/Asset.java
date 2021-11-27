@@ -175,6 +175,9 @@ public final class Asset {
   /** The value of the data as a {@link String}. */
   private final transient String dataAsString;
 
+  /** Is this a broken asset or not. */
+  private final transient boolean broken;
+
   /**
    * The value of the data as a {@link JsonElement} if it is of type JSON, otherwise {@code null}.
    */
@@ -197,7 +200,8 @@ public final class Asset {
         name,
         image != null ? image : new byte[] {},
         Type.IMAGE,
-        Type.IMAGE.getDefaultExtension());
+        Type.IMAGE.getDefaultExtension(),
+        false);
   }
 
   /**
@@ -208,7 +212,7 @@ public final class Asset {
    * @return the {@code Asset} that represents the audio.
    */
   public static Asset createAudioAsset(String name, byte[] audio) {
-    return new Asset(null, name, audio, Type.AUDIO, Type.AUDIO.getDefaultExtension());
+    return new Asset(null, name, audio, Type.AUDIO, Type.AUDIO.getDefaultExtension(), false);
   }
 
   /**
@@ -219,7 +223,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the image.
    */
   public static Asset createImageAsset(String name, BufferedImage image) {
-    return new Asset(name, image);
+    return new Asset(name, image, false);
   }
 
   /**
@@ -230,7 +234,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the pdf.
    */
   public static Asset createPDFAsset(String name, byte[] pdf) {
-    return new Asset(null, name, pdf, Type.PDF, Type.PDF.getDefaultExtension());
+    return new Asset(null, name, pdf, Type.PDF, Type.PDF.getDefaultExtension(), false);
   }
 
   /**
@@ -241,7 +245,8 @@ public final class Asset {
    * @return an {@code Asset} that represents the markdown.
    */
   public static Asset createMarkdownAsset(String name, byte[] markdown) {
-    return new Asset(null, name, markdown, Type.MARKDOWN, Type.MARKDOWN.getDefaultExtension());
+    return new Asset(
+        null, name, markdown, Type.MARKDOWN, Type.MARKDOWN.getDefaultExtension(), false);
   }
 
   /**
@@ -253,7 +258,7 @@ public final class Asset {
    */
   public static Asset createJavaScriptAsset(String name, byte[] javascript) {
     return new Asset(
-        null, name, javascript, Type.JAVASCRIPT, Type.JAVASCRIPT.getDefaultExtension());
+        null, name, javascript, Type.JAVASCRIPT, Type.JAVASCRIPT.getDefaultExtension(), false);
   }
 
   /**
@@ -264,7 +269,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the css.
    */
   public static Asset createCSSAsset(String name, byte[] css) {
-    return new Asset(null, name, css, Type.CSS, Type.CSS.getDefaultExtension());
+    return new Asset(null, name, css, Type.CSS, Type.CSS.getDefaultExtension(), false);
   }
 
   /**
@@ -275,7 +280,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the text.
    */
   public static Asset createTextAsset(String name, byte[] text) {
-    return new Asset(null, name, text, Type.TEXT, Type.TEXT.getDefaultExtension());
+    return new Asset(null, name, text, Type.TEXT, Type.TEXT.getDefaultExtension(), false);
   }
 
   /**
@@ -286,7 +291,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the json.
    */
   public static Asset createJsonAsset(String name, byte[] json) {
-    return new Asset(null, name, json, Type.JSON, Type.JSON.getDefaultExtension());
+    return new Asset(null, name, json, Type.JSON, Type.JSON.getDefaultExtension(), false);
   }
 
   /**
@@ -297,7 +302,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the xml.
    */
   public static Asset createXMLAsset(String name, byte[] xml) {
-    return new Asset(null, name, xml, Type.XML, Type.XML.getDefaultExtension());
+    return new Asset(null, name, xml, Type.XML, Type.XML.getDefaultExtension(), false);
   }
 
   /**
@@ -309,7 +314,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the data.
    */
   public static Asset createInvalidAssetType(String name, byte[] data) {
-    return createBrokenImageAsset(new MD5Key(data));
+    return createBrokenImageAsset(name, new MD5Key(data));
   }
 
   /**
@@ -319,7 +324,17 @@ public final class Asset {
    * @return an {@code Asset} that represents a broken image.
    */
   public static Asset createBrokenImageAsset(MD5Key md5Key) {
-    return new Asset(md5Key, BROKEN_IMAGE_NAME, new byte[] {}, Type.IMAGE, ".png");
+    return new Asset(md5Key, BROKEN_IMAGE_NAME, new byte[] {}, Type.IMAGE, ".png", true);
+  }
+
+  /**
+   * Create an {@code Asset} for representing a broken image.
+   *
+   * @param md5Key The Md5 sum of the {@code Asset}.
+   * @return an {@code Asset} that represents a broken image.
+   */
+  public static Asset createBrokenImageAsset(String name, MD5Key md5Key) {
+    return new Asset(md5Key, name, new byte[] {}, Type.IMAGE, ".png", true);
   }
 
   /**
@@ -330,7 +345,7 @@ public final class Asset {
    * @return an {@code Asset} that represents the data.
    */
   public static Asset createDataAssetType(String name, byte[] data) {
-    return new Asset(null, name, data, Type.DATA, Type.DATA.getDefaultExtension());
+    return new Asset(null, name, data, Type.DATA, Type.DATA.getDefaultExtension(), false);
   }
 
   /**
@@ -355,7 +370,7 @@ public final class Asset {
    * @return the HTML {@code Asset}.
    */
   public static Asset createHTMLAsset(String name, byte[] data) {
-    return new Asset(null, name, data, Type.HTML, Type.HTML.getDefaultExtension());
+    return new Asset(null, name, data, Type.HTML, Type.HTML.getDefaultExtension(), false);
   }
 
   /**
@@ -366,7 +381,7 @@ public final class Asset {
    * @return the MapTool Drop In Library {@code Asset}.
    */
   private static Asset createMTLibAsset(String namespace, byte[] data) {
-    return new Asset(null, namespace, data, Type.MTLIB, Type.MTLIB.getDefaultExtension());
+    return new Asset(null, namespace, data, Type.MTLIB, Type.MTLIB.getDefaultExtension(), false);
   }
 
   /**
@@ -390,12 +405,14 @@ public final class Asset {
    * @param data The data for the {@code Asset}.
    * @param type The type of the {@code Asset}.
    * @param extension the extension for the {@code Asset}.
+   * @param broken is the {@code Asset} broken.
    */
-  private Asset(MD5Key key, String name, byte[] data, Type type, String extension) {
+  private Asset(MD5Key key, String name, byte[] data, Type type, String extension, boolean broken) {
     assert data != null;
     this.data = Arrays.copyOf(data, data.length);
     this.name = name;
     this.type = type;
+    this.broken = broken;
 
     md5Key = Objects.requireNonNullElseGet(key, () -> new MD5Key(this.data));
 
@@ -425,8 +442,9 @@ public final class Asset {
    *
    * @param name The name of the {@code Asset}.
    * @param image The data for the {@code Asset}.
+   * @param broken is the {@code Asset} broken.
    */
-  private Asset(String name, BufferedImage image) {
+  private Asset(String name, BufferedImage image, boolean broken) {
     this.name = name;
     byte[] imageData = null;
     try {
@@ -458,6 +476,7 @@ public final class Asset {
     }
 
     json = null;
+    this.broken = broken;
   }
 
   /**
@@ -469,12 +488,13 @@ public final class Asset {
    * @param extension The extension for the {@code Asset}.
    * @param type The {@link Type} of the {@code Asset}.
    */
-  private Asset(MD5Key key, String name, byte[] data, String extension, Type type) {
+  private Asset(MD5Key key, String name, byte[] data, String extension, Type type, boolean broken) {
     this.name = name;
     this.data = Arrays.copyOf(data, data.length);
     this.extension = extension;
     this.type = type;
     this.md5Key = key != null ? key : new MD5Key(this.data);
+    this.broken = broken;
 
     if (type.isStringType()) {
       dataAsString = new String(data);
@@ -517,7 +537,7 @@ public final class Asset {
    * @return the new {@code Asset}.
    */
   public Asset setData(byte[] data, boolean recalcMd5) {
-    return new Asset(recalcMd5 ? null : this.md5Key, this.name, data, type, extension);
+    return new Asset(recalcMd5 ? null : this.md5Key, this.name, data, type, extension, broken);
   }
 
   /**
@@ -644,9 +664,14 @@ public final class Asset {
     byte[] dataVal;
     dataVal = Objects.requireNonNullElseGet(this.data, () -> new byte[0]);
     try {
-      return Asset.createAssetDetectType(this.name, dataVal);
+      var asset = Asset.createAssetDetectType(this.name, dataVal);
+      if (asset.isBroken()) {
+        return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type, true);
+      } else {
+        return asset;
+      }
     } catch (IOException e) {
-      return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type);
+      return new Asset(this.md5Key, this.name, dataVal, this.extension, this.type, false);
     }
   }
 
@@ -703,5 +728,14 @@ public final class Asset {
    */
   public static MediaType getMediaType(URL url) throws IOException {
     return getMediaType(url.getFile(), TikaInputStream.get(url));
+  }
+
+  /**
+   * Returns if the {@code Asset} is broken or not.
+   *
+   * @return {@code true} if the {@code Asset} is broken.
+   */
+  private boolean isBroken() {
+    return broken;
   }
 }
