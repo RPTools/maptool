@@ -212,6 +212,7 @@ public class DungeonDraftImporter {
             Area vblArea = new Area(getVBLPath(v.getAsJsonArray(), pixelsPerCell));
             if (finalDo_transform) vblArea.transform(at);
             zone.addTopology(vblArea, Zone.TopologyType.HILL_VBL);
+            zone.addTopology(vblArea, Zone.TopologyType.PIT_VBL);
           });
     }
 
