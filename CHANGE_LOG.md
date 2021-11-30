@@ -10,8 +10,8 @@ Feature release using OpenJDK 16
 - Long-time Java bug causing MapTool to hang when dropping images into Edit Token dialog fixed with new Java release.
 
 ## Enhancements & Features
-
-- [#3200][i3200] New MapTool Easy Connect™ option for servers to allow players to submit their Public Key information at connectiong for approval by GM. 
+- [#3212][i3212] New GUI for managing Add-Ons.
+- [#3200][i3200] New MapTool Easy Connect™ option for servers to allow players to submit their Public Key information at connection for approval by GM. 
 - [#3171][i3171] Extend `@this` behaviour to the data.getStaticData function.
 - [#3164][i3164] New macro function `data.getStaticData(namespace, path)` for accessing static data in Add-On libraries.
 - [#3103][i3103] Additional properties added to output of `getFrameProperties()`
@@ -43,6 +43,9 @@ Feature release using OpenJDK 16
 - [#1104][i1104] New server option to disable Player access to Resource Library. 
  
 ## Bug Fixes
+- [#3216][i3216] Alpha 5 builds failing to load assets from campaign file. Fixed.
+- [#3211][i3211] Macro buttons with missing images causing MapTool to hang. Fixed. (Develop only.)
+- [#3199][i3199] `getMapDisplayName()` wasn't being handled correctly in untrusted/trusted contexts. Fixed.
 - [#3191][i3191] `isNumber()` was returning false (0) for numeric strings with whitespace padding or a `+` sign. Fixed.
 - [#3183][i3183] Exporting lib:token as Add-On failing under Windows. Fixed.
 - [#3176][i3176] `getLibraryProperty()` not handling numeric values correctly. Fixed.
@@ -72,9 +75,11 @@ Feature release using OpenJDK 16
 
 [Change Log for 1.10.4](https://github.com/RPTools/maptool/blob/1.10.4/CHANGE_LOG.md)
 
-[i]: https://github.com/RPTools/maptool/issues/
+[i3216]: https://github.com/RPTools/maptool/issues/3216
+[i3211]: https://github.com/RPTools/maptool/issues/3211
 [i3200]: https://github.com/RPTools/maptool/issues/3200
 [i3204]: https://github.com/RPTools/maptool/issues/3204
+[i3199]: https://github.com/RPTools/maptool/issues/3199
 [i3191]: https://github.com/RPTools/maptool/issues/3191
 [i3183]: https://github.com/RPTools/maptool/issues/3183
 [i3176]: https://github.com/RPTools/maptool/issues/3176
