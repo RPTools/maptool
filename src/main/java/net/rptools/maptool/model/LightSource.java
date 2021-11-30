@@ -22,7 +22,10 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import net.rptools.lib.FileUtil;
+import net.rptools.maptool.server.proto.LightSourceDto;
+import net.rptools.maptool.server.proto.ShapeTypeDto;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -238,5 +241,30 @@ public class LightSource implements Comparable<LightSource> {
       return name.compareTo(o.name);
     }
     return 0;
+  }
+
+  public static LightSource fromDto(LightSourceDto dto) {
+    var lightSource = new LightSource();
+    lightSource.lightList =
+        dto.getLightsList().stream().map(l -> Light.fromDto(l)).collect(Collectors.toList());
+    lightSource.name = dto.getName();
+    lightSource.id = GUID.valueOf(dto.getId());
+    lightSource.type = Type.valueOf(dto.getType().name());
+    lightSource.shapeType = ShapeType.valueOf(dto.getShapeType().name());
+    lightSource.lumens = dto.getLumens();
+    lightSource.scaleWithToken = dto.getScaleWithToken();
+    return lightSource;
+  }
+
+  public LightSourceDto toDto() {
+    var dto = LightSourceDto.newBuilder();
+    dto.addAllLights(lightList.stream().map(l -> l.toDto()).collect(Collectors.toList()));
+    dto.setName(name);
+    dto.setId(id.toString());
+    dto.setType(LightSourceDto.LightTypeDto.valueOf(type.name()));
+    dto.setShapeType(ShapeTypeDto.valueOf(shapeType.name()));
+    dto.setLumens(lumens);
+    dto.setScaleWithToken(scaleWithToken);
+    return dto.build();
   }
 }

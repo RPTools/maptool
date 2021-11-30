@@ -188,7 +188,8 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   private void handle(SendTokensToBackMsg msg) {
     var zoneGuid = GUID.valueOf(msg.getZoneGuid());
-    var tokens = msg.getTokenGuidsList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
+    var tokens =
+        msg.getTokenGuidsList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
     sendTokensToBack(zoneGuid, tokens);
   }
 

@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Place a Yield (triangle point down) over a token.
@@ -83,5 +84,15 @@ public class YieldTokenOverlay extends XTokenOverlay {
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
+  }
+
+  public static YieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new YieldTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.YIELD).build();
   }
 }

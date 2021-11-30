@@ -464,8 +464,11 @@ public class ServerCommandClientImpl implements ServerCommand {
     // there seem to be other ways to upload textures (?) (e.g. in MapToolUtil)
     putAsset(AssetManager.getAsset(mapAssetId));
     // Second, tell the client to change the zone's board info
-    var msg = SetBoardMsg.newBuilder().setZoneGuid(zoneGUID.toString())
-            .setAssetId(mapAssetId.toString()).setPoint(IntPointDto.newBuilder().setY(x).setY(y));
+    var msg =
+        SetBoardMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setAssetId(mapAssetId.toString())
+            .setPoint(IntPointDto.newBuilder().setY(x).setY(y));
     makeServerCall(Message.newBuilder().setSetBoardMsg(msg).build());
   }
 

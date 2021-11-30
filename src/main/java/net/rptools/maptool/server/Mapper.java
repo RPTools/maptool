@@ -333,4 +333,8 @@ public class Mapper {
   public static IntPointDto map(Dimension d) {
     return IntPointDto.newBuilder().setY(d.width).setY(d.height).build();
   }
+
+  public static BasicStroke map(StrokeDto dto) {}
+
+  public static StrokeDto map(BasicStroke stroke) {}
 }

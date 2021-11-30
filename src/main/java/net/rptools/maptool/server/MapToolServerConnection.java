@@ -22,7 +22,6 @@ import net.rptools.clientserver.hessian.server.MethodServerConnection;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerObserver;
-import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
@@ -111,7 +110,8 @@ public class MapToolServerConnection
 
     var msg2 = SetCampaignMsg.newBuilder().setCampaign(server.getCampaign().toDto());
     server
-        .getConnection().sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
+        .getConnection()
+        .sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
   public void connectionRemoved(ClientConnection conn) {

@@ -61,7 +61,7 @@ message LookupEntryDto {
   int32 max = 2;
   bool picked = 3;
   string value = 4;
-  string image_id = 55;
+  string image_id = 5;
 }
 
 message LightSourceDto {
@@ -99,7 +99,7 @@ message LightDto {
 message LocationDto {
   oneof LocationTyp {
     LocalLocationDto local_location = 1;
-    FtpLocation ftp_location = 2;
+    FtpLocationDto ftp_location = 2;
   }
 }
 
@@ -107,7 +107,7 @@ message LocalLocationDto {
   string local_file = 1;
 }
 
-message FtpLocation {
+message FtpLocationDto {
   string user_name = 1;
   string host_name = 2;
   string path = 3;
@@ -150,6 +150,17 @@ message TokenPropertyDto {
   string default_value = 6;
 }
 
+message TokenOverlayDto {
+  string name = 1;
+  int32 order = 2;
+  string group = 3;
+  bool mouse_over = 4;
+  int32 opacity = 5;
+  bool show_gm = 6;
+  bool show_owner = 7;
+  bool show_others = 8;
+}
+
 message BarTokenOverlayDto {
   enum SideDto {
     TOP = 0;
@@ -164,21 +175,14 @@ message BarTokenOverlayDto {
     TWO_TONE = 3;
     TWO_IMAGES = 4;
   }
-  string name = 1;
-  int32 order = 2;
-  string group = 3;
-  bool mouse_over = 4;
-  int32 opacity = 5;
-  bool show_gm = 6;
-  bool show_owner = 7;
-  bool show_others = 8;
-  int32 increments = 9;
-  SideDto side = 10;
-  repeated string asset_ids = 11;
-  int32 color = 12;
-  int32 bg_color = 13;
-  int32 thickness = 14;
-  BarTokenOverlayTypeDto type = 15;
+  TokenOverlayDto common = 1;
+  int32 increments = 2;
+  SideDto side = 3;
+  repeated string asset_ids = 4;
+  int32 color = 5;
+  int32 bg_color = 6;
+  int32 thickness = 7;
+  BarTokenOverlayTypeDto type = 8;
 }
 
 enum QuadrantDto {
@@ -206,20 +210,13 @@ message BooleanTokenOverlayDto {
     FLOW_IMAGE = 13;
     CORNER_IMAGE = 14;
   }
-  string name = 1;
-  int32 order = 2;
-  string group = 3;
-  bool mouse_over = 4;
-  int32 opacity = 5;
-  bool show_gm = 6;
-  bool show_owner = 7;
-  bool show_others = 8;
-  int32 color = 9;
-  StrokeDto stroke = 10;
-  QuadrantDto quadrant = 11;
-  int32 grid_size = 12;
-  string asset_id = 13;
-  BooleanTokenOverlayTypeDto type = 14;
+  TokenOverlayDto common = 1;
+  int32 color = 2;
+  StrokeDto stroke = 3;
+  QuadrantDto quadrant = 4;
+  int32 grid_size = 5;
+  string asset_id = 6;
+  BooleanTokenOverlayTypeDto type = 7;
 }
 
 message StrokeDto {

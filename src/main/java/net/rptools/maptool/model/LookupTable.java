@@ -20,6 +20,8 @@ import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.LookupEntryDto;
+import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.parser.ParserException;
 
 public class LookupTable {
@@ -381,10 +383,10 @@ public class LookupTable {
     /** @Deprecated here to prevent xstream from breaking b24-b25 */
     private String result;
 
-    public LookupEntry(int min, int max, String result, MD5Key imageId) {
+    public LookupEntry(int min, int max, String value, MD5Key imageId) {
       this.min = min;
       this.max = max;
-      this.value = result;
+      this.value = value;
       this.imageId = imageId;
     }
 
@@ -415,6 +417,23 @@ public class LookupTable {
         result = null;
       }
       return value;
+    }
+
+    public static LookupEntry fromDto(LookupEntryDto dto) {
+      var entry =
+          new LookupEntry(dto.getMin(), dto.getMax(), dto.getValue(), new MD5Key(dto.getImageId()));
+      entry.picked = dto.getPicked();
+      return entry;
+    }
+
+    public LookupEntryDto toDto() {
+      var dto = LookupEntryDto.newBuilder();
+      dto.setMin(min);
+      dto.setMax(max);
+      dto.setPicked(picked);
+      dto.setValue(value);
+      dto.setImageId(imageId.toString());
+      return dto.build();
     }
   }
 
@@ -478,5 +497,30 @@ public class LookupTable {
    */
   public void setAllowLookup(Boolean value) {
     allowLookup = value;
+  }
+
+  public static LookupTable fromDto(LookupTableDto dto) {
+    var table = new LookupTable();
+    table.name = dto.getName();
+    table.entryList =
+        dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
+    table.defaultRoll = dto.getDefaultRoll();
+    table.tableImage = new MD5Key(dto.getTableImage());
+    table.setVisible(dto.getVisible());
+    table.setAllowLookup(dto.getAllowLookup());
+    table.setPickOnce(dto.getPickOnce());
+    return table;
+  }
+
+  public LookupTableDto toDto() {
+    var dto = LookupTableDto.newBuilder();
+    dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
+    dto.setName(name);
+    dto.setDefaultRoll(defaultRoll);
+    dto.setTableImage(tableImage.toString());
+    dto.setVisible(visible);
+    dto.setAllowLookup(allowLookup);
+    dto.setPickOnce(pickOnce);
+    return dto.build();
   }
 }
