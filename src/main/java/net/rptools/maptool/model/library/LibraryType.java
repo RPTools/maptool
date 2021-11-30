@@ -17,5 +17,5 @@ package net.rptools.maptool.model.library;
 /** Library types */
 public enum LibraryType {
   TOKEN,
-  DROP_IN
+  ADD_ON
 }

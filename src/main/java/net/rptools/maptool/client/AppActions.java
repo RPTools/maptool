@@ -82,6 +82,7 @@ import net.rptools.maptool.client.ui.StartServerDialog;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.SysInfoDialog;
+import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
@@ -118,8 +119,6 @@ import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
@@ -2966,8 +2965,8 @@ public class AppActions {
         }
       };
 
-  private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
-    MapPreviewFileChooser() {
+  public static class MapPreviewFileChooser extends PreviewPanelFileChooser {
+    public MapPreviewFileChooser() {
       super();
       addChoosableFileFilter(MapTool.getFrame().getMapFileFilter());
     }
@@ -3253,10 +3252,10 @@ public class AppActions {
         }
       };
 
-  public static final Action IMPORT_DROP_IN_LIBRARY =
+  public static final Action VIEW_ADD_ON_LIBRARIES =
       new DefaultClientAction() {
         {
-          init("action.importLibrary");
+          init("action.addOnLibraries");
         }
 
         @Override
@@ -3267,7 +3266,9 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          JFileChooser chooser = new MapPreviewFileChooser();
+          new AddOnLibrariesDialog().show();
+          // TODO: CDW
+          /*JFileChooser chooser = new MapPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
@@ -3288,7 +3289,7 @@ public class AppActions {
             } catch (IOException | InterruptedException | ExecutionException ioException) {
               MapTool.showError("library.import.ioError", ioException);
             }
-          }
+          }*/
         }
       };
 
