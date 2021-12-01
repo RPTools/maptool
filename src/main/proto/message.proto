@@ -54,5 +54,11 @@ message Message {
     SendTokensToBackMsg send_tokens_to_back_msg = 37;
     SetBoardMsg set_board_msg = 38;
     SetCampaignMsg set_campaign_msg = 39;
+    SetCampaignNameMsg set_campaign_name_msg = 40;
+    SetFowMsg set_fow_msg = 41;
+    SetLiveTypingLabelMsg set_live_typing_label_msg = 42;
+    SetTokenLocationMsg set_token_location_msg = 43;
+    SetVisionTypeMsg set_vision_type_msg = 44;
+    SetZoneGridSizeMsg set_zone_grid_size_msg = 45;
   }
 }

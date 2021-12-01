@@ -205,3 +205,37 @@ message SetBoardMsg {
 message SetCampaignMsg {
   CampaignDto campaign = 1;
 }
+
+message SetCampaignNameMsg {
+  string name = 1;
+}
+
+message SetFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string selected_tokens = 3;
+}
+
+message SetLiveTypingLabelMsg {
+  string player_name = 1;
+  bool typing = 2;
+}
+
+message SetTokenLocationMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+  IntPointDto location = 3;
+}
+
+message SetVisionTypeMsg {
+  string zone_guid = 1;
+  ZoneDto.VisionTypeDto vision = 2;
+}
+
+message SetZoneGridSizeMsg {
+  string zone_guid = 1;
+  int32 x_offset = 2;
+  int32 y_offset = 3;
+  int32 size = 4;
+  int32 color = 5;
+}

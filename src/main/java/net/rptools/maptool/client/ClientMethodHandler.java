@@ -128,6 +128,12 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case RESTORE_ZONE_VIEW_MSG -> handle(msg.getRestoreZoneViewMsg());
         case SET_BOARD_MSG -> handle(msg.getSetBoardMsg());
         case SET_CAMPAIGN_MSG -> handle(msg.getSetCampaignMsg());
+        case SET_CAMPAIGN_NAME_MSG -> handle(msg.getSetCampaignNameMsg());
+        case SET_FOW_MSG -> handle(msg.getSetFowMsg());
+        case SET_LIVE_TYPING_LABEL_MSG -> handle(msg.getSetLiveTypingLabelMsg());
+        case SET_TOKEN_LOCATION_MSG -> handle(msg.getSetTokenLocationMsg());
+        case SET_VISION_TYPE_MSG -> handle(msg.getSetVisionTypeMsg());
+        case SET_ZONE_GRID_SIZE_MSG -> handle(msg.getSetZoneGridSizeMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -136,12 +142,120 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void handle(SetCampaignMsg msg) {
-    Campaign campaign = Campaign.fromDto(msg.getCampaign());
-    MapTool.setCampaign(campaign);
+  private void handle(SetZoneGridSizeMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          int xOffset = msg.getXOffset();
+          int yOffset = msg.getYOffset();
+          int size = msg.getSize();
+          int color = msg.getColor();
 
-    // Hide the "Connecting" overlay
-    MapTool.getFrame().hideGlassPane();
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.getGrid().setSize(size);
+          zone.getGrid().setOffset(xOffset, yOffset);
+          zone.setGridColor(color);
+
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(SetVisionTypeMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          VisionType visionType = VisionType.valueOf(msg.getVision().name());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          if (zone != null) {
+            zone.setVisionType(visionType);
+            if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
+              MapTool.getFrame().getCurrentZoneRenderer().flushFog();
+              MapTool.getFrame().getCurrentZoneRenderer().getZoneView().flush();
+            }
+            MapTool.getFrame().refresh();
+          }
+        });
+  }
+
+  private void handle(SetTokenLocationMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          // Only the table should process this
+          if (MapTool.getPlayer().getName().equalsIgnoreCase("Table")) {
+            var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+            var keyToken = GUID.valueOf(msg.getTokenGuid());
+
+            // This X,Y is the where the center of the token needs to be placed in
+            // relation to the screen. So 0,0 would be top left which means only 1/4
+            // of token would be drawn. 1024,768 would be lower right (on my table).
+            var x = msg.getLocation().getX();
+            var y = msg.getLocation().getY();
+
+            // Get the zone
+            var zone = MapTool.getCampaign().getZone(zoneGUID);
+            // Get the token
+            var token = zone.getToken(keyToken);
+
+            Grid grid = zone.getGrid();
+            // Convert the X/Y to the screen point
+            var renderer = MapTool.getFrame().getZoneRenderer(zone);
+            CellPoint newPoint = renderer.getCellAt(new ScreenPoint(x, y));
+            ZonePoint zp2 = grid.convert(newPoint);
+
+            token.setX(zp2.x);
+            token.setY(zp2.y);
+
+            MapTool.serverCommand().putToken(zoneGUID, token);
+          }
+        });
+  }
+
+  private void handle(SetLiveTypingLabelMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          if (msg.getTyping()) {
+            // add a typer
+            MapTool.getFrame().getChatNotificationTimers().setChatTyper(msg.getPlayerName());
+          } else {
+            // remove typer from list
+            MapTool.getFrame().getChatNotificationTimers().removeChatTyper(msg.getPlayerName());
+          }
+        });
+  }
+
+  private void handle(SetFowMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var area = Mapper.map(msg.getArea());
+          var selectedToks =
+              msg.getSelectedTokensList().stream()
+                  .map(t -> GUID.valueOf(t))
+                  .collect(Collectors.toSet());
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.setFogArea(area, selectedToks);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(SetCampaignNameMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.getCampaign().setName(msg.getName());
+          MapTool.getFrame().setTitle();
+        });
+  }
+
+  private void handle(SetCampaignMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          Campaign campaign = Campaign.fromDto(msg.getCampaign());
+          MapTool.setCampaign(campaign);
+
+          // Hide the "Connecting" overlay
+          MapTool.getFrame().hideGlassPane();
+        });
   }
 
   private void handle(SetBoardMsg msg) {
@@ -676,23 +790,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case setFoW:
-              zoneGUID = (GUID) parameters[0];
-              var area = (Area) parameters[1];
-
-              if (parameters.length > 2 && parameters[2] != null) {
-                selectedToks = (Set<GUID>) parameters[2];
-              }
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.setFogArea(area, selectedToks);
-              MapTool.getFrame().refresh();
-              return;
-
-            case setCampaignName:
-              MapTool.getCampaign().setName((String) parameters[0]);
-              MapTool.getFrame().setTitle();
-              return;
-
             case updateTokenProperty: // get token and update its property
               zoneGUID = (GUID) parameters[0];
               zone = MapTool.getCampaign().getZone(zoneGUID);
@@ -750,21 +847,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               MapTool.getFrame().refresh();
               return;
 
-            case setZoneGridSize:
-              zoneGUID = (GUID) parameters[0];
-              int xOffset = (Integer) parameters[1];
-              int yOffset = (Integer) parameters[2];
-              int size = (Integer) parameters[3];
-              int color = (Integer) parameters[4];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.getGrid().setSize(size);
-              zone.getGrid().setOffset(xOffset, yOffset);
-              zone.setGridColor(color);
-
-              MapTool.getFrame().refresh();
-              return;
-
             case showPointer:
               MapTool.getFrame()
                   .getPointerOverlay()
@@ -799,36 +881,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
               renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
               renderer.updateMoveSelectionSet(keyToken, new ZonePoint(x, y));
-              return;
-
-            case setTokenLocation:
-              // Only the table should process this
-              if (MapTool.getPlayer().getName().equalsIgnoreCase("Table")) {
-                zoneGUID = (GUID) parameters[0];
-                keyToken = (GUID) parameters[1];
-
-                // This X,Y is the where the center of the token needs to be placed in
-                // relation to the screen. So 0,0 would be top left which means only 1/4
-                // of token would be drawn. 1024,768 would be lower right (on my table).
-                x = (Integer) parameters[2];
-                y = (Integer) parameters[3];
-
-                // Get the zone
-                zone = MapTool.getCampaign().getZone(zoneGUID);
-                // Get the token
-                token = zone.getToken(keyToken);
-
-                Grid grid = zone.getGrid();
-                // Convert the X/Y to the screen point
-                renderer = MapTool.getFrame().getZoneRenderer(zone);
-                CellPoint newPoint = renderer.getCellAt(new ScreenPoint(x, y));
-                ZonePoint zp2 = grid.convert(newPoint);
-
-                token.setX(zp2.x);
-                token.setY(zp2.y);
-
-                MapTool.serverCommand().putToken(zoneGUID, token);
-              }
               return;
 
             case toggleTokenMoveWaypoint:
@@ -898,20 +950,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               ti.update((Boolean) parameters[2], (String) parameters[3]);
               return;
 
-            case setUseVision:
-              zoneGUID = (GUID) parameters[0];
-              VisionType visionType = (VisionType) parameters[1];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              if (zone != null) {
-                zone.setVisionType(visionType);
-                if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-                  MapTool.getFrame().getCurrentZoneRenderer().flushFog();
-                  MapTool.getFrame().getCurrentZoneRenderer().getZoneView().flush();
-                }
-                MapTool.getFrame().refresh();
-              }
-              return;
-
             case updateCampaignMacros:
               MapTool.getCampaign()
                   .setMacroButtonPropertiesArray(
@@ -927,21 +965,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                           (ArrayList<MacroButtonProperties>) parameters[0]));
               MapTool.getFrame().getGmPanel().reset();
               return;
-
-            case setLiveTypingLabel:
-              if ((Boolean) parameters[1]) {
-                // add a typer
-                MapTool.getFrame()
-                    .getChatNotificationTimers()
-                    .setChatTyper(parameters[0].toString());
-                return;
-              } else {
-                // remove typer from list
-                MapTool.getFrame()
-                    .getChatNotificationTimers()
-                    .removeChatTyper(parameters[0].toString());
-                return;
-              }
 
             case updateExposedAreaMeta:
               zoneGUID = (GUID) parameters[0];

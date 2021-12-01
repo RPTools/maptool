@@ -339,7 +339,8 @@ public class Mapper {
   }
 
   public static StrokeDto map(BasicStroke stroke) {
-    return StrokeDto.newBuilder().setWidth(stroke.getLineWidth())
+    return StrokeDto.newBuilder()
+        .setWidth(stroke.getLineWidth())
         .setCap(StrokeDto.CapDto.forNumber(stroke.getEndCap()))
         .setJoin(StrokeDto.JoinDto.forNumber(stroke.getLineJoin()))
         .build();

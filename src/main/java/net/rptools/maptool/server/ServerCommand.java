@@ -43,10 +43,8 @@ import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 public interface ServerCommand {
   enum COMMAND {
     // @formatter:off
-    setCampaignName,
     updateTokenProperty,
     updateDrawing,
-    setZoneGridSize,
     undoDraw,
     showPointer,
     startTokenMove,
@@ -55,17 +53,12 @@ public interface ServerCommand {
     updateTokenMove,
     setZoneVisibility,
     setZoneHasFoW,
-    setFoW,
     setServerPolicy,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,
-    setVisionType,
     updateCampaignMacros,
     updateGmMacros,
-    setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
-    // depended on for general purpose token movement
-    setLiveTypingLabel, // Experimental
     updateExposedAreaMeta,
     clearExposedArea,
     removeAddOnLibrary,

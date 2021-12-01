@@ -754,11 +754,13 @@ public final class Asset {
   }
 
   public static Asset fromDto(AssetDto dto) {
-    var asset = new Asset(
-        new MD5Key(dto.getMd5Key()),
-        dto.getName(),
-        dto.getExtension(),
-        Asset.Type.valueOf(dto.getType().name()), false);
+    var asset =
+        new Asset(
+            new MD5Key(dto.getMd5Key()),
+            dto.getName(),
+            dto.getExtension(),
+            Asset.Type.valueOf(dto.getType().name()),
+            false);
     return asset;
   }
 

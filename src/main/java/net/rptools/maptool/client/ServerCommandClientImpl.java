@@ -98,11 +98,16 @@ public class ServerCommandClientImpl implements ServerCommand {
   public void setCampaignName(String name) {
     MapTool.getCampaign().setName(name);
     MapTool.getFrame().setTitle();
-    makeServerCall(COMMAND.setCampaignName, name);
+    var msg = SetCampaignNameMsg.newBuilder().setName(name);
+    makeServerCall(Message.newBuilder().setSetCampaignNameMsg(msg).build());
   }
 
   public void setVisionType(GUID zoneGUID, VisionType visionType) {
-    makeServerCall(COMMAND.setVisionType, zoneGUID, visionType);
+    var msg =
+        SetVisionTypeMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setVision(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
+    makeServerCall(Message.newBuilder().setSetVisionTypeMsg(msg).build());
   }
 
   public void updateCampaign(CampaignProperties properties) {
@@ -271,7 +276,14 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color) {
-    makeServerCall(COMMAND.setZoneGridSize, zoneGUID, xOffset, yOffset, size, color);
+    var msg =
+        SetZoneGridSizeMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setXOffset(xOffset)
+            .setYOffset(yOffset)
+            .setSize(size)
+            .setColor(color);
+    makeServerCall(Message.newBuilder().setSetZoneGridSizeMsg(msg).build());
   }
 
   public void setZoneVisibility(GUID zoneGUID, boolean visible) {
@@ -320,7 +332,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setLiveTypingLabel(String label, boolean show) {
-    makeServerCall(COMMAND.setLiveTypingLabel, label, show);
+    var msg = SetLiveTypingLabelMsg.newBuilder().setPlayerName(label).setTyping(show);
+    makeServerCall(Message.newBuilder().setSetLiveTypingLabelMsg(msg).build());
   }
 
   public void enforceNotification(Boolean enforce) {
@@ -379,7 +392,13 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    makeServerCall(COMMAND.setFoW, zoneGUID, area, selectedToks);
+    var msg =
+        SetFowMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setArea(Mapper.map(area))
+            .addAllSelectedTokens(
+                selectedToks.stream().map(t -> t.toString()).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setSetFowMsg(msg).build());
   }
 
   public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {

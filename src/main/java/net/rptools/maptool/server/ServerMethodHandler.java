@@ -171,6 +171,25 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getSetCampaignMsg());
           sendToClients(id, msg);
         }
+        case SET_CAMPAIGN_NAME_MSG -> {
+          handle(msg.getSetCampaignNameMsg());
+          sendToClients(id, msg);
+        }
+        case SET_FOW_MSG -> {
+          handle(msg.getSetFowMsg());
+          sendToAllClients(msg);
+        }
+        case SET_LIVE_TYPING_LABEL_MSG -> sendToClients(id, msg);
+        case SET_TOKEN_LOCATION_MSG -> sendToClients(id, msg);
+        case SET_VISION_TYPE_MSG -> {
+          handle(msg.getSetVisionTypeMsg());
+          sendToAllClients(msg);
+        }
+        case SET_ZONE_GRID_SIZE_MSG -> {
+          handle(msg.getSetZoneGridSizeMsg());
+          sendToAllClients(msg);
+        }
+
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -180,6 +199,31 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(SetZoneGridSizeMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    Grid grid = zone.getGrid();
+    grid.setSize(msg.getSize());
+    grid.setOffset(msg.getXOffset(), msg.getYOffset());
+    zone.setGridColor(msg.getColor());
+  }
+
+  private void handle(SetVisionTypeMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.setVisionType(VisionType.valueOf(msg.getVision().name()));
+  }
+
+  private void handle(SetFowMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    var area = Mapper.map(msg.getArea());
+    var selectedToks =
+        msg.getSelectedTokensList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
+    zone.setFogArea(area, selectedToks);
+  }
+
+  private void handle(SetCampaignNameMsg msg) {
+    server.getCampaign().setName(msg.getName());
   }
 
   private void handle(SetCampaignMsg msg) {
@@ -368,27 +412,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         case updateDrawing:
           updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
           break;
-        case setFoW:
-          setFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
-          break;
-        case setLiveTypingLabel:
-          setLiveTypingLabel(context.getString(0), context.getBool(1));
-          break;
         case updateTokenProperty:
           Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
               context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case setCampaignName:
-          setCampaignName((String) context.get(0));
-          break;
-        case setZoneGridSize:
-          setZoneGridSize(
-              context.getGUID(0),
-              context.getInt(1),
-              context.getInt(2),
-              context.getInt(3),
-              context.getInt(4));
           break;
         case setZoneVisibility:
           setZoneVisibility(context.getGUID(0), (Boolean) context.get(1));
@@ -437,18 +464,11 @@ public class ServerMethodHandler extends AbstractMethodHandler {
               context.getString(3),
               context.getInt(4));
           break;
-        case setVisionType:
-          setVisionType(context.getGUID(0), (VisionType) context.get(1));
-          break;
         case updateCampaignMacros:
           updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
           break;
         case updateGmMacros:
           updateGmMacros((List<MacroButtonProperties>) context.get(0));
-          break;
-        case setTokenLocation:
-          setTokenLocation(
-              context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
           break;
         case updateExposedAreaMeta:
           updateExposedAreaMeta(
@@ -548,15 +568,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
 
   ////
   // SERVER COMMAND
-  private void setVisionType(GUID zoneGUID, VisionType visionType) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.setVisionType(visionType);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.setUseVision.name(), RPCContext.getCurrent().parameters);
-  }
-
   private void updateCampaign(CampaignProperties properties) {
     server.getCampaign().replaceCampaignProperties(properties);
     forwardToClients();
@@ -638,15 +649,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     var zone = server.getCampaign().getZone(zoneGUID);
     var msg = PutZoneMsg.newBuilder().setZone(zone.toDto());
     server.getConnection().sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
-  }
-
-  private void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.setFogArea(area, selectedToks);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.setFoW.name(), RPCContext.getCurrent().parameters);
   }
 
   private void updateInitiative(InitiativeList list, Boolean ownerPermission) {
@@ -739,23 +741,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void setCampaignName(String name) {
-    server.getCampaign().setName(name);
-    forwardToClients();
-  }
-
-  private void setZoneGridSize(GUID zoneGUID, int offsetX, int offsetY, int size, int color) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    Grid grid = zone.getGrid();
-    grid.setSize(size);
-    grid.setOffset(offsetX, offsetY);
-    zone.setGridColor(color);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.setZoneGridSize.name(), RPCContext.getCurrent().parameters);
-  }
-
   private void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.setHasFog(hasFog);
@@ -778,10 +763,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         .getConnection()
         .broadcastCallMethod(
             ClientCommand.COMMAND.showPointer.name(), RPCContext.getCurrent().parameters);
-  }
-
-  private void setLiveTypingLabel(String label, boolean show) {
-    forwardToClients();
   }
 
   private void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
@@ -818,10 +799,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
   }
 
   private void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y) {
-    forwardToClients();
-  }
-
-  private void setTokenLocation(GUID zoneGUID, GUID tokenGUID, int x, int y) {
     forwardToClients();
   }
 

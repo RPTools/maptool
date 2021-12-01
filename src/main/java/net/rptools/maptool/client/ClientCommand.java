@@ -22,7 +22,6 @@ public class ClientCommand {
     updateAssetTransfer,
     updateTokenProperty,
     updateDrawing,
-    setZoneGridSize,
     setZoneVisibility,
     undoDraw,
     showPointer,
@@ -31,19 +30,13 @@ public class ClientCommand {
     toggleTokenMoveWaypoint,
     updateTokenMove,
     setZoneHasFoW,
-    setFoW,
     setServerPolicy,
     updateCampaign,
     updateInitiative,
     updateTokenInitiative,
-    setUseVision,
     updateCampaignMacros,
     updateGmMacros,
-    setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
-    // depended on for general purpose token movement
-    setLiveTypingLabel, // Experimental chat notification
     updateExposedAreaMeta,
-    setCampaignName,
     addAddOnLibrary,
     removeAllAddOnLibraries,
     removeAddOnLibrary,
