@@ -240,7 +240,7 @@ public class Token extends BaseModel implements Cloneable {
   private double scaleX = 1;
   private double scaleY = 1;
 
-  private Map<Class<? extends Grid>, GUID> sizeMap;
+  private Map<String, GUID> sizeMap;
 
   private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
   // floating
@@ -475,7 +475,7 @@ public class Token extends BaseModel implements Cloneable {
       imageAssetMap.putAll(token.imageAssetMap);
     }
     if (token.sizeMap != null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>(token.sizeMap);
+      sizeMap = new HashMap<>(token.sizeMap);
     }
 
     exposedAreaGUID = token.exposedAreaGUID;
@@ -1701,20 +1701,20 @@ public class Token extends BaseModel implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getSizeMap().get(grid.getClass()));
+    return grid.getFootprint(getSizeMap().get(grid.getClass().getName()));
   }
 
   public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-    return grid.getFootprint(getSizeMap().put(grid.getClass(), footprint.getId()));
+    return grid.getFootprint(getSizeMap().put(grid.getClass().getName(), footprint.getId()));
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
     return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
   }
 
-  private Map<Class<? extends Grid>, GUID> getSizeMap() {
+  private Map<String, GUID> getSizeMap() {
     if (sizeMap == null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>();
+      sizeMap = new HashMap<>();
     }
     return sizeMap;
   }
