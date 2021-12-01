@@ -32,8 +32,8 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.framework.Library;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -57,6 +57,8 @@ public class MacroDialogFunctions extends AbstractFunction {
         "resetFrame",
         "closeFrame",
         "closeOverlay",
+        "setOverlayVisible",
+        "isOverlayVisible",
         "getFrameProperties",
         "getDialogProperties",
         "getOverlayProperties",
@@ -76,13 +78,13 @@ public class MacroDialogFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("isDialogVisible")) {
+    if (functionName.equalsIgnoreCase("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
-    if (functionName.equals("isFrameVisible")) {
+    if (functionName.equalsIgnoreCase("isFrameVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(true, parameters.get(0).toString())
           ? BigDecimal.ONE
@@ -93,34 +95,46 @@ public class MacroDialogFunctions extends AbstractFunction {
       String name = parameters.get(0).toString();
       return isOverlayRegistered(name) ? BigDecimal.ONE : BigDecimal.ZERO;
     }
-    if (functionName.equals("closeDialog")) {
+    if (functionName.equalsIgnoreCase("closeDialog")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(false, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeFrame")) {
+    if (functionName.equalsIgnoreCase("closeFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(true, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeOverlay")) {
+    if (functionName.equalsIgnoreCase("closeOverlay")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       String name = parameters.get(0).toString();
       removeOverlay(name);
       return "";
     }
-    if (functionName.equals("resetFrame")) {
+    if (functionName.equalsIgnoreCase("setOverlayVisible")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String name = parameters.get(0).toString();
+      BigDecimal param = FunctionUtil.paramAsBigDecimal(functionName, parameters, 1, false);
+      setOverlayVisible(name, param.equals(BigDecimal.ONE));
+      return "";
+    }
+    if (functionName.equalsIgnoreCase("isOverlayVisible")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      String name = parameters.get(0).toString();
+      return isOverlayVisible(name) ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+    if (functionName.equalsIgnoreCase("resetFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrame.center(parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("getFrameProperties")) {
+    if (functionName.equalsIgnoreCase("getFrameProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLFrame.getFrameProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
       else return "";
     }
-    if (functionName.equals("getDialogProperties")) {
+    if (functionName.equalsIgnoreCase("getDialogProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLDialog.getDialogProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
@@ -242,6 +256,32 @@ public class MacroDialogFunctions extends AbstractFunction {
     } else {
       MapTool.getFrame().getOverlayPanel().removeOverlay(name);
     }
+  }
+
+  /**
+   * Sets the visible status of the Overlay
+   *
+   * @param name the name of the overlay
+   * @param visible true or false
+   */
+  private void setOverlayVisible(String name, boolean visible) {
+    HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
+    if (overlay != null) {
+      overlay.setVisible(visible);
+    }
+  }
+
+  /**
+   * Gets the visible status of the Overlay
+   *
+   * @param name the name of the overlay
+   */
+  private boolean isOverlayVisible(String name) {
+    HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
+    if (overlay != null) {
+      return overlay.isVisible();
+    }
+    return false;
   }
 
   /**

@@ -184,6 +184,15 @@ public interface PlayerDatabase {
   Set<String> getEncodedPublicKeys(String name);
 
   /**
+   * Returns if the player has the specified public key.
+   *
+   * @param player The player to check if they have the specified public key.
+   * @param md5key The {@link MD5Key} of the public key.
+   * @return {@code true} if the player has the specified public key.
+   */
+  CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key);
+
+  /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
    * this will not return {@code true} for every input but only for those that are actually known.
    *

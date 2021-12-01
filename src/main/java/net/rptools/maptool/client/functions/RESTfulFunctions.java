@@ -174,13 +174,13 @@ public class RESTfulFunctions extends AbstractFunction {
 
     if (headerMap.isEmpty()) {
       // Build without any headers...
-      if (functionName.equals("REST.post")) {
+      if (functionName.equalsIgnoreCase("REST.post")) {
         request = new Request.Builder().url(baseURL).post(requestBody).build();
-      } else if (functionName.equals("REST.put")) {
+      } else if (functionName.equalsIgnoreCase("REST.put")) {
         request = new Request.Builder().url(baseURL).put(requestBody).build();
-      } else if (functionName.equals("REST.patch")) {
+      } else if (functionName.equalsIgnoreCase("REST.patch")) {
         request = new Request.Builder().url(baseURL).patch(requestBody).build();
-      } else if (functionName.equals("REST.delete")) {
+      } else if (functionName.equalsIgnoreCase("REST.delete")) {
         request = new Request.Builder().url(baseURL).delete(requestBody).build();
       } else {
         throw new ParserException(
@@ -188,13 +188,13 @@ public class RESTfulFunctions extends AbstractFunction {
       }
     } else {
       // Now build request with headers
-      if (functionName.equals("REST.post")) {
+      if (functionName.equalsIgnoreCase("REST.post")) {
         request = new Request.Builder().url(baseURL).headers(headers).post(requestBody).build();
-      } else if (functionName.equals("REST.put")) {
+      } else if (functionName.equalsIgnoreCase("REST.put")) {
         request = new Request.Builder().url(baseURL).headers(headers).put(requestBody).build();
-      } else if (functionName.equals("REST.patch")) {
+      } else if (functionName.equalsIgnoreCase("REST.patch")) {
         request = new Request.Builder().url(baseURL).headers(headers).patch(requestBody).build();
-      } else if (functionName.equals("REST.delete")) {
+      } else if (functionName.equalsIgnoreCase("REST.delete")) {
         request = new Request.Builder().url(baseURL).headers(headers).delete(requestBody).build();
       } else {
         throw new ParserException(

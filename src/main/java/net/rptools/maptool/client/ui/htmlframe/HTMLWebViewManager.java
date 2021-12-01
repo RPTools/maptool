@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
@@ -34,13 +35,14 @@ import javafx.scene.web.*;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.swing.*;
+import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.parser.ParserException;
+import net.rptools.maptool.model.library.LibraryManager;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,6 +89,11 @@ public class HTMLWebViewManager {
 
     /** Name of the Bridge. */
     private static final String NAME = "MapTool";
+
+    public MTXMLHttpRequest makeXMLHttpRequest(JSObject ctx, String href) {
+      return new MTXMLHttpRequest(ctx, href);
+    }
+
     /**
      * Display a self-only message in the chat window.
      *
@@ -172,7 +179,7 @@ public class HTMLWebViewManager {
           + " https://ajax.googleapis.com " // Google CDN
           + " https://fonts.googleapis.com  https://fonts.gstatic.com " // Google Fonts
           + " 'unsafe-inline' 'unsafe-eval' ; "
-          + " img-src * asset: ; "
+          + " img-src * asset: lib: ; "
           + " font-src https://fonts.gstatic.com 'self'"
           + "\">\n";
 
@@ -192,20 +199,16 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_REPLACE_LOG =
       "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
 
-  /** JS that replace the form.submit() in JS by a function that works. */
-  private static final String SCRIPT_REPLACE_SUBMIT =
-      "HTMLFormElement.prototype.submit = function(){this.dispatchEvent(new Event('submit'));};";
-
   /** JS to initialize the Java bridge. Needs to be the first script of the page. */
   private static final String SCRIPT_BRIDGE =
       String.format(
           "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
 
-  /** JS adding Mutation Observer to the document, handle new nodes with handleAddedNode. */
-  private static final String SCRIPT_MUTATION_OBS =
-      "const maptool_observer = new MutationObserver(function(mutations, observer) {"
-          + "for(let mutation of mutations) {if (mutation.type === 'childList') {for (let i = 0; i < mutation.addedNodes.length; i++) {MapTool.handleAddedNode(mutation.addedNodes[i]);}}}});"
-          + "maptool_observer.observe(document.documentElement, { attributes: false, characterData: false, childList: true, subtree: true });";
+  private static final String[] INITIALIZATION_SCRIPTS = {
+    "net/rptools/maptool/client/html5/javascript/Replace_Submit.js",
+    "net/rptools/maptool/client/html5/javascript/Mutation_Observer.js",
+    "net/rptools/maptool/client/html5/javascript/XMLHttpRequest.js"
+  };
 
   HTMLWebViewManager() {}
 
@@ -286,11 +289,15 @@ public class HTMLWebViewManager {
       // Redirect console.log to the JavaBridge
       webEngine.executeScript(SCRIPT_REPLACE_LOG);
 
-      // Replace the broken javascript form.submit method
-      webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
-
-      // Add the MutationObserver to handle new nodes as they are added
-      webEngine.executeScript(SCRIPT_MUTATION_OBS);
+      for (String rsrc : INITIALIZATION_SCRIPTS) {
+        try {
+          String src = new String(FileUtil.loadResource(rsrc), StandardCharsets.UTF_8);
+          webEngine.executeScript(src);
+        } catch (Exception e) {
+          log.error("Failed initializing: " + rsrc);
+          log.error(e);
+        }
+      }
     }
   }
 
@@ -456,13 +463,23 @@ public class HTMLWebViewManager {
           return;
         }
         try {
-          String cssText = MapTool.getParser().getTokenLibMacro(vals[0], vals[1]);
-          Element styleNode = doc.createElement("style");
-          Text styleContent = doc.createTextNode(cssText);
-          styleNode.appendChild(styleContent);
-          // Insert the style node before the link.
-          node.getParentNode().insertBefore(styleNode, node);
-        } catch (ParserException e) {
+
+          var lib = new LibraryManager().getLibrary(vals[1].substring(4));
+          if (lib.isPresent()) {
+            var library = lib.get();
+            var macroInfo = library.getMTScriptMacroInfo(vals[0]).get();
+
+            if (macroInfo.isPresent()) {
+              String cssText = macroInfo.get().macro();
+
+              Element styleNode = doc.createElement("style");
+              Text styleContent = doc.createTextNode(cssText);
+              styleNode.appendChild(styleContent);
+              // Insert the style node before the link.
+              node.getParentNode().insertBefore(styleNode, node);
+            }
+          }
+        } catch (ExecutionException | InterruptedException e) {
           // Do nothing
         }
       } else if (type.getTextContent().equalsIgnoreCase("macro")) {

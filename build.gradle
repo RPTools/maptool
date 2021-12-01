@@ -28,6 +28,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -152,7 +153,7 @@ sourceSets {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
                                  "-Dpolyglot.engine.WarnInterpreterOnly=false",
                                  "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
                                  "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
@@ -204,7 +205,7 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+        jvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
                    "-Dpolyglot.engine.WarnInterpreterOnly=false",
                    "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
                    "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
@@ -239,7 +240,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_windows_hotspot_16_36.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip');
             }
         }
 
@@ -250,7 +251,7 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_mac_hotspot_16.0.2_7.tar.gz');
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
@@ -276,7 +277,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_linux_hotspot_16_36.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz');
             }
         }
     }
@@ -444,12 +445,19 @@ dependencies {
 
         // protobuf
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+
+    // Java Tuples
+    implementation 'com.flipkart.utils:javatuples:3.0'
 
     // HTTP End Point
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.14.3'
+
+    implementation 'com.google.guava:guava:31.0.1-jre'
 }
 
 

@@ -20,8 +20,11 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Area;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,6 +38,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -61,6 +65,7 @@ import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.library.token.LibTokenConverter;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.FunctionUtil;
@@ -127,6 +132,11 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     add(new JSeparator());
 
     add(new RevertLastMoveAction());
+    if (selectedTokenSet.size() == 1) {
+      if (getTokenUnderMouse().getName().toLowerCase().startsWith("lib:")) {
+        add(new ExportLibTokenAsAddOnAction(getTokenUnderMouse()));
+      }
+    }
     add(new ShowPropertiesDialogAction().asJMenuItem());
     addOwnedItem(new SaveAction());
   }
@@ -1010,6 +1020,43 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         MapTool.serverCommand().putToken(zone.getId(), token);
       }
       getRenderer().repaint();
+    }
+  }
+
+  private class ExportLibTokenAsAddOnAction extends AbstractAction {
+
+    private final Token libToken;
+
+    ExportLibTokenAsAddOnAction(Token libToken) {
+      putValue(Action.NAME, I18N.getString("token.popup.menu.export.libTokenAddon"));
+      this.libToken = libToken;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      MapTool.showInformation("library.export.information");
+      var dirChooser = new JFileChooser();
+      dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      int option = dirChooser.showSaveDialog(MapTool.getFrame());
+      if (option == JFileChooser.APPROVE_OPTION) {
+        File file = dirChooser.getSelectedFile();
+        if (!file.exists()) {
+          file.mkdirs();
+        }
+        boolean empty = false;
+        try (var directory = Files.newDirectoryStream(file.toPath())) {
+          empty = !directory.iterator().hasNext();
+        } catch (IOException ie) {
+          MapTool.showError(
+              I18N.getText("library.export.errorReadingDirectory", file.getAbsolutePath()), ie);
+        }
+        if (!empty) {
+          MapTool.showInformation(
+              I18N.getText("library.export.error.overwrite", file.getAbsolutePath()));
+          return;
+        }
+        new LibTokenConverter(file, libToken).convert();
+      }
     }
   }
 

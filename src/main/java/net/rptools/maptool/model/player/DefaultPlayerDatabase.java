@@ -132,6 +132,11 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return false;

@@ -39,17 +39,26 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * Represents a container of content/files within a single actual file.
@@ -554,6 +563,69 @@ public class PackedFile implements AutoCloseable {
       log.error("Found at line number " + r.getLineNumber());
       log.error("Cannot convert XML to Object", ie);
       throw ie;
+    }
+  }
+
+  public Asset getAsset(String path) throws IOException {
+    var reader = getFileAsReader(path);
+    var prop = reader.lines().collect(Collectors.joining("\n"));
+    if (prop.trim().startsWith("<net.rptools.maptool.model.Asset>")) {
+      // This is an older format that has the asset in XML
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      try (InputStream is = new ByteArrayInputStream(prop.getBytes(StandardCharsets.UTF_8))) {
+        DocumentBuilder docBuilder = factory.newDocumentBuilder();
+
+        Document doc = docBuilder.parse(is);
+        if (!doc.hasChildNodes()) {
+          log.error("Error reading asset, no child nodes found.");
+          return null;
+        }
+
+        String id = null;
+        String name = null;
+        String extension = null;
+        String type = null;
+
+        NodeList childNodes = doc.getChildNodes().item(0).getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+          Node item = childNodes.item(i);
+          if ("id".equals(item.getNodeName())) {
+            var idNodes = item.getChildNodes();
+            if (idNodes.getLength() == 0) {
+              log.error("Error reading asset, no id found.");
+            } else {
+              for (int x = 0; x < idNodes.getLength(); x++) {
+                var idNode = idNodes.item(x);
+                if ("id".equals(idNode.getNodeName())) {
+                  id = idNode.getTextContent();
+                }
+              }
+            }
+          } else if ("name".equals(item.getNodeName())) {
+            name = item.getTextContent();
+          } else if ("extension".equals(item.getNodeName())) {
+            extension = item.getTextContent();
+          } else if ("type".equals(item.getNodeName())) {
+            type = item.getTextContent();
+          }
+        }
+
+        if (id == null || name == null || extension == null) {
+          log.error("Error reading asset, missing id, name, extension.");
+          return null;
+        }
+
+        byte[] image = getFileAsInputStream(path + "." + extension).readAllBytes();
+
+        return Asset.createImageAsset(name, image);
+
+      } catch (ParserConfigurationException | SAXException | IOException e) {
+        log.error("Error reading asset", e);
+        return null;
+      }
+    } else {
+      log.error("Error reading asset unknown format.");
+      return null;
     }
   }
 

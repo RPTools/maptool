@@ -22,9 +22,12 @@ import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
+import org.apache.log4j.Logger;
 
 /** @author drice */
 public class MethodServerDecorator implements MethodServerConnection {
+  private static final Logger log = Logger.getLogger(MethodServerDecorator.class);
+
   private ServerConnection connection;
 
   public MethodServerDecorator(ServerConnection connection) {
@@ -32,20 +35,24 @@ public class MethodServerDecorator implements MethodServerConnection {
   }
 
   public void broadcastCallMethod(String method, Object... parameters) {
+    log.debug("will broadcast " + method);
     broadcastMessage(HessianUtils.methodToBytesGZ(method, parameters));
   }
 
   public void broadcastCallMethod(String[] exclude, String method, Object... parameters) {
+    log.debug("will broadcast " + method);
     byte[] data = HessianUtils.methodToBytesGZ(method, parameters);
     broadcastMessage(exclude, data);
   }
 
   public void callMethod(String id, String method, Object... parameters) {
+    log.debug("will call " + method + " to " + id);
     byte[] data = HessianUtils.methodToBytesGZ(method, parameters);
     sendMessage(id, null, data);
   }
 
   public void callMethod(String id, Object channel, String method, Object... parameters) {
+    log.debug("will call " + method + " to " + id + "(" + channel + ")");
     byte[] data = HessianUtils.methodToBytesGZ(method, parameters);
     sendMessage(id, channel, data);
   }

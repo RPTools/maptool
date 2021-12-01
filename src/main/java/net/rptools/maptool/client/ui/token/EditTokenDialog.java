@@ -102,7 +102,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.framework.LibraryManager;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
@@ -1229,12 +1229,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                   }
                 }
 
-                TokenVBL.renderVBL(
+                TokenVBL.renderTopology(
                     MapTool.getFrame().getCurrentZoneRenderer(),
                     getTokenVblPanel()
                         .getToken()
                         .getTransformedVBL(getTokenVblPanel().getTokenVBL_optimized()),
-                    false);
+                    false,
+                    Zone.TopologyType.WALL_VBL);
 
                 if (getCopyOrMoveCheckbox().isSelected()) {
                   getTokenVblPanel().setTokenVBL_optimized(null);
@@ -1258,7 +1259,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 Area newTokenVBL =
                     TokenVBL.getVBL_underToken(
                         MapTool.getFrame().getCurrentZoneRenderer(), getTokenVblPanel().getToken());
-                TokenVBL.renderVBL(MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true);
+                TokenVBL.renderTopology(
+                    MapTool.getFrame().getCurrentZoneRenderer(),
+                    newTokenVBL,
+                    true,
+                    Zone.TopologyType.WALL_VBL);
               }
 
               getTokenVblPanel().repaint();

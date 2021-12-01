@@ -84,7 +84,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
-import net.rptools.maptool.model.framework.LibraryURLStreamHandler;
+import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -976,6 +976,7 @@ public class MapTool {
       clientFrame.setCurrentZoneRenderer(null);
       return;
     }
+
     // Install new campaign
     for (Zone zone : campaign.getZones()) {
       ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);
@@ -1074,6 +1075,10 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+
+    if (MapTool.isHostingServer()) {
+      getFrame().getConnectionPanel().startHosting();
+    }
     server.start();
   }
 
@@ -1093,6 +1098,7 @@ public class MapTool {
     disconnect();
     server.stop();
     server = null;
+    getFrame().getConnectionPanel().stopHosting();
   }
 
   public static ObservableList<Player> getPlayerList() {
@@ -1365,7 +1371,7 @@ public class MapTool {
     MapTool.getFrame()
         .getCurrentZoneRenderer()
         .getZone()
-        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+        .setTopologyTypes(AppPreferences.getTopologyTypes());
   }
 
   /**

@@ -212,8 +212,8 @@ public class AssetGroup {
             // Get the asset, is it already in the game?
             try {
               Asset asset = AssetManager.createAsset(file);
-              if (AssetManager.hasAsset(asset.getId())) {
-                asset = AssetManager.getAsset(asset.getId());
+              if (AssetManager.hasAsset(asset.getMD5Key())) {
+                asset = AssetManager.getAsset(asset.getMD5Key());
               }
               // Add the asset
               assetTSMap.put(file, new AssetTS(asset, file.lastModified()));

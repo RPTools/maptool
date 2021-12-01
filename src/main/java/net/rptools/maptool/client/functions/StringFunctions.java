@@ -78,7 +78,7 @@ public class StringFunctions extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
     try {
-      if (functionName.equals("replace")) {
+      if (functionName.equalsIgnoreCase("replace")) {
         if (parameters.size() < 3) {
           throw new ParserException(
               I18N.getText(
@@ -105,7 +105,7 @@ public class StringFunctions extends AbstractFunction {
               parameters.get(2).toString());
         }
       }
-      if (functionName.equals("stringToList")) {
+      if (functionName.equalsIgnoreCase("stringToList")) {
         if (parameters.size() < 2) {
           throw new ParserException(
               I18N.getText(
@@ -119,7 +119,7 @@ public class StringFunctions extends AbstractFunction {
         }
         return stringToList(parameters.get(0).toString(), parameters.get(1).toString(), delim);
       }
-      if (functionName.equals("substring")) {
+      if (functionName.equalsIgnoreCase("substring")) {
         if (parameters.size() < 2) {
           throw new ParserException(
               I18N.getText(
@@ -152,10 +152,10 @@ public class StringFunctions extends AbstractFunction {
             .toString()
             .substring(((BigDecimal) parameters.get(1)).intValue(), end);
       }
-      if (functionName.equals("length")) {
+      if (functionName.equalsIgnoreCase("length")) {
         return BigDecimal.valueOf(parameters.get(0).toString().length());
       }
-      if (functionName.equals("upper")) {
+      if (functionName.equalsIgnoreCase("upper")) {
         if (parameters.size() > 1) {
           String str = parameters.get(0).toString();
           try {
@@ -174,7 +174,7 @@ public class StringFunctions extends AbstractFunction {
           return parameters.get(0).toString().toUpperCase();
         }
       }
-      if (functionName.equals("lower")) {
+      if (functionName.equalsIgnoreCase("lower")) {
         if (parameters.size() > 1) {
           String str = parameters.get(0).toString();
           try {
@@ -193,7 +193,7 @@ public class StringFunctions extends AbstractFunction {
           return parameters.get(0).toString().toLowerCase();
         }
       }
-      if (functionName.equals("indexOf")) {
+      if (functionName.equalsIgnoreCase("indexOf")) {
         if (parameters.size() < 2) {
           throw new ParserException(
               I18N.getText(
@@ -216,7 +216,7 @@ public class StringFunctions extends AbstractFunction {
         return BigDecimal.valueOf(
             parameters.get(0).toString().indexOf(parameters.get(1).toString(), from));
       }
-      if (functionName.equals("lastIndexOf")) {
+      if (functionName.equalsIgnoreCase("lastIndexOf")) {
         if (parameters.size() < 2) {
           throw new ParserException(
               I18N.getText(
@@ -225,10 +225,10 @@ public class StringFunctions extends AbstractFunction {
         return BigDecimal.valueOf(
             parameters.get(0).toString().lastIndexOf(parameters.get(1).toString()));
       }
-      if (functionName.equals("trim")) {
+      if (functionName.equalsIgnoreCase("trim")) {
         return parameters.get(0).toString().trim();
       }
-      if (functionName.equals("strformat")) {
+      if (functionName.equalsIgnoreCase("strformat")) {
         int size = parameters.size();
         if (size > 1) {
           return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
@@ -236,7 +236,7 @@ public class StringFunctions extends AbstractFunction {
           return format(parameters.get(0).toString(), resolver, null);
         }
       }
-      if (functionName.equals("matches")) {
+      if (functionName.equalsIgnoreCase("matches")) {
         if (parameters.size() < 2) {
           throw new ParserException(
               I18N.getText(
@@ -251,10 +251,10 @@ public class StringFunctions extends AbstractFunction {
     } catch (PatternSyntaxException e) {
       throw new ParserException(e.getMessage());
     }
-    if (functionName.equals("string")) {
+    if (functionName.equalsIgnoreCase("string")) {
       return parameters.get(0).toString();
     }
-    if (functionName.equals("number")) {
+    if (functionName.equalsIgnoreCase("number")) {
       if (parameters.get(0).toString().trim().isEmpty()) return BigDecimal.ZERO;
       try {
         return BigDecimal.valueOf(Integer.parseInt(parameters.get(0).toString()));
@@ -272,14 +272,20 @@ public class StringFunctions extends AbstractFunction {
                 parameters.get(0).toString()));
       }
     }
-    if (functionName.equals("isNumber")) {
-      if (NumberUtils.isParsable(parameters.get(0).toString())) {
+    if (functionName.equalsIgnoreCase("isNumber")) {
+      String str = parameters.get(0).toString().trim();
+      // isParsable() returns false for leading + so stripping
+      // off the first one. Any extras will return false.
+      if (str.length() > 1 && str.charAt(0) == '+') {
+        str = str.substring(1);
+      }
+      if (NumberUtils.isParsable(str)) {
         return BigDecimal.ONE;
       } else {
         return BigDecimal.ZERO;
       }
     }
-    if (functionName.equals("strfind")) {
+    if (functionName.equalsIgnoreCase("strfind")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -287,7 +293,7 @@ public class StringFunctions extends AbstractFunction {
       }
       return stringFind(resolver, parameters.get(0).toString(), parameters.get(1).toString());
     }
-    if (functionName.equals("getGroupCount")) {
+    if (functionName.equalsIgnoreCase("getGroupCount")) {
       if (parameters.size() < 1) {
         throw new ParserException(
             I18N.getText(
@@ -307,14 +313,14 @@ public class StringFunctions extends AbstractFunction {
       sb.append("match.").append(parameters.get(0));
       sb.append(".m").append(parameters.get(1));
       sb.append(".group").append(parameters.get(2));
-      if (functionName.equals("getGroupStart")) {
+      if (functionName.equalsIgnoreCase("getGroupStart")) {
         sb.append(".start");
-      } else if (functionName.equals("getGroupEnd")) {
+      } else if (functionName.equalsIgnoreCase("getGroupEnd")) {
         sb.append(".end");
       }
       return resolver.getVariable(sb.toString());
     }
-    if (functionName.equals("getFindCount")) {
+    if (functionName.equalsIgnoreCase("getFindCount")) {
       if (parameters.size() < 1) {
         throw new ParserException(
             I18N.getText(
@@ -324,7 +330,7 @@ public class StringFunctions extends AbstractFunction {
       sb.append("match.").append(parameters.get(0)).append(".matchCount");
       return resolver.getVariable(sb.toString());
     }
-    if (functionName.equals("encode")) {
+    if (functionName.equalsIgnoreCase("encode")) {
       if (parameters.size() < 1) {
         throw new ParserException(
             I18N.getText(
@@ -337,7 +343,7 @@ public class StringFunctions extends AbstractFunction {
       encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8);
       return encoded;
     }
-    if (functionName.equals("decode")) {
+    if (functionName.equalsIgnoreCase("decode")) {
       if (parameters.size() < 1) {
         throw new ParserException(
             I18N.getText(
@@ -350,7 +356,7 @@ public class StringFunctions extends AbstractFunction {
       decoded = decoded.replaceAll("&semi;", ";");
       return decoded;
     }
-    if (functionName.equals("startsWith")) {
+    if (functionName.equalsIgnoreCase("startsWith")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -360,7 +366,7 @@ public class StringFunctions extends AbstractFunction {
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
-    if (functionName.equals("endsWith")) {
+    if (functionName.equalsIgnoreCase("endsWith")) {
       if (parameters.size() < 2) {
         throw new ParserException(
             I18N.getText(
@@ -370,7 +376,7 @@ public class StringFunctions extends AbstractFunction {
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
-    if (functionName.equals("capitalize")) {
+    if (functionName.equalsIgnoreCase("capitalize")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       boolean treatNumbersSymbolsAsBoundaries = true;
       if (parameters.size() == 2) {

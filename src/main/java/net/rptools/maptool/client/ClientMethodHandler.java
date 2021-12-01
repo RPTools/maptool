@@ -14,13 +14,18 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.protobuf.util.JsonFormat;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import javax.swing.SwingUtilities;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
@@ -30,6 +35,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -46,18 +52,26 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.gamedata.DataStoreManager;
+import net.rptools.maptool.model.gamedata.GameDataImporter;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
+import org.apache.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -66,12 +80,14 @@ import net.rptools.maptool.transfer.AssetHeader;
  * @author drice
  */
 public class ClientMethodHandler extends AbstractMethodHandler {
+  private static final Logger log = Logger.getLogger(ClientMethodHandler.class);
+
   public ClientMethodHandler() {}
 
   public void handleMethod(final String id, final String method, final Object... parameters) {
     final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
 
-    // System.out.println("ClientMethodHandler#handleMethod: " + cmd.name());
+    log.debug("from " + id + " got " + method);
 
     // These commands are safe to do in the background, any events that cause model updates need
     // to be on the EDT (See next section)
@@ -102,6 +118,121 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           ioe.printStackTrace();
         }
         return;
+
+      case addAddOnLibrary:
+        var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
+        for (var lib : addedLibs) {
+          AssetManager.getAssetAsynchronously(
+              lib.getAssetKey(),
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText("library.import.error", lib.getNamespace()), e);
+                      });
+                }
+              });
+        }
+        return;
+
+      case removeAddOnLibrary:
+        var remLibraryManager = new LibraryManager();
+        var removedNamespaces = (List<String>) parameters[0];
+        for (String namespace : removedNamespaces) {
+          remLibraryManager.deregisterAddOnLibrary(namespace);
+        }
+        return;
+
+      case removeAllAddOnLibraries:
+        new LibraryManager().deregisterAddOnLibraries();
+        return;
+
+      case updateDataStore:
+        var storeBuilder = DataStoreDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                  storeBuilder);
+          var dataStoreDto = storeBuilder.build();
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(dataStoreDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case updateDataNamespace:
+        System.out.println("updateDataNamespace");
+        var namespaceBuilder = GameDataDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
+                  namespaceBuilder);
+          var dataNamespaceDto = namespaceBuilder.build();
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(dataNamespaceDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case updateData:
+        System.out.println("updateData");
+        String type = (String) parameters[0];
+        String namespace = (String) parameters[1];
+        var dataBuilder = GameDataValueDto.newBuilder();
+        try {
+          JsonFormat.parser()
+              .merge(
+                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
+                  dataBuilder);
+          var dataDto = dataBuilder.build();
+          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+          new GameDataImporter(dataStore).importData(type, namespace, dataDto);
+        } catch (IOException | ExecutionException | InterruptedException e) {
+          MapTool.showError("data.error.receivingUpdate", e);
+        }
+        break;
+
+      case removeDataStore:
+        new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
+        break;
+
+      case removeDataNamespace:
+        String removeType = (String) parameters[0];
+        String removeNamespace = (String) parameters[1];
+        try {
+          new DataStoreManager()
+              .getDefaultDataStoreForRemoteUpdate()
+              .clearNamespace(removeType, removeNamespace)
+              .get();
+        } catch (InterruptedException | ExecutionException e) {
+          log.error(I18N.getText("data.error.clearingNamespace", removeType, removeNamespace), e);
+        }
+        break;
+
+      case removeData:
+        String removeDType = (String) parameters[0];
+        String removeDNamespace = (String) parameters[1];
+        String removeDName = (String) parameters[2];
+        try {
+          new DataStoreManager()
+              .getDefaultDataStoreForRemoteUpdate()
+              .removeProperty(removeDType, removeDNamespace, removeDName)
+              .get();
+        } catch (InterruptedException | ExecutionException e) {
+          log.error(
+              I18N.getText("data.error.removingData", removeDType, removeDNamespace, removeDName),
+              e);
+        }
+        break;
     }
 
     // Model events need to update on the EDT
@@ -495,10 +626,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case addTopology:
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
-              TopologyMode topologyMode = (TopologyMode) parameters[2];
+              var topologyType = (Zone.TopologyType) parameters[2];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.addTopology(area, topologyMode);
+              zone.addTopology(area, topologyType);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;
@@ -506,10 +637,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             case removeTopology:
               zoneGUID = (GUID) parameters[0];
               area = (Area) parameters[1];
-              topologyMode = (TopologyMode) parameters[2];
+              topologyType = (Zone.TopologyType) parameters[2];
 
               zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.removeTopology(area, topologyMode);
+              zone.removeTopology(area, topologyType);
 
               MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
               return;
