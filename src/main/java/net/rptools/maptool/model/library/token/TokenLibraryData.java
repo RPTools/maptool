@@ -16,7 +16,6 @@ package net.rptools.maptool.model.library.token;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.MapTool;
@@ -76,18 +75,6 @@ public class TokenLibraryData implements LibraryData {
     } else if (val instanceof Boolean b) {
       return DataValueFactory.fromBoolean(key, b);
     } else if (val instanceof String s) {
-      if (s.trim().startsWith("{") || s.startsWith("[")) {
-        var jsonElement = JsonParser.parseString(s);
-        try {
-          if (jsonElement.isJsonArray()) {
-            return DataValueFactory.fromJsonArray(key, jsonElement.getAsJsonArray());
-          } else if (jsonElement.isJsonObject()) {
-            return DataValueFactory.fromJsonObject(key, jsonElement.getAsJsonObject());
-          }
-        } catch (Exception e) {
-          // Do nothing if the json is invalid
-        }
-      }
       try {
         double dval = Double.parseDouble(s.trim());
         if (dval == (long) dval) {
