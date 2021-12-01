@@ -334,7 +334,14 @@ public class Mapper {
     return IntPointDto.newBuilder().setY(d.width).setY(d.height).build();
   }
 
-  public static BasicStroke map(StrokeDto dto) {}
+  public static BasicStroke map(StrokeDto dto) {
+    return new BasicStroke(dto.getWidth(), dto.getCapValue(), dto.getJoinValue());
+  }
 
-  public static StrokeDto map(BasicStroke stroke) {}
+  public static StrokeDto map(BasicStroke stroke) {
+    return StrokeDto.newBuilder().setWidth(stroke.getLineWidth())
+        .setCap(StrokeDto.CapDto.forNumber(stroke.getEndCap()))
+        .setJoin(StrokeDto.JoinDto.forNumber(stroke.getLineJoin()))
+        .build();
+  }
 }

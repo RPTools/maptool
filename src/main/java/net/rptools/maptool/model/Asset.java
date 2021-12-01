@@ -512,7 +512,7 @@ public final class Asset {
   }
 
   // for serialisation
-  public Asset(MD5Key key, String name, String extension, Type type) {
+  public Asset(MD5Key key, String name, String extension, Type type, boolean broken) {
     this.md5Key = key;
     this.name = name;
     this.extension = extension;
@@ -520,6 +520,7 @@ public final class Asset {
     data = new byte[0];
     dataAsString = null;
     json = null;
+    this.broken = broken;
   }
 
   /**
@@ -743,12 +744,22 @@ public final class Asset {
     return getMediaType(url.getFile(), TikaInputStream.get(url));
   }
 
+  /**
+   * Returns if the {@code Asset} is broken or not.
+   *
+   * @return {@code true} if the {@code Asset} is broken.
+   */
+  private boolean isBroken() {
+    return broken;
+  }
+
   public static Asset fromDto(AssetDto dto) {
-    return new Asset(
+    var asset = new Asset(
         new MD5Key(dto.getMd5Key()),
         dto.getName(),
         dto.getExtension(),
-        Asset.Type.valueOf(dto.getType().name()));
+        Asset.Type.valueOf(dto.getType().name()), false);
+    return asset;
   }
 
   public AssetDto toDto() {
@@ -758,14 +769,5 @@ public final class Asset {
         .setExtension(getExtension())
         .setType(AssetDtoType.valueOf(getType().name()))
         .build();
-  }
-
-  /**
-   * Returns if the {@code Asset} is broken or not.
-   *
-   * @return {@code true} if the {@code Asset} is broken.
-   */
-  private boolean isBroken() {
-    return broken;
   }
 }

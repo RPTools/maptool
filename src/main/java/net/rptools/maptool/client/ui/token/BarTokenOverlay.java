@@ -198,7 +198,26 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   // return image;
   // }
 
-  public static BarTokenOverlay fromDto(BarTokenOverlayDto b) {}
+  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    switch (dto.getType()) {
+      case DRAWN -> {
+        return DrawnBarTokenOverlay.fromDto(dto);
+      }
+      case MULTIPLE_IMAGE -> {
+        return MultipleImageBarTokenOverlay.fromDto(dto);
+      }
+      case SINGLE_IMAGE -> {
+        return SingleImageBarTokenOverlay.fromDto(dto);
+      }
+      case TWO_IMAGES -> {
+        return TwoImageBarTokenOverlay.fromDto(dto);
+      }
+      case TWO_TONE -> {
+        return TwoToneBarTokenOverlay.fromDto(dto);
+      }
+    }
+    return null;
+  }
 
-  public BarTokenOverlayDto toDto() {}
+  public abstract BarTokenOverlayDto toDto();
 }
