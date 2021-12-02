@@ -29,7 +29,6 @@ public class ClientCommand {
     stopTokenMove,
     toggleTokenMoveWaypoint,
     updateTokenMove,
-    setZoneHasFoW,
     setServerPolicy,
     updateCampaign,
     updateInitiative,

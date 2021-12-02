@@ -134,12 +134,27 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case SET_TOKEN_LOCATION_MSG -> handle(msg.getSetTokenLocationMsg());
         case SET_VISION_TYPE_MSG -> handle(msg.getSetVisionTypeMsg());
         case SET_ZONE_GRID_SIZE_MSG -> handle(msg.getSetZoneGridSizeMsg());
+        case SET_ZONE_HAS_FOW_MSG -> handle(msg.getSetZoneHasFowMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       super.handleMessage(id, message);
     }
+  }
+
+  private void handle(SetZoneHasFowMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          boolean hasFog = msg.getHasFow();
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.setHasFog(hasFog);
+
+          // In case we're looking at the zone
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(SetZoneGridSizeMsg msg) {
@@ -779,17 +794,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           ZoneRenderer renderer;
 
           switch (cmd) {
-            case setZoneHasFoW:
-              zoneGUID = (GUID) parameters[0];
-              boolean hasFog = (Boolean) parameters[1];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.setHasFog(hasFog);
-
-              // In case we're looking at the zone
-              MapTool.getFrame().refresh();
-              return;
-
             case updateTokenProperty: // get token and update its property
               zoneGUID = (GUID) parameters[0];
               zone = MapTool.getCampaign().getZone(zoneGUID);

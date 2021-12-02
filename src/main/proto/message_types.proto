@@ -13,6 +13,7 @@ option java_outer_classname = "MessageTypeProtos";
 
 import "data_transfer_objects.proto";
 import "drawing_dto.proto";
+import "gamedata.proto";
 
 message AddTopologyMsg {
   string zone_guid = 1;
@@ -221,6 +222,10 @@ message SetLiveTypingLabelMsg {
   bool typing = 2;
 }
 
+message SetServerPolicyMsg {
+  ServerPolicyDto policy = 1;
+}
+
 message SetTokenLocationMsg {
   string zone_guid = 1;
   string token_guid = 2;
@@ -238,4 +243,136 @@ message SetZoneGridSizeMsg {
   int32 y_offset = 3;
   int32 size = 4;
   int32 color = 5;
+}
+
+message SetZoneHasFowMsg {
+  string zone_guid = 1;
+  bool has_fow = 2;
+}
+
+message SetZoneVisibilityMsg {
+  string zone_guid = 1;
+  bool is_visible = 2;
+}
+
+message ShowPointerMsg {
+  string player = 1;
+  PointerDto pointer = 2;
+}
+
+message StartAssetTransferMsg {
+  AssetTransferHeaderDto header = 1;
+}
+
+message StartTokenMoveMsg {
+  string player_id = 1;
+  string zone_guid = 2;
+  string key_token_id = 3;
+  repeated  string selected_tokens = 4;
+}
+
+message StopTokenMoveMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+}
+
+message ToggleTokenMoveWaypointMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+  IntPointDto point = 3;
+}
+
+message UndoDrawMsg {
+  string zone_guid = 1;
+  string drawable_guid = 2;
+}
+
+message UpdateAssetTransferMsg {
+  AssetChunkDto chunk = 1;
+}
+
+message UpdateCampaignMsg {
+  CampaignPropertiesDto properties = 1;
+}
+
+message UpdateCampaignMacrosMsg {
+  repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message UpdateDrawingMsg {
+  string zone_guid = 1;
+  PenDto pen = 2;
+  DrawnElementDto drawing = 3;
+}
+
+message UpdateExposedAreaMetaMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+  AreaDto area = 3;
+}
+
+message UpdateGmMacrosMsg {
+  repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message UpdateInitiativeMsg {
+  InitiativeListDto list = 1;
+  bool owner_permission = 2;
+}
+
+message UpdateTokenInitiativeMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+  bool is_holding = 3;
+  string state = 4;
+  int32 index = 5;
+}
+
+message UpdateTokenMoveMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+  IntPointDto point = 3;
+}
+
+message UpdateTokenPropertyMsg {
+ string zone_guid = 1;
+ string token_guid = 2;
+ TokenUpdateDto property = 3;
+ repeated TokenPropertyValueDto values = 4;
+}
+
+message RemoveAddOnLibraryMsg {
+  repeated  string namespaces = 1;
+}
+message RemoveAllAddOnLibrariesMsg { /* empty */ }
+
+message AddAddOnLibraryMsg {
+  repeated TransferableAddOnLibraryDto add_ons = 1;
+}
+
+message UpdateDataStoreMsg {
+  DataStoreDto store = 1;
+}
+
+message UpdateDataMsg {
+  string type = 1;
+  string namespace = 2;
+  GameDataValueDto value = 3;
+}
+
+message UpdateDataNamespaceMsg {
+  GameDataDto data = 1;
+}
+
+message RemoveDataStoreMsg { /* empty */ }
+
+message RemoveDataNamespaceMsg {
+  string type = 1;
+  string namespace = 2;
+}
+
+message RemoveDataMsg {
+  string type = 1;
+  string namespace = 2;
+  string name = 3;
 }

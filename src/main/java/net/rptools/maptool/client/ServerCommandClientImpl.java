@@ -408,7 +408,9 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
-    makeServerCall(COMMAND.setZoneHasFoW, zoneGUID, hasFog);
+    var msg = SetZoneHasFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
+            .setHasFow(hasFog);
+    makeServerCall(Message.newBuilder().setSetZoneHasFowMsg(msg).build());
   }
 
   public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenList) {

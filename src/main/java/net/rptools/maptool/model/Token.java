@@ -2942,22 +2942,8 @@ public class Token extends BaseModel implements Cloneable {
       }
     }
 
-    var dtoProperties = dto.getPropertiesMap();
-    for (var key : dtoProperties.keySet()) {
-      var proptertyDto = dtoProperties.get(key);
-      switch (proptertyDto.getPropertyTypeCase()) {
-        case STRING_VALUE -> {
-          var value = proptertyDto.getStringValue();
-          token.setProperty(key, value);
-        }
-        case DOUBLE_VALUE -> {
-          token.setProperty(key, new BigDecimal(proptertyDto.getDoubleValue()));
-        }
-        default -> {
-          log.warn("unknown token property type:" + proptertyDto.getPropertyTypeCase());
-        }
-      }
-    }
+    dto.getPropertiesMap()
+        .forEach((k, v) -> token.propertyMap.put(k, v));
 
     var dtoMacros = dto.getMacroPropertiesMap();
     var tokenMacros = token.getMacroPropertiesMap(false);
@@ -3089,19 +3075,7 @@ public class Token extends BaseModel implements Cloneable {
       }
     }
 
-    for (var key : token.getPropertyNamesRaw()) {
-      var property = token.getProperty(key);
-      if (String.class.equals(property.getClass())) {
-        var value = (String) property;
-        dto.putProperties(key, TokenDto.Property.newBuilder().setStringValue(value).build());
-      } else if (BigDecimal.class.equals(property.getClass())) {
-        var value = ((BigDecimal) property).doubleValue();
-        dto.putProperties(key, TokenDto.Property.newBuilder().setDoubleValue(value).build());
-      } else {
-        log.warn("unknown token property type:" + property.getClass());
-      }
-    }
-
+    propertyMap.forEach((k,v)-> dto.putProperties(k, (String)v));
     var tokenMacros = token.getMacroPropertiesMap(false);
     for (var key : tokenMacros.keySet()) dto.putMacroProperties(key, tokenMacros.get(key).toDto());
 

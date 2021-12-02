@@ -189,6 +189,10 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getSetZoneGridSizeMsg());
           sendToAllClients(msg);
         }
+        case SET_ZONE_HAS_FOW_MSG -> {
+          handle(msg.getSetZoneHasFowMsg());
+          sendToAllClients(msg);
+        }
 
         default -> log.warn(msgType + "not handled.");
       }
@@ -199,6 +203,11 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(SetZoneHasFowMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.setHasFog(msg.getHasFow());
   }
 
   private void handle(SetZoneGridSizeMsg msg) {
@@ -419,9 +428,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           break;
         case setZoneVisibility:
           setZoneVisibility(context.getGUID(0), (Boolean) context.get(1));
-          break;
-        case setZoneHasFoW:
-          setZoneHasFoW(context.getGUID(0), context.getBool(1));
           break;
         case showPointer:
           showPointer(context.getString(0), (Pointer) context.get(1));
@@ -739,15 +745,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       }
       zone.sortZOrder(); // update new ZOrder on server zone
     }
-  }
-
-  private void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.setHasFog(hasFog);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.setZoneHasFoW.name(), RPCContext.getCurrent().parameters);
   }
 
   private void setZoneVisibility(GUID zoneGUID, boolean visible) {

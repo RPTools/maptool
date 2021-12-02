@@ -52,7 +52,6 @@ public interface ServerCommand {
     toggleTokenMoveWaypoint,
     updateTokenMove,
     setZoneVisibility,
-    setZoneHasFoW,
     setServerPolicy,
     updateCampaign,
     updateInitiative,

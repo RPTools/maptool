@@ -279,11 +279,11 @@ message TokenDto {
       double double_value = 2;
     }
   }
-  message Property {
-    oneof property_type {
-      string string_value = 1;
-      double double_value = 2;
-    }
+  enum TokenShape {
+    TOP_DOWN = 0;
+    CIRCLE = 1;
+    SQUARE = 2;
+    FIGURE = 3;
   }
   string id = 1;
   bool being_impersonated = 2;
@@ -351,7 +351,7 @@ message TokenDto {
   google.protobuf.StringValue gm_notes = 57;
   google.protobuf.StringValue gm_name = 58;
   map<string, TokenDto.State> state = 59;
-  map<string, TokenDto.Property> properties = 60;
+  map<string, string> properties = 60;
   map<int32, MacroButtonPropertiesDto> macro_properties = 61;
   map<string, string> speech = 62;
   HeroLabDataDto hero_lab_data = 63;
@@ -374,6 +374,10 @@ enum TerrainModifierOperationDto {
     ADD = 2;
     BLOCK = 3;
     FREE = 4;
+}
+
+message TerrainModifierOperationListDto {
+  repeated TerrainModifierOperationDto modifiers = 1;
 }
 
 message AttachedLightSourceDto {
@@ -401,6 +405,10 @@ message MacroButtonPropertiesDto {
   bool allow_player_edits = 17;
   string tool_tip = 18;
   bool display_hot_key = 19;
+}
+
+message MacroButtonPropertiesListDto {
+  repeated MacroButtonPropertiesDto macros = 1;
 }
 
 message HeroLabDataDto {
@@ -569,4 +577,110 @@ message HexGridDto {
   double scaled_edge_length = 8;
   double last_scale = 9;
   IntPointDto cellOffset = 10;
+}
+
+enum TokenUpdateDto {
+    setState = 0;
+    setAllStates = 1;
+    setPropertyType = 2;
+    setPC = 3;
+    setNPC = 4;
+    setLayer = 5;
+    setLayerShape = 6;
+    setShape = 7;
+    setSnapToScale = 8;
+    setSnapToGrid = 9;
+    setSnapToGridAndXY = 10;
+    setFootprint = 11;
+    setProperty = 12;
+    resetProperty = 13;
+    setZOrder = 14;
+    setFacing = 15;
+    clearAllOwners = 16;
+    setOwnedByAll = 17;
+    addOwner = 18;
+    setScaleX = 19;
+    setScaleY = 20;
+    setScaleXY = 21;
+    setNotes = 22;
+    setGMNotes = 23;
+    saveMacro = 24;
+    saveMacroList = 25;
+    deleteMacro = 26;
+    setX = 27;
+    setY = 28;
+    setXY = 29;
+    setHaloColor = 30;
+    setLabel = 31;
+    setName = 32;
+    setGMName = 33;
+    setVisible = 34;
+    setVisibleOnlyToOwner = 35;
+    setIsAlwaysVisible = 36;
+    setTokenOpacity = 37;
+    setTerrainModifier = 38;
+    setTerrainModifierOperation = 39;
+    setTerrainModifiersIgnored = 40;
+    setVBL = 41;
+    setImageAsset = 42;
+    setPortraitImage = 43;
+    setCharsheetImage = 44;
+    setLayout = 45;
+    clearLightSources = 46;
+    removeLightSource = 47;
+    addLightSource = 48;
+    setHasSight = 49;
+    setSightType = 50;
+    flipX = 51;
+    flipY = 52;
+    flipIso = 53;
+    setSpeechName = 54;
+}
+
+message AssetTransferHeaderDto {
+  string id = 1;
+  string name = 2;
+  int64  size = 3;
+}
+
+message AssetChunkDto {
+  string id = 1;
+  bytes data = 2;
+}
+
+message TokenPropertyValueDto {
+  oneof value_type {
+    int32 int_value = 1;
+    bool bool_value = 2;
+    string string_value = 3;
+    double double_value = 4;
+    MacroButtonPropertiesListDto macros = 5;
+    LightSourceDto light_source = 6;
+    AreaDto area = 7;
+    TerrainModifierOperationListDto modifiers = 8;
+    TokenDto.State token_state = 9;
+    GridDto grid = 10;
+  }
+}
+
+message PointerDto {
+  string zone_guid = 1;
+  IntPointDto point = 2;
+  double direction = 3;
+  string type = 4;
+}
+
+message TransferableAddOnLibraryDto {
+  string namespace = 1;
+  string version = 2;
+  string asset_key = 3;
+}
+
+message TokenFootPrintDto {
+  repeated IntPointDto cell_set = 1;
+  string name = 2;
+  string id = 3;
+  bool is_default = 4;;
+  double scale = 5;
+  bool localize_name = 6;
 }

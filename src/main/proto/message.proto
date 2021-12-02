@@ -58,7 +58,35 @@ message Message {
     SetFowMsg set_fow_msg = 41;
     SetLiveTypingLabelMsg set_live_typing_label_msg = 42;
     SetTokenLocationMsg set_token_location_msg = 43;
-    SetVisionTypeMsg set_vision_type_msg = 44;
-    SetZoneGridSizeMsg set_zone_grid_size_msg = 45;
+    SetServerPolicyMsg set_server_policy_msg = 44;
+    SetVisionTypeMsg set_vision_type_msg = 45;
+    SetZoneGridSizeMsg set_zone_grid_size_msg = 46;
+    SetZoneHasFowMsg set_zone_has_fow_msg = 47;
+    SetZoneVisibilityMsg set_zone_visibility_msg = 48;
+    ShowPointerMsg show_pointer_msg = 49;
+    StartAssetTransferMsg start_asset_transfer_msg = 50;
+    StartTokenMoveMsg start_token_move_msg = 51;
+    StopTokenMoveMsg stop_token_move_msg = 52;
+    ToggleTokenMoveWaypointMsg toggle_token_move_waypoint_msg = 53;
+    UndoDrawMsg undo_draw_msg = 54;
+    UpdateAssetTransferMsg update_asset_transfer_msg = 55;
+    UpdateCampaignMsg update_campaign_msg = 56;
+    UpdateCampaignMacrosMsg update_campaign_macros_msg = 57;
+    UpdateDrawingMsg update_drawing_msg = 58;
+    UpdateExposedAreaMetaMsg update_exposed_area_meta_msg = 59;
+    UpdateGmMacrosMsg update_gm_macros_msg = 60;
+    UpdateInitiativeMsg update_initiative_msg = 61;
+    UpdateTokenInitiativeMsg update_token_initiative_msg = 62;
+    UpdateTokenMoveMsg update_token_move_msg = 63;
+    UpdateTokenPropertyMsg update_token_property_msg = 64;
+    RemoveAddOnLibraryMsg remove_add_on_library_msg = 65;
+    RemoveAllAddOnLibrariesMsg remove_all_add_on_libraries_msg = 66;
+    AddAddOnLibraryMsg add_add_on_library_msg = 67;
+    UpdateDataStoreMsg update_data_store_msg = 68;
+    UpdateDataMsg update_data_msg = 69;
+    UpdateDataNamespaceMsg update_data_namespace_msg = 70;
+    RemoveDataStoreMsg remove_data_store_msg = 71;
+    RemoveDataNamespaceMsg remove_data_namespace_msg = 72;
+    RemoveDataMsg remove_data_msg = 73;
   }
 }
