@@ -27,6 +27,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,7 +65,8 @@ public class AssetManager {
   private static final Logger log = LogManager.getLogger(AssetManager.class);
 
   /** Assets are associated with the MD5 sum of their raw data */
-  private static Map<MD5Key, Asset> assetMap = new ConcurrentHashMap<MD5Key, Asset>();
+  private static final Map<MD5Key, Asset> assetMap =
+      Collections.synchronizedMap(new HashMap<MD5Key, Asset>());
 
   /** Location of the cache on the filesystem */
   private static File cacheDir;
@@ -247,7 +249,10 @@ public class AssetManager {
       }
     }
 
-    assetMap.put(asset.getMD5Key(), asset);
+    var oldAsset = assetMap.get(asset.getMD5Key());
+    if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+      assetMap.put(asset.getMD5Key(), asset);
+    }
 
     // Invalid images are represented by empty assets.
     // Don't persist those
@@ -473,7 +478,10 @@ public class AssetManager {
         return null;
       }
 
-      assetMap.put(id, asset);
+      var oldAsset = assetMap.get(id);
+      if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+        assetMap.put(id, asset);
+      }
 
       return asset;
     } catch (IOException ioe) {

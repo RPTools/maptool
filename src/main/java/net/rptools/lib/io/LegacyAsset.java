@@ -16,19 +16,41 @@ package net.rptools.lib.io;
 
 import net.rptools.lib.MD5Key;
 
+/**
+ * This class represents a legacy asset where the asset is serialized with xstream including the
+ * image data. This is only used for xstream serialization.
+ */
 public class LegacyAsset {
+  /** the key of the asset */
   private MD5Key id;
+  /** The image data */
   private byte[] image;
+  /** The name of the asset */
   private String name;
 
+  /**
+   * Returns the key of the asset.
+   *
+   * @return the key of the asset.
+   */
   public MD5Key getId() {
     return id;
   }
 
+  /**
+   * Returns the image data.
+   *
+   * @return the image data.
+   */
   public byte[] getImageData() {
     return image;
   }
 
+  /**
+   * Returns the name of the asset.
+   *
+   * @return the name of the asset.
+   */
   public String getName() {
     return name;
   }

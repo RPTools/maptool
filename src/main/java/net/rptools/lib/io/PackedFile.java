@@ -53,6 +53,7 @@ import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -569,8 +570,17 @@ public class PackedFile implements AutoCloseable {
     }
   }
 
+  /**
+   * Loads Legacy Asset data. The legacy format contains a single XML file with the Asset data
+   * including image bytes serialized via XStream.
+   *
+   * @param path the path to the file.
+   * @return the LegacyAsset object.
+   * @throws IOException if an error occurs.
+   */
   public LegacyAsset getLegacyAsset(String path) throws IOException {
     var reader = getFileAsReader(path);
+    // Not the prettiest, but it works. Change the class to LegacyAsset
     var bytes =
         CharStreams.toString(reader)
             .replace("<net.rptools.maptool.model.Asset>", "<net.rptools.lib.io.LegacyAsset>")
@@ -609,7 +619,6 @@ public class PackedFile implements AutoCloseable {
         String name = null;
         String extension = null;
         String type = null;
-        String imageString = null;
         byte[] embeddedImage = null;
 
         NodeList childNodes = doc.getChildNodes().item(0).getChildNodes();
@@ -634,15 +643,12 @@ public class PackedFile implements AutoCloseable {
           } else if ("type".equals(item.getNodeName())) {
             type = item.getTextContent();
           } else if ("image".equalsIgnoreCase(item.getNodeName())) {
-            imageString = item.getTextContent();
-            System.out.println("here");
             var legacyAsset = getLegacyAsset(path);
-            System.out.println(legacyAsset);
-            System.out.println("here2");
+            embeddedImage = legacyAsset.getImageData();
           }
         }
 
-        if (id == null || name == null || extension == null) {
+        if (id == null || name == null || (extension == null && embeddedImage == null)) {
           log.error("Error reading asset, missing id, name, extension.");
           return null;
         }
@@ -651,7 +657,9 @@ public class PackedFile implements AutoCloseable {
           byte[] image = getFileAsInputStream(path + "." + extension).readAllBytes();
           return Asset.createImageAsset(name, image);
         } else {
-          return Asset.createImageAsset(name, embeddedImage);
+          var asset = Asset.createImageAsset(name, embeddedImage);
+          AssetManager.putAsset(asset);
+          return asset;
         }
 
       } catch (ParserConfigurationException | SAXException | IOException e) {
