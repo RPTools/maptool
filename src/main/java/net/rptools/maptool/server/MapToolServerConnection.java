@@ -160,6 +160,10 @@ public class MapToolServerConnection
     connection.sendMessage(id, message.toByteArray());
   }
 
+  public void sendMessage(String id, Object channel, Message message) {
+    connection.sendMessage(id, channel, message.toByteArray());
+  }
+
   public void broadcastMessage(Message message) {
     connection.broadcastMessage(message.toByteArray());
   }

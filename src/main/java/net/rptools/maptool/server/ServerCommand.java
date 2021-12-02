@@ -41,37 +41,6 @@ import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 
 public interface ServerCommand {
-  enum COMMAND {
-    // @formatter:off
-    updateTokenProperty,
-    updateDrawing,
-    undoDraw,
-    showPointer,
-    startTokenMove,
-    stopTokenMove,
-    toggleTokenMoveWaypoint,
-    updateTokenMove,
-    setZoneVisibility,
-    setServerPolicy,
-    updateCampaign,
-    updateInitiative,
-    updateTokenInitiative,
-    updateCampaignMacros,
-    updateGmMacros,
-    updateExposedAreaMeta,
-    clearExposedArea,
-    removeAddOnLibrary,
-    removeAllAddOnLibraries,
-    addAddOnLibrary,
-    updateDataStore,
-    updateData,
-    updateDataNamespace,
-    removeDataStore,
-    removeDataNamespace,
-    removeData
-    // @formatter:on
-  }
-
   void bootPlayer(String player);
 
   void setZoneHasFoW(GUID zoneGUID, boolean hasFog);

@@ -629,7 +629,7 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     try {
       AssetProducer producer =
           new AssetProducer(
-              assetID,
+              assetID.toString(),
               AssetManager.getAssetInfo(assetID).getProperty(AssetManager.NAME),
               AssetManager.getAssetCacheFile(assetID));
       server
