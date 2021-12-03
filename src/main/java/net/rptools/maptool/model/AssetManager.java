@@ -249,9 +249,11 @@ public class AssetManager {
       }
     }
 
-    var oldAsset = assetMap.get(asset.getMD5Key());
-    if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
-      assetMap.put(asset.getMD5Key(), asset);
+    synchronized (assetMap) {
+      var oldAsset = assetMap.get(asset.getMD5Key());
+      if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+        assetMap.put(asset.getMD5Key(), asset);
+      }
     }
 
     // Invalid images are represented by empty assets.
@@ -478,9 +480,11 @@ public class AssetManager {
         return null;
       }
 
-      var oldAsset = assetMap.get(id);
-      if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
-        assetMap.put(id, asset);
+      synchronized (assetMap) {
+        var oldAsset = assetMap.get(id);
+        if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+          assetMap.put(id, asset);
+        }
       }
 
       return asset;
