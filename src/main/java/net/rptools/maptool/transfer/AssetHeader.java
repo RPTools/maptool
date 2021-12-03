@@ -15,13 +15,14 @@
 package net.rptools.maptool.transfer;
 
 import java.io.Serializable;
+import net.rptools.maptool.server.proto.AssetTransferHeaderDto;
 
 public class AssetHeader implements Serializable {
-  private Serializable id;
+  private String id;
   private String name;
   private long size;
 
-  public AssetHeader(Serializable id, String name, long size) {
+  public AssetHeader(String id, String name, long size) {
     this.id = id;
     this.size = size;
     this.name = name;
@@ -37,5 +38,9 @@ public class AssetHeader implements Serializable {
 
   public String getName() {
     return name;
+  }
+
+  public AssetTransferHeaderDto toDto() {
+    return AssetTransferHeaderDto.newBuilder().setName(name).setId(id).setSize(size).build();
   }
 }

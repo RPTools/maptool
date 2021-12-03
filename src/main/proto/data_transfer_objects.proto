@@ -660,6 +660,7 @@ message TokenPropertyValueDto {
     TerrainModifierOperationListDto modifiers = 8;
     TokenDto.State token_state = 9;
     GridDto grid = 10;
+    TokenFootPrintDto token_foot_print = 11;
   }
 }
 

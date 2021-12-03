@@ -47,7 +47,7 @@ public class MapToolServer {
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final MapToolServerConnection conn;
-  private final ServerMethodHandler handler;
+  private final ServerMessageHandler handler;
   private final ServerConfig config;
   private final PlayerDatabase playerDatabase;
 
@@ -65,7 +65,7 @@ public class MapToolServer {
       throws IOException {
     this.config = config;
     this.policy = policy;
-    handler = new ServerMethodHandler(this);
+    handler = new ServerMessageHandler(this);
     playerDatabase = playerDb;
     conn = new MapToolServerConnection(this, playerDatabase);
     conn.addMessageHandler(handler);
@@ -157,7 +157,7 @@ public class MapToolServer {
     this.policy = policy;
   }
 
-  public ServerMethodHandler getMethodHandler() {
+  public ServerMessageHandler getMethodHandler() {
     return handler;
   }
 
@@ -280,8 +280,11 @@ public class MapToolServer {
             if (chunk != null) {
               lookForMore = true;
               var msg = UpdateAssetTransferMsg.newBuilder().setChunk(chunk);
-              getConnection().sendMessage(entry.getKey(), MapToolConstants.Channel.IMAGE,
-                  Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
+              getConnection()
+                  .sendMessage(
+                      entry.getKey(),
+                      MapToolConstants.Channel.IMAGE,
+                      Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
             }
           }
           if (lookForMore) {

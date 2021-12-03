@@ -50,7 +50,7 @@ import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
-import net.rptools.maptool.server.ServerMethodHandler;
+import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
@@ -58,7 +58,7 @@ import net.rptools.maptool.server.proto.drawing.IntPointDto;
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
  * typically accessed through MapTool.serverCommand(). Once sent, the commands are then received by
- * the {@link ServerMethodHandler ServerMethodHandler}
+ * the {@link ServerMessageHandler ServerMethodHandler}
  */
 public class ServerCommandClientImpl implements ServerCommand {
 
@@ -408,8 +408,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setZoneHasFoW(GUID zoneGUID, boolean hasFog) {
-    var msg = SetZoneHasFowMsg.newBuilder().setZoneGuid(zoneGUID.toString())
-            .setHasFow(hasFog);
+    var msg = SetZoneHasFowMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setHasFow(hasFog);
     makeServerCall(Message.newBuilder().setSetZoneHasFowMsg(msg).build());
   }
 

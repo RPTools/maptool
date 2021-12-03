@@ -14,34 +14,22 @@
  */
 package net.rptools.maptool.server;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
 import java.awt.geom.Area;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
-import net.rptools.clientserver.hessian.AbstractMethodHandler;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.client.ClientMethodHandler;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.common.MapToolConstants;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
-import net.rptools.maptool.model.gamedata.proto.GameDataDto;
-import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
-import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
@@ -56,12 +44,12 @@ import org.apache.tika.utils.ExceptionUtils;
  *
  * @author drice *
  */
-public class ServerMethodHandler extends AbstractMethodHandler {
+public class ServerMessageHandler implements MessageHandler {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
-  private static final Logger log = Logger.getLogger(ServerMethodHandler.class);
+  private static final Logger log = Logger.getLogger(ServerMessageHandler.class);
 
-  public ServerMethodHandler(MapToolServer server) {
+  public ServerMessageHandler(MapToolServer server) {
     this.server = server;
   }
 
@@ -193,16 +181,171 @@ public class ServerMethodHandler extends AbstractMethodHandler {
           handle(msg.getSetZoneHasFowMsg());
           sendToAllClients(msg);
         }
-
+        case UPDATE_DRAWING_MSG -> {
+          handle(msg.getUpdateDrawingMsg());
+          sendToAllClients(msg);
+        }
+        case UPDATE_TOKEN_PROPERTY_MSG -> {
+          handle(msg.getUpdateTokenPropertyMsg());
+          sendToClients(id, msg);
+        }
+        case SET_ZONE_VISIBILITY_MSG -> {
+          handle(msg.getSetZoneVisibilityMsg());
+          sendToAllClients(msg);
+        }
+        case SHOW_POINTER_MSG -> sendToAllClients(msg);
+        case START_TOKEN_MOVE_MSG -> sendToClients(id, msg);
+        case STOP_TOKEN_MOVE_MSG -> sendToClients(id, msg);
+        case TOGGLE_TOKEN_MOVE_WAYPOINT_MSG -> sendToClients(id, msg);
+        case UNDO_DRAW_MSG -> {
+          sendToAllClients(msg);
+          handle(msg.getUndoDrawMsg());
+        }
+        case UPDATE_TOKEN_MOVE_MSG -> sendToClients(id, msg);
+        case SET_SERVER_POLICY_MSG -> {
+          handle(msg.getSetServerPolicyMsg());
+          sendToClients(id, msg);
+        }
+        case UPDATE_CAMPAIGN_MSG -> {
+          handle(msg.getUpdateCampaignMsg());
+          sendToClients(id, msg);
+        }
+        case UPDATE_INITIATIVE_MSG -> {
+          handle(msg.getUpdateInitiativeMsg());
+          sendToAllClients(msg);
+        }
+        case UPDATE_TOKEN_INITIATIVE_MSG -> {
+          handle(msg.getUpdateTokenInitiativeMsg());
+          sendToAllClients(msg);
+        }
+        case UPDATE_CAMPAIGN_MACROS_MSG -> {
+          handle(msg.getUpdateCampaignMacrosMsg());
+          sendToClients(id, msg);
+        }
+        case UPDATE_GM_MACROS_MSG -> {
+          handle(msg.getUpdateGmMacrosMsg());
+          sendToClients(id, msg);
+        }
+        case UPDATE_EXPOSED_AREA_META_MSG -> {
+          handle(msg.getUpdateExposedAreaMetaMsg());
+          sendToClients(id, msg);
+        }
+        case ADD_ADD_ON_LIBRARY_MSG -> sendToClients(id, msg);
+        case REMOVE_ADD_ON_LIBRARY_MSG -> sendToClients(id, msg);
+        case REMOVE_ALL_ADD_ON_LIBRARIES_MSG -> sendToClients(id, msg);
+        case UPDATE_DATA_STORE_MSG -> sendToClients(id, msg);
+        case UPDATE_DATA_NAMESPACE_MSG -> sendToClients(id, msg);
+        case UPDATE_DATA_MSG -> sendToClients(id, msg);
+        case REMOVE_DATA_MSG -> sendToClients(id, msg);
+        case REMOVE_DATA_NAMESPACE_MSG -> sendToClients(id, msg);
+        case REMOVE_DATA_STORE_MSG -> sendToClients(id, msg);
         default -> log.warn(msgType + "not handled.");
       }
-
-    } catch (InvalidProtocolBufferException e) {
-      super.handleMessage(id, message);
     } catch (Exception e) {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
     }
+  }
+
+  private void handle(UpdateExposedAreaMetaMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.setExposedAreaMetaData(
+        GUID.valueOf(msg.getTokenGuid()),
+        new ExposedAreaMetaData(Mapper.map(msg.getArea()))); // update the server
+  }
+
+  private void handle(UpdateGmMacrosMsg msg) {
+    var campaignMacros =
+        msg.getMacrosList().stream()
+            .map(p -> MacroButtonProperties.fromDto(p))
+            .collect(Collectors.toList());
+    MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
+  }
+
+  private void handle(UpdateCampaignMacrosMsg msg) {
+    var campaignMacros =
+        msg.getMacrosList().stream()
+            .map(p -> MacroButtonProperties.fromDto(p))
+            .collect(Collectors.toList());
+    MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+  }
+
+  private void handle(UpdateTokenInitiativeMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    var tokenId = GUID.valueOf(msg.getTokenGuid());
+    InitiativeList list = zone.getInitiativeList();
+    TokenInitiative ti = list.getTokenInitiative(msg.getIndex());
+    if (!ti.getId().equals(tokenId)) {
+      // Index doesn't point to same token, try to find it
+      Token token = zone.getToken(tokenId);
+      List<Integer> tokenIndex = list.indexOf(token);
+
+      // If token in list more than one time, punt
+      if (tokenIndex.size() != 1) return;
+      ti = list.getTokenInitiative(tokenIndex.get(0));
+    } // endif
+    ti.update(msg.getIsHolding(), msg.getState());
+  }
+
+  private void handle(UpdateInitiativeMsg msg) {
+    var list = InitiativeList.fromDto(msg.getList());
+    if (list != null) {
+      if (list.getZone() == null) return;
+      Zone zone = server.getCampaign().getZone(list.getZone().getId());
+      zone.setInitiativeList(list);
+    } else if (msg.getOwnerPermission() != null) {
+      MapTool.getFrame()
+          .getInitiativePanel()
+          .setOwnerPermissions(msg.getOwnerPermission().getValue());
+    }
+  }
+
+  private void handle(UpdateCampaignMsg msg) {
+    server.getCampaign().replaceCampaignProperties(CampaignProperties.fromDto(msg.getProperties()));
+  }
+
+  private void handle(SetServerPolicyMsg msg) {
+    server.updateServerPolicy(
+        ServerPolicy.fromDto(msg.getPolicy())); // updates the server policy, fixes #1648
+    MapTool.getFrame().getToolbox().updateTools();
+  }
+
+  private void handle(UndoDrawMsg msg) {
+    // This is a problem. The contents of the UndoManager are not synchronized across machines
+    // so if one machine uses Meta-Z to undo a drawing, that drawable will be removed on all
+    // machines, but there is no attempt to keep the UndoManager in sync. So that same drawable
+    // will still be in the UndoManager queue on other machines. Ideally we should be filtering
+    // the local Undomanager queue based on the drawable (removing it when we find it), but
+    // the Swing UndoManager doesn't provide that capability so we would need to subclass it.
+    // And if we're going to do that, we may as well fix the other problems: the UndoManager should
+    // be per-map and per-layer (?) and not a singleton instance for the entire application! But
+    // now we're talking a pretty intrusive set of changes: when a zone is deleted, the UndoManagers
+    // would need to be cleared and duplicating a zone means doing a deep copy on the UndoManager
+    // or flushing it entirely in the new zone. We'll save all of this for a separate patch against
+    // 1.3 or
+    // for 1.4.
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.removeDrawable(GUID.valueOf(msg.getDrawableGuid()));
+  }
+
+  private void handle(SetZoneVisibilityMsg msg) {
+    server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid())).setVisible(msg.getIsVisible());
+  }
+
+  private void handle(UpdateTokenPropertyMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    Token token = zone.getToken(GUID.valueOf(msg.getTokenGuid()));
+    token.updateProperty(
+        zone,
+        Token.Update.valueOf(msg.getProperty().name()),
+        msg.getValuesList()); // update server version of token
+  }
+
+  private void handle(UpdateDrawingMsg msg) {
+    Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
+    zone.updateDrawable(DrawnElement.fromDto(msg.getDrawing()), Pen.fromDto(msg.getPen()));
   }
 
   private void handle(SetZoneHasFowMsg msg) {
@@ -408,175 +551,12 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     server.releaseClientConnection(server.getConnectionId(bootPlayerMsg.getPlayerName()));
   }
 
-  @SuppressWarnings("unchecked")
-  public void handleMethod(String id, String method, Object... parameters) {
-    ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-
-    log.debug("from " + id + " got " + method);
-
-    try {
-      RPCContext context = new RPCContext(id, method, parameters);
-      RPCContext.setCurrent(context);
-      switch (cmd) {
-        case updateDrawing:
-          updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
-          break;
-        case updateTokenProperty:
-          Token.Update update = (Token.Update) context.parameters[2];
-          updateTokenProperty(
-              context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
-          break;
-        case setZoneVisibility:
-          setZoneVisibility(context.getGUID(0), (Boolean) context.get(1));
-          break;
-        case showPointer:
-          showPointer(context.getString(0), (Pointer) context.get(1));
-          break;
-        case startTokenMove:
-          startTokenMove(
-              context.getString(0),
-              context.getGUID(1),
-              context.getGUID(2),
-              (Set<GUID>) context.get(3));
-          break;
-        case stopTokenMove:
-          stopTokenMove(context.getGUID(0), context.getGUID(1));
-          break;
-        case toggleTokenMoveWaypoint:
-          toggleTokenMoveWaypoint(
-              context.getGUID(0), context.getGUID(1), (ZonePoint) context.get(2));
-          break;
-        case undoDraw:
-          undoDraw(context.getGUID(0), context.getGUID(1));
-          break;
-        case updateTokenMove:
-          updateTokenMove(
-              context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
-          break;
-        case setServerPolicy:
-          setServerPolicy((ServerPolicy) context.get(0));
-          break;
-        case updateCampaign:
-          updateCampaign((CampaignProperties) context.get(0));
-          break;
-        case updateInitiative:
-          updateInitiative((InitiativeList) context.get(0), (Boolean) context.get(1));
-          break;
-        case updateTokenInitiative:
-          updateTokenInitiative(
-              context.getGUID(0),
-              context.getGUID(1),
-              context.getBool(2),
-              context.getString(3),
-              context.getInt(4));
-          break;
-        case updateCampaignMacros:
-          updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
-          break;
-        case updateGmMacros:
-          updateGmMacros((List<MacroButtonProperties>) context.get(0));
-          break;
-        case updateExposedAreaMeta:
-          updateExposedAreaMeta(
-              context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
-          break;
-        case addAddOnLibrary:
-          addAddOnLibrary((List<TransferableAddOnLibrary>) context.get(0));
-          break;
-        case removeAddOnLibrary:
-          removeAddOnLibrary((List<String>) context.get(0));
-          break;
-        case removeAllAddOnLibraries:
-          removeAllAddOnLibraries();
-          break;
-        case updateDataStore:
-          var storeBuilder = DataStoreDto.newBuilder();
-          try {
-            JsonFormat.parser()
-                .merge(
-                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
-                    storeBuilder);
-            var dataStoreDto = storeBuilder.build();
-            updateDataStore(dataStoreDto);
-          } catch (IOException e) {
-            log.error(I18N.getText("data.error.sendingUpdate"), e);
-          }
-          break;
-        case updateDataNamespace:
-          var namespaceBuilder = GameDataDto.newBuilder();
-          try {
-            JsonFormat.parser()
-                .merge(
-                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
-                    namespaceBuilder);
-            var dataNamespaceDto = namespaceBuilder.build();
-            updateDataNamespace(dataNamespaceDto);
-          } catch (IOException e) {
-            log.error(I18N.getText("data.error.sendingUpdate"), e);
-          }
-          break;
-        case updateData:
-          String type = (String) parameters[0];
-          String namespace = (String) parameters[1];
-          var dataBuilder = GameDataValueDto.newBuilder();
-          try {
-            JsonFormat.parser()
-                .merge(
-                    new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
-                    dataBuilder);
-            var dataDto = dataBuilder.build();
-            updateData((String) context.get(0), (String) context.get(1), dataDto);
-          } catch (IOException e) {
-            log.error(I18N.getText("data.error.sendingUpdate"), e);
-          }
-          break;
-      }
-    } finally {
-      RPCContext.setCurrent(null);
-    }
-  }
-
   private void sendToClients(String excludedId, Message message) {
     server.getConnection().broadcastMessage(new String[] {excludedId}, message.toByteArray());
   }
 
   private void sendToAllClients(Message message) {
     server.getConnection().broadcastMessage(message.toByteArray());
-  }
-
-  /** Send the current call to all other clients except for the sender */
-  private void forwardToClients() {
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            new String[] {RPCContext.getCurrent().id},
-            RPCContext.getCurrent().method,
-            RPCContext.getCurrent().parameters);
-  }
-
-  /** Send the current call to all clients including the sender */
-  private void forwardToAllClients() {
-    server
-        .getConnection()
-        .broadcastCallMethod(RPCContext.getCurrent().method, RPCContext.getCurrent().parameters);
-  }
-
-  /**
-   * Broadcast a method to a single client
-   *
-   * @param client the client to send the method to
-   * @param method the method to send
-   * @param parameters an array of parameters related to the method
-   */
-  private void broadcastToClient(String client, String method, Object... parameters) {
-    server.getConnection().callMethod(client, method, parameters);
-  }
-
-  ////
-  // SERVER COMMAND
-  private void updateCampaign(CampaignProperties properties) {
-    server.getCampaign().replaceCampaignProperties(properties);
-    forwardToClients();
   }
 
   private void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet) {
@@ -609,19 +589,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     }
   }
 
-  private void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.updateDrawing.name(), RPCContext.getCurrent().parameters);
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.updateDrawable(drawnElement, pen);
-  }
-
-  public void restoreZoneView(GUID zoneGUID) {
-    forwardToClients();
-  }
-
   private void getAsset(String id, MD5Key assetID) {
     if (assetID == null) {
       return;
@@ -632,14 +599,11 @@ public class ServerMethodHandler extends AbstractMethodHandler {
               assetID.toString(),
               AssetManager.getAssetInfo(assetID).getProperty(AssetManager.NAME),
               AssetManager.getAssetCacheFile(assetID));
+      var msg = StartAssetTransferMsg.newBuilder().setHeader(producer.getHeader().toDto());
       server
           .getConnection()
-          .callMethod(
-              RPCContext.getCurrent().id,
-              MapToolConstants.Channel.IMAGE,
-              ClientCommand.COMMAND.startAssetTransfer.name(),
-              producer.getHeader());
-      server.addAssetProducer(RPCContext.getCurrent().id, producer);
+          .sendMessage(id, Message.newBuilder().setStartAssetTransferMsg(msg).build());
+      server.addAssetProducer(id, producer);
 
     } catch (IllegalArgumentException iae) {
       // Sending an empty asset will cause a failure of the image to load on the client side,
@@ -655,35 +619,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
     var zone = server.getCampaign().getZone(zoneGUID);
     var msg = PutZoneMsg.newBuilder().setZone(zone.toDto());
     server.getConnection().sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
-  }
-
-  private void updateInitiative(InitiativeList list, Boolean ownerPermission) {
-    if (list != null) {
-      if (list.getZone() == null) return;
-      Zone zone = server.getCampaign().getZone(list.getZone().getId());
-      zone.setInitiativeList(list);
-    } else if (ownerPermission != null) {
-      MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
-    }
-    forwardToAllClients();
-  }
-
-  private void updateTokenInitiative(
-      GUID zoneId, GUID tokenId, Boolean hold, String state, Integer index) {
-    Zone zone = server.getCampaign().getZone(zoneId);
-    InitiativeList list = zone.getInitiativeList();
-    TokenInitiative ti = list.getTokenInitiative(index);
-    if (!ti.getId().equals(tokenId)) {
-      // Index doesn't point to same token, try to find it
-      Token token = zone.getToken(tokenId);
-      List<Integer> tokenIndex = list.indexOf(token);
-
-      // If token in list more than one time, punt
-      if (tokenIndex.size() != 1) return;
-      ti = list.getTokenInitiative(tokenIndex.get(0));
-    } // endif
-    ti.update(hold, state);
-    forwardToAllClients();
   }
 
   private void putToken(String clientId, GUID zoneGUID, Token token) {
@@ -704,17 +639,16 @@ public class ServerMethodHandler extends AbstractMethodHandler {
       Object[] parameters = {
         zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
       };
-      broadcastToClient(clientId, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
+      var msg =
+          UpdateTokenPropertyMsg.newBuilder()
+              .setZoneGuid(zoneGUID.toString())
+              .setTokenGuid(token.getId().toString())
+              .setProperty(TokenUpdateDto.valueOf(Token.Update.setZOrder.name()))
+              .setValues(0, TokenPropertyValueDto.newBuilder().setIntValue(zOrder));
+      server
+          .getConnection()
+          .sendMessage(clientId, Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
     }
-  }
-
-  private void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    Token token = zone.getToken(tokenGUID);
-    token.updateProperty(zone, update, parameters); // update server version of token
-
-    forwardToClients();
   }
 
   private void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet) {
@@ -744,193 +678,6 @@ public class ServerMethodHandler extends AbstractMethodHandler {
         sendToAllClients(Message.newBuilder().setPutTokenMsg(putTokenMsg).build());
       }
       zone.sortZOrder(); // update new ZOrder on server zone
-    }
-  }
-
-  private void setZoneVisibility(GUID zoneGUID, boolean visible) {
-    server.getCampaign().getZone(zoneGUID).setVisible(visible);
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.setZoneVisibility.name(), RPCContext.getCurrent().parameters);
-  }
-
-  private void showPointer(String player, Pointer pointer) {
-    server
-        .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.showPointer.name(), RPCContext.getCurrent().parameters);
-  }
-
-  private void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
-    forwardToClients();
-  }
-
-  private void stopTokenMove(GUID zoneGUID, GUID tokenGUID) {
-    forwardToClients();
-  }
-
-  private void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp) {
-    forwardToClients();
-  }
-
-  private void undoDraw(GUID zoneGUID, GUID drawableGUID) {
-    // This is a problem. The contents of the UndoManager are not synchronized across machines
-    // so if one machine uses Meta-Z to undo a drawing, that drawable will be removed on all
-    // machines, but there is no attempt to keep the UndoManager in sync. So that same drawable
-    // will still be in the UndoManager queue on other machines. Ideally we should be filtering
-    // the local Undomanager queue based on the drawable (removing it when we find it), but
-    // the Swing UndoManager doesn't provide that capability so we would need to subclass it.
-    // And if we're going to do that, we may as well fix the other problems: the UndoManager should
-    // be per-map and per-layer (?) and not a singleton instance for the entire application! But
-    // now we're talking a pretty intrusive set of changes: when a zone is deleted, the UndoManagers
-    // would need to be cleared and duplicating a zone means doing a deep copy on the UndoManager
-    // or flushing it entirely in the new zone. We'll save all of this for a separate patch against
-    // 1.3 or
-    // for 1.4.
-    server
-        .getConnection()
-        .broadcastCallMethod(ClientCommand.COMMAND.undoDraw.name(), zoneGUID, drawableGUID);
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.removeDrawable(drawableGUID);
-  }
-
-  private void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y) {
-    forwardToClients();
-  }
-
-  private void setServerPolicy(ServerPolicy policy) {
-    server.updateServerPolicy(policy); // updates the server policy, fixes #1648
-    forwardToClients();
-    MapTool.getFrame().getToolbox().updateTools();
-  }
-
-  private void updateCampaignMacros(List<MacroButtonProperties> properties) {
-    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
-    MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
-    server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
-    forwardToClients();
-  }
-
-  private void updateGmMacros(List<MacroButtonProperties> properties) {
-    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
-    MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
-    server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
-    forwardToClients();
-  }
-
-  /**
-   * Update the server exposed area meta data, and forward the change to the clients
-   *
-   * @param zoneGUID the zone GUID of the map
-   * @param tokenExposedAreaGUID the GUID of the token to update the exposed meta data
-   * @param meta the exposed area meta data
-   * @see
-   *     net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
-   *     net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
-   */
-  private void updateExposedAreaMeta(
-      GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
-    Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
-    forwardToClients();
-  }
-
-  private void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
-    forwardToClients();
-  }
-
-  private void removeAddOnLibrary(List<String> namespaces) {
-    forwardToClients();
-  }
-
-  private void removeAllAddOnLibraries() {
-    forwardToClients();
-  }
-
-  private void updateDataStore(DataStoreDto dataStore) {
-    forwardToClients();
-  }
-
-  private void updateDataNamespace(GameDataDto gameData) {
-    forwardToClients();
-  }
-
-  private void updateData(String type, String namespace, GameDataValueDto gameData) {
-    forwardToClients();
-  }
-
-  private void removeDataStore() {
-    forwardToClients();
-  }
-
-  private void removeDataNamespace(String type, String namespace) {
-    forwardToClients();
-  }
-
-  private void removeData(String type, String namespace, String name) {
-    forwardToClients();
-  }
-
-  ////
-  // CONTEXT
-  private static class RPCContext {
-    private static ThreadLocal<RPCContext> threadLocal = new ThreadLocal<RPCContext>();
-
-    public String id;
-    public String method;
-    public Object[] parameters;
-
-    public RPCContext(String id, String method, Object[] parameters) {
-      this.id = id;
-      this.method = method;
-      this.parameters = parameters;
-    }
-
-    public static boolean hasCurrent() {
-      return threadLocal.get() != null;
-    }
-
-    public static RPCContext getCurrent() {
-      return threadLocal.get();
-    }
-
-    public static void setCurrent(RPCContext context) {
-      threadLocal.set(context);
-    }
-
-    ////
-    // Convenience methods
-    public GUID getGUID(int index) {
-      return (GUID) parameters[index];
-    }
-
-    public List<GUID> getGUIDs(int index) {
-      return (List<GUID>) parameters[index];
-    }
-
-    public Integer getInt(int index) {
-      return (Integer) parameters[index];
-    }
-
-    public Double getDouble(int index) {
-      return (Double) parameters[index];
-    }
-
-    public Object get(int index) {
-      return parameters[index];
-    }
-
-    public String getString(int index) {
-      return (String) parameters[index];
-    }
-
-    public Boolean getBool(int index) {
-      return (Boolean) parameters[index];
-    }
-
-    public Object[] getObjArray(int index) {
-      return (Object[]) parameters[index];
     }
   }
 }

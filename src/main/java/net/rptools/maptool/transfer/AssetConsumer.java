@@ -14,12 +14,11 @@
  */
 package net.rptools.maptool.transfer;
 
-import net.rptools.maptool.server.proto.AssetChunkDto;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
  * Receiving end of AssetProducer

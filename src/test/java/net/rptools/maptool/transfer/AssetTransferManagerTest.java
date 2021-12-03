@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import net.rptools.maptool.server.proto.AssetChunkDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

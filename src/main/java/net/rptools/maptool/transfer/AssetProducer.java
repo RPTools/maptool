@@ -15,12 +15,10 @@
 package net.rptools.maptool.transfer;
 
 import com.google.protobuf.ByteString;
-import net.rptools.maptool.server.proto.AssetChunkDto;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
  * Creates data chunks for transferring binary data. Assumes large datasets (otherwise it would be a

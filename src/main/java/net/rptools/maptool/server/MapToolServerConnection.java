@@ -128,7 +128,7 @@ public class MapToolServerConnection
     playerMap.remove(conn.getId().toUpperCase());
   }
 
-  public void addMessageHandler(ServerMethodHandler handler) {
+  public void addMessageHandler(ServerMessageHandler handler) {
     connection.addMessageHandler(handler);
   }
 
@@ -155,6 +155,8 @@ public class MapToolServerConnection
   public void broadcastMessage(String[] exclude, byte[] message) {
     connection.broadcastMessage(exclude, message);
   }
+
+  public void broadcastMessage(String clientId, Message build) {}
 
   public void sendMessage(String id, Message message) {
     connection.sendMessage(id, message.toByteArray());

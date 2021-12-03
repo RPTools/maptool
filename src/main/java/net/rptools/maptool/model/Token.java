@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
@@ -54,6 +55,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
+import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
@@ -2561,23 +2563,28 @@ public class Token extends BaseModel implements Cloneable {
    * Call the relevant setter from methodName with an array of parameters Called by
    * ClientMethodHandler to deal with sent change to token
    *
-   * @param update The method to be used
    * @param zone The zone where the token is
+   * @param update The method to be used
    * @param parameters An array of parameters
    */
-  public void updateProperty(Zone zone, Update update, Object[] parameters) {
+  public void updateProperty(Zone zone, Update update, List<TokenPropertyValueDto> parameters) {
     boolean lightChanged = false;
     boolean macroChanged = false;
     boolean panelLookChanged = false; // appearance of token in a panel changed
     switch (update) {
       case setState:
-        setState(parameters[0].toString(), parameters[1]);
+        var state = parameters.get(0).getStringValue();
+        var stateValue = parameters.get(1).getTokenState();
+        if (stateValue.hasBoolValue()) setState(state, Boolean.valueOf(stateValue.getBoolValue()));
+        else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        setAllStates(parameters[0]);
+        stateValue = parameters.get(1).getTokenState();
+        if (stateValue.hasBoolValue()) setAllStates(Boolean.valueOf(stateValue.getBoolValue()));
+        else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setPropertyType:
-        setPropertyType(parameters[0].toString());
+        setPropertyType(parameters.get(0).getStringValue());
         break;
       case setPC:
         setType(Type.PC);
@@ -2586,155 +2593,162 @@ public class Token extends BaseModel implements Cloneable {
         setType(Type.NPC);
         break;
       case setLayer:
-        setLayer((Zone.Layer) parameters[0]);
+        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
         break;
       case setLayerShape:
-        setLayer((Zone.Layer) parameters[0]);
-        setShape((TokenShape) parameters[1]);
+        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
+        setShape(TokenShape.valueOf(parameters.get(1).getStringValue()));
         break;
       case setShape:
-        setShape((TokenShape) parameters[0]);
+        setShape(TokenShape.valueOf(parameters.get(0).getStringValue()));
         break;
       case setSnapToScale:
-        setSnapToScale((Boolean) parameters[0]);
+        setSnapToScale(parameters.get(0).getBoolValue());
         break;
       case setSnapToGrid:
-        setSnapToGrid((Boolean) parameters[0]);
+        setSnapToGrid(parameters.get(0).getBoolValue());
         break;
       case setSnapToGridAndXY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setSnapToGrid((boolean) parameters[0]);
-        setX((int) parameters[1]);
-        setY((int) parameters[2]);
+        setSnapToGrid(parameters.get(0).getBoolValue());
+        setX(parameters.get(1).getIntValue());
+        setY(parameters.get(2).getIntValue());
         break;
       case setFootprint:
         setSnapToScale(true);
-        setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
+        setFootprint(
+            Grid.fromDto(parameters.get(0).getGrid()),
+            TokenFootprint.fromDto(parameters.get(1).getTokenFootPrint()));
         break;
       case setProperty:
-        setProperty(parameters[0].toString(), parameters[1].toString());
+        setProperty(parameters.get(0).getStringValue(), parameters.get(1).getStringValue());
         break;
       case resetProperty:
-        resetProperty(parameters[0].toString());
+        resetProperty(parameters.get(0).getStringValue());
         break;
       case setZOrder:
-        setZOrder((int) parameters[0]);
+        setZOrder(parameters.get(0).getIntValue());
         zone.sortZOrder(); // update new ZOrder
         break;
       case setFacing:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setFacing((Integer) parameters[0]);
+        setFacing(parameters.get(0).getIntValue());
         break;
       case clearAllOwners:
         clearAllOwners();
         panelLookChanged = true;
         break;
       case setOwnedByAll:
-        setOwnedByAll((Boolean) parameters[0]);
+        setOwnedByAll(parameters.get(0).getBoolValue());
         panelLookChanged = true;
         break;
       case addOwner:
-        addOwner(parameters[0].toString());
+        addOwner(parameters.get(0).getStringValue());
         break;
       case setScaleX:
         setSnapToScale(false);
-        setScaleX((double) parameters[0]);
+        setScaleX(parameters.get(0).getDoubleValue());
         break;
       case setScaleY:
         setSnapToScale(false);
-        setScaleY((double) parameters[0]);
+        setScaleY(parameters.get(0).getDoubleValue());
         break;
       case setScaleXY:
         setSnapToScale(false);
-        setScaleX((double) parameters[0]);
-        setScaleY((double) parameters[1]);
+        setScaleX(parameters.get(0).getDoubleValue());
+        setScaleY(parameters.get(1).getDoubleValue());
         break;
       case setNotes:
-        setNotes(parameters[0].toString());
+        setNotes(parameters.get(0).getStringValue());
         break;
       case setGMNotes:
-        setGMNotes(parameters[0].toString());
+        setGMNotes(parameters.get(0).getStringValue());
         break;
       case setX:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setX((int) parameters[0]);
+        setX(parameters.get(0).getIntValue());
         break;
       case setY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setY((int) parameters[0]);
+        setY(parameters.get(0).getIntValue());
         break;
       case setXY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setX((int) parameters[0]);
-        setY((int) parameters[1]);
+        setX(parameters.get(0).getIntValue());
+        setY(parameters.get(1).getIntValue());
         break;
       case setHaloColor:
-        setHaloColor((Color) parameters[0]);
+        setHaloColor(new Color(parameters.get(0).getIntValue(), true));
         break;
       case setLabel:
-        setLabel((String) parameters[0]);
+        setLabel(parameters.get(0).getStringValue());
         break;
       case setName:
-        setName((String) parameters[0]);
+        setName(parameters.get(0).getStringValue());
         panelLookChanged = true;
         break;
       case setGMName:
-        setGMName((String) parameters[0]);
+        setGMName(parameters.get(0).getStringValue());
         panelLookChanged = true;
         break;
       case setSpeechName:
-        setSpeechName((String) parameters[0]);
+        setSpeechName(parameters.get(0).getStringValue());
         break;
       case setVisible:
-        setVisible((boolean) parameters[0]);
+        setVisible(parameters.get(0).getBoolValue());
         break;
       case setVisibleOnlyToOwner:
-        setVisibleOnlyToOwner((boolean) parameters[0]);
+        setVisibleOnlyToOwner(parameters.get(0).getBoolValue());
         break;
       case setIsAlwaysVisible:
-        setIsAlwaysVisible((boolean) parameters[0]);
+        setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
       case setTokenOpacity:
-        setTokenOpacity((String) parameters[0]);
+        setTokenOpacity(parameters.get(0).getStringValue());
         break;
       case setTerrainModifier:
-        setTerrainModifier((double) parameters[0]);
+        setTerrainModifier(parameters.get(0).getDoubleValue());
         break;
       case setTerrainModifierOperation:
-        setTerrainModifierOperation((TerrainModifierOperation) parameters[0]);
+        setTerrainModifierOperation(
+            TerrainModifierOperation.valueOf(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifiersIgnored:
-        setTerrainModifiersIgnored((Set<TerrainModifierOperation>) parameters[0]);
+        setTerrainModifiersIgnored(
+            parameters.get(0).getModifiers().getModifiersList().stream()
+                .map(m -> TerrainModifierOperation.valueOf(m.name()))
+                .collect(Collectors.toSet()));
         break;
       case setVBL:
-        setVBL((Area) parameters[0]);
+        setVBL(Mapper.map(parameters.get(0).getArea()));
         if (!hasVBL()) { // if VBL removed
           zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
         }
         break;
       case setImageAsset:
-        setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        setImageAsset(
+            parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
-        setPortraitImage((MD5Key) parameters[0]);
+        setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
         break;
       case setCharsheetImage:
-        setCharsheetImage((MD5Key) parameters[0]);
+        setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
         break;
       case setLayout:
-        setSizeScale((Double) parameters[0]);
-        setAnchor((int) parameters[1], (int) parameters[2]);
+        setSizeScale(parameters.get(0).getDoubleValue());
+        setAnchor(parameters.get(1).getIntValue(), parameters.get(2).getIntValue());
         break;
       case clearLightSources:
         if (hasLightSources()) {
@@ -2746,34 +2760,40 @@ public class Token extends BaseModel implements Cloneable {
         if (hasLightSources()) {
           lightChanged = true;
         }
-        removeLightSource((LightSource) parameters[0]);
+        removeLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
         break;
       case addLightSource:
         lightChanged = true;
-        addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
+        addLightSource(
+            LightSource.fromDto(parameters.get(0).getLightSource()),
+            Direction.valueOf(parameters.get(1).getStringValue()));
         break;
       case setHasSight:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setHasSight((boolean) parameters[0]);
+        setHasSight(parameters.get(0).getBoolValue());
         break;
       case setSightType:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setSightType((String) parameters[0]);
+        setSightType(parameters.get(0).getStringValue());
         break;
       case saveMacro:
-        saveMacro((MacroButtonProperties) parameters[0]);
+        saveMacro(MacroButtonProperties.fromDto(parameters.get(0).getMacros().getMacros(0)));
         macroChanged = true;
         break;
       case saveMacroList:
-        saveMacroList((List<MacroButtonProperties>) parameters[0], (boolean) parameters[1]);
+        saveMacroList(
+            parameters.get(0).getMacros().getMacrosList().stream()
+                .map(m -> MacroButtonProperties.fromDto(m))
+                .collect(Collectors.toList()),
+            parameters.get(1).getBoolValue());
         macroChanged = true;
         break;
       case deleteMacro:
-        deleteMacro((int) parameters[0]);
+        deleteMacro(parameters.get(0).getIntValue());
         macroChanged = true;
         break;
       case flipX:
@@ -2942,8 +2962,7 @@ public class Token extends BaseModel implements Cloneable {
       }
     }
 
-    dto.getPropertiesMap()
-        .forEach((k, v) -> token.propertyMap.put(k, v));
+    dto.getPropertiesMap().forEach((k, v) -> token.propertyMap.put(k, v));
 
     var dtoMacros = dto.getMacroPropertiesMap();
     var tokenMacros = token.getMacroPropertiesMap(false);
@@ -3075,7 +3094,7 @@ public class Token extends BaseModel implements Cloneable {
       }
     }
 
-    propertyMap.forEach((k,v)-> dto.putProperties(k, (String)v));
+    propertyMap.forEach((k, v) -> dto.putProperties(k, (String) v));
     var tokenMacros = token.getMacroPropertiesMap(false);
     for (var key : tokenMacros.keySet()) dto.putMacroProperties(key, tokenMacros.get(key).toDto());
 

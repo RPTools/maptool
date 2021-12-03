@@ -68,17 +68,16 @@ import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
-import net.rptools.maptool.server.ServerMethodHandler;
+import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
-import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
 import org.apache.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
- * ServerMethodHandler ServerMethodHandler}.
+ * ServerMessageHandler ServerMethodHandler}.
  *
  * @author drice
  */

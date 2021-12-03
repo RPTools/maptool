@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "MessageTypeProtos";
 
+import "google/protobuf/wrappers.proto";
 /*
  * For easier differentiation between protobuf classes and "normal" classes
  * protobuf classes end with "Dto" or "Msg".
@@ -317,7 +318,7 @@ message UpdateGmMacrosMsg {
 
 message UpdateInitiativeMsg {
   InitiativeListDto list = 1;
-  bool owner_permission = 2;
+  google.protobuf.BoolValue owner_permission = 2;
 }
 
 message UpdateTokenInitiativeMsg {
