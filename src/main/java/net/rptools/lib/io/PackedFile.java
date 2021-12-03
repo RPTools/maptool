@@ -643,8 +643,10 @@ public class PackedFile implements AutoCloseable {
           } else if ("type".equals(item.getNodeName())) {
             type = item.getTextContent();
           } else if ("image".equalsIgnoreCase(item.getNodeName())) {
-            var legacyAsset = getLegacyAsset(path);
-            embeddedImage = legacyAsset.getImageData();
+            if (!item.getTextContent().isEmpty()) {
+              var legacyAsset = getLegacyAsset(path);
+              embeddedImage = legacyAsset.getImageData();
+            }
           }
         }
 
