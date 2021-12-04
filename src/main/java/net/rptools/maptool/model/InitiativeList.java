@@ -697,7 +697,7 @@ public class InitiativeList implements Serializable {
     try {
       var libs =
           new LibraryManager()
-              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK)
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK)
               .get();
       if (!libs.isEmpty()) {
         JsonObject args = new JsonObject();
