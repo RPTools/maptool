@@ -291,7 +291,7 @@ public class AssetManager {
           Asset asset = getAsset(id);
 
           // Simplest case, we already have it
-          if (asset != null) {
+          if (asset != null && asset.getData() != null && asset.getData().length > 0) {
             for (AssetAvailableListener listener : listeners) {
               listener.assetAvailable(id);
             }
