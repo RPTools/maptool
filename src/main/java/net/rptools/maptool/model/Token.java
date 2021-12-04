@@ -2472,6 +2472,18 @@ public class Token extends BaseModel implements Cloneable {
       exposedAreaGUID = new GUID();
     }
 
+    // Fix for pre 1.11.3 campaigns and token size issues
+    Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
+    sizeMap.clear();
+    for (var entry : oldSizeMap.entrySet()) {
+      var key = entry.getKey();
+      if (key instanceof Class<?> cl) {
+        sizeMap.put(cl.getName(), entry.getValue());
+      } else {
+        sizeMap.put(key.toString(), entry.getValue());
+      }
+    }
+
     return this;
   }
 
