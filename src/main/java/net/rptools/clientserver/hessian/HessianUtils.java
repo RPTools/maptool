@@ -31,8 +31,10 @@ public class HessianUtils {
     HessianInput in = hessianFactory.createHessianInput(is);
     in.getSerializerFactory().setAllowNonSerializable(true);
     in.getSerializerFactory().getClassFactory().setWhitelist(true);
+    in.getSerializerFactory().getClassFactory().deny("net.rptools.model.Asset");
     hessianSecurity.getAllowed().forEach(a -> in.getSerializerFactory().getClassFactory().allow(a));
     hessianSecurity.getDenied().forEach(d -> in.getSerializerFactory().getClassFactory().deny(d));
+    in.getSerializerFactory().getClassFactory().deny("net.rptools.model.Asset");
     return in;
   }
 

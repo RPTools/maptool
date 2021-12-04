@@ -122,7 +122,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putAsset(Asset asset) {
-    makeServerCall(COMMAND.putAsset, asset);
+    makeServerCall(COMMAND.putAsset, asset.getAssetDetails());
   }
 
   public void getAsset(MD5Key assetID) {
@@ -363,6 +363,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {
+    for (Object obj : params) {
+      if (obj instanceof Asset) {
+        System.out.println("Asset!!!");
+      }
+    }
     if (MapTool.getConnection() != null) {
       MapTool.getConnection().callMethod(command.name(), params);
     }
