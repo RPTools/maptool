@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.ClientMethodHandler;
+import net.rptools.maptool.client.ClientMessageHandler;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -39,7 +39,7 @@ import org.apache.tika.utils.ExceptionUtils;
  * This class is used by the server host to receive client commands sent through {@link
  * ServerCommandClientImpl ServerCommandClientImpl}. Once the command is received, this will update
  * the server data, before forwarding the command to the clients. Clients will then handle the
- * command through {@link ClientMethodHandler ClientMethodHandler}. Updating the server itself is
+ * command through {@link ClientMessageHandler ClientMethodHandler}. Updating the server itself is
  * important as new client receive the server's campaign data when connecting.
  *
  * @author drice *
@@ -87,15 +87,33 @@ public class ServerMessageHandler implements MessageHandler {
           handle(id, msg.getEditTokenMsg());
           sendToClients(id, msg);
         }
-        case ENFORCE_NOTIFICATION_MSG -> sendToClients(id, msg);
-        case ENFORCE_ZONE_MSG -> sendToClients(id, msg);
-        case ENFORCE_ZONE_VIEW_MSG -> sendToClients(id, msg);
-        case EXEC_LINK_MSG -> sendToClients(id, msg);
+        case ENFORCE_NOTIFICATION_MSG,
+            ENFORCE_ZONE_MSG,
+            ENFORCE_ZONE_VIEW_MSG,
+            EXEC_LINK_MSG,
+            EXEC_FUNCTION_MSG,
+            MESSAGE_MSG,
+            SET_BOARD_MSG,
+            RESTORE_ZONE_VIEW_MSG,
+            SET_LIVE_TYPING_LABEL_MSG,
+            SET_TOKEN_LOCATION_MSG,
+            START_TOKEN_MOVE_MSG,
+            STOP_TOKEN_MOVE_MSG,
+            TOGGLE_TOKEN_MOVE_WAYPOINT_MSG,
+            UPDATE_TOKEN_MOVE_MSG,
+            ADD_ADD_ON_LIBRARY_MSG,
+            REMOVE_ADD_ON_LIBRARY_MSG,
+            REMOVE_ALL_ADD_ON_LIBRARIES_MSG,
+            UPDATE_DATA_STORE_MSG,
+            UPDATE_DATA_NAMESPACE_MSG,
+            UPDATE_DATA_MSG,
+            REMOVE_DATA_MSG,
+            REMOVE_DATA_NAMESPACE_MSG,
+            REMOVE_DATA_STORE_MSG -> sendToClients(id, msg);
         case EXPOSE_FOW_MSG -> {
           handle(msg.getExposeFowMsg());
           sendToClients(id, msg);
         }
-        case EXEC_FUNCTION_MSG -> sendToClients(id, msg);
         case EXPOSE_PC_AREA_MSG -> {
           handle(msg.getExposePcAreaMsg());
           sendToAllClients(msg);
@@ -109,9 +127,7 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getHideFowMsg());
           sendToAllClients(msg);
         }
-        case HIDE_POINTER_MSG -> sendToAllClients(msg);
-        case MESSAGE_MSG -> sendToClients(id, msg);
-        case MOVE_POINTER_MSG -> sendToAllClients(msg);
+        case HIDE_POINTER_MSG, MOVE_POINTER_MSG, SHOW_POINTER_MSG -> sendToAllClients(msg);
         case PUT_ASSET_MSG -> handle(msg.getPutAssetMsg());
         case PUT_LABEL_MSG -> {
           handle(msg.getPutLabelMsg());
@@ -125,9 +141,7 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getPutZoneMsg());
           sendToClients(id, msg);
         }
-        case REMOVE_ASSET_MSG -> {
-          handle(msg.getRemoveAssetMsg());
-        }
+        case REMOVE_ASSET_MSG -> handle(msg.getRemoveAssetMsg());
         case REMOVE_LABEL_MSG -> {
           handle(msg.getRemoveLabelMsg());
           sendToAllClients(msg);
@@ -152,8 +166,6 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getRenameZoneMsg());
           sendToAllClients(msg);
         }
-        case SET_BOARD_MSG -> sendToClients(id, msg);
-        case RESTORE_ZONE_VIEW_MSG -> sendToClients(id, msg);
         case SEND_TOKENS_TO_BACK_MSG -> handle(msg.getSendTokensToBackMsg());
         case SET_CAMPAIGN_MSG -> {
           handle(msg.getSetCampaignMsg());
@@ -167,8 +179,6 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getSetFowMsg());
           sendToAllClients(msg);
         }
-        case SET_LIVE_TYPING_LABEL_MSG -> sendToClients(id, msg);
-        case SET_TOKEN_LOCATION_MSG -> sendToClients(id, msg);
         case SET_VISION_TYPE_MSG -> {
           handle(msg.getSetVisionTypeMsg());
           sendToAllClients(msg);
@@ -193,15 +203,10 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getSetZoneVisibilityMsg());
           sendToAllClients(msg);
         }
-        case SHOW_POINTER_MSG -> sendToAllClients(msg);
-        case START_TOKEN_MOVE_MSG -> sendToClients(id, msg);
-        case STOP_TOKEN_MOVE_MSG -> sendToClients(id, msg);
-        case TOGGLE_TOKEN_MOVE_WAYPOINT_MSG -> sendToClients(id, msg);
         case UNDO_DRAW_MSG -> {
           sendToAllClients(msg);
           handle(msg.getUndoDrawMsg());
         }
-        case UPDATE_TOKEN_MOVE_MSG -> sendToClients(id, msg);
         case SET_SERVER_POLICY_MSG -> {
           handle(msg.getSetServerPolicyMsg());
           sendToClients(id, msg);
@@ -230,15 +235,6 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getUpdateExposedAreaMetaMsg());
           sendToClients(id, msg);
         }
-        case ADD_ADD_ON_LIBRARY_MSG -> sendToClients(id, msg);
-        case REMOVE_ADD_ON_LIBRARY_MSG -> sendToClients(id, msg);
-        case REMOVE_ALL_ADD_ON_LIBRARIES_MSG -> sendToClients(id, msg);
-        case UPDATE_DATA_STORE_MSG -> sendToClients(id, msg);
-        case UPDATE_DATA_NAMESPACE_MSG -> sendToClients(id, msg);
-        case UPDATE_DATA_MSG -> sendToClients(id, msg);
-        case REMOVE_DATA_MSG -> sendToClients(id, msg);
-        case REMOVE_DATA_NAMESPACE_MSG -> sendToClients(id, msg);
-        case REMOVE_DATA_STORE_MSG -> sendToClients(id, msg);
         default -> log.warn(msgType + "not handled.");
       }
     } catch (Exception e) {
@@ -257,7 +253,7 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(UpdateGmMacrosMsg msg) {
     var campaignMacros =
         msg.getMacrosList().stream()
-            .map(p -> MacroButtonProperties.fromDto(p))
+            .map(MacroButtonProperties::fromDto)
             .collect(Collectors.toList());
     MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
@@ -266,7 +262,7 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(UpdateCampaignMacrosMsg msg) {
     var campaignMacros =
         msg.getMacrosList().stream()
-            .map(p -> MacroButtonProperties.fromDto(p))
+            .map(MacroButtonProperties::fromDto)
             .collect(Collectors.toList());
     MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
@@ -290,12 +286,12 @@ public class ServerMessageHandler implements MessageHandler {
   }
 
   private void handle(UpdateInitiativeMsg msg) {
-    var list = InitiativeList.fromDto(msg.getList());
-    if (list != null) {
+    if (msg.hasList()) {
+      var list = InitiativeList.fromDto(msg.getList());
       if (list.getZone() == null) return;
       Zone zone = server.getCampaign().getZone(list.getZone().getId());
       zone.setInitiativeList(list);
-    } else if (msg.getOwnerPermission() != null) {
+    } else if (msg.hasOwnerPermission()) {
       MapTool.getFrame()
           .getInitiativePanel()
           .setOwnerPermissions(msg.getOwnerPermission().getValue());
@@ -369,9 +365,9 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(SetFowMsg msg) {
     Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
     var area = Mapper.map(msg.getArea());
-    var selectedToks =
-        msg.getSelectedTokensList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
-    zone.setFogArea(area, selectedToks);
+    var selectedTokens =
+        msg.getSelectedTokensList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+    zone.setFogArea(area, selectedTokens);
   }
 
   private void handle(SetCampaignNameMsg msg) {
@@ -384,8 +380,7 @@ public class ServerMessageHandler implements MessageHandler {
 
   private void handle(SendTokensToBackMsg msg) {
     var zoneGuid = GUID.valueOf(msg.getZoneGuid());
-    var tokens =
-        msg.getTokenGuidsList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toSet());
+    var tokens = msg.getTokenGuidsList().stream().map(GUID::valueOf).collect(Collectors.toSet());
     sendTokensToBack(zoneGuid, tokens);
   }
 
@@ -414,7 +409,7 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(RemoveTokensMsg msg) {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
     var tokenGUIDs =
-        msg.getTokenGuidList().stream().map(t -> GUID.valueOf(t)).collect(Collectors.toList());
+        msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toList());
     Zone zone = server.getCampaign().getZone(zoneGUID);
     zone.removeTokens(tokenGUIDs); // remove server tokens
   }
@@ -453,11 +448,11 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(HideFowMsg msg) {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
     var area = Mapper.map(msg.getArea());
-    var selectedToks =
+    var selectedTokens =
         msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
     Zone zone = server.getCampaign().getZone(zoneGUID);
-    zone.hideArea(area, selectedToks);
+    zone.hideArea(area, selectedTokens);
   }
 
   private void handle(String id, GetZoneMsg msg) {
@@ -478,9 +473,9 @@ public class ServerMessageHandler implements MessageHandler {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Area area = Mapper.map(msg.getArea());
-    var selectedToks =
+    var selectedTokens =
         msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
-    zone.exposeArea(area, selectedToks);
+    zone.exposeArea(area, selectedTokens);
   }
 
   private void handle(String clientId, PutTokenMsg putTokenMsg) {
@@ -533,7 +528,7 @@ public class ServerMessageHandler implements MessageHandler {
     var zoneGuid = GUID.valueOf(bringTokensToFrontMsg.getZoneGuid());
     var tokenSet =
         bringTokensToFrontMsg.getTokenGuidsList().stream()
-            .map(str -> GUID.valueOf(str))
+            .map(GUID::valueOf)
             .collect(Collectors.toSet());
     bringTokensToFront(zoneGuid, tokenSet);
   }
@@ -564,7 +559,7 @@ public class ServerMessageHandler implements MessageHandler {
       Zone zone = server.getCampaign().getZone(zoneGUID);
 
       // Get the tokens to update
-      List<Token> tokenList = new ArrayList<Token>();
+      List<Token> tokenList = new ArrayList<>();
       for (GUID tokenGUID : tokenSet) {
         Token token = zone.getToken(tokenGUID);
         if (token != null) {
@@ -636,9 +631,6 @@ public class ServerMessageHandler implements MessageHandler {
     }
     if (newToken) {
       // don't send whole token back to sender, instead just send new ZOrder
-      Object[] parameters = {
-        zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
-      };
       var msg =
           UpdateTokenPropertyMsg.newBuilder()
               .setZoneGuid(zoneGUID.toString())
@@ -656,7 +648,7 @@ public class ServerMessageHandler implements MessageHandler {
       Zone zone = server.getCampaign().getZone(zoneGUID);
 
       // Get the tokens to update
-      List<Token> tokenList = new ArrayList<Token>();
+      List<Token> tokenList = new ArrayList<>();
       for (GUID tokenGUID : tokenSet) {
         Token token = zone.getToken(tokenGUID);
         if (token != null) {

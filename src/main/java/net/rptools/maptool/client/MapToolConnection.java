@@ -77,7 +77,7 @@ public class MapToolConnection {
     handshake.startHandshake();
   }
 
-  public void addMessageHandler(ClientMethodHandler handler) {
+  public void addMessageHandler(ClientMessageHandler handler) {
     connection.addMessageHandler(handler);
   }
 

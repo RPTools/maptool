@@ -14,20 +14,15 @@
  */
 package net.rptools.maptool.client;
 
-import com.google.protobuf.util.JsonFormat;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.hessian.AbstractMethodHandler;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -60,9 +55,6 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
-import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
-import net.rptools.maptool.model.gamedata.proto.GameDataDto;
-import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
@@ -81,10 +73,10 @@ import org.apache.log4j.Logger;
  *
  * @author drice
  */
-public class ClientMethodHandler extends AbstractMethodHandler {
-  private static final Logger log = Logger.getLogger(ClientMethodHandler.class);
+public class ClientMessageHandler implements MessageHandler {
+  private static final Logger log = Logger.getLogger(ClientMessageHandler.class);
 
-  public ClientMethodHandler() {}
+  public ClientMessageHandler() {}
 
   @Override
   public void handleMessage(String id, byte[] message) {
@@ -134,12 +126,363 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         case SET_VISION_TYPE_MSG -> handle(msg.getSetVisionTypeMsg());
         case SET_ZONE_GRID_SIZE_MSG -> handle(msg.getSetZoneGridSizeMsg());
         case SET_ZONE_HAS_FOW_MSG -> handle(msg.getSetZoneHasFowMsg());
+        case START_ASSET_TRANSFER_MSG -> handle(msg.getStartAssetTransferMsg());
+        case UPDATE_ASSET_TRANSFER_MSG -> handle(msg.getUpdateAssetTransferMsg());
+        case ADD_ADD_ON_LIBRARY_MSG -> handle(msg.getAddAddOnLibraryMsg());
+        case REMOVE_ADD_ON_LIBRARY_MSG -> handle(msg.getRemoveAddOnLibraryMsg());
+        case REMOVE_ALL_ADD_ON_LIBRARIES_MSG -> handle(msg.getRemoveAllAddOnLibrariesMsg());
+        case UPDATE_DATA_STORE_MSG -> handle(msg.getUpdateDataStoreMsg());
+        case UPDATE_DATA_NAMESPACE_MSG -> handle(msg.getUpdateDataNamespaceMsg());
+        case UPDATE_DATA_MSG -> handle(msg.getUpdateDataMsg());
+        case REMOVE_DATA_STORE_MSG -> handle(msg.getRemoveDataStoreMsg());
+        case REMOVE_DATA_NAMESPACE_MSG -> handle(msg.getRemoveDataNamespaceMsg());
+        case REMOVE_DATA_MSG -> handle(msg.getRemoveDataMsg());
+        case UPDATE_TOKEN_PROPERTY_MSG -> handle(msg.getUpdateTokenPropertyMsg());
+        case UPDATE_DRAWING_MSG -> handle(msg.getUpdateDrawingMsg());
+        case UNDO_DRAW_MSG -> handle(msg.getUndoDrawMsg());
+        case SET_ZONE_VISIBILITY_MSG -> handle(msg.getSetZoneVisibilityMsg());
+        case SHOW_POINTER_MSG -> handle(msg.getShowPointerMsg());
+        case START_TOKEN_MOVE_MSG -> handle(msg.getStartTokenMoveMsg());
+        case STOP_TOKEN_MOVE_MSG -> handle(msg.getStopTokenMoveMsg());
+        case TOGGLE_TOKEN_MOVE_WAYPOINT_MSG -> handle(msg.getToogleTokemMoveWaypointMsg());
+        case SET_SERVER_POLICY_MSG -> handle(msg.getSetServerPolicyMsg());
+        case UPDATE_CAMPAIGN_MSG -> handle(msg.getUpdateCampaignMsg());
+        case UPDATE_INITIATIVE_MSG -> handle(msg.getUpdateInitiativeMsg());
+        case UPDATE_TOKEN_INITIATIVE_MSG -> handle(msg.getUpdateTokenInitiativeMsg());
+        case UPDATE_CAMPAIGN_MACROS_MSG -> handle(msg.getUpdateCampaignMacrosMsg());
+        case UPDATE_GM_MACROS_MSG -> handle(msg.getUpdateGmMacrosMsg());
+        case UPDATE_EXPOSED_AREA_META_MSG -> handle(msg.getUpdateExposedAreaMetaMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
-      super.handleMessage(id, message);
+      log.error(e);
     }
+  }
+
+  private void handle(UpdateExposedAreaMetaMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          ExposedAreaMetaData meta = new ExposedAreaMetaData(Mapper.map(msg.getArea()));
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.setExposedAreaMetaData(tokenGUID, meta);
+        });
+  }
+
+  private void handle(UpdateGmMacrosMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var macros =
+              msg.getMacrosList().stream()
+                  .map(MacroButtonProperties::fromDto)
+                  .collect(Collectors.toList());
+          MapTool.getCampaign().setGmMacroButtonPropertiesArray(macros);
+          MapTool.getFrame().getGmPanel().reset();
+        });
+  }
+
+  private void handle(UpdateCampaignMacrosMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var macros =
+              msg.getMacrosList().stream()
+                  .map(MacroButtonProperties::fromDto)
+                  .collect(Collectors.toList());
+          MapTool.getCampaign().setMacroButtonPropertiesArray(macros);
+          MapTool.getFrame().getCampaignPanel().reset();
+        });
+  }
+
+  private void handle(UpdateTokenInitiativeMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var list = zone.getInitiativeList();
+          TokenInitiative ti = list.getTokenInitiative(msg.getIndex());
+          if (!ti.getId().equals(tokenGUID)) {
+            // Index doesn't point to same token, try to find it
+            var token = zone.getToken(tokenGUID);
+            List<Integer> tokenIndex = list.indexOf(token);
+
+            // If token in list more than one time, punt
+            if (tokenIndex.size() != 1) return;
+            ti = list.getTokenInitiative(tokenIndex.get(0));
+          } // endif
+          ti.update(msg.getIsHolding(), msg.getState());
+        });
+  }
+
+  private void handle(UpdateInitiativeMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          if (msg.hasList()) {
+            InitiativeList list = InitiativeList.fromDto(msg.getList());
+            var zone = list.getZone();
+            if (zone == null) return;
+            zone.setInitiativeList(list);
+          }
+          if (msg.hasOwnerPermission()) {
+            var ownerPermission = msg.getOwnerPermission();
+            MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission.getValue());
+          }
+        });
+  }
+
+  private void handle(UpdateCampaignMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          CampaignProperties properties = CampaignProperties.fromDto(msg.getProperties());
+
+          MapTool.getCampaign().replaceCampaignProperties(properties);
+          MapToolFrame frame = MapTool.getFrame();
+          ZoneRenderer zr = frame.getCurrentZoneRenderer();
+          if (zr != null) {
+            zr.getZoneView().flush();
+            zr.repaint();
+          }
+          AssetManager.updateRepositoryList();
+
+          InitiativePanel ip = frame.getInitiativePanel();
+          ip.setOwnerPermissions(properties.isInitiativeOwnerPermissions());
+          ip.setMovementLock(properties.isInitiativeMovementLock());
+          ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
+          ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
+          ip.updateView();
+          MapTool.getFrame().getLookupTablePanel().updateView();
+        });
+  }
+
+  private void handle(SetServerPolicyMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          ServerPolicy policy = ServerPolicy.fromDto(msg.getPolicy());
+          MapTool.setServerPolicy(policy);
+          MapTool.getFrame().getToolbox().updateTools();
+        });
+  }
+
+  private void handle(ToggleTokenMoveWaypointMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var keyToken = GUID.valueOf(msg.getKeyTokenId());
+          ZonePoint zp = new ZonePoint(msg.getPoint().getX(), msg.getPoint().getY());
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          renderer.toggleMoveSelectionSetWaypoint(keyToken, zp);
+        });
+  }
+
+  private void handle(StopTokenMoveMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var keyToken = GUID.valueOf(msg.getKeyTokenId());
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          renderer.removeMoveSelectionSet(keyToken);
+        });
+  }
+
+  private void handle(StartTokenMoveMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var playerId = msg.getPlayerId();
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var keyToken = GUID.valueOf(msg.getKeyTokenId());
+          var selectedSet =
+              msg.getSelectedTokensList().stream().map(GUID::valueOf).collect(Collectors.toSet());
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          renderer.addMoveSelectionSet(playerId, keyToken, selectedSet, true);
+        });
+  }
+
+  private void handle(ShowPointerMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          MapTool.getFrame()
+              .getPointerOverlay()
+              .addPointer(msg.getPlayer(), Pointer.fromDto(msg.getPointer()));
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(SetZoneVisibilityMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          boolean visible = msg.getIsVisible();
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.setVisible(visible);
+
+          ZoneRenderer currentRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+          if (!visible
+              && !MapTool.getPlayer().isGM()
+              && currentRenderer != null
+              && currentRenderer.getZone().getId().equals(zoneGUID)) {
+            MapTool.getFrame().setCurrentZoneRenderer(null);
+          }
+          if (visible && currentRenderer == null) {
+            currentRenderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+            MapTool.getFrame().setCurrentZoneRenderer(currentRenderer);
+          }
+          MapTool.getFrame().getZoneMiniMapPanel().flush();
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(UndoDrawMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          GUID drawableId = GUID.valueOf(msg.getDrawableGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          if (zone == null) {
+            return;
+          }
+          zone.removeDrawable(drawableId);
+          if (MapTool.getFrame().getCurrentZoneRenderer().getZone().getId().equals(zoneGUID)) {
+            MapTool.getFrame().refresh();
+          }
+        });
+  }
+
+  private void handle(UpdateDrawingMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          Pen p = Pen.fromDto(msg.getPen());
+          DrawnElement de = DrawnElement.fromDto(msg.getDrawing());
+
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.updateDrawable(de, p);
+          MapTool.getFrame().refresh();
+        });
+  }
+
+  private void handle(UpdateTokenPropertyMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          var token = zone.getToken(tokenGUID);
+          if (token != null) {
+            Token.Update update = Token.Update.valueOf(msg.getProperty().name());
+            token.updateProperty(zone, update, msg.getValuesList());
+          }
+        });
+  }
+
+  private void handle(RemoveDataMsg msg) {
+    String removeDType = msg.getType();
+    String removeDNamespace = msg.getNamespace();
+    String removeDName = msg.getName();
+    try {
+      new DataStoreManager()
+          .getDefaultDataStoreForRemoteUpdate()
+          .removeProperty(removeDType, removeDNamespace, removeDName)
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      log.error(
+          I18N.getText("data.error.removingData", removeDType, removeDNamespace, removeDName), e);
+    }
+  }
+
+  private void handle(RemoveDataNamespaceMsg msg) {
+    try {
+      new DataStoreManager()
+          .getDefaultDataStoreForRemoteUpdate()
+          .clearNamespace(msg.getType(), msg.getNamespace())
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      log.error(I18N.getText("data.error.clearingNamespace", msg.getType(), msg.getNamespace()), e);
+    }
+  }
+
+  private void handle(RemoveDataStoreMsg msg) {
+    new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
+  }
+
+  private void handle(UpdateDataMsg msg) {
+    try {
+      var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+      new GameDataImporter(dataStore).importData(msg.getType(), msg.getNamespace(), msg.getValue());
+    } catch (ExecutionException | InterruptedException e) {
+      MapTool.showError("data.error.receivingUpdate", e);
+    }
+  }
+
+  private void handle(UpdateDataNamespaceMsg msg) {
+    try {
+      var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+      new GameDataImporter(dataStore).importData(msg.getData());
+    } catch (ExecutionException | InterruptedException e) {
+      MapTool.showError("data.error.receivingUpdate", e);
+    }
+  }
+
+  private void handle(UpdateDataStoreMsg msg) {
+    try {
+      var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
+      new GameDataImporter(dataStore).importData(msg.getStore());
+    } catch (ExecutionException | InterruptedException e) {
+      MapTool.showError("data.error.receivingUpdate", e);
+    }
+  }
+
+  private void handle(RemoveAllAddOnLibrariesMsg msg) {
+    new LibraryManager().deregisterAddOnLibraries();
+  }
+
+  private void handle(RemoveAddOnLibraryMsg msg) {
+    var remLibraryManager = new LibraryManager();
+    var removedNamespaces = msg.getNamespacesList();
+    for (String namespace : removedNamespaces) {
+      remLibraryManager.deregisterAddOnLibrary(namespace);
+    }
+  }
+
+  private void handle(AddAddOnLibraryMsg msg) {
+    var addedLibs =
+        msg.getAddOnsList().stream()
+            .map(TransferableAddOnLibrary::fromDto)
+            .collect(Collectors.toList());
+    for (var lib : addedLibs) {
+      AssetManager.getAssetAsynchronously(
+          lib.getAssetKey(),
+          a -> {
+            Asset asset = AssetManager.getAsset(a);
+            try {
+              var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+              new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+            } catch (IOException e) {
+              SwingUtilities.invokeLater(
+                  () ->
+                      MapTool.showError(
+                          I18N.getText("library.import.error", lib.getNamespace()), e));
+            }
+          });
+    }
+  }
+
+  private void handle(UpdateAssetTransferMsg msg) {
+    try {
+      MapTool.getAssetTransferManager().update(msg.getChunk());
+    } catch (IOException ioe) {
+      log.error(ioe.toString());
+    }
+  }
+
+  private void handle(StartAssetTransferMsg msg) {
+    AssetHeader header = AssetHeader.fromDto(msg.getHeader());
+    MapTool.getAssetTransferManager().addConsumer(new AssetConsumer(AppUtil.getTmpDir(), header));
   }
 
   private void handle(SetZoneHasFowMsg msg) {
@@ -242,13 +585,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var area = Mapper.map(msg.getArea());
-          var selectedToks =
-              msg.getSelectedTokensList().stream()
-                  .map(t -> GUID.valueOf(t))
-                  .collect(Collectors.toSet());
+          var selectedTokens =
+              msg.getSelectedTokensList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.setFogArea(area, selectedToks);
+          zone.setFogArea(area, selectedTokens);
           MapTool.getFrame().refresh();
         });
   }
@@ -335,9 +676,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           var tokenGUIDs =
-              msg.getTokenGuidList().stream()
-                  .map(t -> GUID.valueOf(t))
-                  .collect(Collectors.toList());
+              msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toList());
           zone.removeTokens(tokenGUIDs);
           MapTool.getFrame().refresh();
         });
@@ -450,11 +789,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           var area = Mapper.map(msg.getArea());
-          var selectedToks =
+          var selectedTokens =
               msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.hideArea(area, selectedToks);
+          zone.hideArea(area, selectedTokens);
           MapTool.getFrame().refresh();
         });
   }
@@ -473,30 +812,27 @@ public class ClientMethodHandler extends AbstractMethodHandler {
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
           Area area = Mapper.map(msg.getArea());
-          var selectedToks =
+          var selectedTokens =
               msg.getTokenGuidList().stream().map(GUID::valueOf).collect(Collectors.toSet());
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.exposeArea(area, selectedToks);
+          zone.exposeArea(area, selectedTokens);
           MapTool.getFrame().refresh();
         });
   }
 
   private void handle(ExecLinkMsg msg) {
     EventQueue.invokeLater(
-        () -> {
-          MacroLinkFunction.receiveExecLink(msg.getLink(), msg.getTarget(), msg.getSource());
-        });
+        () -> MacroLinkFunction.receiveExecLink(msg.getLink(), msg.getTarget(), msg.getSource()));
   }
 
   private void handle(ExecFunctionMsg msg) {
     EventQueue.invokeLater(
-        () -> {
-          ExecFunction.receiveExecFunction(
-              msg.getTarget(),
-              msg.getSource(),
-              msg.getFunctionName(),
-              Mapper.map(msg.getArgumentList()));
-        });
+        () ->
+            ExecFunction.receiveExecFunction(
+                msg.getTarget(),
+                msg.getSource(),
+                msg.getFunctionName(),
+                Mapper.map(msg.getArgumentList())));
   }
 
   private void handle(EnforceZoneViewMsg msg) {
@@ -538,9 +874,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
   private void handle(EnforceNotificationMsg msg) {
     EventQueue.invokeLater(
-        () -> {
-          MapTool.getFrame().getCommandPanel().disableNotifyButton(msg.getEnforce());
-        });
+        () -> MapTool.getFrame().getCommandPanel().disableNotifyButton(msg.getEnforce()));
   }
 
   private void handle(PutTokenMsg putTokenMsg) {
@@ -603,11 +937,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     EventQueue.invokeLater(
         () -> {
           var zoneGUID = GUID.valueOf(changeZoneDisplayNameMsg.getZoneGuid());
-          String dispName = changeZoneDisplayNameMsg.getName();
+          String displayName = changeZoneDisplayNameMsg.getName();
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           if (zone != null) {
-            zone.setPlayerAlias(dispName);
+            zone.setPlayerAlias(displayName);
           }
           MapTool.getFrame()
               .setTitleViaRenderer(
@@ -637,346 +971,5 @@ public class ClientMethodHandler extends AbstractMethodHandler {
             AppActions.disconnectFromServer();
             MapTool.showInformation("You have been booted from the server.");
           });
-  }
-
-  public void handleMethod(final String id, final String method, final Object... parameters) {
-    final ClientCommand.COMMAND cmd = Enum.valueOf(ClientCommand.COMMAND.class, method);
-
-    log.debug("from " + id + " got " + method);
-
-    // These commands are safe to do in the background, any events that cause model updates need
-    // to be on the EDT (See next section)
-    switch (cmd) {
-      case startAssetTransfer:
-        AssetHeader header = (AssetHeader) parameters[0];
-        MapTool.getAssetTransferManager()
-            .addConsumer(new AssetConsumer(AppUtil.getTmpDir(), header));
-        return;
-
-      case updateAssetTransfer:
-        AssetChunk chunk = (AssetChunk) parameters[0];
-        try {
-          MapTool.getAssetTransferManager().update(chunk);
-        } catch (IOException ioe) {
-          // TODO: do something intelligent like clear the transfer
-          // manager, and clear the "we're waiting for" flag so that it
-          // gets requested again
-          ioe.printStackTrace();
-        }
-        return;
-
-      case addAddOnLibrary:
-        var addedLibs = (List<TransferableAddOnLibrary>) parameters[0];
-        for (var lib : addedLibs) {
-          AssetManager.getAssetAsynchronously(
-              lib.getAssetKey(),
-              a -> {
-                Asset asset = AssetManager.getAsset(a);
-                try {
-                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
-                } catch (IOException e) {
-                  SwingUtilities.invokeLater(
-                      () -> {
-                        MapTool.showError(
-                            I18N.getText("library.import.error", lib.getNamespace()), e);
-                      });
-                }
-              });
-        }
-        return;
-
-      case removeAddOnLibrary:
-        var remLibraryManager = new LibraryManager();
-        var removedNamespaces = (List<String>) parameters[0];
-        for (String namespace : removedNamespaces) {
-          remLibraryManager.deregisterAddOnLibrary(namespace);
-        }
-        return;
-
-      case removeAllAddOnLibraries:
-        new LibraryManager().deregisterAddOnLibraries();
-        return;
-
-      case updateDataStore:
-        var storeBuilder = DataStoreDto.newBuilder();
-        try {
-          JsonFormat.parser()
-              .merge(
-                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
-                  storeBuilder);
-          var dataStoreDto = storeBuilder.build();
-          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
-          new GameDataImporter(dataStore).importData(dataStoreDto);
-        } catch (IOException | ExecutionException | InterruptedException e) {
-          MapTool.showError("data.error.receivingUpdate", e);
-        }
-        break;
-
-      case updateDataNamespace:
-        System.out.println("updateDataNamespace");
-        var namespaceBuilder = GameDataDto.newBuilder();
-        try {
-          JsonFormat.parser()
-              .merge(
-                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[0])),
-                  namespaceBuilder);
-          var dataNamespaceDto = namespaceBuilder.build();
-          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
-          new GameDataImporter(dataStore).importData(dataNamespaceDto);
-        } catch (IOException | ExecutionException | InterruptedException e) {
-          MapTool.showError("data.error.receivingUpdate", e);
-        }
-        break;
-
-      case updateData:
-        System.out.println("updateData");
-        String type = (String) parameters[0];
-        String namespace = (String) parameters[1];
-        var dataBuilder = GameDataValueDto.newBuilder();
-        try {
-          JsonFormat.parser()
-              .merge(
-                  new InputStreamReader(new ByteArrayInputStream((byte[]) parameters[2])),
-                  dataBuilder);
-          var dataDto = dataBuilder.build();
-          var dataStore = new DataStoreManager().getDefaultDataStoreForRemoteUpdate();
-          new GameDataImporter(dataStore).importData(type, namespace, dataDto);
-        } catch (IOException | ExecutionException | InterruptedException e) {
-          MapTool.showError("data.error.receivingUpdate", e);
-        }
-        break;
-
-      case removeDataStore:
-        new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
-        break;
-
-      case removeDataNamespace:
-        String removeType = (String) parameters[0];
-        String removeNamespace = (String) parameters[1];
-        try {
-          new DataStoreManager()
-              .getDefaultDataStoreForRemoteUpdate()
-              .clearNamespace(removeType, removeNamespace)
-              .get();
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(I18N.getText("data.error.clearingNamespace", removeType, removeNamespace), e);
-        }
-        break;
-
-      case removeData:
-        String removeDType = (String) parameters[0];
-        String removeDNamespace = (String) parameters[1];
-        String removeDName = (String) parameters[2];
-        try {
-          new DataStoreManager()
-              .getDefaultDataStoreForRemoteUpdate()
-              .removeProperty(removeDType, removeDNamespace, removeDName)
-              .get();
-        } catch (InterruptedException | ExecutionException e) {
-          log.error(
-              I18N.getText("data.error.removingData", removeDType, removeDNamespace, removeDName),
-              e);
-        }
-        break;
-    }
-
-    // Model events need to update on the EDT
-    EventQueue.invokeLater(
-        () -> {
-          GUID zoneGUID;
-          GUID tokenGUID;
-          Zone zone;
-          Token token;
-          Set<GUID> selectedToks = null;
-          List<GUID> tokenGUIDs;
-          ZoneRenderer renderer;
-
-          switch (cmd) {
-            case updateTokenProperty: // get token and update its property
-              zoneGUID = (GUID) parameters[0];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              tokenGUID = (GUID) parameters[1];
-              token = zone.getToken(tokenGUID);
-              if (token != null) {
-                Token.Update update = (Token.Update) parameters[2];
-                token.updateProperty(zone, update, (Object[]) parameters[3]);
-              }
-              return;
-
-            case updateDrawing:
-              zoneGUID = (GUID) parameters[0];
-              Pen p = (Pen) parameters[1];
-              DrawnElement de = (DrawnElement) parameters[2];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.updateDrawable(de, p);
-              MapTool.getFrame().refresh();
-              return;
-
-            case undoDraw:
-              zoneGUID = (GUID) parameters[0];
-              GUID drawableId = (GUID) parameters[1];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              if (zone == null) {
-                return;
-              }
-              zone.removeDrawable(drawableId);
-              if (MapTool.getFrame().getCurrentZoneRenderer().getZone().getId().equals(zoneGUID)
-                  && zoneGUID != null) {
-                MapTool.getFrame().refresh();
-              }
-              return;
-
-            case setZoneVisibility:
-              zoneGUID = (GUID) parameters[0];
-              boolean visible = (Boolean) parameters[1];
-
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.setVisible(visible);
-
-              ZoneRenderer currentRenderer = MapTool.getFrame().getCurrentZoneRenderer();
-              if (!visible
-                  && !MapTool.getPlayer().isGM()
-                  && currentRenderer != null
-                  && currentRenderer.getZone().getId().equals(zoneGUID)) {
-                MapTool.getFrame().setCurrentZoneRenderer(null);
-              }
-              if (visible && currentRenderer == null) {
-                currentRenderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-                MapTool.getFrame().setCurrentZoneRenderer(currentRenderer);
-              }
-              MapTool.getFrame().getZoneMiniMapPanel().flush();
-              MapTool.getFrame().refresh();
-              return;
-
-            case showPointer:
-              MapTool.getFrame()
-                  .getPointerOverlay()
-                  .addPointer((String) parameters[0], (Pointer) parameters[1]);
-              MapTool.getFrame().refresh();
-              return;
-
-            case startTokenMove:
-              String playerId = (String) parameters[0];
-              zoneGUID = (GUID) parameters[1];
-              GUID keyToken = (GUID) parameters[2];
-              Set<GUID> selectedSet = (Set<GUID>) parameters[3];
-
-              renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-              renderer.addMoveSelectionSet(playerId, keyToken, selectedSet, true);
-              return;
-
-            case stopTokenMove:
-              zoneGUID = (GUID) parameters[0];
-              keyToken = (GUID) parameters[1];
-
-              renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-              renderer.removeMoveSelectionSet(keyToken);
-              return;
-
-            case updateTokenMove:
-              zoneGUID = (GUID) parameters[0];
-              keyToken = (GUID) parameters[1];
-
-              int x = (Integer) parameters[2];
-              int y = (Integer) parameters[3];
-
-              renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-              renderer.updateMoveSelectionSet(keyToken, new ZonePoint(x, y));
-              return;
-
-            case toggleTokenMoveWaypoint:
-              zoneGUID = (GUID) parameters[0];
-              keyToken = (GUID) parameters[1];
-              ZonePoint zp = (ZonePoint) parameters[2];
-
-              renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-              renderer.toggleMoveSelectionSetWaypoint(keyToken, zp);
-              return;
-
-            case setServerPolicy:
-              ServerPolicy policy = (ServerPolicy) parameters[0];
-              MapTool.setServerPolicy(policy);
-              MapTool.getFrame().getToolbox().updateTools();
-              return;
-
-            case updateCampaign:
-              CampaignProperties properties = (CampaignProperties) parameters[0];
-
-              MapTool.getCampaign().replaceCampaignProperties(properties);
-              MapToolFrame frame = MapTool.getFrame();
-              ZoneRenderer zr = frame.getCurrentZoneRenderer();
-              if (zr != null) {
-                zr.getZoneView().flush();
-                zr.repaint();
-              }
-              AssetManager.updateRepositoryList();
-
-              InitiativePanel ip = frame.getInitiativePanel();
-              ip.setOwnerPermissions(properties.isInitiativeOwnerPermissions());
-              ip.setMovementLock(properties.isInitiativeMovementLock());
-              ip.setInitUseReverseSort(properties.isInitiativeUseReverseSort());
-              ip.setInitPanelButtonsDisabled(properties.isInitiativePanelButtonsDisabled());
-              ip.updateView();
-              MapTool.getFrame().getLookupTablePanel().updateView();
-              return;
-
-            case updateInitiative:
-              InitiativeList list = (InitiativeList) parameters[0];
-              Boolean ownerPermission = (Boolean) parameters[1];
-              if (list != null) {
-                zone = list.getZone();
-                if (zone == null) return;
-                zone.setInitiativeList(list);
-              }
-              if (ownerPermission != null) {
-                MapTool.getFrame().getInitiativePanel().setOwnerPermissions(ownerPermission);
-              }
-              return;
-
-            case updateTokenInitiative:
-              zoneGUID = (GUID) parameters[0];
-              tokenGUID = (GUID) parameters[1];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              list = zone.getInitiativeList();
-              TokenInitiative ti = list.getTokenInitiative((Integer) parameters[4]);
-              if (!ti.getId().equals(tokenGUID)) {
-                // Index doesn't point to same token, try to find it
-                token = zone.getToken(tokenGUID);
-                List<Integer> tokenIndex = list.indexOf(token);
-
-                // If token in list more than one time, punt
-                if (tokenIndex.size() != 1) return;
-                ti = list.getTokenInitiative(tokenIndex.get(0));
-              } // endif
-              ti.update((Boolean) parameters[2], (String) parameters[3]);
-              return;
-
-            case updateCampaignMacros:
-              MapTool.getCampaign()
-                  .setMacroButtonPropertiesArray(
-                      new ArrayList<MacroButtonProperties>(
-                          (ArrayList<MacroButtonProperties>) parameters[0]));
-              MapTool.getFrame().getCampaignPanel().reset();
-              return;
-
-            case updateGmMacros:
-              MapTool.getCampaign()
-                  .setGmMacroButtonPropertiesArray(
-                      new ArrayList<MacroButtonProperties>(
-                          (ArrayList<MacroButtonProperties>) parameters[0]));
-              MapTool.getFrame().getGmPanel().reset();
-              return;
-
-            case updateExposedAreaMeta:
-              zoneGUID = (GUID) parameters[0];
-              tokenGUID = (GUID) parameters[1];
-              ExposedAreaMetaData meta = (ExposedAreaMetaData) parameters[2];
-              zone = MapTool.getCampaign().getZone(zoneGUID);
-              zone.setExposedAreaMetaData(tokenGUID, meta);
-              return;
-          }
-        });
   }
 }

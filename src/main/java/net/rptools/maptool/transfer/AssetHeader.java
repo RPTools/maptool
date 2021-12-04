@@ -28,6 +28,10 @@ public class AssetHeader implements Serializable {
     this.name = name;
   }
 
+  public static AssetHeader fromDto(AssetTransferHeaderDto dto) {
+    return new AssetHeader(dto.getId(), dto.getName(), dto.getSize());
+  }
+
   public Serializable getId() {
     return id;
   }
