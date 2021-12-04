@@ -121,7 +121,7 @@ public class RequestHandler {
       }
       responseHeaders.put(":Status", "200");
       try {
-        c.complete(new String(stream.readAllBytes(), StandardCharsets.UTF_16));
+        c.complete(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
         return c;
       } catch (IOException e) {
         responseHeaders.put(":Status", "500 Internal Exception");
