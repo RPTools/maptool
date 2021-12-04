@@ -107,7 +107,7 @@ class XMLHttpRequest {
 }
 
 
-async function fetch(target, optionObject) {
+function fetch(target, optionObject) {
     let request;
     if (target instanceof Request) {
 	request = target;
@@ -126,8 +126,7 @@ async function fetch(target, optionObject) {
     for (let header of request.headers) {
 	x.setRequestHeader(header[0], header[1])
     }
-    let body = await request.text();
-    
+    let body = request.text();
 
     let _resolve;
     let _reject;

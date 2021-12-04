@@ -56,9 +56,7 @@ public class MTXMLHttpRequest {
 
     responseHeaders.forEach(
         (key, value) -> {
-          if (!key.equals(":Status")) {
-            jheaders.setMember(key, value);
-          }
+          jheaders.setMember(key, value);
         });
   }
 
