@@ -1,5 +1,7 @@
 # MapTool 1.11.1
-Bug fix release.
+**Bug fix release.**
+
+- Fixes for the dreaded red X plus bar and size resets.
 
 ## Bug Fixes
 - [#3243][i3243] Health bars now stay visible/enabled on both server & player clients.
