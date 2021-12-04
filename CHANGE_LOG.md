@@ -1,3 +1,23 @@
+# MapTool 1.11.1
+Bug fix release.
+
+## Bug Fixes
+- [#3243][i3243] Health bars now stay visible/enabled on both server & player clients.
+- [#3239][i3239] Assets from older token files (`.rptok`) were failing to load when dropped on map. Fixed.
+- [#3236][i3236] HTML5 cannot pass `{body:...` to fetch. Fixed.
+- [#3235][i3235] `XMLHttpRequest()` improperly decodes `lib://` responses as UTF-16 producing gibberish output. Fixed. 
+- [#3232][i3232] Token images not loading on both player and server clients when dropped. Fixed.
+- [#3229][i3229] `getLibProperty()` was failing on properties starting with `[` or `{`. Fixed.
+- [#3225][i3225] Token sizes resetting with server stop/start or movement. Fixed.
+
+[i3243]: https://github.com/RPTools/maptool/issues/3243
+[i3239]: https://github.com/RPTools/maptool/issues/3239
+[i3236]: https://github.com/RPTools/maptool/issues/3236
+[i3234]: https://github.com/RPTools/maptool/issues/3235
+[i3232]: https://github.com/RPTools/maptool/issues/3232
+[i3229]: https://github.com/RPTools/maptool/issues/3229
+[i3225]: https://github.com/RPTools/maptool/issues/3225
+
 # MapTool 1.11.0
 Feature release using OpenJDK 16
 
