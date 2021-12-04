@@ -13,7 +13,7 @@ Bug fix release.
 [i3243]: https://github.com/RPTools/maptool/issues/3243
 [i3239]: https://github.com/RPTools/maptool/issues/3239
 [i3236]: https://github.com/RPTools/maptool/issues/3236
-[i3234]: https://github.com/RPTools/maptool/issues/3235
+[i3235]: https://github.com/RPTools/maptool/issues/3235
 [i3232]: https://github.com/RPTools/maptool/issues/3232
 [i3229]: https://github.com/RPTools/maptool/issues/3229
 [i3225]: https://github.com/RPTools/maptool/issues/3225
