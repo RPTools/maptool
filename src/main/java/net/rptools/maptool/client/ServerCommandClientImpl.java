@@ -363,11 +363,6 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {
-    for (Object obj : params) {
-      if (obj instanceof Asset) {
-        System.out.println("Asset!!!");
-      }
-    }
     if (MapTool.getConnection() != null) {
       MapTool.getConnection().callMethod(command.name(), params);
     }
