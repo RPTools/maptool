@@ -2574,12 +2574,12 @@ public class Token extends BaseModel implements Cloneable {
     switch (update) {
       case setState:
         var state = parameters.get(0).getStringValue();
-        var stateValue = parameters.get(1).getTokenState();
+        var stateValue = parameters.get(1);
         if (stateValue.hasBoolValue()) setState(state, Boolean.valueOf(stateValue.getBoolValue()));
         else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        stateValue = parameters.get(1).getTokenState();
+        stateValue = parameters.get(1);
         if (stateValue.hasBoolValue()) setAllStates(Boolean.valueOf(stateValue.getBoolValue()));
         else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
@@ -2725,8 +2725,8 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setTerrainModifiersIgnored:
         setTerrainModifiersIgnored(
-            parameters.get(0).getModifiers().getModifiersList().stream()
-                .map(m -> TerrainModifierOperation.valueOf(m.name()))
+            parameters.get(0).getStringValues().getValuesList().stream()
+                .map(TerrainModifierOperation::valueOf)
                 .collect(Collectors.toSet()));
         break;
       case setVBL:

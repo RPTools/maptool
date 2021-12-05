@@ -144,7 +144,7 @@ public class ClientMessageHandler implements MessageHandler {
         case SHOW_POINTER_MSG -> handle(msg.getShowPointerMsg());
         case START_TOKEN_MOVE_MSG -> handle(msg.getStartTokenMoveMsg());
         case STOP_TOKEN_MOVE_MSG -> handle(msg.getStopTokenMoveMsg());
-        case TOGGLE_TOKEN_MOVE_WAYPOINT_MSG -> handle(msg.getToogleTokemMoveWaypointMsg());
+        case TOGGLE_TOKEN_MOVE_WAYPOINT_MSG -> handle(msg.getToggleTokenMoveWaypointMsg());
         case SET_SERVER_POLICY_MSG -> handle(msg.getSetServerPolicyMsg());
         case UPDATE_CAMPAIGN_MSG -> handle(msg.getUpdateCampaignMsg());
         case UPDATE_INITIATIVE_MSG -> handle(msg.getUpdateInitiativeMsg());

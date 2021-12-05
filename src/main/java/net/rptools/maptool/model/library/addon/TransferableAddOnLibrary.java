@@ -51,4 +51,9 @@ public class TransferableAddOnLibrary {
   public MD5Key getAssetKey() {
     return assetKey;
   }
+
+  public TransferableAddOnLibraryDto toDto() {
+    var dto = TransferableAddOnLibraryDto.newBuilder();
+    return dto.setNamespace(namespace).setVersion(version).setAssetKey(assetKey.toString()).build();
+  }
 }

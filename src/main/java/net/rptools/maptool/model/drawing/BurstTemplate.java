@@ -143,7 +143,7 @@ public class BurstTemplate extends RadiusTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(Mapper.map(getVertex()));
+        .setVertex(getVertex().toDto());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 

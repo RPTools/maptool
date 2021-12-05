@@ -15,23 +15,12 @@
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -39,6 +28,7 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 
 public interface ServerCommand {
   void bootPlayer(String player);
@@ -108,10 +98,6 @@ public interface ServerCommand {
    * @param tokenGUIDs the list of IDs of the tokens
    */
   void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
-
-  void updateTokenProperty(GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
-
-  void updateTokenProperty(Token token, Token.Update update, Object... parameters);
 
   void putLabel(GUID zoneGUID, Label label);
 
@@ -202,4 +188,42 @@ public interface ServerCommand {
   void removeDataNamespace(String type, String namespace);
 
   void removeData(String type, String namespace, String name);
+
+  void updateTokenProperty(Token token, Token.Update update, int value);
+
+  void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
+
+  void updateTokenProperty(Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b);
+
+  void updateTokenProperty(Token token, Token.Update update);
+
+  void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value);
+
+  void updateTokenProperty(Token token, Token.Update update, String value);
+
+  void updateTokenProperty(Token token, Token.Update update, LightSource value);
+
+  void updateTokenProperty(Token token, Token.Update update, LightSource value1, String value2);
+
+  void updateTokenProperty(Token token, Token.Update update, int value1, int value2);
+
+  void updateTokenProperty(Token token, Token.Update update, boolean value);
+
+  void updateTokenProperty(Token token, Token.Update update, double value1, double value2);
+
+  void updateTokenProperty(Token token, Token.Update update, double value1, int value2, int value3);
+
+  void updateTokenProperty(Token token, Token.Update update, Grid grid, TokenFootprint footprint);
+
+  void updateTokenProperty(Token token, Token.Update update, List<String> values);
+
+  void updateTokenProperty(Token token, Token.Update update, double value);
+
+  void updateTokenProperty(Token token, Token.Update update, boolean value1, int value2, int value3);
+
+  void updateTokenProperty(Token token, Token.Update update, Area area);
+
+  void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
+
+  void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
 }

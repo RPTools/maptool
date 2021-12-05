@@ -61,6 +61,17 @@ public class TokenFootprint {
     return footPrint;
   }
 
+  public TokenFootPrintDto toDto() {
+    var dto = TokenFootPrintDto.newBuilder();
+    dto.addAllCellSet(cellSet.stream().map(Mapper::map).collect(Collectors.toList()));
+    dto.setName(name);
+    dto.setId(id.toString());
+    dto.setIsDefault(isDefault);
+    dto.setScale(scale);
+    return dto.build();
+  }
+
+
   @Override
   public String toString() {
     return getLocalizedName();

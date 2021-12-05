@@ -335,7 +335,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(Mapper.map(getVertex()));
+        .setVertex(getVertex().toDto());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 

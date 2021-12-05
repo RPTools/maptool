@@ -467,10 +467,10 @@ public class LineCellTemplate extends AbstractTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(Mapper.map(getVertex()))
+        .setVertex(getVertex().toDto())
         .setQuadrant(getQuadrant().name())
         .setMouseSlopeGreater(isMouseSlopeGreater())
-        .setPathVertex(Mapper.map(getPathVertex()));
+        .setPathVertex(getPathVertex().toDto());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 

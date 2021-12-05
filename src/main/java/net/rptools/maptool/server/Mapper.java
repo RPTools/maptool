@@ -197,14 +197,6 @@ public class Mapper {
     return builder.build();
   }
 
-  public static IntPointDto map(CellPoint point) {
-    return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
-  }
-
-  public static IntPointDto map(ZonePoint point) {
-    return IntPointDto.newBuilder().setX(point.x).setY(point.y).build();
-  }
-
   public static Point map(IntPointDto dto) {
     var point = new Point();
     point.x = dto.getX();

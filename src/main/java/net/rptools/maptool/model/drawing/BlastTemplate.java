@@ -186,7 +186,7 @@ public class BlastTemplate extends ConeTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(Mapper.map(getVertex()))
+        .setVertex(getVertex().toDto())
         .setDirection(getDirection().name())
         .setOffsetX(getOffsetX())
         .setOffsetY(getOffsetY());

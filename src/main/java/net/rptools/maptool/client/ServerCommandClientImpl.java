@@ -14,11 +14,10 @@
  */
 package net.rptools.maptool.client;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
+import com.google.protobuf.BoolValue;
 import java.awt.geom.Area;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,21 +25,8 @@ import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -58,7 +44,7 @@ import net.rptools.maptool.server.proto.drawing.IntPointDto;
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
  * typically accessed through MapTool.serverCommand(). Once sent, the commands are then received by
- * the {@link ServerMessageHandler ServerMethodHandler}
+ * the {@link ServerMessageHandler ServerMessageHandler}
  */
 public class ServerCommandClientImpl implements ServerCommand {
 
@@ -111,7 +97,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void updateCampaign(CampaignProperties properties) {
-    makeServerCall(COMMAND.updateCampaign, properties);
+    var msg = UpdateCampaignMsg.newBuilder().setProperties(properties.toDto());
+    makeServerCall(Message.newBuilder().setUpdateCampaignMsg(msg).build());
   }
 
   public void getZone(GUID zoneGUID) {
@@ -217,8 +204,14 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param parameters an array of parameters
    */
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
-    makeServerCall(COMMAND.updateTokenProperty, zoneGUID, tokenGUID, update, parameters);
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, List<TokenPropertyValueDto> parameters) {
+    var msg =
+        UpdateTokenPropertyMsg.newBuilder()
+            .setTokenGuid(tokenGUID.toString())
+            .setZoneGuid(zoneGUID.toString())
+            .setProperty(TokenUpdateDto.valueOf(update.name()))
+            .addAllValues(parameters);
+    makeServerCall(Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
   }
 
   /**
@@ -228,13 +221,15 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param update the type of token update
    * @param parameters an array of parameters
    */
-  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {
+  public void updateTokenProperty(
+      Token token, Token.Update update, TokenPropertyValueDto... parameters) {
     Zone zone = token.getZoneRenderer().getZone();
     GUID tokenGUID = token.getId();
     GUID zoneGUID = zone.getId();
 
-    token.updateProperty(zone, update, parameters); // update locally right away
-    updateTokenProperty(zoneGUID, tokenGUID, update, parameters);
+    var parameterList = Arrays.stream(parameters).toList();
+    token.updateProperty(zone, update, parameterList); // update locally right away
+    updateTokenProperty(zoneGUID, tokenGUID, update, parameterList);
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
@@ -261,7 +256,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
-    makeServerCall(COMMAND.updateDrawing, zoneGUID, pen, drawnElement);
+    var msg =
+        UpdateDrawingMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setPen(pen.toDto())
+            .setDrawing(drawnElement.toDto());
+    makeServerCall(Message.newBuilder().setUpdateDrawingMsg(msg).build());
   }
 
   public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
@@ -272,7 +272,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void undoDraw(GUID zoneGUID, GUID drawableGUID) {
-    makeServerCall(COMMAND.undoDraw, zoneGUID, drawableGUID);
+    var msg =
+        UndoDrawMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setDrawableGuid(drawableGUID.toString());
+    makeServerCall(Message.newBuilder().setUndoDrawMsg(msg).build());
   }
 
   public void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color) {
@@ -287,7 +291,9 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setZoneVisibility(GUID zoneGUID, boolean visible) {
-    makeServerCall(COMMAND.setZoneVisibility, zoneGUID, visible);
+    var msg =
+        SetZoneVisibilityMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setIsVisible(visible);
+    makeServerCall(Message.newBuilder().setSetZoneVisibilityMsg(msg).build());
   }
 
   public void message(TextMessage message) {
@@ -323,7 +329,8 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void showPointer(String player, Pointer pointer) {
-    makeServerCall(COMMAND.showPointer, player, pointer);
+    var msg = ShowPointerMsg.newBuilder().setPlayer(player).setPointer(pointer.toDto());
+    makeServerCall(Message.newBuilder().setShowPointerMsg(msg).build());
   }
 
   public void hidePointer(String player) {
@@ -342,21 +349,42 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList) {
-    makeServerCall(COMMAND.startTokenMove, playerId, zoneGUID, tokenGUID, tokenList);
+    var msg =
+        StartTokenMoveMsg.newBuilder()
+            .setPlayerId(playerId)
+            .setZoneGuid(zoneGUID.toString())
+            .setKeyTokenId(tokenGUID.toString())
+            .addAllSelectedTokens(
+                tokenList.stream().map(GUID::toString).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setStartTokenMoveMsg(msg).build());
   }
 
   public void stopTokenMove(GUID zoneGUID, GUID tokenGUID) {
     movementUpdateQueue.flush();
-    makeServerCall(COMMAND.stopTokenMove, zoneGUID, tokenGUID);
+    var msg =
+        StopTokenMoveMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setKeyTokenId(tokenGUID.toString());
+    makeServerCall(Message.newBuilder().setStopTokenMoveMsg(msg).build());
   }
 
   public void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y) {
-    movementUpdateQueue.enqueue(COMMAND.updateTokenMove, zoneGUID, tokenGUID, x, y);
+    var msg =
+        UpdateTokenMoveMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setKeyTokenId(tokenGUID.toString())
+            .setPoint(IntPointDto.newBuilder().setX(x).setY(y).build());
+    movementUpdateQueue.enqueue(Message.newBuilder().setUpdateTokenMoveMsg(msg).build());
   }
 
   public void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp) {
     movementUpdateQueue.flush();
-    makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
+    var msg =
+        ToggleTokenMoveWaypointMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setKeyTokenId(tokenGUID.toString())
+            .setPoint(cp.toDto());
+    makeServerCall(Message.newBuilder().setToggleTokenMoveWaypointMsg(msg).build());
   }
 
   public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
@@ -431,24 +459,43 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setServerPolicy(ServerPolicy policy) {
-    makeServerCall(COMMAND.setServerPolicy, policy);
+    var msg = SetServerPolicyMsg.newBuilder().setPolicy(policy.toDto());
+    makeServerCall(Message.newBuilder().setSetServerPolicyMsg(msg).build());
   }
 
   public void updateInitiative(InitiativeList list, Boolean ownerPermission) {
-    makeServerCall(COMMAND.updateInitiative, list, ownerPermission);
+    var msg = UpdateInitiativeMsg.newBuilder();
+    if (list != null) msg.setList(list.toDto());
+    if (ownerPermission != null) msg.setOwnerPermission(BoolValue.of(ownerPermission));
+    makeServerCall(Message.newBuilder().setUpdateInitiativeMsg(msg).build());
   }
 
   public void updateTokenInitiative(
       GUID zone, GUID token, Boolean holding, String state, Integer index) {
-    makeServerCall(COMMAND.updateTokenInitiative, zone, token, holding, state, index);
+    var msg =
+        UpdateTokenInitiativeMsg.newBuilder()
+            .setZoneGuid(zone.toString())
+            .setTokenGuid(token.toString())
+            .setIsHolding(holding)
+            .setState(state)
+            .setIndex(index);
+    makeServerCall(Message.newBuilder().setUpdateTokenInitiativeMsg(msg).build());
   }
 
   public void updateCampaignMacros(List<MacroButtonProperties> properties) {
-    makeServerCall(COMMAND.updateCampaignMacros, properties);
+    var msg =
+        UpdateCampaignMacrosMsg.newBuilder()
+            .addAllMacros(
+                properties.stream().map(MacroButtonProperties::toDto).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setUpdateCampaignMacrosMsg(msg).build());
   }
 
   public void updateGmMacros(List<MacroButtonProperties> properties) {
-    makeServerCall(COMMAND.updateGmMacros, properties);
+    var msg =
+        UpdateGmMacrosMsg.newBuilder()
+            .addAllMacros(
+                properties.stream().map(MacroButtonProperties::toDto).collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setUpdateGmMacrosMsg(msg).build());
   }
 
   /**
@@ -467,12 +514,6 @@ public class ServerCommandClientImpl implements ServerCommand {
   private static void makeServerCall(Message msg) {
     if (MapTool.getConnection() != null) {
       MapTool.getConnection().sendMessage(msg);
-    }
-  }
-
-  private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {
-    if (MapTool.getConnection() != null) {
-      MapTool.getConnection().callMethod(command.name(), params);
     }
   }
 
@@ -499,71 +540,185 @@ public class ServerCommandClientImpl implements ServerCommand {
    */
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
-    makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
+    var msg =
+        UpdateExposedAreaMetaMsg.newBuilder()
+            .setZoneGuid(zoneGUID.toString())
+            .setTokenGuid(tokenExposedAreaGUID.toString())
+            .setArea(Mapper.map(meta.getExposedAreaHistory()));
+    makeServerCall(Message.newBuilder().setUpdateExposedAreaMetaMsg(msg).build());
   }
 
   @Override
   public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
-    var libs = new ArrayList<TransferableAddOnLibrary>();
-    libs.addAll(addOnLibraries);
-    makeServerCall(COMMAND.addAddOnLibrary, libs);
+    var msg =
+        AddAddOnLibraryMsg.newBuilder()
+            .addAllAddOns(
+                addOnLibraries.stream()
+                    .map(TransferableAddOnLibrary::toDto)
+                    .collect(Collectors.toList()));
+    makeServerCall(Message.newBuilder().setAddAddOnLibraryMsg(msg).build());
   }
 
   @Override
   public void removeAddOnLibrary(List<String> namespaces) {
-    var libs = new ArrayList<String>();
-    libs.addAll(namespaces);
-    makeServerCall(COMMAND.removeAddOnLibrary, libs);
+    var msg = RemoveAddOnLibraryMsg.newBuilder().addAllNamespaces(namespaces);
+    makeServerCall(Message.newBuilder().setRemoveAddOnLibraryMsg(msg).build());
   }
 
   @Override
   public void removeAllAddOnLibraries() {
-    makeServerCall(COMMAND.removeAllAddOnLibraries);
+    makeServerCall(
+        Message.newBuilder()
+            .setRemoveAllAddOnLibrariesMsg(RemoveAllAddOnLibrariesMsg.newBuilder())
+            .build());
   }
 
   @Override
   public void updateDataStore(DataStoreDto dataStore) {
-    try {
-      byte[] bytes = JsonFormat.printer().print(dataStore).getBytes(StandardCharsets.UTF_8);
-      makeServerCall(COMMAND.updateDataStore, bytes);
-    } catch (InvalidProtocolBufferException e) {
-      MapTool.showError("data.error.sendingUpdate", e);
-    }
+    var msg = UpdateDataStoreMsg.newBuilder().setStore(dataStore);
+    makeServerCall(Message.newBuilder().setUpdateDataStoreMsg(msg).build());
   }
 
   @Override
   public void updateDataNamespace(GameDataDto gameData) {
-    try {
-      byte[] bytes = JsonFormat.printer().print(gameData).getBytes(StandardCharsets.UTF_8);
-      makeServerCall(COMMAND.updateDataNamespace, bytes);
-    } catch (InvalidProtocolBufferException e) {
-      MapTool.showError("data.error.sendingUpdate", e);
-    }
+    var msg = UpdateDataNamespaceMsg.newBuilder().setData(gameData);
+    makeServerCall(Message.newBuilder().setUpdateDataNamespaceMsg(msg).build());
   }
 
   @Override
   public void updateData(String type, String namespace, GameDataValueDto gameData) {
-    try {
-      byte[] bytes = JsonFormat.printer().print(gameData).getBytes(StandardCharsets.UTF_8);
-      makeServerCall(COMMAND.updateData, type, namespace, bytes);
-    } catch (InvalidProtocolBufferException e) {
-      MapTool.showError("data.error.sendingUpdate", e);
-    }
+    var msg = UpdateDataMsg.newBuilder().setType(type).setNamespace(namespace).setValue(gameData);
+    makeServerCall(Message.newBuilder().setUpdateDataMsg(msg).build());
   }
 
   @Override
   public void removeDataStore() {
-    makeServerCall(COMMAND.removeDataStore);
+    makeServerCall(
+        Message.newBuilder().setRemoveDataStoreMsg(RemoveDataStoreMsg.newBuilder()).build());
   }
 
   @Override
   public void removeDataNamespace(String type, String namespace) {
-    makeServerCall(COMMAND.removeDataNamespace, type, namespace);
+    var msg = RemoveDataNamespaceMsg.newBuilder().setType(type).setNamespace(namespace);
+    makeServerCall(Message.newBuilder().setRemoveDataNamespaceMsg(msg).build());
   }
 
   @Override
   public void removeData(String type, String namespace, String name) {
-    makeServerCall(COMMAND.removeData, type, namespace, name);
+    var msg = RemoveDataMsg.newBuilder().setType(type).setNamespace(namespace).setName(name);
+    makeServerCall(Message.newBuilder().setRemoveDataMsg(msg).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, int value) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setIntValue(value).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, String value1, String value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setStringValue(value1).build()
+        , TokenPropertyValueDto.newBuilder().setStringValue(value2).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b) {
+    var list = MacroButtonPropertiesListDto.newBuilder().addAllMacros(workingMacros.stream()
+        .map(MacroButtonProperties::toDto).collect(Collectors.toList()));
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setMacros(list).build()
+        , TokenPropertyValueDto.newBuilder().setBoolValue(b).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update) {
+    updateTokenProperty(token, update);
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value) {
+    var list = MacroButtonPropertiesListDto.newBuilder()
+            .addMacros(value.toDto());
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setMacros(list).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, String value) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setStringValue(value).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, LightSource value) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setLightSource(value.toDto()).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, LightSource value1, String value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setLightSource(value1.toDto()).build(),
+        TokenPropertyValueDto.newBuilder().setStringValue(value2).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, int value1, int value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setIntValue(value1).build(),
+        TokenPropertyValueDto.newBuilder().setIntValue(value2).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, boolean value) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setBoolValue(value).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, double value1, double value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setDoubleValue(value1).build(),
+        TokenPropertyValueDto.newBuilder().setDoubleValue(value2).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, double value1, int value2, int value3) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setDoubleValue(value1).build(),
+        TokenPropertyValueDto.newBuilder().setIntValue(value2).build(),
+        TokenPropertyValueDto.newBuilder().setIntValue(value3).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, Grid grid, TokenFootprint footprint) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setGrid(grid.toDto()).build(),
+        TokenPropertyValueDto.newBuilder().setTokenFootPrint(footprint.toDto()).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, List<String> values) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder()
+            .setStringValues(StringListDto.newBuilder().addAllValues(values).build()).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, double value) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setDoubleValue(value).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, boolean value1, int value2, int value3) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setBoolValue(value1).build(),
+        TokenPropertyValueDto.newBuilder().setIntValue(value2).build(),
+        TokenPropertyValueDto.newBuilder().setIntValue(value3).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, Area area) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setArea(Mapper.map(area)).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setStringValue(value1).build(),
+        TokenPropertyValueDto.newBuilder().setBoolValue(value2).build());
+  }
+
+  @Override
+  public void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2) {
+    updateTokenProperty(token, update, TokenPropertyValueDto.newBuilder().setStringValue(value).build(),
+        TokenPropertyValueDto.newBuilder().setDoubleValue(value2.doubleValue()).build());
   }
 
   /**
@@ -574,9 +729,7 @@ public class ServerCommandClientImpl implements ServerCommand {
    */
   private static class TimedEventQueue extends Thread {
 
-    ServerCommand.COMMAND command;
-    Object[] params;
-
+    Message msg;
     long delay;
 
     final Object sleepSemaphore = new Object();
@@ -586,19 +739,15 @@ public class ServerCommandClientImpl implements ServerCommand {
       delay = millidelay;
     }
 
-    public synchronized void enqueue(ServerCommand.COMMAND command, Object... params) {
-
-      this.command = command;
-      this.params = params;
+    public void enqueue(Message message) {
+      msg = message;
     }
 
     public synchronized void flush() {
 
-      if (command != null) {
-        makeServerCall(command, params);
+      if (msg != null) {
+        makeServerCall(msg);
       }
-      command = null;
-      params = null;
     }
 
     @Override

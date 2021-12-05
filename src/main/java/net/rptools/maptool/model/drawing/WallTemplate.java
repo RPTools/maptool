@@ -77,14 +77,14 @@ public class WallTemplate extends LineTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(Mapper.map(getVertex()))
+        .setVertex(getVertex().toDto())
         .setMouseSlopeGreater(isMouseSlopeGreater())
-        .setPathVertex(Mapper.map(getPathVertex()))
+        .setPathVertex(getPathVertex().toDto())
         .setDoubleWide(isDoubleWide());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
-    for (var point : getPath()) dto.addPoints(Mapper.map(point));
+    for (var point : getPath()) dto.addPoints(point.toDto());
 
     return DrawableDto.newBuilder().setWallTemplate(dto).build();
   }
