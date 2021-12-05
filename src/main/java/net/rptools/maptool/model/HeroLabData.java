@@ -527,48 +527,39 @@ public class HeroLabData {
     return heroLabInfo;
   }
 
-  public MD5Key getHeroLabStatblockAssetID() {
-    return heroLabStatblockAssetID;
-  }
-
-  public void setHeroLabStatblockAssetID(MD5Key statblockAssetID) {
-    heroLabStatblockAssetID = statblockAssetID;
-  }
-
   public static HeroLabData fromDto(HeroLabDataDto dto) {
     var data = new HeroLabData(dto.getName());
-    data.setHeroLabStatblockAssetID(new MD5Key(dto.getHeroLabStatblockAssetId()));
-    data.setSummary(dto.getSummary());
-    data.setPlayerName(dto.getPlayerName());
-    data.setGameSystem(dto.getGameSystem());
-    data.setHeroLabIndex(dto.getHeroLabIndex());
-    data.setMinionMasterIndex(dto.getMinionMasterIndex());
-    data.setMinionMasterName(dto.getMinionMasterName());
-    data.setAlly(dto.getIsAlly());
-    data.setDirty(dto.getIsDirty());
-    data.setMinion(dto.getIsMinion());
-    data.setPortfolioPath(dto.getPortfolioPath());
-    var assets = data.getAssetMap();
-    dto.getHeroImageAssetsMap().forEach((key, value) -> assets.put(key, new MD5Key(value)));
+    data.heroLabStatblockAssetID = new MD5Key(dto.getHeroLabStatblockAssetId());
+    data.summary = dto.getSummary();
+    data.playerName = dto.getPlayerName();
+    data.gameSystem = dto.getGameSystem();
+    data.heroLabIndex = dto.getHeroLabIndex();
+    data.minionMasterIndex = dto.getMinionMasterIndex();
+    data.minionMasterName = dto.getMinionMasterName();
+    data.isAlly = dto.getIsAlly();
+    data.isDirty = dto.getIsDirty();
+    data.isMinion = dto.getIsMinion();
+    data.portfolioPath = dto.getPortfolioPath();
+    dto.getHeroImageAssetsMap().forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
     return data;
   }
 
   public HeroLabDataDto toDto() {
     var data = this;
     var dto = HeroLabDataDto.newBuilder();
-    dto.setHeroLabStatblockAssetId(data.getHeroLabStatblockAssetID().toString());
-    dto.setName(data.getName());
-    dto.setSummary(data.getSummary());
-    dto.setPlayerName(data.getPlayerName());
-    dto.setGameSystem(data.getGameSystem());
-    dto.setHeroLabIndex(data.getHeroLabIndex());
-    dto.setMinionMasterIndex(data.getMinionMasterIndex());
-    dto.setMinionMasterName(data.getMinionMasterName());
-    dto.setIsAlly(data.isAlly());
-    dto.setIsDirty(data.isDirty());
-    dto.setIsMinion(data.isMinion());
-    dto.setPortfolioPath(data.getPortfolioPath());
-    data.getAssetMap().forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+    dto.setHeroLabStatblockAssetId(heroLabStatblockAssetID.toString());
+    dto.setName(name);
+    dto.setSummary(summary);
+    dto.setPlayerName(playerName);
+    dto.setGameSystem(gameSystem);
+    dto.setHeroLabIndex(heroLabIndex);
+    dto.setMinionMasterIndex(minionMasterIndex);
+    dto.setMinionMasterName(minionMasterName);
+    dto.setIsAlly(isAlly);
+    dto.setIsDirty(isDirty);
+    dto.setIsMinion(isMinion);
+    dto.setPortfolioPath(portfolioPath);
+    heroImageAssets.forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
     return dto.build();
   }
 }

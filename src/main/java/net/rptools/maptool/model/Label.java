@@ -25,7 +25,7 @@ public class Label {
   private int foregroundColor;
 
   // for serialisation
-  public Label(GUID id, String label, int x, int y, boolean showBackground, int foregroundColor) {
+  private Label(GUID id, String label, int x, int y, boolean showBackground, int foregroundColor) {
     this.id = id;
     this.label = label;
     this.x = x;
@@ -114,12 +114,12 @@ public class Label {
 
   public LabelDto toDto() {
     return LabelDto.newBuilder()
-        .setId(getId().toString())
-        .setLabel(getLabel())
-        .setX(getX())
-        .setY(getY())
-        .setShowBackground(isShowBackground())
-        .setForegroundColor(getForegroundColorValue())
+        .setId(id.toString())
+        .setLabel(label)
+        .setX(x)
+        .setY(y)
+        .setShowBackground(showBackground)
+        .setForegroundColor(foregroundColor)
         .build();
   }
 }
