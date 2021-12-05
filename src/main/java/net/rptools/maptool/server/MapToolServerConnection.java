@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
-import net.rptools.clientserver.hessian.server.MethodServerConnection;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
+import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -38,7 +38,7 @@ public class MapToolServerConnection
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
-  private final MethodServerConnection connection;
+  private final ServerConnection connection;
   private final PlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
@@ -132,22 +132,6 @@ public class MapToolServerConnection
     connection.addMessageHandler(handler);
   }
 
-  public void broadcastCallMethod(String method, Object... parameters) {
-    connection.broadcastCallMethod(method, parameters);
-  }
-
-  public void broadcastCallMethod(String[] exclude, String method, Object... parameters) {
-    connection.broadcastCallMethod(exclude, method, parameters);
-  }
-
-  public void callMethod(String id, String method, Object... parameters) {
-    connection.callMethod(id, method, parameters);
-  }
-
-  public void callMethod(String id, Object channel, String method, Object... parameters) {
-    connection.callMethod(id, channel, method, parameters);
-  }
-
   public void broadcastMessage(byte[] message) {
     connection.broadcastMessage(message);
   }
@@ -155,8 +139,6 @@ public class MapToolServerConnection
   public void broadcastMessage(String[] exclude, byte[] message) {
     connection.broadcastMessage(exclude, message);
   }
-
-  public void broadcastMessage(String clientId, Message build) {}
 
   public void sendMessage(String id, Message message) {
     connection.sendMessage(id, message.toByteArray());

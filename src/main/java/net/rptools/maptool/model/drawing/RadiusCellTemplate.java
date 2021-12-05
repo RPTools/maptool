@@ -24,7 +24,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.RadiusCellTemplateDto;
 

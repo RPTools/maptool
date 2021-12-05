@@ -71,7 +71,6 @@ public class TokenFootprint {
     return dto.build();
   }
 
-
   @Override
   public String toString() {
     return getLocalizedName();

@@ -24,7 +24,6 @@ import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 

@@ -196,8 +196,11 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
 
         MapTool.serverCommand()
             .updateTokenProperty(
-                token, Update.setTerrainModifiersIgnored, ignoredTerrainOperationsSet.stream()
-                    .map(TerrainModifierOperation::name).collect(Collectors.toList()));
+                token,
+                Update.setTerrainModifiersIgnored,
+                ignoredTerrainOperationsSet.stream()
+                    .map(TerrainModifierOperation::name)
+                    .collect(Collectors.toList()));
       }
     }
 

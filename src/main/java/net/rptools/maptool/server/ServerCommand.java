@@ -28,7 +28,6 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
-import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 
 public interface ServerCommand {
   void bootPlayer(String player);
@@ -193,7 +192,8 @@ public interface ServerCommand {
 
   void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
 
-  void updateTokenProperty(Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b);
+  void updateTokenProperty(
+      Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b);
 
   void updateTokenProperty(Token token, Token.Update update);
 
@@ -219,7 +219,8 @@ public interface ServerCommand {
 
   void updateTokenProperty(Token token, Token.Update update, double value);
 
-  void updateTokenProperty(Token token, Token.Update update, boolean value1, int value2, int value3);
+  void updateTokenProperty(
+      Token token, Token.Update update, boolean value1, int value2, int value3);
 
   void updateTokenProperty(Token token, Token.Update update, Area area);
 
