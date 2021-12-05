@@ -112,12 +112,12 @@ public class Player {
 
   public static Player fromDto(PlayerDto dto) {
     var player = new Player();
-    player.setName(dto.getName());
-    player.setRole(Player.Role.valueOf(dto.getRole()));
+    player.name = dto.getName();
+    player.role = dto.getRole();
     return player;
   }
 
   public PlayerDto toDto() {
-    return PlayerDto.newBuilder().setName(getName()).setRole(getRole().name()).build();
+    return PlayerDto.newBuilder().setName(name).setRole(role).build();
   }
 }

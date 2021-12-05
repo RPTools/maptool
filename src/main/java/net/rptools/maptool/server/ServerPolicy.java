@@ -300,44 +300,44 @@ public class ServerPolicy {
 
   public static ServerPolicy fromDto(ServerPolicyDto dto) {
     var policy = new ServerPolicy();
-    policy.setUseStrictTokenManagement(dto.getUseStrictTokenManagement());
-    policy.setIsMovementLocked(dto.getIsMovementLocked());
-    policy.setIsTokenEditorLocked(dto.getIsTokenEditorLocked());
-    policy.setPlayersCanRevealVision(dto.getPlayersCanRevealVision());
-    policy.setGmRevealsVisionForUnownedTokens(dto.getGmRevealsVisionForUnownedTokens());
-    policy.setUseIndividualViews(dto.getUseIndividualViews());
-    policy.setRestrictedImpersonation(dto.getRestrictedImpersonation());
-    policy.setPlayersReceiveCampaignMacros(dto.getPlayersReceiveCampaignMacros());
-    policy.setUseToolTipsForDefaultRollFormat(dto.getUseToolTipsForDefaultRollFormat());
-    policy.setUseIndividualFOW(dto.getUseIndividualFOW());
-    policy.setAutoRevealOnMovement(dto.getIsAutoRevealOnMovement());
-    policy.setIncludeOwnedNPCs(dto.getIncludeOwnedNPCs());
-    policy.setMovementMetric(WalkerMetric.valueOf(dto.getMovementMetric().name()));
-    policy.setUsingAstarPathfinding(dto.getUsingAstarPathfinding());
-    policy.setVblBlocksMove(dto.getVblBlocksMove());
-    policy.setHiddenMapSelectUI(dto.getHideMapSelectUi());
+    policy.strictTokenMovement = dto.getUseStrictTokenManagement();
+    policy.isMovementLocked = dto.getIsMovementLocked();
+    policy.isTokenEditorLocked = dto.getIsTokenEditorLocked();
+    policy.playersCanRevealVision = dto.getPlayersCanRevealVision();
+    policy.gmRevealsVisionForUnownedTokens = dto.getGmRevealsVisionForUnownedTokens();
+    policy.useIndividualViews = dto.getUseIndividualViews();
+    policy.restrictedImpersonation = dto.getRestrictedImpersonation();
+    policy.playersReceiveCampaignMacros = dto.getPlayersReceiveCampaignMacros();
+    policy.useToolTipsForDefaultRollFormat = dto.getUseToolTipsForDefaultRollFormat();
+    policy.useIndividualFOW = dto.getUseIndividualFOW();
+    policy.isAutoRevealOnMovement = dto.getIsAutoRevealOnMovement();
+    policy.includeOwnedNPCs = dto.getIncludeOwnedNPCs();
+    policy.movementMetric = WalkerMetric.valueOf(dto.getMovementMetric().name());
+    policy.useAstarPathfinding = dto.getUsingAstarPathfinding();
+    policy.vblBlocksMove = dto.getVblBlocksMove();
+    policy.hidemapselectui = dto.getHideMapSelectUi();
     policy.disablePlayerAssetPanel = dto.getLockPlayerLibrary();
     return policy;
   }
 
   public ServerPolicyDto toDto() {
     var dto = ServerPolicyDto.newBuilder();
-    dto.setUseStrictTokenManagement(this.useStrictTokenManagement());
-    dto.setIsMovementLocked(this.isMovementLocked());
-    dto.setIsTokenEditorLocked(this.isTokenEditorLocked());
-    dto.setPlayersCanRevealVision(this.getPlayersCanRevealVision());
-    dto.setGmRevealsVisionForUnownedTokens(this.getGmRevealsVisionForUnownedTokens());
-    dto.setUseIndividualViews(this.isUseIndividualViews());
-    dto.setRestrictedImpersonation(this.isRestrictedImpersonation());
-    dto.setPlayersReceiveCampaignMacros(this.playersReceiveCampaignMacros());
-    dto.setUseToolTipsForDefaultRollFormat(this.getUseToolTipsForDefaultRollFormat());
-    dto.setUseIndividualFOW(this.isUseIndividualFOW());
-    dto.setIsAutoRevealOnMovement(this.isAutoRevealOnMovement());
-    dto.setIncludeOwnedNPCs(this.isIncludeOwnedNPCs());
-    dto.setMovementMetric(WalkerMetricDto.valueOf(this.getMovementMetric().name()));
-    dto.setUsingAstarPathfinding(this.isUsingAstarPathfinding());
-    dto.setVblBlocksMove(this.getVblBlocksMove());
-    dto.setHideMapSelectUi(this.getMapSelectUIHidden());
+    dto.setUseStrictTokenManagement(strictTokenMovement);
+    dto.setIsMovementLocked(isMovementLocked);
+    dto.setIsTokenEditorLocked(isTokenEditorLocked);
+    dto.setPlayersCanRevealVision(playersCanRevealVision);
+    dto.setGmRevealsVisionForUnownedTokens(gmRevealsVisionForUnownedTokens);
+    dto.setUseIndividualViews(useIndividualViews);
+    dto.setRestrictedImpersonation(restrictedImpersonation);
+    dto.setPlayersReceiveCampaignMacros(playersReceiveCampaignMacros);
+    dto.setUseToolTipsForDefaultRollFormat(useToolTipsForDefaultRollFormat);
+    dto.setUseIndividualFOW(useIndividualFOW);
+    dto.setIsAutoRevealOnMovement(isAutoRevealOnMovement);
+    dto.setIncludeOwnedNPCs(includeOwnedNPCs);
+    dto.setMovementMetric(WalkerMetricDto.valueOf(movementMetric.name()));
+    dto.setUsingAstarPathfinding(useAstarPathfinding);
+    dto.setVblBlocksMove(vblBlocksMove);
+    dto.setHideMapSelectUi(hidemapselectui);
     dto.setLockPlayerLibrary(disablePlayerAssetPanel);
     return dto.build();
   }
