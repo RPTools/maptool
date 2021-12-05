@@ -512,7 +512,7 @@ public final class Asset {
   }
 
   // for serialisation
-  public Asset(MD5Key key, String name, String extension, Type type, boolean broken) {
+  private Asset(MD5Key key, String name, String extension, Type type, boolean broken) {
     this.md5Key = key;
     this.name = name;
     this.extension = extension;
