@@ -32,6 +32,7 @@ import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -456,21 +457,49 @@ public class Zone extends BaseModel {
       drawables = new LinkedList<DrawnElement>();
       drawables.addAll(Collections.nCopies(zone.drawables.size(), null));
       Collections.copy(drawables, zone.drawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : drawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.objectDrawables != null && !zone.objectDrawables.isEmpty()) {
       objectDrawables = new LinkedList<DrawnElement>();
       objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), null));
       Collections.copy(objectDrawables, zone.objectDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : objectDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.backgroundDrawables != null && !zone.backgroundDrawables.isEmpty()) {
       backgroundDrawables = new LinkedList<DrawnElement>();
       backgroundDrawables.addAll(Collections.nCopies(zone.backgroundDrawables.size(), null));
       Collections.copy(backgroundDrawables, zone.backgroundDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : backgroundDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.gmDrawables != null && !zone.gmDrawables.isEmpty()) {
       gmDrawables = new LinkedList<DrawnElement>();
       gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), null));
       Collections.copy(gmDrawables, zone.gmDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : gmDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {
       for (GUID guid : zone.labels.keySet()) {
