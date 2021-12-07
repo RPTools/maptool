@@ -306,14 +306,7 @@ message TokenDto {
   int32 iso_height = 19;
   double scale_x = 20;
   double scale_y = 21;
-  // size_map hold the footprint for different grids
-  // Key:
-  // Square = 0;
-  // Gridless = 1;
-  // HexVertical = 2;
-  // HexHorizontal = 3;
-  // Isometric = 4;
-  map<int32, string> size_map = 22;
+  map<string, string> size_map = 22;
   bool snap_to_grid = 23;
   bool is_visible = 24;
   bool visible_only_to_owner = 25;

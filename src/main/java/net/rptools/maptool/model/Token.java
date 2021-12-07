@@ -2821,29 +2821,8 @@ public class Token extends BaseModel implements Cloneable {
     token.isoHeight = dto.getIsoHeight();
     token.scaleX = dto.getScaleX();
     token.scaleY = dto.getScaleY();
-    var dtoSizeMap = dto.getSizeMapMap();
-    for (var key : dtoSizeMap.keySet()) {
-      switch (key) {
-        case 0 -> {
-          token.sizeMap.put(SquareGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
-        }
-        case 1 -> {
-          token.sizeMap.put(GridlessGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
-        }
-        case 2 -> {
-          token.sizeMap.put(HexGridVertical.class, GUID.valueOf(dtoSizeMap.get(key)));
-        }
-        case 3 -> {
-          token.sizeMap.put(HexGridHorizontal.class, GUID.valueOf(dtoSizeMap.get(key)));
-        }
-        case 4 -> {
-          token.sizeMap.put(IsometricGrid.class, GUID.valueOf(dtoSizeMap.get(key)));
-        }
-        default -> {
-          log.warn("unknown grid in tokensizemap: " + key);
-        }
-      }
-    }
+    token.sizeMap = new HashMap<>();
+    dto.getSizeMapMap().forEach((k, v) -> token.sizeMap.put(k, GUID.valueOf(v)));
     token.snapToGrid = dto.getSnapToGrid();
     token.isVisible = dto.getIsVisible();
     token.visibleOnlyToOwner = dto.getVisibleOnlyToOwner();
@@ -2944,21 +2923,7 @@ public class Token extends BaseModel implements Cloneable {
     dto.setIsoHeight(isoHeight);
     dto.setScaleX(scaleX);
     dto.setScaleY(scaleY);
-    for (var key : sizeMap.keySet()) {
-      if (SquareGrid.class.equals(key.getClass())) {
-        dto.putSizeMap(0, sizeMap.get(key).toString());
-      } else if (GridlessGrid.class.equals(key.getClass())) {
-        dto.putSizeMap(1, sizeMap.get(key).toString());
-      } else if (HexGridVertical.class.equals(key.getClass())) {
-        dto.putSizeMap(2, sizeMap.get(key).toString());
-      } else if (HexGridHorizontal.class.equals(key.getClass())) {
-        dto.putSizeMap(3, sizeMap.get(key).toString());
-      } else if (IsometricGrid.class.equals(key.getClass())) {
-        dto.putSizeMap(4, sizeMap.get(key).toString());
-      } else {
-        log.warn("unknown grid in tokensizemap: " + key);
-      }
-    }
+    sizeMap.forEach((k, v) -> dto.putSizeMap(k, v.toString()));
     dto.setSnapToGrid(snapToGrid);
     dto.setIsVisible(isVisible);
     dto.setVisibleOnlyToOwner(visibleOnlyToOwner);
