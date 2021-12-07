@@ -772,4 +772,23 @@ public final class Asset {
         .setType(AssetDtoType.valueOf(getType().name()))
         .build();
   }
+
+  /**
+   * Returns a transferable asset from the values of this asset.
+   *
+   * @return a transferable asset from the values of this asset.
+   */
+  public AssetDetails getAssetDetails() {
+    return new AssetDetails(md5Key, name, extension, type, data);
+  }
+
+  public static Asset fromAssetDetails(AssetDetails asset) {
+    return new Asset(
+        asset.getMd5Key(),
+        asset.getName(),
+        asset.getData(),
+        asset.getType(),
+        asset.getExtension(),
+        asset.getData() == null);
+  }
 }
