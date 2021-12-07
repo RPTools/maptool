@@ -37,6 +37,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetDetails;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -93,7 +94,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
     // to be on the EDT (See next section)
     switch (cmd) {
       case putAsset:
-        AssetManager.putAsset((Asset) parameters[0]);
+        var assetDetails = (AssetDetails) parameters[0];
+
+        AssetManager.putAsset(Asset.fromAssetDetails(assetDetails));
         MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
         MapTool.getFrame().refresh();
         return;

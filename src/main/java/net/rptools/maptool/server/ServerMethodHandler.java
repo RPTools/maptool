@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetDetails;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -147,7 +148,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
           break;
         case putAsset:
-          putAsset((Asset) context.get(0));
+          putAsset(Asset.fromAssetDetails((AssetDetails) context.get(0)));
           break;
         case putLabel:
           putLabel(context.getGUID(0), (Label) context.get(1));
@@ -529,7 +530,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       Asset asset = Asset.createBrokenImageAsset(assetID);
       server
           .getConnection()
-          .callMethod(RPCContext.getCurrent().id, ClientCommand.COMMAND.putAsset.name(), asset);
+          .callMethod(
+              RPCContext.getCurrent().id,
+              ClientCommand.COMMAND.putAsset.name(),
+              asset.getAssetDetails());
     }
   }
 

@@ -122,7 +122,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putAsset(Asset asset) {
-    makeServerCall(COMMAND.putAsset, asset);
+    makeServerCall(COMMAND.putAsset, asset.getAssetDetails());
   }
 
   public void getAsset(MD5Key assetID) {
