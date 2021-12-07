@@ -79,6 +79,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private String toolTip;
   private Boolean displayHotKey = true;
 
+  private MacroButtonProperties() {}
+
   // constructor that creates a new instance, doesn't auto-save
   public MacroButtonProperties(
       int index,
@@ -355,10 +357,6 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setCompareCommand(properties.getCompareCommand());
     setToolTip(properties.getToolTip());
     commonMacro = true;
-  }
-
-  public MacroButtonProperties(String macroUUID) {
-    this.macroUUID = macroUUID;
   }
 
   public MacroButtonProperties(Token token, Map<String, String> props) {
@@ -1111,50 +1109,50 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public static MacroButtonProperties fromDto(MacroButtonPropertiesDto dto) {
-    var macro = new MacroButtonProperties(dto.getMacroId());
-    macro.setSaveLocation(dto.getSaveLocation());
-    macro.setIndex(dto.getIndex());
-    macro.setColorKey(dto.getColorKey());
-    macro.setHotKey(dto.getHotKey());
-    macro.setCommand(dto.getCommand());
-    macro.setLabel(dto.getLabel());
-    macro.setGroup(dto.getGroup());
-    macro.setSortby(dto.getSortby());
-    macro.setAutoExecute(dto.getAutoExecute());
-    macro.setIncludeLabel(dto.getIncludeLabel());
-    macro.setApplyToTokens(dto.getApplyToTokens());
-    macro.setFontColorKey(dto.getFontColorKey());
-    macro.setFontSize(dto.getFontSize());
-    macro.setMinWidth(dto.getMinWidth());
-    macro.setMaxWidth(dto.getMaxWidth());
-    macro.setAllowPlayerEdits(dto.getAllowPlayerEdits());
-    macro.setToolTip(dto.getToolTip());
-    macro.setDisplayHotKey(dto.getDisplayHotKey());
+    var macro = new MacroButtonProperties();
+    macro.macroUUID = dto.getMacroId();
+    macro.saveLocation = dto.getSaveLocation();
+    macro.index = dto.getIndex();
+    macro.colorKey = dto.getColorKey();
+    macro.hotKey = dto.getHotKey();
+    macro.command = dto.getCommand();
+    macro.label = dto.getLabel();
+    macro.group = dto.getGroup();
+    macro.sortby = dto.getSortby();
+    macro.autoExecute = dto.getAutoExecute();
+    macro.includeLabel = dto.getIncludeLabel();
+    macro.applyToTokens = dto.getApplyToTokens();
+    macro.fontColorKey = dto.getFontColorKey();
+    macro.fontSize = dto.getFontSize();
+    macro.minWidth = dto.getMinWidth();
+    macro.maxWidth = dto.getMaxWidth();
+    macro.allowPlayerEdits = dto.getAllowPlayerEdits();
+    macro.toolTip = dto.getToolTip();
+    macro.displayHotKey = dto.getDisplayHotKey();
     return macro;
   }
 
   public MacroButtonPropertiesDto toDto() {
-    var macro = this;
     var dto = MacroButtonPropertiesDto.newBuilder();
-    dto.setMacroId(macro.getMacroUUID());
-    dto.setSaveLocation(macro.getSaveLocation());
-    dto.setIndex(macro.getIndex());
-    dto.setColorKey(macro.getColorKey());
-    dto.setHotKey(macro.getHotKey());
-    dto.setCommand(macro.getCommand());
-    dto.setLabel(macro.getLabel());
-    dto.setGroup(macro.getGroup());
-    dto.setSortby(macro.getSortby());
-    dto.setAutoExecute(macro.getAutoExecute());
-    dto.setIncludeLabel(macro.getIncludeLabel());
-    dto.setApplyToTokens(macro.getApplyToTokens());
-    dto.setFontColorKey(macro.getFontColorKey());
-    dto.setFontSize(macro.getFontSize());
-    dto.setMinWidth(macro.getMinWidth());
-    dto.setMaxWidth(macro.getMaxWidth());
-    dto.setAllowPlayerEdits(macro.getAllowPlayerEdits());
-    dto.setToolTip(macro.getToolTip());
-    dto.setDisplayHotKey(macro.getDisplayHotKey());
+    dto.setMacroId(macroUUID);
+    dto.setSaveLocation(saveLocation);
+    dto.setIndex(index);
+    dto.setColorKey(colorKey);
+    dto.setHotKey(hotKey);
+    dto.setCommand(command);
+    dto.setLabel(label);
+    dto.setGroup(group);
+    dto.setSortby(sortby);
+    dto.setAutoExecute(autoExecute);
+    dto.setIncludeLabel(includeLabel);
+    dto.setApplyToTokens(applyToTokens);
+    dto.setFontColorKey(fontColorKey);
+    dto.setFontSize(fontSize);
+    dto.setMinWidth(minWidth);
+    dto.setMaxWidth(maxWidth);
+    dto.setAllowPlayerEdits(allowPlayerEdits);
+    dto.setToolTip(toolTip);
+    dto.setDisplayHotKey(displayHotKey);
     return dto.build();
   }
 }

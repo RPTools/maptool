@@ -540,7 +540,8 @@ public class HeroLabData {
     data.isDirty = dto.getIsDirty();
     data.isMinion = dto.getIsMinion();
     data.portfolioPath = dto.getPortfolioPath();
-    dto.getHeroImageAssetsMap().forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
+    dto.getHeroImageAssetsMap()
+        .forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
     return data;
   }
 
