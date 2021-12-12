@@ -81,12 +81,37 @@ public class Token extends BaseModel implements Cloneable {
   public static final String NUM_ON_GM = "GM Name";
   public static final String NUM_ON_BOTH = "Both";
 
+  public static final String LIB_TOKEN_PREFIX = "lib:";
+
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
       new Gson().getAdapter(JsonObject.class);
+
+  public boolean getAllowURIAccess() {
+    if (allowURIAccess && !isLibToken()) {
+      allowURIAccess = false;
+    }
+    return allowURIAccess;
+  }
+
+  public void setAllowURIAccess(boolean allowURIAccess) {
+    if (isLibToken()) {
+      this.allowURIAccess = allowURIAccess;
+    } else {
+      this.allowURIAccess = false;
+    }
+  }
+
+  public boolean isLibToken() {
+    return isValidLibTokenName(name);
+  }
+
+  public static boolean isValidLibTokenName(String name) {
+    return name.toLowerCase().startsWith(LIB_TOKEN_PREFIX);
+  }
 
   public enum TokenShape {
     TOP_DOWN(),
@@ -177,7 +202,9 @@ public class Token extends BaseModel implements Cloneable {
     setHasSight,
     setSightType,
     flipX,
-    flipY
+    flipY,
+    flipIso,
+    setSpeechName
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -213,7 +240,7 @@ public class Token extends BaseModel implements Cloneable {
   private double scaleX = 1;
   private double scaleY = 1;
 
-  private Map<Class<? extends Grid>, GUID> sizeMap;
+  private Map<String, GUID> sizeMap;
 
   private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
   // floating
@@ -252,6 +279,8 @@ public class Token extends BaseModel implements Cloneable {
 
   // Jamz: allow token alpha channel modification
   private float tokenOpacity = 1.0f;
+
+  private String speechName = "";
 
   /** Terrain Modifier Operations */
   public enum TerrainModifierOperation {
@@ -324,6 +353,8 @@ public class Token extends BaseModel implements Cloneable {
   private Map<String, String> speechMap;
 
   private HeroLabData heroLabData;
+
+  private boolean allowURIAccess = false;
 
   /**
    * Constructor from another token, with the option to keep the token id
@@ -444,7 +475,7 @@ public class Token extends BaseModel implements Cloneable {
       imageAssetMap.putAll(token.imageAssetMap);
     }
     if (token.sizeMap != null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>(token.sizeMap);
+      sizeMap = new HashMap<>(token.sizeMap);
     }
 
     exposedAreaGUID = token.exposedAreaGUID;
@@ -457,6 +488,9 @@ public class Token extends BaseModel implements Cloneable {
     if (token.terrainModifiersIgnored != null) {
       terrainModifiersIgnored = new HashSet<>(token.terrainModifiersIgnored);
     }
+
+    speechName = token.speechName;
+    allowURIAccess = token.allowURIAccess;
   }
 
   public Token() {
@@ -679,6 +713,24 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOpacity;
   }
 
+  /**
+   * Returns the name to be displayed in speech and thought bubbles.
+   *
+   * @return the name to be displayed in speech and thought bubbles/
+   */
+  public String getSpeechName() {
+    return speechName;
+  }
+
+  /**
+   * Sets the name to be displayed in speech and thought bubbles.
+   *
+   * @param name the name to be displayed.
+   */
+  public void setSpeechName(String name) {
+    speechName = name;
+  }
+
   public double getTerrainModifier() {
     return terrainModifier;
   }
@@ -785,6 +837,11 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /**
+   * Sets the token's type. Sets hasSight to true if the new type is PC.
+   *
+   * @param type The new type
+   */
   public void setType(Type type) {
     tokenType = type.name();
     if (type == Type.PC) {
@@ -1458,7 +1515,7 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Return the existence of the token's VBL
    *
-   * @return rue if the token's vbl is null, and false otherwise
+   * @return true if the token's vbl is not null, and false otherwise
    */
   public boolean hasVBL() {
     return vbl != null;
@@ -1644,20 +1701,20 @@ public class Token extends BaseModel implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getSizeMap().get(grid.getClass()));
+    return grid.getFootprint(getSizeMap().get(grid.getClass().getName()));
   }
 
   public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-    return grid.getFootprint(getSizeMap().put(grid.getClass(), footprint.getId()));
+    return grid.getFootprint(getSizeMap().put(grid.getClass().getName(), footprint.getId()));
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
     return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
   }
 
-  private Map<Class<? extends Grid>, GUID> getSizeMap() {
+  private Map<String, GUID> getSizeMap() {
     if (sizeMap == null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>();
+      sizeMap = new HashMap<>();
     }
     return sizeMap;
   }
@@ -2191,11 +2248,11 @@ public class Token extends BaseModel implements Cloneable {
     // Get the image and portrait for the token
     Asset asset = createAssetFromIcon(td.getToken());
     if (asset != null) {
-      imageAssetMap.put(null, asset.getId());
+      imageAssetMap.put(null, asset.getMD5Key());
     }
     asset = createAssetFromIcon((ImageIcon) td.get(TokenTransferData.PORTRAIT));
     if (asset != null) {
-      portraitImage = asset.getId();
+      portraitImage = asset.getMD5Key();
     }
 
     // Get the macros
@@ -2240,7 +2297,7 @@ public class Token extends BaseModel implements Cloneable {
     // Create the asset
     Asset asset = null;
     try {
-      asset = new Asset(name, ImageUtil.imageToBytes((BufferedImage) image));
+      asset = Asset.createImageAsset(name, ImageUtil.imageToBytes((BufferedImage) image));
       if (!AssetManager.hasAsset(asset)) {
         AssetManager.putAsset(asset);
       }
@@ -2414,6 +2471,19 @@ public class Token extends BaseModel implements Cloneable {
     if (exposedAreaGUID == null) {
       exposedAreaGUID = new GUID();
     }
+
+    // Fix for pre 1.11.3 campaigns and token size issues
+    Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
+    sizeMap.clear();
+    for (var entry : oldSizeMap.entrySet()) {
+      var key = entry.getKey();
+      if (key instanceof Class<?> cl) {
+        sizeMap.put(cl.getName(), entry.getValue());
+      } else {
+        sizeMap.put(key.toString(), entry.getValue());
+      }
+    }
+
     return this;
   }
 
@@ -2590,6 +2660,9 @@ public class Token extends BaseModel implements Cloneable {
         setGMName((String) parameters[0]);
         panelLookChanged = true;
         break;
+      case setSpeechName:
+        setSpeechName((String) parameters[0]);
+        break;
       case setVisible:
         setVisible((boolean) parameters[0]);
         break;
@@ -2676,6 +2749,9 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case flipY:
         setFlippedY(!isFlippedY());
+        break;
+      case flipIso:
+        setFlippedIso(!isFlippedIso());
         break;
     }
     if (lightChanged) {

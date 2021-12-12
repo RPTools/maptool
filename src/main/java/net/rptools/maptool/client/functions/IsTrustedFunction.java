@@ -20,7 +20,7 @@ import java.util.List;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;

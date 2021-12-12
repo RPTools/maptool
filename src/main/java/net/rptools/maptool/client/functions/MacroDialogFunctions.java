@@ -16,22 +16,32 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 
 public class MacroDialogFunctions extends AbstractFunction {
   private static final MacroDialogFunctions instance = new MacroDialogFunctions();
@@ -47,10 +57,17 @@ public class MacroDialogFunctions extends AbstractFunction {
         "resetFrame",
         "closeFrame",
         "closeOverlay",
+        "setOverlayVisible",
+        "isOverlayVisible",
         "getFrameProperties",
         "getDialogProperties",
         "getOverlayProperties",
-        "runJsFunction");
+        "runJsFunction",
+        "html.frame",
+        "html.dialog",
+        "html.frame5",
+        "html.dialog5",
+        "html.overlay");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -61,13 +78,13 @@ public class MacroDialogFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
-    if (functionName.equals("isDialogVisible")) {
+    if (functionName.equalsIgnoreCase("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
-    if (functionName.equals("isFrameVisible")) {
+    if (functionName.equalsIgnoreCase("isFrameVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(true, parameters.get(0).toString())
           ? BigDecimal.ONE
@@ -78,34 +95,46 @@ public class MacroDialogFunctions extends AbstractFunction {
       String name = parameters.get(0).toString();
       return isOverlayRegistered(name) ? BigDecimal.ONE : BigDecimal.ZERO;
     }
-    if (functionName.equals("closeDialog")) {
+    if (functionName.equalsIgnoreCase("closeDialog")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(false, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeFrame")) {
+    if (functionName.equalsIgnoreCase("closeFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrameFactory.close(true, parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("closeOverlay")) {
+    if (functionName.equalsIgnoreCase("closeOverlay")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       String name = parameters.get(0).toString();
       removeOverlay(name);
       return "";
     }
-    if (functionName.equals("resetFrame")) {
+    if (functionName.equalsIgnoreCase("setOverlayVisible")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String name = parameters.get(0).toString();
+      BigDecimal param = FunctionUtil.paramAsBigDecimal(functionName, parameters, 1, false);
+      setOverlayVisible(name, param.equals(BigDecimal.ONE));
+      return "";
+    }
+    if (functionName.equalsIgnoreCase("isOverlayVisible")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      String name = parameters.get(0).toString();
+      return isOverlayVisible(name) ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
+    if (functionName.equalsIgnoreCase("resetFrame")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       HTMLFrame.center(parameters.get(0).toString());
       return "";
     }
-    if (functionName.equals("getFrameProperties")) {
+    if (functionName.equalsIgnoreCase("getFrameProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLFrame.getFrameProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
       else return "";
     }
-    if (functionName.equals("getDialogProperties")) {
+    if (functionName.equalsIgnoreCase("getDialogProperties")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       Optional<JsonObject> props = HTMLDialog.getDialogProperties(parameters.get(0).toString());
       if (props.isPresent()) return props.get();
@@ -131,8 +160,62 @@ public class MacroDialogFunctions extends AbstractFunction {
       runJsFunction(name, type, func, thisArg, argsArray);
       return "";
     }
+    if (functionName.toLowerCase().startsWith("html.")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String name = parameters.get(0).toString();
+      String opts = parameters.size() > 2 ? parameters.get(2).toString() : "";
+      URL url = null;
+      try {
+        url = new URL(parameters.get(1).toString());
+      } catch (MalformedURLException e) {
+        throw new ParserException(e);
+      }
+
+      return switch (functionName.toLowerCase()) {
+        case "html.frame5" -> showURL(name, url, opts, FrameType.FRAME, true);
+        case "html.dialog5" -> showURL(name, url, opts, FrameType.DIALOG, true);
+        case "html.frame" -> showURL(name, url, opts, FrameType.FRAME, false);
+        case "html.dialog" -> showURL(name, url, opts, FrameType.DIALOG, false);
+        case "html.overlay" -> showURL(name, url, opts, FrameType.OVERLAY, true);
+        default -> throw new ParserException(I18N.getText("macro.function.html5.unknownType"));
+      };
+    }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  private String showURL(String name, URL url, String opts, FrameType frameType, boolean isHTML5)
+      throws ParserException {
+    String htmlString = "";
+    try {
+      Optional<Library> library = new LibraryManager().getLibrary(url).get();
+      if (library.isEmpty()) {
+        throw new ParserException(
+            I18N.getText("macro.function.html5.invalidURI", url.toExternalForm()));
+      }
+
+      htmlString = library.get().readAsString(url).get();
+
+      var document = Jsoup.parse(htmlString);
+      var head = document.select("head").first();
+      if (head != null) {
+        String baseURL = url.toExternalForm().replaceFirst("\\?.*", "");
+        baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
+        var baseElement = new Element(Tag.valueOf("base"), "").attr("href", baseURL);
+        if (head.children().isEmpty()) {
+          head.appendChild(baseElement);
+        } else {
+          head.child(0).before(baseElement);
+        }
+
+        htmlString = document.html();
+      }
+
+    } catch (InterruptedException | ExecutionException | IOException e) {
+      throw new ParserException(e);
+    }
+    HTMLFrameFactory.show(name, frameType, true, opts, htmlString);
+    return "";
   }
 
   /**
@@ -173,6 +256,32 @@ public class MacroDialogFunctions extends AbstractFunction {
     } else {
       MapTool.getFrame().getOverlayPanel().removeOverlay(name);
     }
+  }
+
+  /**
+   * Sets the visible status of the Overlay
+   *
+   * @param name the name of the overlay
+   * @param visible true or false
+   */
+  private void setOverlayVisible(String name, boolean visible) {
+    HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
+    if (overlay != null) {
+      overlay.setVisible(visible);
+    }
+  }
+
+  /**
+   * Gets the visible status of the Overlay
+   *
+   * @param name the name of the overlay
+   */
+  private boolean isOverlayVisible(String name) {
+    HTMLOverlayManager overlay = MapTool.getFrame().getOverlayPanel().getOverlay(name);
+    if (overlay != null) {
+      return overlay.isVisible();
+    }
+    return false;
   }
 
   /**

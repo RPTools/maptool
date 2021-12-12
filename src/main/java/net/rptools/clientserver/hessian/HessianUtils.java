@@ -32,7 +32,7 @@ public class HessianUtils {
     in.getSerializerFactory().setAllowNonSerializable(true);
     in.getSerializerFactory().getClassFactory().setWhitelist(true);
     hessianSecurity.getAllowed().forEach(a -> in.getSerializerFactory().getClassFactory().allow(a));
-    hessianSecurity.getDenied().forEach(d -> in.getSerializerFactory().getClassFactory().allow(d));
+    hessianSecurity.getDenied().forEach(d -> in.getSerializerFactory().getClassFactory().deny(d));
     return in;
   }
 

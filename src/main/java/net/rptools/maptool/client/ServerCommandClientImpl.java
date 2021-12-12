@@ -14,7 +14,11 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import java.awt.geom.Area;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,12 +38,15 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataDto;
+import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -115,7 +122,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void putAsset(Asset asset) {
-    makeServerCall(COMMAND.putAsset, asset);
+    makeServerCall(COMMAND.putAsset, asset.getAssetDetails());
   }
 
   public void getAsset(MD5Key assetID) {
@@ -281,12 +288,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.toggleTokenMoveWaypoint, zoneGUID, tokenGUID, cp);
   }
 
-  public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyMode);
+  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+    makeServerCall(COMMAND.addTopology, zoneGUID, area, topologyType);
   }
 
-  public void removeTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
-    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyMode);
+  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType) {
+    makeServerCall(COMMAND.removeTopology, zoneGUID, area, topologyType);
   }
 
   public void exposePCArea(GUID zoneGUID) {
@@ -382,6 +389,70 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
   }
 
+  @Override
+  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries) {
+    var libs = new ArrayList<TransferableAddOnLibrary>();
+    libs.addAll(addOnLibraries);
+    makeServerCall(COMMAND.addAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAddOnLibrary(List<String> namespaces) {
+    var libs = new ArrayList<String>();
+    libs.addAll(namespaces);
+    makeServerCall(COMMAND.removeAddOnLibrary, libs);
+  }
+
+  @Override
+  public void removeAllAddOnLibraries() {
+    makeServerCall(COMMAND.removeAllAddOnLibraries);
+  }
+
+  @Override
+  public void updateDataStore(DataStoreDto dataStore) {
+    try {
+      byte[] bytes = JsonFormat.printer().print(dataStore).getBytes(StandardCharsets.UTF_8);
+      makeServerCall(COMMAND.updateDataStore, bytes);
+    } catch (InvalidProtocolBufferException e) {
+      MapTool.showError("data.error.sendingUpdate", e);
+    }
+  }
+
+  @Override
+  public void updateDataNamespace(GameDataDto gameData) {
+    try {
+      byte[] bytes = JsonFormat.printer().print(gameData).getBytes(StandardCharsets.UTF_8);
+      makeServerCall(COMMAND.updateDataNamespace, bytes);
+    } catch (InvalidProtocolBufferException e) {
+      MapTool.showError("data.error.sendingUpdate", e);
+    }
+  }
+
+  @Override
+  public void updateData(String type, String namespace, GameDataValueDto gameData) {
+    try {
+      byte[] bytes = JsonFormat.printer().print(gameData).getBytes(StandardCharsets.UTF_8);
+      makeServerCall(COMMAND.updateData, type, namespace, bytes);
+    } catch (InvalidProtocolBufferException e) {
+      MapTool.showError("data.error.sendingUpdate", e);
+    }
+  }
+
+  @Override
+  public void removeDataStore() {
+    makeServerCall(COMMAND.removeDataStore);
+  }
+
+  @Override
+  public void removeDataNamespace(String type, String namespace) {
+    makeServerCall(COMMAND.removeDataNamespace, type, namespace);
+  }
+
+  @Override
+  public void removeData(String type, String namespace, String name) {
+    makeServerCall(COMMAND.removeData, type, namespace, name);
+  }
+
   /**
    * Some events become obsolete very quickly, such as dragging a token around. This queue always
    * has exactly one element, the more current version of the event. The event is then dispatched at
@@ -398,6 +469,7 @@ public class ServerCommandClientImpl implements ServerCommand {
     final Object sleepSemaphore = new Object();
 
     public TimedEventQueue(long millidelay) {
+      setName("ServerCommandClientImpl.TimedEventQueue");
       delay = millidelay;
     }
 

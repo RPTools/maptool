@@ -19,6 +19,8 @@ import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -28,6 +30,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -50,6 +53,8 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.util.UserJvmOptions.JVM_OPTION;
+import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,6 +87,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
   private final JCheckBox forceFacingArrowCheckBox;
+  private final JCheckBox mapVisibilityWarning;
   private final JSpinner haloLineWidthSpinner;
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
@@ -127,6 +133,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
   private final JTextField defaultUsername;
+
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -136,6 +143,12 @@ public class PreferencesDialog extends JDialog {
   private final JTextField fileSyncPath;
   private final JButton fileSyncPathButton;
   private final JCheckBox allowExternalMacroAccessCheckBox;
+
+  // Authentication
+  private final JTextArea publicKeyTextArea;
+  private final JButton regeneratePublicKey;
+  private final JButton copyPublicKey;
+
   // Startup
   private final JTextField jvmXmxTextField;
   private final JTextField jvmXmsTextField;
@@ -257,6 +270,7 @@ public class PreferencesDialog extends JDialog {
     auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
     lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
     fogOverlayOpacitySpinner = panel.getSpinner("fogOverlayOpacitySpinner");
+    mapVisibilityWarning = panel.getCheckBox("mapVisibilityWarning");
 
     useHaloColorAsVisionOverlayCheckBox = panel.getCheckBox("useHaloColorAsVisionOverlayCheckBox");
     autoRevealVisionOnGMMoveCheckBox = panel.getCheckBox("autoRevealVisionOnGMMoveCheckBox");
@@ -298,6 +312,10 @@ public class PreferencesDialog extends JDialog {
     allowExternalMacroAccessCheckBox = panel.getCheckBox("allowExternalMacroAccessCheckBox");
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
+
+    publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
+    regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
+    copyPublicKey = (JButton) panel.getButton("copyKey");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -475,6 +493,7 @@ public class PreferencesDialog extends JDialog {
             }
           }
         });
+
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -635,6 +654,8 @@ public class PreferencesDialog extends JDialog {
         e -> AppPreferences.setShowSmilies(showSmiliesCheckBox.isSelected()));
     playSystemSoundCheckBox.addActionListener(
         e -> AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected()));
+    mapVisibilityWarning.addActionListener(
+        e -> AppPreferences.setMapVisibilityWarning(mapVisibilityWarning.isSelected()));
 
     playStreamsCheckBox.addActionListener(
         e -> {
@@ -866,6 +887,26 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setDefaultMacroEditorTheme(
                 (String) macroEditorThemeCombo.getSelectedItem()));
 
+    copyPublicKey.addActionListener(
+        e -> {
+          Toolkit.getDefaultToolkit()
+              .getSystemClipboard()
+              .setContents(new StringSelection(publicKeyTextArea.getText()), null);
+        });
+
+    regeneratePublicKey.addActionListener(
+        e -> {
+          CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().regenerateKeys();
+
+          keys.thenAccept(
+              cu -> {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+                    });
+              });
+        });
+
     add(panel);
     pack();
   }
@@ -930,6 +971,7 @@ public class PreferencesDialog extends JDialog {
     statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));
     fontSizeTextField.setText(Integer.toString(AppPreferences.getFontSize()));
     haloLineWidthSpinner.setValue(AppPreferences.getHaloLineWidth());
+    mapVisibilityWarning.setSelected(AppPreferences.getMapVisibilityWarning());
 
     haloOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getHaloOverlayOpacity(), 0, 255, 1));
@@ -1019,6 +1061,16 @@ public class PreferencesDialog extends JDialog {
 
     chatNotificationColor.setColor(AppPreferences.getChatNotificationColor());
     chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
+
+    CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().getKeys();
+
+    keys.thenAccept(
+        cu -> {
+          SwingUtilities.invokeLater(
+              () -> {
+                publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
+              });
+        });
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */

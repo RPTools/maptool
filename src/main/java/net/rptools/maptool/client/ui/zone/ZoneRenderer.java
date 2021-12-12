@@ -64,6 +64,7 @@ import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -846,7 +847,7 @@ public class ZoneRenderer extends JComponent
     int noteVPos = 20;
     if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
 
-    if (!zone.isVisible() && pl.isGMView()) {
+    if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
       GraphicsUtil.drawBoxedString(
           g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
       noteVPos += 20;
@@ -1994,7 +1995,7 @@ public class ZoneRenderer extends JComponent
       downloadCount++;
 
       // Have we loaded the image into memory yet ?
-      Image image = ImageManager.getImage(asset.getId(), this);
+      Image image = ImageManager.getImage(asset.getMD5Key(), this);
       if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
         loaded = false;
         continue;
@@ -4752,13 +4753,15 @@ public class ZoneRenderer extends JComponent
    */
   @Override
   public void drop(DropTargetDropEvent dtde) {
-    ZonePoint zp =
-        new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
-            .convertToZone(this);
-    TransferableHelper th = (TransferableHelper) getTransferHandler();
-    List<Token> tokens = th.getTokens();
-    if (tokens != null && !tokens.isEmpty()) {
-      addTokens(tokens, zp, th.getConfigureTokens(), false);
+    if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().getDisablePlayerAssetPanel()) {
+      ZonePoint zp =
+          new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
+              .convertToZone(this);
+      TransferableHelper th = (TransferableHelper) getTransferHandler();
+      List<Token> tokens = th.getTokens();
+      if (tokens != null && !tokens.isEmpty()) {
+        addTokens(tokens, zp, th.getConfigureTokens(), false);
+      }
     }
   }
 

@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.util.GraphicsUtil;
 
 public class GridlessGrid extends Grid {
   private static List<TokenFootprint> footprintList;
@@ -178,5 +179,13 @@ public class GridlessGrid extends Grid {
   @Override
   public Point2D.Double getCenterOffset() {
     return new Point2D.Double(0, 0);
+  }
+
+  @Override
+  protected Area getGridArea(
+      Token token, double range, boolean scaleWithToken, double visionRange) {
+    // A grid area isn't well-defined when there is no grid, so fall back to a circle.
+    return GraphicsUtil.createLineSegmentEllipse(
+        -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
   }
 }
