@@ -1,3 +1,16 @@
+# MapTool 1.11.4
+**Security Fix Release**
+
+Updated the Log4J libraries for a [security vulnerability](https://www.cisa.gov/uscert/ncas/current-activity/2021/12/10/apache-releases-log4j-version-2150-address-critical-rce).
+
+- [#3266][i3266] Update to log4j-1.2-api v2.15.0
+- [#3265][i3265] Update to log4j-core v2.15.0
+- [#3264][i3264] Update to log4j-api v2.15.0
+
+[i3266]: https://github.com/RPTools/maptool/issues/3266
+[i3265]: https://github.com/RPTools/maptool/issues/3265
+[i3264]: https://github.com/RPTools/maptool/issues/3264
+
 # MapTool 1.11.3
 
 **Bug fix release.**
