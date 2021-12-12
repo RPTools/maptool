@@ -197,13 +197,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             super.closeDialog();
           }
         };
+    getTokenVblPanel().reset(token);
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
     getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
     getComponent("@GMName").setEnabled(MapTool.getPlayer().isGM());
-
-    getTokenVblPanel().reset(token);
 
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -352,6 +351,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getPlayer().isGM()) {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
       getTokenVblPanel().setToken(token);
+      getInverseVblCheckbox().setSelected(getTokenVblPanel().isInverseVbl());
       getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
       getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
       getJtsDistanceToleranceSpinner().setValue(getTokenVblPanel().getJtsDistanceTolerance());
