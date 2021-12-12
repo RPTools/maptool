@@ -43,10 +43,12 @@ public class ServerConfig {
 
   private int port;
   private String hostPlayerId;
-  private String gmPassword;
-  private String playerPassword;
+  private final String gmPassword;
+  private final String playerPassword;
   private boolean personalServer;
   private String serverName;
+  private String hostName;
+  private final boolean useEasyConnect;
 
   public static String getPersonalServerGMPassword() {
     return personalServerGMPassword;
@@ -59,15 +61,34 @@ public class ServerConfig {
   public ServerConfig() {
     playerPassword = getPersonalServerPlayerPassword();
     gmPassword = getPersonalServerGMPassword();
+    useEasyConnect = false;
   }
 
   public ServerConfig(
-      String hostPlayerId, String gmPassword, String playerPassword, int port, String serverName) {
+      String hostPlayerId,
+      String gmPassword,
+      String playerPassword,
+      int port,
+      String serverName,
+      String hostName) {
+    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false);
+  }
+
+  public ServerConfig(
+      String hostPlayerId,
+      String gmPassword,
+      String playerPassword,
+      int port,
+      String serverName,
+      String hostName,
+      boolean useEasyConnect) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
+    this.hostName = hostName;
+    this.useEasyConnect = useEasyConnect;
   }
 
   public String getHostPlayerId() {
@@ -100,6 +121,7 @@ public class ServerConfig {
 
   public static ServerConfig createPersonalServerConfig() {
     ServerConfig config = new ServerConfig();
+    config.hostName = "localhost";
     config.personalServer = true;
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
     return config;
@@ -111,6 +133,14 @@ public class ServerConfig {
 
   public String getPlayerPassword() {
     return playerPassword;
+  }
+
+  public String getHostName() {
+    return hostName;
+  }
+
+  public boolean getUseEasyConnect() {
+    return useEasyConnect;
   }
 
   private static Random r = new Random();

@@ -35,14 +35,38 @@ public class HessianSecurity {
     allow.add("java.lang.Long");
     allow.add("java.lang.Short");
     allow.add("java.lang.String");
+    allow.add("java.lang.Integer");
+    allow.add("java.lang.Number");
 
+    allow.add("java.math.*");
+
+    allow.add("java.util.ArrayList");
+    allow.add("java.util.Arrays");
+    allow.add("java.util.Base64");
+    allow.add("java.util.BitSet");
+    allow.add("java.util.EnumMap");
+    allow.add("java.util.EnumSet");
+    allow.add("java.util.HashMap");
+    allow.add("java.util.HashSet");
+    allow.add("java.util.LinkedHashMap");
+    allow.add("java.util.LinkedHashSet");
+    allow.add("java.util.LinkedList");
+    allow.add("java.util.TreeMap");
+    allow.add("java.util.TreeSet");
+    allow.add("java.util.UUID");
+
+    allow.add("java.awt.*");
     allow.add("java.awt.geom.*");
+    allow.add("java.awt.Point");
     allow.add("sun.awt.geom.*");
     allow.add("java.awt.BasicStroke");
 
     allow.add("net.rptools.maptool.client.walker.*");
     allow.add("net.rptools.maptool.common.*");
     allow.add("net.rptools.maptool.model.*");
+    allow.add("net.rptools.maptool.client.ui.*");
+    allow.add("net.rptools.CaseInsensitiveHashMap");
+    allow.add("net.rptools.*");
 
     allow.add("net.rptools.lib.MD5Key");
 

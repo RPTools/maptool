@@ -15,31 +15,45 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool.model.campaign.CampaignManager;
 
 /** This class handles when the server inexplicably disconnects */
 public class ServerDisconnectHandler implements DisconnectHandler {
   // TODO: This is a temporary hack until I can come up with a cleaner mechanism
   public static boolean disconnectExpected;
 
-  public void handleDisconnect(AbstractConnection arg0) {
+  public void handleDisconnect(AbstractConnection connection) {
     // Update internal state
     MapTool.disconnect();
 
     // TODO: attempt to reconnect if this was unexpected
     if (!disconnectExpected) {
-      MapTool.showError(I18N.getText("msg.error.server.disconnected"));
+      var errorText = I18N.getText("msg.error.server.disconnected");
+      var connectionError = connection.getError();
+      var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
+      MapTool.showError(errorMessage);
 
       // hide map so player doesn't get a brief GM view
       MapTool.getFrame().setCurrentZoneRenderer(null);
+      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
+      MapTool.getFrame().getAssetPanel().enableAssets();
+      new CampaignManager().clearCampaignData();
 
       try {
         MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
-      } catch (IOException ioe) {
-        MapTool.showError(I18N.getText("msg.error.server.cantrestart"));
+      } catch (IOException
+          | NoSuchAlgorithmException
+          | InvalidKeySpecException
+          | ExecutionException
+          | InterruptedException e) {
+        MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
       }
     } else if (!MapTool.isPersonalServer() && !MapTool.isHostingServer()) {
       // expected disconnect from someone else's server

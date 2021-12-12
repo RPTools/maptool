@@ -17,19 +17,84 @@ package net.rptools.maptool.client.script.javascript.api;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.HostAccess;
 
-public class JSAPITokens {
+public class JSAPITokens implements MapToolJSAPIInterface {
+  @Override
+  public String serializeToString() {
+    return "MapTool.tokens";
+  }
 
   @HostAccess.Export
-  public JSList getMapTokens() {
-    final List<Object> tokens = new ArrayList<>();
+  public List<Object> getMapTokens() {
+    return getMapTokens(MapTool.getFrame().getCurrentZoneRenderer());
+  }
 
-    MapTool.getFrame()
-        .getCurrentZoneRenderer()
-        .getZone()
+  @HostAccess.Export
+  public List<Object> getMapTokens(String zoneName) {
+
+    return getMapTokens(MapTool.getFrame().getZoneRenderer(zoneName));
+  }
+
+  public List<Object> getMapTokens(ZoneRenderer zr) {
+    final List<Object> tokens = new ArrayList<>();
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    zr.getZone()
         .getTokens()
-        .forEach(t -> tokens.add(new JSAPIToken(t)));
-    return new JSList(tokens);
+        .forEach(
+            (t -> {
+              if (trusted || t.isOwner(playerId)) {
+                tokens.add(new JSAPIToken(t));
+              }
+            }));
+
+    return tokens;
+  }
+
+  @HostAccess.Export
+  public JSAPIToken getTokenByName(String tokenName) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    for (ZoneRenderer z : MapTool.getFrame().getZoneRenderers()) {
+      if (trusted || z.getZone().isVisible()) {
+        Token t = z.getZone().getTokenByName(tokenName);
+        if (t != null && (trusted || t.isOwner(playerId))) {
+          return new JSAPIToken(t);
+        }
+      }
+    }
+    return null;
+  }
+
+  @HostAccess.Export
+  public List<JSAPIToken> getSelectedTokens() {
+    List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
+    List<JSAPIToken> out_tokens = new ArrayList<JSAPIToken>();
+    for (Token token : tokens) {
+      out_tokens.add(new JSAPIToken(token));
+    }
+    return out_tokens;
+  }
+
+  @HostAccess.Export
+  public JSAPIToken getSelected() {
+    List<Token> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
+    if (tokens.size() > 0) {
+      return new JSAPIToken(tokens.get(0));
+    }
+    return null;
+  }
+
+  @HostAccess.Export
+  public JSAPIToken getTokenByID(String uuid) {
+    JSAPIToken token = new JSAPIToken(uuid);
+    if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
+      return token;
+    }
+    return null;
   }
 }

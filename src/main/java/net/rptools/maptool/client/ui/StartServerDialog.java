@@ -20,13 +20,16 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
@@ -42,10 +45,16 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useIndividualViews;
   private JCheckBox autoRevealOnMovement;
   private JCheckBox playersCanRevealVision;
+  private JCheckBox hideMapSelectUI;
+  private JCheckBox lockTokenEditOnStartup;
+  private JCheckBox lockPlayerMoveOnStartup;
+  private JCheckBox lockPlayerLibrary;
   private JButton generateGMPassword;
   private JButton generatePlayerPassword;
   private JTextField gmPassword;
   private JTextField playerPassword;
+  private JCheckBox usePasswordFile;
+  private JCheckBox useEasyConnect;
 
   public StartServerDialog() {
     super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
@@ -69,6 +78,12 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     generatePlayerPassword = (JButton) getComponent("@generatePlayerPassword");
     gmPassword = (JTextField) getComponent("@GMPassword");
     playerPassword = (JTextField) getComponent("@playerPassword");
+    useEasyConnect = (JCheckBox) getComponent("@useEasyConnect");
+    usePasswordFile = (JCheckBox) getComponent("@usePasswordFile");
+    hideMapSelectUI = (JCheckBox) getComponent("@hideMapSelectUI");
+    lockTokenEditOnStartup = (JCheckBox) getComponent("@lockTokenEditOnStartup");
+    lockPlayerMoveOnStartup = (JCheckBox) getComponent("@lockPlayerMovementOnStartup");
+    lockPlayerLibrary = (JCheckBox) getComponent("@disablePlayerLibrary");
 
     getRoleCombo().setModel(new DefaultComboBoxModel<>(Player.Role.values()));
     getRoleCombo().setSelectedItem(prefs.getRole());
@@ -94,6 +109,32 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
             autoRevealOnMovement.setEnabled(true);
           }
         });
+
+    boolean usePf = usePasswordFile.isSelected();
+    boolean useEC = useEasyConnect.isSelected();
+    playerPassword.setEnabled(!usePf);
+    gmPassword.setEnabled(!usePf);
+    usePasswordFile.setEnabled(!useEC);
+    usePasswordFile.addItemListener(
+        e -> {
+          boolean passwordFile = usePasswordFile.isSelected();
+          playerPassword.setEnabled(!passwordFile);
+          gmPassword.setEnabled(!passwordFile);
+        });
+    useEasyConnect.addItemListener(
+        e -> {
+          boolean easyConnect = useEasyConnect.isSelected();
+          if (easyConnect) {
+            usePasswordFile.setSelected(true);
+            usePasswordFile.setEnabled(false);
+          } else {
+            usePasswordFile.setEnabled(true);
+          }
+        });
+    hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
+    lockTokenEditOnStartup.setSelected(prefs.getLockTokenEditOnStart());
+    lockPlayerMoveOnStartup.setSelected(prefs.getLockPlayerMovementOnStart());
+    lockPlayerLibrary.setSelected(prefs.getPlayerLibraryLock());
 
     movementMetricCombo = getMovementMetric();
     DefaultComboBoxModel movementMetricModel = new DefaultComboBoxModel();
@@ -122,7 +163,16 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
         });
 
     getRootPane().setDefaultButton(getOKButton());
+    getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
     dialog.showDialog();
+  }
+
+  public JCheckBox getUseWebRTCCheckBox() {
+    return (JCheckBox) getComponent("@useWebRTC");
+  }
+
+  public JTextField getRPToolsAlias() {
+    return (JTextField) getComponent("@RPToolsName");
   }
 
   public JButton getGenerateGMPasswordButton() {
@@ -182,13 +232,17 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 MapTool.showError("ServerDialog.error.port");
                 return;
               }
-              if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
-                MapTool.showError("ServerDialog.error.passwordMissing");
-                return;
-              }
-              if (gmPassword.getText().equals(playerPassword.getText())) {
-                MapTool.showError("ServerDialog.error.passwordMustDiffer");
-                return;
+              // If not using the password file then both the player and GM passwords must be
+              // present and must differ.
+              if (!usePasswordFile.isSelected()) {
+                if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
+                  MapTool.showError("ServerDialog.error.passwordMissing");
+                  return;
+                }
+                if (gmPassword.getText().equals(playerPassword.getText())) {
+                  MapTool.showError("ServerDialog.error.passwordMustDiffer");
+                  return;
+                }
               }
               try {
                 Integer.parseInt(getPortTextField().getText());
@@ -204,8 +258,40 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setRole((Player.Role) getRoleCombo().getSelectedItem());
                 prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
                 prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
+                prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                prefs.setUseEasyConnect(useEasyConnect.isSelected());
+                prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
+                prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
+                prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
+                prefs.setPlayerLibraryLock(lockPlayerLibrary.isSelected());
+                JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
+                AppState.setUseWebRTC(
+                    useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
                 accepted = true;
                 dialog.closeDialog();
+              }
+            });
+    getRPToolsAlias()
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              private void checkName() {
+                getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
+              }
+
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                checkName();
               }
             });
   }

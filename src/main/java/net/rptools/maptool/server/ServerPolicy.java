@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
 
 public class ServerPolicy {
@@ -37,6 +39,8 @@ public class ServerPolicy {
   private boolean isAutoRevealOnMovement;
   private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
   private WalkerMetric movementMetric;
+  private boolean hidemapselectui;
+  private boolean disablePlayerAssetPanel;
 
   private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
   private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
@@ -125,6 +129,14 @@ public class ServerPolicy {
     playersReceiveCampaignMacros = flag;
   }
 
+  public boolean getMapSelectUIHidden() {
+    return hidemapselectui;
+  }
+
+  public void setHiddenMapSelectUI(boolean flag) {
+    hidemapselectui = flag;
+  }
+
   /**
    * Sets if ToolTips should be used instead of extended output for [ ] rolls with no formatting
    * option.
@@ -195,7 +207,7 @@ public class ServerPolicy {
     return useAstarPathfinding;
   }
 
-  public void setUseAstarPathfinding(boolean useAstarPathfinding) {
+  public void setUsingAstarPathfinding(boolean useAstarPathfinding) {
     this.useAstarPathfinding = useAstarPathfinding;
   }
 
@@ -205,6 +217,14 @@ public class ServerPolicy {
 
   public void setVblBlocksMove(boolean vblBlocksMove) {
     this.vblBlocksMove = vblBlocksMove;
+  }
+
+  public boolean getDisablePlayerAssetPanel() {
+    return disablePlayerAssetPanel;
+  }
+
+  public void setDisablePlayerAssetPanel(boolean flag) {
+    this.disablePlayerAssetPanel = flag;
   }
 
   /**
@@ -238,6 +258,11 @@ public class ServerPolicy {
     sinfo.addProperty(
         "players receive campaign macros",
         playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "hide map select ui", getMapSelectUIHidden() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "disable player asset panel",
+        getDisablePlayerAssetPanel() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
@@ -261,6 +286,13 @@ public class ServerPolicy {
     sinfo.addProperty(
         "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
+    sinfo.addProperty("useWebRTC", AppState.useWebRTC() ? BigDecimal.ONE : BigDecimal.ZERO);
+
+    StartServerDialogPreferences prefs = new StartServerDialogPreferences();
+    sinfo.addProperty(
+        "usePasswordFile", prefs.getUsePasswordFile() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("server name", prefs.getRPToolsName());
+    sinfo.addProperty("port number", prefs.getPort());
     return sinfo;
   }
 }

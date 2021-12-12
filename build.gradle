@@ -2,13 +2,24 @@
 * For more details take a look at the Java Quickstart chapter in the Gradle
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
 */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
+
 // Access Git info from build script
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.1.0"
-    id "com.diffplug.spotless" version "5.2.0"
+    id "com.diffplug.spotless" version "5.14.3"
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.beryx.runtime' version '1.12.5'
+    id "com.google.protobuf" version "0.8.17"
 }
 
 // Apply the java plugin to add support for Java
@@ -17,11 +28,15 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
 sourceCompatibility = 16
 targetCompatibility = 16
+def grpcVersion = '1.39.0'
+def protobufVersion = '3.17.3'
+def protocVersion = protobufVersion
 
 
 // Used by gradle assemble & run tasks
@@ -89,6 +104,13 @@ spotless {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
             exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
+            exclude '**/MapToolInfo.java' // Temporary until supported.
+            exclude '**/PlayerDatabaseInfo.java' // Temporary until supported.
+            exclude '**/PlayerInfo.java' // Temporary until supported.
+            exclude '**/PlayTimeInfo.java' // Temporary until supported.
+            exclude '**/NoData.java' // Temporary until supported.
+            exclude '**/PlayTime.java' // Temporary until supported.
+            exclude '**/CipherUtil.java' // Temporary until supported.
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -115,13 +137,28 @@ javafx {
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
 
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+}
+
+// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+                                 "-Dpolyglot.engine.WarnInterpreterOnly=false",
                                  "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
                                  "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
                                  "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
                                  "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
@@ -168,11 +205,12 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+        jvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+                   "-Dpolyglot.engine.WarnInterpreterOnly=false",
                    "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
                    "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
                    "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
                    "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
 
         imageOptions = []
@@ -202,7 +240,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_windows_hotspot_16_36.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip');
             }
         }
 
@@ -213,7 +251,7 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_mac_hotspot_16_36.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_mac_hotspot_16.0.2_7.tar.gz');
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
@@ -239,7 +277,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16%2B36/OpenJDK16-jdk_x64_linux_hotspot_16_36.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz');
             }
         }
     }
@@ -258,12 +296,9 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
-    // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.13.0'	// Bridges v1 to v2 for other code in other libs
-
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.15.0'	// Bridges v1 to v2 for other code in other libs
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.31'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
@@ -340,7 +375,7 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.17'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-    implementation group: 'org.graalvm.js', name: 'js', version: '21.1.0'
+    implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
     implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
     implementation 'com.jayway.jsonpath:json-path:2.6.0'
@@ -395,6 +430,31 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
+    // webrtc
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.1'
+    implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0'
+    if (osdetector.os.is('windows'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:windows-x86_64'
+    else if (osdetector.os.is('osx'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:macos-x86_64'
+    else if (osdetector.os.is('linux'))
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:linux-x86_64'
+
+        // protobuf
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+
+    // Java Tuples
+    implementation 'com.flipkart.utils:javatuples:3.0'
+
+    // HTTP End Point
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+
+    // HTML Parsing
+    implementation 'org.jsoup:jsoup:1.14.3'
+
+    implementation 'com.google.guava:guava:31.0.1-jre'
 }
 
 
@@ -431,7 +491,8 @@ task uberJar(type: Jar) {
                 'Built-JDK': System.getProperty('java.version'),
                 'Source-Compatibility': project.sourceCompatibility,
                 'Target-Compatibility': project.targetCompatibility,
-                'Main-Class': project.mainClassName
+                'Main-Class': project.mainClassName,
+                'Multi-Release': true
     }
 
     from {

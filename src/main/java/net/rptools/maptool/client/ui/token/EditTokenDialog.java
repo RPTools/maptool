@@ -80,6 +80,8 @@ import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
@@ -100,6 +102,8 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -136,6 +140,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
+  private final LibraryManager libraryManager = new LibraryManager();
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
@@ -192,16 +197,46 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             super.closeDialog();
           }
         };
+    getTokenVblPanel().reset(token);
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
     getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
     getComponent("@GMName").setEnabled(MapTool.getPlayer().isGM());
 
-    getTokenVblPanel().reset(token);
-
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+    setLibTokenPaneEnabled(token.isLibToken());
+    validateLibTokenURIAccess(getNameField().getName());
     dialog.showDialog();
+  }
+
+  private void validateLibTokenURIAccess(String name) {
+    if (!name.toLowerCase().startsWith("lib:")) {
+      getLibTokenURIErrorLabel()
+          .setText(I18N.getText("EditTokenDialog.libTokenURI.error.notLibToken", name));
+      getAllowURLAccess().setEnabled(false);
+      return;
+    } else {
+      if (libraryManager.usesReservedPrefix(name.substring(4))) {
+        getLibTokenURIErrorLabel()
+            .setText(
+                I18N.getText(
+                    "macro.setAllowsURIAccess.reservedPrefix",
+                    libraryManager.getReservedPrefix(name.substring(4))));
+        getAllowURLAccess().setEnabled(false);
+        return;
+      } else if (libraryManager.usesReservedName(name.substring(4))) {
+        getLibTokenURIErrorLabel()
+            .setText(I18N.getText("EditTokenDialog.libTokenURI.error.reserved", name));
+
+        getAllowURLAccess().setEnabled(false);
+        return;
+      }
+    }
+
+    getAllowURLAccess().setEnabled(true);
+    getLibTokenURIErrorLabel().setText(" ");
   }
 
   @Override
@@ -316,6 +351,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getPlayer().isGM()) {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
       getTokenVblPanel().setToken(token);
+      getInverseVblCheckbox().setSelected(getTokenVblPanel().isInverseVbl());
       getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
       getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
       getJtsDistanceToleranceSpinner().setValue(getTokenVblPanel().getJtsDistanceTolerance());
@@ -331,6 +367,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       }
     }
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
+
+    setLibTokenPaneEnabled(token.isLibToken());
+
+    getAllowURLAccess().setSelected(token.getAllowURIAccess());
 
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();
@@ -416,6 +456,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     super.bind(token);
   }
 
+  private void setLibTokenPaneEnabled(boolean show) {
+    JTabbedPane tabbedPane = getTabbedPane();
+    String libTokenTile = I18N.getString("EditTokenDialog.tab.libToken");
+    tabbedPane.setEnabledAt(tabbedPane.indexOfTab(libTokenTile), show);
+    getAllowURLAccess().setEnabled(show);
+  }
+
   public JTabbedPane getTabbedPane() {
     return (JTabbedPane) getComponent("TabPane");
   }
@@ -442,6 +489,34 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public void initTypeCombo() {
     getTypeCombo().setModel(new DefaultComboBoxModel<>(Token.Type.values()));
+  }
+
+  public void initLibTokenTable() {
+    getNameField()
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              private void checkName() {
+                String name = getNameField().getText();
+                setLibTokenPaneEnabled(Token.isValidLibTokenName(name));
+                validateLibTokenURIAccess(name);
+              }
+
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                checkName();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                checkName();
+              }
+            });
   }
 
   public JComboBox getTypeCombo() {
@@ -574,6 +649,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public JList<TerrainModifierOperation> getTerrainModifiersIgnoredList() {
     return (JList<TerrainModifierOperation>) getComponent("terrainModifiersIgnored");
+  }
+
+  public JLabel getLibTokenURIErrorLabel() {
+    return (JLabel) getComponent("Label.LibURIError");
   }
 
   public void initOKButton() {
@@ -746,6 +825,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     token.setHeroLabData(heroLabData);
 
+    // URI Access
+    token.setAllowURIAccess(getAllowURLAccess().isEnabled() && getAllowURLAccess().isSelected());
     // OTHER
     tokenSaved = true;
 
@@ -921,6 +1002,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JTextField) getComponent("@name");
   }
 
+  private JTextField getSpeechNameField() {
+    return (JTextField) getComponent("@speechName");
+  }
+
   public CheckBoxListWithSelectable getOwnerList() {
     return (CheckBoxListWithSelectable) getComponent("ownerList");
   }
@@ -987,6 +1072,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public GridView getVblToolView() {
     return (GridView) getComponent("vblToolView");
+  }
+
+  public JCheckBox getAllowURLAccess() {
+    return (JCheckBox) getComponent("@allowURIAccess");
   }
 
   public void initSpeechPanel() {
@@ -1140,12 +1229,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                   }
                 }
 
-                TokenVBL.renderVBL(
+                TokenVBL.renderTopology(
                     MapTool.getFrame().getCurrentZoneRenderer(),
                     getTokenVblPanel()
                         .getToken()
                         .getTransformedVBL(getTokenVblPanel().getTokenVBL_optimized()),
-                    false);
+                    false,
+                    Zone.TopologyType.WALL_VBL);
 
                 if (getCopyOrMoveCheckbox().isSelected()) {
                   getTokenVblPanel().setTokenVBL_optimized(null);
@@ -1169,7 +1259,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 Area newTokenVBL =
                     TokenVBL.getVBL_underToken(
                         MapTool.getFrame().getCurrentZoneRenderer(), getTokenVblPanel().getToken());
-                TokenVBL.renderVBL(MapTool.getFrame().getCurrentZoneRenderer(), newTokenVBL, true);
+                TokenVBL.renderTopology(
+                    MapTool.getFrame().getCurrentZoneRenderer(),
+                    newTokenVBL,
+                    true,
+                    Zone.TopologyType.WALL_VBL);
               }
 
               getTokenVblPanel().repaint();

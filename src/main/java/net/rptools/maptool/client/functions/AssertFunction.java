@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -67,13 +68,6 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
       }
     }
     return BigDecimal.ONE;
-  }
-
-  /** Exception type thrown by assert() function, allowing a user-defined error message. */
-  public static class AssertFunctionException extends ParameterException {
-    public AssertFunctionException(String msg) {
-      super(msg);
-    }
   }
 
   @Override
