@@ -752,7 +752,8 @@ public final class Asset {
     return new Asset(
         asset.getMd5Key(),
         asset.getName(),
-        new byte[0], // Always null for now, in future we may want to add the data for small assets.
+        new byte[0], // Always empty for now, in future we may want to add the data for small
+        // assets.
         asset.getType(),
         asset.getExtension(),
         asset.getData() == null);
