@@ -17,6 +17,11 @@ package net.rptools.maptool.model;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset.Type;
 
+/**
+ * Asset details for passing assets around.
+ * The data may be empty even if the asset is valid in which case the asset will need to be
+ * loaded using the AssetManager (which may fetch the data from the server).
+ */
 public class AssetDetails {
   private final MD5Key md5Key;
   private final String name;
