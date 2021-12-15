@@ -18,7 +18,7 @@ plugins {
     id "org.ajoberstar.grgit" version "4.1.0"
     id "com.diffplug.spotless" version "5.14.3"
     id 'org.openjfx.javafxplugin' version '0.0.10'
-    id 'org.beryx.runtime' version '1.12.5'
+    id 'org.beryx.runtime' version '1.12.7'
     id "com.google.protobuf" version "0.8.17"
 }
 
