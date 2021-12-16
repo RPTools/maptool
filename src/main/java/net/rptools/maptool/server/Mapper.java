@@ -37,6 +37,8 @@ public class Mapper {
 
   public static Area map(AreaDto areaDto) {
     var segmentIterator = areaDto.getSegmentsList().iterator();
+    if (!segmentIterator.hasNext())
+      return new Area();
 
     var it =
         new PathIterator() {

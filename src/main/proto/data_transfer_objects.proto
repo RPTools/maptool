@@ -36,7 +36,7 @@ message ServerPolicyDto {
 message CampaignDto {
   string id = 1;
   string name = 2;
-  bool has_used_fog_toolbar = 3;
+  google.protobuf.BoolValue has_used_fog_toolbar = 3;
   CampaignPropertiesDto properties = 4;
   LocationDto export_location = 5;
   map<string, bool> export_settings = 6;
@@ -143,17 +143,17 @@ message SightTypeDto {
 
 message TokenPropertyDto {
   string name = 1;
-  string short_name = 2;
+  google.protobuf.StringValue short_name = 2;
   bool high_priority = 3;
   bool owner_only = 4;
   bool gm_only = 5;
-  string default_value = 6;
+  google.protobuf.StringValue default_value = 6;
 }
 
 message TokenOverlayDto {
   string name = 1;
   int32 order = 2;
-  string group = 3;
+  google.protobuf.StringValue group = 3;
   bool mouse_over = 4;
   int32 opacity = 5;
   bool show_gm = 6;
@@ -516,12 +516,12 @@ message ZoneDto {
   AreaDto pit_vbl = 24;
   AreaDto topology_terrain = 25;
   DrawablePaintDto background_paint = 26;
-  string map_asset = 27;
+  google.protobuf.StringValue map_asset = 27;
   IntPointDto boardPosition = 28;
   bool draw_board = 29;
   bool boardChanged = 30;
   string name = 31;
-  string player_alias = 32;
+  google.protobuf.StringValue player_alias = 32;
   bool is_visible = 33;
   VisionTypeDto vision_type = 34;
   TokenSelectionDto token_selection = 35;
