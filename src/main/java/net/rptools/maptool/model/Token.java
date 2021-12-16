@@ -2473,14 +2473,16 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     // Fix for pre 1.11.3 campaigns and token size issues
-    Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
-    sizeMap.clear();
-    for (var entry : oldSizeMap.entrySet()) {
-      var key = entry.getKey();
-      if (key instanceof Class<?> cl) {
-        sizeMap.put(cl.getName(), entry.getValue());
-      } else {
-        sizeMap.put(key.toString(), entry.getValue());
+    if (sizeMap != null && sizeMap.size() > 0) {
+      Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
+      sizeMap.clear();
+      for (var entry : oldSizeMap.entrySet()) {
+        var key = entry.getKey();
+        if (key instanceof Class<?> cl) {
+          sizeMap.put(cl.getName(), entry.getValue());
+        } else {
+          sizeMap.put(key.toString(), entry.getValue());
+        }
       }
     }
 
