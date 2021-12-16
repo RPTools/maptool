@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -21,7 +22,10 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /**
  * The blast template draws a square for DnD 4e
@@ -40,6 +44,14 @@ public class BlastTemplate extends ConeTemplate {
 
   private int offsetX;
   private int offsetY;
+
+  public BlastTemplate() {}
+
+  public BlastTemplate(GUID id, int offsetX, int offsetY) {
+    super(id);
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
@@ -156,5 +168,30 @@ public class BlastTemplate extends ConeTemplate {
   @Override
   public Area getArea() {
     return renderer.getArea();
+  }
+
+  public int getOffsetX() {
+    return offsetX;
+  }
+
+  public int getOffsetY() {
+    return offsetY;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = BlastTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setDirection(getDirection().name())
+        .setOffsetX(getOffsetX())
+        .setOffsetY(getOffsetY());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setBlastTemplate(dto).build();
   }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
@@ -38,6 +39,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -712,5 +714,41 @@ public class Campaign {
 
   public CampaignExportDialog getExportCampaignDialog() {
     return campaignExportDialog;
+  }
+
+  public static Campaign fromDto(CampaignDto dto) {
+    var campaign = new Campaign();
+    campaign.id = GUID.valueOf(dto.getId());
+    campaign.name = dto.getName();
+    campaign.hasUsedFogToolbar = dto.getHasUsedFogToolbar();
+    campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
+    campaign.exportLocation = Location.fromDto(dto.getExportLocation());
+    campaign.exportSettings = dto.getExportSettingsMap();
+    campaign.macroButtonLastIndex = dto.getMacroButtonLastIndex();
+    campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
+    campaign.macroButtonProperties =
+        dto.getMacroButtonPropertiesList().stream()
+            .map(p -> MacroButtonProperties.fromDto(p))
+            .collect(Collectors.toList());
+    var zoneList =
+        dto.getZonesList().stream().map(z -> Zone.fromDto(z)).collect(Collectors.toList());
+    zoneList.forEach(z -> campaign.zones.put(z.getId(), z));
+    return campaign;
+  }
+
+  public CampaignDto toDto() {
+    var dto = CampaignDto.newBuilder();
+    dto.setId(id.toString());
+    dto.setName(name);
+    dto.setHasUsedFogToolbar(hasUsedFogToolbar);
+    dto.setProperties(campaignProperties.toDto());
+    dto.setExportLocation(exportLocation.toDto());
+    dto.putAllExportSettings(exportSettings);
+    dto.setMacroButtonLastIndex(macroButtonLastIndex);
+    dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
+    dto.addAllMacroButtonProperties(
+        macroButtonProperties.stream().map(p -> p.toDto()).collect(Collectors.toList()));
+    dto.addAllZones(zones.values().stream().map(z -> z.toDto()).collect(Collectors.toList()));
+    return dto.build();
   }
 }

@@ -14,10 +14,11 @@
  */
 package net.rptools.maptool.transfer;
 
+import com.google.protobuf.ByteString;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
  * Creates data chunks for transferring binary data. Assumes large datasets (otherwise it would be a
@@ -26,13 +27,13 @@ import java.io.Serializable;
  * @author trevor
  */
 public class AssetProducer {
-  private Serializable id;
+  private String id;
   private String name;
   private File assetFile;
   private long length;
   private long currentPosition = 0;
 
-  public AssetProducer(Serializable id, String name, File assetFile) {
+  public AssetProducer(String id, String name, File assetFile) {
     if (!assetFile.exists() || assetFile.isDirectory()) {
       throw new IllegalArgumentException(assetFile + " is an invalid asset path");
     }
@@ -54,7 +55,7 @@ public class AssetProducer {
    * @throws IOException if an I/O error occurs or current position in the file is wrong
    * @return an {@link AssetChunk} with the next chunk of data
    */
-  public AssetChunk nextChunk(int size) throws IOException {
+  public AssetChunkDto nextChunk(int size) throws IOException {
     if (currentPosition + size > length) {
       size = (int) (length - currentPosition);
     }
@@ -64,7 +65,7 @@ public class AssetProducer {
       in.read(data, 0, size);
     }
     currentPosition += size;
-    return new AssetChunk(id, data);
+    return AssetChunkDto.newBuilder().setId(id).setData(ByteString.copyFrom(data)).build();
   }
 
   /**

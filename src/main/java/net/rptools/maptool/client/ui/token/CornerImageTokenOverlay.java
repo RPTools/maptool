@@ -18,6 +18,8 @@ import java.awt.Rectangle;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.QuadrantDto;
 
 /**
  * Place an image in a given corner.
@@ -87,5 +89,19 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
   /** @return Getter for corner */
   public Quadrant getCorner() {
     return corner;
+  }
+
+  public static CornerImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new CornerImageTokenOverlay();
+    overlay.fillFrom(dto);
+    overlay.corner = Quadrant.valueOf(dto.getQuadrant().name());
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setQuadrant(QuadrantDto.valueOf(corner.name()))
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.CORNER_IMAGE)
+        .build();
   }
 }

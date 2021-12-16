@@ -162,7 +162,7 @@ public class MapTool {
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
-  private static ClientMethodHandler handler;
+  private static ClientMessageHandler handler;
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
@@ -680,7 +680,7 @@ public class MapTool {
     messageList =
         new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
-    handler = new ClientMethodHandler();
+    handler = new ClientMessageHandler();
 
     setClientFrame(new MapToolFrame(menuBar));
 

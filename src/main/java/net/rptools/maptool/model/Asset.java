@@ -33,6 +33,8 @@ import javax.imageio.stream.ImageInputStream;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.AssetDto;
+import net.rptools.maptool.server.proto.AssetDtoType;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -509,6 +511,18 @@ public final class Asset {
     }
   }
 
+  // for serialisation
+  private Asset(MD5Key key, String name, String extension, Type type, boolean broken) {
+    this.md5Key = key;
+    this.name = name;
+    this.extension = extension;
+    this.type = type;
+    data = new byte[0];
+    dataAsString = null;
+    json = null;
+    this.broken = broken;
+  }
+
   /**
    * Returns the MD5 Sum of the {@code Asset}.
    *
@@ -739,22 +753,23 @@ public final class Asset {
     return broken;
   }
 
-  /**
-   * Returns a transferable asset from the values of this asset.
-   *
-   * @return a transferable asset from the values of this asset.
-   */
-  public AssetDetails getAssetDetails() {
-    return new AssetDetails(md5Key, name, extension, type, data);
+  public static Asset fromDto(AssetDto dto) {
+    var asset =
+        new Asset(
+            new MD5Key(dto.getMd5Key()),
+            dto.getName(),
+            dto.getExtension(),
+            Asset.Type.valueOf(dto.getType().name()),
+            false);
+    return asset;
   }
 
-  public static Asset fromAssetDetails(AssetDetails asset) {
-    return new Asset(
-        asset.getMd5Key(),
-        asset.getName(),
-        asset.getData(),
-        asset.getType(),
-        asset.getExtension(),
-        asset.getData() == null);
+  public AssetDto toDto() {
+    return AssetDto.newBuilder()
+        .setMd5Key(getMD5Key().toString())
+        .setName(getName())
+        .setExtension(getExtension())
+        .setType(AssetDtoType.valueOf(getType().name()))
+        .build();
   }
 }

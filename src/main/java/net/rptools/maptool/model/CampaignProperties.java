@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -44,6 +45,9 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.server.proto.CampaignPropertiesDto;
+import net.rptools.maptool.server.proto.LightSourceListDto;
+import net.rptools.maptool.server.proto.TokenPropertyListDto;
 
 public class CampaignProperties {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
@@ -459,5 +463,105 @@ public class CampaignProperties {
   /** @param characterSheets Setter for characterSheets */
   public void setCharacterSheets(Map<String, String> characterSheets) {
     this.characterSheets = characterSheets;
+  }
+
+  public static CampaignProperties fromDto(CampaignPropertiesDto dto) {
+    var props = new CampaignProperties();
+    props.tokenTypeMap = new HashMap<>();
+    var tokenTypes = dto.getTokenTypesMap();
+    tokenTypes.forEach(
+        (k, v) -> {
+          props.tokenTypeMap.put(
+              k,
+              v.getPropertiesList().stream()
+                  .map(p -> TokenProperty.fromDto(p))
+                  .collect(Collectors.toList()));
+        });
+    props.defaultSightType = dto.getDefaultSightType();
+    props.tokenStates = new HashMap<>();
+    dto.getTokenStatesList()
+        .forEach(
+            s -> {
+              var overlay = BooleanTokenOverlay.fromDto(s);
+              props.tokenStates.put(overlay.getName(), overlay);
+            });
+    props.tokenBars = new HashMap<>();
+    dto.getTokenBarsList()
+        .forEach(
+            b -> {
+              var overlay = BarTokenOverlay.fromDto(b);
+              props.tokenBars.put(overlay.getName(), overlay);
+            });
+    props.characterSheets = dto.getCharacterSheetsMap();
+    props.initiativeOwnerPermissions = dto.getInitiativeOwnerPermissions();
+    props.initiativeMovementLock = dto.getInitiativeMovementLock();
+    props.initiativeUseReverseSort = dto.getInitiativeUseReverseSort();
+    props.initiativePanelButtonsDisabled = dto.getInitiativePanelButtonsDisabled();
+    props.lightSourcesMap = new HashMap<>();
+    dto.getLightSourcesMap()
+        .forEach(
+            (k, v) -> {
+              var map = new HashMap<GUID, LightSource>();
+              v.getLightSourcesList().stream()
+                  .forEach(
+                      l -> {
+                        var lightSource = LightSource.fromDto(l);
+                        map.put(lightSource.getId(), lightSource);
+                      });
+              props.lightSourcesMap.put(k, map);
+            });
+    props.remoteRepositoryList = dto.getRemoteRepositoriesList();
+    props.lookupTableMap = new HashMap<>();
+    dto.getLookupTablesList()
+        .forEach(
+            lt -> {
+              var table = LookupTable.fromDto(lt);
+              props.lookupTableMap.put(table.getName(), table);
+            });
+    props.sightTypeMap = new HashMap<>();
+    dto.getSightTypesList()
+        .forEach(
+            st -> {
+              var sightType = SightType.fromDto(st);
+              props.sightTypeMap.put(sightType.getName(), sightType);
+            });
+    return props;
+  }
+
+  public CampaignPropertiesDto toDto() {
+    var dto = CampaignPropertiesDto.newBuilder();
+    tokenTypeMap.forEach(
+        (k, v) -> {
+          dto.putTokenTypes(
+              k,
+              TokenPropertyListDto.newBuilder()
+                  .addAllProperties(v.stream().map(p -> p.toDto()).collect(Collectors.toList()))
+                  .build());
+        });
+    dto.setDefaultSightType(defaultSightType);
+    dto.addAllTokenStates(
+        tokenStates.values().stream().map(s -> s.toDto()).collect(Collectors.toList()));
+    dto.addAllTokenBars(
+        tokenBars.values().stream().map(s -> s.toDto()).collect(Collectors.toList()));
+    dto.putAllCharacterSheets(characterSheets);
+    dto.setInitiativeOwnerPermissions(initiativeOwnerPermissions);
+    dto.setInitiativeMovementLock(initiativeMovementLock);
+    dto.setInitiativeUseReverseSort(initiativeUseReverseSort);
+    dto.setInitiativePanelButtonsDisabled(initiativePanelButtonsDisabled);
+    lightSourcesMap.forEach(
+        (k, v) -> {
+          dto.putLightSources(
+              k,
+              LightSourceListDto.newBuilder()
+                  .addAllLightSources(
+                      v.values().stream().map(l -> l.toDto()).collect(Collectors.toList()))
+                  .build());
+        });
+    dto.addAllRemoteRepositories(remoteRepositoryList);
+    dto.addAllLookupTables(
+        lookupTableMap.values().stream().map(lt -> lt.toDto()).collect(Collectors.toList()));
+    dto.addAllSightTypes(
+        sightTypeMap.values().stream().map(st -> st.toDto()).collect(Collectors.toList()));
+    return dto.build();
   }
 }

@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "MessageProtos";
+
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+import "message_types.proto";
+
+message Message {
+  oneof message_type {
+    AddTopologyMsg add_topology_msg = 1;
+    BootPlayerMsg boot_player_msg = 2;
+    BringTokensToFrontMsg bring_tokens_to_front_msg = 3;
+    ChangeZoneDisplayNameMsg change_zone_display_name_msg = 4;
+    ClearAllDrawingsMsg clear_all_drawings_msg = 5;
+    ClearExposedAreaMsg clear_exposed_area_msg = 6;
+    DrawMsg draw_msg = 7;
+    EditTokenMsg edit_token_msg = 8;
+    EnforceNotificationMsg enforce_notification_msg = 9;
+    EnforceZoneMsg enforce_zone_msg = 10;
+    EnforceZoneViewMsg enforce_zone_view_msg = 11;
+    ExecFunctionMsg exec_function_msg = 12;
+    ExecLinkMsg exec_link_msg = 13;
+    ExposeFowMsg expose_fow_msg = 14;
+    ExposePcAreaMsg expose_pc_area_msg = 15;
+    GetAssetMsg get_asset_msg = 16;
+    GetZoneMsg get_zone_msg = 17;
+    HeartbeatMsg heartbeat_msg = 18;
+    HideFowMsg hide_fow_msg = 19;
+    HidePointerMsg hide_pointer_msg = 20;
+    MessageMsg message_msg = 21;
+    MovePointerMsg move_pointer_msg = 22;
+    PlayerConnectedMsg player_connected_msg = 23;
+    PlayerDisconnectedMsg player_disconnected_msg = 24;
+    PutAssetMsg put_asset_msg = 25;
+    PutLabelMsg put_label_msg = 26;
+    PutTokenMsg put_token_msg = 27;
+    PutZoneMsg put_zone_msg = 28;
+    RemoveAssetMsg remove_asset_msg = 29;
+    RemoveLabelMsg remove_label_msg = 30;
+    RemoveTokenMsg remove_token_msg = 31;
+    RemoveTokensMsg remove_tokens_msg = 32;
+    RemoveTopologyMsg remove_topology_msg = 33;
+    RemoveZoneMsg remove_zone_msg = 34;
+    RenameZoneMsg rename_zone_msg = 35;
+    RestoreZoneViewMsg restore_zone_view_msg = 36;
+    SendTokensToBackMsg send_tokens_to_back_msg = 37;
+    SetBoardMsg set_board_msg = 38;
+    SetCampaignMsg set_campaign_msg = 39;
+    SetCampaignNameMsg set_campaign_name_msg = 40;
+    SetFowMsg set_fow_msg = 41;
+    SetLiveTypingLabelMsg set_live_typing_label_msg = 42;
+    SetTokenLocationMsg set_token_location_msg = 43;
+    SetServerPolicyMsg set_server_policy_msg = 44;
+    SetVisionTypeMsg set_vision_type_msg = 45;
+    SetZoneGridSizeMsg set_zone_grid_size_msg = 46;
+    SetZoneHasFowMsg set_zone_has_fow_msg = 47;
+    SetZoneVisibilityMsg set_zone_visibility_msg = 48;
+    ShowPointerMsg show_pointer_msg = 49;
+    StartAssetTransferMsg start_asset_transfer_msg = 50;
+    StartTokenMoveMsg start_token_move_msg = 51;
+    StopTokenMoveMsg stop_token_move_msg = 52;
+    ToggleTokenMoveWaypointMsg toggle_token_move_waypoint_msg = 53;
+    UndoDrawMsg undo_draw_msg = 54;
+    UpdateAssetTransferMsg update_asset_transfer_msg = 55;
+    UpdateCampaignMsg update_campaign_msg = 56;
+    UpdateCampaignMacrosMsg update_campaign_macros_msg = 57;
+    UpdateDrawingMsg update_drawing_msg = 58;
+    UpdateExposedAreaMetaMsg update_exposed_area_meta_msg = 59;
+    UpdateGmMacrosMsg update_gm_macros_msg = 60;
+    UpdateInitiativeMsg update_initiative_msg = 61;
+    UpdateTokenInitiativeMsg update_token_initiative_msg = 62;
+    UpdateTokenMoveMsg update_token_move_msg = 63;
+    UpdateTokenPropertyMsg update_token_property_msg = 64;
+    RemoveAddOnLibraryMsg remove_add_on_library_msg = 65;
+    RemoveAllAddOnLibrariesMsg remove_all_add_on_libraries_msg = 66;
+    AddAddOnLibraryMsg add_add_on_library_msg = 67;
+    UpdateDataStoreMsg update_data_store_msg = 68;
+    UpdateDataMsg update_data_msg = 69;
+    UpdateDataNamespaceMsg update_data_namespace_msg = 70;
+    RemoveDataStoreMsg remove_data_store_msg = 71;
+    RemoveDataNamespaceMsg remove_data_namespace_msg = 72;
+    RemoveDataMsg remove_data_msg = 73;
+  }
+}

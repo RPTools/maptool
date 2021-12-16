@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.TextMessageDto;
 
 public class TextMessage {
   // Not an enum so that it can be hessian serialized
@@ -195,5 +196,24 @@ public class TextMessage {
 
   public boolean isWhisper() {
     return channel == Channel.WHISPER;
+  }
+
+  public static TextMessage fromDto(TextMessageDto dto) {
+    return new TextMessage(
+        dto.getChannel(),
+        dto.getTarget(),
+        dto.getSource(),
+        dto.getMessage(),
+        dto.getTransformList());
+  }
+
+  public TextMessageDto toDto() {
+    return TextMessageDto.newBuilder()
+        .setChannel(getChannel())
+        .setTarget(getTarget())
+        .setSource(getSource())
+        .setMessage(getMessage())
+        .addAllTransform(getTransformHistory())
+        .build();
   }
 }

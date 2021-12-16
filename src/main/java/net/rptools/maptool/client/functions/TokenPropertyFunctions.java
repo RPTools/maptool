@@ -788,7 +788,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token.TokenShape newShape =
           Token.TokenShape.valueOf(
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape.name());
       return token.getShape().name();
     }
 
@@ -1138,9 +1138,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
     if (tokenShape != null) {
       MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayerShape, layer, tokenShape);
+          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), tokenShape.name());
     } else {
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer.name());
     }
     return layer.name();
   }

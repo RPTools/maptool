@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import net.rptools.maptool.server.proto.AssetChunkDto;
 
 public class AssetTransferManager {
   private Map<Serializable, AssetConsumer> consumerMap = new HashMap<Serializable, AssetConsumer>();
@@ -50,14 +51,14 @@ public class AssetTransferManager {
    *
    * @param size size of the data to retrieve
    * @throws IOException if an I/O error occurs or current position in the file is wrong
-   * @return an {@link AssetChunk} with the next size bytes of data
+   * @return an {@link AssetChunkDto} with the next size bytes of data
    */
-  public synchronized AssetChunk nextChunk(int size) throws IOException {
+  public synchronized AssetChunkDto nextChunk(int size) throws IOException {
     if (producerList.size() == 0) {
       return null;
     }
     AssetProducer producer = producerList.remove(0);
-    AssetChunk chunk = producer.nextChunk(size);
+    AssetChunkDto chunk = producer.nextChunk(size);
     if (!producer.isComplete()) {
       producerList.add(producer);
     }
@@ -88,7 +89,7 @@ public class AssetTransferManager {
    * @throws IOException if the file exists but is a directory rather than a regular file, does not
    *     exist but cannot be created, or cannot be opened for any other reason
    */
-  public synchronized void update(AssetChunk chunk) throws IOException {
+  public synchronized void update(AssetChunkDto chunk) throws IOException {
     AssetConsumer consumer = consumerMap.get(chunk.getId());
     if (consumer == null) {
       throw new IllegalArgumentException("Not expecting chunk: " + chunk.getId());

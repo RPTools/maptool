@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -196,4 +197,27 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   // image = ImageUtil.createCompatibleImage(image, size.width, size.height, null);
   // return image;
   // }
+
+  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    switch (dto.getType()) {
+      case DRAWN -> {
+        return DrawnBarTokenOverlay.fromDto(dto);
+      }
+      case MULTIPLE_IMAGE -> {
+        return MultipleImageBarTokenOverlay.fromDto(dto);
+      }
+      case SINGLE_IMAGE -> {
+        return SingleImageBarTokenOverlay.fromDto(dto);
+      }
+      case TWO_IMAGES -> {
+        return TwoImageBarTokenOverlay.fromDto(dto);
+      }
+      case TWO_TONE -> {
+        return TwoToneBarTokenOverlay.fromDto(dto);
+      }
+    }
+    return null;
+  }
+
+  public abstract BarTokenOverlayDto toDto();
 }

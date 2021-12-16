@@ -44,6 +44,8 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -920,6 +922,35 @@ public abstract class Grid implements Cloneable {
     at.scale(rescale, rescale);
 
     return getGridShapeCache().get(gridRadius).createTransformedArea(at);
+  }
+
+  public static Grid fromDto(GridDto dto) {
+    Grid grid = null;
+    switch (dto.getTypeCase()) {
+      case GRIDLESS_GRID -> grid = new GridlessGrid();
+      case HEX_GRID -> {
+        grid = HexGrid.fromDto(dto.getHexGrid());
+      }
+      case SQUARE_GRID -> grid = new SquareGrid();
+      case ISOMETRIC_GRID -> grid = new IsometricGrid();
+    }
+    grid.offsetX = dto.getOffsetX();
+    grid.offsetY = dto.getOffsetY();
+    grid.size = dto.getSize();
+    grid.cellShape = Mapper.map(dto.getCellShape());
+    return grid;
+  }
+
+  protected abstract void fillDto(GridDto.Builder dto);
+
+  public GridDto toDto() {
+    var dto = GridDto.newBuilder();
+    fillDto(dto);
+    dto.setOffsetX(offsetX);
+    dto.setOffsetX(offsetY);
+    dto.setSize(size);
+    dto.setCellShape(Mapper.map(cellShape));
+    return dto.build();
   }
 
   static class DirectionCalculator {
