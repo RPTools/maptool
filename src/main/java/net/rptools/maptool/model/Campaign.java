@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.BoolValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,8 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.protobuf.BoolValue;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
@@ -722,9 +721,11 @@ public class Campaign {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());
     campaign.name = dto.getName();
-    campaign.hasUsedFogToolbar = dto.hasHasUsedFogToolbar() ? dto.getHasUsedFogToolbar().getValue() : null;
+    campaign.hasUsedFogToolbar =
+        dto.hasHasUsedFogToolbar() ? dto.getHasUsedFogToolbar().getValue() : null;
     campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
-    campaign.exportLocation = dto.hasExportLocation() ? Location.fromDto(dto.getExportLocation()) : null;
+    campaign.exportLocation =
+        dto.hasExportLocation() ? Location.fromDto(dto.getExportLocation()) : null;
     campaign.exportSettings = dto.getExportSettingsMap();
     campaign.macroButtonLastIndex = dto.getMacroButtonLastIndex();
     campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
@@ -744,8 +745,8 @@ public class Campaign {
     dto.setName(name);
     if (hasUsedFogToolbar != null) dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
     dto.setProperties(campaignProperties.toDto());
-    if(exportLocation != null) dto.setExportLocation(exportLocation.toDto());
-    if(exportSettings != null) dto.putAllExportSettings(exportSettings);
+    if (exportLocation != null) dto.setExportLocation(exportLocation.toDto());
+    if (exportSettings != null) dto.putAllExportSettings(exportSettings);
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
     dto.addAllMacroButtonProperties(

@@ -143,7 +143,8 @@ public class SightType {
     var sightType = new SightType();
     sightType.name = dto.getName();
     sightType.multiplier = dto.getMultiplier();
-    sightType.personalLightSource = dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null;
+    sightType.personalLightSource =
+        dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null;
     sightType.shape = ShapeType.valueOf(dto.getShape().name());
     sightType.arc = dto.getArc();
     sightType.distance = dto.getDistance();
@@ -156,8 +157,8 @@ public class SightType {
     var dto = SightTypeDto.newBuilder();
     dto.setName(name);
     dto.setMultiplier(multiplier);
-    if(personalLightSource != null) dto.setPersonalLightSource(personalLightSource.toDto());
-    if(shape == null) shape = ShapeType.CIRCLE;
+    if (personalLightSource != null) dto.setPersonalLightSource(personalLightSource.toDto());
+    if (shape == null) shape = ShapeType.CIRCLE;
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
     dto.setArc(arc);
     dto.setDistance(distance);

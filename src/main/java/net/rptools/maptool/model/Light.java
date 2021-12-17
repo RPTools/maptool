@@ -143,12 +143,12 @@ public class Light {
 
   public LightDto toDto() {
     var dto = LightDto.newBuilder();
-    if(paint != null) dto.setPaint(paint.toDto());
+    if (paint != null) dto.setPaint(paint.toDto());
     dto.setFacingOffset(facingOffset);
     dto.setRadius(radius);
     dto.setArcAngle(arcAngle);
     // default shape is circle
-    if(shape == null) shape = ShapeType.CIRCLE;
+    if (shape == null) shape = ShapeType.CIRCLE;
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
     dto.setIsGm(isGM);
     dto.setOwnerOnly(ownerOnly);

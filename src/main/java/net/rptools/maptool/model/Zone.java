@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -21,8 +22,6 @@ import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-
-import com.google.protobuf.StringValue;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -2276,12 +2275,12 @@ public class Zone extends BaseModel {
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));
     dto.setBackgroundPaint(backgroundPaint.toDto());
-    if(mapAsset != null) dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    if (mapAsset != null) dto.setMapAsset(StringValue.of(mapAsset.toString()));
     dto.setBoardPosition(Mapper.map(boardPosition));
     dto.setDrawBoard(drawBoard);
     dto.setBoardChanged(boardChanged);
     dto.setName(name);
-    if(playerAlias != null) dto.setPlayerAlias(StringValue.of(playerAlias));
+    if (playerAlias != null) dto.setPlayerAlias(StringValue.of(playerAlias));
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));

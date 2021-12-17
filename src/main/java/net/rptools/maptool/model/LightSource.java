@@ -263,7 +263,7 @@ public class LightSource implements Comparable<LightSource> {
     dto.setId(id.toString());
     dto.setType(LightSourceDto.LightTypeDto.valueOf(type.name()));
     // default shape type
-    if(shapeType == null) shapeType = ShapeType.CIRCLE;
+    if (shapeType == null) shapeType = ShapeType.CIRCLE;
     dto.setShapeType(ShapeTypeDto.valueOf(shapeType.name()));
     dto.setLumens(lumens);
     dto.setScaleWithToken(scaleWithToken);

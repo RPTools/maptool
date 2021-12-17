@@ -14,9 +14,8 @@
  */
 package net.rptools.maptool.model;
 
-import java.io.Serializable;
-
 import com.google.protobuf.StringValue;
+import java.io.Serializable;
 import net.rptools.maptool.server.proto.TokenPropertyDto;
 
 public class TokenProperty implements Serializable {
@@ -129,11 +128,11 @@ public class TokenProperty implements Serializable {
   public TokenPropertyDto toDto() {
     var dto = TokenPropertyDto.newBuilder();
     dto.setName(name);
-    if(shortName != null) dto.setShortName(StringValue.of(shortName));
+    if (shortName != null) dto.setShortName(StringValue.of(shortName));
     dto.setHighPriority(highPriority);
     dto.setOwnerOnly(ownerOnly);
     dto.setGmOnly(gmOnly);
-    if(defaultValue != null) dto.setDefaultValue(StringValue.of(defaultValue));
+    if (defaultValue != null) dto.setDefaultValue(StringValue.of(defaultValue));
     return dto.build();
   }
 }

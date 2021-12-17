@@ -14,11 +14,10 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
-
-import com.google.protobuf.StringValue;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.proto.TokenOverlayDto;
@@ -232,7 +231,7 @@ public abstract class AbstractTokenOverlay implements Cloneable {
     var dto = TokenOverlayDto.newBuilder();
     dto.setName(name);
     dto.setOrder(order);
-    if ( group != null ) dto.setGroup(StringValue.of(group));
+    if (group != null) dto.setGroup(StringValue.of(group));
     dto.setMouseOver(mouseover);
     dto.setOpacity(opacity);
     dto.setShowGm(showGM);
