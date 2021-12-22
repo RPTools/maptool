@@ -743,10 +743,16 @@ public class Campaign {
     var dto = CampaignDto.newBuilder();
     dto.setId(id.toString());
     dto.setName(name);
-    if (hasUsedFogToolbar != null) dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
+    if (hasUsedFogToolbar != null) {
+      dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
+    }
     dto.setProperties(campaignProperties.toDto());
-    if (exportLocation != null) dto.setExportLocation(exportLocation.toDto());
-    if (exportSettings != null) dto.putAllExportSettings(exportSettings);
+    if (exportLocation != null) {
+      dto.setExportLocation(exportLocation.toDto());
+    }
+    if (exportSettings != null) {
+      dto.putAllExportSettings(exportSettings);
+    }
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
     dto.addAllMacroButtonProperties(

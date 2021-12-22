@@ -2901,12 +2901,16 @@ public class Token extends BaseModel implements Cloneable {
     var dto = TokenDto.newBuilder();
     dto.setId(id.toString());
     dto.setBeingImpersonated(beingImpersonated);
-    if (exposedAreaGUID != null) dto.setExposedAreaGuid(StringValue.of(exposedAreaGUID.toString()));
+    if (exposedAreaGUID != null) {
+      dto.setExposedAreaGuid(StringValue.of(exposedAreaGUID.toString()));
+    }
     for (var key : imageAssetMap.keySet()) {
       var notNullKey = key == null ? "" : key;
       dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
     }
-    if (currentImageAsset != null) dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
+    if (currentImageAsset != null) {
+      dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
+    }
     dto.setLastX(lastX);
     dto.setX(x);
     dto.setLastY(lastY);
@@ -2915,7 +2919,9 @@ public class Token extends BaseModel implements Cloneable {
     dto.setAnchorX(anchorX);
     dto.setAnchorY(anchorY);
     dto.setSizeScale(sizeScale);
-    if (lastPath != null) dto.setLastPath(lastPath.toDto());
+    if (lastPath != null) {
+      dto.setLastPath(lastPath.toDto());
+    }
     dto.setSnapToScale(snapToScale);
     dto.setWidth(width);
     dto.setHeight(height);
@@ -2930,7 +2936,9 @@ public class Token extends BaseModel implements Cloneable {
     dto.setVblColorSensitivity(vblColorSensitivity);
     dto.setAlwaysVisibleTolerance(alwaysVisibleTolerance);
     dto.setIsAlwaysVisible(isVisible);
-    if (vbl != null) dto.setVbl(Mapper.map(vbl));
+    if (vbl != null) {
+      dto.setVbl(Mapper.map(vbl));
+    }
     dto.setName(name);
     dto.addAllOwnerList(ownerList);
     dto.setOwnerType(ownerType);
@@ -2938,10 +2946,15 @@ public class Token extends BaseModel implements Cloneable {
     dto.setTokenType(tokenType);
     dto.setLayer(layer);
     dto.setPropertyType(propertyType);
-    if (facing != null) dto.setFacing(Int32Value.of(facing));
-    if (haloColorValue != null) dto.setHaloColor(Int32Value.of(haloColorValue));
-    if (visionOverlayColorValue != null)
+    if (facing != null) {
+      dto.setFacing(Int32Value.of(facing));
+    }
+    if (haloColorValue != null) {
+      dto.setHaloColor(Int32Value.of(haloColorValue));
+    }
+    if (visionOverlayColorValue != null) {
       dto.setVisionOverlayColor(Int32Value.of(visionOverlayColorValue));
+    }
     dto.setTokenOpacity(tokenOpacity);
     dto.setSpeechName(speechName);
     dto.setTerrainModifier(terrainModifier);
@@ -2954,8 +2967,12 @@ public class Token extends BaseModel implements Cloneable {
     dto.setIsFlippedX(isFlippedX);
     dto.setIsFlippedY(isFlippedY);
     dto.setIsFlippedIso(isFlippedIso);
-    if (charsheetImage != null) dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
-    if (portraitImage != null) dto.setPortraitImage(StringValue.of(portraitImage.toString()));
+    if (charsheetImage != null) {
+      dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
+    }
+    if (portraitImage != null) {
+      dto.setPortraitImage(StringValue.of(portraitImage.toString()));
+    }
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
     if (sightType != null) dto.setSightType(StringValue.of(sightType));
@@ -2981,7 +2998,9 @@ public class Token extends BaseModel implements Cloneable {
     propertyMap.forEach((k, v) -> dto.putProperties(k, (String) v));
     macroPropertiesMap.forEach((k, v) -> dto.putMacroProperties(k, v.toDto()));
     dto.putAllSpeech(speechMap);
-    if (heroLabData != null) dto.setHeroLabData(heroLabData.toDto());
+    if (heroLabData != null) {
+      dto.setHeroLabData(heroLabData.toDto());
+    }
     dto.setAllowUriAccess(allowURIAccess);
     return dto.build();
   }

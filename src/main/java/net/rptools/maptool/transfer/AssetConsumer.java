@@ -17,7 +17,7 @@ package net.rptools.maptool.transfer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
@@ -57,7 +57,7 @@ public class AssetConsumer {
   }
 
   /** @return the ID of the incoming asset */
-  public Serializable getId() {
+  public MD5Key getId() {
     return header.getId();
   }
 

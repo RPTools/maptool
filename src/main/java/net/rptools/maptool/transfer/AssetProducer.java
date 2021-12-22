@@ -18,6 +18,7 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
@@ -27,13 +28,13 @@ import net.rptools.maptool.server.proto.AssetChunkDto;
  * @author trevor
  */
 public class AssetProducer {
-  private String id;
+  private MD5Key id;
   private String name;
   private File assetFile;
   private long length;
   private long currentPosition = 0;
 
-  public AssetProducer(String id, String name, File assetFile) {
+  public AssetProducer(MD5Key id, String name, File assetFile) {
     if (!assetFile.exists() || assetFile.isDirectory()) {
       throw new IllegalArgumentException(assetFile + " is an invalid asset path");
     }
@@ -53,7 +54,7 @@ public class AssetProducer {
    *
    * @param size how many bytes to grab, may end up being less if there isn't enough data
    * @throws IOException if an I/O error occurs or current position in the file is wrong
-   * @return an {@link AssetChunk} with the next chunk of data
+   * @return an {@link AssetChunkDto} with the next chunk of data
    */
   public AssetChunkDto nextChunk(int size) throws IOException {
     if (currentPosition + size > length) {
@@ -65,7 +66,10 @@ public class AssetProducer {
       in.read(data, 0, size);
     }
     currentPosition += size;
-    return AssetChunkDto.newBuilder().setId(id).setData(ByteString.copyFrom(data)).build();
+    return AssetChunkDto.newBuilder()
+        .setId(id.toString())
+        .setData(ByteString.copyFrom(data))
+        .build();
   }
 
   /**

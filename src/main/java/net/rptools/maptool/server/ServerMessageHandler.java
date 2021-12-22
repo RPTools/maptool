@@ -591,7 +591,7 @@ public class ServerMessageHandler implements MessageHandler {
     try {
       AssetProducer producer =
           new AssetProducer(
-              assetID.toString(),
+              assetID,
               AssetManager.getAssetInfo(assetID).getProperty(AssetManager.NAME),
               AssetManager.getAssetCacheFile(assetID));
       var msg = StartAssetTransferMsg.newBuilder().setHeader(producer.getHeader().toDto());

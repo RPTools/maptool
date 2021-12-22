@@ -2275,12 +2275,16 @@ public class Zone extends BaseModel {
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));
     dto.setBackgroundPaint(backgroundPaint.toDto());
-    if (mapAsset != null) dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    if (mapAsset != null) {
+      dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    }
     dto.setBoardPosition(Mapper.map(boardPosition));
     dto.setDrawBoard(drawBoard);
     dto.setBoardChanged(boardChanged);
     dto.setName(name);
-    if (playerAlias != null) dto.setPlayerAlias(StringValue.of(playerAlias));
+    if (playerAlias != null) {
+      dto.setPlayerAlias(StringValue.of(playerAlias));
+    }
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
