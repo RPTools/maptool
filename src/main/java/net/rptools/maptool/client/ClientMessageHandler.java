@@ -152,12 +152,25 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_CAMPAIGN_MACROS_MSG -> handle(msg.getUpdateCampaignMacrosMsg());
         case UPDATE_GM_MACROS_MSG -> handle(msg.getUpdateGmMacrosMsg());
         case UPDATE_EXPOSED_AREA_META_MSG -> handle(msg.getUpdateExposedAreaMetaMsg());
+        case UPDATE_TOKEN_MOVE_MSG -> handle(msg.getUpdateTokenMoveMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
     } catch (Exception e) {
       log.error(e);
     }
+  }
+
+  private void handle(UpdateTokenMoveMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var keyToken = GUID.valueOf(msg.getKeyTokenId());
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          renderer.updateMoveSelectionSet(
+              keyToken, new ZonePoint(msg.getPoint().getX(), msg.getPoint().getY()));
+        });
   }
 
   private void handle(UpdateExposedAreaMetaMsg msg) {

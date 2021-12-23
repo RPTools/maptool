@@ -430,7 +430,7 @@ message ScriptTypeDto {
 
 message TextMessageDto {
   int32 channel = 1;
-  string target = 2;
+  google.protobuf.StringValue target = 2;
   string message = 3;
   string source = 4;
   repeated string transform = 5;

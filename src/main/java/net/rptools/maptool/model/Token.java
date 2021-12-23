@@ -342,7 +342,7 @@ public class Token extends BaseModel implements Cloneable {
    * A state properties for this token. This allows state to be added that can change appearance of
    * the token.
    */
-  private Map<String, Object> state;
+  private final Map<String, Object> state = new HashMap<>();
 
   /** Properties */
   // I screwed up. propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
@@ -511,7 +511,6 @@ public class Token extends BaseModel implements Cloneable {
 
   public Token(String name, MD5Key assetId) {
     this.name = name;
-    state = new HashMap<String, Object>();
     imageAssetMap = new HashMap<String, MD5Key>();
 
     // NULL key is the default
@@ -2231,7 +2230,6 @@ public class Token extends BaseModel implements Cloneable {
    */
   public Token(TokenTransferData td) {
     imageAssetMap = new HashMap<String, MD5Key>();
-    state = new HashMap<String, Object>();
     if (td.getLocation() != null) {
       x = td.getLocation().x;
       y = td.getLocation().y;
@@ -2940,7 +2938,9 @@ public class Token extends BaseModel implements Cloneable {
       dto.setVbl(Mapper.map(vbl));
     }
     dto.setName(name);
-    dto.addAllOwnerList(ownerList);
+    if (ownerList != null) {
+      dto.addAllOwnerList(ownerList);
+    }
     dto.setOwnerType(ownerType);
     dto.setTokenShape(tokenShape);
     dto.setTokenType(tokenType);
@@ -2966,6 +2966,9 @@ public class Token extends BaseModel implements Cloneable {
             .collect(Collectors.toList()));
     dto.setIsFlippedX(isFlippedX);
     dto.setIsFlippedY(isFlippedY);
+    if (isFlippedIso == null) {
+      isFlippedIso = false;
+    }
     dto.setIsFlippedIso(isFlippedIso);
     if (charsheetImage != null) {
       dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
@@ -2973,16 +2976,33 @@ public class Token extends BaseModel implements Cloneable {
     if (portraitImage != null) {
       dto.setPortraitImage(StringValue.of(portraitImage.toString()));
     }
-    dto.addAllLightSources(
-        lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
-    if (sightType != null) dto.setSightType(StringValue.of(sightType));
+    if (lightSourceList != null) {
+      dto.addAllLightSources(
+          lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
+    }
+    if (sightType != null) {
+      dto.setSightType(StringValue.of(sightType));
+    }
     dto.setHasSight(hasSight);
+    if (hasImageTable == null) {
+      hasImageTable = false;
+    }
     dto.setHasImageTable(hasImageTable);
-    if (imageTableName != null) dto.setImageTableName(StringValue.of(imageTableName));
-    if (label != null) dto.setLabel(StringValue.of(label));
-    if (notes != null) dto.setNotes(StringValue.of(notes));
-    if (gmNotes != null) dto.setGmNotes(StringValue.of(gmNotes));
-    if (gmName != null) dto.setGmName(StringValue.of(gmName));
+    if (imageTableName != null) {
+      dto.setImageTableName(StringValue.of(imageTableName));
+    }
+    if (label != null) {
+      dto.setLabel(StringValue.of(label));
+    }
+    if (notes != null) {
+      dto.setNotes(StringValue.of(notes));
+    }
+    if (gmNotes != null) {
+      dto.setGmNotes(StringValue.of(gmNotes));
+    }
+    if (gmName != null) {
+      dto.setGmName(StringValue.of(gmName));
+    }
     state.forEach(
         (key, state) -> {
           if (Boolean.class.equals(state.getClass())) {
@@ -2995,9 +3015,15 @@ public class Token extends BaseModel implements Cloneable {
             log.warn("unknown state type:" + state.getClass());
           }
         });
-    propertyMap.forEach((k, v) -> dto.putProperties(k, (String) v));
-    macroPropertiesMap.forEach((k, v) -> dto.putMacroProperties(k, v.toDto()));
-    dto.putAllSpeech(speechMap);
+    if (propertyMap != null) {
+      propertyMap.forEach((k, v) -> dto.putProperties(k, (String) v));
+    }
+    if (macroPropertiesMap != null) {
+      macroPropertiesMap.forEach((k, v) -> dto.putMacroProperties(k, v.toDto()));
+    }
+    if (speechMap != null) {
+      dto.putAllSpeech(speechMap);
+    }
     if (heroLabData != null) {
       dto.setHeroLabData(heroLabData.toDto());
     }

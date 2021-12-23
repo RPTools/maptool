@@ -636,7 +636,7 @@ public class ServerMessageHandler implements MessageHandler {
               .setZoneGuid(zoneGUID.toString())
               .setTokenGuid(token.getId().toString())
               .setProperty(TokenUpdateDto.valueOf(Token.Update.setZOrder.name()))
-              .setValues(0, TokenPropertyValueDto.newBuilder().setIntValue(zOrder));
+              .addValues(0, TokenPropertyValueDto.newBuilder().setIntValue(zOrder));
       server
           .getConnection()
           .sendMessage(clientId, Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
