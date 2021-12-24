@@ -2251,11 +2251,12 @@ public class Zone extends BaseModel {
     dto.setTokenVisionDistance(tokenVisionDistance);
     dto.setUnitsPerCell(unitsPerCell);
     dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
-    dto.addAllTopologyTypes(
-        topologyTypes.topologyTypes.stream()
-            .map(t -> TopologyTypeDto.valueOf(t.name()))
-            .collect(Collectors.toList()));
-
+    if (topologyTypes != null) {
+      dto.addAllTopologyTypes(
+          topologyTypes.topologyTypes.stream()
+              .map(t -> TopologyTypeDto.valueOf(t.name()))
+              .collect(Collectors.toList()));
+    }
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
@@ -2269,8 +2270,8 @@ public class Zone extends BaseModel {
     dto.setInitiative(initiativeList.toDto());
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);
-    dto.setFogPaint(fogPaint.toDto());
     dto.setTopology(Mapper.map(topology));
+    dto.setFogPaint(fogPaint.toDto());
     dto.setHillVbl(Mapper.map(hillVbl));
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));

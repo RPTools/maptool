@@ -15,6 +15,7 @@
 package net.rptools.maptool.client;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.StringValue;
 import java.awt.geom.Area;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -442,8 +443,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenList) {
     var msg = BringTokensToFrontMsg.newBuilder().setZoneGuid(zoneGUID.toString());
-    tokenList.stream().forEach(guid -> msg.addTokenGuids(guid.toString()));
-
+    msg.addAllTokenGuids(tokenList.stream().map(g -> g.toString()).collect(Collectors.toList()));
     makeServerCall(Message.newBuilder().setBringTokensToFrontMsg(msg).build());
   }
 
@@ -477,8 +477,10 @@ public class ServerCommandClientImpl implements ServerCommand {
             .setZoneGuid(zone.toString())
             .setTokenGuid(token.toString())
             .setIsHolding(holding)
-            .setState(state)
             .setIndex(index);
+    if (state != null) {
+      msg.setState(StringValue.of(state));
+    }
     makeServerCall(Message.newBuilder().setUpdateTokenInitiativeMsg(msg).build());
   }
 
@@ -543,8 +545,10 @@ public class ServerCommandClientImpl implements ServerCommand {
     var msg =
         UpdateExposedAreaMetaMsg.newBuilder()
             .setZoneGuid(zoneGUID.toString())
-            .setTokenGuid(tokenExposedAreaGUID.toString())
             .setArea(Mapper.map(meta.getExposedAreaHistory()));
+    if (tokenExposedAreaGUID != null) {
+      msg.setTokenGuid(StringValue.of(tokenExposedAreaGUID.toString()));
+    }
     makeServerCall(Message.newBuilder().setUpdateExposedAreaMetaMsg(msg).build());
   }
 
@@ -796,6 +800,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
       if (msg != null) {
         makeServerCall(msg);
+        msg = null;
       }
     }
 

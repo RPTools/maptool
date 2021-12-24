@@ -246,7 +246,7 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(UpdateExposedAreaMetaMsg msg) {
     Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
     zone.setExposedAreaMetaData(
-        GUID.valueOf(msg.getTokenGuid()),
+        msg.hasTokenGuid() ? GUID.valueOf(msg.getTokenGuid().getValue()) : null,
         new ExposedAreaMetaData(Mapper.map(msg.getArea()))); // update the server
   }
 
@@ -282,7 +282,7 @@ public class ServerMessageHandler implements MessageHandler {
       if (tokenIndex.size() != 1) return;
       ti = list.getTokenInitiative(tokenIndex.get(0));
     } // endif
-    ti.update(msg.getIsHolding(), msg.getState());
+    ti.update(msg.getIsHolding(), msg.hasState() ? msg.getState().getValue() : null);
   }
 
   private void handle(UpdateInitiativeMsg msg) {

@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import com.google.gson.JsonObject;
+import com.google.protobuf.StringValue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -782,7 +783,7 @@ public class InitiativeList implements Serializable {
     var initiative = new TokenInitiative();
     initiative.holding = dto.getHolding();
     initiative.id = GUID.valueOf(dto.getTokenId());
-    initiative.state = dto.getState();
+    initiative.state = dto.hasState() ? dto.getState().getValue() : null;
     return initiative;
   }
 
@@ -955,7 +956,9 @@ public class InitiativeList implements Serializable {
       var dto = TokenInitiativeDto.newBuilder();
       dto.setHolding(holding);
       dto.setTokenId(id.toString());
-      dto.setState(state);
+      if (state != null) {
+        dto.setState(StringValue.of(state));
+      }
       return dto.build();
     }
   }

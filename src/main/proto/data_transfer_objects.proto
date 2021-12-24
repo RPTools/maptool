@@ -50,7 +50,7 @@ message LookupTableDto {
   repeated LookupEntryDto entries = 1;
   string name = 2;
   string default_roll = 3;
-  string table_image = 4;
+  google.protobuf.StringValue table_image = 4;
   bool visible = 5;
   bool allow_lookup = 6;
   bool pick_once = 7;
@@ -60,8 +60,8 @@ message LookupEntryDto {
   int32 min = 1;
   int32 max = 2;
   bool picked = 3;
-  string value = 4;
-  string image_id = 5;
+  google.protobuf.StringValue value = 4;
+  google.protobuf.StringValue image_id = 5;
 }
 
 message LightSourceDto {
@@ -70,8 +70,8 @@ message LightSourceDto {
     AURA = 1;
   }
   repeated LightDto lights = 1;
-  string name = 2;
-  string id = 3;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue id = 3;
   LightTypeDto type = 4;
   ShapeTypeDto shape_type = 5;
   int32 lumens = 6;;
@@ -540,7 +540,7 @@ message InitiativeListDto {
 message TokenInitiativeDto {
   string token_id = 1;
   bool holding = 2;
-  string state = 3;
+  google.protobuf.StringValue state = 3;
 }
 
 message GridDto {

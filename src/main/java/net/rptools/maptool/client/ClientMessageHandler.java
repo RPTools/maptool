@@ -177,7 +177,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
-          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          var tokenGUID = msg.hasTokenGuid() ? GUID.valueOf(msg.getTokenGuid().getValue()) : null;
           ExposedAreaMetaData meta = new ExposedAreaMetaData(Mapper.map(msg.getArea()));
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           zone.setExposedAreaMetaData(tokenGUID, meta);
@@ -225,7 +225,7 @@ public class ClientMessageHandler implements MessageHandler {
             if (tokenIndex.size() != 1) return;
             ti = list.getTokenInitiative(tokenIndex.get(0));
           } // endif
-          ti.update(msg.getIsHolding(), msg.getState());
+          ti.update(msg.getIsHolding(), msg.hasState() ? msg.getState().getValue() : null);
         });
   }
 

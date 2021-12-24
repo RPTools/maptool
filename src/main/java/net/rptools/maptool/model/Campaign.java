@@ -75,8 +75,8 @@ public class Campaign {
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
   private Location exportLocation; // FJE 2011-01-14
-  private Map<String, Boolean>
-      exportSettings; // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
+  private Map<String, Boolean> exportSettings =
+      new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
   private CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
@@ -726,7 +726,7 @@ public class Campaign {
     campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
     campaign.exportLocation =
         dto.hasExportLocation() ? Location.fromDto(dto.getExportLocation()) : null;
-    campaign.exportSettings = dto.getExportSettingsMap();
+    campaign.exportSettings.putAll(dto.getExportSettingsMap());
     campaign.macroButtonLastIndex = dto.getMacroButtonLastIndex();
     campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
     campaign.macroButtonProperties =
@@ -750,9 +750,7 @@ public class Campaign {
     if (exportLocation != null) {
       dto.setExportLocation(exportLocation.toDto());
     }
-    if (exportSettings != null) {
-      dto.putAllExportSettings(exportSettings);
-    }
+    dto.putAllExportSettings(exportSettings);
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
     dto.addAllMacroButtonProperties(
