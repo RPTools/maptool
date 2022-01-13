@@ -1499,7 +1499,11 @@ public class ZoneRenderer extends JComponent
           newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 1);
 
           // newRgba[3] = (srcRgba[3] + dstRgba[3]) / 2;
-          newRgba[3] = Math.max(srcRgba[3], dstRgba[3]);
+          if (dstRgba[3] == 0) {
+            newRgba[3] = srcRgba[3];
+          } else {
+            newRgba[3] = Math.min(srcRgba[3], dstRgba[3]);
+          }
 
           for (int i = 0; i < 4; i++) {
             newRgba[i] *= 255.0f;
@@ -1541,7 +1545,7 @@ public class ZoneRenderer extends JComponent
       clip.intersect(visibleScreenArea);
       newG.setClip(clip);
     }
-    SwingUtil.useAntiAliasing(newG);
+    // SwingUtil.useAntiAliasing(newG);
     timer.stop("lights-1");
     timer.start("lights-2");
 
@@ -1584,36 +1588,36 @@ public class ZoneRenderer extends JComponent
       // Avoid combining _all_ of the lights as the area adds are very expensive, just combine those
       // that overlap
       // Jamz TODO: Check this and make sure proper order is happening
-      for (List<Area> areaList : colorMap.values()) {
-        List<Area> sourceList = new LinkedList<Area>(areaList);
-        areaList.clear();
-
-        outter:
-        while (sourceList.size() > 0) {
-          Area area = sourceList.remove(0);
-
-          for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
-            Area currArea = iter.next();
-
-            if (currArea.getBounds().intersects(area.getBounds())) {
-              iter.remove();
-              area.add(currArea);
-              sourceList.add(area);
-              continue outter;
-            }
-          }
-          // If we are here, we didn't find any other area to merge with
-          areaList.add(area);
-        }
-        // Cut out the bright light
-        if (areaList.size() > 0) {
-          for (Area area : areaList) {
-            for (Area brightArea : zoneView.getBrightLights(view)) {
-              area.subtract(brightArea);
-            }
-          }
-        }
-      }
+//      for (List<Area> areaList : colorMap.values()) {
+//        List<Area> sourceList = new LinkedList<Area>(areaList);
+//        areaList.clear();
+//
+//        outter:
+//        while (sourceList.size() > 0) {
+//          Area area = sourceList.remove(0);
+//
+//          for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
+//            Area currArea = iter.next();
+//
+//            if (currArea.getBounds().intersects(area.getBounds())) {
+//              iter.remove();
+//              area.add(currArea);
+//              sourceList.add(area);
+//              continue outter;
+//            }
+//          }
+//          // If we are here, we didn't find any other area to merge with
+//          areaList.add(area);
+//        }
+//        // Cut out the bright light
+//        if (areaList.size() > 0) {
+//          for (Area area : areaList) {
+//            for (Area brightArea : zoneView.getBrightLights(view)) {
+//              area.subtract(brightArea);
+//            }
+//          }
+//        }
+//      }
       renderedLightMap = new LinkedHashMap<Paint, List<Area>>();
       for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
         renderedLightMap.put(entry.getKey(), entry.getValue());
@@ -1628,7 +1632,15 @@ public class ZoneRenderer extends JComponent
         newG.fill(area);
       }
     }
+
+    // Anti-aliasing is on by default, but the render quality is medium by default
+    // If lights start getting ugly outlines running through other lights, these should fix that
+    // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
     g.drawImage(lightOverlay, null, 0, 0);
+
+
     timer.stop("lights-5");
     newG.dispose();
   }
