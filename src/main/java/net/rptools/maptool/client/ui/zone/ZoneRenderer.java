@@ -27,6 +27,9 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -1416,6 +1419,103 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
+
+  /**
+   * A custom Composite class to replace AlphaComposite for the purposes of mixing
+   * lights, auras, and other colored effects.
+   * https://stackoverflow.com/q/14625833 for class structure
+   * https://stackoverflow.com/a/727339 for additive RGB light algorithm
+   */
+  private static class BlendingComposite implements Composite {
+
+    // public static BlendingComposite INSTANCE = new BlendingComposite();
+
+    float srcAlphaMultiplier;
+
+    public BlendingComposite(float srcAlphaMultiplier) {
+      this.srcAlphaMultiplier = srcAlphaMultiplier;
+    }
+
+    // private BlendingContext context = new BlendingContext();
+
+    @Override
+    public CompositeContext createContext(ColorModel srcColorModel,
+        ColorModel dstColorModel, RenderingHints hints) {
+      return new BlendingContext(
+          srcAlphaMultiplier,
+          srcColorModel.getTransparency() == 1,
+          dstColorModel.getTransparency() == 1);
+    }
+
+  }
+
+  private static class BlendingContext implements CompositeContext {
+
+    float srcAlphaMultiplier;
+    boolean srcOpaque;
+    boolean dstOpaque;
+
+    public BlendingContext(float srcAlphaMultiplier, boolean srcOpaque, boolean dstOpaque) {
+      this.srcAlphaMultiplier = srcAlphaMultiplier;
+      this.srcOpaque = srcOpaque;
+      this.dstOpaque = dstOpaque;
+    }
+
+    @Override
+    public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+      int w = Math.min(src.getWidth(), dstIn.getWidth());
+      int h = Math.min(src.getHeight(), dstIn.getHeight());
+
+      float[] srcRgba = new float[4];
+      float[] dstRgba = new float[4];
+      float[] newRgba = new float[4];
+
+      for (int x = 0; x < w; x++) {
+        for (int y = 0; y < h; y++) {
+          src.getPixel(x, y, srcRgba);
+          dstIn.getPixel(x, y, dstRgba);
+          for (int i = 0; i < 4; i++) {
+            srcRgba[i] /= 255.0f;
+            dstRgba[i] /= 255.0f;
+          }
+
+          srcRgba[3] = srcOpaque ? 1 : srcRgba[3] * srcAlphaMultiplier;
+          dstRgba[3] = dstOpaque ? 1 : dstRgba[3];
+
+//          newRgba[3] = 1 - (1 - srcRgba[3]) * (1 - dstRgba[3]);
+//          if (newRgba[3] < 1.0e-6) { // Fully transparent -- R,G,B not important
+//            dstOut.setPixel(x, y, newRgba);
+//            continue;
+//          }
+//          newRgba[0] = srcRgba[0] * srcRgba[3] / newRgba[3] +
+//              dstRgba[0] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
+//          newRgba[1] = srcRgba[1] * srcRgba[3] / newRgba[3] +
+//              dstRgba[1] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
+//          newRgba[2] = srcRgba[2] * srcRgba[3] / newRgba[3] +
+//              dstRgba[2] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
+
+          newRgba[0] = Math.min(srcRgba[0] + dstRgba[0], 1);
+          newRgba[1] = Math.min(srcRgba[1] + dstRgba[1], 1);
+          newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 1);
+
+          // newRgba[3] = (srcRgba[3] + dstRgba[3]) / 2;
+          newRgba[3] = Math.max(srcRgba[3], dstRgba[3]);
+
+          for (int i = 0; i < 4; i++) {
+            newRgba[i] *= 255.0f;
+          }
+
+          dstOut.setPixel(x, y, newRgba);
+        }
+      }
+    }
+
+    @Override
+    public void dispose() {
+    }
+
+  }
+
   /** Map of the lights from drawableLightCache that have been combined. */
   private Map<Paint, List<Area>> renderedLightMap;
 
@@ -1429,7 +1529,13 @@ public class ZoneRenderer extends JComponent
   private void renderLights(Graphics2D g, PlayerView view) {
     // Setup
     timer.start("lights-1");
-    Graphics2D newG = (Graphics2D) g.create();
+    BufferedImage lightOverlay =
+        new BufferedImage(
+            g.getClip().getBounds().width,
+            g.getClip().getBounds().height,
+            BufferedImage.TYPE_4BYTE_ABGR);
+    Graphics2D newG = lightOverlay.createGraphics();
+    // Graphics2D newG = (Graphics2D) g.create();
     if (!view.isGMView() && visibleScreenArea != null) {
       Area clip = new Area(g.getClip());
       clip.intersect(visibleScreenArea);
@@ -1439,14 +1545,16 @@ public class ZoneRenderer extends JComponent
     timer.stop("lights-1");
     timer.start("lights-2");
 
-    AffineTransform af = g.getTransform();
+    //AffineTransform af = g.getTransform();
+    AffineTransform af = new AffineTransform();
     af.translate(getViewOffsetX(), getViewOffsetY());
     af.scale(getScale(), getScale());
     newG.setTransform(af);
 
-    newG.setComposite(
-        AlphaComposite.getInstance(
-            AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
+    // newG.setComposite(
+    //     AlphaComposite.getInstance(
+    //         AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
+    newG.setComposite(new BlendingComposite(AppPreferences.getLightOverlayOpacity() / 255.0f));
     timer.stop("lights-2");
 
     if (renderedLightMap == null) {
@@ -1520,6 +1628,7 @@ public class ZoneRenderer extends JComponent
         newG.fill(area);
       }
     }
+    g.drawImage(lightOverlay, null, 0, 0);
     timer.stop("lights-5");
     newG.dispose();
   }
