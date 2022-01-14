@@ -8,7 +8,7 @@ _If you are using WebRTC for your sessions or wish to help with testing please u
 
 - [#3327][i3327] Additional logging and improved connection handling for WebRTC.
 
-[i3327]: https://github.com/RPTools/maptool/issues/33267
+[i3327]: https://github.com/RPTools/maptool/issues/3327
 
 # MapTool 1.11.4
 **Security Fix Release**
