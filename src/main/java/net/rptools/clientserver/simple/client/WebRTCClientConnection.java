@@ -424,6 +424,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   public void addIceCandidate(RTCIceCandidate candidate) {
+    log.info(prefix() + "PeerConnection.addIceCandidate: " + candidate.toString());
     peerConnection.addIceCandidate(candidate);
   }
 
