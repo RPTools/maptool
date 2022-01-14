@@ -28,7 +28,10 @@ import java.awt.font.TextLayout;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
+import java.awt.image.RasterFormatException;
 import java.awt.image.WritableRaster;
 import java.text.NumberFormat;
 import java.util.*;
@@ -1426,19 +1429,50 @@ public class ZoneRenderer extends JComponent
    */
   private static class BlendingComposite implements Composite {
 
-    // public static BlendingComposite INSTANCE = new BlendingComposite();
-
     float srcAlphaMultiplier;
+
+    private BlendingComposite() {
+      this(1.0f);
+    }
 
     public BlendingComposite(float srcAlphaMultiplier) {
       this.srcAlphaMultiplier = srcAlphaMultiplier;
     }
 
-    // private BlendingContext context = new BlendingContext();
+    public static BlendingComposite getInstance() {
+      return new BlendingComposite();
+    }
+
+    public static BlendingComposite getInstance(float srcAlphaMultiplier) {
+      return new BlendingComposite(srcAlphaMultiplier);
+    }
+
+    public float getSrcAlphaMultiplier() {
+      return srcAlphaMultiplier;
+    }
+
+    private static boolean checkComponentsOrder(ColorModel cm) {
+      if (cm instanceof DirectColorModel directCM &&
+          cm.getTransferType() == DataBuffer.TYPE_INT) {
+
+        return directCM.getRedMask() == 0x00FF0000 &&
+            directCM.getGreenMask() == 0x0000FF00 &&
+            directCM.getBlueMask() == 0x000000FF &&
+            (directCM.getNumComponents() != 4 ||
+                directCM.getAlphaMask() == 0xFF000000);
+      }
+
+      return false;
+    }
 
     @Override
     public CompositeContext createContext(
         ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
+      if (!checkComponentsOrder(srcColorModel) ||
+          !checkComponentsOrder(dstColorModel)) {
+        throw new RasterFormatException("Incompatible color models");
+      }
+
       return new BlendingContext(srcAlphaMultiplier);
     }
   }
