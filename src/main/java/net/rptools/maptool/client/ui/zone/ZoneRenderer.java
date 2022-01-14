@@ -1419,12 +1419,10 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
-
   /**
-   * A custom Composite class to replace AlphaComposite for the purposes of mixing
-   * lights, auras, and other colored effects.
-   * https://stackoverflow.com/q/14625833 for class structure
-   * https://stackoverflow.com/a/727339 for additive RGB light algorithm
+   * A custom Composite class to replace AlphaComposite for the purposes of mixing lights, auras,
+   * and other colored effects.
+   * http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm
    */
   private static class BlendingComposite implements Composite {
 
@@ -1439,26 +1437,18 @@ public class ZoneRenderer extends JComponent
     // private BlendingContext context = new BlendingContext();
 
     @Override
-    public CompositeContext createContext(ColorModel srcColorModel,
-        ColorModel dstColorModel, RenderingHints hints) {
-      return new BlendingContext(
-          srcAlphaMultiplier,
-          srcColorModel.getTransparency() == 1,
-          dstColorModel.getTransparency() == 1);
+    public CompositeContext createContext(
+        ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
+      return new BlendingContext(srcAlphaMultiplier);
     }
-
   }
 
   private static class BlendingContext implements CompositeContext {
 
     float srcAlphaMultiplier;
-    boolean srcOpaque;
-    boolean dstOpaque;
 
-    public BlendingContext(float srcAlphaMultiplier, boolean srcOpaque, boolean dstOpaque) {
+    public BlendingContext(float srcAlphaMultiplier) {
       this.srcAlphaMultiplier = srcAlphaMultiplier;
-      this.srcOpaque = srcOpaque;
-      this.dstOpaque = dstOpaque;
     }
 
     @Override
@@ -1466,58 +1456,59 @@ public class ZoneRenderer extends JComponent
       int w = Math.min(src.getWidth(), dstIn.getWidth());
       int h = Math.min(src.getHeight(), dstIn.getHeight());
 
-      float[] srcRgba = new float[4];
-      float[] dstRgba = new float[4];
-      float[] newRgba = new float[4];
+      int[] srcRgba = new int[4];
+      int[] dstRgba = new int[4];
+      int[] newRgba = new int[4];
+      int[] srcPixels = new int[w];
+      int[] dstInPixels = new int[w];
+      int[] dstOutPixels = new int[w];
 
-      for (int x = 0; x < w; x++) {
-        for (int y = 0; y < h; y++) {
-          src.getPixel(x, y, srcRgba);
-          dstIn.getPixel(x, y, dstRgba);
-          for (int i = 0; i < 4; i++) {
-            srcRgba[i] /= 255.0f;
-            dstRgba[i] /= 255.0f;
-          }
+      for (int y = 0; y < h; y++) {
+        src.getDataElements(0, y, w, 1, srcPixels);
+        dstIn.getDataElements(0, y, w, 1, dstInPixels);
 
-          srcRgba[3] = srcOpaque ? 1 : srcRgba[3] * srcAlphaMultiplier;
-          dstRgba[3] = dstOpaque ? 1 : dstRgba[3];
+        for (int x = 0; x < w; x++) {
+          // pixels are stored as INT_ARGB
+          // our arrays are [R, G, B, A]
+          int pixel = srcPixels[x];
+          srcRgba[0] = (pixel >> 16) & 0xFF;
+          srcRgba[1] = (pixel >> 8) & 0xFF;
+          srcRgba[2] = (pixel) & 0xFF;
+          srcRgba[3] = (pixel >> 24) & 0xFF;
 
-//          newRgba[3] = 1 - (1 - srcRgba[3]) * (1 - dstRgba[3]);
-//          if (newRgba[3] < 1.0e-6) { // Fully transparent -- R,G,B not important
-//            dstOut.setPixel(x, y, newRgba);
-//            continue;
-//          }
-//          newRgba[0] = srcRgba[0] * srcRgba[3] / newRgba[3] +
-//              dstRgba[0] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
-//          newRgba[1] = srcRgba[1] * srcRgba[3] / newRgba[3] +
-//              dstRgba[1] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
-//          newRgba[2] = srcRgba[2] * srcRgba[3] / newRgba[3] +
-//              dstRgba[2] * dstRgba[3] * (1 - srcRgba[3]) / newRgba[3];
+          pixel = dstInPixels[x];
+          dstRgba[0] = (pixel >> 16) & 0xFF;
+          dstRgba[1] = (pixel >> 8) & 0xFF;
+          dstRgba[2] = (pixel) & 0xFF;
+          dstRgba[3] = (pixel >> 24) & 0xFF;
 
-          newRgba[0] = Math.min(srcRgba[0] + dstRgba[0], 1);
-          newRgba[1] = Math.min(srcRgba[1] + dstRgba[1], 1);
-          newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 1);
+          // Combine colors appropriately
+          srcRgba[3] = (int) (srcRgba[3] * srcAlphaMultiplier);
 
-          // newRgba[3] = (srcRgba[3] + dstRgba[3]) / 2;
+          newRgba[0] = Math.min(srcRgba[0] + dstRgba[0], 255);
+          newRgba[1] = Math.min(srcRgba[1] + dstRgba[1], 255);
+          newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 255);
+
           if (dstRgba[3] == 0) {
             newRgba[3] = srcRgba[3];
           } else {
             newRgba[3] = Math.min(srcRgba[3], dstRgba[3]);
           }
 
-          for (int i = 0; i < 4; i++) {
-            newRgba[i] *= 255.0f;
-          }
-
-          dstOut.setPixel(x, y, newRgba);
+          // Recombine [R, G, B, A] array to INT_ARGB
+          dstOutPixels[x] =
+              (newRgba[3] & 0xFF) << 24
+                  | (newRgba[0] & 0xFF) << 16
+                  | (newRgba[1] & 0xFF) << 8
+                  | newRgba[2] & 0xFF;
         }
+
+        dstOut.setDataElements(0, y, w, 1, dstOutPixels);
       }
     }
 
     @Override
-    public void dispose() {
-    }
-
+    public void dispose() {}
   }
 
   /** Map of the lights from drawableLightCache that have been combined. */
@@ -1537,27 +1528,22 @@ public class ZoneRenderer extends JComponent
         new BufferedImage(
             g.getClip().getBounds().width,
             g.getClip().getBounds().height,
-            BufferedImage.TYPE_4BYTE_ABGR);
+            BufferedImage.TYPE_INT_ARGB);
     Graphics2D newG = lightOverlay.createGraphics();
-    // Graphics2D newG = (Graphics2D) g.create();
+
     if (!view.isGMView() && visibleScreenArea != null) {
       Area clip = new Area(g.getClip());
       clip.intersect(visibleScreenArea);
       newG.setClip(clip);
     }
-    // SwingUtil.useAntiAliasing(newG);
     timer.stop("lights-1");
-    timer.start("lights-2");
 
-    //AffineTransform af = g.getTransform();
+    timer.start("lights-2");
     AffineTransform af = new AffineTransform();
     af.translate(getViewOffsetX(), getViewOffsetY());
     af.scale(getScale(), getScale());
     newG.setTransform(af);
 
-    // newG.setComposite(
-    //     AlphaComposite.getInstance(
-    //         AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
     newG.setComposite(new BlendingComposite(AppPreferences.getLightOverlayOpacity() / 255.0f));
     timer.stop("lights-2");
 
@@ -1581,67 +1567,34 @@ public class ZoneRenderer extends JComponent
           otherLightList.add(light); // not used for anything?!
         }
       }
-      timer.stop("lights-3");
 
-      timer.start("lights-4");
-      // Combine same colors to avoid ugly overlap
-      // Avoid combining _all_ of the lights as the area adds are very expensive, just combine those
-      // that overlap
-      // Jamz TODO: Check this and make sure proper order is happening
-//      for (List<Area> areaList : colorMap.values()) {
-//        List<Area> sourceList = new LinkedList<Area>(areaList);
-//        areaList.clear();
-//
-//        outter:
-//        while (sourceList.size() > 0) {
-//          Area area = sourceList.remove(0);
-//
-//          for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
-//            Area currArea = iter.next();
-//
-//            if (currArea.getBounds().intersects(area.getBounds())) {
-//              iter.remove();
-//              area.add(currArea);
-//              sourceList.add(area);
-//              continue outter;
-//            }
-//          }
-//          // If we are here, we didn't find any other area to merge with
-//          areaList.add(area);
-//        }
-//        // Cut out the bright light
-//        if (areaList.size() > 0) {
-//          for (Area area : areaList) {
-//            for (Area brightArea : zoneView.getBrightLights(view)) {
-//              area.subtract(brightArea);
-//            }
-//          }
-//        }
-//      }
       renderedLightMap = new LinkedHashMap<Paint, List<Area>>();
       for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
         renderedLightMap.put(entry.getKey(), entry.getValue());
       }
-      timer.stop("lights-4");
+      timer.stop("lights-3");
     }
+
     // Draw
-    timer.start("lights-5");
+    timer.start("lights-4");
     for (Entry<Paint, List<Area>> entry : renderedLightMap.entrySet()) {
       newG.setPaint(entry.getKey());
       for (Area area : entry.getValue()) {
         newG.fill(area);
       }
     }
+    timer.stop("lights-4");
 
-    // Anti-aliasing is on by default, but the render quality is medium by default
+    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to
+    // high)
     // If lights start getting ugly outlines running through other lights, these should fix that
     // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
+    timer.start("lights-5");
     g.drawImage(lightOverlay, null, 0, 0);
-
-
     timer.stop("lights-5");
+
     newG.dispose();
   }
 
