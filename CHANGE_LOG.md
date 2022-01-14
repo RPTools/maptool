@@ -4,8 +4,7 @@
 
 Adds additional logging for WebRTC and improved connection handling.
 
-_If you are using WebRTC for your sessions or wish to help with testing please update to this version and report back to the MapTool Discord your experiences when using it, both positive and negative.
-_
+_If you are using WebRTC for your sessions or wish to help with testing please update to this version and report back to the MapTool Discord your experiences when using it, both positive and negative._
 
 - [#3327][i3327] Additional logging and improved connection handling for WebRTC.
 
