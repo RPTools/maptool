@@ -15,20 +15,19 @@
 package net.rptools.maptool.transfer;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.server.proto.AssetChunkDto;
 
 public class AssetTransferManager {
-  private Map<Serializable, AssetConsumer> consumerMap = new HashMap<Serializable, AssetConsumer>();
-  private List<ConsumerListener> consumerListenerList =
-      new CopyOnWriteArrayList<ConsumerListener>();
-  private List<AssetProducer> producerList = new LinkedList<AssetProducer>();
+  private final Map<MD5Key, AssetConsumer> consumerMap = new HashMap<>();
+  private final List<ConsumerListener> consumerListenerList = new CopyOnWriteArrayList<>();
+  private final List<AssetProducer> producerList = new LinkedList<>();
 
   /** Clear out all existing consumers and producers */
   public synchronized void flush() {
@@ -69,7 +68,7 @@ public class AssetTransferManager {
    * Add the corresponding consumer that is expecting to receive chunks. Add a ConsumerListener to
    * know when the asset is complete
    *
-   * @param consumer the consumer the will receive the chunks
+   * @param consumer the consumer which will receive the chunks
    */
   public synchronized void addConsumer(AssetConsumer consumer) {
     if (consumerMap.get(consumer.getId()) != null) {
@@ -90,7 +89,7 @@ public class AssetTransferManager {
    *     exist but cannot be created, or cannot be opened for any other reason
    */
   public synchronized void update(AssetChunkDto chunk) throws IOException {
-    AssetConsumer consumer = consumerMap.get(chunk.getId());
+    AssetConsumer consumer = consumerMap.get(new MD5Key(chunk.getId()));
     if (consumer == null) {
       throw new IllegalArgumentException("Not expecting chunk: " + chunk.getId());
     }
@@ -113,7 +112,7 @@ public class AssetTransferManager {
    * @return a list of consumers for the asset
    */
   public synchronized List<AssetConsumer> getAssetConsumers() {
-    return new ArrayList<AssetConsumer>(consumerMap.values());
+    return new ArrayList<>(consumerMap.values());
   }
 
   public void addConsumerListener(ConsumerListener listener) {

@@ -131,7 +131,7 @@ public class Light {
 
   public static Light fromDto(LightDto dto) {
     var light = new Light();
-    light.paint = DrawablePaint.fromDto(dto.getPaint());
+    light.paint = dto.hasPaint() ? DrawablePaint.fromDto(dto.getPaint()) : null;
     light.facingOffset = dto.getFacingOffset();
     light.radius = dto.getRadius();
     light.arcAngle = dto.getArcAngle();
@@ -143,10 +143,12 @@ public class Light {
 
   public LightDto toDto() {
     var dto = LightDto.newBuilder();
-    dto.setPaint(paint.toDto());
+    if (paint != null) dto.setPaint(paint.toDto());
     dto.setFacingOffset(facingOffset);
     dto.setRadius(radius);
     dto.setArcAngle(arcAngle);
+    // default shape is circle
+    if (shape == null) shape = ShapeType.CIRCLE;
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
     dto.setIsGm(isGM);
     dto.setOwnerOnly(ownerOnly);

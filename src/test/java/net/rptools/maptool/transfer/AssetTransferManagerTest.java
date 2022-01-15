@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.server.proto.AssetChunkDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class AssetTransferManagerTest {
     File tmpFile = createTempFile(data);
 
     // PRODUCER
-    AssetProducer producer = new AssetProducer("Testing", "onetwo", tmpFile);
+    AssetProducer producer = new AssetProducer(new MD5Key("Testing"), "onetwo", tmpFile);
     AssetHeader header = producer.getHeader();
 
     assertNotNull(header);

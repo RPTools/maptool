@@ -152,6 +152,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_CAMPAIGN_MACROS_MSG -> handle(msg.getUpdateCampaignMacrosMsg());
         case UPDATE_GM_MACROS_MSG -> handle(msg.getUpdateGmMacrosMsg());
         case UPDATE_EXPOSED_AREA_META_MSG -> handle(msg.getUpdateExposedAreaMetaMsg());
+        case UPDATE_TOKEN_MOVE_MSG -> handle(msg.getUpdateTokenMoveMsg());
         default -> log.warn(msgType + "not handled.");
       }
 
@@ -160,11 +161,23 @@ public class ClientMessageHandler implements MessageHandler {
     }
   }
 
+  private void handle(UpdateTokenMoveMsg msg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          var keyToken = GUID.valueOf(msg.getKeyTokenId());
+
+          var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          renderer.updateMoveSelectionSet(
+              keyToken, new ZonePoint(msg.getPoint().getX(), msg.getPoint().getY()));
+        });
+  }
+
   private void handle(UpdateExposedAreaMetaMsg msg) {
     EventQueue.invokeLater(
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
-          var tokenGUID = GUID.valueOf(msg.getTokenGuid());
+          var tokenGUID = msg.hasTokenGuid() ? GUID.valueOf(msg.getTokenGuid().getValue()) : null;
           ExposedAreaMetaData meta = new ExposedAreaMetaData(Mapper.map(msg.getArea()));
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           zone.setExposedAreaMetaData(tokenGUID, meta);
@@ -212,7 +225,7 @@ public class ClientMessageHandler implements MessageHandler {
             if (tokenIndex.size() != 1) return;
             ti = list.getTokenInitiative(tokenIndex.get(0));
           } // endif
-          ti.update(msg.getIsHolding(), msg.getState());
+          ti.update(msg.getIsHolding(), msg.hasState() ? msg.getState().getValue() : null);
         });
   }
 

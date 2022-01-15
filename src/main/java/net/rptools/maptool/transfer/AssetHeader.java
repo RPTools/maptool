@@ -15,24 +15,25 @@
 package net.rptools.maptool.transfer;
 
 import java.io.Serializable;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.server.proto.AssetTransferHeaderDto;
 
 public class AssetHeader implements Serializable {
-  private String id;
+  private MD5Key id;
   private String name;
   private long size;
 
-  public AssetHeader(String id, String name, long size) {
+  public AssetHeader(MD5Key id, String name, long size) {
     this.id = id;
     this.size = size;
     this.name = name;
   }
 
   public static AssetHeader fromDto(AssetTransferHeaderDto dto) {
-    return new AssetHeader(dto.getId(), dto.getName(), dto.getSize());
+    return new AssetHeader(new MD5Key(dto.getId()), dto.getName(), dto.getSize());
   }
 
-  public Serializable getId() {
+  public MD5Key getId() {
     return id;
   }
 
@@ -45,6 +46,10 @@ public class AssetHeader implements Serializable {
   }
 
   public AssetTransferHeaderDto toDto() {
-    return AssetTransferHeaderDto.newBuilder().setName(name).setId(id).setSize(size).build();
+    return AssetTransferHeaderDto.newBuilder()
+        .setName(name)
+        .setId(id.toString())
+        .setSize(size)
+        .build();
   }
 }

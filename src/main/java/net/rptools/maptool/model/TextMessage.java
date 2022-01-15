@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.MapTool;
@@ -201,19 +202,20 @@ public class TextMessage {
   public static TextMessage fromDto(TextMessageDto dto) {
     return new TextMessage(
         dto.getChannel(),
-        dto.getTarget(),
+        dto.hasTarget() ? dto.getTarget().getValue() : null,
         dto.getSource(),
         dto.getMessage(),
         dto.getTransformList());
   }
 
   public TextMessageDto toDto() {
-    return TextMessageDto.newBuilder()
-        .setChannel(getChannel())
-        .setTarget(getTarget())
-        .setSource(getSource())
-        .setMessage(getMessage())
-        .addAllTransform(getTransformHistory())
-        .build();
+    var dto = TextMessageDto.newBuilder().setChannel(channel).setSource(source).setMessage(message);
+    if (target != null) {
+      dto.setTarget(StringValue.of(target));
+    }
+    if (transform != null) {
+      dto.addAllTransform(transform);
+    }
+    return dto.build();
   }
 }

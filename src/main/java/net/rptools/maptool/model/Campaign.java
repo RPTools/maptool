@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.BoolValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,8 +75,8 @@ public class Campaign {
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
   private Location exportLocation; // FJE 2011-01-14
-  private Map<String, Boolean>
-      exportSettings; // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
+  private Map<String, Boolean> exportSettings =
+      new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
   private CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
@@ -720,10 +721,12 @@ public class Campaign {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());
     campaign.name = dto.getName();
-    campaign.hasUsedFogToolbar = dto.getHasUsedFogToolbar();
+    campaign.hasUsedFogToolbar =
+        dto.hasHasUsedFogToolbar() ? dto.getHasUsedFogToolbar().getValue() : null;
     campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
-    campaign.exportLocation = Location.fromDto(dto.getExportLocation());
-    campaign.exportSettings = dto.getExportSettingsMap();
+    campaign.exportLocation =
+        dto.hasExportLocation() ? Location.fromDto(dto.getExportLocation()) : null;
+    campaign.exportSettings.putAll(dto.getExportSettingsMap());
     campaign.macroButtonLastIndex = dto.getMacroButtonLastIndex();
     campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
     campaign.macroButtonProperties =
@@ -740,9 +743,13 @@ public class Campaign {
     var dto = CampaignDto.newBuilder();
     dto.setId(id.toString());
     dto.setName(name);
-    dto.setHasUsedFogToolbar(hasUsedFogToolbar);
+    if (hasUsedFogToolbar != null) {
+      dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
+    }
     dto.setProperties(campaignProperties.toDto());
-    dto.setExportLocation(exportLocation.toDto());
+    if (exportLocation != null) {
+      dto.setExportLocation(exportLocation.toDto());
+    }
     dto.putAllExportSettings(exportSettings);
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);

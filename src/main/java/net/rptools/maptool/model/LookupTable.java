@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.rptools.common.expression.ExpressionParser;
@@ -421,7 +422,11 @@ public class LookupTable {
 
     public static LookupEntry fromDto(LookupEntryDto dto) {
       var entry =
-          new LookupEntry(dto.getMin(), dto.getMax(), dto.getValue(), new MD5Key(dto.getImageId()));
+          new LookupEntry(
+              dto.getMin(),
+              dto.getMax(),
+              dto.hasValue() ? dto.getValue().getValue() : null,
+              dto.hasImageId() ? new MD5Key(dto.getImageId().getValue()) : null);
       entry.picked = dto.getPicked();
       return entry;
     }
@@ -431,8 +436,12 @@ public class LookupTable {
       dto.setMin(min);
       dto.setMax(max);
       dto.setPicked(picked);
-      dto.setValue(value);
-      dto.setImageId(imageId.toString());
+      if (value != null) {
+        dto.setValue(StringValue.of(value));
+      }
+      if (imageId != null) {
+        dto.setImageId(StringValue.of(imageId.toString()));
+      }
       return dto.build();
     }
   }
@@ -505,7 +514,7 @@ public class LookupTable {
     table.entryList =
         dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
     table.defaultRoll = dto.getDefaultRoll();
-    table.tableImage = new MD5Key(dto.getTableImage());
+    table.tableImage = dto.hasTableImage() ? new MD5Key(dto.getTableImage().getValue()) : null;
     table.setVisible(dto.getVisible());
     table.setAllowLookup(dto.getAllowLookup());
     table.setPickOnce(dto.getPickOnce());
@@ -517,7 +526,9 @@ public class LookupTable {
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     dto.setName(name);
     dto.setDefaultRoll(defaultRoll);
-    dto.setTableImage(tableImage.toString());
+    if (tableImage != null) {
+      dto.setTableImage(StringValue.of(tableImage.toString()));
+    }
     dto.setVisible(visible);
     dto.setAllowLookup(allowLookup);
     dto.setPickOnce(pickOnce);

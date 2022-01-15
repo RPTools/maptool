@@ -308,7 +308,7 @@ message UpdateDrawingMsg {
 
 message UpdateExposedAreaMetaMsg {
   string zone_guid = 1;
-  string token_guid = 2;
+  google.protobuf.StringValue token_guid = 2;
   AreaDto area = 3;
 }
 
@@ -325,7 +325,7 @@ message UpdateTokenInitiativeMsg {
   string zone_guid = 1;
   string token_guid = 2;
   bool is_holding = 3;
-  string state = 4;
+  google.protobuf.StringValue state = 4;
   int32 index = 5;
 }
 

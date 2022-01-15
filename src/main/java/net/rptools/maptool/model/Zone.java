@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -2224,13 +2225,13 @@ public class Zone extends BaseModel {
     zone.pitVbl = Mapper.map(dto.getPitVbl());
     zone.topologyTerrain = Mapper.map(dto.getTopologyTerrain());
     zone.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundPaint());
-    zone.mapAsset = new MD5Key(dto.getMapAsset());
+    zone.mapAsset = dto.hasMapAsset() ? new MD5Key(dto.getMapAsset().getValue()) : null;
     zone.boardPosition.x = dto.getBoardPosition().getX();
     zone.boardPosition.y = dto.getBoardPosition().getY();
     zone.drawBoard = dto.getDrawBoard();
     zone.boardChanged = dto.getBoardChanged();
     zone.name = dto.getName();
-    zone.playerAlias = dto.getPlayerAlias();
+    zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
     zone.isVisible = dto.getIsVisible();
     zone.visionType = VisionType.valueOf(dto.getVisionType().name());
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
@@ -2250,11 +2251,12 @@ public class Zone extends BaseModel {
     dto.setTokenVisionDistance(tokenVisionDistance);
     dto.setUnitsPerCell(unitsPerCell);
     dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
-    dto.addAllTopologyTypes(
-        topologyTypes.topologyTypes.stream()
-            .map(t -> TopologyTypeDto.valueOf(t.name()))
-            .collect(Collectors.toList()));
-
+    if (topologyTypes != null) {
+      dto.addAllTopologyTypes(
+          topologyTypes.topologyTypes.stream()
+              .map(t -> TopologyTypeDto.valueOf(t.name()))
+              .collect(Collectors.toList()));
+    }
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
@@ -2268,18 +2270,22 @@ public class Zone extends BaseModel {
     dto.setInitiative(initiativeList.toDto());
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);
-    dto.setFogPaint(fogPaint.toDto());
     dto.setTopology(Mapper.map(topology));
+    dto.setFogPaint(fogPaint.toDto());
     dto.setHillVbl(Mapper.map(hillVbl));
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));
     dto.setBackgroundPaint(backgroundPaint.toDto());
-    dto.setMapAsset(mapAsset.toString());
+    if (mapAsset != null) {
+      dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    }
     dto.setBoardPosition(Mapper.map(boardPosition));
     dto.setDrawBoard(drawBoard);
     dto.setBoardChanged(boardChanged);
     dto.setName(name);
-    dto.setPlayerAlias(playerAlias);
+    if (playerAlias != null) {
+      dto.setPlayerAlias(StringValue.of(playerAlias));
+    }
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));

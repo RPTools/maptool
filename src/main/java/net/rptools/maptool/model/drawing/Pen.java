@@ -153,28 +153,33 @@ public class Pen {
 
   public static Pen fromDto(PenDto dto) {
     var pen = new Pen();
-    pen.setEraser(dto.getEraser());
-    pen.setForegroundMode(dto.getForegroundModeValue());
-    pen.setBackgroundMode(dto.getBackgroundModeValue());
-    pen.setThickness(dto.getThickness());
-    pen.setOpacity(dto.getOpacity());
-    pen.setSquareCap(dto.getSquareCap());
-    pen.setPaint(DrawablePaint.fromDto(dto.getForegroundColor()));
-    pen.setBackgroundPaint(DrawablePaint.fromDto(dto.getBackgroundColor()));
+    pen.eraser = dto.getEraser();
+    pen.foregroundMode = dto.getForegroundModeValue();
+    pen.backgroundMode = dto.getBackgroundModeValue();
+    pen.thickness = dto.getThickness();
+    pen.opacity = dto.getOpacity();
+    pen.squareCap = dto.getSquareCap();
+    pen.paint = DrawablePaint.fromDto(dto.getForegroundColor());
+    pen.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundColor());
     return pen;
   }
 
   public PenDto toDto() {
-    var pen = this;
-    return PenDto.newBuilder()
-        .setEraser(pen.isEraser())
-        .setForegroundMode(PenDto.mode.forNumber(pen.getForegroundMode()))
-        .setBackgroundMode(PenDto.mode.forNumber(pen.getBackgroundMode()))
-        .setThickness(pen.getThickness())
-        .setOpacity(pen.getOpacity())
-        .setSquareCap(pen.getSquareCap())
-        .setForegroundColor(pen.getPaint().toDto())
-        .setBackgroundColor(pen.getBackgroundPaint().toDto())
-        .build();
+    var dto =
+        PenDto.newBuilder()
+            .setEraser(eraser)
+            .setForegroundMode(PenDto.mode.forNumber(foregroundMode))
+            .setBackgroundMode(PenDto.mode.forNumber(backgroundMode))
+            .setThickness(thickness)
+            .setOpacity(opacity)
+            .setSquareCap(squareCap);
+
+    if (paint != null) {
+      dto.setForegroundColor(paint.toDto());
+    }
+    if (backgroundPaint != null) {
+      dto.setBackgroundColor(backgroundPaint.toDto());
+    }
+    return dto.build();
   }
 }
