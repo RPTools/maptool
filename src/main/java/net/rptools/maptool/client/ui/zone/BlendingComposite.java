@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Composite;
@@ -11,43 +25,24 @@ import java.awt.image.RasterFormatException;
 import java.awt.image.WritableRaster;
 
 /**
- * A custom Composite class to replace AlphaComposite for the purposes of mixing lights, auras,
- * and other colored effects.
- * http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm
+ * A custom Composite class to replace AlphaComposite for the purposes of mixing lights, auras, and
+ * other colored effects. http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm
  */
 class BlendingComposite implements Composite {
 
-  float srcAlphaMultiplier;
-
-  private BlendingComposite() {
-    this(1.0f);
-  }
-
-  public BlendingComposite(float srcAlphaMultiplier) {
-    this.srcAlphaMultiplier = srcAlphaMultiplier;
-  }
+  public BlendingComposite() {}
 
   public static BlendingComposite getInstance() {
     return new BlendingComposite();
   }
 
-  public static BlendingComposite getInstance(float srcAlphaMultiplier) {
-    return new BlendingComposite(srcAlphaMultiplier);
-  }
-
-  public float getSrcAlphaMultiplier() {
-    return srcAlphaMultiplier;
-  }
-
   private static boolean checkComponentsOrder(ColorModel cm) {
-    if (cm instanceof DirectColorModel directCM &&
-        cm.getTransferType() == DataBuffer.TYPE_INT) {
+    if (cm instanceof DirectColorModel directCM && cm.getTransferType() == DataBuffer.TYPE_INT) {
 
-      return directCM.getRedMask() == 0x00FF0000 &&
-          directCM.getGreenMask() == 0x0000FF00 &&
-          directCM.getBlueMask() == 0x000000FF &&
-          (directCM.getNumComponents() != 4 ||
-              directCM.getAlphaMask() == 0xFF000000);
+      return directCM.getRedMask() == 0x00FF0000
+          && directCM.getGreenMask() == 0x0000FF00
+          && directCM.getBlueMask() == 0x000000FF
+          && (directCM.getNumComponents() != 4 || directCM.getAlphaMask() == 0xFF000000);
     }
 
     return false;
@@ -56,22 +51,16 @@ class BlendingComposite implements Composite {
   @Override
   public CompositeContext createContext(
       ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
-    if (!checkComponentsOrder(srcColorModel) ||
-        !checkComponentsOrder(dstColorModel)) {
+    if (!checkComponentsOrder(srcColorModel) || !checkComponentsOrder(dstColorModel)) {
       throw new RasterFormatException("Incompatible color models");
     }
 
-    return new BlendingContext(srcAlphaMultiplier);
+    return new BlendingContext();
   }
-
 
   private static final class BlendingContext implements CompositeContext {
 
-    float srcAlphaMultiplier;
-
-    public BlendingContext(float srcAlphaMultiplier) {
-      this.srcAlphaMultiplier = srcAlphaMultiplier;
-    }
+    public BlendingContext() {}
 
     @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
@@ -109,11 +98,11 @@ class BlendingComposite implements Composite {
           newRgba[1] = Math.min(srcRgba[1] + dstRgba[1], 255);
           newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 255);
 
-//          if (dstRgba[3] == 0) {
-//            newRgba[3] = srcRgba[3];
-//          } else {
-//            newRgba[3] = Math.min(srcRgba[3], dstRgba[3]);
-//          }
+          //          if (dstRgba[3] == 0) {
+          //            newRgba[3] = srcRgba[3];
+          //          } else {
+          //            newRgba[3] = Math.min(srcRgba[3], dstRgba[3]);
+          //          }
 
           // this could be why there's a line between two light sources
           newRgba[3] = Math.max(srcRgba[3], dstRgba[3]);

@@ -55,7 +55,6 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
-import net.rptools.maptool.client.ui.zone.BlendingComposite;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -1428,33 +1427,9 @@ public class ZoneRenderer extends JComponent
    * @param view the player view
    */
   private void renderLights(Graphics2D g, PlayerView view) {
-    // Setup
-    timer.start("lights-1");
-    BufferedImage lightOverlay =
-        new BufferedImage(
-            g.getClip().getBounds().width,
-            g.getClip().getBounds().height,
-            BufferedImage.TYPE_INT_ARGB);
-    Graphics2D newG = lightOverlay.createGraphics();
-
-    if (!view.isGMView() && visibleScreenArea != null) {
-      Area clip = new Area(g.getClip());
-      clip.intersect(visibleScreenArea);
-      newG.setClip(clip);
-    }
-    timer.stop("lights-1");
-
-    timer.start("lights-2");
-    AffineTransform af = new AffineTransform();
-    af.translate(getViewOffsetX(), getViewOffsetY());
-    af.scale(getScale(), getScale());
-    newG.setTransform(af);
-
-    newG.setComposite(new BlendingComposite(AppPreferences.getLightOverlayOpacity() / 255.0f));
-    timer.stop("lights-2");
-
+    // Collect and organize lights
     if (renderedLightMap == null) {
-      timer.start("lights-3");
+      timer.start("lights-1");
       // Organize
       Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
       List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
@@ -1478,10 +1453,35 @@ public class ZoneRenderer extends JComponent
       for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
         renderedLightMap.put(entry.getKey(), entry.getValue());
       }
-      timer.stop("lights-3");
+      timer.stop("lights-1");
     }
 
-    // Draw
+    // Set up a buffer image for lights to be drawn onto before the map
+    timer.start("lights-2");
+    BufferedImage lightOverlay =
+            new BufferedImage(
+                    g.getClip().getBounds().width,
+                    g.getClip().getBounds().height,
+                    BufferedImage.TYPE_INT_ARGB);
+    Graphics2D newG = lightOverlay.createGraphics();
+
+    if (!view.isGMView() && visibleScreenArea != null) {
+      Area clip = new Area(g.getClip());
+      clip.intersect(visibleScreenArea);
+      newG.setClip(clip);
+    }
+    timer.stop("lights-2");
+
+    timer.start("lights-3");
+    AffineTransform af = new AffineTransform();
+    af.translate(getViewOffsetX(), getViewOffsetY());
+    af.scale(getScale(), getScale());
+    newG.setTransform(af);
+
+    newG.setComposite(new BlendingComposite());
+    timer.stop("lights-3");
+
+    // Draw lights into the buffer image so the map doesn't affect how they blend
     timer.start("lights-4");
     for (Entry<Paint, List<Area>> entry : renderedLightMap.entrySet()) {
       newG.setPaint(entry.getKey());
@@ -1491,14 +1491,19 @@ public class ZoneRenderer extends JComponent
     }
     timer.stop("lights-4");
 
-    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to
-    // high)
+    // Draw the buffer image with all the lights onto the map
+    timer.start("lights-5");
+    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to high)
     // If lights start getting ugly outlines running through other lights, these should fix that
     // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-    timer.start("lights-5");
+    Composite previousComposite = g.getComposite();
+    g.setComposite(
+            AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
     g.drawImage(lightOverlay, null, 0, 0);
+    g.setComposite(previousComposite);
     timer.stop("lights-5");
 
     newG.dispose();
