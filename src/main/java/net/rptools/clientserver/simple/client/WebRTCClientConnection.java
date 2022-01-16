@@ -182,7 +182,8 @@ public class WebRTCClientConnection extends AbstractConnection
   public void sendMessage(Object channel, byte[] message) {
     log.debug(prefix() + "added message");
     addMessage(channel, message);
-    if (peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
+    if (peerConnection != null
+        && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
       synchronized (sendThread) {
         sendThread.notify();
       }
@@ -424,6 +425,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   public void addIceCandidate(RTCIceCandidate candidate) {
+    log.info(prefix() + "PeerConnection.addIceCandidate: " + candidate.toString());
     peerConnection.addIceCandidate(candidate);
   }
 

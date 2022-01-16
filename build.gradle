@@ -431,14 +431,14 @@ dependencies {
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
     // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.1'
-    implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0'
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.2'
+    implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0'
     if (osdetector.os.is('windows'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:windows-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0:windows-x86_64'
     else if (osdetector.os.is('osx'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:macos-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0:macos-x86_64'
     else if (osdetector.os.is('linux'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.3.0:linux-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0:linux-x86_64'
 
         // protobuf
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
