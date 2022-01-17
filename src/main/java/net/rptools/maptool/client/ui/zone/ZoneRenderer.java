@@ -1459,10 +1459,10 @@ public class ZoneRenderer extends JComponent
     // Set up a buffer image for lights to be drawn onto before the map
     timer.start("lights-2");
     BufferedImage lightOverlay =
-            new BufferedImage(
-                    g.getClip().getBounds().width,
-                    g.getClip().getBounds().height,
-                    BufferedImage.TYPE_INT_ARGB);
+        new BufferedImage(
+            g.getClip().getBounds().width,
+            g.getClip().getBounds().height,
+            BufferedImage.TYPE_INT_ARGB);
     Graphics2D newG = lightOverlay.createGraphics();
 
     if (!view.isGMView() && visibleScreenArea != null) {
@@ -1493,15 +1493,16 @@ public class ZoneRenderer extends JComponent
 
     // Draw the buffer image with all the lights onto the map
     timer.start("lights-5");
-    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to high)
+    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to
+    // high)
     // If lights start getting ugly outlines running through other lights, these should fix that
     // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
     Composite previousComposite = g.getComposite();
     g.setComposite(
-            AlphaComposite.getInstance(
-                    AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
+        AlphaComposite.getInstance(
+            AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
     g.drawImage(lightOverlay, null, 0, 0);
     g.setComposite(previousComposite);
     timer.stop("lights-5");
