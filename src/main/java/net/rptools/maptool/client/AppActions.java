@@ -662,7 +662,7 @@ public class AppActions {
       };
 
   public static final Action TOGGLE_FULLSCREEN_TOOLS =
-      new AdminClientAction() {
+      new DefaultClientAction() {
         {
           init("action.toggleFullScreenTools");
         }
