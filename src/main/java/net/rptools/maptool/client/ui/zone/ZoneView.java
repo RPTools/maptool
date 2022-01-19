@@ -22,8 +22,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
-import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
@@ -53,8 +51,6 @@ public class ZoneView implements ModelChangeListener {
   private final Map<GUID, Map<String, Set<Area>>> brightLightCache = new Hashtable<>();
   /** Map the PlayerView to its visible area. */
   private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
-  /** Hold all of our lights combined by lumens. Used for hard FoW reveal. */
-  private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<>();
   /** Map each token to their personal bright light source area. */
   private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<>();
   /** Map each token to their personal drawable lights. */
@@ -425,19 +421,7 @@ public class ZoneView implements ModelChangeListener {
       // stopwatch.reset();
       // stopwatch.start();
       // Jamz: Iterate through all tokens and combine light areas by lumens
-      CombineLightsSwingWorker workerThread =
-          new CombineLightsSwingWorker(token.getSightType(), lightSourceTokens);
-      workerThread.execute();
-      try {
-        workerThread
-            .get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish
-        // before we go on
-      } catch (InterruptedException | ExecutionException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-
-      // log.info("CombineLightsSwingWorker: \t" + stopwatch);
+      final var allLightAreaMap = getLightAreasByLumens(token.getSightType(), lightSourceTokens);
 
       // Check for personal vision and add to overall light map
       if (sight.hasPersonalLightSource()) {
@@ -477,11 +461,11 @@ public class ZoneView implements ModelChangeListener {
           }
         }
       }
+      allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
 
       tokenVisibleArea = allLightArea;
     }
 
-    allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
     tokenVisionCache.put(token.getId(), tokenVisibleArea);
 
     // log.info("getVisibleArea: \t\t" + stopwatch);
@@ -489,80 +473,36 @@ public class ZoneView implements ModelChangeListener {
     return tokenVisibleArea;
   }
 
-  private class CombineLightsSwingWorker extends SwingWorker<Void, List<Token>> {
-    private final String sightName;
-    private final List<Token> lightSourceTokens;
-    private final ExecutorService lightsThreadPool;
-    private final long startTime = System.currentTimeMillis();
+  private SortedMap<Double, Area> getLightAreasByLumens(
+      String sightName, List<Token> lightSourceTokens) {
+    /* Hold all of our lights combined by lumens. Used for hard FoW reveal. */
+    var allLightPathMap = new HashMap<Double, Path2D>();
 
-    private CombineLightsSwingWorker(String sightName, List<Token> lightSourceTokens) {
-      this.sightName = sightName;
-      this.lightSourceTokens = lightSourceTokens;
-      lightsThreadPool = Executors.newCachedThreadPool();
-    }
-
-    @Override
-    protected Void doInBackground() throws Exception {
-      for (Token lightSourceToken : lightSourceTokens) {
-        CombineLightsTask task = new CombineLightsTask(sightName, lightSourceToken);
-        lightsThreadPool.submit(task);
-      }
-
-      lightsThreadPool.shutdown();
-      lightsThreadPool.awaitTermination(3, TimeUnit.MINUTES);
-
-      return null;
-    }
-
-    @Override
-    public void done() {
-      lightsThreadPool.shutdown(); // always reclaim resources just in case?
-      // System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " +
-      // (System.currentTimeMillis() - startTime) + "ms");
-
-      return;
-    }
-  }
-
-  /**
-   * @author Jamz
-   *     <p>A Callable task add to the ExecutorCompletionService to combine lights as a threaded
-   *     task
-   */
-  private final class CombineLightsTask implements Callable<Map<Double, Area>> {
-    private final String sightName;
-    private final Token lightSourceToken;
-
-    private CombineLightsTask(String sightName, Token lightSourceToken) {
-      this.sightName = sightName;
-      this.lightSourceToken = lightSourceToken;
-    }
-
-    @Override
-    public Map<Double, Area> call() {
+    for (Token lightSourceToken : lightSourceTokens) {
       Map<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
-        // Area tempArea = light.getValue();
+        // Add the token's light area to the global area in `allLightPathMap`.
+        var lumens = light.getKey();
         Path2D path = new Path2D.Double();
         path.append(light.getValue().getPathIterator(null, 1), false);
 
-        synchronized (allLightAreaMap) {
-          if (allLightAreaMap.containsKey(light.getKey())) {
-            // Area allLight = allLightAreaMap.get(light.getKey());
-            // tempArea.add(allLight);
-
-            // Path2D is faster than Area it looks like
-            path.append(allLightAreaMap.get(light.getKey()).getPathIterator(null, 1), false);
-          }
-
-          // allLightAreaMap.put(light.getKey(), tempArea);
-          allLightAreaMap.put(light.getKey(), new Area(path));
+        if (allLightPathMap.containsKey(lumens)) {
+          var totalPath = allLightPathMap.get(lumens);
+          totalPath.append(path.getPathIterator(null, 1), false);
+        } else {
+          allLightPathMap.put(lumens, path);
         }
       }
-
-      return lightArea;
     }
+
+    // Convert the luminous paths to areas.
+    var allLightAreaMap = new TreeMap<Double, Area>();
+    for (var entry : allLightPathMap.entrySet()) {
+      allLightAreaMap.put(entry.getKey(), new Area(entry.getValue()));
+    }
+
+    return allLightAreaMap;
   }
 
   /**
