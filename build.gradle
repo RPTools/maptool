@@ -376,7 +376,7 @@ dependencies {
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
-    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
+    implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '22.0.0'
 
     implementation 'com.jayway.jsonpath:json-path:2.6.0'
 
