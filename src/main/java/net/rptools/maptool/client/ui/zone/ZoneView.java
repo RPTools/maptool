@@ -53,8 +53,6 @@ public class ZoneView implements ModelChangeListener {
   private final Map<GUID, Map<String, Set<Area>>> brightLightCache = new Hashtable<>();
   /** Map the PlayerView to its visible area. */
   private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
-  /** Hold all of our lights combined by lumens. Used for hard FoW reveal. */
-  private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<>();
   /** Map each token to their personal bright light source area. */
   private final Map<GUID, Set<Area>> personalBrightLightCache = new HashMap<>();
   /** Map each token to their personal drawable lights. */
@@ -428,13 +426,14 @@ public class ZoneView implements ModelChangeListener {
       CombineLightsSwingWorker workerThread =
           new CombineLightsSwingWorker(token.getSightType(), lightSourceTokens);
       workerThread.execute();
+      SortedMap<Double, Area> allLightAreaMap;
       try {
-        workerThread
-            .get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish
-        // before we go on
+        // Jamz: We need to wait for this thread (which spawns more threads) to finish before we go
+        // on
+        allLightAreaMap = workerThread.get();
       } catch (InterruptedException | ExecutionException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
+        allLightAreaMap = Collections.emptySortedMap();
       }
 
       // log.info("CombineLightsSwingWorker: \t" + stopwatch);
@@ -477,11 +476,11 @@ public class ZoneView implements ModelChangeListener {
           }
         }
       }
+      allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
 
       tokenVisibleArea = allLightArea;
     }
 
-    allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
     tokenVisionCache.put(token.getId(), tokenVisibleArea);
 
     // log.info("getVisibleArea: \t\t" + stopwatch);
@@ -489,7 +488,7 @@ public class ZoneView implements ModelChangeListener {
     return tokenVisibleArea;
   }
 
-  private class CombineLightsSwingWorker extends SwingWorker<Void, List<Token>> {
+  private class CombineLightsSwingWorker extends SwingWorker<SortedMap<Double, Area>, List<Token>> {
     private final String sightName;
     private final List<Token> lightSourceTokens;
     private final ExecutorService lightsThreadPool;
@@ -502,16 +501,26 @@ public class ZoneView implements ModelChangeListener {
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
+    protected SortedMap<Double, Area> doInBackground() throws Exception {
+      /* Hold all of our lights combined by lumens. Used for hard FoW reveal. */
+      var allLightPathMap = new ConcurrentSkipListMap<Double, Path2D>();
+
       for (Token lightSourceToken : lightSourceTokens) {
-        CombineLightsTask task = new CombineLightsTask(sightName, lightSourceToken);
+        CombineLightsTask task =
+            new CombineLightsTask(allLightPathMap, sightName, lightSourceToken);
         lightsThreadPool.submit(task);
       }
 
       lightsThreadPool.shutdown();
       lightsThreadPool.awaitTermination(3, TimeUnit.MINUTES);
 
-      return null;
+      // Convert the luminous paths to areas.
+      var allLightAreaMap = new TreeMap<Double, Area>();
+      for (var entry : allLightPathMap.entrySet()) {
+        allLightAreaMap.put(entry.getKey(), new Area(entry.getValue()));
+      }
+
+      return allLightAreaMap;
     }
 
     @Override
@@ -530,10 +539,13 @@ public class ZoneView implements ModelChangeListener {
    *     task
    */
   private final class CombineLightsTask implements Callable<Map<Double, Area>> {
+    private final Map<Double, Path2D> allLightPathMap;
     private final String sightName;
     private final Token lightSourceToken;
 
-    private CombineLightsTask(String sightName, Token lightSourceToken) {
+    private CombineLightsTask(
+        Map<Double, Path2D> allLightPathMap, String sightName, Token lightSourceToken) {
+      this.allLightPathMap = allLightPathMap;
       this.sightName = sightName;
       this.lightSourceToken = lightSourceToken;
     }
@@ -543,22 +555,21 @@ public class ZoneView implements ModelChangeListener {
       Map<Double, Area> lightArea = getLightSourceArea(sightName, lightSourceToken);
 
       for (Entry<Double, Area> light : lightArea.entrySet()) {
-        // Area tempArea = light.getValue();
-        Path2D path = new Path2D.Double();
-        path.append(light.getValue().getPathIterator(null, 1), false);
-
-        synchronized (allLightAreaMap) {
-          if (allLightAreaMap.containsKey(light.getKey())) {
-            // Area allLight = allLightAreaMap.get(light.getKey());
-            // tempArea.add(allLight);
-
-            // Path2D is faster than Area it looks like
-            path.append(allLightAreaMap.get(light.getKey()).getPathIterator(null, 1), false);
-          }
-
-          // allLightAreaMap.put(light.getKey(), tempArea);
-          allLightAreaMap.put(light.getKey(), new Area(path));
-        }
+        // Add the token's light area to the global area in `allLightPathMap`.
+        // Because the remapping function may be called multiple times in case a retry is required,
+        // we make sure to use a clean `Path2D` object for each invocation. We also need to make
+        // sure we don't modify `existingValue` as such a change may result in an inconsistent
+        // state.
+        allLightPathMap.compute(
+            light.getKey(),
+            (lumens, totalPath) -> {
+              Path2D path = new Path2D.Double();
+              path.append(light.getValue().getPathIterator(null, 1), false);
+              if (totalPath != null) {
+                path.append(totalPath.getPathIterator(null, 1), false);
+              }
+              return path;
+            });
       }
 
       return lightArea;
