@@ -68,14 +68,13 @@ public class CipherUtil {
   /** Asynchronous Key Algorithm */
   private static final String ASYNC_KEY_ALGORITHM = "RSA";
 
-
   private static final String PUBLIC_KEY_FIRST_LINE = "====== Begin Public Key ======";
   private static final String PUBLIC_KEY_LAST_LINE = "====== End Public Key ======";
 
-
   private final Key key;
   private final Cipher encryptionCipher;
-  private final Cipher decryptionCipher;;
+  private final Cipher decryptionCipher;
+  ;
 
   /** {@link MessageDigest} used for generating a 256 bit key from the password. */
   private final MessageDigest messageDigest;
@@ -94,8 +93,8 @@ public class CipherUtil {
     public Key(PublicKey publicKey, PrivateKey privateKey) {
       this(null, null, publicKey, privateKey, true);
     }
-  };
-
+  }
+  ;
 
   private CipherUtil(Key keyToUse)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
@@ -110,7 +109,8 @@ public class CipherUtil {
   }
 
   public static CipherUtil fromPublicPrivatePair(File publicKeyFile, File privateKeyFile)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     KeyPair keyPair = readKeyPair(publicKeyFile, privateKeyFile);
     return CipherUtil.fromPublicPrivatePair(keyPair.getPublic(), keyPair.getPrivate());
   }
@@ -120,24 +120,26 @@ public class CipherUtil {
     return new CipherUtil(new Key(publicKey, privateKey));
   }
 
-
   public static CipherUtil fromPublicKeyString(String pk)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     return new CipherUtil(new Key(CipherUtil.decodePublicKeyString(pk), null));
   }
 
   public static CipherUtil fromSharedKey(String pass, byte[] salt)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
+      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+          InvalidKeyException {
     Key key = createKey(pass, salt);
     return new CipherUtil(key);
   }
 
   public static CipherUtil fromSharedKeyNewSalt(String pass)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+          InvalidKeyException {
     byte[] salt = createSalt();
     return fromSharedKey(pass, salt);
   }
-  
+
   public static CipherUtil fromKey(Key key)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     return new CipherUtil(key);
@@ -145,11 +147,10 @@ public class CipherUtil {
 
   public static CipherUtil fromSecretKeySpec(SecretKeySpec keySpec)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    Key keyTo =  new Key(keySpec, createSalt());
+    Key keyTo = new Key(keySpec, createSalt());
 
     return new CipherUtil(keyTo);
   }
-
 
   /**
    * Returns a {@link Cipher} that can be used to decipher encoded values.
@@ -215,8 +216,8 @@ public class CipherUtil {
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
     if (key.asymmetric()) {
       Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
-      cipher.init(encryptMode, encryptMode == Cipher.ENCRYPT_MODE ? key.publicKey() :
-          key.privateKey());
+      cipher.init(
+          encryptMode, encryptMode == Cipher.ENCRYPT_MODE ? key.publicKey() : key.privateKey());
       return cipher;
     } else {
       Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
@@ -276,7 +277,8 @@ public class CipherUtil {
     KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, KEY_ITERATION_KEY_COUNT, 128);
     SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_GENERATION_ALGORITHM);
 
-    return new Key(new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM), salt);
+    return new Key(
+        new SecretKeySpec(factory.generateSecret(spec).getEncoded(), CIPHER_ALGORITHM), salt);
   }
 
   public Key createKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -381,8 +383,7 @@ public class CipherUtil {
     return keyPairGenerator.generateKeyPair();
   }
 
-  static void writeKeyPair(KeyPair keyPair, File publicFile, File privateFile)
-      throws IOException {
+  static void writeKeyPair(KeyPair keyPair, File publicFile, File privateFile) throws IOException {
     publicFile.getParentFile().mkdirs();
     privateFile.getParentFile().mkdirs();
     try (FileOutputStream fos = new FileOutputStream(publicFile)) {
@@ -419,10 +420,11 @@ public class CipherUtil {
   }
 
   private static byte[] decodePublicKeyText(String pks) {
-    byte[] bytes = pks.replaceFirst(PUBLIC_KEY_FIRST_LINE, "")
-        .replaceFirst(PUBLIC_KEY_LAST_LINE, "")
-        .replaceAll("\\s", "")
-        .getBytes(StandardCharsets.UTF_8);
+    byte[] bytes =
+        pks.replaceFirst(PUBLIC_KEY_FIRST_LINE, "")
+            .replaceFirst(PUBLIC_KEY_LAST_LINE, "")
+            .replaceAll("\\s", "")
+            .getBytes(StandardCharsets.UTF_8);
     return Base64.getDecoder().decode(bytes);
   }
 
@@ -430,7 +432,7 @@ public class CipherUtil {
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     byte[] privateKeyBytes = Files.readAllBytes(privateFile.toPath());
     String publicKey = String.join("\n", Files.readAllLines(publicFile.toPath()));
-        decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath())));
+    decodePublicKeyText(new String(Files.readAllBytes(publicFile.toPath())));
     return generateKeyPair(publicKey, privateKeyBytes);
   }
 
@@ -439,16 +441,13 @@ public class CipherUtil {
     PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKey);
 
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    return new KeyPair(
-        decodePublicKeyString(publicKey),
-        keyFactory.generatePrivate(privateSpec)
-    );
+    return new KeyPair(decodePublicKeyString(publicKey), keyFactory.generatePrivate(privateSpec));
   }
 
   public static PublicKey decodePublicKeyString(String pub)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     byte[] publicKeyBytes = decodePublicKeyText(pub);
-    X509EncodedKeySpec publicSpec = new X509EncodedKeySpec (publicKeyBytes);
+    X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
 
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
     return keyFactory.generatePublic(publicSpec);

@@ -14,10 +14,15 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.CrossDrawableDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /** An Cross */
 public class Cross extends AbstractDrawing {
@@ -26,13 +31,32 @@ public class Cross extends AbstractDrawing {
   private transient java.awt.Rectangle bounds;
 
   public Cross(int startX, int startY, int endX, int endY) {
+    startPoint = new Point(startX, startY);
+    endPoint = new Point(endX, endY);
+  }
 
+  public Cross(GUID id, int startX, int startY, int endX, int endY) {
+    super(id);
     startPoint = new Point(startX, startY);
     endPoint = new Point(endX, endY);
   }
 
   public Area getArea() {
     return new Area(getBounds());
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto =
+        CrossDrawableDto.newBuilder()
+            .setId(getId().toString())
+            .setLayer(getLayer().name())
+            .setStartPoint(Mapper.map(getStartPoint()))
+            .setEndPoint(Mapper.map(getEndPoint()));
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setCrossDrawable(dto).build();
   }
 
   /*

@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Place a cross over a token.
@@ -82,5 +83,15 @@ public class CrossTokenOverlay extends XTokenOverlay {
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
+  }
+
+  public static CrossTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new CrossTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.CROSS).build();
   }
 }

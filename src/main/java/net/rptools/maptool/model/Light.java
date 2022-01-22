@@ -16,6 +16,8 @@ package net.rptools.maptool.model;
 
 import java.awt.geom.Area;
 import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.server.proto.LightDto;
+import net.rptools.maptool.server.proto.ShapeTypeDto;
 
 public class Light {
   private DrawablePaint paint;
@@ -125,5 +127,31 @@ public class Light {
 
   public void setOwnerOnly(boolean owner) {
     ownerOnly = owner;
+  }
+
+  public static Light fromDto(LightDto dto) {
+    var light = new Light();
+    light.paint = dto.hasPaint() ? DrawablePaint.fromDto(dto.getPaint()) : null;
+    light.facingOffset = dto.getFacingOffset();
+    light.radius = dto.getRadius();
+    light.arcAngle = dto.getArcAngle();
+    light.shape = ShapeType.valueOf(dto.getShape().name());
+    light.isGM = dto.getIsGm();
+    light.ownerOnly = dto.getOwnerOnly();
+    return light;
+  }
+
+  public LightDto toDto() {
+    var dto = LightDto.newBuilder();
+    if (paint != null) dto.setPaint(paint.toDto());
+    dto.setFacingOffset(facingOffset);
+    dto.setRadius(radius);
+    dto.setArcAngle(arcAngle);
+    // default shape is circle
+    if (shape == null) shape = ShapeType.CIRCLE;
+    dto.setShape(ShapeTypeDto.valueOf(shape.name()));
+    dto.setIsGm(isGM);
+    dto.setOwnerOnly(ownerOnly);
+    return dto.build();
   }
 }

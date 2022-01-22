@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Place a diamond over a token.
@@ -84,5 +85,15 @@ public class DiamondTokenOverlay extends XTokenOverlay {
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
+  }
+
+  public static DiamondTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new DiamondTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.DIAMOND).build();
   }
 }
