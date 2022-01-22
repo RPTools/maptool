@@ -447,6 +447,7 @@ public class Zone extends BaseModel {
     } catch (CloneNotSupportedException cnse) {
       MapTool.showError("Trying to copy the zone's grid; no grid assigned", cnse);
     }
+    gridColor = zone.gridColor;
     unitsPerCell = zone.unitsPerCell;
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
