@@ -35,7 +35,7 @@ defaultTasks 'clean', 'build'
 sourceCompatibility = 17
 targetCompatibility = 17
 def grpcVersion = '1.39.0'
-def protobufVersion = '3.17.3'
+def protobufVersion = '3.19.3'
 def protocVersion = protobufVersion
 
 
