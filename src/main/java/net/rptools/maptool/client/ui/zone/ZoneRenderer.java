@@ -1137,7 +1137,7 @@ public class ZoneRenderer extends JComponent
      */
     // @formatter:on
 
-    if (visibleScreenArea == null && zoneView.isUsingVision()) {
+    if (visibleScreenArea == null) {
       timer.start("ZoneRenderer-getVisibleArea");
       Area a = zoneView.getVisibleArea(view);
       timer.stop("ZoneRenderer-getVisibleArea");
@@ -1434,9 +1434,8 @@ public class ZoneRenderer extends JComponent
       Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
       List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
       for (DrawableLight light : zoneView.getDrawableLights(view)) {
-        // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
         if (light.getType() == LightSource.Type.NORMAL) {
-          if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
+          if (light.getPaint() != null) {
             List<Area> areaList =
                 colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
             areaList.add(new Area(light.getArea()));

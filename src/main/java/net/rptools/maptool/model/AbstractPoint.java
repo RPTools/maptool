@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.server.proto.drawing.IntPointDto;
+
 public abstract class AbstractPoint implements Cloneable {
 
   public int x;
@@ -60,5 +62,9 @@ public abstract class AbstractPoint implements Cloneable {
       // this shouldn't happen, since we are Cloneable
       throw new InternalError(e);
     }
+  }
+
+  public IntPointDto toDto() {
+    return IntPointDto.newBuilder().setX(x).setY(y).build();
   }
 }

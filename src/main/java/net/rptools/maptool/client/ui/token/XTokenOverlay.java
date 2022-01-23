@@ -23,6 +23,8 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Draw an X over a token.
@@ -138,5 +140,29 @@ public class XTokenOverlay extends BooleanTokenOverlay {
   public void setWidth(int aWidth) {
     if (aWidth <= 0) aWidth = 3;
     stroke = new BasicStroke(aWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+  }
+
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    color = new Color(dto.getColor(), true);
+    stroke = Mapper.map(dto.getStroke());
+  }
+
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    var dto = BooleanTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setColor(color.getRGB());
+    dto.setStroke(Mapper.map(stroke));
+    return dto;
+  }
+
+  public static XTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new XTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.X).build();
   }
 }

@@ -20,6 +20,7 @@ import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Paint a square so that it doesn't overlay any other states being displayed in the same grid.
@@ -74,5 +75,15 @@ public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
     p.lineTo((float) r.getCenterX(), (float) r.getY());
     p.closePath();
     return p;
+  }
+
+  public static FlowDiamondTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowDiamondTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_DIAMOND).build();
   }
 }

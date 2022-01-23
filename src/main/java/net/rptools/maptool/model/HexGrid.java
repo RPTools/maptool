@@ -34,6 +34,9 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.GridDto;
+import net.rptools.maptool.server.proto.HexGridDto;
 
 /**
  * An abstract hex grid class that uses generic Cartesian-coordinates for calculations to allow for
@@ -618,6 +621,39 @@ public abstract class HexGrid extends Grid {
   }
 
   protected abstract OffsetTranslator getOffsetTranslator();
+
+  public static HexGrid fromDto(HexGridDto dto) {
+    HexGrid grid = null;
+    if (dto.getVertical()) grid = new HexGridVertical();
+    else grid = new HexGridHorizontal();
+
+    grid.hexRatio = dto.getHexRatio();
+    grid.edgeProjection = dto.getEdgeProjection();
+    grid.minorRadius = dto.getMinorRadius();
+    grid.edgeLength = dto.getEdgeLength();
+    grid.scaledEdgeProjection = dto.getScaledEdgeProjection();
+    grid.scaledMinorRadius = dto.getScaledMinorRadius();
+    grid.scaledEdgeLength = dto.getScaledEdgeLength();
+    grid.lastScale = dto.getLastScale();
+    var point = dto.getCellOffset();
+    grid.cellOffset = new Dimension(point.getX(), point.getY());
+    return grid;
+  }
+
+  protected void fillDto(GridDto.Builder dto) {
+    var hexDto = HexGridDto.newBuilder();
+    hexDto.setVertical(this instanceof HexGridVertical);
+    hexDto.setHexRatio(hexRatio);
+    hexDto.setEdgeProjection(edgeProjection);
+    hexDto.setMinorRadius(minorRadius);
+    hexDto.setEdgeLength(edgeLength);
+    hexDto.setScaledEdgeProjection(scaledEdgeProjection);
+    hexDto.setScaledMinorRadius(scaledMinorRadius);
+    hexDto.setScaledEdgeLength(scaledEdgeLength);
+    hexDto.setLastScale(lastScale);
+    hexDto.setCellOffset(Mapper.map(cellOffset));
+    dto.setHexGrid(hexDto);
+  }
 
   static class DirectionCalculator {
 

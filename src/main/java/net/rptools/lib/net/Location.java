@@ -18,11 +18,26 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageWriter;
+import net.rptools.maptool.server.proto.LocationDto;
 
 public interface Location {
-  public void putContent(ImageWriter content, BufferedImage img) throws IOException;
+  void putContent(ImageWriter content, BufferedImage img) throws IOException;
 
-  public void putContent(InputStream content) throws IOException;
+  void putContent(InputStream content) throws IOException;
 
-  public InputStream getContent() throws IOException;
+  InputStream getContent() throws IOException;
+
+  LocationDto toDto();
+
+  static Location fromDto(LocationDto dto) {
+    switch (dto.getLocationTypCase()) {
+      case FTP_LOCATION -> {
+        return FTPLocation.fromDto(dto.getFtpLocation());
+      }
+      case LOCAL_LOCATION -> {
+        return LocalLocation.fromDto(dto.getLocalLocation());
+      }
+    }
+    return null;
+  }
 }
