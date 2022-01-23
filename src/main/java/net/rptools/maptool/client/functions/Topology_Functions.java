@@ -217,7 +217,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -309,7 +309,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -395,7 +395,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
