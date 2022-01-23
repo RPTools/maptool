@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
+import net.rptools.maptool.server.proto.LabelDto;
 
 public class Label {
   private final GUID id;
@@ -22,6 +23,16 @@ public class Label {
   private int x, y;
   private boolean showBackground;
   private int foregroundColor;
+
+  // for serialisation
+  private Label(GUID id, String label, int x, int y, boolean showBackground, int foregroundColor) {
+    this.id = id;
+    this.label = label;
+    this.x = x;
+    this.y = y;
+    this.showBackground = showBackground;
+    this.foregroundColor = foregroundColor;
+  }
 
   public Label() {
     this("");
@@ -83,7 +94,32 @@ public class Label {
     return new Color(foregroundColor);
   }
 
+  public int getForegroundColorValue() {
+    return foregroundColor;
+  }
+
   public void setForegroundColor(Color foregroundColor) {
     this.foregroundColor = foregroundColor.getRGB();
+  }
+
+  public static Label fromDto(LabelDto dto) {
+    return new Label(
+        GUID.valueOf(dto.getId()),
+        dto.getLabel(),
+        dto.getX(),
+        dto.getY(),
+        dto.getShowBackground(),
+        dto.getForegroundColor());
+  }
+
+  public LabelDto toDto() {
+    return LabelDto.newBuilder()
+        .setId(id.toString())
+        .setLabel(label)
+        .setX(x)
+        .setY(y)
+        .setShowBackground(showBackground)
+        .setForegroundColor(foregroundColor)
+        .build();
   }
 }

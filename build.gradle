@@ -103,17 +103,8 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
-            exclude '**/TransferableHelper.java' // Temporary until switch expression is supported.
-            exclude '**/MapToolInfo.java' // Temporary until supported.
-            exclude '**/PlayerDatabaseInfo.java' // Temporary until supported.
-            exclude '**/PlayerInfo.java' // Temporary until supported.
-            exclude '**/PlayTimeInfo.java' // Temporary until supported.
-            exclude '**/NoData.java' // Temporary until supported.
-            exclude '**/PlayTime.java' // Temporary until supported.
-            exclude '**/CipherUtil.java' // Temporary until supported.
         }
         licenseHeaderFile 'spotless.license.java'
-
 
         // Now using the Google Java style guide
         googleJavaFormat()
@@ -302,7 +293,6 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.31'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
-
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
@@ -364,7 +354,6 @@ dependencies {
 
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
-    implementation 'com.caucho:hessian:4.0.63'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -386,8 +375,6 @@ dependencies {
     implementation 'org.bouncycastle:bcmail-jdk15on:1.69'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
-
-
 
     implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
 
@@ -423,7 +410,6 @@ dependencies {
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
 
-
     // Apache Tika Parsers for determining file type
     implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
 
@@ -440,10 +426,9 @@ dependencies {
     else if (osdetector.os.is('linux'))
         implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0:linux-x86_64'
 
-        // protobuf
+    // protobuf
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
-
 
     // Java Tuples
     implementation 'com.flipkart.utils:javatuples:3.0'

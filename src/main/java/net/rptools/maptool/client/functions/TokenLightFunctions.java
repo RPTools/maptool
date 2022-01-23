@@ -148,7 +148,8 @@ public class TokenLightFunctions extends AbstractFunction {
             MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeLightSource, ls);
           } else {
             MapTool.serverCommand()
-                .updateTokenProperty(token, Token.Update.addLightSource, ls, Direction.CENTER);
+                .updateTokenProperty(
+                    token, Token.Update.addLightSource, ls, Direction.CENTER.name());
           }
         }
       }

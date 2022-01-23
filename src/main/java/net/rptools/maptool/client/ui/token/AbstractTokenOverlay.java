@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.proto.TokenOverlayDto;
 
 /**
  * An overlay that may be applied to a token to show state.
@@ -213,4 +215,28 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 
   /** @see java.lang.Object#clone() */
   public abstract Object clone();
+
+  protected void fillFrom(TokenOverlayDto dto) {
+    name = dto.getName();
+    order = dto.getOrder();
+    group = dto.hasGroup() ? dto.getGroup().getValue() : null;
+    mouseover = dto.getMouseOver();
+    opacity = dto.getOpacity();
+    showGM = dto.getShowGm();
+    showOwner = dto.getShowOwner();
+    showOthers = dto.getShowOthers();
+  }
+
+  protected TokenOverlayDto getCommonDto() {
+    var dto = TokenOverlayDto.newBuilder();
+    dto.setName(name);
+    dto.setOrder(order);
+    if (group != null) dto.setGroup(StringValue.of(group));
+    dto.setMouseOver(mouseover);
+    dto.setOpacity(opacity);
+    dto.setShowGm(showGM);
+    dto.setShowOwner(showOwner);
+    dto.setShowOthers(showOthers);
+    return dto.build();
+  }
 }

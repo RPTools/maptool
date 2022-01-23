@@ -18,13 +18,16 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
-import net.rptools.clientserver.hessian.server.MethodServerConnection;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
+import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
-import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.PlayerConnectedMsg;
+import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
+import net.rptools.maptool.server.proto.SetCampaignMsg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +38,7 @@ public class MapToolServerConnection
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
-  private final MethodServerConnection connection;
+  private final ServerConnection connection;
   private final PlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
@@ -96,54 +99,61 @@ public class MapToolServerConnection
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
     for (Player player : playerMap.values()) {
+      var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.toDto());
       server
           .getConnection()
-          .callMethod(
-              conn.getId(),
-              ClientCommand.COMMAND.playerConnected.name(),
-              player.getTransferablePlayer());
+          .sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
+    var msg =
+        PlayerConnectedMsg.newBuilder().setPlayer(connectedPlayer.getTransferablePlayer().toDto());
     server
         .getConnection()
-        .broadcastCallMethod(
-            ClientCommand.COMMAND.playerConnected.name(), connectedPlayer.getTransferablePlayer());
-    // if (!server.isHostId(player.getName())) {
-    // Don't bother sending the campaign file if we're hosting it ourselves
+        .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+
+    var msg2 = SetCampaignMsg.newBuilder().setCampaign(server.getCampaign().toDto());
     server
         .getConnection()
-        .callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
-    // }
+        .sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
   public void connectionRemoved(ClientConnection conn) {
     server.releaseClientConnection(conn.getId());
+    var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
+    var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(player.toDto());
     server
         .getConnection()
-        .broadcastCallMethod(
+        .broadcastMessage(
             new String[] {conn.getId()},
-            ClientCommand.COMMAND.playerDisconnected.name(),
-            playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer());
+            Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     playerMap.remove(conn.getId().toUpperCase());
   }
 
-  public void addMessageHandler(ServerMethodHandler handler) {
+  public void addMessageHandler(ServerMessageHandler handler) {
     connection.addMessageHandler(handler);
   }
 
-  public void broadcastCallMethod(String method, Object... parameters) {
-    connection.broadcastCallMethod(method, parameters);
+  public void broadcastMessage(byte[] message) {
+    connection.broadcastMessage(message);
   }
 
-  public void broadcastCallMethod(String[] exclude, String method, Object... parameters) {
-    connection.broadcastCallMethod(exclude, method, parameters);
+  public void broadcastMessage(String[] exclude, byte[] message) {
+    connection.broadcastMessage(exclude, message);
   }
 
-  public void callMethod(String id, String method, Object... parameters) {
-    connection.callMethod(id, method, parameters);
+  public void sendMessage(String id, Message message) {
+    connection.sendMessage(id, message.toByteArray());
   }
 
-  public void callMethod(String id, Object channel, String method, Object... parameters) {
-    connection.callMethod(id, channel, method, parameters);
+  public void sendMessage(String id, Object channel, Message message) {
+    connection.sendMessage(id, channel, message.toByteArray());
+  }
+
+  public void broadcastMessage(Message message) {
+    connection.broadcastMessage(message.toByteArray());
+  }
+
+  public void broadcastMessage(String[] exclude, Message message) {
+    connection.broadcastMessage(exclude, message.toByteArray());
   }
 
   public void open() throws IOException {
