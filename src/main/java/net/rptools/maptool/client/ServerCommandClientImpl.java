@@ -646,7 +646,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   @Override
   public void updateTokenProperty(Token token, Token.Update update) {
-    updateTokenProperty(token, update);
+    updateTokenProperty(token, update, new TokenPropertyValueDto[]{});
   }
 
   @Override
