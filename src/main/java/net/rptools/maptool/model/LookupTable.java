@@ -391,6 +391,14 @@ public class LookupTable {
       this.imageId = imageId;
     }
 
+    private Object readResolve() {
+      if (picked == null) {
+        picked = false;
+      }
+
+      return this;
+    }
+
     public MD5Key getImageId() {
       return imageId;
     }
@@ -525,7 +533,9 @@ public class LookupTable {
     var dto = LookupTableDto.newBuilder();
     dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
     dto.setName(name);
-    dto.setDefaultRoll(defaultRoll);
+    if (defaultRoll != null) {
+      dto.setDefaultRoll(defaultRoll);
+    }
     if (tableImage != null) {
       dto.setTableImage(StringValue.of(tableImage.toString()));
     }

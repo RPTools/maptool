@@ -126,6 +126,14 @@ public class Campaign {
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
   }
 
+  private Object readResolve() {
+    if (exportSettings == null) {
+      exportSettings = new HashMap<>();
+    }
+
+    return this;
+  }
+
   private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();

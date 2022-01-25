@@ -2266,8 +2266,12 @@ public class Zone extends BaseModel {
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
     exposedAreaMeta.forEach(
-        (id, area) ->
-            dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory())));
+        (id, area) -> {
+          if (id == null) {
+            return;
+          }
+          dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory()));
+        });
     dto.setInitiative(initiativeList.toDto());
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);
