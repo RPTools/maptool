@@ -263,7 +263,7 @@ public class Token extends BaseModel implements Cloneable {
   private Area vbl;
 
   private String name;
-  private final Set<String> ownerList = new HashSet<>();
+  private Set<String> ownerList = new HashSet<>();
 
   private int ownerType;
 
@@ -323,7 +323,7 @@ public class Token extends BaseModel implements Cloneable {
   private MD5Key charsheetImage;
   private MD5Key portraitImage;
 
-  private final List<AttachedLightSource> lightSourceList = new ArrayList<>();
+  private List<AttachedLightSource> lightSourceList = new ArrayList<>();
   private String sightType;
   private boolean hasSight;
   private Boolean hasImageTable = false;
@@ -353,12 +353,12 @@ public class Token extends BaseModel implements Cloneable {
   // help XStream move the data around.
   private Map<String, Object> propertyMap; // 1.3b77 and earlier
 
-  private final CaseInsensitiveHashMap<Object> propertyMapCI = new CaseInsensitiveHashMap<>();
+  private CaseInsensitiveHashMap<Object> propertyMapCI = new CaseInsensitiveHashMap<>();
 
   private Map<String, String> macroMap;
-  private final Map<Integer, MacroButtonProperties> macroPropertiesMap = new HashMap<>();
+  private Map<Integer, MacroButtonProperties> macroPropertiesMap = new HashMap<>();
 
-  private final Map<String, String> speechMap = new HashMap<>();
+  private Map<String, String> speechMap = new HashMap<>();
 
   private HeroLabData heroLabData;
 
@@ -2378,6 +2378,9 @@ public class Token extends BaseModel implements Cloneable {
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
     // Newer tokens will use propertyMapCI so we only need to make corrections
     // if the old field has data in it.
+    if (propertyMapCI == null) {
+      propertyMapCI = new CaseInsensitiveHashMap<>();
+    }
     if (propertyMap != null) {
       propertyMapCI.putAll(propertyMap);
       propertyMap.clear(); // It'll never be written out, but we should free the memory.
@@ -2400,6 +2403,34 @@ public class Token extends BaseModel implements Cloneable {
           sizeMap.put(key.toString(), entry.getValue());
         }
       }
+    }
+
+    if (ownerList == null) {
+      ownerList = new HashSet<>();
+    }
+    if (lightSourceList == null) {
+      lightSourceList = new ArrayList<>();
+    }
+    if (macroPropertiesMap == null) {
+      macroPropertiesMap = new HashMap<>();
+    }
+    if (speechMap == null) {
+      speechMap = new HashMap<>();
+    }
+    if (isFlippedIso == null) {
+      isFlippedIso = false;
+    }
+    if (hasImageTable == null) {
+      hasImageTable = false;
+    }
+    if (tokenShape == null) {
+      tokenShape = TokenShape.SQUARE.toString();
+    }
+    if (tokenType == null) {
+      tokenType = Type.NPC.toString();
+    }
+    if (speechName == null) {
+      speechName = "";
     }
 
     return this;
@@ -2840,7 +2871,7 @@ public class Token extends BaseModel implements Cloneable {
     dto.setVisibleOnlyToOwner(visibleOnlyToOwner);
     dto.setVblColorSensitivity(vblColorSensitivity);
     dto.setAlwaysVisibleTolerance(alwaysVisibleTolerance);
-    dto.setIsAlwaysVisible(isVisible);
+    dto.setIsAlwaysVisible(isAlwaysVisible);
     if (vbl != null) {
       dto.setVbl(Mapper.map(vbl));
     }
