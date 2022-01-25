@@ -2871,7 +2871,7 @@ public class Token extends BaseModel implements Cloneable {
     dto.setVisibleOnlyToOwner(visibleOnlyToOwner);
     dto.setVblColorSensitivity(vblColorSensitivity);
     dto.setAlwaysVisibleTolerance(alwaysVisibleTolerance);
-    dto.setIsAlwaysVisible(isVisible);
+    dto.setIsAlwaysVisible(isAlwaysVisible);
     if (vbl != null) {
       dto.setVbl(Mapper.map(vbl));
     }
