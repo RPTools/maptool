@@ -2109,6 +2109,10 @@ public class Zone extends BaseModel {
     if (topologyTerrain == null) {
       topologyTerrain = new Area();
     }
+
+    if (aStarRounding == null) {
+      aStarRounding = AStarRoundingOptions.NONE;
+    }
     return this;
   }
 
