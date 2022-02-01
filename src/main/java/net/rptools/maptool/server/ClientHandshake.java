@@ -127,8 +127,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   @Override
   public void startHandshake() throws ExecutionException, InterruptedException {
-    var md5key =
-        CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().getKey().publicKey());
+    var md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
     var clientInitMsg =
         ClientInitMsg.newBuilder()
             .setPlayerName(player.getName())
@@ -269,10 +268,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
     HandshakeChallenge handshakeChallenge = null;
 
     if (useAuthTypeMsg.getAuthType() == AuthTypeEnum.ASYMMETRIC_KEY) {
-      CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
+      CipherUtil.Key publicKey = new PublicPrivateKeyStore().getKeys().get();
       handshakeChallenge =
           HandshakeChallenge.fromChallengeBytes(
-              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), cipherUtil.getKey());
+              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), publicKey);
     } else {
       player.setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {

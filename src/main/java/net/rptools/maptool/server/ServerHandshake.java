@@ -521,10 +521,10 @@ public class ServerHandshake implements Handshake, MessageHandler {
       }
       return State.AwaitingPublicKey;
     }
-    CipherUtil cipherUtil = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
+    CipherUtil.Key publicKey = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
     handshakeChallenges[0] =
-        HandshakeChallenge.createChallenge(player.getName(), password, cipherUtil.getKey());
+        HandshakeChallenge.createChallenge(player.getName(), password, publicKey);
 
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()

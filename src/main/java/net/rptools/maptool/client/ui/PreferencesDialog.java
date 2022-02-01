@@ -896,7 +896,7 @@ public class PreferencesDialog extends JDialog {
 
     regeneratePublicKey.addActionListener(
         e -> {
-          CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().regenerateKeys();
+          CompletableFuture<CipherUtil.Key> keys = new PublicPrivateKeyStore().regenerateKeys();
 
           keys.thenAccept(
               cu -> {
@@ -1062,7 +1062,7 @@ public class PreferencesDialog extends JDialog {
     chatNotificationColor.setColor(AppPreferences.getChatNotificationColor());
     chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
 
-    CompletableFuture<CipherUtil> keys = new PublicPrivateKeyStore().getKeys();
+    CompletableFuture<CipherUtil.Key> keys = new PublicPrivateKeyStore().getKeys();
 
     keys.thenAccept(
         cu -> {

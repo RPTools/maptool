@@ -100,7 +100,7 @@ public final class PasswordFilePlayerDatabase
     this.backupPasswordFile = new File(passwordFile + ".backup");
     this.additionalUsers = additionalUsers;
     try {
-      this.serverPublicPrivateKey = new PublicPrivateKeyStore().getKeys().get().getKey();
+      this.serverPublicPrivateKey = new PublicPrivateKeyStore().getKeys().get();
     } catch (InterruptedException | ExecutionException e) {
       if (e.getCause() instanceof IOException) {
         throw (IOException) e.getCause();
@@ -188,8 +188,7 @@ public final class PasswordFilePlayerDatabase
             byte[] salt = Base64.getDecoder().decode(passwordEntry.get("salt").getAsString());
             passwordKey = new CipherUtil.Key(password, salt);
           } else if (passwordString != null) {
-            CipherUtil cipherUtil = CipherUtil.fromSharedKeyNewSalt(passwordString);
-            passwordKey = cipherUtil.getKey();
+            passwordKey = CipherUtil.fromSharedKeyNewSalt(passwordString);
             dirty.set(true);
           } else if (passwordEntry.has("publicKeys")) {
             JsonArray pkeys = passwordEntry.get("publicKeys").getAsJsonArray();
@@ -633,7 +632,7 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
+  public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key)
       throws ExecutionException, InterruptedException {
     PlayerDetails pd = getPlayerDetails(player.getName());
     if (pd == null) {
@@ -646,7 +645,7 @@ public final class PasswordFilePlayerDatabase
           Optional<PublicKeyDetails> key =
               pd.publicKeyDetails().stream().filter(pk -> pk.md5Key().equals(md5key)).findFirst();
           if (key.isPresent()) {
-            return key.get().cipherUtil();
+            return key.get().publicKey();
           } else {
             throw new CompletionException(
                 new IllegalArgumentException(I18N.getText("Password" + ".publicKeyNotFound")));
@@ -845,9 +844,7 @@ public final class PasswordFilePlayerDatabase
     return putUncommittedPlayer(
         name,
         role,
-        password != null & !password.isEmpty()
-            ? CipherUtil.fromSharedKeyNewSalt(password).getKey()
-            : null,
+        password != null & !password.isEmpty() ? CipherUtil.fromSharedKeyNewSalt(password) : null,
         publicKeyDetails,
         blockedReason,
         persisted);
@@ -938,5 +935,5 @@ public final class PasswordFilePlayerDatabase
 
   /** Record containing the public key information */
   private static record PublicKeyDetails(
-      String keyString, MD5Key md5Key, CipherUtil cipherUtil, String filename) {}
+      String keyString, MD5Key md5Key, CipherUtil.Key publicKey, String filename) {}
 }

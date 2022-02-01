@@ -38,7 +38,7 @@ public class PublicPrivateKeyStore {
    *
    * @return the keys.
    */
-  public CompletableFuture<CipherUtil> getKeys() {
+  public CompletableFuture<CipherUtil.Key> getKeys() {
 
     return CompletableFuture.supplyAsync(
         () -> {
@@ -65,7 +65,7 @@ public class PublicPrivateKeyStore {
    *
    * @return the newly generated keys.
    */
-  public CompletableFuture<CipherUtil> regenerateKeys() {
+  public CompletableFuture<CipherUtil.Key> regenerateKeys() {
     return CompletableFuture.supplyAsync(
         () -> {
           try {
