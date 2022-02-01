@@ -31,6 +31,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.lib.MD5Key;
@@ -43,7 +44,9 @@ import org.apache.logging.log4j.Logger;
 public class CipherUtil {
 
   /** The algorithm to use for encoding / decoding. */
-  private static final String CIPHER_ALGORITHM = "AES";
+  private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+  /** The size of the block cipher's block size in bytes. */
+  public static final int CIPHER_BLOCK_SIZE = 16;
 
   /** The format of generated keys. */
   private static final String KEY_ALGORITHM = "AES";
@@ -95,19 +98,20 @@ public class CipherUtil {
 
   public static CipherUtil.Key fromPublicPrivatePair(File publicKeyFile, File privateKeyFile)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidAlgorithmParameterException {
     KeyPair keyPair = readKeyPair(publicKeyFile, privateKeyFile);
     return CipherUtil.fromPublicPrivatePair(keyPair.getPublic(), keyPair.getPrivate());
   }
 
   public static CipherUtil.Key fromPublicPrivatePair(PublicKey publicKey, PrivateKey privateKey)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
     return new Key(publicKey, privateKey);
   }
 
   public static CipherUtil.Key fromPublicKeyString(String pk)
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidAlgorithmParameterException {
     return new Key(CipherUtil.decodePublicKeyString(pk), null);
   }
 
@@ -133,25 +137,68 @@ public class CipherUtil {
    * Returns a {@link Cipher} that can be used to decipher encoded values.
    *
    * @param key the key used for deciphering.
+   * @param iv the initialization vector used for deciphering.
    * @return a {@link Cipher} that can be used for deciphering encoded values.
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public static Cipher createDecryptor(Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+  public static Cipher createSymmetricDecryptor(Key key, byte[] iv)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
-      if (!key.privateKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
-        throw new AssertionError(
-            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
-      }
-    } else {
-      if (!key.secretKeySpec.getAlgorithm().equals(KEY_ALGORITHM)) {
-        throw new AssertionError(
-            "Expected Algorithm " + KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
-      }
+      throw new AssertionError("Expected symmetric key, got asymmetric");
     }
-    return createCipher(Cipher.DECRYPT_MODE, key);
+    if (!key.secretKeySpec.getAlgorithm().equals(KEY_ALGORITHM)) {
+      throw new AssertionError(
+          "Expected Algorithm " + KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+    }
+    return createCipher(Cipher.DECRYPT_MODE, key, iv);
+  }
+
+  /**
+   * Returns a {@link Cipher} that can be used to decipher encoded values.
+   *
+   * @param key the key used for deciphering.
+   * @return a {@link Cipher} that can be used for deciphering encoded values.
+   * @throws NoSuchPaddingException if the requested padding algorithm is not available.
+   * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
+   * @throws InvalidKeyException if there are problems with the supplied key.
+   */
+  public static Cipher createAsymmetricDecryptor(Key key)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
+    if (!key.asymmetric()) {
+      throw new AssertionError("Expected asymmetric key, got symmetric");
+    }
+    if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+      throw new AssertionError(
+          "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.privateKey.getAlgorithm());
+    }
+    return createCipher(Cipher.DECRYPT_MODE, key, null);
+  }
+
+  /**
+   * Returns a {@link Cipher} that can be used to encipher encoded values.
+   *
+   * @param key the key used for encipher.
+   * @param iv the initialization vector used for encipher.
+   * @return a {@link Cipher} that can be used for deciphering encoded values.
+   * @throws NoSuchPaddingException if the requested padding algorithm is not available.
+   * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
+   * @throws InvalidKeyException if there are problems with the supplied key.
+   */
+  public static Cipher createSymmetricEncryptor(Key key, byte[] iv)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
+    if (key.asymmetric()) {
+      throw new AssertionError("Expected symmetric key, got asymmetric");
+    }
+    if (!key.secretKeySpec.getAlgorithm().equals(KEY_ALGORITHM)) {
+      throw new AssertionError(
+          "Expected Algorithm " + KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
+    }
+    return createCipher(Cipher.ENCRYPT_MODE, key, iv);
   }
 
   /**
@@ -163,20 +210,17 @@ public class CipherUtil {
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  public static Cipher createEncryptor(Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-    if (key.asymmetric()) {
-      if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
-        throw new AssertionError(
-            "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
-      }
-    } else {
-      if (!key.secretKeySpec.getAlgorithm().equals(KEY_ALGORITHM)) {
-        throw new AssertionError(
-            "Expected Algorithm " + KEY_ALGORITHM + " got " + key.secretKeySpec.getAlgorithm());
-      }
+  public static Cipher createAsymmetricEncryptor(Key key)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
+    if (!key.asymmetric()) {
+      throw new AssertionError("Expected asymmetric key, got symmetric");
     }
-    return createCipher(Cipher.ENCRYPT_MODE, key);
+    if (!key.publicKey.getAlgorithm().equals(ASYNC_KEY_ALGORITHM)) {
+      throw new AssertionError(
+          "Expected Algorithm " + ASYNC_KEY_ALGORITHM + " got " + key.publicKey.getAlgorithm());
+    }
+    return createCipher(Cipher.ENCRYPT_MODE, key, null);
   }
 
   /**
@@ -184,13 +228,15 @@ public class CipherUtil {
    *
    * @param encryptMode the mode for the {@link Cipher}.
    * @param key the key used for encipher.
+   * @param iv the initialization vector used for encipher or null if asymmetric.
    * @return a {@link Cipher} that can be used for enciphering / deciphering encoded values.
    * @throws NoSuchPaddingException if the requested padding algorithm is not available.
    * @throws NoSuchAlgorithmException if the requested encryption algorithm is not available.
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
-  private static Cipher createCipher(int encryptMode, Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+  private static Cipher createCipher(int encryptMode, Key key, byte[] iv)
+      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);
       cipher.init(
@@ -198,7 +244,7 @@ public class CipherUtil {
       return cipher;
     } else {
       Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-      cipher.init(encryptMode, key.secretKeySpec);
+      cipher.init(encryptMode, key.secretKeySpec, new IvParameterSpec(iv));
       return cipher;
     }
   }

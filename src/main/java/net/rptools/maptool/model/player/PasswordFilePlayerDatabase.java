@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -117,7 +118,7 @@ public final class PasswordFilePlayerDatabase
 
   public void readPasswordFile()
       throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException {
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
 
     try {
       passwordFileLock.lock();
@@ -137,7 +138,7 @@ public final class PasswordFilePlayerDatabase
 
   public void initialize()
       throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException {
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     transientPlayerDetails.clear();
     readPasswordFile();
     savedDetails.putAll(playerDetails);
@@ -147,7 +148,7 @@ public final class PasswordFilePlayerDatabase
 
   private Map<String, PlayerDetails> readPasswordFile(File file)
       throws PasswordDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException,
-          NoSuchPaddingException, InvalidKeyException {
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
 
     try {
       passwordFileLock.lock();
@@ -448,7 +449,7 @@ public final class PasswordFilePlayerDatabase
   @Override
   public void addPlayerAsymmetricKey(String name, Role role, Set<String> publicKeyStrings)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException {
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     if (playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("Password.playerExists", name));
     }
@@ -520,7 +521,7 @@ public final class PasswordFilePlayerDatabase
   @Override
   public void setAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException {
 
     var pd = getPlayerDetails(name);
 
@@ -535,7 +536,7 @@ public final class PasswordFilePlayerDatabase
   @Override
   public void addAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException {
     if (!playerExists(name)) {
       throw new PasswordDatabaseException(I18N.getText("msg.error.playerNotInDatabase", name));
     }
@@ -768,7 +769,7 @@ public final class PasswordFilePlayerDatabase
   private PlayerDetails putUncommittedPlayer(
       String name, Role role, Set<String> publicKeyStrings, String blockedReason, boolean persisted)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException {
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     return putUncommittedPlayer(
         name, role, null, createPublicKeyDetails(publicKeyStrings, name), blockedReason, persisted);
   }
@@ -865,7 +866,7 @@ public final class PasswordFilePlayerDatabase
   private Set<PublicKeyDetails> createPublicKeyDetails(
       Set<String> publicKeyStrings, String playerName)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidAlgorithmParameterException {
     Set<PublicKeyDetails> pkDetails = new HashSet<>();
 
     String pkFilename = derivePublicKeyFilename(playerName);

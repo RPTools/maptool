@@ -15,6 +15,7 @@
 package net.rptools.maptool.server;
 
 import com.google.protobuf.ByteString;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -302,6 +303,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       setCurrentState(State.AwaitingClientInit);
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
+        | InvalidAlgorithmParameterException
         | InvalidKeySpecException
         | InvalidKeyException
         | PasswordDatabaseException e) {
@@ -312,13 +314,17 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   private void handle(ClientAuthMsg clientAuthMessage)
       throws NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
-          InterruptedException {
+          InterruptedException, NoSuchPaddingException, IllegalBlockSizeException,
+          NoSuchAlgorithmException, BadPaddingException, InvalidKeyException,
+          InvalidAlgorithmParameterException {
     byte[] response = clientAuthMessage.getChallengeResponse().toByteArray();
     if (handshakeChallenges.length > 1) {
-      if (Arrays.compare(response, handshakeChallenges[GM_CHALLENGE].getExpectedResponse()) == 0) {
+      var iv = clientAuthMessage.getIv().toByteArray();
+      if (Arrays.compare(response, handshakeChallenges[GM_CHALLENGE].getExpectedResponse(iv))
+          == 0) {
         setPlayer(playerDatabase.getPlayerWithRole(player.getName(), Role.GM));
       } else if (Arrays.compare(
-              response, handshakeChallenges[PLAYER_CHALLENGE].getExpectedResponse())
+              response, handshakeChallenges[PLAYER_CHALLENGE].getExpectedResponse(iv))
           == 0) {
         setPlayer(playerDatabase.getPlayerWithRole(player.getName(), Role.PLAYER));
       } else {
@@ -326,7 +332,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
         return;
       }
     } else if (currentState == State.AwaitingClientPasswordAuth) {
-      if (Arrays.compare(response, handshakeChallenges[0].getExpectedResponse()) != 0) {
+      var iv = clientAuthMessage.getIv().toByteArray();
+      if (Arrays.compare(response, handshakeChallenges[0].getExpectedResponse(iv)) != 0) {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
         return;
       }
@@ -369,7 +376,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private void handle(ClientInitMsg clientInitMsg)
       throws ExecutionException, InterruptedException, NoSuchPaddingException,
           IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidAlgorithmParameterException {
     var server = MapTool.getServer();
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
       setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
@@ -447,17 +454,23 @@ public class ServerHandshake implements Handshake, MessageHandler {
    */
   private void sendSharedPasswordAuthType()
       throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException {
+          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
+
+    SecureRandom rnd = new SecureRandom();
+    byte[] iv = new byte[CipherUtil.CIPHER_BLOCK_SIZE];
+    rnd.nextBytes(iv);
     String password = new PasswordGenerator().getPassword();
     handshakeChallenges = new HandshakeChallenge[1];
     Key key = playerDatabase.getPlayerPassword(player.getName()).get();
-    handshakeChallenges[0] = HandshakeChallenge.createChallenge(player.getName(), password, key);
+    handshakeChallenges[0] =
+        HandshakeChallenge.createSymmetricChallenge(player.getName(), password, key, iv);
 
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
+            .setIv(ByteString.copyFrom(iv))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
     sendMessage(handshakeMsg);
@@ -474,27 +487,33 @@ public class ServerHandshake implements Handshake, MessageHandler {
    */
   private void sendRoleSharedPasswordAuthType()
       throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException {
+          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String[] password = new String[2];
     password[GM_CHALLENGE] = new PasswordGenerator().getPassword();
     password[PLAYER_CHALLENGE] = new PasswordGenerator().getPassword();
 
+    SecureRandom rnd = new SecureRandom();
+    byte[] iv = new byte[CipherUtil.CIPHER_BLOCK_SIZE];
+    rnd.nextBytes(iv);
     handshakeChallenges[GM_CHALLENGE] =
-        HandshakeChallenge.createChallenge(
+        HandshakeChallenge.createSymmetricChallenge(
             player.getName(),
             password[GM_CHALLENGE],
-            playerDatabase.getRolePassword(Role.GM).get());
+            playerDatabase.getRolePassword(Role.GM).get(),
+            iv);
     handshakeChallenges[PLAYER_CHALLENGE] =
-        HandshakeChallenge.createChallenge(
+        HandshakeChallenge.createSymmetricChallenge(
             player.getName(),
             password[GM_CHALLENGE],
-            playerDatabase.getRolePassword(Role.PLAYER).get());
+            playerDatabase.getRolePassword(Role.PLAYER).get(),
+            iv);
 
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()
             .setAuthType(AuthTypeEnum.SHARED_PASSWORD)
             .setSalt(ByteString.copyFrom(playerPasswordSalt))
+            .setIv(ByteString.copyFrom(iv))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[GM_CHALLENGE].getChallenge()))
             .addChallenge(
                 ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()));
@@ -517,7 +536,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private State sendAsymmetricKeyAuthType()
       throws ExecutionException, InterruptedException, NoSuchPaddingException,
           IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException {
+          InvalidKeyException, InvalidAlgorithmParameterException {
     handshakeChallenges = new HandshakeChallenge[1];
     if (!playerDatabase.hasPublicKey(player, playerPublicKeyMD5).join()) {
       if (useEasyConnect) {
@@ -530,7 +549,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
     CipherUtil.Key publicKey = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
     handshakeChallenges[0] =
-        HandshakeChallenge.createChallenge(player.getName(), password, publicKey);
+        HandshakeChallenge.createAsymmetricChallenge(player.getName(), password, publicKey);
 
     var authTypeMsg =
         UseAuthTypeMsg.newBuilder()
