@@ -238,7 +238,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
             sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
           }
           break;
-        case AwaitingClientAuth:
+        case AwaitingClientPasswordAuth:
+        case AwaitingClientPublicKeyAuth:
           if (msgType == MessageTypeCase.CLIENT_AUTH_MESSAGE) {
             handle(handshakeMsg.getClientAuthMessage());
           } else {
@@ -321,6 +322,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
           == 0) {
         setPlayer(playerDatabase.getPlayerWithRole(player.getName(), Role.PLAYER));
       } else {
+        sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
+        return;
+      }
+    } else if (currentState == State.AwaitingClientPasswordAuth) {
+      if (Arrays.compare(response, handshakeChallenges[0].getExpectedResponse()) != 0) {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
         return;
       }
@@ -417,7 +423,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       } else {
         sendSharedPasswordAuthType();
       }
-      setCurrentState(State.AwaitingClientAuth);
+      setCurrentState(State.AwaitingClientPasswordAuth);
     }
   }
 
@@ -532,7 +538,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
     sendMessage(handshakeMsg);
-    return State.AwaitingClientAuth;
+    return State.AwaitingClientPublicKeyAuth;
   }
 
   /**
@@ -572,7 +578,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
     Error,
     Success,
     AwaitingClientInit,
-    AwaitingClientAuth,
+    AwaitingClientPasswordAuth,
+    AwaitingClientPublicKeyAuth,
     AwaitingPublicKey,
     PlayerBlocked
   }
