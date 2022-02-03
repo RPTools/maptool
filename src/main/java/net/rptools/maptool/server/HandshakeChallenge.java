@@ -58,7 +58,7 @@ public class HandshakeChallenge {
       throw new IllegalStateException(
           "Handhshake challenge " + challengeString + " does not start with username " + username);
     }
-    String responseString = challengeString.replace(username, "");
+    String responseString = challengeString.substring(username.length());
     byte[] response;
     var revPassword = new StringBuilder(responseString).reverse().toString();
     if (key.asymmetric()) {
