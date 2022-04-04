@@ -52,9 +52,9 @@ public class TokenSelectionFunctions extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
-    if (functionName.equals("selectTokens")) {
+    if (functionName.equalsIgnoreCase("selectTokens")) {
       selectTokens(parameters);
-    } else if (functionName.equals("deselectTokens")) {
+    } else if (functionName.equalsIgnoreCase("deselectTokens")) {
       deselectTokens(parameters);
     } else {
       throw new ParserException(

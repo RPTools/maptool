@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.lib.MD5Key;
@@ -32,6 +33,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
 
   private final CipherUtil playerPassword;
   private final CipherUtil gmPassword;
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
@@ -95,18 +97,23 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean isDisabled(Player player) {
+  public boolean isBlocked(Player player) {
     return false;
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public String getBlockedReason(Player player) {
     return "";
+  }
+
+  @Override
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return loggedInPlayers.getPlayers();
+  }
+
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
   }
 
   @Override
@@ -120,8 +127,33 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    return Set.of();
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return false;
+  }
+
+  @Override
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
+  }
+
+  @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
   }
 }

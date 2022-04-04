@@ -24,6 +24,7 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Paint a dot so that it doesn't overlay any other states being displayed in the same grid.
@@ -119,5 +120,28 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
   /** @return Getter for grid */
   public int getGrid() {
     return grid;
+  }
+
+  @Override
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    return super.getDto().setGridSize(grid);
+  }
+
+  @Override
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    super.fillFrom(dto);
+    grid = dto.getGridSize();
+  }
+
+  public static FlowColorDotTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowColorDotTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_COLOR_DOT)
+        .build();
   }
 }

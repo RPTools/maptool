@@ -20,9 +20,12 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
 
 /**
@@ -110,5 +113,20 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   /** @param theAssetIds Setter for bottomAssetId */
   public void setAssetIds(MD5Key[] theAssetIds) {
     this.assetIds = theAssetIds;
+  }
+
+  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar = new MultipleImageBarTokenOverlay();
+    bar.fillFrom(dto.getCommon());
+    bar.assetIds =
+        dto.getAssetIdsList().stream().map(a -> new MD5Key(a)).toArray(size -> new MD5Key[size]);
+    return bar;
+  }
+
+  public BarTokenOverlayDto toDto() {
+    var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
+    dto.addAllAssetIds(
+        Arrays.asList(assetIds).stream().map(a -> a.toString()).collect(Collectors.toList()));
+    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE).build();
   }
 }

@@ -6,23 +6,31 @@ option java_multiple_files = true;
 option java_package = "net.rptools.maptool.server.proto";
 option java_outer_classname = "HandshakeProtos";
 
+import "library.proto";
+import "data_transfer_objects.proto";
+import "gamedata.proto";
+
 /*
  * For easier differentiation between protobuf classes and "normal" classes
  * protobuf classes end with "Dto" or "Msg".
  */
 
+
+
 message HandshakeMsg {
   oneof message_type {
-    // Client initiated messages
-    ClientInitMsg client_init_msg = 1;
-    ClientAuthMsg client_auth_message = 3;
-    // Server initiated messages
-    UseAuthTypeMsg use_auth_type_msg = 2;
-    ConnectionSuccessfulMsg connection_successful_msg = 5;
-    // Initiated by either server or client
-    HandshakeResponseCodeMsg handshake_response_code_msg = 4;
+    ClientInitMsg client_init_msg = 1; // Client Initiated
+    ClientAuthMsg client_auth_message = 3; // Client Initiated
+    UseAuthTypeMsg use_auth_type_msg = 2; // Server initiated
+    HandshakeResponseCodeMsg handshake_response_code_msg = 4; // Either
+    ConnectionSuccessfulMsg connection_successful_msg = 5; // Server initiated
+    PlayerBlockedMsg player_blocked_msg = 6; // Server initiated
+    RequestPublicKeyMsg request_public_key_msg = 7; // Server initiated
+    PublicKeyUploadMsg public_key_upload_msg = 8; // Client initiated
+    PublicKeyAddedMsg public_key_added_msg = 9; // Server initiated
   }
 }
+
 message ClientInitMsg {
   string player_name = 1;
   string version = 2;
@@ -42,6 +50,24 @@ message ClientAuthMsg {
 message ConnectionSuccessfulMsg {
   RoleDto role_dto = 1;
   ServerPolicyDto server_policy_dto = 2;
+  AddOnLibraryListDto add_on_library_list_dto = 3;
+  DataStoreDto game_data_dto = 4;
+}
+
+message PlayerBlockedMsg {
+  string reason = 1;
+}
+
+message RequestPublicKeyMsg {
+  string pin = 1;
+}
+
+message PublicKeyUploadMsg {
+  string public_key = 1;
+}
+
+message PublicKeyAddedMsg {
+  string public_key = 1;
 }
 
 enum HandshakeResponseCodeMsg {
@@ -53,40 +79,10 @@ enum HandshakeResponseCodeMsg {
   INVALID_PASSWORD = 5;
   INVALID_PUBLIC_KEY = 6;
   INVALID_HANDSHAKE = 7;
+  SERVER_DENIED = 8;
 }
 
 enum AuthTypeEnum {
   SHARED_PASSWORD = 0;
   ASYMMETRIC_KEY = 1;
-}
-
-
-message ServerPolicyDto {
-  bool use_strict_token_management = 1;
-  bool is_movement_locked = 2;
-  bool is_token_editor_locked = 3;
-  bool players_can_reveal_vision = 4;
-  bool gm_reveals_vision_for_unowned_tokens = 5;
-  bool use_individual_views = 6;
-  bool restricted_impersonation = 7;
-  bool players_receive_campaign_macros = 8;
-  bool use_tool_tips_for_default_roll_format = 9;
-  bool use_individual_FOW = 10;
-  bool is_auto_reveal_on_movement = 11;
-  bool include_owned_NPCs = 12;
-  WalkerMetricDto movement_metric = 13;
-  bool using_astar_pathfinding = 14;
-  bool vbl_blocks_move = 15;
-}
-
-enum WalkerMetricDto {
-    NO_DIAGONALS = 0;
-    MANHATTAN = 1;
-    ONE_TWO_ONE = 2;
-    ONE_ONE_ONE = 3;
-}
-
-enum RoleDto {
-    PLAYER = 0;
-    GM = 1;
 }

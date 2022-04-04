@@ -44,7 +44,13 @@ public class StartServerDialogPreferences {
   private static final String KEY_WALKER_METRIC = "movementMetric";
   private static final String KEY_USE_INDIVIDUAL_FOW = "useIndividualFOW";
   private static final String KEY_AUTO_REVEAL_ON_MOVE = "autoRevealOnMovement";
+
+  private static final String KEY_USE_EASY_CONNECT = "useEasyConnect";
   private static final String KEY_USE_PASSWORD_FILE = "usePasswordFile";
+  private static final String KEY_HIDE_MAP_SELECT_UI = "hideMapSelectUI";
+  private static final String KEY_START_LOCKED_TOKEN_EDIT = "lockTokenEditOnStartup";
+  private static final String KEY_START_LOCKED_PLAYER_MOVEMENT = "lockPlayerMovementOnStartup";
+  private static final String KEY_LOCK_PLAYER_LIBRARY = "lockPlayerLibrary";
 
   private static Boolean useToolTipsForUnformattedRolls = null;
 
@@ -212,5 +218,45 @@ public class StartServerDialogPreferences {
 
   public void setUsePasswordFile(boolean flag) {
     prefs.putBoolean(KEY_USE_PASSWORD_FILE, flag);
+  }
+
+  public boolean getUseEasyConnect() {
+    return prefs.getBoolean(KEY_USE_EASY_CONNECT, false);
+  }
+
+  public void setUseEasyConnect(boolean flag) {
+    prefs.putBoolean(KEY_USE_EASY_CONNECT, flag);
+  }
+
+  public boolean getMapSelectUIHidden() {
+    return prefs.getBoolean(KEY_HIDE_MAP_SELECT_UI, false);
+  }
+
+  public void setMapSelectUIHidden(boolean flag) {
+    prefs.putBoolean(KEY_HIDE_MAP_SELECT_UI, flag);
+  }
+
+  public boolean getLockTokenEditOnStart() {
+    return prefs.getBoolean(KEY_START_LOCKED_TOKEN_EDIT, false);
+  }
+
+  public void setLockTokenEditOnStart(boolean flag) {
+    prefs.putBoolean(KEY_START_LOCKED_TOKEN_EDIT, flag);
+  }
+
+  public boolean getLockPlayerMovementOnStart() {
+    return prefs.getBoolean(KEY_START_LOCKED_PLAYER_MOVEMENT, false);
+  }
+
+  public void setLockPlayerMovementOnStart(boolean flag) {
+    prefs.putBoolean(KEY_START_LOCKED_PLAYER_MOVEMENT, flag);
+  }
+
+  public boolean getPlayerLibraryLock() {
+    return prefs.getBoolean(KEY_LOCK_PLAYER_LIBRARY, false);
+  }
+
+  public void setPlayerLibraryLock(boolean flag) {
+    prefs.putBoolean(KEY_LOCK_PLAYER_LIBRARY, flag);
   }
 }

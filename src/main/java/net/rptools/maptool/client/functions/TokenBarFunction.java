@@ -49,15 +49,15 @@ public class TokenBarFunction extends AbstractFunction {
     String bar = (String) parameters.get(0);
     verifyBar(functionName, bar);
 
-    if (functionName.equals("getBar")) {
+    if (functionName.equalsIgnoreCase("getBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getValue(token, bar);
-    } else if (functionName.equals("setBar")) {
+    } else if (functionName.equalsIgnoreCase("setBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return setValue(token, bar, parameters.get(1));
-    } else if (functionName.equals("isBarVisible")) {
+    } else if (functionName.equalsIgnoreCase("isBarVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return isVisible(token, bar);
@@ -90,7 +90,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, val);
     return val;
   }
 

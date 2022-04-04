@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.player;
 
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.proto.PlayerDto;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** @author trevor */
@@ -107,5 +108,16 @@ public class Player {
 
   public Player getTransferablePlayer() {
     return this;
+  }
+
+  public static Player fromDto(PlayerDto dto) {
+    var player = new Player();
+    player.name = dto.getName();
+    player.role = dto.getRole();
+    return player;
+  }
+
+  public PlayerDto toDto() {
+    return PlayerDto.newBuilder().setName(name).setRole(role).build();
   }
 }

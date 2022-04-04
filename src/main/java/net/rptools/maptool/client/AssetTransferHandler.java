@@ -16,7 +16,7 @@ package net.rptools.maptool.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.transfer.ConsumerListener;
@@ -28,32 +28,33 @@ import org.apache.commons.io.FileUtils;
  * @author trevor
  */
 public class AssetTransferHandler implements ConsumerListener {
-  public void assetComplete(Serializable id, String name, File data) {
+  public void assetComplete(MD5Key id, String name, File data) {
     byte[] assetData = null;
     try {
       assetData = FileUtils.readFileToByteArray(data);
+
+      Asset asset = Asset.createAssetDetectType(name, assetData);
+      if (!asset.getMD5Key().equals(id)) {
+        MapTool.showError("Received an invalid image: " + id);
+        return;
+      }
+      // Install it into our system
+      AssetManager.putAsset(asset);
+
     } catch (IOException ioe) {
       MapTool.showError("Error loading composed asset file: " + id);
       return;
     }
-    Asset asset = new Asset(name, assetData);
-    if (!asset.getId().equals(id)) {
-      MapTool.showError("Received an invalid image: " + id);
-      return;
-    }
-    // Install it into our system
-    AssetManager.putAsset(asset);
-
     // Remove the temp file
     data.delete();
     MapTool.getFrame().refresh();
   }
 
-  public void assetUpdated(Serializable id) {
+  public void assetUpdated(MD5Key id) {
     // Nothing to do
   }
 
-  public void assetAdded(Serializable id) {
+  public void assetAdded(MD5Key id) {
     // Nothing to do
   }
 }

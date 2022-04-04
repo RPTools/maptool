@@ -15,14 +15,22 @@
 package net.rptools.maptool.model;
 
 import com.google.gson.JsonObject;
+import com.google.protobuf.StringValue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.server.proto.InitiativeListDto;
+import net.rptools.maptool.server.proto.TokenInitiativeDto;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +43,8 @@ import org.apache.logging.log4j.Logger;
  * @author Jay
  */
 public class InitiativeList implements Serializable {
+
+  private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -100,13 +110,11 @@ public class InitiativeList implements Serializable {
   /** "callback" name used for the onInitiativeChange (non-vetoable) event */
   public static final String ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK = "onInitiativeChange";
 
-  /** Logger for this class */
-  private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
-
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
+  private InitiativeList() {}
   /**
    * Create an initiative list for a zone.
    *
@@ -639,30 +647,42 @@ public class InitiativeList implements Serializable {
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
-    List<Token> libTokens =
-        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK);
-    boolean isVetoed = false;
-    if (!libTokens.isEmpty()) {
-      JsonObject args = new JsonObject();
-      args.add("old", getInfoForOffset(oldOffset, oldRound));
-      args.add("new", getInfoForOffset(newOffset, newRound));
-      args.addProperty("direction", direction.toString());
-      String argStr = args.toString();
-      String prefix = ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK + "@";
-      for (Token handler : libTokens) {
-        boolean thisVote =
-            EventMacroUtil.pollEventHandlerForVeto(
-                prefix + handler.getName(),
-                argStr,
-                null,
-                ON_INITIATIVE_CHANGE_DENY_VARIABLE,
-                Collections.emptyMap());
-        isVetoed = isVetoed || thisVote;
+    try {
+      var libs =
+          new LibraryManager()
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK)
+              .get();
+      boolean isVetoed = false;
+      if (!libs.isEmpty()) {
+        JsonObject args = new JsonObject();
+        args.add("old", getInfoForOffset(oldOffset, oldRound));
+        args.add("new", getInfoForOffset(newOffset, newRound));
+        args.addProperty("direction", direction.toString());
+        String argStr = args.toString();
+        for (Library handler : libs) {
+          try {
+            String libraryNamespace = handler.getNamespace().get();
+            boolean thisVote =
+                EventMacroUtil.pollEventHandlerForVeto(
+                    ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
+                    libraryNamespace,
+                    argStr,
+                    null,
+                    ON_INITIATIVE_CHANGE_DENY_VARIABLE,
+                    Collections.emptyMap());
+            isVetoed = isVetoed || thisVote;
+          } catch (InterruptedException | ExecutionException e) {
+            // Should not be possible
+            throw new AssertionError("Error retrieving library namespace");
+          }
+        }
       }
+      return isVetoed;
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
+      return false; // if we completely fail we should never prevent the change of initiative.
     }
-    return isVetoed;
   }
-
   /**
    * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
    * are present. Passes in some relevant info to each qualifying lib:token macro identified.
@@ -679,19 +699,35 @@ public class InitiativeList implements Serializable {
       int oldRound,
       int newRound,
       InitiativeChangeDirection direction) {
-    List<Token> libTokens =
-        EventMacroUtil.getEventMacroTokens(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK);
-    if (!libTokens.isEmpty()) {
-      JsonObject args = new JsonObject();
-      args.add("old", getInfoForOffset(oldOffset, oldRound));
-      args.add("new", getInfoForOffset(newOffset, newRound));
-      args.addProperty("direction", direction.toString());
-      String argStr = args.toString();
-      String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
-      for (Token handler : libTokens) {
-        EventMacroUtil.callEventHandler(
-            prefix + handler.getName(), argStr, null, Collections.emptyMap());
+    try {
+      var libs =
+          new LibraryManager()
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK)
+              .get();
+      if (!libs.isEmpty()) {
+        JsonObject args = new JsonObject();
+        args.add("old", getInfoForOffset(oldOffset, oldRound));
+        args.add("new", getInfoForOffset(newOffset, newRound));
+        args.addProperty("direction", direction.toString());
+        String argStr = args.toString();
+        String prefix = ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK + "@";
+        for (Library handler : libs) {
+          try {
+            String libraryNamespace = handler.getNamespace().get();
+            EventMacroUtil.callEventHandler(
+                ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK,
+                libraryNamespace,
+                argStr,
+                null,
+                Collections.emptyMap());
+          } catch (InterruptedException | ExecutionException e) {
+            // Should not be possible
+            throw new AssertionError("Error retrieving library namespace");
+          }
+        }
       }
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
     }
   }
 
@@ -718,6 +754,37 @@ public class InitiativeList implements Serializable {
     info.addProperty("holding", isHolding ? 1 : 0);
     info.addProperty("token", offset != -1 ? getToken(offset).getId().toString() : "");
     return info;
+  }
+
+  public static InitiativeList fromDto(InitiativeListDto dto) {
+    var initiativeList = new InitiativeList();
+    initiativeList.current = dto.getCurrent();
+    initiativeList.round = dto.getRound();
+    initiativeList.zoneId = GUID.valueOf(dto.getZoneId());
+    initiativeList.hideNPC = dto.getHideNpc();
+    initiativeList.tokens =
+        dto.getTokensList().stream()
+            .map(t -> initiativeList.fromDto(t))
+            .collect(Collectors.toList());
+    return initiativeList;
+  }
+
+  public InitiativeListDto toDto() {
+    var dto = InitiativeListDto.newBuilder();
+    dto.setCurrent(current);
+    dto.setRound(round);
+    dto.setZoneId(zoneId.toString());
+    dto.setHideNpc(hideNPC);
+    dto.addAllTokens(tokens.stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    return dto.build();
+  }
+
+  public TokenInitiative fromDto(TokenInitiativeDto dto) {
+    var initiative = new TokenInitiative();
+    initiative.holding = dto.getHolding();
+    initiative.id = GUID.valueOf(dto.getTokenId());
+    initiative.state = dto.hasState() ? dto.getState().getValue() : null;
+    return initiative;
   }
 
   /** Types of initiative changes - intended for use with initiative event macros. */
@@ -766,6 +833,8 @@ public class InitiativeList implements Serializable {
     /*---------------------------------------------------------------------------------------------
      * Constructors
      *-------------------------------------------------------------------------------------------*/
+
+    private TokenInitiative() {}
 
     /**
      * Create the token initiative for the passed token.
@@ -881,6 +950,16 @@ public class InitiativeList implements Serializable {
       state = aState;
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), old, isHolding);
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), oldState, aState);
+    }
+
+    public TokenInitiativeDto toDto() {
+      var dto = TokenInitiativeDto.newBuilder();
+      dto.setHolding(holding);
+      dto.setTokenId(id.toString());
+      if (state != null) {
+        dto.setState(StringValue.of(state));
+      }
+      return dto.build();
     }
   }
 }

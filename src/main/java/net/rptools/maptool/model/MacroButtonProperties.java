@@ -29,6 +29,7 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.proto.MacroButtonPropertiesDto;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
@@ -77,6 +78,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private Boolean allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
   private String toolTip;
   private Boolean displayHotKey = true;
+
+  private MacroButtonProperties() {}
 
   // constructor that creates a new instance, doesn't auto-save
   public MacroButtonProperties(
@@ -1103,5 +1106,53 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (allowPlayerEdits == null)
       allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
     return this;
+  }
+
+  public static MacroButtonProperties fromDto(MacroButtonPropertiesDto dto) {
+    var macro = new MacroButtonProperties();
+    macro.macroUUID = dto.getMacroId();
+    macro.saveLocation = dto.getSaveLocation();
+    macro.index = dto.getIndex();
+    macro.colorKey = dto.getColorKey();
+    macro.hotKey = dto.getHotKey();
+    macro.command = dto.getCommand();
+    macro.label = dto.getLabel();
+    macro.group = dto.getGroup();
+    macro.sortby = dto.getSortby();
+    macro.autoExecute = dto.getAutoExecute();
+    macro.includeLabel = dto.getIncludeLabel();
+    macro.applyToTokens = dto.getApplyToTokens();
+    macro.fontColorKey = dto.getFontColorKey();
+    macro.fontSize = dto.getFontSize();
+    macro.minWidth = dto.getMinWidth();
+    macro.maxWidth = dto.getMaxWidth();
+    macro.allowPlayerEdits = dto.getAllowPlayerEdits();
+    macro.toolTip = dto.getToolTip();
+    macro.displayHotKey = dto.getDisplayHotKey();
+    return macro;
+  }
+
+  public MacroButtonPropertiesDto toDto() {
+    var dto = MacroButtonPropertiesDto.newBuilder();
+    dto.setMacroId(macroUUID);
+    dto.setSaveLocation(saveLocation);
+    dto.setIndex(index);
+    dto.setColorKey(colorKey);
+    dto.setHotKey(hotKey);
+    dto.setCommand(command);
+    dto.setLabel(label);
+    dto.setGroup(group);
+    dto.setSortby(sortby);
+    dto.setAutoExecute(autoExecute);
+    dto.setIncludeLabel(includeLabel);
+    dto.setApplyToTokens(applyToTokens);
+    dto.setFontColorKey(fontColorKey);
+    dto.setFontSize(fontSize);
+    dto.setMinWidth(minWidth);
+    dto.setMaxWidth(maxWidth);
+    dto.setAllowPlayerEdits(allowPlayerEdits);
+    dto.setToolTip(toolTip);
+    dto.setDisplayHotKey(displayHotKey);
+    return dto.build();
   }
 }

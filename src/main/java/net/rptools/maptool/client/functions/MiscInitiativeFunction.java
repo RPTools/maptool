@@ -64,7 +64,7 @@ public class MiscInitiativeFunction extends AbstractFunction {
       throws ParserException {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
-    if (functionName.equals("nextInitiative")) {
+    if (functionName.equalsIgnoreCase("nextInitiative")) {
       if (!MapTool.getParser().isMacroTrusted()) {
         if (!ip.hasGMPermission()
             && (list.getCurrent() <= 0
@@ -77,7 +77,7 @@ public class MiscInitiativeFunction extends AbstractFunction {
       }
       list.nextInitiative();
       return new BigDecimal(list.getCurrent());
-    } else if (functionName.equals("prevInitiative")) {
+    } else if (functionName.equalsIgnoreCase("prevInitiative")) {
       if (!MapTool.getParser().isMacroTrusted()) {
         if (!ip.hasGMPermission()
             && (list.getCurrent() <= 0
@@ -90,7 +90,7 @@ public class MiscInitiativeFunction extends AbstractFunction {
       }
       list.prevInitiative();
       return new BigDecimal(list.getCurrent());
-    } else if (functionName.equals("getInitiativeList")) {
+    } else if (functionName.equalsIgnoreCase("getInitiativeList")) {
 
       // Save round and zone name
       JsonObject out = new JsonObject();
@@ -118,14 +118,14 @@ public class MiscInitiativeFunction extends AbstractFunction {
     }
     if (!MapTool.getParser().isMacroTrusted() && !ip.hasGMPermission())
       throw new ParserException(I18N.getText("macro.function.general.onlyGM", functionName));
-    if (functionName.equals("sortInitiative")) {
+    if (functionName.equalsIgnoreCase("sortInitiative")) {
       boolean ascendingOrder = false;
       if (args.size() > 0) {
         ascendingOrder = FunctionUtil.paramAsBoolean(functionName, args, 0, false);
       }
       list.sort(ascendingOrder);
       return new BigDecimal(list.getSize());
-    } else if (functionName.equals("initiativeSize")) {
+    } else if (functionName.equalsIgnoreCase("initiativeSize")) {
       return new BigDecimal(list.getSize());
     } // endif
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

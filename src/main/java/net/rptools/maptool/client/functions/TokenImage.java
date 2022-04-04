@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonObject;
+import java.awt.Image;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -26,6 +28,7 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.maptool.util.ImageManager;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -89,7 +92,7 @@ public class TokenImage extends AbstractFunction {
       throws ParserException {
     Token token;
 
-    if (functionName.equals("setTokenOpacity")) {
+    if (functionName.equalsIgnoreCase("setTokenOpacity")) {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
@@ -102,7 +105,7 @@ public class TokenImage extends AbstractFunction {
       return token.getTokenOpacity();
     }
 
-    if (functionName.equals("getTokenOpacity")) {
+    if (functionName.equalsIgnoreCase("getTokenOpacity")) {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
@@ -112,7 +115,7 @@ public class TokenImage extends AbstractFunction {
       return token.getTokenOpacity();
     }
 
-    if (functionName.equals("setTokenImage")) {
+    if (functionName.equalsIgnoreCase("setTokenImage")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -122,7 +125,7 @@ public class TokenImage extends AbstractFunction {
       return "";
     }
 
-    if (functionName.equals("setTokenPortrait")) {
+    if (functionName.equalsIgnoreCase("setTokenPortrait")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -132,7 +135,7 @@ public class TokenImage extends AbstractFunction {
       return "";
     }
 
-    if (functionName.equals("setTokenHandout")) {
+    if (functionName.equalsIgnoreCase("setTokenHandout")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
@@ -149,13 +152,31 @@ public class TokenImage extends AbstractFunction {
       if (asset == null) {
         return "";
       } else {
-        return asset.getProperties();
+        JsonObject properties = new JsonObject();
+        properties.addProperty("type", asset.getType().toString().toLowerCase());
+        properties.addProperty("subtype", asset.getExtension());
+        properties.addProperty("id", asset.getMD5Key().toString());
+        properties.addProperty("name", asset.getName());
+
+        Image img =
+            ImageManager.getImageAndWait(
+                asset.getMD5Key()); // wait until loaded, so width/height are correct
+        String status = "loaded";
+        if (img == ImageManager.BROKEN_IMAGE) {
+          status = "broken";
+        } else if (img == ImageManager.TRANSFERING_IMAGE) {
+          status = "transferring";
+        }
+        properties.addProperty("status", status);
+        properties.addProperty("width", img.getWidth(null));
+        properties.addProperty("height", img.getHeight(null));
+        return properties;
       }
     }
 
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
-    if (functionName.equals("getImage")) {
+    if (functionName.equalsIgnoreCase("getImage")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 2);
 
       token = findImageToken(args.get(0).toString(), "getImage");
@@ -178,17 +199,17 @@ public class TokenImage extends AbstractFunction {
     }
 
     StringBuilder assetId = new StringBuilder("asset://");
-    if (functionName.equals("getTokenImage")) {
+    if (functionName.equalsIgnoreCase("getTokenImage")) {
       if (token.getImageAssetId() == null) {
         return "";
       }
       assetId.append(token.getImageAssetId().toString());
-    } else if (functionName.equals("getTokenPortrait")) {
+    } else if (functionName.equalsIgnoreCase("getTokenPortrait")) {
       if (token.getPortraitImage() == null) {
         return "";
       }
       assetId.append(token.getPortraitImage().toString());
-    } else if (functionName.equals("getImage")) {
+    } else if (functionName.equalsIgnoreCase("getImage")) {
       if (token.getImageAssetId() == null) {
         return "";
       }
@@ -260,17 +281,20 @@ public class TokenImage extends AbstractFunction {
 
   private static void setImage(Token token, String assetName) throws ParserException {
     MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setImageAsset, null, md5key);
+    MapTool.serverCommand()
+        .updateTokenProperty(token, Token.Update.setImageAsset, (String) null, md5key.toString());
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {
     MD5Key md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_PORTRAIT);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPortraitImage, md5key);
+    MapTool.serverCommand()
+        .updateTokenProperty(token, Token.Update.setPortraitImage, md5key.toString());
   }
 
   private static void setHandout(Token token, String assetName) throws ParserException {
     MD5Key md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_HANDOUT);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setCharsheetImage, md5key);
+    MapTool.serverCommand()
+        .updateTokenProperty(token, Token.Update.setCharsheetImage, md5key.toString());
   }
 
   private static Token findImageToken(final String name, String functionName) {

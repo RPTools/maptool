@@ -22,6 +22,8 @@ import java.util.stream.Stream;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.client.script.javascript.api.*;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -53,7 +55,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               MacroLinkFunction.getInstance(),
               MapFunctions.getInstance(),
               MiscInitiativeFunction.getInstance(),
-              PlayerFunctions.getInstance(),
+              PlayerNameFunctions.getInstance(),
               RemoveAllFromInitiativeFunction.getInstance(),
               ReturnFunction.getInstance(),
               SoundFunctions.getInstance(),
@@ -103,7 +105,10 @@ public class MapToolExpressionParser extends ExpressionParser {
               TestFunctions.getInstance(),
               TextLabelFunctions.getInstance(),
               TokenSpeechNameFunction.getInstance(),
-              new MarkDownFunctions())
+              new MarkDownFunctions(),
+              new PlayerFunctions(),
+              new LibraryFunctions(),
+              new DataFunctions())
           .collect(Collectors.toList());
 
   public MapToolExpressionParser() {
@@ -150,8 +155,14 @@ public class MapToolExpressionParser extends ExpressionParser {
      */
     @Override
     public Function getFunction(String functionName) {
+      // check javascript UDFs first.
+      if (functionName.startsWith("js.") || functionName.startsWith("ujs.")) {
+        if (JSMacro.isFunctionDefined(functionName)) {
+          return JSMacro.getInstance();
+        }
+      }
 
-      // check user defined functions first
+      // check user defined functions next
       UserDefinedMacroFunctions userFunctions = UserDefinedMacroFunctions.getInstance();
       if (userFunctions.isFunctionDefined(functionName)) return userFunctions;
 

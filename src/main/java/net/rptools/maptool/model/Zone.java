@@ -14,11 +14,14 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -31,6 +34,7 @@ import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -39,6 +43,9 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TopologyTypeDto;
+import net.rptools.maptool.server.proto.ZoneDto;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,11 +156,61 @@ public class Zone extends BaseModel {
     }
   }
 
-  // Control what topology layer(s) to add/get drawing to/from
-  public enum TopologyMode {
-    VBL,
-    MBL,
-    COMBINED
+  public enum TopologyType {
+    WALL_VBL,
+    HILL_VBL,
+    PIT_VBL,
+    MBL;
+  }
+
+  public static final class TopologyTypeSet implements Iterable<TopologyType> {
+    private final Set<TopologyType> topologyTypes;
+
+    public static TopologyTypeSet valueOf(String value) {
+      List<TopologyType> topologyTypes = new ArrayList<>();
+      for (var topologyType : TopologyType.values()) {
+        var topologyTypeName = topologyType.toString();
+        if (value.contains(topologyTypeName)) {
+          topologyTypes.add(topologyType);
+        }
+      }
+
+      return new TopologyTypeSet(topologyTypes.toArray(TopologyType[]::new));
+    }
+
+    public TopologyTypeSet(TopologyType... types) {
+      // I would prefer using an enum set, but Hessian can't handle it properly.
+      topologyTypes = new HashSet<>();
+      topologyTypes.addAll(Arrays.asList(types));
+    }
+
+    public boolean contains(TopologyType type) {
+      return topologyTypes.contains(type);
+    }
+
+    public TopologyTypeSet with(TopologyType type) {
+      var newMode = new TopologyTypeSet();
+      newMode.topologyTypes.addAll(this.topologyTypes);
+      newMode.topologyTypes.add(type);
+      return newMode;
+    }
+
+    public TopologyTypeSet without(TopologyType type) {
+      var newMode = new TopologyTypeSet();
+      newMode.topologyTypes.addAll(this.topologyTypes);
+      newMode.topologyTypes.remove(type);
+      return newMode;
+    }
+
+    @Nonnull
+    @Override
+    public Iterator<TopologyType> iterator() {
+      return topologyTypes.iterator();
+    }
+
+    public String toString() {
+      return topologyTypes.toString();
+    }
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
@@ -181,7 +238,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private TopologyMode topologyMode = null; // get default from AppPreferences
+  private TopologyTypeSet topologyTypes = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -208,6 +265,9 @@ public class Zone extends BaseModel {
 
   /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
+
+  private Area hillVbl = new Area();
+  private Area pitVbl = new Area();
 
   // New topology to hold Movement Blocking Only
   private Area topologyTerrain = new Area();
@@ -387,6 +447,7 @@ public class Zone extends BaseModel {
     } catch (CloneNotSupportedException cnse) {
       MapTool.showError("Trying to copy the zone's grid; no grid assigned", cnse);
     }
+    gridColor = zone.gridColor;
     unitsPerCell = zone.unitsPerCell;
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
@@ -402,21 +463,49 @@ public class Zone extends BaseModel {
       drawables = new LinkedList<DrawnElement>();
       drawables.addAll(Collections.nCopies(zone.drawables.size(), null));
       Collections.copy(drawables, zone.drawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : drawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.objectDrawables != null && !zone.objectDrawables.isEmpty()) {
       objectDrawables = new LinkedList<DrawnElement>();
       objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), null));
       Collections.copy(objectDrawables, zone.objectDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : objectDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.backgroundDrawables != null && !zone.backgroundDrawables.isEmpty()) {
       backgroundDrawables = new LinkedList<DrawnElement>();
       backgroundDrawables.addAll(Collections.nCopies(zone.backgroundDrawables.size(), null));
       Collections.copy(backgroundDrawables, zone.backgroundDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : backgroundDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.gmDrawables != null && !zone.gmDrawables.isEmpty()) {
       gmDrawables = new LinkedList<DrawnElement>();
       gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), null));
       Collections.copy(gmDrawables, zone.gmDrawables);
+
+      // Classes that extend Abstract template have a zone id so we need to make sure to update it
+      for (DrawnElement de : gmDrawables) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {
       for (GUID guid : zone.labels.keySet()) {
@@ -472,9 +561,11 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    hillVbl = (Area) zone.hillVbl.clone();
+    pitVbl = (Area) zone.pitVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
-    topologyMode = zone.topologyMode;
+    topologyTypes = zone.topologyTypes;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -765,63 +856,54 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
-  public void clearTopology() {
-    topology = new Area();
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
-   * @param topologyMode the mode of the topology
+   * @param topologyType the type of the topology
    */
-  public void addTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
-        getTopology().add(area);
-        break;
-      case MBL:
-        getTopologyTerrain().add(area);
-        break;
-      case COMBINED:
-        getTopology().add(area);
-        getTopologyTerrain().add(area);
-        break;
-    }
+  public void addTopology(Area area, TopologyType topologyType) {
+    var topology =
+        switch (topologyType) {
+          case WALL_VBL -> getTopology();
+          case HILL_VBL -> getHillVbl();
+          case PIT_VBL -> getPitVbl();
+          case MBL -> getTopologyTerrain();
+        };
+    topology.add(area);
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void addTopology(Area area) {
-    addTopology(area, getTopologyMode());
+    for (var topologyType : getTopologyTypes()) {
+      addTopology(area, topologyType);
+    }
   }
 
   /**
    * Subtract the area from the topology, and fire the event TOPOLOGY_CHANGED
    *
    * @param area the area
-   * @param topologyMode the mode of the topology
+   * @param topologyType the type of the topology
    */
-  public void removeTopology(Area area, TopologyMode topologyMode) {
-    switch (topologyMode) {
-      case VBL:
-        getTopology().subtract(area);
-        break;
-      case MBL:
-        getTopologyTerrain().subtract(area);
-        break;
-      case COMBINED:
-        getTopology().subtract(area);
-        getTopologyTerrain().subtract(area);
-        break;
-    }
+  public void removeTopology(Area area, TopologyType topologyType) {
+    var topology =
+        switch (topologyType) {
+          case WALL_VBL -> getTopology();
+          case HILL_VBL -> getHillVbl();
+          case PIT_VBL -> getPitVbl();
+          case MBL -> getTopologyTerrain();
+        };
+    topology.subtract(area);
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
   }
 
   public void removeTopology(Area area) {
-    removeTopology(area, getTopologyMode());
+    for (var topologyType : getTopologyTypes()) {
+      removeTopology(area, topologyType);
+    }
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
@@ -832,6 +914,14 @@ public class Zone extends BaseModel {
   /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
+  }
+
+  public Area getHillVbl() {
+    return hillVbl;
+  }
+
+  public Area getPitVbl() {
+    return pitVbl;
   }
 
   /** @return the terrain topology of the zone */
@@ -1136,16 +1226,16 @@ public class Zone extends BaseModel {
     this.aStarRounding = aStarRounding;
   }
 
-  public TopologyMode getTopologyMode() {
-    if (topologyMode == null) {
-      topologyMode = AppPreferences.getTopologyDrawingMode();
+  public TopologyTypeSet getTopologyTypes() {
+    if (topologyTypes == null) {
+      topologyTypes = AppPreferences.getTopologyTypes();
     }
 
-    return topologyMode;
+    return topologyTypes;
   }
 
-  public void setTopologyMode(TopologyMode topologyMode) {
-    this.topologyMode = topologyMode;
+  public void setTopologyTypes(TopologyTypeSet topologyTypes) {
+    this.topologyTypes = topologyTypes;
   }
 
   public int getLargestZOrder() {
@@ -2009,9 +2099,19 @@ public class Zone extends BaseModel {
       undo = new UndoPerZone(this);
     }
 
+    if (hillVbl == null) {
+      hillVbl = new Area();
+    }
+    if (pitVbl == null) {
+      pitVbl = new Area();
+    }
     // Movement Blocking Layer
     if (topologyTerrain == null) {
       topologyTerrain = new Area();
+    }
+
+    if (aStarRounding == null) {
+      aStarRounding = AStarRoundingOptions.NONE;
     }
     return this;
   }
@@ -2070,5 +2170,136 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+  public static Zone fromDto(ZoneDto dto) {
+    var zone = new Zone();
+    zone.creationTime = dto.getCreationTime();
+    zone.id = GUID.valueOf(dto.getId());
+    zone.grid = Grid.fromDto(dto.getGrid());
+    zone.grid.setZone(zone);
+    zone.gridColor = dto.getGridColor();
+    zone.imageScaleX = dto.getImageScaleX();
+    zone.imageScaleY = dto.getImageScaleY();
+    zone.tokenVisionDistance = dto.getTokenVisionDistance();
+    zone.unitsPerCell = dto.getUnitsPerCell();
+    zone.aStarRounding = AStarRoundingOptions.valueOf(dto.getAStarRounding().name());
+    zone.topologyTypes = new TopologyTypeSet();
+    zone.topologyTypes.topologyTypes.addAll(
+        dto.getTopologyTypesList().stream()
+            .map(t -> TopologyType.valueOf(t.name()))
+            .collect(Collectors.toList()));
+    zone.drawables =
+        dto.getDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.gmDrawables =
+        dto.getGmDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.objectDrawables =
+        dto.getObjectDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.backgroundDrawables =
+        dto.getBackgroundDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    dto.getLabelsList().stream()
+        .map(d -> Label.fromDto(d))
+        .forEach(l -> zone.labels.put(l.getId(), l));
+    dto.getTokensList().stream()
+        .map(t -> Token.fromDto(t))
+        .forEach(
+            t -> {
+              zone.tokenMap.put(t.getId(), t);
+              zone.tokenOrderedList.add(t);
+            });
+    zone.tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
+    dto.getExposedAreaMetaMap()
+        .forEach(
+            (id, area) ->
+                zone.exposedAreaMeta.put(
+                    GUID.valueOf(id), new ExposedAreaMetaData(Mapper.map(area))));
+    zone.initiativeList = InitiativeList.fromDto(dto.getInitiative());
+    zone.exposedArea = Mapper.map(dto.getExposedArea());
+    zone.hasFog = dto.getHasFog();
+    zone.fogPaint = DrawablePaint.fromDto(dto.getFogPaint());
+    zone.topology = Mapper.map(dto.getTopology());
+    zone.hillVbl = Mapper.map(dto.getHillVbl());
+    zone.pitVbl = Mapper.map(dto.getPitVbl());
+    zone.topologyTerrain = Mapper.map(dto.getTopologyTerrain());
+    zone.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundPaint());
+    zone.mapAsset = dto.hasMapAsset() ? new MD5Key(dto.getMapAsset().getValue()) : null;
+    zone.boardPosition.x = dto.getBoardPosition().getX();
+    zone.boardPosition.y = dto.getBoardPosition().getY();
+    zone.drawBoard = dto.getDrawBoard();
+    zone.boardChanged = dto.getBoardChanged();
+    zone.name = dto.getName();
+    zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
+    zone.isVisible = dto.getIsVisible();
+    zone.visionType = VisionType.valueOf(dto.getVisionType().name());
+    zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
+    zone.height = dto.getHeight();
+    zone.width = dto.getWidth();
+    return zone;
+  }
+
+  public ZoneDto toDto() {
+    var dto = ZoneDto.newBuilder();
+    dto.setCreationTime(creationTime);
+    dto.setId(id.toString());
+    dto.setGrid(grid.toDto());
+    dto.setGridColor(gridColor);
+    dto.setImageScaleX(imageScaleX);
+    dto.setImageScaleY(imageScaleY);
+    dto.setTokenVisionDistance(tokenVisionDistance);
+    dto.setUnitsPerCell(unitsPerCell);
+    dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
+    if (topologyTypes != null) {
+      dto.addAllTopologyTypes(
+          topologyTypes.topologyTypes.stream()
+              .map(t -> TopologyTypeDto.valueOf(t.name()))
+              .collect(Collectors.toList()));
+    }
+    dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(
+        backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
+    dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    exposedAreaMeta.forEach(
+        (id, area) -> {
+          if (id == null) {
+            return;
+          }
+          dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory()));
+        });
+    dto.setInitiative(initiativeList.toDto());
+    dto.setExposedArea(Mapper.map(exposedArea));
+    dto.setHasFog(hasFog);
+    dto.setTopology(Mapper.map(topology));
+    dto.setFogPaint(fogPaint.toDto());
+    dto.setHillVbl(Mapper.map(hillVbl));
+    dto.setPitVbl(Mapper.map(pitVbl));
+    dto.setTopologyTerrain(Mapper.map(topologyTerrain));
+    dto.setBackgroundPaint(backgroundPaint.toDto());
+    if (mapAsset != null) {
+      dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    }
+    dto.setBoardPosition(Mapper.map(boardPosition));
+    dto.setDrawBoard(drawBoard);
+    dto.setBoardChanged(boardChanged);
+    dto.setName(name);
+    if (playerAlias != null) {
+      dto.setPlayerAlias(StringValue.of(playerAlias));
+    }
+    dto.setIsVisible(isVisible);
+    dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
+    dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
+    dto.setHeight(height);
+    dto.setWidth(width);
+    return dto.build();
   }
 }

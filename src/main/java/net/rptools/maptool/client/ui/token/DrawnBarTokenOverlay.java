@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 
 /**
  * Draws a single color bar along one side of a token.
@@ -114,5 +115,29 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   /** @param thickness Setter for thickness */
   public void setThickness(int thickness) {
     this.thickness = thickness;
+  }
+
+  protected void fillFrom(BarTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    barColor = new Color(dto.getColor(), true);
+    thickness = dto.getThickness();
+  }
+
+  public static DrawnBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar = new DrawnBarTokenOverlay();
+    bar.fillFrom(dto);
+    return bar;
+  }
+
+  protected BarTokenOverlayDto.Builder getDto() {
+    var dto = BarTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setThickness(thickness);
+    dto.setColor(barColor.getRGB());
+    return dto;
+  }
+
+  public BarTokenOverlayDto toDto() {
+    return getDto().setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.DRAWN).build();
   }
 }

@@ -17,7 +17,9 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
@@ -29,6 +31,7 @@ import net.rptools.maptool.util.cipher.CipherUtil;
 public class PersonalServerPlayerDatabase implements PlayerDatabase {
 
   private final LocalPlayer player;
+  private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   public PersonalServerPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
     player =
@@ -86,24 +89,54 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public Set<String> getEncodedPublicKeys(String name) {
+    return Set.of();
+  }
+
+  @Override
+  public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return player != null && player.getName() != null && player.getName().equals(name);
   }
 
   @Override
-  public String getDisabledReason(Player player) {
+  public void playerSignedIn(Player player) {
+    loggedInPlayers.playerSignedIn(player);
+  }
+
+  @Override
+  public void playerSignedOut(Player player) {
+    loggedInPlayers.playerSignedOut(player);
+  }
+
+  @Override
+  public boolean isPlayerConnected(String name) {
+    return loggedInPlayers.isLoggedIn(name);
+  }
+
+  @Override
+  public String getBlockedReason(Player player) {
     return "";
   }
 
   @Override
-  public boolean isDisabled(Player player) {
-    return false;
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+    return new HashSet<>(loggedInPlayers.getPlayers());
   }
 
   @Override
-  public void disablePlayer(Player player, String reason) throws PasswordDatabaseException {
-    throw new PasswordDatabaseException("msg.err.passFile.cantDisablePlayer");
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
+  }
+
+  @Override
+  public boolean isBlocked(Player player) {
+    return false;
   }
 
   @Override

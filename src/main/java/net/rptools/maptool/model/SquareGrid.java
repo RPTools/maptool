@@ -42,6 +42,8 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.server.proto.GridDto;
+import net.rptools.maptool.server.proto.SquareGridDto;
 
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
@@ -151,6 +153,11 @@ public class SquareGrid extends Grid {
         actionMap.remove(key);
       }
     }
+  }
+
+  @Override
+  protected void fillDto(GridDto.Builder dto) {
+    dto.setSquareGrid(SquareGridDto.newBuilder());
   }
 
   @Override
@@ -293,8 +300,8 @@ public class SquareGrid extends Grid {
     boolean exactCalcX = (zp.x - getOffsetX()) % getSize() == 0;
     boolean exactCalcY = (zp.y - getOffsetY()) % getSize() == 0;
 
-    int newX = (int) (zp.x < 0 && !exactCalcX ? calcX - 1 : calcX);
-    int newY = (int) (zp.y < 0 && !exactCalcY ? calcY - 1 : calcY);
+    int newX = (int) (calcX < 0 && !exactCalcX ? calcX - 1 : calcX);
+    int newY = (int) (calcY < 0 && !exactCalcY ? calcY - 1 : calcY);
 
     // System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX,
     // newY);

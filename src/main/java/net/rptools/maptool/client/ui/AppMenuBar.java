@@ -97,10 +97,12 @@ public class AppMenuBar extends JMenuBar {
     fileMenu.add(createExportMenu());
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.ADD_RESOURCE_TO_LIBRARY));
+    fileMenu.add(new JMenuItem(AppActions.VIEW_ADD_ON_LIBRARIES));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(AppActions.START_SERVER));
     fileMenu.add(new JMenuItem(AppActions.CONNECT_TO_SERVER));
     fileMenu.add(new JMenuItem(AppActions.DISCONNECT_FROM_SERVER));
+    fileMenu.add(new JMenuItem(AppActions.PLAYER_DATABASE));
     fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
     fileMenu.addSeparator();
     fileMenu.add(createRecentCampaignMenu());
@@ -393,10 +395,6 @@ public class AppMenuBar extends JMenuBar {
       menu.addSeparator();
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
-
-    JCheckBoxMenuItem item = new RPCheckBoxMenuItem(AppActions.TOGGLE_WEBRTC, menu);
-    item.setSelected(AppState.useWebRTC());
-    menu.add(item);
 
     if (!AppUtil.MAC_OS_X) {
       menu.addSeparator();

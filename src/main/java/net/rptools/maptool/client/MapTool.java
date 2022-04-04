@@ -57,6 +57,7 @@ import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.box2d.unused.DesktopLauncher;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
 import net.rptools.maptool.client.swing.SplashScreen;
@@ -78,10 +79,12 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -154,7 +157,7 @@ public class MapTool {
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
-  private static ClientMethodHandler handler;
+  private static ClientMessageHandler handler;
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
@@ -285,7 +288,7 @@ public class MapTool {
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
-    log.error(msgKey, t);
+    log.error(I18N.getString(msgKey), t);
     showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
   }
 
@@ -672,7 +675,7 @@ public class MapTool {
     messageList =
         new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
-    handler = new ClientMethodHandler();
+    handler = new ClientMessageHandler();
 
     setClientFrame(new MapToolFrame(menuBar));
 
@@ -695,7 +698,7 @@ public class MapTool {
     ChatAutoSave.changeTimeout(AppPreferences.getChatAutosaveTime());
 
     // TODO: make this more formal when we switch to mina
-    new ServerHeartBeatThread().start();
+    // new ServerHeartBeatThread().start();
   }
 
   public static NoteFrame getProfilingNoteFrame() {
@@ -761,6 +764,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
+      new Players().playerSignedIn(player);
 
       // LATER: Make this non-anonymous
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
@@ -787,6 +791,7 @@ public class MapTool {
       return;
     }
     playerList.remove(player);
+    new Players().playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
@@ -966,6 +971,7 @@ public class MapTool {
       clientFrame.setCurrentZoneRenderer(null);
       return;
     }
+
     // Install new campaign
     for (Zone zone : campaign.getZones()) {
       ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);
@@ -990,6 +996,7 @@ public class MapTool {
     MapTool.getFrame().getGmPanel().reset();
     // overlay vanishes after campaign change
     MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    JSScriptEngine.resetContexts();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
@@ -1063,6 +1070,10 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+
+    if (MapTool.isHostingServer()) {
+      getFrame().getConnectionPanel().startHosting();
+    }
     server.start();
   }
 
@@ -1082,6 +1093,7 @@ public class MapTool {
     disconnect();
     server.stop();
     server = null;
+    getFrame().getConnectionPanel().stopHosting();
   }
 
   public static ObservableList<Player> getPlayerList() {
@@ -1254,7 +1266,7 @@ public class MapTool {
     }
 
     try {
-      if (conn != null || conn.isAlive()) {
+      if (conn != null && conn.isAlive()) {
         conn.close();
       }
     } catch (IOException ioe) {
@@ -1354,7 +1366,7 @@ public class MapTool {
     MapTool.getFrame()
         .getCurrentZoneRenderer()
         .getZone()
-        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+        .setTopologyTypes(AppPreferences.getTopologyTypes());
   }
 
   /**
@@ -1684,6 +1696,7 @@ public class MapTool {
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
     RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
     factory.registerProtocol("asset", new AssetURLStreamHandler());
+    factory.registerProtocol("lib", new LibraryURLStreamHandler());
 
     // Syrinscape Protocols
     if (AppPreferences.getSyrinscapeActive()) {

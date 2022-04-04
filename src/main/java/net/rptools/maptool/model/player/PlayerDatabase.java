@@ -17,14 +17,11 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 /**
@@ -33,7 +30,8 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public interface PlayerDatabase {
 
-  public enum AuthMethod {
+  /** The type of authentication for the player. */
+  enum AuthMethod {
     PASSWORD,
     ASYMMETRIC_KEY
   };
@@ -100,6 +98,11 @@ public interface PlayerDatabase {
    */
   boolean supportsDisabling();
 
+  /**
+   * Returns {@code true} if the database supports asymmetric keys for authentication.
+   *
+   * @return {@code true} if the database supports asymmetric keys for authentication.
+   */
   boolean supportsAsymmetricalKeys();
 
   /**
@@ -110,21 +113,12 @@ public interface PlayerDatabase {
   boolean supportsRolePasswords();
 
   /**
-   * Disables the specified player. This will not boot the player from the server.
-   *
-   * @param player The player to disable.
-   * @param reason The reason that the player is disabled, this can be a key in i18n properties.
-   * @throws PasswordDatabaseException If the password database does not support disabling players.
-   */
-  void disablePlayer(Player player, String reason) throws PasswordDatabaseException;
-
-  /**
    * Returns if the player has been disabled.
    *
    * @param player {@code true} the player to check if they have been disabled.
    * @return {@code true} if the player has been disabled.
    */
-  boolean isDisabled(Player player);
+  boolean isBlocked(Player player);
 
   /**
    * Returns the reason tha the player has been disabled, if the player has not been disabled then
@@ -133,7 +127,7 @@ public interface PlayerDatabase {
    * @param player the player to get the disabled reason for.
    * @return the reason that the player has been disabled, or empty string if they have not.
    */
-  String getDisabledReason(Player player);
+  String getBlockedReason(Player player);
 
   /**
    * Returns the known players. For many player databases this will be the players that are
@@ -150,23 +144,14 @@ public interface PlayerDatabase {
    *
    * @return The players that are currently connected.
    */
-  default Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
-    Set<Player> players = new HashSet<>();
-    if (SwingUtilities.isEventDispatchThread()) {
-      MapTool.getPlayerList().forEach(players::add);
-    } else {
-      SwingUtilities.invokeAndWait(() -> MapTool.getPlayerList().forEach(players::add));
-    }
-
-    return players;
-  }
+  Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException;
 
   /**
-   * Adds a player to the database if the
+   * Returns if this player database records information about only currently connected players.
    *
-   * @param player
+   * @return if this player database records information about only currently connected players.
    */
-  // void addPlayer(Player player);
+  boolean recordsOnlyConnectedPlayers();
 
   /**
    * Returns the authentication method for the player.
@@ -191,11 +176,50 @@ public interface PlayerDatabase {
       throws ExecutionException, InterruptedException;
 
   /**
+   * Returns the {@link String} encoding of the public keys for a player.
+   *
+   * @param name The name of the player to return the public keys of.
+   * @return the {@link String} encoding of the public keys for a player.
+   */
+  Set<String> getEncodedPublicKeys(String name);
+
+  /**
+   * Returns if the player has the specified public key.
+   *
+   * @param player The player to check if they have the specified public key.
+   * @param md5key The {@link MD5Key} of the public key.
+   * @return {@code true} if the player has the specified public key.
+   */
+  CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key);
+
+  /**
    * Checks to see if the player is defined in the database, unlike {@link #playerExists(String)}
-   * this will not return {@code true} for every input but only for those that are logged on.
+   * this will not return {@code true} for every input but only for those that are actually known.
    *
    * @param name the name of the player to check for.
    * @return {@code true} if the player is registered, {@code false} otherwise.
    */
   boolean isPlayerRegistered(String name) throws InterruptedException, InvocationTargetException;
+
+  /**
+   * Inform the database that the player has signed in.
+   *
+   * @param player the player that has signed in.
+   */
+  void playerSignedIn(Player player);
+
+  /**
+   * Inform the database that the player has signed out.
+   *
+   * @param player the player that has signed out.
+   */
+  void playerSignedOut(Player player);
+
+  /**
+   * Returns if a player is connected or not.
+   *
+   * @param name the player to check.
+   * @return if a player is connected or not.
+   */
+  boolean isPlayerConnected(String name);
 }

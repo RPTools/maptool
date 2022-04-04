@@ -17,13 +17,13 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.File;
-import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -151,15 +151,15 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
 
   ////
   // CONSUMER LISTENER
-  public void assetComplete(Serializable id, String name, File data) {
+  public void assetComplete(MD5Key id, String name, File data) {
     updateTransferTable();
   }
 
-  public void assetUpdated(Serializable id) {
+  public void assetUpdated(MD5Key id) {
     getTransferTable().repaint();
   }
 
-  public void assetAdded(Serializable id) {
+  public void assetAdded(MD5Key id) {
     updateTransferTable();
   }
 }

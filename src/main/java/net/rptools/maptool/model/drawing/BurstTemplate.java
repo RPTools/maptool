@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -21,8 +22,11 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
 import org.locationtech.jts.awt.ShapeReader;
+import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /**
  * Create and paint a donut burst
@@ -39,6 +43,12 @@ public class BurstTemplate extends RadiusTemplate {
 
   /** Renderer for the blast. The {@link Shape} is just a rectangle. */
   private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
+
+  public BurstTemplate() {}
+
+  public BurstTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
@@ -127,4 +137,18 @@ public class BurstTemplate extends RadiusTemplate {
   }
 
   public ShapeDrawable getVertexRenderer() { return vertexRenderer; }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = BurstTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setBurstTemplate(dto).build();
+  }
 }
