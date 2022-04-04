@@ -23,10 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
@@ -64,7 +62,6 @@ public class ImageManager {
 
   /** The buffered "?" image to display while transferring the image. */
   public static BufferedImage TRANSFERING_IMAGE;
-
 
   /** The broken image, a "X" is used for all situations where the asset or image was invalid. */
   private static final String BROKEN_IMAGE_PNG = "net/rptools/maptool/client/image/broken.png";

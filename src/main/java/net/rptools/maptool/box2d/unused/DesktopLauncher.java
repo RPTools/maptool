@@ -1,61 +1,66 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
- * at <http://www.gnu.org/licenses/agpl.html>.
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.box2d.unused;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.badlogic.gdx.backends.lwjgl.LwjglAWTCanvas;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ui.MapToolFrame;
 
 public class DesktopLauncher extends JFrame {
 
-	private static final long serialVersionUID = 2536172952937398744L;
-	private LwjglAWTCanvas canvas;
-	private LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-	private MapToolFrame mapToolFrame;
+  private static final long serialVersionUID = 2536172952937398744L;
+  private LwjglAWTCanvas canvas;
+  private LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+  private MapToolFrame mapToolFrame;
 
-	public DesktopLauncher(MapToolFrame clientFrame) {
-		cfg.title = MapToolGame.TITLE;
-		cfg.width = MapToolGame.SCREEN_WIDTH;
-		cfg.height = MapToolGame.SCREEN_HEIGHT;
-		cfg.useGL30 = true;
-		cfg.useHDPI = true;
-		cfg.allowSoftwareMode = true;
-		cfg.resizable = true;
-		
-		mapToolFrame = clientFrame;
+  public DesktopLauncher(MapToolFrame clientFrame) {
+    cfg.title = MapToolGame.TITLE;
+    cfg.width = MapToolGame.SCREEN_WIDTH;
+    cfg.height = MapToolGame.SCREEN_HEIGHT;
+    cfg.useGL30 = true;
+    cfg.useHDPI = true;
+    cfg.allowSoftwareMode = true;
+    cfg.resizable = true;
 
-		// setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    mapToolFrame = clientFrame;
 
-//		canvas = new LwjglAWTCanvas(new MapToolGame(mapToolFrame, this), cfg);
-		canvas.getCanvas().setSize(MapToolGame.SCREEN_WIDTH, MapToolGame.SCREEN_HEIGHT);
-		add(canvas.getCanvas());
+    // setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		pack();
-		setVisible(true);
-	}
+    //		canvas = new LwjglAWTCanvas(new MapToolGame(mapToolFrame, this), cfg);
+    canvas.getCanvas().setSize(MapToolGame.SCREEN_WIDTH, MapToolGame.SCREEN_HEIGHT);
+    add(canvas.getCanvas());
 
-	public static void main(String[] arg) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new DesktopLauncher(null);
-			}
-		});
-	}
+    pack();
+    setVisible(true);
+  }
 
-	@Override
-	public void dispose() {
-		canvas.stop();
+  public static void main(String[] arg) {
+    SwingUtilities.invokeLater(
+        new Runnable() {
+          public void run() {
+            new DesktopLauncher(null);
+          }
+        });
+  }
 
-		super.dispose();
-	}
+  @Override
+  public void dispose() {
+    canvas.stop();
+
+    super.dispose();
+  }
 }

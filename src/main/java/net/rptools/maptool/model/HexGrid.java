@@ -148,11 +148,17 @@ public abstract class HexGrid extends Grid {
     return minorRadius;
   }
 
-  public double getScaledMinorRadius() { return scaledMinorRadius; }
+  public double getScaledMinorRadius() {
+    return scaledMinorRadius;
+  }
 
-  public double getScaledEdgeProjection() { return scaledEdgeProjection; }
+  public double getScaledEdgeProjection() {
+    return scaledEdgeProjection;
+  }
 
-  public double getScaledEdgeLength() { return scaledEdgeLength; }
+  public double getScaledEdgeLength() {
+    return scaledEdgeLength;
+  }
 
   public void setMinorRadius(double minorRadius) {
     this.minorRadius = minorRadius;

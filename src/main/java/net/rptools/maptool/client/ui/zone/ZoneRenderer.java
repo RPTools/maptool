@@ -234,7 +234,9 @@ public class ZoneRenderer extends JComponent
     this.autoResizeStamp = value;
   }
 
-  public Map<GUID, SelectionSet> getSelectionSetMap() { return selectionSetMap; }
+  public Map<GUID, SelectionSet> getSelectionSetMap() {
+    return selectionSetMap;
+  }
 
   public boolean isAutoResizeStamp() {
     return autoResizeStamp;
@@ -293,7 +295,6 @@ public class ZoneRenderer extends JComponent
   public List<Token> getShowPathList() {
     return showPathList;
   }
-
 
   /**
    * Resets the token panels, fire onTokenSelection, repaints. The impersonation panel is only reset
@@ -1114,7 +1115,7 @@ public class ZoneRenderer extends JComponent
     }
     // Are we still waiting to show the zone ?
     if (isLoading()) {
-      if(!skipDrawing) {
+      if (!skipDrawing) {
         g2d.setColor(Color.black);
         g2d.fillRect(0, 0, viewRect.width, viewRect.height);
         GraphicsUtil.drawBoxedString(g2d, loadingProgress, viewRect.width / 2, viewRect.height / 2);
@@ -1122,7 +1123,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     if (MapTool.getCampaign().isBeingSerialized()) {
-      if(!skipDrawing) {
+      if (!skipDrawing) {
         g2d.setColor(Color.black);
         g2d.fillRect(0, 0, viewRect.width, viewRect.height);
         GraphicsUtil.drawBoxedString(
@@ -1213,8 +1214,7 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableBackground");
-      if(!skipDrawing)
-        renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+      if (!skipDrawing) renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
       timer.stop("drawableBackground");
       // }
       List<Token> background = zone.getBackgroundStamps(false);
@@ -1229,13 +1229,12 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getObjectDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableObjects");
-      if(!skipDrawing)
-        renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+      if (!skipDrawing) renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
       timer.stop("drawableObjects");
       // }
     }
     timer.start("grid");
-    if(!skipDrawing) renderGrid(g2d, view);
+    if (!skipDrawing) renderGrid(g2d, view);
     timer.stop("grid");
 
     if (Zone.Layer.OBJECT.isEnabled()) {
@@ -1249,13 +1248,11 @@ public class ZoneRenderer extends JComponent
     }
     if (Zone.Layer.TOKEN.isEnabled()) {
       timer.start("lights");
-      if(!skipDrawing)
-        renderLights(g2d, view);
+      if (!skipDrawing) renderLights(g2d, view);
       timer.stop("lights");
 
       timer.start("auras");
-      if(!skipDrawing)
-        renderAuras(g2d, view);
+      if (!skipDrawing) renderAuras(g2d, view);
       timer.stop("auras");
     }
 
@@ -1284,8 +1281,7 @@ public class ZoneRenderer extends JComponent
       List<DrawnElement> drawables = zone.getDrawnElements();
       // if (!drawables.isEmpty()) {
       timer.start("drawableTokens");
-      if(!skipDrawing)
-        renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+      if (!skipDrawing) renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
       timer.stop("drawableTokens");
       // }
 
@@ -1293,8 +1289,7 @@ public class ZoneRenderer extends JComponent
         drawables = zone.getGMDrawnElements();
         // if (!drawables.isEmpty()) {
         timer.start("drawableGM");
-        if(!skipDrawing)
-          renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        if (!skipDrawing) renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
         timer.stop("drawableGM");
         // }
         List<Token> stamps = zone.getGMStamps(false);
@@ -1311,8 +1306,7 @@ public class ZoneRenderer extends JComponent
         timer.stop("tokens");
       }
       timer.start("unowned movement");
-      if(!skipDrawing)
-        showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
+      if (!skipDrawing) showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
       timer.stop("unowned movement");
 
       // Moved below, after the renderFog() call...
@@ -1372,8 +1366,7 @@ public class ZoneRenderer extends JComponent
       }
 
       timer.start("owned movement");
-      if(!skipDrawing)
-        showBlockedMoves(g2d, view, getOwnedMovementSet(view));
+      if (!skipDrawing) showBlockedMoves(g2d, view, getOwnedMovementSet(view));
       timer.stop("owned movement");
 
       // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
@@ -1383,21 +1376,18 @@ public class ZoneRenderer extends JComponent
       // will be
       // visible.
       timer.start("token name/labels");
-      if(!skipDrawing)
-        renderRenderables(g2d);
+      if (!skipDrawing) renderRenderables(g2d);
       timer.stop("token name/labels");
     }
 
     // if (zone.visionType ...)
     if (view.isGMView()) {
       timer.start("visionOverlayGM");
-      if(!skipDrawing)
-        renderGMVisionOverlay(g2d, view);
+      if (!skipDrawing) renderGMVisionOverlay(g2d, view);
       timer.stop("visionOverlayGM");
     } else {
       timer.start("visionOverlayPlayer");
-      if(!skipDrawing)
-        renderPlayerVisionOverlay(g2d, view);
+      if (!skipDrawing) renderPlayerVisionOverlay(g2d, view);
       timer.stop("visionOverlayPlayer");
     }
 
@@ -2001,7 +1991,6 @@ public class ZoneRenderer extends JComponent
   public String getLoadingProgress() {
     return loadingProgress;
   }
-
 
   public boolean isLoading() {
     if (isLoaded) {
@@ -2866,7 +2855,9 @@ public class ZoneRenderer extends JComponent
     return list;
   }
 
-  public Token getTokenUnderMouse() { return tokenUnderMouse; }
+  public Token getTokenUnderMouse() {
+    return tokenUnderMouse;
+  }
 
   public Zone.Layer getActiveLayer() {
     return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
@@ -3164,8 +3155,7 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("renderTokens:OnscreenCheck");
 
-      if(skipDrawing)
-        continue;
+      if (skipDrawing) continue;
 
       // create a per token Graphics object - normally clipped, unless always visible
       Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);
@@ -3705,7 +3695,8 @@ public class ZoneRenderer extends JComponent
     // Stacks
     if (!tokenList.isEmpty()
         && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
-      if (tokenStackMap != null && !skipDrawing) { // FIXME Needed to prevent NPE but how can it be null?
+      if (tokenStackMap != null
+          && !skipDrawing) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
           Area bounds = getTokenBounds(token);
           if (bounds == null) {

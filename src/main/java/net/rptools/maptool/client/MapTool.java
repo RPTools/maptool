@@ -25,7 +25,6 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -39,13 +38,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
-
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
@@ -55,7 +53,6 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.box2d.unused.DesktopLauncher;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
@@ -1597,7 +1594,6 @@ public class MapTool {
     cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
     cmdOptions.addOption("F", "file", true, "load campaign on startup");
-
 
     CommandLineParser cmdParser = new DefaultParser();
     CommandLine cmd = null;

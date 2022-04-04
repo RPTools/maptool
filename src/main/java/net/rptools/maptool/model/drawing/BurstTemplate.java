@@ -24,7 +24,6 @@ import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
-import org.locationtech.jts.awt.ShapeReader;
 import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
@@ -136,7 +135,9 @@ public class BurstTemplate extends RadiusTemplate {
     return renderer.getArea();
   }
 
-  public ShapeDrawable getVertexRenderer() { return vertexRenderer; }
+  public ShapeDrawable getVertexRenderer() {
+    return vertexRenderer;
+  }
 
   @Override
   public DrawableDto toDto() {

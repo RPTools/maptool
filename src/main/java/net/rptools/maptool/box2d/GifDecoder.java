@@ -1,14 +1,26 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.box2d;
+
+import static java.lang.System.arraycopy;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import net.rptools.lib.image.ImageUtil;
-
-import static java.lang.System.arraycopy;
-
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -17,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.lib.image.ImageUtil;
 
 /*
  * Copyright 2014 Dhyan Blum
@@ -34,16 +47,11 @@ import java.util.List;
  * limitations under the License.
  */
 /**
- * <p>
- * A decoder capable of processing a GIF data stream to render the graphics
- * contained in it. This implementation follows the official
- * <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF
+ * A decoder capable of processing a GIF data stream to render the graphics contained in it. This
+ * implementation follows the official <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF
  * specification</A>.
- * </p>
  *
- * <p>
- * Example usage:
- * </p>
+ * <p>Example usage:
  *
  * <p>
  *
@@ -58,21 +66,17 @@ import java.util.List;
  * }
  * </pre>
  *
- * </p>
- *
  * @author Dhyan Blum
  * @version 1.09 November 2017
- *
  */
 public final class GifDecoder {
   private GifImage image;
+
   public GifDecoder(InputStream is) throws IOException {
     image = read(is);
   }
 
-  public GifDecoder() {
-
-  }
+  public GifDecoder() {}
 
   static final class BitReader {
     private int bitPos; // Next bit to read
@@ -149,8 +153,8 @@ public final class GifDecoder {
       for (int c = numColors - 1; c >= 0; c--) {
         tbl[c][0] = activeColTbl[c]; // Translated color
       } // A gap may follow with no colors assigned if numCols < CLEAR
-      tbl[fr.clearCode] = new int[] { fr.clearCode }; // CLEAR
-      tbl[fr.endOfInfoCode] = new int[] { fr.endOfInfoCode }; // EOI
+      tbl[fr.clearCode] = new int[] {fr.clearCode}; // CLEAR
+      tbl[fr.endOfInfoCode] = new int[] {fr.endOfInfoCode}; // EOI
       // Locate transparent color in code table and set to 0
       if (fr.transpColFlag && fr.transpColIndex < numColors) {
         tbl[fr.transpColIndex][0] = 0;
@@ -173,8 +177,10 @@ public final class GifDecoder {
     private int wh; // width * height
     private boolean hasLocColTbl; // Has local color table? 1 Bit
     private boolean interlaceFlag; // Is an interlace image? 1 Bit
+
     @SuppressWarnings("unused")
     private boolean sortFlag; // True if local colors are sorted, 1 Bit
+
     private int sizeOfLocColTbl; // Size of the local color table, 3 Bits
     private int[] localColTbl; // Local color table (optional)
     // Image data
@@ -325,12 +331,12 @@ public final class GifDecoder {
     }
 
     /**
-     * Returns the background color of the first frame in this GIF image. If
-     * the frame has a local color table, the returned color will be from
-     * that table. If not, the color will be from the global color table.
-     * Returns 0 if there is neither a local nor a global color table.
+     * Returns the background color of the first frame in this GIF image. If the frame has a local
+     * color table, the returned color will be from that table. If not, the color will be from the
+     * global color table. Returns 0 if there is neither a local nor a global color table.
      *
-     *            Index of the current frame, 0 to N-1
+     * <p>Index of the current frame, 0 to N-1
+     *
      * @return 32 bit ARGB color in the form 0xAARRGGBB
      */
     public final int getBackgroundColor() {
@@ -344,11 +350,10 @@ public final class GifDecoder {
     }
 
     /**
-     * If not 0, the delay specifies how many hundredths (1/100) of a second
-     * to wait before displaying the frame <i>after</i> the current frame.
+     * If not 0, the delay specifies how many hundredths (1/100) of a second to wait before
+     * displaying the frame <i>after</i> the current frame.
      *
-     * @param index
-     *            Index of the current frame, 0 to N-1
+     * @param index Index of the current frame, 0 to N-1
      * @return Delay as number of hundredths (1/100) of a second
      */
     public final int getDelay(final int index) {
@@ -356,15 +361,12 @@ public final class GifDecoder {
     }
 
     /**
-     * @param index
-     *            Index of the frame to return as image, starting from 0.
-     *            For incremental calls such as [0, 1, 2, ...] the method's
-     *            run time is O(1) as only one frame is drawn per call. For
-     *            random access calls such as [7, 12, ...] the run time is
-     *            O(N+1) with N being the number of previous frames that
-     *            need to be drawn before N+1 can be drawn on top. Once a
-     *            frame has been drawn it is being cached and the run time
-     *            is more or less O(0) to retrieve it from the list.
+     * @param index Index of the frame to return as image, starting from 0. For incremental calls
+     *     such as [0, 1, 2, ...] the method's run time is O(1) as only one frame is drawn per call.
+     *     For random access calls such as [7, 12, ...] the run time is O(N+1) with N being the
+     *     number of previous frames that need to be drawn before N+1 can be drawn on top. Once a
+     *     frame has been drawn it is being cached and the run time is more or less O(0) to retrieve
+     *     it from the list.
      * @return A BufferedImage for the specified frame.
      */
     public final BufferedImage getFrame(final int index) {
@@ -386,23 +388,17 @@ public final class GifDecoder {
       return fr.img;
     }
 
-    /**
-     * @return The number of frames contained in this GIF image
-     */
+    /** @return The number of frames contained in this GIF image */
     public final int getFrameCount() {
       return frames.size();
     }
 
-    /**
-     * @return The height of the GIF image
-     */
+    /** @return The height of the GIF image */
     public final int getHeight() {
       return h;
     }
 
-    /**
-     * @return The width of the GIF image
-     */
+    /** @return The width of the GIF image */
     public final int getWidth() {
       return w;
     }
@@ -411,11 +407,9 @@ public final class GifDecoder {
   static final boolean DEBUG_MODE = false;
 
   /**
-   * @param in
-   *            Raw image data as a byte[] array
+   * @param in Raw image data as a byte[] array
    * @return A GifImage object exposing the properties of the GIF image.
-   * @throws IOException
-   *             If the image violates the GIF specification or is truncated.
+   * @throws IOException If the image violates the GIF specification or is truncated.
    */
   public static final GifImage read(final byte[] in) throws IOException {
     final GifDecoder decoder = new GifDecoder();
@@ -487,16 +481,12 @@ public final class GifDecoder {
   }
 
   /**
-   * @param is
-   *            Image data as input stream. This method will read from the
-   *            input stream's current position. It will not reset the
-   *            position before reading and won't reset or close the stream
-   *            afterwards. Call these methods before and after calling this
-   *            method as needed.
+   * @param is Image data as input stream. This method will read from the input stream's current
+   *     position. It will not reset the position before reading and won't reset or close the stream
+   *     afterwards. Call these methods before and after calling this method as needed.
    * @return A GifImage object exposing the properties of the GIF image.
-   * @throws IOException
-   *             If an I/O error occurs, the image violates the GIF
-   *             specification or the GIF is truncated.
+   * @throws IOException If an I/O error occurs, the image violates the GIF specification or the GIF
+   *     is truncated.
    */
   public static final GifImage read(final InputStream is) throws IOException {
     final byte[] data = new byte[is.available()];
@@ -505,11 +495,10 @@ public final class GifDecoder {
   }
 
   /**
-   *            Empty application extension object
-   * @param in
-   *            Raw data
-   * @param i
-   *            Index of the first byte of the application extension
+   * Empty application extension object
+   *
+   * @param in Raw data
+   * @param i Index of the first byte of the application extension
    * @return Index of the first byte after this extension
    */
   static final int readAppExt(final GifImage img, final byte[] in, int i) {
@@ -530,12 +519,9 @@ public final class GifDecoder {
   }
 
   /**
-   * @param in
-   *            Raw data
-   * @param colors
-   *            Pre-initialized target array to store ARGB colors
-   * @param i
-   *            Index of the color table's first byte
+   * @param in Raw data
+   * @param colors Pre-initialized target array to store ARGB colors
+   * @param i Index of the color table's first byte
    * @return Index of the first byte after the color table
    */
   static final int readColTbl(final byte[] in, final int[] colors, int i) {
@@ -551,11 +537,10 @@ public final class GifDecoder {
   }
 
   /**
-   *            Graphic control extension object
-   * @param in
-   *            Raw data
-   * @param i
-   *            Index of the extension introducer
+   * Graphic control extension object
+   *
+   * @param in Raw data
+   * @param i Index of the extension introducer
    * @return Index of the first byte after this block
    */
   static final int readGraphicControlExt(final GifFrame fr, final byte[] in, final int i) {
@@ -567,13 +552,10 @@ public final class GifDecoder {
   }
 
   /**
-   * @param in
-   *            Raw data
-   * @param img
-   *            The GifImage object that is currently read
+   * @param in Raw data
+   * @param img The GifImage object that is currently read
    * @return Index of the first byte after this block
-   * @throws IOException
-   *             If the GIF header/trailer is missing, incomplete or unknown
+   * @throws IOException If the GIF header/trailer is missing, incomplete or unknown
    */
   static final int readHeader(final byte[] in, final GifImage img) throws IOException {
     if (in.length < 6) { // Check first 6 bytes
@@ -587,12 +569,9 @@ public final class GifDecoder {
   }
 
   /**
-   * @param fr
-   *            The GIF frame to whom this image descriptor belongs
-   * @param in
-   *            Raw data
-   * @param i
-   *            Index of the first byte of this block, i.e. the minCodeSize
+   * @param fr The GIF frame to whom this image descriptor belongs
+   * @param in Raw data
+   * @param i Index of the first byte of this block, i.e. the minCodeSize
    * @return
    */
   static final int readImgData(final GifFrame fr, final byte[] in, int i) {
@@ -650,12 +629,9 @@ public final class GifDecoder {
   }
 
   /**
-   * @param fr
-   *            The GIF frame to whom this image descriptor belongs
-   * @param in
-   *            Raw data
-   * @param i
-   *            Index of the image separator, i.e. the first block byte
+   * @param fr The GIF frame to whom this image descriptor belongs
+   * @param in Raw data
+   * @param i Index of the image separator, i.e. the first block byte
    * @return Index of the first byte after this block
    */
   static final int readImgDescr(final GifFrame fr, final byte[] in, int i) {
@@ -675,8 +651,7 @@ public final class GifDecoder {
 
   /**
    * @param img
-   * @param i
-   *            Start index of this block.
+   * @param i Start index of this block.
    * @return Index of the first byte after this block.
    */
   static final int readLogicalScreenDescriptor(final GifImage img, final byte[] in, final int i) {
@@ -696,10 +671,8 @@ public final class GifDecoder {
   }
 
   /**
-   * @param in
-   *            Raw data
-   * @param pos
-   *            Index of the extension introducer
+   * @param in Raw data
+   * @param pos Index of the extension introducer
    * @return Index of the first byte after this block
    */
   static final int readTextExtension(final byte[] in, final int pos) {
@@ -763,16 +736,16 @@ public final class GifDecoder {
     var bytes = ImageUtil.imageToBytes(image.getFrame(i), "png");
     // without imageutil there seem to be some issues with tranparency  for some images.
     // (black background instead of tranparent)
-    //var bytes = AssetManager.getAsset(key).getImage();
+    // var bytes = AssetManager.getAsset(key).getImage();
     return new Pixmap(bytes, 0, bytes.length);
   }
-
 
   private int getFrameCount() {
     return image.getFrameCount();
   }
 
-  public static Animation<TextureRegion> loadGIFAnimation(Animation.PlayMode playMode, InputStream is) {
+  public static Animation<TextureRegion> loadGIFAnimation(
+      Animation.PlayMode playMode, InputStream is) {
     try {
       var dec = new GifDecoder(is);
       return dec.getAnimation(playMode);

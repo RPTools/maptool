@@ -1134,15 +1134,16 @@ public class Token extends BaseModel implements Cloneable {
     if (!getHasImageTable() || !hasFacing() || getImageTableName() == null)
       return getImageAssetId();
 
-    LookupTable lookupTable =  MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
-    if(lookupTable == null)
-      return getImageAssetId();
+    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
+    if (lookupTable == null) return getImageAssetId();
 
     try {
       LookupTable.LookupEntry result = lookupTable.getLookup(getFacing().toString());
-       if (result != null)  return result.getImageId();
+      if (result != null) return result.getImageId();
 
-    } catch (ParserException p) { /* do nothing  */ }
+    } catch (ParserException p) {
+      /* do nothing  */
+    }
 
     return getImageAssetId();
   }

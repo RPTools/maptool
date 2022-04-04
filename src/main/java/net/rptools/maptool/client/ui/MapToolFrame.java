@@ -17,7 +17,9 @@ package net.rptools.maptool.client.ui;
 import com.badlogic.gdx.backends.jogamp.JoglSwingCanvas;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
+import com.jogamp.opengl.awt.GLJPanel;
 import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -38,9 +40,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
-import com.jogamp.opengl.awt.GLJPanel;
-import com.jogamp.opengl.util.Animator;
-import com.jogamp.opengl.util.awt.AWTGLPixelBuffer;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
@@ -53,9 +52,8 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
-import net.rptools.maptool.client.swing.*;
-import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.MapTool.ZoneEvent;
+import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -90,9 +88,9 @@ import net.rptools.maptool.client.ui.zone.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -105,27 +103,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
-import javax.swing.Timer;
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Rectangle;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-/**
- *
- */
+/** */
 public class MapToolFrame extends DefaultDockableHolder
     implements WindowListener, AppEventListener {
   private static final Logger log = LogManager.getLogger(MapToolFrame.class);
@@ -145,10 +123,9 @@ public class MapToolFrame extends DefaultDockableHolder
   // Components
   private final AssetPanel assetPanel;
   private final ClientConnectionPanel connectionPanel;
-  /**
-   * The panel showing the initiative order.
-   */
+  /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
   private final AboutDialog aboutDialog;
@@ -156,14 +133,11 @@ public class MapToolFrame extends DefaultDockableHolder
   private final Toolbox toolbox;
   private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
-  /**
-   * Contains the zoneRenderer, as well as all overlays.
-   */
+  /** Contains the zoneRenderer, as well as all overlays. */
   private final JPanel zoneRendererPanel;
+
   private JPanel currentRenderPanel;
-  /**
-   * Contains the overlays that should be displayed in front of everything else.
-   */
+  /** Contains the overlays that should be displayed in front of everything else. */
   private final PointerToolOverlay pointerToolOverlay;
 
   private JPanel visibleControlPanel;
@@ -201,16 +175,14 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
   private JoglSwingCanvas joglSwingCanvas;
-  /**
-   * Are the drawing measurements being painted?
-   */
+  /** Are the drawing measurements being painted? */
   private boolean paintDrawingMeasurement = true;
+
   private ImageChooserDialog imageChooserDialog;
   private ZoneRenderer currentRenderer;
-  /**
-   * The HTML pane showing the map overlay.
-   */
+  /** The HTML pane showing the map overlay. */
   private HTMLOverlayPanel overlayPanel;
+
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
   private JPanel fullScreenToolPanel;
@@ -230,6 +202,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   /** Model for the token tree panel of the map explorer. */
   private TokenPanelTreeModel tokenPanelTreeModel;
+
   private DrawPanelTreeModel drawPanelTreeModel;
   private DrawablesPanel drawablesPanel;
   private LookupTablePanel lookupTablePanel;
@@ -241,10 +214,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser saveFileChooser;
   private JFileChooser saveMapFileChooser;
   private JFileChooser saveTokenFileChooser;
-  /**
-   * Remember the last layer selected
-   */
+  /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
+
   private EditTokenDialog tokenPropertiesDialog;
   private GLJPanel gdxPanel;
   private JFileChooser saveMacroFileChooser;
@@ -321,14 +293,14 @@ public class MapToolFrame extends DefaultDockableHolder
     statusPanel.addPanel(new SpacerStatusBar(25));
 
     zoneMiniMapPanel = new ZoneMiniMapPanel();
-    //zoneMiniMapPanel.setSize(100, 100);
+    // zoneMiniMapPanel.setSize(100, 100);
 
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
     currentRenderPanel = zoneRendererPanel;
     initGdx();
 
-    //zoneRendererPanel.setBackground(Color.black);
-    //zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
+    // zoneRendererPanel.setBackground(Color.black);
+    // zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
@@ -337,7 +309,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
-    //rendererBorderPanel.add(gdxPanel);
+    // rendererBorderPanel.add(gdxPanel);
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
 
@@ -346,7 +318,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
-
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -395,10 +366,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private void initGdx() {
     joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
-    //gdxPanel = new GLJPanel();
-    //gdxPanel.addGLEventListener(gears);
-    //animator.add(gdxPanel);
-    //animator.start();
+    // gdxPanel = new GLJPanel();
+    // gdxPanel.addGLEventListener(gears);
+    // animator.add(gdxPanel);
+    // animator.start();
 
     gdxPanel = joglSwingCanvas.getGLCanvas();
     gdxPanel.setVisible(false);
@@ -429,7 +400,6 @@ public class MapToolFrame extends DefaultDockableHolder
     currentRenderPanel.setVisible(false);
     nextRenderPanel.setVisible(true);
     rendererBorderPanel.remove(currentRenderPanel);
-
 
     rendererBorderPanel.add(nextRenderPanel);
     currentRenderPanel = nextRenderPanel;
@@ -632,7 +602,7 @@ public class MapToolFrame extends DefaultDockableHolder
    * Updates the window title, tab title, and side title of the given frame
    *
    * @param mtFrame The frame to set the title of
-   * @param title   The new title
+   * @param title The new title
    */
   public void setFrameTitle(MTFrame mtFrame, String title) {
     DockableFrame frame = getFrame(mtFrame);
@@ -654,7 +624,7 @@ public class MapToolFrame extends DefaultDockableHolder
    * Shows the token properties dialog, and saves the token.
    *
    * @param token the token to edit
-   * @param zr    the ZoneRenderer of the token
+   * @param zr the ZoneRenderer of the token
    */
   public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
     if (token != null && zr != null) {
@@ -678,9 +648,7 @@ public class MapToolFrame extends DefaultDockableHolder
     return tokenPropertiesDialog;
   }
 
-  /**
-   * Repaints the current ZoneRenderer, if it is not null.
-   */
+  /** Repaints the current ZoneRenderer, if it is not null. */
   public void refresh() {
     if (getCurrentZoneRenderer() != null) {
       getCurrentZoneRenderer().repaint();
@@ -802,7 +770,6 @@ public class MapToolFrame extends DefaultDockableHolder
   public GLJPanel getGdxPanel() {
     return gdxPanel;
   }
-
 
   public AssetCacheStatusBar getAssetCacheStatusBar() {
     if (assetCacheStatusBar == null) {
@@ -1054,12 +1021,12 @@ public class MapToolFrame extends DefaultDockableHolder
                     if (!selectedDrawSet.isEmpty()) {
                       try {
                         new DrawPanelPopupMenu(
-                            selectedDrawSet,
-                            x,
-                            y,
-                            getCurrentZoneRenderer(),
-                            firstElement,
-                            topLevelOnly)
+                                selectedDrawSet,
+                                x,
+                                y,
+                                getCurrentZoneRenderer(),
+                                firstElement,
+                                topLevelOnly)
                             .showPopup(tree);
                       } catch (IllegalComponentStateException icse) {
                         log.info(tree.toString(), icse);
@@ -1085,9 +1052,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  /**
-   * Create the token tree panel for the map explorer
-   */
+  /** Create the token tree panel for the map explorer */
   private JComponent createTokenTreePanel() {
     final JTree tree = new JTree();
     tokenPanelTreeModel = new TokenPanelTreeModel(tree);
@@ -1150,11 +1115,11 @@ public class MapToolFrame extends DefaultDockableHolder
                       try {
                         if (firstToken.isStamp()) {
                           new StampPopupMenu(
-                              selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
+                                  selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
                               .showPopup(tree);
                         } else {
                           new TokenPopupMenu(
-                              selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
+                                  selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
                               .showPopup(tree);
                         }
                       } catch (IllegalComponentStateException icse) {
@@ -1178,9 +1143,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  /**
-   * Update tokenPanelTreeModel and the initiativePanel.
-   */
+  /** Update tokenPanelTreeModel and the initiativePanel. */
   public void updateTokenTree() {
     if (tokenPanelTreeModel != null) {
       tokenPanelTreeModel.update();
@@ -1702,9 +1665,9 @@ public class MapToolFrame extends DefaultDockableHolder
     toolbarPanel.add(toolbarPanel.getOptionPanel(), toolbarPanel.getOptionsPanelIndex());
 
     JToggleButton buttons[] = {
-        toolbarPanel.getTopologyButton(), toolbarPanel.getFogButton(),
-        toolbarPanel.getTemplateButton(), toolbarPanel.getDrawButton(),
-        toolbarPanel.getPointerGroupButton()
+      toolbarPanel.getTopologyButton(), toolbarPanel.getFogButton(),
+      toolbarPanel.getTemplateButton(), toolbarPanel.getDrawButton(),
+      toolbarPanel.getPointerGroupButton()
     };
 
     for (var button : buttons) {
@@ -1786,8 +1749,7 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   // WINDOW LISTENER
-  public void windowOpened(WindowEvent e) {
-  }
+  public void windowOpened(WindowEvent e) {}
 
   public void windowClosing(WindowEvent e) {
     if (!confirmClose()) {
@@ -1863,17 +1825,13 @@ public class MapToolFrame extends DefaultDockableHolder
     System.exit(0);
   }
 
-  public void windowIconified(WindowEvent e) {
-  }
+  public void windowIconified(WindowEvent e) {}
 
-  public void windowDeiconified(WindowEvent e) {
-  }
+  public void windowDeiconified(WindowEvent e) {}
 
-  public void windowActivated(WindowEvent e) {
-  }
+  public void windowActivated(WindowEvent e) {}
 
-  public void windowDeactivated(WindowEvent e) {
-  }
+  public void windowDeactivated(WindowEvent e) {}
 
   // Windows OS defaults F10 to the menu bar, noooooo!! We want for macro buttons.
   // XXX Shouldn't this keystroke be configurable via the properties file anyway?
@@ -1980,17 +1938,13 @@ public class MapToolFrame extends DefaultDockableHolder
     return selectionPanel;
   }
 
-  /**
-   * Reset the impersonatePanel and the selectionPanel.
-   */
+  /** Reset the impersonatePanel and the selectionPanel. */
   public void resetTokenPanels() {
     impersonatePanel.reset();
     selectionPanel.reset();
   }
 
-  /**
-   * Reset the macro panels. Currently only used after loading a campaign.
-   */
+  /** Reset the macro panels. Currently only used after loading a campaign. */
   public void resetPanels() {
     MacroButtonHotKeyManager.clearKeyStrokes();
     campaignPanel.reset();
@@ -2001,9 +1955,7 @@ public class MapToolFrame extends DefaultDockableHolder
     updateKeyStrokes();
   }
 
-  /**
-   * @return Getter for initiativePanel
-   */
+  /** @return Getter for initiativePanel */
   public InitiativePanel getInitiativePanel() {
     return initiativePanel;
   }
@@ -2076,6 +2028,7 @@ public class MapToolFrame extends DefaultDockableHolder
     loadTableFileChooser.setFileFilter(tableFilter);
     return loadTableFileChooser;
   }
+
   public enum MTFrame {
     /*
      * These enums should be specified using references to the properties file. However, a simple toString() method is used later to determine what to display on the various panels. So if I
@@ -2209,8 +2162,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {
@@ -2243,8 +2195,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
-    }
+    public void keyPressed(KeyEvent e) {}
   }
 
   private final class KeyListenerDeleteToken implements KeyListener {
@@ -2255,8 +2206,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {
@@ -2274,8 +2224,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
-    }
+    public void keyPressed(KeyEvent e) {}
   }
 
   private class ChatTyperObserver implements Observer {
