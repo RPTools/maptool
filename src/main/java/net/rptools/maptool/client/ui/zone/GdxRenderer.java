@@ -794,7 +794,7 @@ public class GdxRenderer extends ApplicationAdapter
       } else {
         if (fog == null) {
           var texturePaint = (DrawableTexturePaint) paint;
-          var image = texturePaint.getAsset().getImage();
+          var image = texturePaint.getAsset().getData();
           var pix = new Pixmap(image, 0, image.length);
           fog = new Texture(pix);
           fog.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -1507,7 +1507,7 @@ public class GdxRenderer extends ApplicationAdapter
     } else {
       if (background == null) {
         var texturePaint = (DrawableTexturePaint) paint;
-        var image = texturePaint.getAsset().getImage();
+        var image = texturePaint.getAsset().getData();
         var pix = new Pixmap(image, 0, image.length);
         background = new Texture(pix);
         background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -3202,7 +3202,7 @@ public class GdxRenderer extends ApplicationAdapter
   private Texture paintToTexture(DrawablePaint paint) {
     if (paint instanceof DrawableTexturePaint) {
       var texturePaint = (DrawableTexturePaint) paint;
-      var image = texturePaint.getAsset().getImage();
+      var image = texturePaint.getAsset().getData();
       var pix = new Pixmap(image, 0, image.length);
       var texture = new Texture(pix);
       pix.dispose();
@@ -3227,7 +3227,7 @@ public class GdxRenderer extends ApplicationAdapter
   private Sprite paintToSprite(DrawablePaint paint) {
     if (paint instanceof DrawableTexturePaint) {
       var texturePaint = (DrawableTexturePaint) paint;
-      var image = texturePaint.getAsset().getImage();
+      var image = texturePaint.getAsset().getData();
       var pix = new Pixmap(image, 0, image.length);
       var sprite = new Sprite(new Texture(pix));
       sprite.setSize(pix.getWidth(), pix.getHeight());
@@ -3499,25 +3499,25 @@ public class GdxRenderer extends ApplicationAdapter
   public void assetAvailable(MD5Key key) {
     try {
       var asset = AssetManager.getAsset(key);
-      if (asset.getImageExtension() == "gif") {
+      if (asset.getExtension() == "gif") {
 
         Gdx.app.postRunnable(
             () -> {
               // var ass = AssetManager.getAsset(key);
-              var is = new ByteArrayInputStream(asset.getImage());
+              var is = new ByteArrayInputStream(asset.getData());
               var animation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, is);
               animationMap.put(key, animation);
             });
         return;
       }
-      if (asset.getImageExtension() == "data") {
+      if (asset.getExtension() == "data") {
         var videoPlayer = VideoPlayerCreator.createVideoPlayer();
         videoPlayerMap.put(key, videoPlayer);
         return;
       }
       var img =
           ImageUtil.createCompatibleImage(
-              ImageUtil.bytesToImage(asset.getImage(), asset.getName()), null);
+              ImageUtil.bytesToImage(asset.getData(), asset.getName()), null);
       // var img = ImageManager.getImage(key);
       var bytes = ImageUtil.imageToBytes(img, "png");
       // without imageutil there seem to be some issues with tranparency  for some images.
