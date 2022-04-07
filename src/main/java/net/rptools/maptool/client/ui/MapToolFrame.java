@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.badlogic.gdx.backends.jogamp.JoglAwtApplicationConfiguration;
 import com.badlogic.gdx.backends.jogamp.JoglSwingCanvas;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
@@ -342,11 +343,12 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   private void initGdx() {
-    joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), "test", 640, 480);
-    // gdxPanel = new GLJPanel();
-    // gdxPanel.addGLEventListener(gears);
-    // animator.add(gdxPanel);
-    // animator.start();
+    var config = new JoglAwtApplicationConfiguration();
+    config.foregroundFPS = 30;
+    config.title = "maptool";
+    config.width = 640;
+    config.height = 480;
+    joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), config);
 
     gdxPanel = joglSwingCanvas.getGLCanvas();
     gdxPanel.setVisible(false);

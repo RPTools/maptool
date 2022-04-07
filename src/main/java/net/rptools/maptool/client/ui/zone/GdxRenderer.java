@@ -16,6 +16,8 @@ package net.rptools.maptool.client.ui.zone;
 
 import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
@@ -174,10 +176,12 @@ public class GdxRenderer extends ApplicationAdapter
   private boolean showAstarDebugging = false;
 
   // Box2D stuff
-  //   private World world;
-  //   private RayHandler rayHandler;
-  //    private Box2DDebugRenderer debugRenderer;
+  private World world;
+  private RayHandler rayHandler;
+  private Box2DDebugRenderer debugRenderer;
   private Map<Token, Body> tokenBodies = new HashMap<>();
+  private Body body;
+  private PointLight pointLight;
   //   private VideoPlayer videoPlayer;
 
   public GdxRenderer() {
@@ -216,7 +220,44 @@ public class GdxRenderer extends ApplicationAdapter
     manager = new com.badlogic.gdx.assets.AssetManager();
     packer = createPacker();
 
-    // debugRenderer = new Box2DDebugRenderer();
+    world = new World(new Vector2(0, 0), false);
+    rayHandler = new RayHandler(world);
+    rayHandler.setGammaCorrection(true);
+    rayHandler.useDiffuseLight(true);
+    rayHandler.setBlurNum(3);
+    //rayHandler.setAmbientLight(0.3f);
+    pointLight = new PointLight(rayHandler, 120, Color.WHITE, 6, 4 ,-3);
+
+    debugRenderer = new Box2DDebugRenderer();
+    // First we create a body definition
+    BodyDef bodyDef = new BodyDef();
+// We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
+    bodyDef.type = BodyDef.BodyType.DynamicBody;
+// Set our body's starting position in the world
+    bodyDef.position.set(2.5f, -2.5f);
+
+// Create our body in the world using our body definition
+    body = world.createBody(bodyDef);
+
+// Create a circle shape and set its radius to 6
+    CircleShape circle = new CircleShape();
+    circle.setRadius(0.5f);
+
+// Create a fixture definition to apply our shape to
+    FixtureDef fixtureDef = new FixtureDef();
+    fixtureDef.shape = circle;
+    fixtureDef.density = 0.5f;
+    fixtureDef.friction = 0.4f;
+    fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+
+// Create our fixture and attach it to the body
+    Fixture fixture = body.createFixture(fixtureDef);
+
+// Remember to dispose of any shapes after you're done with them!
+// BodyDef and FixtureDef don't need disposing, but shapes do.
+    circle.dispose();
+    body.setLinearDamping(20f);
+
     var resolver = new InternalFileHandleResolver();
     manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
     manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
@@ -259,6 +300,20 @@ public class GdxRenderer extends ApplicationAdapter
     initializeZoneResources(zone);
   }
 
+  private float accumulator = 0;
+
+  private void doPhysicsStep(float deltaTime) {
+    // fixed time step
+    // max frame time to avoid spiral of death (on slow devices)
+    float frameTime = Math.min(deltaTime, 0.25f);
+    accumulator += frameTime;
+    while (accumulator >= 1/60f) {
+      world.step(1/60f, 6, 2);
+      rayHandler.update();
+      accumulator -= 1/60f;
+    }
+  }
+
   @Override
   public void dispose() {
     manager.dispose();
@@ -272,6 +327,9 @@ public class GdxRenderer extends ApplicationAdapter
         atlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
     packer.dispose();
     tokenAtlas.dispose();
+    world.dispose();
+    debugRenderer.dispose();
+    rayHandler.dispose();
   }
 
   @Override
@@ -340,14 +398,13 @@ public class GdxRenderer extends ApplicationAdapter
     //   vfxManager.beginInputCapture();
     ScreenUtils.clear(Color.BLACK);
     doRendering();
-    //     rayHandler.setCombinedMatrix(cam.combined, cam.position.x, cam.position.y,
-    // cam.viewportWidth, cam.viewportHeight);
-    //     rayHandler.updateAndRender();
-    //     debugRenderer.render(world, cam.combined);
-    //    world.step(1/60f, 6, 2);
+    debugRenderer.render(world, cam.combined.cpy().scl((float)zone.getGrid().getCellWidth()));
+    rayHandler.setCombinedMatrix(cam.combined.cpy().scl((float)zone.getGrid().getCellWidth()));
+    rayHandler.render();
     //   vfxManager.endInputCapture();
     //   vfxManager.applyEffects();
     //   vfxManager.renderToScreen();
+    doPhysicsStep(delta);
   }
 
   @NotNull

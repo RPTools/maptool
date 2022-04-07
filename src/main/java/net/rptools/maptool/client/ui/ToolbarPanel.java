@@ -180,7 +180,7 @@ public class ToolbarPanel extends JToolBar {
 
     add(
         createJfxButton(
-            "net/rptools/maptool/client/image/javafx.png",
+            "net/rptools/maptool/client/image/libgdx.png",
             I18N.getText("tools.mute.tooltip"),
             I18N.getText("tools.unmute.tooltip")));
 
