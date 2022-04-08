@@ -35,7 +35,7 @@ defaultTasks 'clean', 'build'
 sourceCompatibility = 17
 targetCompatibility = 17
 def grpcVersion = '1.39.0'
-def protobufVersion = '3.17.3'
+def protobufVersion = '3.20.0'
 def protocVersion = protobufVersion
 
 
@@ -402,7 +402,7 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.11.2'
