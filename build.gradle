@@ -299,7 +299,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.7.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.7.0'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.7.0'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.7.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.7.0'
 
     implementation 'org.apache.xmlgraphics:batik-all:1.14' // For Twelvemonkey SVG
@@ -401,7 +401,7 @@ dependencies {
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 
     // For mocking features during unit tests
