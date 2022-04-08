@@ -90,7 +90,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, val);
     return val;
   }
 

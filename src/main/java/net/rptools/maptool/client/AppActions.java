@@ -662,7 +662,7 @@ public class AppActions {
       };
 
   public static final Action TOGGLE_FULLSCREEN_TOOLS =
-      new AdminClientAction() {
+      new DefaultClientAction() {
         {
           init("action.toggleFullScreenTools");
         }
@@ -2666,7 +2666,7 @@ public class AppActions {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
         } else {
-          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+          MapTool.showError("msg.error.failedLoadCampaign", t);
         }
       }
     }

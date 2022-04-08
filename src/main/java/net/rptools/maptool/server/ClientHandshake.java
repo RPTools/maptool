@@ -301,9 +301,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
     currentState = State.AwaitingConnectionSuccessful;
   }
 
-  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-    var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
+  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg) throws IOException {
+    var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     MapTool.getFrame()

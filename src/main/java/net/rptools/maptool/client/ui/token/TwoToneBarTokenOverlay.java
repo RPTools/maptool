@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 
 /** @author Jay */
 public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
@@ -107,5 +108,18 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     overlay.setShowOwner(isShowOwner());
     overlay.setShowOthers(isShowOthers());
     return overlay;
+  }
+
+  public static TwoToneBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar = new TwoToneBarTokenOverlay();
+    bar.fillFrom(dto);
+    bar.bgColor = new Color(dto.getBgColor(), true);
+    return bar;
+  }
+
+  public BarTokenOverlayDto toDto() {
+    var dto = getDto();
+    dto.setBgColor(bgColor.getRGB());
+    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_TONE).build();
   }
 }

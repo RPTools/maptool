@@ -1137,7 +1137,7 @@ public class ZoneRenderer extends JComponent
      */
     // @formatter:on
 
-    if (visibleScreenArea == null && zoneView.isUsingVision()) {
+    if (visibleScreenArea == null) {
       timer.start("ZoneRenderer-getVisibleArea");
       Area a = zoneView.getVisibleArea(view);
       timer.stop("ZoneRenderer-getVisibleArea");
@@ -1427,37 +1427,15 @@ public class ZoneRenderer extends JComponent
    * @param view the player view
    */
   private void renderLights(Graphics2D g, PlayerView view) {
-    // Setup
-    timer.start("lights-1");
-    Graphics2D newG = (Graphics2D) g.create();
-    if (!view.isGMView() && visibleScreenArea != null) {
-      Area clip = new Area(g.getClip());
-      clip.intersect(visibleScreenArea);
-      newG.setClip(clip);
-    }
-    SwingUtil.useAntiAliasing(newG);
-    timer.stop("lights-1");
-    timer.start("lights-2");
-
-    AffineTransform af = g.getTransform();
-    af.translate(getViewOffsetX(), getViewOffsetY());
-    af.scale(getScale(), getScale());
-    newG.setTransform(af);
-
-    newG.setComposite(
-        AlphaComposite.getInstance(
-            AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
-    timer.stop("lights-2");
-
+    // Collect and organize lights
     if (renderedLightMap == null) {
-      timer.start("lights-3");
+      timer.start("lights-1");
       // Organize
       Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
       List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
       for (DrawableLight light : zoneView.getDrawableLights(view)) {
-        // Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
         if (light.getType() == LightSource.Type.NORMAL) {
-          if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
+          if (light.getPaint() != null) {
             List<Area> areaList =
                 colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
             areaList.add(new Area(light.getArea()));
@@ -1469,58 +1447,65 @@ public class ZoneRenderer extends JComponent
           otherLightList.add(light); // not used for anything?!
         }
       }
-      timer.stop("lights-3");
 
-      timer.start("lights-4");
-      // Combine same colors to avoid ugly overlap
-      // Avoid combining _all_ of the lights as the area adds are very expensive, just combine those
-      // that overlap
-      // Jamz TODO: Check this and make sure proper order is happening
-      for (List<Area> areaList : colorMap.values()) {
-        List<Area> sourceList = new LinkedList<Area>(areaList);
-        areaList.clear();
-
-        outter:
-        while (sourceList.size() > 0) {
-          Area area = sourceList.remove(0);
-
-          for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext(); ) {
-            Area currArea = iter.next();
-
-            if (currArea.getBounds().intersects(area.getBounds())) {
-              iter.remove();
-              area.add(currArea);
-              sourceList.add(area);
-              continue outter;
-            }
-          }
-          // If we are here, we didn't find any other area to merge with
-          areaList.add(area);
-        }
-        // Cut out the bright light
-        if (areaList.size() > 0) {
-          for (Area area : areaList) {
-            for (Area brightArea : zoneView.getBrightLights(view)) {
-              area.subtract(brightArea);
-            }
-          }
-        }
-      }
       renderedLightMap = new LinkedHashMap<Paint, List<Area>>();
       for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
         renderedLightMap.put(entry.getKey(), entry.getValue());
       }
-      timer.stop("lights-4");
+      timer.stop("lights-1");
     }
-    // Draw
-    timer.start("lights-5");
+
+    // Set up a buffer image for lights to be drawn onto before the map
+    timer.start("lights-2");
+    BufferedImage lightOverlay =
+        new BufferedImage(
+            g.getClip().getBounds().width,
+            g.getClip().getBounds().height,
+            BufferedImage.TYPE_INT_ARGB);
+    Graphics2D newG = lightOverlay.createGraphics();
+
+    if (!view.isGMView() && visibleScreenArea != null) {
+      Area clip = new Area(g.getClip());
+      clip.intersect(visibleScreenArea);
+      newG.setClip(clip);
+    }
+    timer.stop("lights-2");
+
+    timer.start("lights-3");
+    AffineTransform af = new AffineTransform();
+    af.translate(getViewOffsetX(), getViewOffsetY());
+    af.scale(getScale(), getScale());
+    newG.setTransform(af);
+
+    newG.setComposite(new BlendingComposite());
+    timer.stop("lights-3");
+
+    // Draw lights into the buffer image so the map doesn't affect how they blend
+    timer.start("lights-4");
     for (Entry<Paint, List<Area>> entry : renderedLightMap.entrySet()) {
       newG.setPaint(entry.getKey());
       for (Area area : entry.getValue()) {
         newG.fill(area);
       }
     }
+    timer.stop("lights-4");
+
+    // Draw the buffer image with all the lights onto the map
+    timer.start("lights-5");
+    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to
+    // high)
+    // If lights start getting ugly outlines running through other lights, these should fix that
+    // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+    Composite previousComposite = g.getComposite();
+    g.setComposite(
+        AlphaComposite.getInstance(
+            AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
+    g.drawImage(lightOverlay, null, 0, 0);
+    g.setComposite(previousComposite);
     timer.stop("lights-5");
+
     newG.dispose();
   }
 

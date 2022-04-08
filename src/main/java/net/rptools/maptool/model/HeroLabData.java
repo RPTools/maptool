@@ -36,6 +36,7 @@ import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.server.proto.HeroLabDataDto;
 
 /**
  * @author Jamz
@@ -524,5 +525,42 @@ public class HeroLabData {
     heroLabInfo.add("images", urls);
 
     return heroLabInfo;
+  }
+
+  public static HeroLabData fromDto(HeroLabDataDto dto) {
+    var data = new HeroLabData(dto.getName());
+    data.heroLabStatblockAssetID = new MD5Key(dto.getHeroLabStatblockAssetId());
+    data.summary = dto.getSummary();
+    data.playerName = dto.getPlayerName();
+    data.gameSystem = dto.getGameSystem();
+    data.heroLabIndex = dto.getHeroLabIndex();
+    data.minionMasterIndex = dto.getMinionMasterIndex();
+    data.minionMasterName = dto.getMinionMasterName();
+    data.isAlly = dto.getIsAlly();
+    data.isDirty = dto.getIsDirty();
+    data.isMinion = dto.getIsMinion();
+    data.portfolioPath = dto.getPortfolioPath();
+    dto.getHeroImageAssetsMap()
+        .forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
+    return data;
+  }
+
+  public HeroLabDataDto toDto() {
+    var data = this;
+    var dto = HeroLabDataDto.newBuilder();
+    dto.setHeroLabStatblockAssetId(heroLabStatblockAssetID.toString());
+    dto.setName(name);
+    dto.setSummary(summary);
+    dto.setPlayerName(playerName);
+    dto.setGameSystem(gameSystem);
+    dto.setHeroLabIndex(heroLabIndex);
+    dto.setMinionMasterIndex(minionMasterIndex);
+    dto.setMinionMasterName(minionMasterName);
+    dto.setIsAlly(isAlly);
+    dto.setIsDirty(isDirty);
+    dto.setIsMinion(isMinion);
+    dto.setPortfolioPath(portfolioPath);
+    heroImageAssets.forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
+    return dto.build();
   }
 }

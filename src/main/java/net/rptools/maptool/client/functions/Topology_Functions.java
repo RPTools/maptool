@@ -217,7 +217,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -257,7 +257,10 @@ public class Topology_Functions extends AbstractFunction {
       } else {
         // Build separate objects for each area.
         JsonArray allShapes = new JsonArray();
-        allShapes.add(getAreaShapeObject(topologyArea));
+        var areaShape = getAreaShapeObject(topologyArea);
+        if (areaShape != null) {
+          allShapes.add(areaShape);
+        }
         return allShapes.toString();
       }
     } else if (functionName.equalsIgnoreCase("getTokenVBL")) {
@@ -285,14 +288,15 @@ public class Topology_Functions extends AbstractFunction {
                 "macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
       }
 
+      JsonArray allShapes = new JsonArray();
       Area vblArea = token.getVBL();
       if (vblArea != null) {
-        JsonArray allShapes = new JsonArray();
-        allShapes.add(getAreaShapeObject(vblArea));
-        return allShapes.toString();
-      } else {
-        return "";
+        var areaShape = getAreaShapeObject(vblArea);
+        if (areaShape != null) {
+          allShapes.add(areaShape);
+        }
       }
+      return allShapes.toString();
     } else if (functionName.equalsIgnoreCase("setTokenVBL")) {
       Token token = null;
 
@@ -305,7 +309,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -391,7 +395,7 @@ public class Topology_Functions extends AbstractFunction {
       if (parameters.isEmpty()) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
 
       if (!MapTool.getParser().isMacroTrusted()) {
@@ -1053,6 +1057,9 @@ public class Topology_Functions extends AbstractFunction {
           point.addProperty("y", y);
           points.add(point);
         });
+    if (points.isEmpty()) {
+      return null;
+    }
     polygon.add("points", points);
 
     return polygon;

@@ -185,7 +185,7 @@ public class AppPreferences {
   private static final boolean DEFAULT_VBL_BLOCKS_MOVE = true;
 
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
-  private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
+  private static final String DEFAULT_MACRO_EDITOR_THEME = "Default";
 
   // When hill VBL was introduced, older versions of MapTool were unable to read the new topology
   // modes. So we use a different preference key than in the past so older versions would not
