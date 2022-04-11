@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.player;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -67,7 +68,7 @@ public interface PersistedPlayerDatabase {
    */
   void addPlayerAsymmetricKey(String name, Role role, Set<String> publicKeyStrings)
       throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException;
+          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException;
 
   /**
    * Sets the shared password for the specified player. If the player does not exist then a {@link
@@ -102,7 +103,7 @@ public interface PersistedPlayerDatabase {
    */
   void setAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException;
+          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException;
 
   /**
    * Adds the keys to the existing keys for the specified player. This will remove any shared key
@@ -120,7 +121,7 @@ public interface PersistedPlayerDatabase {
    */
   void addAsymmetricKeys(String name, Set<String> keys)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException;
+          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException;
 
   /**
    * Returns if the specified player is persisted or not. Persisted players include those that are
