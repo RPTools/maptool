@@ -17,6 +17,7 @@ package net.rptools.maptool.model.player;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -330,6 +331,7 @@ public class Players {
         playerDb.addPlayerAsymmetricKey(name, role, pkeys);
         return ChangePlayerStatus.OK;
       } catch (NoSuchAlgorithmException
+          | InvalidAlgorithmParameterException
           | InvalidKeySpecException
           | PasswordDatabaseException
           | NoSuchPaddingException
@@ -364,6 +366,7 @@ public class Players {
         playerDb.setAsymmetricKeys(name, pkeys);
       } catch (NoSuchPaddingException
           | NoSuchAlgorithmException
+          | InvalidAlgorithmParameterException
           | InvalidKeySpecException
           | PasswordDatabaseException
           | InvalidKeyException e) {
