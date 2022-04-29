@@ -12,18 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.box2d.unused;
+package net.rptools.maptool.client.ui.zone.gdx;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.Camera;
 
-public class Main {
-  public static void main(String[] args) {
-    LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-    cfg.title = "MapTool libgdx Test!";
-    cfg.width = 1280;
-    cfg.height = 720;
-
-    new LwjglApplication(new Box2dLightTest(), cfg);
-  }
+public interface ItemRenderer {
+  void render(Camera camera, float zoom);
 }

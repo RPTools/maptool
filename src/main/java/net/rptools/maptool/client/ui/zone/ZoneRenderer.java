@@ -55,6 +55,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
+import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -3731,7 +3732,7 @@ public class ZoneRenderer extends JComponent
     visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
   }
 
-  protected Map<Token, Set<Token>> getTokenStackMap() {
+  public Map<Token, Set<Token>> getTokenStackMap() {
     return tokenStackMap;
   }
 
@@ -3744,7 +3745,7 @@ public class ZoneRenderer extends JComponent
    * @param isGMView whether it is the view of a GM
    * @return true if the token is need of clipping, false otherwise
    */
-  protected boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
+  public boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
 
     // can view everything or zone is not using vision = no clipping needed
     if (isGMView || !zoneView.isUsingVision()) return false;
