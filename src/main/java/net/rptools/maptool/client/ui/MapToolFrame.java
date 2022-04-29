@@ -346,6 +346,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private void initGdx() {
     var config = new JoglAwtApplicationConfiguration();
     config.foregroundFPS = 30;
+    config.backgroundFPS = 10;
     config.title = "maptool";
     config.width = 640;
     config.height = 480;
