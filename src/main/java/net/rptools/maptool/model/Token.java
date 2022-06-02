@@ -199,7 +199,7 @@ public class Token extends BaseModel implements Cloneable {
     setTerrainModifier,
     setTerrainModifierOperation,
     setTerrainModifiersIgnored,
-    setVBL,
+    setTopology,
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
@@ -255,12 +255,17 @@ public class Token extends BaseModel implements Cloneable {
 
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
-
   private int vblColorSensitivity = -1;
+  private int hillVblColorSensitivity = -1;
+  private int pitVblColorSensitivity = -1;
+  private int mblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
   private Area vbl;
+  private Area hillVbl;
+  private Area pitVbl;
+  private Area mbl;
 
   private String name;
   private Set<String> ownerList = new HashSet<>();
@@ -295,7 +300,7 @@ public class Token extends BaseModel implements Cloneable {
     NONE(), // Default, no terrain modifications to pathfinding cost
     MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
     ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had VBL
+    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
     FREE(); // Any cell with a token of this type in it has ALL movement costs removed
 
     private final String displayName;
@@ -413,9 +418,15 @@ public class Token extends BaseModel implements Cloneable {
     visibleOnlyToOwner = token.visibleOnlyToOwner;
 
     vblColorSensitivity = token.vblColorSensitivity;
+    hillVblColorSensitivity = token.hillVblColorSensitivity;
+    pitVblColorSensitivity = token.pitVblColorSensitivity;
+    mblColorSensitivity = token.mblColorSensitivity;
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
+    hillVbl = token.hillVbl;
+    pitVbl = token.pitVbl;
+    mbl = token.mbl;
 
     name = token.name;
     notes = token.notes;
@@ -1344,49 +1355,102 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  public void setColorSensitivity(int tolerance) {
-    vblColorSensitivity = tolerance;
+  public void setColorSensitivity(Zone.TopologyType topologyType, int tolerance) {
+    switch (topologyType) {
+      case WALL_VBL -> vblColorSensitivity = tolerance;
+      case HILL_VBL -> hillVblColorSensitivity = tolerance;
+      case PIT_VBL -> pitVblColorSensitivity = tolerance;
+      case MBL -> mblColorSensitivity = tolerance;
+    }
   }
 
-  public int getColorSensitivity() {
-    return vblColorSensitivity;
+  public int getColorSensitivity(Zone.TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> vblColorSensitivity;
+      case HILL_VBL -> hillVblColorSensitivity;
+      case PIT_VBL -> pitVblColorSensitivity;
+      case MBL -> mblColorSensitivity;
+    };
   }
 
   /**
-   * Set the VBL of the token. If vbl null, set vblAplphaSensitivity to -1.
+   * Return the area of the token for the requested type of topology.
    *
-   * @param vbl the VBL to set.
+   * @param topologyType The type of topology to return.
+   * @return the current topology of the token.
    */
-  public void setVBL(Area vbl) {
-    this.vbl = vbl;
-    if (vbl == null) {
+  public Area getTopology(Zone.TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> vbl;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> mbl;
+    };
+  }
+
+  /**
+   * Transform the token's topology according to the token's scale, position, rotation and flipping.
+   *
+   * @param topologyType The type of topology to transform.
+   * @return the transformed topology for the token
+   */
+  public Area getTransformedTopology(Zone.TopologyType topologyType) {
+    return getTransformedTopology(getTopology(topologyType));
+  }
+
+  /**
+   * Set the topology of the given type for the token.
+   *
+   * <p>If topology is null, set {@link #vblColorSensitivity} to -1.
+   *
+   * @param topologyType The type of topology to set.
+   * @param topology the topology area to set.
+   */
+  public void setTopology(Zone.TopologyType topologyType, Area topology) {
+    switch (topologyType) {
+      case WALL_VBL -> vbl = topology;
+      case HILL_VBL -> hillVbl = topology;
+      case PIT_VBL -> pitVbl = topology;
+      case MBL -> mbl = topology;
+    }
+    ;
+
+    if (topology == null) {
       vblColorSensitivity = -1;
     }
   }
 
   /**
-   * Return the vbl area of the token
+   * Return the existence of the requested type of topology.
    *
-   * @return the current VBL of the token
+   * @param topologyType The type of topology to check for.
+   * @return true if the token has the given type of topology.
    */
-  public Area getVBL() {
-    return vbl;
-  }
-
-  public Area getTransformedVBL() {
-    return getTransformedVBL(vbl);
+  public boolean hasTopology(Zone.TopologyType topologyType) {
+    return getTopology(topologyType) != null;
   }
 
   /**
-   * This method returns the vbl stored on the token with AffineTransformations applied for scale,
-   * position, rotation, &amp; flipping.
+   * Return the existence of any type of topology.
    *
-   * @param areaToTransform transformations to apply to the VBL
-   * @return the transformed VBL for the token
+   * @return true if the token has any kind of topology.
+   */
+  public boolean hasAnyTopology() {
+    return Arrays.stream(Zone.TopologyType.values())
+        .map(this::getTopology)
+        .anyMatch(Objects::nonNull);
+  }
+
+  /**
+   * This method transforms an area (meant to be one of the token's topologies) with
+   * AffineTransformations applied for scale, position, rotation, &amp; flipping.
+   *
+   * @param areaToTransform The area to apply transformations tos.
+   * @return the transformed area for the token
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedVBL(Area areaToTransform) {
+  public Area getTransformedTopology(Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
@@ -1453,15 +1517,6 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     return new Area(atArea.createTransformedShape(areaToTransform));
-  }
-
-  /**
-   * Return the existence of the token's VBL
-   *
-   * @return true if the token's vbl is not null, and false otherwise
-   */
-  public boolean hasVBL() {
-    return vbl != null;
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -2644,12 +2699,16 @@ public class Token extends BaseModel implements Cloneable {
                 .map(TerrainModifierOperation::valueOf)
                 .collect(Collectors.toSet()));
         break;
-      case setVBL:
-        setVBL(Mapper.map(parameters.get(0).getArea()));
-        if (!hasVBL()) { // if VBL removed
-          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+      case setTopology:
+        {
+          final var topologyType = Zone.TopologyType.valueOf(parameters.get(0).getTopologyType());
+          setTopology(topologyType, Mapper.map(parameters.get(1).getArea()));
+          if (!hasTopology(topologyType)) { // if topology removed
+            zone.tokenTopologyChanged(); // if token lost topology, TOKEN_CHANGED won't update
+            // topology
+          }
+          break;
         }
-        break;
       case setImageAsset:
         setImageAsset(
             parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
@@ -2770,6 +2829,9 @@ public class Token extends BaseModel implements Cloneable {
     token.alwaysVisibleTolerance = dto.getAlwaysVisibleTolerance();
     token.isAlwaysVisible = dto.getIsAlwaysVisible();
     token.vbl = dto.hasVbl() ? Mapper.map(dto.getVbl()) : null;
+    token.hillVbl = dto.hasHillVbl() ? Mapper.map(dto.getHillVbl()) : null;
+    token.pitVbl = dto.hasPitVbl() ? Mapper.map(dto.getPitVbl()) : null;
+    token.mbl = dto.hasMbl() ? Mapper.map(dto.getMbl()) : null;
     token.name = dto.getName();
     token.ownerList.addAll(dto.getOwnerListList());
     token.ownerType = dto.getOwnerType();
@@ -2874,6 +2936,15 @@ public class Token extends BaseModel implements Cloneable {
     dto.setIsAlwaysVisible(isAlwaysVisible);
     if (vbl != null) {
       dto.setVbl(Mapper.map(vbl));
+    }
+    if (hillVbl != null) {
+      dto.setHillVbl(Mapper.map(hillVbl));
+    }
+    if (pitVbl != null) {
+      dto.setPitVbl(Mapper.map(pitVbl));
+    }
+    if (mbl != null) {
+      dto.setMbl(Mapper.map(mbl));
     }
     dto.setName(name);
     dto.addAllOwnerList(ownerList);

@@ -29,26 +29,42 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
   CellPoint startPoint, endPoint;
   private final boolean restrictMovement;
   private final Set<TerrainModifierOperation> terrainModifiersIgnored;
-  private final Area tokenVBL;
+  private final Area tokenWallVbl;
+  private final Area tokenHillVbl;
+  private final Area tokenPitVbl;
+  private final Area tokenMbl;
 
   public RenderPathWorker(
       ZoneWalker walker,
       CellPoint endPoint,
       boolean restrictMovement,
       Set<TerrainModifierOperation> terrainModifiersIgnored,
-      Area tokenVBL,
+      Area tokenWallVbl,
+      Area tokenHillVbl,
+      Area tokenPitVbl,
+      Area tokenMbl,
       ZoneRenderer zoneRenderer) {
     this.walker = walker;
     this.endPoint = endPoint;
     this.restrictMovement = restrictMovement;
     this.zoneRenderer = zoneRenderer;
     this.terrainModifiersIgnored = terrainModifiersIgnored;
-    this.tokenVBL = tokenVBL;
+    this.tokenWallVbl = tokenWallVbl;
+    this.tokenHillVbl = tokenHillVbl;
+    this.tokenPitVbl = tokenPitVbl;
+    this.tokenMbl = tokenMbl;
   }
 
   @Override
   protected Void doInBackground() {
-    walker.replaceLastWaypoint(endPoint, restrictMovement, terrainModifiersIgnored, tokenVBL);
+    walker.replaceLastWaypoint(
+        endPoint,
+        restrictMovement,
+        terrainModifiersIgnored,
+        tokenWallVbl,
+        tokenHillVbl,
+        tokenPitVbl,
+        tokenMbl);
     return null;
   }
 
