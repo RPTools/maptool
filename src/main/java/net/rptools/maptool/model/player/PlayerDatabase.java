@@ -172,7 +172,7 @@ public interface PlayerDatabase {
    *     decode with * the public key, the {@code CompletableFuture} can return {@code null} if
    *     there is no public key.
    */
-  CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
+  CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key)
       throws ExecutionException, InterruptedException;
 
   /**

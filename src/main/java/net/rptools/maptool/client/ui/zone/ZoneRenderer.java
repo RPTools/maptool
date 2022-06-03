@@ -30,7 +30,6 @@ import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -664,8 +663,8 @@ public class ZoneRenderer extends JComponent
 
   /**
    * Remove the token from: tokenLocationCache, flipImageMap, opacityImageMap, replacementImageMap,
-   * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, renderedLightMap, rendered Aura
-   * map to null. Flush the fog. Flush the token from the zoneView.
+   * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, drawableLights, drawableAuras to
+   * null. Flush the fog. Flush the token from the zoneView.
    *
    * @param token the token to flush
    */
@@ -686,8 +685,8 @@ public class ZoneRenderer extends JComponent
     tokenStackMap = null;
 
     flushFog = true;
-    renderedLightMap = null;
-    renderedAuraMap = null;
+    drawableLights = null;
+    drawableAuras = null;
 
     zoneView.flush(token);
     GdxRenderer.getInstance().flushFog();
@@ -713,16 +712,16 @@ public class ZoneRenderer extends JComponent
     flipImageMap.clear();
     flipIsoImageMap.clear();
     fogBuffer = null;
-    renderedLightMap = null;
-    renderedAuraMap = null;
+    drawableLights = null;
+    drawableAuras = null;
 
     isLoaded = false;
   }
 
-  /** Set the rendererLightMap and renderedAuraMap to null, flush the zoneView, and repaint. */
+  /** Set the drawableLights and drawableAuras to null, flush the zoneView, and repaint. */
   public void flushLight() {
-    renderedLightMap = null;
-    renderedAuraMap = null;
+    drawableLights = null;
+    drawableAuras = null;
     zoneView.flush();
     repaintDebouncer.dispatch();
   }
@@ -1077,14 +1076,14 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * This method clears {@link #renderedAuraMap}, {@link #renderedLightMap}, {@link
-   * #visibleScreenArea}, and {@link #lastView}. It also flushes the {@link #zoneView} and sets the
-   * {@link #flushFog} flag so that fog will be recalculated.
+   * This method clears {@link #drawableAuras}, {@link #drawableLights}, {@link #visibleScreenArea},
+   * and {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog}
+   * flag so that fog will be recalculated.
    */
   public void invalidateCurrentViewCache() {
     flushFog = true;
-    renderedLightMap = null;
-    renderedAuraMap = null;
+    drawableLights = null;
+    drawableAuras = null;
     visibleScreenArea = null;
     lastView = null;
 
@@ -1449,47 +1448,82 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
-  /** Map of the lights from drawableLightCache that have been combined. */
-  private Map<Paint, List<Area>> renderedLightMap;
+  /**
+   * Cached set of lights arranged by lumens for some stability. TODO Token draw order would be
+   * nice.
+   */
+  private List<DrawableLight> drawableLights = null;
 
   /**
    * Render the lights. Get the lights from drawableLightCache, combine them, put them in
-   * renderedLightMap, and draw them.
+   * drawableLights, and draw them.
    *
    * @param g the graphic 2D object
    * @param view the player view
    */
   private void renderLights(Graphics2D g, PlayerView view) {
     // Collect and organize lights
-    if (renderedLightMap == null) {
-      timer.start("lights-1");
-      // Organize
-      Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
-      List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
-      for (DrawableLight light : zoneView.getDrawableLights(view)) {
-        if (light.getType() == LightSource.Type.NORMAL) {
-          if (light.getPaint() != null) {
-            List<Area> areaList =
-                colorMap.computeIfAbsent(light.getPaint().getPaint(), k -> new ArrayList<>());
-            areaList.add(new Area(light.getArea()));
-          }
-        } else {
-          // I'm not a huge fan of this hard wiring, but I haven't thought of a better way yet, so
-          // this'll
-          // work fine for now
-          otherLightList.add(light); // not used for anything?!
-        }
-      }
-
-      renderedLightMap = new LinkedHashMap<Paint, List<Area>>();
-      for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
-        renderedLightMap.put(entry.getKey(), entry.getValue());
-      }
-      timer.stop("lights-1");
+    timer.start("lights-1");
+    if (drawableLights == null) {
+      drawableLights = new ArrayList<>(zoneView.getDrawableLights(view));
+      drawableLights.removeIf(light -> light.getType() != LightSource.Type.NORMAL);
     }
+    timer.stop("lights-1");
 
-    // Set up a buffer image for lights to be drawn onto before the map
     timer.start("lights-2");
+    renderLightOverlay(
+        g,
+        view,
+        drawableLights,
+        new Color(255, 255, 255, 150),
+        AppPreferences.getLightOverlayOpacity() / 255.0f);
+    timer.stop("lights-2");
+  }
+
+  /** Holds the auras from lightSourceMap after they have been combined. */
+  private List<DrawableLight> drawableAuras;
+
+  /**
+   * Get the list of auras from lightSourceMap, combine them, store them in drawableAuras, and draw
+   * them.
+   *
+   * @param g the Graphics2D object.
+   * @param view the player view.
+   */
+  private void renderAuras(Graphics2D g, PlayerView view) {
+    // Setup
+    timer.start("auras-1");
+    if (drawableAuras == null) {
+      drawableAuras = new ArrayList<>(zoneView.getLights(LightSource.Type.AURA));
+    }
+    timer.stop("auras-1");
+
+    timer.start("auras-2");
+    renderLightOverlay(
+        g,
+        view,
+        drawableAuras,
+        new Color(255, 255, 255, 150),
+        AppPreferences.getAuraOverlayOpacity() / 255.0f);
+    timer.stop("auras-2");
+  }
+
+  /**
+   * Combines a set of lights into an image that is then rendered into the zone.
+   *
+   * @param g The graphics object used to render the zone.
+   * @param view The player view.
+   * @param lights The lights that will be rendered and blended.
+   * @param defaultPaint A default paint for lights with a paint.
+   */
+  private void renderLightOverlay(
+      Graphics2D g,
+      PlayerView view,
+      List<DrawableLight> lights,
+      Paint defaultPaint,
+      float overlayOpacity) {
+    // Set up a buffer image for lights to be drawn onto before the map
+    timer.start("light-overlay-1");
     BufferedImage lightOverlay =
         new BufferedImage(
             g.getClip().getBounds().width,
@@ -1502,113 +1536,33 @@ public class ZoneRenderer extends JComponent
       clip.intersect(visibleScreenArea);
       newG.setClip(clip);
     }
-    timer.stop("lights-2");
+    timer.stop("light-overlay-1");
 
-    timer.start("lights-3");
+    timer.start("light-overlay-2");
     AffineTransform af = new AffineTransform();
     af.translate(getViewOffsetX(), getViewOffsetY());
     af.scale(getScale(), getScale());
     newG.setTransform(af);
 
     newG.setComposite(new BlendingComposite());
-    timer.stop("lights-3");
+    timer.stop("light-overlay-2");
 
-    // Draw lights into the buffer image so the map doesn't affect how they blend
-    timer.start("lights-4");
-    for (Entry<Paint, List<Area>> entry : renderedLightMap.entrySet()) {
-      newG.setPaint(entry.getKey());
-      for (Area area : entry.getValue()) {
-        newG.fill(area);
-      }
+    // Draw lights onto the buffer image so the map doesn't affect how they blend
+    timer.start("light-overlay-3");
+    for (var light : lights) {
+      var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
+      newG.setPaint(paint);
+      newG.fill(light.getArea());
     }
-    timer.stop("lights-4");
+    timer.stop("light-overlay-3");
 
     // Draw the buffer image with all the lights onto the map
-    timer.start("lights-5");
-    // Anti-aliasing is on by default, but the render quality is set to medium (this sets it to
-    // high)
-    // If lights start getting ugly outlines running through other lights, these should fix that
-    // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    // g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
+    timer.start("light-overlay-4");
     Composite previousComposite = g.getComposite();
-    g.setComposite(
-        AlphaComposite.getInstance(
-            AlphaComposite.SRC_OVER, AppPreferences.getLightOverlayOpacity() / 255.0f));
+    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, overlayOpacity));
     g.drawImage(lightOverlay, null, 0, 0);
     g.setComposite(previousComposite);
-    timer.stop("lights-5");
-
-    newG.dispose();
-  }
-
-  /** Holds the auras from lightSourceMap after they have been combined. */
-  private Map<Paint, Area> renderedAuraMap;
-
-  /**
-   * Get the list of auras from lightSourceMap, combine them, store them in renderedAuraMap, and
-   * draw them.
-   *
-   * @param g the Graphics2D object.
-   * @param view the player view.
-   */
-  private void renderAuras(Graphics2D g, PlayerView view) {
-    // Setup
-    timer.start("auras-1");
-    Graphics2D newG = (Graphics2D) g.create();
-    if (!view.isGMView() && visibleScreenArea != null) {
-      Area clip = new Area(g.getClip());
-      clip.intersect(visibleScreenArea);
-      newG.setClip(clip);
-    }
-    SwingUtil.useAntiAliasing(newG);
-    timer.stop("auras-1");
-    timer.start("auras-2");
-
-    AffineTransform af = g.getTransform();
-    af.translate(getViewOffsetX(), getViewOffsetY());
-    af.scale(getScale(), getScale());
-    newG.setTransform(af);
-
-    newG.setComposite(
-        AlphaComposite.getInstance(
-            AlphaComposite.SRC_OVER, AppPreferences.getAuraOverlayOpacity() / 255.0f));
-    timer.stop("auras-2");
-
-    if (renderedAuraMap == null) {
-
-      // Organize
-      Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
-
-      timer.start("auras-4");
-      Color paintColor = new Color(255, 255, 255, 150);
-      for (DrawableLight light : zoneView.getLights(LightSource.Type.AURA)) {
-        Paint paint = light.getPaint() != null ? light.getPaint().getPaint() : paintColor;
-        List<Area> list = colorMap.get(paint);
-        if (list == null) {
-          list = new LinkedList<Area>();
-          list.add(new Area(light.getArea()));
-          colorMap.put(paint, list);
-        } else {
-          list.get(0).add(new Area(light.getArea()));
-        }
-      }
-
-      renderedAuraMap = new LinkedHashMap<Paint, Area>();
-      for (Entry<Paint, List<Area>> entry : colorMap.entrySet()) {
-        renderedAuraMap.put(entry.getKey(), entry.getValue().get(0));
-      }
-      timer.stop("auras-4");
-    }
-
-    // Draw
-    timer.start("auras-5");
-    for (Entry<Paint, Area> entry : renderedAuraMap.entrySet()) {
-
-      newG.setPaint(entry.getKey());
-      newG.fill(entry.getValue());
-    }
-    timer.stop("auras-5");
+    timer.stop("light-overlay-4");
 
     newG.dispose();
   }

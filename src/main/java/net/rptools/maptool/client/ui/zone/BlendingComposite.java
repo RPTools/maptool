@@ -23,6 +23,7 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.RasterFormatException;
 import java.awt.image.WritableRaster;
+import org.checkerframework.common.value.qual.IntRange;
 
 /**
  * A custom Composite class to replace AlphaComposite for the purposes of mixing lights, auras, and
@@ -62,60 +63,61 @@ class BlendingComposite implements Composite {
 
     public BlendingContext() {}
 
+    /**
+     * Applies a <a href="https://en.wikipedia.org/wiki/Blend_modes#Screen">"screen" blend mode</a>
+     * to two color components.
+     *
+     * <p>This operation is basically fancy multiplication, so it is commutative and associative
+     * (i.e., it is order independent). A zero input (black) acts as an identity element, causing
+     * the result to simply be the other input. A maximum input (white) acts an absorbing element,
+     * causing the result to also be white. For all other inputs, the result is brighter than both
+     * of the inputs, though not as bright as would be with addition.
+     *
+     * @param src The first color component to blend.
+     * @param dst The second color component to blend.
+     * @return The screen blending of the inputs.
+     */
+    private @IntRange(from = 0, to = 255) int blendScreen(
+        @IntRange(from = 0, to = 255) int src, @IntRange(from = 0, to = 255) int dst) {
+      return 255 - (255 - src) * (255 - dst) / 255;
+    }
+
     @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
-      int w = Math.min(src.getWidth(), dstIn.getWidth());
-      int h = Math.min(src.getHeight(), dstIn.getHeight());
+      final int w = Math.min(src.getWidth(), dstIn.getWidth());
+      final int h = Math.min(src.getHeight(), dstIn.getHeight());
 
-      int[] srcRgba = new int[4];
-      int[] dstRgba = new int[4];
-      int[] newRgba = new int[4];
-      int[] srcPixels = new int[w];
-      int[] dstInPixels = new int[w];
-      int[] dstOutPixels = new int[w];
+      final int[] srcPixels = new int[w];
+      final int[] dstPixels = new int[w];
 
       for (int y = 0; y < h; y++) {
         src.getDataElements(0, y, w, 1, srcPixels);
-        dstIn.getDataElements(0, y, w, 1, dstInPixels);
+        dstIn.getDataElements(0, y, w, 1, dstPixels);
 
         for (int x = 0; x < w; x++) {
-          // pixels are stored as INT_ARGB
-          // our arrays are [R, G, B, A]
-          int pixel = srcPixels[x];
-          srcRgba[0] = (pixel >> 16) & 0xFF;
-          srcRgba[1] = (pixel >> 8) & 0xFF;
-          srcRgba[2] = (pixel) & 0xFF;
-          srcRgba[3] = (pixel >> 24) & 0xFF;
+          final int srcPixel = srcPixels[x];
+          final int dstPixel = dstPixels[x];
 
-          pixel = dstInPixels[x];
-          dstRgba[0] = (pixel >> 16) & 0xFF;
-          dstRgba[1] = (pixel >> 8) & 0xFF;
-          dstRgba[2] = (pixel) & 0xFF;
-          dstRgba[3] = (pixel >> 24) & 0xFF;
+          /*
+           * checkComponentsOrder() guarantees that we are handling simple integer ARGB formats.
+           * If this changes in the future, we could work with the color model here to handle more
+           * cases, though with more overhead.
+           */
 
-          // Combine colors appropriately
-          newRgba[0] = Math.min(srcRgba[0] + dstRgba[0], 255);
-          newRgba[1] = Math.min(srcRgba[1] + dstRgba[1], 255);
-          newRgba[2] = Math.min(srcRgba[2] + dstRgba[2], 255);
-
-          //          if (dstRgba[3] == 0) {
-          //            newRgba[3] = srcRgba[3];
-          //          } else {
-          //            newRgba[3] = Math.min(srcRgba[3], dstRgba[3]);
-          //          }
-
-          // this could be why there's a line between two light sources
-          newRgba[3] = Math.max(srcRgba[3], dstRgba[3]);
-
-          // Recombine [R, G, B, A] array to INT_ARGB
-          dstOutPixels[x] =
-              (newRgba[3] & 0xFF) << 24
-                  | (newRgba[0] & 0xFF) << 16
-                  | (newRgba[1] & 0xFF) << 8
-                  | newRgba[2] & 0xFF;
+          if (dstPixel == 0) {
+            // Since lights are drawn onto a transparent black image, a fairly common case is that
+            // dstPixel is black and will not affect srcPixel at all.
+            dstPixels[x] = srcPixel;
+          } else {
+            dstPixels[x] =
+                (blendScreen((dstPixel >>> 24) & 0xFF, (srcPixel >>> 24) & 0xFF) << 24)
+                    | (blendScreen((dstPixel >>> 16) & 0xFF, (srcPixel >>> 16) & 0xFF) << 16)
+                    | (blendScreen((dstPixel >>> 8) & 0xFF, (srcPixel >>> 8) & 0xFF) << 8)
+                    | (blendScreen(dstPixel & 0xFF, srcPixel & 0xFF));
+          }
         }
 
-        dstOut.setDataElements(0, y, w, 1, dstOutPixels);
+        dstOut.setDataElements(0, y, w, 1, dstPixels);
       }
     }
 
