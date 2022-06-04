@@ -56,14 +56,9 @@ public class ZoneView implements ModelChangeListener {
   /** Map each token to their personal drawable lights. */
   private final Map<GUID, Set<DrawableLight>> personalDrawableLightCache = new HashMap<>();
 
-  /** The digested topology of the map VBL, and possibly tokens VBL. */
-  private AreaTree topologyTree;
-  /** The digested topology of the map hill VBL, and possibly tokens VBL. */
-  private AreaTree hillVblTree;
-  /** The digested topology of the map pit VBL, and possibly tokens VBL. */
-  private AreaTree pitVblTree;
-  /** The VBL area of the zone VBL and the tokens VBL. */
-  private Area tokenTopology;
+  private final Map<Zone.TopologyType, Area> topologyAreas = new EnumMap<>(Zone.TopologyType.class);
+  private final Map<Zone.TopologyType, AreaTree> topologyTrees =
+      new EnumMap<>(Zone.TopologyType.class);
 
   /** Lumen for personal vision (darkvision). */
   private static final int LUMEN_VISION = 100;
@@ -101,68 +96,59 @@ public class ZoneView implements ModelChangeListener {
     return zone.getVisionType() != Zone.VisionType.OFF;
   }
 
-  /** @return the current combined VBL (base VBL + TokenVBL) */
-  public synchronized AreaTree getTopologyTree() {
-    return getTopologyTree(true);
+  /**
+   * Get the map and token topology of the requested type.
+   *
+   * <p>The topology is cached and should only regenerate when not yet present, which should happen
+   * on flush calls.
+   *
+   * @param topologyType The type of topology tree to get.
+   * @return the area of the topology.
+   */
+  public synchronized Area getTopology(Zone.TopologyType topologyType) {
+    var topology = topologyAreas.get(topologyType);
+
+    if (topology == null) {
+      log.debug("ZoneView topology area for {} is null, generating...", topologyType.name());
+
+      topology = new Area(zone.getTopology(topologyType));
+      List<Token> topologyTokens =
+          MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
+      for (Token topologyToken : topologyTokens) {
+        topology.add(topologyToken.getTransformedTopology(topologyType));
+      }
+
+      topologyAreas.put(topologyType, topology);
+    }
+
+    return topology;
   }
 
   /**
-   * Get the topologyTree. The topologyTree is "cached" and should only regenerate when topologyTree
-   * is null which should happen on flush calls.
+   * Get the topology tree of the requested type.
    *
-   * @param useTokenVBL using token VBL? If so and topology null, create one from VBL tokens.
-   * @return the AreaTree (topologyTree).
+   * <p>The topology tree is cached and should only regenerate when the tree is not present, which
+   * should happen on flush calls.
+   *
+   * <p>This method is equivalent to building an AreaTree from the results of getTopology(), but the
+   * results are cached.
+   *
+   * @param topologyType The type of topology tree to get.
+   * @return the AreaTree (topology tree).
    */
-  public synchronized AreaTree getTopologyTree(boolean useTokenVBL) {
-    if (tokenTopology == null && useTokenVBL) {
-      log.debug("ZoneView topologyTree is null, generating...");
+  private synchronized AreaTree getTopologyTree(Zone.TopologyType topologyType) {
+    var topologyTree = topologyTrees.get(topologyType);
 
-      tokenTopology = new Area(zone.getTopology());
-      List<Token> vblTokens =
-          MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
+    if (topologyTree == null) {
+      log.debug("ZoneView topology tree for {} is null, generating...", topologyType.name());
 
-      for (Token vblToken : vblTokens) {
-        tokenTopology.add(vblToken.getTransformedVBL());
-      }
+      var topology = getTopology(topologyType);
 
-      topologyTree = new AreaTree(tokenTopology);
-    } else if (topologyTree == null) {
-      topologyTree = new AreaTree(zone.getTopology());
+      topologyTree = new AreaTree(topology);
+      topologyTrees.put(topologyType, topologyTree);
     }
 
     return topologyTree;
-  }
-
-  /**
-   * Get the hill VBL tree.
-   *
-   * <p>The tree is "cached" and should only regenerate when `hillVblTree` is null, which should
-   * happen on flush calls.
-   *
-   * @return the hill VBL tree.
-   */
-  public synchronized AreaTree getHillVblTree() {
-    if (hillVblTree == null) {
-      hillVblTree = new AreaTree(zone.getHillVbl());
-    }
-
-    return hillVblTree;
-  }
-
-  /**
-   * Get the pit VBL tree.
-   *
-   * <p>The tree is "cached" and should only regenerate when `pitVblTree` is null, which should
-   * happen on flush calls.
-   *
-   * @return the pit VBL tree.
-   */
-  public synchronized AreaTree getPitVblTree() {
-    if (pitVblTree == null) {
-      pitVblTree = new AreaTree(zone.getPitVbl());
-    }
-
-    return pitVblTree;
   }
 
   /**
@@ -275,7 +261,12 @@ public class ZoneView implements ModelChangeListener {
     }
     Area visibleArea =
         FogUtil.calculateVisibility(
-            p.x, p.y, lightSourceArea, getTopologyTree(), getHillVblTree(), getPitVblTree());
+            p.x,
+            p.y,
+            lightSourceArea,
+            getTopologyTree(Zone.TopologyType.WALL_VBL),
+            getTopologyTree(Zone.TopologyType.HILL_VBL),
+            getTopologyTree(Zone.TopologyType.PIT_VBL));
 
     if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
       addLightSourceToCache(
@@ -386,7 +377,12 @@ public class ZoneView implements ModelChangeListener {
       Area visibleArea = sight.getVisionShape(token, zone);
       tokenVisibleArea =
           FogUtil.calculateVisibility(
-              p.x, p.y, visibleArea, getTopologyTree(), getHillVblTree(), getPitVblTree());
+              p.x,
+              p.y,
+              visibleArea,
+              getTopologyTree(Zone.TopologyType.WALL_VBL),
+              getTopologyTree(Zone.TopologyType.HILL_VBL),
+              getTopologyTree(Zone.TopologyType.PIT_VBL));
 
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
@@ -539,9 +535,9 @@ public class ZoneView implements ModelChangeListener {
                     p.x,
                     p.y,
                     lightSourceArea,
-                    getTopologyTree(),
-                    getHillVblTree(),
-                    getPitVblTree());
+                    getTopologyTree(Zone.TopologyType.WALL_VBL),
+                    getTopologyTree(Zone.TopologyType.HILL_VBL),
+                    getTopologyTree(Zone.TopologyType.PIT_VBL));
             if (visibleArea == null) {
               continue;
             }
@@ -746,15 +742,14 @@ public class ZoneView implements ModelChangeListener {
    *
    * @param event the event.
    */
-  @SuppressWarnings("unchecked")
   public void modelChanged(ModelChangeEvent event) {
     Object evt = event.getEvent();
     if (event.getModel() instanceof Zone) {
-      boolean tokenChangedVBL = false;
+      boolean tokenChangedTopology = false;
 
       if (evt == Zone.Event.TOKEN_CHANGED || evt == Zone.Event.TOKEN_REMOVED) {
         for (Token token : event.getTokensAsList()) {
-          if (token.hasVBL()) tokenChangedVBL = true;
+          if (token.hasAnyTopology()) tokenChangedTopology = true;
           flush(token);
         }
         // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
@@ -763,12 +758,12 @@ public class ZoneView implements ModelChangeListener {
       }
 
       if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
-        tokenChangedVBL = processTokenAddChangeEvent(event.getTokensAsList());
+        tokenChangedTopology = processTokenAddChangeEvent(event.getTokensAsList());
       }
 
       if (evt == Zone.Event.TOKEN_REMOVED) {
         for (Token token : event.getTokensAsList()) {
-          if (token.hasVBL()) tokenChangedVBL = true;
+          if (token.hasAnyTopology()) tokenChangedTopology = true;
           for (AttachedLightSource als : token.getLightSources()) {
             LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
             if (lightSource == null) {
@@ -783,9 +778,9 @@ public class ZoneView implements ModelChangeListener {
       }
 
       // Moved this event to the bottom so we can check the other events
-      // since if a token that has VBL is added/removed/edited (rotated/moved/etc)
+      // since if a token that has topology is added/removed/edited (rotated/moved/etc)
       // it should also trip a Topology change
-      if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedVBL) {
+      if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedTopology) {
         tokenVisionCache.clear();
         lightSourceCache.clear();
         brightLightCache.clear();
@@ -793,10 +788,7 @@ public class ZoneView implements ModelChangeListener {
         personalBrightLightCache.clear();
         personalDrawableLightCache.clear();
         visibleAreaMap.clear();
-        topologyTree = null;
-        hillVblTree = null;
-        pitVblTree = null;
-        tokenTopology = null;
+        topologyTrees.clear();
         tokenVisibleAreaCache.clear();
 
         // topologyAreaData = null; // Jamz: This isn't used, probably never completed code.
@@ -809,17 +801,17 @@ public class ZoneView implements ModelChangeListener {
    * the tokens has sight.
    *
    * @param tokens the list of tokens
-   * @return if one of the token has VBL or not
+   * @return if one of the token has topology or not
    */
   private boolean processTokenAddChangeEvent(List<Token> tokens) {
     boolean hasSight = false;
-    boolean hasVBL = false;
+    boolean hasTopology = false;
     Campaign c = MapTool.getCampaign();
 
     for (Token token : tokens) {
       boolean hasLightSource =
           token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
-      if (token.hasVBL()) hasVBL = true;
+      if (token.hasAnyTopology()) hasTopology = true;
       for (AttachedLightSource als : token.getLightSources()) {
         LightSource lightSource = c.getLightSource(als.getLightSourceId());
         if (lightSource != null) {
@@ -838,7 +830,7 @@ public class ZoneView implements ModelChangeListener {
 
     if (hasSight) visibleAreaMap.clear();
 
-    return hasVBL;
+    return hasTopology;
   }
 
   /** Has a single field: the visibleArea area */

@@ -234,16 +234,16 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return zp;
   }
 
-  protected Area getTokenTopology() {
-    List<Token> vblTokens =
-        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
+  protected Area getTokenTopology(Zone.TopologyType topologyType) {
+    List<Token> topologyTokens =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
 
-    Area tokenTopolgy = new Area();
-    for (Token vblToken : vblTokens) {
-      tokenTopolgy.add(vblToken.getTransformedVBL());
+    Area tokenTopology = new Area();
+    for (Token topologyToken : topologyTokens) {
+      tokenTopology.add(topologyToken.getTransformedTopology(topologyType));
     }
 
-    return tokenTopolgy;
+    return tokenTopology;
   }
 
   @Override
@@ -287,19 +287,25 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.scale(renderer.getScale(), renderer.getScale());
 
       g2.setColor(AppStyle.tokenTopologyColor);
-      g2.fill(getTokenTopology());
+      g2.fill(getTokenTopology(Zone.TopologyType.WALL_VBL));
+      g2.setColor(AppStyle.tokenHillVblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.HILL_VBL));
+      g2.setColor(AppStyle.tokenPitVblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.PIT_VBL));
+      g2.setColor(AppStyle.tokenMblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.MBL));
 
       g2.setColor(AppStyle.topologyTerrainColor);
-      g2.fill(zone.getTopologyTerrain());
+      g2.fill(zone.getTopology(Zone.TopologyType.MBL));
 
       g2.setColor(AppStyle.topologyColor);
-      g2.fill(zone.getTopology());
+      g2.fill(zone.getTopology(Zone.TopologyType.WALL_VBL));
 
       g2.setColor(AppStyle.hillVblColor);
-      g2.fill(zone.getHillVbl());
+      g2.fill(zone.getTopology(Zone.TopologyType.HILL_VBL));
 
       g2.setColor(AppStyle.pitVblColor);
-      g2.fill(zone.getPitVbl());
+      g2.fill(zone.getTopology(Zone.TopologyType.PIT_VBL));
 
       g2.dispose();
     }

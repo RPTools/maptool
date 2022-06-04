@@ -184,22 +184,41 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Area newFowExposedArea = new Area();
     final var zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     if (zoneRenderer != null) {
+      final var zoneView = zoneRenderer.getZoneView();
+
+      var mbl = zoneView.getTopology(Zone.TopologyType.MBL);
+      if (tokenMbl != null) {
+        mbl = new Area(mbl);
+        mbl.subtract(tokenMbl);
+      }
+
       if (MapTool.getServerPolicy().getVblBlocksMove()) {
-        var vbl = zoneRenderer.getZoneView().getTopologyTree().getArea();
-        var hillVbl = zoneRenderer.getZoneView().getHillVblTree().getArea();
-        var pitVbl = zoneRenderer.getZoneView().getPitVblTree().getArea();
-        newVbl.add(vbl);
+        var wallVbl = zoneView.getTopology(Zone.TopologyType.WALL_VBL);
+        var hillVbl = zoneView.getTopology(Zone.TopologyType.HILL_VBL);
+        var pitVbl = zoneView.getTopology(Zone.TopologyType.PIT_VBL);
+
+        // A token's topology should not be used to block itself!
+        if (tokenWallVbl != null) {
+          wallVbl = new Area(wallVbl);
+          wallVbl.subtract(tokenWallVbl);
+        }
+        if (tokenHillVbl != null) {
+          hillVbl = new Area(hillVbl);
+          hillVbl.subtract(tokenHillVbl);
+        }
+        if (tokenPitVbl != null) {
+          pitVbl = new Area(pitVbl);
+          pitVbl.subtract(tokenPitVbl);
+        }
+
+        newVbl.add(wallVbl);
         newVbl.add(hillVbl);
         newVbl.add(pitVbl);
 
-        if (tokenVBL != null) {
-          newVbl.subtract(tokenVBL);
-        }
-
         // Finally, add the Move Blocking Layer!
-        newVbl.add(zone.getTopologyTerrain());
+        newVbl.add(mbl);
       } else {
-        newVbl = zone.getTopologyTerrain();
+        newVbl = mbl;
       }
 
       newFowExposedArea =
