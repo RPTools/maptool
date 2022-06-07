@@ -92,7 +92,7 @@ public class Token extends BaseModel implements Cloneable {
   public static final String LIB_TOKEN_PREFIX = "lib:";
 
   private boolean beingImpersonated = false;
-  private GUID exposedAreaGUID;
+  private GUID exposedAreaGUID = new GUID();
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -267,7 +267,7 @@ public class Token extends BaseModel implements Cloneable {
   private Area pitVbl;
   private Area mbl;
 
-  private String name;
+  private String name = "";
   private Set<String> ownerList = new HashSet<>();
 
   private int ownerType;
@@ -275,9 +275,9 @@ public class Token extends BaseModel implements Cloneable {
   private static final int OWNER_TYPE_ALL = 1;
   private static final int OWNER_TYPE_LIST = 0;
 
-  private String tokenShape;
-  private String tokenType;
-  private String layer;
+  private String tokenShape = TokenShape.SQUARE.toString();
+  private String tokenType = Type.NPC.toString();
+  private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
   private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
@@ -493,10 +493,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public Token() {}
-
-  public Token(MD5Key assetID) {
-    this("", assetID);
-  }
 
   public Token(String name, MD5Key assetId) {
     this.name = name;
@@ -802,11 +798,9 @@ public class Token extends BaseModel implements Cloneable {
 
   public TokenShape getShape() {
     try {
-      return tokenShape != null ? TokenShape.valueOf(tokenShape) : TokenShape.SQUARE; // TODO:
-      // make
-      // this
-      // a psf
+      return TokenShape.valueOf(tokenShape);
     } catch (IllegalArgumentException iae) {
+      tokenShape = TokenShape.SQUARE.name();
       return TokenShape.SQUARE;
     }
   }
@@ -817,8 +811,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public Type getType() {
     try {
-      // TODO: make this a psf
-      return tokenType != null ? Type.valueOf(tokenType) : Type.NPC;
+      return Type.valueOf(tokenType);
     } catch (IllegalArgumentException iae) {
       tokenType = Type.NPC.name();
       return Type.NPC;
@@ -840,7 +833,7 @@ public class Token extends BaseModel implements Cloneable {
   public Zone.Layer getLayer() {
     try {
       if (actualLayer == null) {
-        actualLayer = layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.TOKEN;
+        actualLayer = Zone.Layer.valueOf(layer);
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
@@ -1528,7 +1521,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getName() {
-    return name != null ? name : "";
+    return name;
   }
 
   public Rectangle getBounds(Zone zone) {
@@ -2796,8 +2789,7 @@ public class Token extends BaseModel implements Cloneable {
     var token = new Token();
     token.id = GUID.valueOf(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
-    token.exposedAreaGUID =
-        dto.hasExposedAreaGuid() ? GUID.valueOf(dto.getExposedAreaGuid().getValue()) : null;
+    token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
     var assetMap = dto.getImageAssetMapMap();
     for (var key : assetMap.keySet()) {
       var nullKey = key.equals("") ? null : key;
@@ -2899,9 +2891,7 @@ public class Token extends BaseModel implements Cloneable {
     var dto = TokenDto.newBuilder();
     dto.setId(id.toString());
     dto.setBeingImpersonated(beingImpersonated);
-    if (exposedAreaGUID != null) {
-      dto.setExposedAreaGuid(StringValue.of(exposedAreaGUID.toString()));
-    }
+    dto.setExposedAreaGuid(exposedAreaGUID.toString());
     for (var key : imageAssetMap.keySet()) {
       var notNullKey = key == null ? "" : key;
       dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
