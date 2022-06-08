@@ -63,7 +63,7 @@ public class TextRenderer {
   public void drawBoxedString(
       String text, float x, float y, int justification, Background background, Color foreground) {
     NinePatch backgroundPatch = null;
-    if(background != null) {
+    if (background != null) {
       switch (background) {
         case Gray -> {
           backgroundPatch = grayLabel;

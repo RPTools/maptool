@@ -167,7 +167,10 @@ public class GdxRenderer extends ApplicationAdapter
   private final TiledDrawable tmpTile = new TiledDrawable();
 
   public GdxRenderer() {
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    var dispatcher = MapTool.getEventDispatcher();
+    if (dispatcher != null) {
+      dispatcher.addListener(this, MapTool.ZoneEvent.Activated);
+    }
   }
 
   public static GdxRenderer getInstance() {
@@ -265,6 +268,8 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   private void updateCam() {
+    if (cam == null) return;
+
     cam.viewportWidth = width;
     cam.viewportHeight = height;
     cam.near = 0.1f;
@@ -3188,8 +3193,7 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void flushFog() {
-    if(!initialized)
-      return;
+    if (!initialized) return;
 
     flushFog = true;
     updateVisibleArea();
