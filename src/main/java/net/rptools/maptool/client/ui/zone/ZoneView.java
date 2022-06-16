@@ -788,6 +788,7 @@ public class ZoneView implements ModelChangeListener {
         personalBrightLightCache.clear();
         personalDrawableLightCache.clear();
         visibleAreaMap.clear();
+        topologyAreas.clear();
         topologyTrees.clear();
         tokenVisibleAreaCache.clear();
 
