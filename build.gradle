@@ -97,7 +97,7 @@ ext {
     // vendor, tagVersion, appSemVer, and DSNs defaults are set in gradle.properties
     println "OS Detected: " + osdetector.os
 
-    gdxVersion = '1.10.0'
+    gdxVersion = '1.11.0'
     roboVMVersion = '2.3.12'
     box2DLightsVersion = '1.5'
     ashleyVersion = '1.7.3'
@@ -459,9 +459,9 @@ dependencies {
     implementation 'com.google.guava:guava:31.0.1-jre'
 
     // libgdx
-    implementation 'com.github.thelsing:libgdx-jogl-backend:master-SNAPSHOT'
+    implementation 'com.github.thelsing:libgdx-jogl-backend:1.11.2'
     //maven local for development
-    //implementation 'com.thelsing.gdx:gdx-backend-jogl:1.10.0'
+    //implementation 'com.thelsing.gdx:gdx-backend-jogl:1.11.2'
 
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
