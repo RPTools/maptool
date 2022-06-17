@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.token;
 
 import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.gui.form.GridView;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
@@ -144,8 +143,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
-  private AutoGenerateVblSwingWorker autoGenerateVblSwingWorker =
-      new AutoGenerateVblSwingWorker(false, Color.BLACK);
+  private AutoGenerateTopologySwingWorker autoGenerateTopologySwingWorker =
+      new AutoGenerateTopologySwingWorker(false, Color.BLACK);
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
@@ -188,16 +187,16 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           public void closeDialog() {
             // TODO: I don't like this. There should really be a AbeilleDialog class that does this
 
-            if (!autoGenerateVblSwingWorker.isDone()) {
-              log.info("Stopping autoGenerateVblSwingWorker...");
-              autoGenerateVblSwingWorker.cancel(true);
+            if (!autoGenerateTopologySwingWorker.isDone()) {
+              log.info("Stopping autoGenerateTopologySwingWorker...");
+              autoGenerateTopologySwingWorker.cancel(true);
             }
 
             unbind();
             super.closeDialog();
           }
         };
-    getTokenVblPanel().reset(token);
+    getTokenTopologyPanel().reset(token);
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
@@ -344,28 +343,36 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 .mapToInt(Integer::valueOf)
                 .toArray());
 
-    // Jamz: Init the VBL tab...
+    // Jamz: Init the Topology tab...
     JTabbedPane tabbedPane = getTabbedPane();
 
-    String vblTitle = I18N.getText("EditTokenDialog.tab.vbl");
+    String topologyTitle = I18N.getText("EditTokenDialog.tab.vbl");
     if (MapTool.getPlayer().isGM()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
-      getTokenVblPanel().setToken(token);
-      getInverseVblCheckbox().setSelected(getTokenVblPanel().isInverseVbl());
-      getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
-      getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
-      getJtsDistanceToleranceSpinner().setValue(getTokenVblPanel().getJtsDistanceTolerance());
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(topologyTitle), true);
+      getTokenTopologyPanel().setToken(token);
+      getInverseTopologyCheckbox().setSelected(getTokenTopologyPanel().isInverseTopology());
+      getColorSensitivitySpinner().setValue(getTokenTopologyPanel().getColorSensitivity());
+      getTopologyIgnoreColorWell().setColor(getTokenTopologyPanel().getTopologyColorPick());
+      getJtsDistanceToleranceSpinner().setValue(getTokenTopologyPanel().getJtsDistanceTolerance());
       getVisibilityToleranceSpinner().setValue(token.getAlwaysVisibleTolerance());
-      getJtsMethodComboBox().setSelectedItem(getTokenVblPanel().getJtsMethod());
+      getJtsMethodComboBox().setSelectedItem(getTokenTopologyPanel().getJtsMethod());
 
       // Reset scale
-      getTokenVblPanel().setScale(1d);
+      getTokenTopologyPanel().setScale(1d);
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(vblTitle)) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(topologyTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(topologyTitle)) {
         tabbedPane.setSelectedIndex(0);
       }
     }
+    getWallVblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.WALL_VBL));
+    getHillVblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.HILL_VBL));
+    getPitVblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.PIT_VBL));
+    getMblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.MBL));
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
     setLibTokenPaneEnabled(token.isLibToken());
@@ -813,12 +820,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     token.setSizeScale(getTokenLayoutPanel().getSizeScale());
     token.setAnchor(getTokenLayoutPanel().getAnchorX(), getTokenLayoutPanel().getAnchorY());
 
-    // VBL
-    token.setVBL(getTokenVblPanel().getTokenVBL_optimized());
+    // TOPOLOGY
+    for (final var type : Zone.TopologyType.values()) {
+      token.setTopology(type, getTokenTopologyPanel().getTopology(type));
+    }
     token.setIsAlwaysVisible(getAlwaysVisibleButton().isSelected());
     token.setAlwaysVisibleTolerance((int) getVisibilityToleranceSpinner().getValue());
-    if (getTokenVblPanel().getAutoGenerated()) {
-      token.setColorSensitivity(getTokenVblPanel().getColorSensitivity());
+    if (getTokenTopologyPanel().getAutoGenerated()) {
+      token.setColorSensitivity(getTokenTopologyPanel().getColorSensitivity());
     } else {
       token.setColorSensitivity(-1);
     }
@@ -839,7 +848,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     MapTool.getFrame().updateTokenTree();
     MapTool.getFrame().resetTokenPanels();
 
-    // Jamz: TODO check if VBL changed on token first
+    // Jamz: TODO check if topology changed on token first
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
     return true;
   }
@@ -1010,19 +1019,35 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (CheckBoxListWithSelectable) getComponent("ownerList");
   }
 
-  public JButton getAutoGenerateVblButton() {
+  public JToggleButton getWallVblToggle() {
+    return (JToggleButton) getComponent("wallVblToggle");
+  }
+
+  public JToggleButton getHillVblToggle() {
+    return (JToggleButton) getComponent("hillVblToggle");
+  }
+
+  public JToggleButton getPitVblToggle() {
+    return (JToggleButton) getComponent("pitVblToggle");
+  }
+
+  public JToggleButton getMblToggle() {
+    return (JToggleButton) getComponent("mblToggle");
+  }
+
+  public JButton getAutoGenerateTopologyButton() {
     return (JButton) getComponent("autoGenerateVblButton");
   }
 
-  public JButton getClearVblButton() {
+  public JButton getClearTopologyButton() {
     return (JButton) getComponent("clearVblButton");
   }
 
-  public JButton getTransferVblToMap() {
+  public JButton getTransferTopologyToMap() {
     return (JButton) getComponent("transferVblToMap");
   }
 
-  public JButton getTransferVblFromMap() {
+  public JButton getTransferTopologyFromMap() {
     return (JButton) getComponent("transferVblFromMap");
   }
 
@@ -1034,7 +1059,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JCheckBox) getComponent("hideTokenCheckbox");
   }
 
-  public JCheckBox getInverseVblCheckbox() {
+  public JCheckBox getInverseTopologyCheckbox() {
     return (JCheckBox) getComponent("inverseVblCheckbox");
   }
 
@@ -1042,11 +1067,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JCheckBox) getComponent("alwaysVisibleButton");
   }
 
-  public JETAColorWell getVblIgnoreColorWell() {
+  public JETAColorWell getTopologyIgnoreColorWell() {
     return (JETAColorWell) getComponent("vblIgnoreColorWell");
   }
 
-  public JToggleButton getVblColorPickerToggleButton() {
+  public JToggleButton getTopologyColorPickerToggleButton() {
     return (JToggleButton) getComponent("vblColorPickerToggleButton");
   }
 
@@ -1068,10 +1093,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public JSpinner getVisibilityToleranceSpinner() {
     return (JSpinner) getComponent("visibilityToleranceSpinner");
-  }
-
-  public GridView getVblToolView() {
-    return (GridView) getComponent("vblToolView");
   }
 
   public JCheckBox getAllowURLAccess() {
@@ -1172,8 +1193,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (TokenLayoutPanel) getComponent("tokenLayout");
   }
 
-  public TokenVblPanel getTokenVblPanel() {
-    return (TokenVblPanel) getComponent("vblPreview");
+  public TokenTopologyPanel getTokenTopologyPanel() {
+    return (TokenTopologyPanel) getComponent("vblPreview");
   }
 
   public JEditorPane getHtmlStatblockEditor() {
@@ -1184,180 +1205,214 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JList) getComponent("heroLabImagesList");
   }
 
-  public void initVblPreviewPanel() {
-    TokenVblPanel vblPanel = new TokenVblPanel(this);
-    vblPanel.setPreferredSize(new Dimension(300, 200));
-    vblPanel.setName("vblPreview");
-    replaceComponent("vblPreviewPanel", "vblPreview", vblPanel);
+  public void initTokenTopologyPanel() {
+    TokenTopologyPanel topologyPanel = new TokenTopologyPanel(this);
+    topologyPanel.setPreferredSize(new Dimension(300, 200));
+    topologyPanel.setName("vblPreview");
+    replaceComponent("vblPreviewPanel", "vblPreview", topologyPanel);
 
-    getAutoGenerateVblButton()
+    getWallVblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.WALL_VBL, ((AbstractButton) e.getSource()).isSelected()));
+    getHillVblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.HILL_VBL, ((AbstractButton) e.getSource()).isSelected()));
+    getPitVblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.PIT_VBL, ((AbstractButton) e.getSource()).isSelected()));
+    getMblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.MBL, ((AbstractButton) e.getSource()).isSelected()));
+
+    getAutoGenerateTopologyButton()
         .addActionListener(
             e -> {
-              if (getTokenVblPanel().getTokenVBL_optimized() != null) {
+              if (getTokenTopologyPanel().hasAnyOptimizedTopologySet()) {
                 if (!MapTool.confirm("EditTokenDialog.confirm.vbl.autoGenerate")) {
                   return;
                 }
               }
 
-              getTokenVblPanel().setAutoGenerated(true);
-              updateAutoGeneratedVBL(true);
-              getTokenVblPanel().repaint();
+              getTokenTopologyPanel().setAutoGenerated(true);
+              updateAutoGeneratedTopology(true);
+              getTokenTopologyPanel().repaint();
             });
 
-    getClearVblButton()
+    getClearTopologyButton()
         .addActionListener(
             e -> {
-              if (getTokenVblPanel().getTokenVBL_optimized() != null) {
+              if (getTokenTopologyPanel().hasAnyOptimizedTopologySet()) {
                 if (!MapTool.confirm("EditTokenDialog.confirm.vbl.clearVBL")) {
                   return;
                 }
               }
-              // Setting to null was causing topology updates on other clients to be skipped.
-              Area empty = new Area();
-              getTokenVblPanel().setTokenVBL_optimized(empty);
-              getTokenVblPanel().setAutoGenerated(false);
-              getTokenVblPanel().repaint();
+              getTokenTopologyPanel().clearGeneratedTopologies();
+              getTokenTopologyPanel().repaint();
             });
 
-    getTransferVblToMap()
+    getTransferTopologyToMap()
         .addActionListener(
             e -> {
-              if (getTokenVblPanel().getTokenVBL_optimized() != null) {
-                if (getCopyOrMoveCheckbox().isSelected()) {
+              if (getTokenTopologyPanel().hasAnyOptimizedTopologySet()) {
+                final boolean clearTokenTopology = getCopyOrMoveCheckbox().isSelected();
+                if (clearTokenTopology) {
                   if (!MapTool.confirm("EditTokenDialog.confirm.vbl.clearVBL")) {
                     return;
                   }
                 }
 
-                TokenVBL.renderTopology(
-                    MapTool.getFrame().getCurrentZoneRenderer(),
-                    getTokenVblPanel()
-                        .getToken()
-                        .getTransformedVBL(getTokenVblPanel().getTokenVBL_optimized()),
-                    false,
-                    Zone.TopologyType.WALL_VBL);
+                for (final var type : Zone.TopologyType.values()) {
+                  final var topology = getTokenTopologyPanel().getTopology(type);
+                  if (topology != null) {
+                    TokenVBL.renderTopology(
+                        MapTool.getFrame().getCurrentZoneRenderer(),
+                        getTokenTopologyPanel().getToken().getTransformedTopology(topology),
+                        false,
+                        type);
+                  }
+                }
 
-                if (getCopyOrMoveCheckbox().isSelected()) {
-                  getTokenVblPanel().setTokenVBL_optimized(null);
-                  getTokenVblPanel().setAutoGenerated(false);
-                  getTokenVblPanel().repaint();
+                if (clearTokenTopology) {
+                  getTokenTopologyPanel().clearGeneratedTopologies();
+                  getTokenTopologyPanel().repaint();
                 }
               }
             });
 
-    getTransferVblFromMap()
+    getTransferTopologyFromMap()
         .addActionListener(
             e -> {
-              Area mapVBL =
-                  TokenVBL.getMapVBL_transformed(
-                      MapTool.getFrame().getCurrentZoneRenderer(), getTokenVblPanel().getToken());
+              final boolean removeFromMap = getCopyOrMoveCheckbox().isSelected();
+              for (final var type : getTokenTopologyPanel().getSelectedTopologyTypes()) {
+                Area mapTopology =
+                    TokenVBL.getMapTopology_transformed(
+                        MapTool.getFrame().getCurrentZoneRenderer(),
+                        getTokenTopologyPanel().getToken(),
+                        type);
 
-              getTokenVblPanel().setTokenVBL_optimized(mapVBL);
-              getTokenVblPanel().setAutoGenerated(false);
+                getTokenTopologyPanel().putCustomTopology(type, mapTopology);
 
-              if (getCopyOrMoveCheckbox().isSelected()) {
-                Area newTokenVBL =
-                    TokenVBL.getVBL_underToken(
-                        MapTool.getFrame().getCurrentZoneRenderer(), getTokenVblPanel().getToken());
-                TokenVBL.renderTopology(
-                    MapTool.getFrame().getCurrentZoneRenderer(),
-                    newTokenVBL,
-                    true,
-                    Zone.TopologyType.WALL_VBL);
+                if (removeFromMap) {
+                  Area topologyToDelete =
+                      TokenVBL.getTopology_underToken(
+                          MapTool.getFrame().getCurrentZoneRenderer(),
+                          getTokenTopologyPanel().getToken(),
+                          type);
+                  TokenVBL.renderTopology(
+                      MapTool.getFrame().getCurrentZoneRenderer(), topologyToDelete, true, type);
+                }
               }
 
-              getTokenVblPanel().repaint();
+              getTokenTopologyPanel().repaint();
             });
 
     getCopyOrMoveCheckbox()
         .addActionListener(
             e -> {
               if (getCopyOrMoveCheckbox().isSelected()) {
-                getTransferVblFromMap()
+                getTransferTopologyFromMap()
                     .setText(
                         I18N.getString("token.properties.button.transferVblFromMap.move.text"));
-                getTransferVblToMap()
+                getTransferTopologyToMap()
                     .setText(I18N.getString("token.properties.button.transferVblToMap.move.text"));
               } else {
-                getTransferVblFromMap()
+                getTransferTopologyFromMap()
                     .setText(
                         I18N.getString("token.properties.button.transferVblFromMap.copy.text"));
-                getTransferVblToMap()
+                getTransferTopologyToMap()
                     .setText(I18N.getString("token.properties.button.transferVblToMap.copy.text"));
               }
 
-              getTokenVblPanel().repaint();
+              getTokenTopologyPanel().repaint();
             });
 
     getHideTokenCheckbox()
         .addActionListener(
             e -> {
-              getTokenVblPanel().setHideTokenImage(getHideTokenCheckbox().isSelected());
-              getTokenVblPanel().repaint();
+              getTokenTopologyPanel().setHideTokenImage(getHideTokenCheckbox().isSelected());
+              getTokenTopologyPanel().repaint();
             });
 
-    getInverseVblCheckbox()
+    getInverseTopologyCheckbox()
         .addActionListener(
             e -> {
-              getTokenVblPanel().setInverseVbl(getInverseVblCheckbox().isSelected());
-              updateAutoGeneratedVBL(true);
+              getTokenTopologyPanel().setInverseTopology(getInverseTopologyCheckbox().isSelected());
+              updateAutoGeneratedTopology(true);
             });
 
     getColorSensitivitySpinner().setModel(new SpinnerNumberModel(1, 0, 255, 1));
     getColorSensitivitySpinner()
         .addChangeListener(
             e -> {
-              getTokenVblPanel().setColorSensitivity((int) getColorSensitivitySpinner().getValue());
-              updateAutoGeneratedVBL(true);
+              getTokenTopologyPanel()
+                  .setColorSensitivity((int) getColorSensitivitySpinner().getValue());
+              updateAutoGeneratedTopology(true);
             });
 
     getJtsDistanceToleranceSpinner().setModel(new SpinnerNumberModel(2, 0, 100, 1));
     getJtsDistanceToleranceSpinner()
         .addChangeListener(
             e -> {
-              getTokenVblPanel()
+              getTokenTopologyPanel()
                   .setJtsDistanceTolerance((int) getJtsDistanceToleranceSpinner().getValue());
-              updateAutoGeneratedVBL(false);
+              updateAutoGeneratedTopology(false);
             });
 
     getJtsMethodComboBox()
         .addActionListener(
             e -> {
-              getTokenVblPanel()
+              getTokenTopologyPanel()
                   .setJtsMethod((JTS_SimplifyMethodType) getJtsMethodComboBox().getSelectedItem());
-              updateAutoGeneratedVBL(false);
+              updateAutoGeneratedTopology(false);
             });
 
-    getVblIgnoreColorWell()
+    getTopologyIgnoreColorWell()
         .addActionListener(
-            e -> getTokenVblPanel().setVblColorPick(getVblIgnoreColorWell().getColor()));
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyColorPick(getTopologyIgnoreColorWell().getColor()));
 
-    getVblColorPickerToggleButton()
+    getTopologyColorPickerToggleButton()
         .addActionListener(
             e -> {
-              getTokenVblPanel().setColorPickerActive(getVblColorPickerToggleButton().isSelected());
-              getTokenVblPanel().updateUI();
+              getTokenTopologyPanel()
+                  .setColorPickerActive(getTopologyColorPickerToggleButton().isSelected());
+              getTokenTopologyPanel().updateUI();
 
-              if (getVblColorPickerToggleButton().isSelected()) {
-                getTokenVblPanel().setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+              if (getTopologyColorPickerToggleButton().isSelected()) {
+                getTokenTopologyPanel()
+                    .setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
               } else {
-                getTokenVblPanel().setCursor(Cursor.getDefaultCursor());
+                getTokenTopologyPanel().setCursor(Cursor.getDefaultCursor());
               }
             });
 
     getVisibilityToleranceSpinner().setModel(new SpinnerNumberModel(2, 1, 9, 1));
   }
 
-  /** @param regenerate Only regenerate VBL from token image when needed */
-  protected void updateAutoGeneratedVBL(boolean regenerate) {
-    if (getTokenVblPanel().getAutoGenerated()) {
-      getTokenVblPanel().setInProgress(true);
-      getTokenVblPanel().setEnabled(false);
-      getTokenVblPanel().repaint();
+  /** @param regenerate Only regenerate topology from token image when needed */
+  protected void updateAutoGeneratedTopology(boolean regenerate) {
+    if (getTokenTopologyPanel().getAutoGenerated()) {
+      getTokenTopologyPanel().setInProgress(true);
+      getTokenTopologyPanel().setEnabled(false);
+      getTokenTopologyPanel().repaint();
 
-      autoGenerateVblSwingWorker =
-          new AutoGenerateVblSwingWorker(regenerate, getTokenVblPanel().getVblColorPick());
-      autoGenerateVblSwingWorker.execute();
+      autoGenerateTopologySwingWorker =
+          new AutoGenerateTopologySwingWorker(
+              regenerate, getTokenTopologyPanel().getTopologyColorPick());
+      autoGenerateTopologySwingWorker.execute();
     }
   }
 
@@ -1816,53 +1871,50 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
   }
 
-  private class AutoGenerateVblSwingWorker extends SwingWorker<Void, Area> {
+  private class AutoGenerateTopologySwingWorker extends SwingWorker<Void, Area> {
     private final boolean regenerate;
     private final Color ignoredColor;
 
-    public AutoGenerateVblSwingWorker(boolean regenerate, Color ignoredColor) {
+    public AutoGenerateTopologySwingWorker(boolean regenerate, Color ignoredColor) {
       this.regenerate = regenerate;
       this.ignoredColor = ignoredColor;
     }
 
     @Override
     protected Void doInBackground() {
-      Area originalVBL = getTokenVblPanel().getTokenVBL_original();
-
-      if (regenerate || originalVBL == null) {
-        originalVBL =
-            TokenVBL.createVblAreaFromToken(
-                getTokenVblPanel().getToken(),
-                getTokenVblPanel().getColorSensitivity(),
-                getTokenVblPanel().isInverseVbl(),
+      if (regenerate || !getTokenTopologyPanel().hasAnyOriginalTopologySet()) {
+        final var generatedTopology =
+            TokenVBL.createTopologyAreaFromToken(
+                getTokenTopologyPanel().getToken(),
+                getTokenTopologyPanel().getColorSensitivity(),
+                getTokenTopologyPanel().isInverseTopology(),
                 ignoredColor);
+        publish(generatedTopology);
       }
 
-      publish(originalVBL);
-
+      // Nothing to do, so nothing to publish.
       return null;
     }
 
     @Override
     protected void process(List<Area> areaChunk) {
       if (!isCancelled()) {
-        Area originalVBL = areaChunk.get(areaChunk.size() - 1);
-        getTokenVblPanel().setTokenVBL_original(originalVBL);
+        final var newArea = areaChunk.get(areaChunk.size() - 1);
+        final var optimizedArea =
+            TokenVBL.simplifyArea(
+                newArea,
+                getTokenTopologyPanel().getJtsDistanceTolerance(),
+                getTokenTopologyPanel().getJtsMethod());
 
-        getTokenVblPanel()
-            .setTokenVBL_optimized(
-                TokenVBL.simplifyArea(
-                    originalVBL,
-                    getTokenVblPanel().getJtsDistanceTolerance(),
-                    getTokenVblPanel().getJtsMethod()));
+        getTokenTopologyPanel().setGeneratedTopologies(newArea, optimizedArea);
       }
     }
 
     @Override
     protected void done() {
-      getTokenVblPanel().setInProgress(false);
+      getTokenTopologyPanel().setInProgress(false);
       requestFocusInWindow();
-      getTokenVblPanel().requestFocus();
+      getTokenTopologyPanel().requestFocus();
     }
   }
 

@@ -436,7 +436,7 @@ public class ZoneRenderer extends JComponent
     removeMoveSelectionSet(keyTokenId);
     MapTool.serverCommand().stopTokenMove(getZone().getId(), keyTokenId);
     Token keyToken = zone.getToken(keyTokenId);
-    boolean vblTokenMoved = false; // If any token has VBL we need to reset FoW
+    boolean topologyTokenMoved = false; // If any token has topology we need to reset FoW
 
     /*
      * Lee: if the lead token is snapped-to-grid and has not moved, every follower should return to where they were. Flag set at PointerTool and StampTool's stopTokenDrag() Handling the rest here.
@@ -541,8 +541,8 @@ public class ZoneRenderer extends JComponent
           filteredTokens.add(tokenGUID);
         }
 
-        if (token.hasVBL()) {
-          vblTokenMoved = true;
+        if (token.hasAnyTopology()) {
+          topologyTokenMoved = true;
         }
 
         // renderPath((Graphics2D) this.getGraphics(), path, token.getFootprint(zone.getGrid()));
@@ -597,7 +597,7 @@ public class ZoneRenderer extends JComponent
       }
     }
 
-    if (vblTokenMoved) {
+    if (topologyTokenMoved) {
       zone.tokenTopologyChanged();
     }
   }
@@ -4353,7 +4353,10 @@ public class ZoneRenderer extends JComponent
                 point,
                 restictMovement,
                 terrainModifiersIgnored,
-                token.getTransformedVBL(),
+                token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
+                token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
+                token.getTransformedTopology(Zone.TopologyType.PIT_VBL),
+                token.getTransformedTopology(Zone.TopologyType.MBL),
                 ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);
       } else {

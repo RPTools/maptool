@@ -263,13 +263,19 @@ public class Zone extends BaseModel {
   private DrawablePaint fogPaint;
   private transient UndoPerZone undo;
 
-  /** The VBL topology of the zone. Does not include token VBL. */
+  /**
+   * The Wall VBL topology of the zone. Does not include token Wall VBL. Should really be called
+   * wallVbl.
+   */
   private Area topology = new Area();
 
+  /** The Hill VBL topology of the zone. Does not include token Hill VBL. */
   private Area hillVbl = new Area();
+
+  /** The Pit VBL topology of the zone. Does not include token Pit VBL. */
   private Area pitVbl = new Area();
 
-  // New topology to hold Movement Blocking Only
+  /** The MBL topology of the zone. Does not include token MBL. Should really be called mbl. */
   private Area topologyTerrain = new Area();
 
   // The 'board' layer, at the very bottom of the layer stack.
@@ -856,6 +862,15 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
+  public Area getTopology(TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> topology;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> topologyTerrain;
+    };
+  }
+
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
@@ -865,10 +880,10 @@ public class Zone extends BaseModel {
   public void addTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.add(area);
 
@@ -890,10 +905,10 @@ public class Zone extends BaseModel {
   public void removeTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.subtract(area);
 
@@ -909,24 +924,6 @@ public class Zone extends BaseModel {
   /** Fire the event TOPOLOGY_CHANGED. */
   public void tokenTopologyChanged() {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
-  /** @return the topology of the zone */
-  public Area getTopology() {
-    return topology;
-  }
-
-  public Area getHillVbl() {
-    return hillVbl;
-  }
-
-  public Area getPitVbl() {
-    return pitVbl;
-  }
-
-  /** @return the terrain topology of the zone */
-  public Area getTopologyTerrain() {
-    return topologyTerrain;
   }
 
   /**
@@ -1755,8 +1752,8 @@ public class Zone extends BaseModel {
     return getTokensFiltered(Token::isAlwaysVisible);
   }
 
-  public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(Token::hasVBL);
+  public List<Token> getTokensWithTopology(TopologyType topologyType) {
+    return getTokensFiltered(token -> token.hasTopology(topologyType));
   }
 
   public List<Token> getTokensWithTerrainModifiers() {
