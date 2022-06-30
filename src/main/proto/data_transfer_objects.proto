@@ -408,18 +408,18 @@ message MacroButtonPropertiesListDto {
 }
 
 message HeroLabDataDto {
-  string hero_lab_statblock_asset_id = 1;
+  google.protobuf.StringValue hero_lab_statblock_asset_id = 1;
   string name = 2;
-  string summary = 3;
-  string player_name = 4;
-  string game_system = 5;
-  string hero_lab_index = 6;
-  string minion_master_index = 7;
-  string minion_master_name = 8;
+  google.protobuf.StringValue summary = 3;
+  google.protobuf.StringValue player_name = 4;
+  google.protobuf.StringValue game_system = 5;
+  google.protobuf.StringValue hero_lab_index = 6;
+  google.protobuf.StringValue minion_master_index = 7;
+  google.protobuf.StringValue minion_master_name = 8;
   bool is_ally = 9;
   bool is_dirty = 10;
   bool is_minion = 11;
-  string portfolio_path = 12;
+  google.protobuf.StringValue portfolio_path = 12;
   map<string, string> hero_image_assets = 13;
 }
 
