@@ -162,7 +162,7 @@ public class MapTool {
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
-  private static ClientMethodHandler handler;
+  private static ClientMessageHandler handler;
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
@@ -293,7 +293,7 @@ public class MapTool {
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
-    log.error(msgKey, t);
+    log.error(I18N.getString(msgKey), t);
     showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
   }
 
@@ -680,7 +680,7 @@ public class MapTool {
     messageList =
         new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
-    handler = new ClientMethodHandler();
+    handler = new ClientMessageHandler();
 
     setClientFrame(new MapToolFrame(menuBar));
 
@@ -703,7 +703,7 @@ public class MapTool {
     ChatAutoSave.changeTimeout(AppPreferences.getChatAutosaveTime());
 
     // TODO: make this more formal when we switch to mina
-    new ServerHeartBeatThread().start();
+    // new ServerHeartBeatThread().start();
   }
 
   public static NoteFrame getProfilingNoteFrame() {

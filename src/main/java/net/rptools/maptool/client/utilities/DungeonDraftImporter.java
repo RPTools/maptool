@@ -166,8 +166,8 @@ public class DungeonDraftImporter {
     dialog.forceGridType(GridFactory.SQUARE);
     dialog.forceMap(asset);
     dialog.setVisible(true);
-    if (dialog.getStatus() == MapPropertiesDialog.Status.OK) {
-      MapTool.addZone(zone);
+    if (dialog.getStatus() != MapPropertiesDialog.Status.OK) {
+      return;
     }
 
     /**
@@ -245,6 +245,9 @@ public class DungeonDraftImporter {
     if (lights != null && lights.size() > 0) {
       placeLights(zone, lights, pixelsPerCell);
     }
+
+    // If everything has been successful, we can add the zone to the campaign.
+    MapTool.addZone(zone);
   }
 
   /**

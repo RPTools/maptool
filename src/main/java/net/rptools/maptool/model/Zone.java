@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -41,6 +43,9 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TopologyTypeDto;
+import net.rptools.maptool.server.proto.ZoneDto;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -258,13 +263,19 @@ public class Zone extends BaseModel {
   private DrawablePaint fogPaint;
   private transient UndoPerZone undo;
 
-  /** The VBL topology of the zone. Does not include token VBL. */
+  /**
+   * The Wall VBL topology of the zone. Does not include token Wall VBL. Should really be called
+   * wallVbl.
+   */
   private Area topology = new Area();
 
+  /** The Hill VBL topology of the zone. Does not include token Hill VBL. */
   private Area hillVbl = new Area();
+
+  /** The Pit VBL topology of the zone. Does not include token Pit VBL. */
   private Area pitVbl = new Area();
 
-  // New topology to hold Movement Blocking Only
+  /** The MBL topology of the zone. Does not include token MBL. Should really be called mbl. */
   private Area topologyTerrain = new Area();
 
   // The 'board' layer, at the very bottom of the layer stack.
@@ -442,6 +453,7 @@ public class Zone extends BaseModel {
     } catch (CloneNotSupportedException cnse) {
       MapTool.showError("Trying to copy the zone's grid; no grid assigned", cnse);
     }
+    gridColor = zone.gridColor;
     unitsPerCell = zone.unitsPerCell;
     tokenVisionDistance = zone.tokenVisionDistance;
     imageScaleX = zone.imageScaleX;
@@ -850,6 +862,15 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
+  public Area getTopology(TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> topology;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> topologyTerrain;
+    };
+  }
+
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
@@ -859,10 +880,10 @@ public class Zone extends BaseModel {
   public void addTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.add(area);
 
@@ -884,10 +905,10 @@ public class Zone extends BaseModel {
   public void removeTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.subtract(area);
 
@@ -903,24 +924,6 @@ public class Zone extends BaseModel {
   /** Fire the event TOPOLOGY_CHANGED. */
   public void tokenTopologyChanged() {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
-  /** @return the topology of the zone */
-  public Area getTopology() {
-    return topology;
-  }
-
-  public Area getHillVbl() {
-    return hillVbl;
-  }
-
-  public Area getPitVbl() {
-    return pitVbl;
-  }
-
-  /** @return the terrain topology of the zone */
-  public Area getTopologyTerrain() {
-    return topologyTerrain;
   }
 
   /**
@@ -1749,8 +1752,8 @@ public class Zone extends BaseModel {
     return getTokensFiltered(Token::isAlwaysVisible);
   }
 
-  public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(Token::hasVBL);
+  public List<Token> getTokensWithTopology(TopologyType topologyType) {
+    return getTokensFiltered(token -> token.hasTopology(topologyType));
   }
 
   public List<Token> getTokensWithTerrainModifiers() {
@@ -2103,6 +2106,10 @@ public class Zone extends BaseModel {
     if (topologyTerrain == null) {
       topologyTerrain = new Area();
     }
+
+    if (aStarRounding == null) {
+      aStarRounding = AStarRoundingOptions.NONE;
+    }
     return this;
   }
 
@@ -2160,5 +2167,136 @@ public class Zone extends BaseModel {
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
+  }
+
+  public static Zone fromDto(ZoneDto dto) {
+    var zone = new Zone();
+    zone.creationTime = dto.getCreationTime();
+    zone.id = GUID.valueOf(dto.getId());
+    zone.grid = Grid.fromDto(dto.getGrid());
+    zone.grid.setZone(zone);
+    zone.gridColor = dto.getGridColor();
+    zone.imageScaleX = dto.getImageScaleX();
+    zone.imageScaleY = dto.getImageScaleY();
+    zone.tokenVisionDistance = dto.getTokenVisionDistance();
+    zone.unitsPerCell = dto.getUnitsPerCell();
+    zone.aStarRounding = AStarRoundingOptions.valueOf(dto.getAStarRounding().name());
+    zone.topologyTypes = new TopologyTypeSet();
+    zone.topologyTypes.topologyTypes.addAll(
+        dto.getTopologyTypesList().stream()
+            .map(t -> TopologyType.valueOf(t.name()))
+            .collect(Collectors.toList()));
+    zone.drawables =
+        dto.getDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.gmDrawables =
+        dto.getGmDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.objectDrawables =
+        dto.getObjectDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    zone.backgroundDrawables =
+        dto.getBackgroundDrawablesList().stream()
+            .map(d -> DrawnElement.fromDto(d))
+            .collect(Collectors.toList());
+    dto.getLabelsList().stream()
+        .map(d -> Label.fromDto(d))
+        .forEach(l -> zone.labels.put(l.getId(), l));
+    dto.getTokensList().stream()
+        .map(t -> Token.fromDto(t))
+        .forEach(
+            t -> {
+              zone.tokenMap.put(t.getId(), t);
+              zone.tokenOrderedList.add(t);
+            });
+    zone.tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
+    dto.getExposedAreaMetaMap()
+        .forEach(
+            (id, area) ->
+                zone.exposedAreaMeta.put(
+                    GUID.valueOf(id), new ExposedAreaMetaData(Mapper.map(area))));
+    zone.initiativeList = InitiativeList.fromDto(dto.getInitiative());
+    zone.exposedArea = Mapper.map(dto.getExposedArea());
+    zone.hasFog = dto.getHasFog();
+    zone.fogPaint = DrawablePaint.fromDto(dto.getFogPaint());
+    zone.topology = Mapper.map(dto.getTopology());
+    zone.hillVbl = Mapper.map(dto.getHillVbl());
+    zone.pitVbl = Mapper.map(dto.getPitVbl());
+    zone.topologyTerrain = Mapper.map(dto.getTopologyTerrain());
+    zone.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundPaint());
+    zone.mapAsset = dto.hasMapAsset() ? new MD5Key(dto.getMapAsset().getValue()) : null;
+    zone.boardPosition.x = dto.getBoardPosition().getX();
+    zone.boardPosition.y = dto.getBoardPosition().getY();
+    zone.drawBoard = dto.getDrawBoard();
+    zone.boardChanged = dto.getBoardChanged();
+    zone.name = dto.getName();
+    zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
+    zone.isVisible = dto.getIsVisible();
+    zone.visionType = VisionType.valueOf(dto.getVisionType().name());
+    zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
+    zone.height = dto.getHeight();
+    zone.width = dto.getWidth();
+    return zone;
+  }
+
+  public ZoneDto toDto() {
+    var dto = ZoneDto.newBuilder();
+    dto.setCreationTime(creationTime);
+    dto.setId(id.toString());
+    dto.setGrid(grid.toDto());
+    dto.setGridColor(gridColor);
+    dto.setImageScaleX(imageScaleX);
+    dto.setImageScaleY(imageScaleY);
+    dto.setTokenVisionDistance(tokenVisionDistance);
+    dto.setUnitsPerCell(unitsPerCell);
+    dto.setAStarRounding(ZoneDto.AStarRoundingOptionsDto.valueOf(aStarRounding.name()));
+    if (topologyTypes != null) {
+      dto.addAllTopologyTypes(
+          topologyTypes.topologyTypes.stream()
+              .map(t -> TopologyTypeDto.valueOf(t.name()))
+              .collect(Collectors.toList()));
+    }
+    dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllDrawables(
+        backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
+    dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    exposedAreaMeta.forEach(
+        (id, area) -> {
+          if (id == null) {
+            return;
+          }
+          dto.putExposedAreaMeta(id.toString(), Mapper.map(area.getExposedAreaHistory()));
+        });
+    dto.setInitiative(initiativeList.toDto());
+    dto.setExposedArea(Mapper.map(exposedArea));
+    dto.setHasFog(hasFog);
+    dto.setTopology(Mapper.map(topology));
+    dto.setFogPaint(fogPaint.toDto());
+    dto.setHillVbl(Mapper.map(hillVbl));
+    dto.setPitVbl(Mapper.map(pitVbl));
+    dto.setTopologyTerrain(Mapper.map(topologyTerrain));
+    dto.setBackgroundPaint(backgroundPaint.toDto());
+    if (mapAsset != null) {
+      dto.setMapAsset(StringValue.of(mapAsset.toString()));
+    }
+    dto.setBoardPosition(Mapper.map(boardPosition));
+    dto.setDrawBoard(drawBoard);
+    dto.setBoardChanged(boardChanged);
+    dto.setName(name);
+    if (playerAlias != null) {
+      dto.setPlayerAlias(StringValue.of(playerAlias));
+    }
+    dto.setIsVisible(isVisible);
+    dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
+    dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
+    dto.setHeight(height);
+    dto.setWidth(width);
+    return dto.build();
   }
 }

@@ -19,8 +19,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -126,8 +128,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   @Override
   public void startHandshake() throws ExecutionException, InterruptedException {
-    var md5key =
-        CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().getKey().publicKey());
+    var md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
     var clientInitMsg =
         ClientInitMsg.newBuilder()
             .setPlayerName(player.getName())
@@ -263,24 +264,36 @@ public class ClientHandshake implements Handshake, MessageHandler {
   private void handle(UseAuthTypeMsg useAuthTypeMsg)
       throws ExecutionException, InterruptedException, IllegalBlockSizeException,
           BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException,
-          InvalidKeyException, InvalidKeySpecException {
+          InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 
-    HandshakeChallenge handshakeChallenge = null;
+    var clientAuthMsg = ClientAuthMsg.newBuilder();
 
     if (useAuthTypeMsg.getAuthType() == AuthTypeEnum.ASYMMETRIC_KEY) {
-      CipherUtil cipherUtil = new PublicPrivateKeyStore().getKeys().get();
-      handshakeChallenge =
-          HandshakeChallenge.fromChallengeBytes(
-              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), cipherUtil.getKey());
+      CipherUtil.Key publicKey = new PublicPrivateKeyStore().getKeys().get();
+      var handshakeChallenge =
+          HandshakeChallenge.fromAsymmetricChallengeBytes(
+              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), publicKey);
+      var expectedResponse = handshakeChallenge.getExpectedResponse();
+      clientAuthMsg = clientAuthMsg.setChallengeResponse(ByteString.copyFrom(expectedResponse));
     } else {
+      SecureRandom rnd = new SecureRandom();
+      byte[] responseIv = new byte[CipherUtil.CIPHER_BLOCK_SIZE];
+      rnd.nextBytes(responseIv);
+
       player.setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
+      var iv = useAuthTypeMsg.getIv().toByteArray();
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
           Key key = player.getPassword();
           // Key key = playerDatabase.getPlayerPassword(player.getName()).get();
-          handshakeChallenge =
-              HandshakeChallenge.fromChallengeBytes(
-                  player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key);
+          var handshakeChallenge =
+              HandshakeChallenge.fromSymmetricChallengeBytes(
+                  player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key, iv);
+          var expectedResponse = handshakeChallenge.getExpectedResponse(responseIv);
+          clientAuthMsg =
+              clientAuthMsg
+                  .setChallengeResponse(ByteString.copyFrom(expectedResponse))
+                  .setIv(ByteString.copyFrom(responseIv));
           break;
         } catch (Exception e) {
           // ignore exception unless is the last one
@@ -291,18 +304,13 @@ public class ClientHandshake implements Handshake, MessageHandler {
       }
     }
 
-    var clientAuthMsg =
-        ClientAuthMsg.newBuilder()
-            .setChallengeResponse(ByteString.copyFrom(handshakeChallenge.getExpectedResponse()));
-
     var handshakeMsg = HandshakeMsg.newBuilder().setClientAuthMessage(clientAuthMsg).build();
     sendMessage(handshakeMsg);
     currentState = State.AwaitingConnectionSuccessful;
   }
 
-  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-    var policy = Mapper.map(connectionSuccessfulMsg.getServerPolicyDto());
+  private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg) throws IOException {
+    var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
     MapTool.setServerPolicy(policy);
     player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     MapTool.getFrame()

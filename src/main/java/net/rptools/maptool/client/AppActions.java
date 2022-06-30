@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -662,7 +663,7 @@ public class AppActions {
       };
 
   public static final Action TOGGLE_FULLSCREEN_TOOLS =
-      new AdminClientAction() {
+      new DefaultClientAction() {
         {
           init("action.toggleFullScreenTools");
         }
@@ -2342,6 +2343,7 @@ public class AppActions {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
                 } catch (NoSuchAlgorithmException
+                    | InvalidAlgorithmParameterException
                     | InvalidKeySpecException
                     | NoSuchPaddingException
                     | InvalidKeyException
@@ -2666,7 +2668,7 @@ public class AppActions {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
         } else {
-          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+          MapTool.showError("msg.error.failedLoadCampaign", t);
         }
       }
     }

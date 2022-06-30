@@ -1,0 +1,294 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto.drawing";
+option java_outer_classname = "DrawingDtoProtos";
+
+import "google/protobuf/wrappers.proto";
+
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+message DrawnElementDto {
+  DrawableDto drawable = 1;
+  PenDto pen = 2;
+}
+
+message PenDto {
+  enum mode {
+    MODE_SOLID = 0;
+    MODE_TRANSPARENT = 1;
+  }
+  mode foreground_mode = 1;
+  DrawablePaintDto foreground_color = 2;
+  mode background_mode = 3;
+  DrawablePaintDto background_color = 4;
+  float thickness = 5;
+  bool eraser = 6;
+  bool square_cap = 7;
+  float opacity = 8;
+}
+
+message DrawableDto {
+  oneof drawable_type {
+    ShapeDrawableDto shape_drawable = 1;
+    RectangleDrawableDto rectangle_drawable = 2;
+    OvalDrawableDto oval_drawable = 3;
+    CrossDrawableDto cross_drawable = 4;
+    DrawnLabelDto drawn_label = 5;
+    LineSegmentDrawableDto line_segment = 6;
+    DrawablesGroupDto drawables_group = 7;
+    RadiusCellTemplateDto radius_cell_template = 8;
+    LineCellTemplateDto line_cell_template = 9;
+    RadiusTemplateDto radius_template = 10;
+    BurstTemplateDto burst_template = 11;
+    ConeTemplateDto cone_template = 12;
+    BlastTemplateDto blast_template = 13;
+    LineTemplateDto line_template = 14;
+    WallTemplateDto wall_template = 15;
+  }
+}
+
+message WallTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  IntPointDto path_vertex = 8;
+  bool double_wide = 9;
+  repeated IntPointDto points = 10;
+}
+
+message LineTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
+  bool double_wide = 10;
+}
+
+message BlastTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
+  int32 offset_x = 8;
+  int32 offset_y = 9;
+}
+
+message ConeTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
+}
+
+message BurstTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+}
+
+message RadiusTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+}
+
+message LineCellTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
+}
+
+message RadiusCellTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+}
+
+message DrawablesGroupDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  repeated DrawnElementDto drawn_elements = 4;
+}
+
+message LineSegmentDrawableDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  repeated IntPointDto points = 4;
+  float width = 5;
+  bool square_cap = 6;
+}
+
+message DrawnLabelDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  RectangleDto bounds = 4;
+  string text = 5;
+  string font = 6;
+}
+
+message RectangleDrawableDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+message OvalDrawableDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+message CrossDrawableDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  IntPointDto start_point = 4;
+  IntPointDto end_point = 5;
+}
+
+
+message ShapeDrawableDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  ShapeDto shape = 4;
+  bool use_anti_aliasing = 5;
+}
+
+message ShapeDto {
+  oneof shape_type  {
+    RectangleDto rectangle = 1;
+    AreaDto area = 2;
+    PolygonDto polygon = 3;
+    EllipseDto ellipse = 4;
+  }
+}
+
+message AreaDto {
+  enum WindingRule {
+    EVEN_ODD = 0;
+    NON_ZERO = 1;
+  }
+  WindingRule winding = 1;
+  repeated SegmentDto segments = 2;
+}
+
+message SegmentDto {
+  oneof segment_type {
+    MoveToSegment move_to = 1;
+    LineToSegment line_to = 2;
+    QuadToSegment quad_to = 3;
+    CubicToSegment cubic_to = 4;
+    CloseSegment close = 5;
+  }
+}
+
+message MoveToSegment {
+  DoublePointDto point_0 = 1;
+}
+
+message LineToSegment {
+  DoublePointDto point_0 = 1;
+}
+
+message QuadToSegment {
+  DoublePointDto point_0 = 1;
+  DoublePointDto point_1 = 2;
+}
+
+message CubicToSegment {
+  DoublePointDto point_0 = 1;
+  DoublePointDto point_1 = 2;
+  DoublePointDto point_2 = 3;
+}
+
+message CloseSegment {
+
+}
+
+message IntPointDto {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message DoublePointDto {
+  double x = 1;
+  double y = 2;
+}
+
+message PolygonDto {
+  repeated IntPointDto points = 1;
+}
+
+message RectangleDto {
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+
+message EllipseDto {
+  float x = 1;
+  float y = 2;
+  float width = 3;
+  float height = 4;
+}
+
+message DrawablePaintDto {
+  oneof paint_type {
+    DrawableColorPaintDto color_paint = 1;
+    DrawableTexturePaintDto texture_paint = 2;
+  }
+}
+
+message DrawableColorPaintDto {
+  int32 color = 1;
+}
+
+message DrawableTexturePaintDto {
+  string asset_id = 1;
+  double scale = 2;
+}

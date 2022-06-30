@@ -14,14 +14,12 @@
  */
 package net.rptools.maptool.util;
 
-import com.caucho.hessian.io.HessianInput;
 import com.google.protobuf.util.JsonFormat;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,7 +32,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -506,47 +503,6 @@ public class PersistenceUtil {
 
     if (persistedCampaign == null) {
       MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
-    }
-    return persistedCampaign;
-  }
-
-  public static PersistedCampaign loadLegacyCampaign(File campaignFile) {
-    HessianInput his = null;
-    PersistedCampaign persistedCampaign = null;
-    try {
-      InputStream is = new BufferedInputStream(new FileInputStream(campaignFile));
-      his = new HessianInput(is);
-      persistedCampaign = (PersistedCampaign) his.readObject(null);
-
-      for (MD5Key key : persistedCampaign.assetMap.keySet()) {
-        Asset asset = persistedCampaign.assetMap.get(key);
-        if (!AssetManager.hasAsset(key)) AssetManager.putAsset(asset);
-        if (!MapTool.isHostingServer() && !MapTool.isPersonalServer()) {
-          // If we are remotely installing this campaign, we'll need to
-          // send the image data to the server
-          MapTool.serverCommand().putAsset(asset);
-        }
-      }
-      // Do some sanity work on the campaign
-      // This specifically handles the case when the zone mappings
-      // are out of sync in the save file
-      Campaign campaign = persistedCampaign.campaign;
-      Set<Zone> zoneSet = new HashSet<Zone>(campaign.getZones());
-      campaign.removeAllZones();
-      for (Zone zone : zoneSet) {
-        campaign.putZone(zone);
-      }
-    } catch (FileNotFoundException fnfe) {
-      if (log.isInfoEnabled()) log.info("Campaign file not found -- this can't happen?!", fnfe);
-      persistedCampaign = null;
-    } catch (IOException ioe) {
-      if (log.isInfoEnabled()) log.info("Campaign is not in legacy Hessian format either.", ioe);
-      persistedCampaign = null;
-    } finally {
-      try {
-        his.close();
-      } catch (Exception e) {
-      }
     }
     return persistedCampaign;
   }

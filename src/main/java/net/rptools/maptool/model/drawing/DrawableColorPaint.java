@@ -18,6 +18,8 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.ImageObserver;
 import java.io.Serializable;
+import net.rptools.maptool.server.proto.drawing.DrawableColorPaintDto;
+import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
 
 public class DrawableColorPaint extends DrawablePaint implements Serializable {
   private int color;
@@ -31,8 +33,16 @@ public class DrawableColorPaint extends DrawablePaint implements Serializable {
     this.color = color.getRGB();
   }
 
+  public DrawableColorPaint(int color) {
+    this.color = color;
+  }
+
   public int getColor() {
     return color;
+  }
+
+  public void setColor(int value) {
+    color = value;
   }
 
   @Override
@@ -46,5 +56,13 @@ public class DrawableColorPaint extends DrawablePaint implements Serializable {
   @Override
   public Paint getPaint(int offsetX, int offsetY, double scale, ImageObserver... observer) {
     return getPaint();
+  }
+
+  @Override
+  public DrawablePaintDto toDto() {
+    {
+      var dto = DrawablePaintDto.newBuilder();
+      return dto.setColorPaint(DrawableColorPaintDto.newBuilder().setColor(getColor())).build();
+    }
   }
 }

@@ -144,7 +144,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
+  public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key) {
     return new PublicPrivateKeyStore().getKeys();
   }
 
@@ -157,7 +157,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
     return new PublicPrivateKeyStore()
         .getKeys()
-        .thenApply(k -> CipherUtil.publicKeyMD5(k.getKey().publicKey()).equals(md5key));
+        .thenApply(k -> CipherUtil.publicKeyMD5(k.publicKey()).equals(md5key));
   }
 
   @Override
