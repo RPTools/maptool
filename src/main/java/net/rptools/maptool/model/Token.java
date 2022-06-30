@@ -38,6 +38,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
@@ -256,9 +257,6 @@ public class Token extends BaseModel implements Cloneable {
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
   private int vblColorSensitivity = -1;
-  private int hillVblColorSensitivity = -1;
-  private int pitVblColorSensitivity = -1;
-  private int mblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
@@ -418,9 +416,6 @@ public class Token extends BaseModel implements Cloneable {
     visibleOnlyToOwner = token.visibleOnlyToOwner;
 
     vblColorSensitivity = token.vblColorSensitivity;
-    hillVblColorSensitivity = token.hillVblColorSensitivity;
-    pitVblColorSensitivity = token.pitVblColorSensitivity;
-    mblColorSensitivity = token.mblColorSensitivity;
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
@@ -1348,22 +1343,12 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  public void setColorSensitivity(Zone.TopologyType topologyType, int tolerance) {
-    switch (topologyType) {
-      case WALL_VBL -> vblColorSensitivity = tolerance;
-      case HILL_VBL -> hillVblColorSensitivity = tolerance;
-      case PIT_VBL -> pitVblColorSensitivity = tolerance;
-      case MBL -> mblColorSensitivity = tolerance;
-    }
+  public void setColorSensitivity(int tolerance) {
+    vblColorSensitivity = tolerance;
   }
 
-  public int getColorSensitivity(Zone.TopologyType topologyType) {
-    return switch (topologyType) {
-      case WALL_VBL -> vblColorSensitivity;
-      case HILL_VBL -> hillVblColorSensitivity;
-      case PIT_VBL -> pitVblColorSensitivity;
-      case MBL -> mblColorSensitivity;
-    };
+  public int getColorSensitivity() {
+    return vblColorSensitivity;
   }
 
   /**
@@ -1394,12 +1379,12 @@ public class Token extends BaseModel implements Cloneable {
   /**
    * Set the topology of the given type for the token.
    *
-   * <p>If topology is null, set {@link #vblColorSensitivity} to -1.
+   * <p>If no topology remains on the token, set {@link #vblColorSensitivity} to -1.
    *
    * @param topologyType The type of topology to set.
    * @param topology the topology area to set.
    */
-  public void setTopology(Zone.TopologyType topologyType, Area topology) {
+  public void setTopology(Zone.TopologyType topologyType, @Nullable Area topology) {
     switch (topologyType) {
       case WALL_VBL -> vbl = topology;
       case HILL_VBL -> hillVbl = topology;
@@ -1408,7 +1393,7 @@ public class Token extends BaseModel implements Cloneable {
     }
     ;
 
-    if (topology == null) {
+    if (!hasAnyTopology()) {
       vblColorSensitivity = -1;
     }
   }

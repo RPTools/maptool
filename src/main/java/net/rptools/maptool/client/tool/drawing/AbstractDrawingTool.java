@@ -286,14 +286,14 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
       g2.scale(renderer.getScale(), renderer.getScale());
 
+      g2.setColor(AppStyle.tokenMblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.MBL));
       g2.setColor(AppStyle.tokenTopologyColor);
       g2.fill(getTokenTopology(Zone.TopologyType.WALL_VBL));
       g2.setColor(AppStyle.tokenHillVblColor);
       g2.fill(getTokenTopology(Zone.TopologyType.HILL_VBL));
       g2.setColor(AppStyle.tokenPitVblColor);
       g2.fill(getTokenTopology(Zone.TopologyType.PIT_VBL));
-      g2.setColor(AppStyle.tokenMblColor);
-      g2.fill(getTokenTopology(Zone.TopologyType.MBL));
 
       g2.setColor(AppStyle.topologyTerrainColor);
       g2.fill(zone.getTopology(Zone.TopologyType.MBL));
