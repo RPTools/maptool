@@ -38,6 +38,7 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.*;
 import org.graalvm.polyglot.*;
 import org.graalvm.polyglot.proxy.*;
+
 public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSpecialVariables {
   private static final String NOT_ENOUGH_PARAM =
       "Function '%s' requires at least %d parameters; %d were provided.";
