@@ -176,7 +176,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
           return jPrim.getAsBoolean();
         }
         if (jPrim.isNumber()) {
-          return jPrim.getAsBigDecimal();
+          return jPrim.getAsDouble();
         }
         if (jPrim.isString()) {
           return jPrim.getAsString();
