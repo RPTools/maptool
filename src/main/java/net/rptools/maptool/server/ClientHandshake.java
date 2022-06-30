@@ -42,7 +42,6 @@ import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
@@ -332,9 +331,24 @@ public class ClientHandshake implements Handshake, MessageHandler {
         }
         var libraryManager = new LibraryManager();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
-          Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
-          AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-          libraryManager.registerAddOnLibrary(addOnLibrary);
+          var md5key = new MD5Key(library.getMd5Hash());
+          AssetManager.getAssetAsynchronously(
+              md5key,
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText(
+                                "library.import.error", library.getDetails().getNamespace()),
+                            e);
+                      });
+                }
+              });
         }
       }
     }

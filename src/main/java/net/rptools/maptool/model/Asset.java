@@ -149,6 +149,7 @@ public final class Asset {
           case "json" -> Type.JSON;
           case "javascript" -> Type.JAVASCRIPT;
           case "xml" -> Type.XML;
+          case "zip" -> Type.MTLIB;
           default -> Type.INVALID;
         };
         default -> Type.INVALID;
