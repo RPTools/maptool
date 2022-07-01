@@ -150,8 +150,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
   }
 
   public Object HostObjectToJavaScriptType(Object obj) {
-    if (obj instanceof JsonElement) {
-      JsonElement jObj = (JsonElement) obj;
+    if (obj instanceof JsonElement jObj) {
       if (jObj.isJsonArray()) {
         ArrayList newList = new ArrayList();
         for (JsonElement element : jObj.getAsJsonArray()) {
