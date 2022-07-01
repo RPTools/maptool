@@ -631,8 +631,7 @@ public class TransferableHelper extends TransferHandler {
             } catch (IOException e) {
               SwingUtilities.invokeLater(
                   () -> {
-                    MapTool.showError(
-                        I18N.getText("library.import.error", asset.getName()), e);
+                    MapTool.showError(I18N.getText("library.import.error", asset.getName()), e);
                   });
             }
           } else {
