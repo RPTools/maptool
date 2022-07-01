@@ -86,6 +86,25 @@ public class AddOnLibraryImporter {
   }
 
   /**
+   * Returns if the asset in the file is an add-on..
+   *
+   * @param filename The name of the file to check.
+   * @return {@code true} if this is contains an add-on.
+   */
+  public static boolean isAssetFileAddonLibrary(String filename) {
+    try (var zip = new ZipFile(new File(filename))) {
+      ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
+      if (entry == null) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (IOException ioe) {
+      return false;
+    }
+  }
+
+  /**
    * Imports the add-on library from the specified asset.
    *
    * @param asset the asset to use for import.
