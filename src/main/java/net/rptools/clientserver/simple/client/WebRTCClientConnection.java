@@ -182,8 +182,11 @@ public class WebRTCClientConnection extends AbstractConnection
   public void sendMessage(Object channel, byte[] message) {
     log.debug(prefix() + "added message");
     addMessage(channel, message);
-    synchronized (sendThread) {
-      sendThread.notify();
+    if (peerConnection != null
+        && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
+      synchronized (sendThread) {
+        sendThread.notify();
+      }
     }
   }
 
@@ -191,7 +194,10 @@ public class WebRTCClientConnection extends AbstractConnection
   public boolean isAlive() {
     if (peerConnection == null) return false;
 
-    return peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED;
+    return switch (peerConnection.getConnectionState()) {
+      case CONNECTED, DISCONNECTED -> true;
+      default -> false;
+    };
   }
 
   @Override
@@ -303,10 +309,19 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onConnectionChange(RTCPeerConnectionState state) {
     log.info(prefix() + "PeerConnection.onConnectionChange " + state);
-    if (state == RTCPeerConnectionState.DISCONNECTED) {
-      lastError = "PeerConnection disconnected";
-      peerConnection = null;
-      fireDisconnectAsync();
+    switch (state) {
+      case FAILED -> {
+        lastError = "PeerConnection failed";
+        peerConnection = null;
+        fireDisconnectAsync();
+      }
+      case CONNECTED -> {
+        if (hasMoreMessages()) {
+          synchronized (sendThread) {
+            sendThread.notify();
+          }
+        }
+      }
     }
   }
 
@@ -410,6 +425,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   public void addIceCandidate(RTCIceCandidate candidate) {
+    log.info(prefix() + "PeerConnection.addIceCandidate: " + candidate.toString());
     peerConnection.addIceCandidate(candidate);
   }
 
@@ -505,7 +521,8 @@ public class WebRTCClientConnection extends AbstractConnection
       log.debug(prefix() + " sendThread started");
       try {
         while (!stopRequested && connection.isAlive()) {
-          while (connection.hasMoreMessages()) {
+          while (connection.hasMoreMessages()
+              && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
             byte[] message = connection.nextMessage();
             if (message == null) {
               continue;

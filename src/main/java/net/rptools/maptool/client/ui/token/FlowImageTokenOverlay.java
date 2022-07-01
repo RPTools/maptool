@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Rectangle;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * An overlay that allows multiple images to be placed on the token so that they do not interfere
@@ -86,5 +87,19 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
   /** @return Getter for grid */
   public int getGrid() {
     return grid;
+  }
+
+  public static FlowImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowImageTokenOverlay();
+    overlay.fillFrom(dto);
+    overlay.grid = dto.getGridSize();
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setGridSize(grid)
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_IMAGE)
+        .build();
   }
 }

@@ -14,15 +14,12 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -112,5 +109,27 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
    */
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
     return bounds;
+  }
+
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    assetId = new MD5Key(dto.getAssetId());
+  }
+
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    var dto = BooleanTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setAssetId(assetId.toString());
+    return dto;
+  }
+
+  public static ImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new ImageTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.IMAGE).build();
   }
 }

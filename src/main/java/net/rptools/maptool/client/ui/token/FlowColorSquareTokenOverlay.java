@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Paint a square so that it doesn't overlay any other states being displayed in the same grid.
@@ -64,5 +65,17 @@ public class FlowColorSquareTokenOverlay extends FlowColorDotTokenOverlay {
   @Override
   protected Shape getShape(Rectangle bounds, Token token) {
     return getFlow().getStateBounds2D(bounds, token, getName());
+  }
+
+  public static FlowColorSquareTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowColorSquareTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_COLOR_SQUARE)
+        .build();
   }
 }

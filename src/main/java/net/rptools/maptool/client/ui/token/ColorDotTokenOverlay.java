@@ -24,6 +24,7 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Token overlay that draws a colored dot in one of the corners.
@@ -112,5 +113,15 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
   /** @return Getter for corner */
   public Quadrant getCorner() {
     return corner;
+  }
+
+  public static ColorDotTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new ColorDotTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.COLOR_DOT).build();
   }
 }

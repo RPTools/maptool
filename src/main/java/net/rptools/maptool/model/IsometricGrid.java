@@ -38,6 +38,8 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.server.proto.GridDto;
+import net.rptools.maptool.server.proto.IsometricGridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
@@ -424,6 +426,11 @@ public class IsometricGrid extends Grid {
     mtx.translate(bounds.getBounds().getX(), bounds.getBounds().getY());
     cellShape.transform(mtx);
     return cellShape;
+  }
+
+  @Override
+  protected void fillDto(GridDto.Builder dto) {
+    dto.setIsometricGrid(IsometricGridDto.newBuilder());
   }
 
   @Override

@@ -49,13 +49,8 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.io.TikaInputStream;
-import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
 /**
@@ -352,7 +347,8 @@ public class TransferableHelper extends TransferHandler {
     }
     if (image != null) {
       String name = findName(url);
-      asset = Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
+      asset =
+          Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
     } else {
       throw new IllegalArgumentException("cannot convert drop object to image: " + url.toString());
     }
@@ -442,24 +438,22 @@ public class TransferableHelper extends TransferHandler {
     return assets;
   }
 
-
   private static boolean checkValidType(MediaType mediaType) {
     String contentType = mediaType.getType();
 
     String subType = mediaType.getSubtype();
-    return switch(contentType) {
+    return switch (contentType) {
       case "audio", "image" -> true;
-      case "text" -> switch(subType) {
+      case "text" -> switch (subType) {
         case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
         default -> false;
       };
-      case "application" -> switch(subType) {
+      case "application" -> switch (subType) {
         case "pdf", "json", "javascript", "xml" -> true;
         default -> false;
       };
       default -> false;
     };
-
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)

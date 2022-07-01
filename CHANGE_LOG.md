@@ -1,3 +1,15 @@
+# MapTool 1.11.5
+
+**WebRTC Updates**
+
+Adds additional logging for WebRTC and improved connection handling.
+
+_If you are using WebRTC for your sessions or wish to help with testing please update to this version and report back to the MapTool Discord your experiences when using it, both positive and negative._
+
+- [#3327][i3327] Additional logging and improved connection handling for WebRTC.
+
+[i3327]: https://github.com/RPTools/maptool/issues/3327
+
 # MapTool 1.11.4
 **Security Fix Release**
 
