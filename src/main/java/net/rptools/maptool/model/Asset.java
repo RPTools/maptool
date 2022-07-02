@@ -419,7 +419,7 @@ public final class Asset {
    * @param data the data for the {@code Asset}.
    * @return the MapTool Drop In Library {@code Asset}.
    */
-  private static Asset createMTLibAsset(String namespace, byte[] data) {
+  static Asset createMTLibAsset(String namespace, byte[] data) {
     return new Asset(null, namespace, data, Type.MTLIB, Type.MTLIB.getDefaultExtension(), false);
   }
 
