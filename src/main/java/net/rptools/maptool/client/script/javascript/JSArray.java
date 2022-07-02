@@ -79,7 +79,7 @@ public class JSArray extends AbstractList<Object> implements ProxyArray {
     if (index < Integer.MAX_VALUE) {
       return;
     } else {
-      String message = "tried to access index " + index + " which deosn't fit in int";
+      String message = "tried to access index " + index + " which doesn't fit in int";
       throw new ArrayIndexOutOfBoundsException(message);
     }
   }
