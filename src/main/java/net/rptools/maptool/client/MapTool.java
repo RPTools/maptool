@@ -62,7 +62,6 @@ import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
-import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
 import net.rptools.maptool.client.swing.SplashScreen;
@@ -84,6 +83,7 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -969,6 +969,8 @@ public class MapTool {
     ZoneRenderer currRenderer = null;
 
     // Clean up
+    new CampaignManager().clearCampaignData();
+
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
     clientFrame.clearTokenTree();
@@ -999,9 +1001,6 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
-    // overlay vanishes after campaign change
-    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
-    JSScriptEngine.resetContexts();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
