@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.List;
 import javax.script.*;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.script.javascript.api.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
@@ -57,6 +58,7 @@ public class JSScriptEngine {
     habuilder.allowAccessAnnotatedBy(HostAccess.Export.class);
     habuilder.allowArrayAccess(true);
     habuilder.allowListAccess(true);
+    habuilder.allowMapAccess(true);
     habuilder.targetTypeMapping(
         Value.class, Object.class, (v) -> v.hasArrayElements(), (v) -> v.as(List.class));
 
@@ -152,8 +154,12 @@ public class JSScriptEngine {
 
   public Object applyFunction(JSAPIRegisteredMacro macro, Object[] args) {
     contextStack.push(macro.context);
+    Object[] modifiedArgs = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      modifiedArgs[i] = MacroJavaScriptBridge.getInstance().HostObjectToJavaScriptType(args[i]);
+    }
     try {
-      return macro.callable.apply(args);
+      return macro.callable.apply(modifiedArgs);
     } finally {
       contextStack.pop();
     }

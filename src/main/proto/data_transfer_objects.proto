@@ -287,7 +287,7 @@ message TokenDto {
   }
   string id = 1;
   bool being_impersonated = 2;
-  google.protobuf.StringValue exposed_area_guid = 3;
+  string exposed_area_guid = 3;
   map<string, string> image_asset_map = 4;
   google.protobuf.StringValue current_image_asset = 5;
   int32 x = 6;
@@ -314,6 +314,9 @@ message TokenDto {
   int32 always_visible_tolerance = 27;
   bool is_always_visible = 28;
   AreaDto vbl = 29;
+  AreaDto hillVbl = 65;
+  AreaDto pitVbl = 66;
+  AreaDto mbl = 67;
   string name = 30;
   repeated string owner_list = 31;
   int32 owner_type = 32;
@@ -405,18 +408,18 @@ message MacroButtonPropertiesListDto {
 }
 
 message HeroLabDataDto {
-  string hero_lab_statblock_asset_id = 1;
+  google.protobuf.StringValue hero_lab_statblock_asset_id = 1;
   string name = 2;
-  string summary = 3;
-  string player_name = 4;
-  string game_system = 5;
-  string hero_lab_index = 6;
-  string minion_master_index = 7;
-  string minion_master_name = 8;
+  google.protobuf.StringValue summary = 3;
+  google.protobuf.StringValue player_name = 4;
+  google.protobuf.StringValue game_system = 5;
+  google.protobuf.StringValue hero_lab_index = 6;
+  google.protobuf.StringValue minion_master_index = 7;
+  google.protobuf.StringValue minion_master_name = 8;
   bool is_ally = 9;
   bool is_dirty = 10;
   bool is_minion = 11;
-  string portfolio_path = 12;
+  google.protobuf.StringValue portfolio_path = 12;
   map<string, string> hero_image_assets = 13;
 }
 
@@ -614,7 +617,7 @@ enum TokenUpdateDto {
     setTerrainModifier = 38;
     setTerrainModifierOperation = 39;
     setTerrainModifiersIgnored = 40;
-    setVBL = 41;
+    setTopology = 41;
     setImageAsset = 42;
     setPortraitImage = 43;
     setCharsheetImage = 44;
@@ -653,6 +656,7 @@ message TokenPropertyValueDto {
     StringListDto string_values = 8;
     GridDto grid = 9;
     TokenFootPrintDto token_foot_print = 10;
+    string topology_type = 11;
   }
 }
 
