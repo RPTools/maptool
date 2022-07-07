@@ -288,6 +288,11 @@ public class GdxRenderer extends ApplicationAdapter
     hudCam.update();
   }
 
+  private float getDpiScale() {
+    int resolution = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+    return resolution/96.0f;
+  }
+
   @Override
   public void render() {
     var delta = Gdx.graphics.getDeltaTime();
@@ -336,7 +341,7 @@ public class GdxRenderer extends ApplicationAdapter
 
     var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
     mySmallFont.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
-    mySmallFont.fontParameters.size = 12;
+    mySmallFont.fontParameters.size = (int) (12 * getDpiScale());
     manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
   }
 
@@ -382,9 +387,6 @@ public class GdxRenderer extends ApplicationAdapter
     textRenderer.drawString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
     textRenderer.drawString(String.valueOf(batch.renderCalls), width - 10, 10);
 
-    //  videoPlayer.update();
-    //       var frame = videoPlayer.getTexture();
-    //      if (frame != null) batch.draw(frame, 20, 20, 100, 100);
     batch.end();
     collectTimerResults();
   }
@@ -1012,8 +1014,9 @@ public class GdxRenderer extends ApplicationAdapter
 
         // Other details
         if (token == keyToken) {
-          var x = footprintBounds.x;
-          var y = footprintBounds.y;
+          var dpiScale = getDpiScale();
+          var x = footprintBounds.x * dpiScale;
+          var y = footprintBounds.y * dpiScale;
           var w = footprintBounds.width;
           var h = footprintBounds.height;
 
@@ -1737,6 +1740,12 @@ public class GdxRenderer extends ApplicationAdapter
         setProjectionMatrix(hudCam.combined);
         tmpWorldCoord.set(gdxTokenRectangle.x, gdxTokenRectangle.y, 0);
         cam.project(tmpWorldCoord);
+
+        var dpiScale = getDpiScale();
+        tmpWorldCoord.x *= dpiScale;
+        tmpWorldCoord.y *= dpiScale;
+
+
         gdxTokenRectangle.set(
             tmpWorldCoord.x,
             tmpWorldCoord.y,
@@ -2009,6 +2018,8 @@ public class GdxRenderer extends ApplicationAdapter
 
     var width = bounds.width + leftMargin + rightMargin;
     var height = bounds.height + topMargin + bottomMargin;
+
+    var dpiScale = getDpiScale();
 
     // Draw Corners
 
@@ -3186,9 +3197,11 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void setScale(Scale scale) {
-    offsetX = scale.getOffsetX() * -1;
-    offsetY = scale.getOffsetY();
-    zoom = (float) (1f / scale.getScale());
+    var dpiScale = getDpiScale();
+
+    offsetX = (int)(scale.getOffsetX()  * dpiScale * -1);
+    offsetY = (int)(scale.getOffsetY() * dpiScale);
+    zoom = (float) (1f / scale.getScale() / dpiScale);
     updateCam();
   }
 
