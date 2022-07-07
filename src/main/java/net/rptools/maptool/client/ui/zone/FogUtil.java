@@ -33,6 +33,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
 import net.rptools.maptool.client.ui.zone.vbl.VisibleAreaSegment;
 import net.rptools.maptool.client.ui.zone.vbl.VisionBlockingAccumulator;
+import net.rptools.maptool.client.walker.astar.ReverseShapePathIterator;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
@@ -46,6 +47,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.player.Player.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -82,7 +84,13 @@ public class FogUtil {
       return null;
     }
 
-    Geometry totalClearedArea = calculateBlockedVision(accumulator.getVisionBlockingSegments());
+    final var shapeReader = new ShapeReader(geometryFactory);
+    final Geometry visionGeometry =
+        shapeReader.read(new ReverseShapePathIterator(vision.getPathIterator(null)));
+    Geometry totalClearedArea =
+        calculateBlockedVision(
+            accumulator.getVisionBlockingSegments(),
+            PreparedGeometryFactory.prepare(visionGeometry));
 
     if (totalClearedArea != null) {
       // Convert back to AWT area to modify vision.
@@ -96,13 +104,18 @@ public class FogUtil {
   }
 
   private static @Nullable Geometry calculateBlockedVision(
-      List<VisibleAreaSegment> visionBlockingSegments) {
+      List<VisibleAreaSegment> visionBlockingSegments, PreparedGeometry vision) {
     int skippedAreas = 0;
     Collections.sort(visionBlockingSegments);
     List<PreparedGeometry> clearedAreaList = new ArrayList<>();
     nextSegment:
     for (var segment : visionBlockingSegments) {
       Geometry boundingBox = segment.getBoundingBox();
+      if (!vision.intersects(boundingBox)) {
+        // Segments outside of vision cannot impact the results, so skip it.
+        continue nextSegment;
+      }
+
       for (var clearedArea : clearedAreaList) {
         if (clearedArea.contains(boundingBox)) {
           skippedAreas++;
