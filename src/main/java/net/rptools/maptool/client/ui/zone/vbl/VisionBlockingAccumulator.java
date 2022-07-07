@@ -18,26 +18,41 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 public final class VisionBlockingAccumulator {
   private final GeometryFactory geometryFactory;
   private final Point origin;
-  private final List<VisibleAreaSegment> visionBlockingSegments;
+  private final Coordinate originCoordinate;
+  private final PreparedGeometry vision;
+  private final List<LineString> visionBlockingSegments;
 
-  public VisionBlockingAccumulator(GeometryFactory geometryFactory, Point origin) {
+  public VisionBlockingAccumulator(
+      GeometryFactory geometryFactory, Point origin, PreparedGeometry vision) {
     this.geometryFactory = geometryFactory;
     this.origin = origin;
+    this.originCoordinate = new Coordinate(origin.getX(), origin.getY());
+
+    this.vision = vision;
+
     this.visionBlockingSegments = new ArrayList<>();
   }
 
-  public List<VisibleAreaSegment> getVisionBlockingSegments() {
+  public Point getOrigin() {
+    return origin;
+  }
+
+  public List<LineString> getVisionBlockingSegments() {
     return visionBlockingSegments;
   }
 
   private void addVisionBlockingSegments(AreaContainer areaContainer, boolean frontSide) {
     var segments =
-        areaContainer.getVisionBlockingBoundarySegements(geometryFactory, origin, frontSide);
+        areaContainer.getVisionBlockingBoundarySegments(
+            geometryFactory, originCoordinate, frontSide, vision);
     visionBlockingSegments.addAll(segments);
   }
 
@@ -191,6 +206,7 @@ public final class VisionBlockingAccumulator {
        * 1. The back side of the island.
        * 2. The front side of any child ocean.
        */
+      // These are actually the same rules as for the hill case, it's just the context that differs.
       addIslandForHillBlocking(island, null);
     }
 
