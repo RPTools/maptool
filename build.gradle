@@ -110,7 +110,7 @@ spotless {
     java {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
-            exclude '**/JTextAreaAppender.java'
+            exclude '**/JTextAreaAppender.java', '**/GifDecoder.java'
         }
         licenseHeaderFile 'spotless.license.java'
 
@@ -294,9 +294,7 @@ repositories {
     maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://nerps.net/repo/' }
     maven { url = 'https://jitpack.io' }
-    google()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     maven { url "https://maven.jzy3d.org/releases/"}
 }
 

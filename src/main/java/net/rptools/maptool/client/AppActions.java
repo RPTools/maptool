@@ -2076,21 +2076,6 @@ public class AppActions {
         }
       };
 
-  public static final DefaultClientAction SHOW_BOX2D_TEST =
-      new DefaultClientAction() {
-        {
-          init("Show jfx");
-          // init("Show Box2D Test");
-        }
-
-        @Override
-        public void executeAction() {
-          MapTool.getFrame().addGdx();
-          // MapTool.loadBox2dTest();
-
-        }
-      };
-
   public static final DefaultClientAction ZOOM_RESET =
       new DefaultClientAction() {
         private Double lastZoom;
