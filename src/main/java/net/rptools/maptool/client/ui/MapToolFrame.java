@@ -20,7 +20,6 @@ import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import com.jogamp.opengl.awt.GLJPanel;
 import java.awt.*;
-import java.awt.Rectangle;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -54,7 +53,19 @@ import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.MapTool.ZoneEvent;
-import net.rptools.maptool.client.swing.*;
+import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
+import net.rptools.maptool.client.swing.AssetCacheStatusBar;
+import net.rptools.maptool.client.swing.CoordinateStatusBar;
+import net.rptools.maptool.client.swing.DragImageGlassPane;
+import net.rptools.maptool.client.swing.GlassPane;
+import net.rptools.maptool.client.swing.ImageCacheStatusBar;
+import net.rptools.maptool.client.swing.ImageChooserDialog;
+import net.rptools.maptool.client.swing.MemoryStatusBar;
+import net.rptools.maptool.client.swing.ProgressStatusBar;
+import net.rptools.maptool.client.swing.SpacerStatusBar;
+import net.rptools.maptool.client.swing.StatusPanel;
+import net.rptools.maptool.client.swing.TopologyModeSelectionPanel;
+import net.rptools.maptool.client.swing.ZoomStatusBar;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -72,12 +83,24 @@ import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
-import net.rptools.maptool.client.ui.zone.*;
+import net.rptools.maptool.client.ui.zone.PointerOverlay;
+import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
+import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.drawing.*;
+import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -102,11 +125,20 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final Pen pen = new Pen(Pen.DEFAULT);
   private final Map<MTFrame, DockableFrame> frameMap = new HashMap<MTFrame, DockableFrame>();
+
+  /** Are the drawing measurements being painted? */
+  private boolean paintDrawingMeasurement = true;
+
+  private ImageChooserDialog imageChooserDialog;
+  private ZoneRenderer currentRenderer;
+
   // Components
   private final AssetPanel assetPanel;
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+  /** The HTML pane showing the map overlay. */
+  private HTMLOverlayPanel overlayPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -117,6 +149,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ZoneMiniMapPanel zoneMiniMapPanel;
   /** Contains the zoneRenderer, as well as all overlays. */
   private final JPanel zoneRendererPanel;
+
+  private GLJPanel gdxPanel;
 
   private JPanel currentRenderPanel;
   /** Contains the overlays that should be displayed in front of everything else. */
@@ -130,13 +164,47 @@ public class MapToolFrame extends DefaultDockableHolder
   private final List<ZoneRenderer> zoneRendererList;
   private final JMenuBar menuBar;
   private final StatusPanel statusPanel;
+  private String statusMessage = "";
   private final ActivityMonitorPanel activityMonitor = new ActivityMonitorPanel();
   private final ProgressStatusBar progressBar = new ProgressStatusBar();
   private final ConnectionStatusPanel connectionStatusPanel = new ConnectionStatusPanel();
+  private CoordinateStatusBar coordinateStatusBar;
+  private AssetCacheStatusBar assetCacheStatusBar;
+  private ImageCacheStatusBar imageCacheStatusBar;
+  private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
+  private ZoomStatusBar zoomStatusBar;
+  private JLabel chatActionLabel;
+  private boolean fullScreenToolsShown;
+
+  private Color chatTypingLabelColor;
+  private ChatTypingNotification chatTypingPanel;
+  private Timer chatTimer;
+  private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
   private final ChatTyperObserver chatTyperObserver;
+  private GUID PreRemoveRenderGUID = null;
+
   private final GlassPane glassPane;
+  /** Model for the token tree panel of the map explorer. */
+  private TokenPanelTreeModel tokenPanelTreeModel;
+
+  private DrawPanelTreeModel drawPanelTreeModel;
+  private DrawablesPanel drawablesPanel;
   private final TextureChooserPanel textureChooserPanel;
+  private LookupTablePanel lookupTablePanel;
+
+  // External filename support
+  private JFileChooser loadPropsFileChooser;
+  private JFileChooser loadFileChooser;
+  private JFileChooser saveCmpgnFileChooser;
+  private JFileChooser savePropsFileChooser;
+  private JFileChooser saveFileChooser;
+  private JFileChooser saveMapFileChooser;
+  private JFileChooser saveTokenFileChooser;
+
+  /** Remember the last layer selected */
+  private Layer lastSelectedLayer = Zone.Layer.TOKEN;
+
   private final FileFilter campaignFilter =
       new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
   private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
@@ -148,62 +216,138 @@ public class MapToolFrame extends DefaultDockableHolder
       new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
   private final FileFilter tableFilter =
       new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
+
   private final FileFilter dungeonDraftFilter =
       new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+  private EditTokenDialog tokenPropertiesDialog;
+
   private final CampaignPanel campaignPanel = new CampaignPanel();
   private final GmPanel gmPanel = new GmPanel();
   private final GlobalPanel globalPanel = new GlobalPanel();
   private final SelectionPanel selectionPanel = new SelectionPanel();
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
+
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
-  private JoglSwingCanvas joglSwingCanvas;
-  /** Are the drawing measurements being painted? */
-  private boolean paintDrawingMeasurement = true;
 
-  private ImageChooserDialog imageChooserDialog;
-  private ZoneRenderer currentRenderer;
-  /** The HTML pane showing the map overlay. */
-  private HTMLOverlayPanel overlayPanel;
+  private final class KeyListenerDeleteDraw implements KeyListener {
+    private final JTree tree;
 
-  private String statusMessage = "";
-  private CoordinateStatusBar coordinateStatusBar;
-  private AssetCacheStatusBar assetCacheStatusBar;
-  private ImageCacheStatusBar imageCacheStatusBar;
-  private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
-  private ZoomStatusBar zoomStatusBar;
-  private JLabel chatActionLabel;
-  private boolean fullScreenToolsShown;
-  private Color chatTypingLabelColor;
-  private ChatTypingNotification chatTypingPanel;
-  private Timer chatTimer;
-  private long chatNotifyDuration;
-  private GUID PreRemoveRenderGUID = null;
+    private KeyListenerDeleteDraw(JTree tree) {
+      this.tree = tree;
+    }
 
-  /** Model for the token tree panel of the map explorer. */
-  private TokenPanelTreeModel tokenPanelTreeModel;
+    @Override
+    public void keyTyped(KeyEvent e) {}
 
-  private DrawPanelTreeModel drawPanelTreeModel;
-  private DrawablesPanel drawablesPanel;
-  private LookupTablePanel lookupTablePanel;
-  // External filename support
-  private JFileChooser loadPropsFileChooser;
-  private JFileChooser loadFileChooser;
-  private JFileChooser saveCmpgnFileChooser;
-  private JFileChooser savePropsFileChooser;
-  private JFileChooser saveFileChooser;
-  private JFileChooser saveMapFileChooser;
-  private JFileChooser saveTokenFileChooser;
-  /** Remember the last layer selected */
-  private Layer lastSelectedLayer = Zone.Layer.TOKEN;
+    @Override
+    public void keyReleased(KeyEvent e) {
+      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+        EventQueue.invokeLater(
+            () -> {
+              TreePath[] selection = tree.getSelectionPaths();
+              Set<GUID> selectedDrawSet = new HashSet<GUID>();
+              if (selection != null) {
+                for (TreePath path : selection) {
+                  if (path.getLastPathComponent() instanceof DrawnElement) {
+                    DrawnElement de = (DrawnElement) path.getLastPathComponent();
+                    selectedDrawSet.add(de.getDrawable().getId());
+                  }
+                }
+              }
+              if (selectedDrawSet.isEmpty()) return;
+              // check to see if this is the required action
+              if (!MapTool.confirmDrawDelete()) {
+                return;
+              }
+              for (GUID id : selectedDrawSet) {
+                MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
+              }
+              getCurrentZoneRenderer().repaint();
+              MapTool.getFrame().updateDrawTree();
+              MapTool.getFrame().refresh();
+            });
+      }
+    }
 
-  private EditTokenDialog tokenPropertiesDialog;
-  private GLJPanel gdxPanel;
-  private JFileChooser saveMacroFileChooser;
-  private JFileChooser saveMacroSetFileChooser;
-  private JFileChooser loadMacroFileChooser;
-  private JFileChooser loadMacroSetFileChooser;
-  private JFileChooser saveTableFileChooser;
-  private JFileChooser loadTableFileChooser;
+    @Override
+    public void keyPressed(KeyEvent e) {}
+  }
+
+  private final class KeyListenerDeleteToken implements KeyListener {
+    private final JTree tree;
+
+    private KeyListenerDeleteToken(JTree tree) {
+      this.tree = tree;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+        EventQueue.invokeLater(
+            () -> {
+              // check to see if this is the required action
+              if (!MapTool.confirmTokenDelete()) {
+                return;
+              }
+              ZoneRenderer zr = getCurrentZoneRenderer();
+              AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
+            });
+      }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {}
+  }
+
+  private class ChatTyperObserver implements Observer {
+    public void update(Observable o, Object arg) {
+      SwingUtilities.invokeLater(
+          () -> {
+            chatTypingPanel.invalidate();
+            chatTypingPanel.repaint();
+          });
+    }
+  }
+
+  public static class ChatNotificationTimers extends Observable {
+    private final LinkedMap chatTypingNotificationTimers;
+
+    public synchronized void setChatTyper(final String playerName) {
+      if (AppPreferences.getTypingNotificationDuration() == 0) {
+        turnOffUpdates();
+        chatTypingNotificationTimers.clear();
+      } else {
+        MapTool.getFrame().getChatTimer().start();
+        MapTool.getFrame().getChatTypingPanel().setVisible(true);
+        chatTypingNotificationTimers.put(playerName, System.currentTimeMillis());
+        setChanged();
+        notifyObservers();
+      }
+    }
+
+    private void turnOffUpdates() {
+      MapTool.getFrame().getChatTimer().stop();
+      MapTool.getFrame().getChatTypingPanel().setVisible(false);
+    }
+
+    public synchronized void removeChatTyper(final String playerName) {
+      chatTypingNotificationTimers.remove(playerName);
+      if (chatTypingNotificationTimers.isEmpty()) turnOffUpdates();
+      setChanged();
+      notifyObservers();
+    }
+
+    public synchronized LinkedMap getChatTypers() {
+      return new LinkedMap(chatTypingNotificationTimers);
+    }
+
+    public ChatNotificationTimers() {
+      chatTypingNotificationTimers = new LinkedMap();
+    }
+  }
 
   public MapToolFrame(JMenuBar menuBar) {
     // Set up the frame
@@ -275,11 +419,11 @@ public class MapToolFrame extends DefaultDockableHolder
     // zoneMiniMapPanel.setSize(100, 100);
 
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
+    zoneRendererPanel.setBackground(Color.black);
     currentRenderPanel = zoneRendererPanel;
     initGdx();
-
-    // zoneRendererPanel.setBackground(Color.black);
     // zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
+    // zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
@@ -288,7 +432,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
-    // rendererBorderPanel.add(gdxPanel);
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
 
@@ -350,18 +493,11 @@ public class MapToolFrame extends DefaultDockableHolder
     config.title = "maptool";
     config.width = 640;
     config.height = 480;
-    joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), config);
+    var joglSwingCanvas = new JoglSwingCanvas(GdxRenderer.getInstance(), config);
 
     gdxPanel = joglSwingCanvas.getGLCanvas();
     gdxPanel.setVisible(false);
     gdxPanel.setLayout(new PositionalLayout(5));
-  }
-
-  private static DockableFrame createDockingFrame(MTFrame mtFrame, Component component, Icon icon) {
-    DockableFrame frame = new DockableFrame(mtFrame.name(), icon);
-    frame.add(component);
-    frame.addDockableFrameListener(new MapToolDockListener());
-    return frame;
   }
 
   public void addGdx() {
@@ -386,6 +522,18 @@ public class MapToolFrame extends DefaultDockableHolder
     currentRenderPanel = nextRenderPanel;
     correctGdxSize();
     refresh();
+  }
+
+  private void correctGdxSize() {
+    if (currentRenderPanel == gdxPanel) {
+      gdxPanel.initializeBackend(false);
+      gdxPanel.reshape(0, 0, 0, 0);
+      gdxPanel.revalidate();
+    }
+  }
+
+  public GLJPanel getGdxPanel() {
+    return gdxPanel;
   }
 
   public ChatNotificationTimers getChatNotificationTimers() {
@@ -426,6 +574,46 @@ public class MapToolFrame extends DefaultDockableHolder
       imageChooserDialog = new ImageChooserDialog(this);
     }
     return imageChooserDialog;
+  }
+
+  public enum MTFrame {
+    /*
+     * These enums should be specified using references to the properties file. However, a simple toString() method is used later to determine what to display on the various panels. So if I
+     * convert the propName into the value from the properties file and return it, parts of the code later on use that string to do a properties file lookup! That means that any code using MTFrame
+     * enums that are converted to Strings need to be checked so that when the return value is used as the NAME of an Action, the property name is retrieved instead. Ugh. :(
+     *
+     * We'll need two additional methods: getPropName() and getDisplayName(). Perhaps toString() could call getDisplayName(), but it might be much simpler to debug if toString() weren't used. In
+     * that case, there's no reason to use an enum either ... may as well use a class with static final objects in it. Sigh.
+     */
+    // @formatter:off
+    CONNECTIONS("Connections"),
+    TOKEN_TREE("MapExplorer"),
+    DRAW_TREE("DrawExplorer"),
+    INITIATIVE("Initiative"),
+    IMAGE_EXPLORER("Library"),
+    CHAT("Chat"),
+    LOOKUP_TABLES("Tables"),
+    GLOBAL("Global"),
+    CAMPAIGN("Campaign"),
+    GM("Gm"),
+    SELECTION("Selected"),
+    IMPERSONATED("Impersonate");
+    // @formatter:on
+
+    private String displayName;
+
+    MTFrame(String dispName) {
+      displayName = dispName;
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+
+    public String getPropertyName() {
+      return "panel." + displayName;
+    }
   }
 
   private void configureDocking() {
@@ -579,6 +767,13 @@ public class MapToolFrame extends DefaultDockableHolder
     return pane;
   }
 
+  private static DockableFrame createDockingFrame(MTFrame mtFrame, Component component, Icon icon) {
+    DockableFrame frame = new DockableFrame(mtFrame.name(), icon);
+    frame.add(component);
+    frame.addDockableFrameListener(new MapToolDockListener());
+    return frame;
+  }
+
   /**
    * Updates the window title, tab title, and side title of the given frame
    *
@@ -633,6 +828,46 @@ public class MapToolFrame extends DefaultDockableHolder
   public void refresh() {
     if (getCurrentZoneRenderer() != null) {
       getCurrentZoneRenderer().repaint();
+    }
+  }
+
+  private static class MTFileFilter extends FileFilter {
+    private final String extension;
+    private final String description;
+
+    MTFileFilter(String exten, String desc) {
+      super();
+      extension = exten;
+      description = desc;
+    }
+
+    // Accept directories and files matching extension
+    @Override
+    public boolean accept(File f) {
+      if (f.isDirectory()) {
+        return true;
+      }
+      String ext = getExtension(f);
+      if (ext != null) {
+        return ext.equals(extension);
+      }
+      return false;
+    }
+
+    @Override
+    public String getDescription() {
+      return description;
+    }
+
+    public String getExtension(File f) {
+      String ext = null;
+      String s = f.getName();
+      int i = s.lastIndexOf('.');
+
+      if (i > 0 && i < s.length() - 1) {
+        ext = s.substring(i + 1).toLowerCase();
+      }
+      return ext;
     }
   }
 
@@ -746,10 +981,6 @@ public class MapToolFrame extends DefaultDockableHolder
       zoomStatusBar = new ZoomStatusBar();
     }
     return zoomStatusBar;
-  }
-
-  public GLJPanel getGdxPanel() {
-    return gdxPanel;
   }
 
   public AssetCacheStatusBar getAssetCacheStatusBar() {
@@ -1230,13 +1461,13 @@ public class MapToolFrame extends DefaultDockableHolder
     return pointerOverlay;
   }
 
-  public String getStatusMessage() {
-    return statusMessage;
-  }
-
   public void setStatusMessage(final String message) {
     statusMessage = message;
     SwingUtilities.invokeLater(() -> statusPanel.setStatus("  " + message));
+  }
+
+  public String getStatusMessage() {
+    return statusMessage;
   }
 
   public ActivityMonitorPanel getActivityMonitor() {
@@ -1355,6 +1586,12 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneMiniMapPanel.repaint();
   }
 
+  public void clearZoneRendererList() {
+    zoneRendererList.clear();
+    zoneMiniMapPanel.flush();
+    zoneMiniMapPanel.repaint();
+  }
+
   /** Stop the drag of the token, if any is being dragged. */
   private void stopTokenDrag() {
     Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -1414,12 +1651,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
     setTitleViaRenderer(renderer);
     getZoomStatusBar().update();
-  }
-
-  public void clearZoneRendererList() {
-    zoneRendererList.clear();
-    zoneMiniMapPanel.flush();
-    zoneMiniMapPanel.repaint();
   }
 
   /**
@@ -1681,7 +1912,6 @@ public class MapToolFrame extends DefaultDockableHolder
 
     rendererBorderPanel.add(currentRenderPanel);
     correctGdxSize();
-
     setJMenuBar(menuBar);
     menuBar.setVisible(true);
     this.setVisible(true);
@@ -1690,11 +1920,9 @@ public class MapToolFrame extends DefaultDockableHolder
     fullScreenFrame = null;
   }
 
-  private void correctGdxSize() {
-    if (currentRenderPanel == gdxPanel) {
-      gdxPanel.initializeBackend(false);
-      gdxPanel.reshape(0, 0, 0, 0);
-      gdxPanel.revalidate();
+  public static class FullScreenFrame extends JFrame {
+    public FullScreenFrame() {
+      setUndecorated(true);
     }
   }
 
@@ -1941,6 +2169,9 @@ public class MapToolFrame extends DefaultDockableHolder
     return initiativePanel;
   }
 
+  private JFileChooser saveMacroFileChooser;
+  private JFileChooser saveMacroSetFileChooser;
+
   public JFileChooser getSaveMacroFileChooser() {
     if (saveMacroFileChooser == null) {
       saveMacroFileChooser = new JFileChooser();
@@ -1963,6 +2194,9 @@ public class MapToolFrame extends DefaultDockableHolder
     return saveMacroSetFileChooser;
   }
 
+  private JFileChooser loadMacroFileChooser;
+  private JFileChooser loadMacroSetFileChooser;
+
   public JFileChooser getLoadMacroFileChooser() {
     if (loadMacroFileChooser == null) {
       loadMacroFileChooser = new JFileChooser();
@@ -1984,6 +2218,11 @@ public class MapToolFrame extends DefaultDockableHolder
     loadMacroSetFileChooser.setFileFilter(macroSetFilter);
     return loadMacroSetFileChooser;
   }
+
+  // end of Macro import/export support
+
+  private JFileChooser saveTableFileChooser;
+  private JFileChooser loadTableFileChooser;
 
   public JFileChooser getSaveTableFileChooser() {
     if (saveTableFileChooser == null) {
@@ -2008,214 +2247,6 @@ public class MapToolFrame extends DefaultDockableHolder
     }
     loadTableFileChooser.setFileFilter(tableFilter);
     return loadTableFileChooser;
-  }
-
-  public enum MTFrame {
-    /*
-     * These enums should be specified using references to the properties file. However, a simple toString() method is used later to determine what to display on the various panels. So if I
-     * convert the propName into the value from the properties file and return it, parts of the code later on use that string to do a properties file lookup! That means that any code using MTFrame
-     * enums that are converted to Strings need to be checked so that when the return value is used as the NAME of an Action, the property name is retrieved instead. Ugh. :(
-     *
-     * We'll need two additional methods: getPropName() and getDisplayName(). Perhaps toString() could call getDisplayName(), but it might be much simpler to debug if toString() weren't used. In
-     * that case, there's no reason to use an enum either ... may as well use a class with static final objects in it. Sigh.
-     */
-    // @formatter:off
-    CONNECTIONS("Connections"),
-    TOKEN_TREE("MapExplorer"),
-    DRAW_TREE("DrawExplorer"),
-    INITIATIVE("Initiative"),
-    IMAGE_EXPLORER("Library"),
-    CHAT("Chat"),
-    LOOKUP_TABLES("Tables"),
-    GLOBAL("Global"),
-    CAMPAIGN("Campaign"),
-    GM("Gm"),
-    SELECTION("Selected"),
-    IMPERSONATED("Impersonate");
-    // @formatter:on
-
-    private String displayName;
-
-    MTFrame(String dispName) {
-      displayName = dispName;
-    }
-
-    @Override
-    public String toString() {
-      return displayName;
-    }
-
-    public String getPropertyName() {
-      return "panel." + displayName;
-    }
-  }
-
-  public static class ChatNotificationTimers extends Observable {
-    private final LinkedMap chatTypingNotificationTimers;
-
-    public ChatNotificationTimers() {
-      chatTypingNotificationTimers = new LinkedMap();
-    }
-
-    public synchronized void setChatTyper(final String playerName) {
-      if (AppPreferences.getTypingNotificationDuration() == 0) {
-        turnOffUpdates();
-        chatTypingNotificationTimers.clear();
-      } else {
-        MapTool.getFrame().getChatTimer().start();
-        MapTool.getFrame().getChatTypingPanel().setVisible(true);
-        chatTypingNotificationTimers.put(playerName, System.currentTimeMillis());
-        setChanged();
-        notifyObservers();
-      }
-    }
-
-    private void turnOffUpdates() {
-      MapTool.getFrame().getChatTimer().stop();
-      MapTool.getFrame().getChatTypingPanel().setVisible(false);
-    }
-
-    public synchronized void removeChatTyper(final String playerName) {
-      chatTypingNotificationTimers.remove(playerName);
-      if (chatTypingNotificationTimers.isEmpty()) turnOffUpdates();
-      setChanged();
-      notifyObservers();
-    }
-
-    public synchronized LinkedMap getChatTypers() {
-      return new LinkedMap(chatTypingNotificationTimers);
-    }
-  }
-
-  private static class MTFileFilter extends FileFilter {
-    private final String extension;
-    private final String description;
-
-    MTFileFilter(String exten, String desc) {
-      super();
-      extension = exten;
-      description = desc;
-    }
-
-    // Accept directories and files matching extension
-    @Override
-    public boolean accept(File f) {
-      if (f.isDirectory()) {
-        return true;
-      }
-      String ext = getExtension(f);
-      if (ext != null) {
-        return ext.equals(extension);
-      }
-      return false;
-    }
-
-    @Override
-    public String getDescription() {
-      return description;
-    }
-
-    public String getExtension(File f) {
-      String ext = null;
-      String s = f.getName();
-      int i = s.lastIndexOf('.');
-
-      if (i > 0 && i < s.length() - 1) {
-        ext = s.substring(i + 1).toLowerCase();
-      }
-      return ext;
-    }
-  }
-
-  // end of Macro import/export support
-
-  public static class FullScreenFrame extends JFrame {
-    public FullScreenFrame() {
-      setUndecorated(true);
-    }
-  }
-
-  private final class KeyListenerDeleteDraw implements KeyListener {
-    private final JTree tree;
-
-    private KeyListenerDeleteDraw(JTree tree) {
-      this.tree = tree;
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-        EventQueue.invokeLater(
-            () -> {
-              TreePath[] selection = tree.getSelectionPaths();
-              Set<GUID> selectedDrawSet = new HashSet<GUID>();
-              if (selection != null) {
-                for (TreePath path : selection) {
-                  if (path.getLastPathComponent() instanceof DrawnElement) {
-                    DrawnElement de = (DrawnElement) path.getLastPathComponent();
-                    selectedDrawSet.add(de.getDrawable().getId());
-                  }
-                }
-              }
-              if (selectedDrawSet.isEmpty()) return;
-              // check to see if this is the required action
-              if (!MapTool.confirmDrawDelete()) {
-                return;
-              }
-              for (GUID id : selectedDrawSet) {
-                MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
-              }
-              getCurrentZoneRenderer().repaint();
-              MapTool.getFrame().updateDrawTree();
-              MapTool.getFrame().refresh();
-            });
-      }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {}
-  }
-
-  private final class KeyListenerDeleteToken implements KeyListener {
-    private final JTree tree;
-
-    private KeyListenerDeleteToken(JTree tree) {
-      this.tree = tree;
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-      if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-        EventQueue.invokeLater(
-            () -> {
-              // check to see if this is the required action
-              if (!MapTool.confirmTokenDelete()) {
-                return;
-              }
-              ZoneRenderer zr = getCurrentZoneRenderer();
-              AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
-            });
-      }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {}
-  }
-
-  private class ChatTyperObserver implements Observer {
-    public void update(Observable o, Object arg) {
-      SwingUtilities.invokeLater(
-          () -> {
-            chatTypingPanel.invalidate();
-            chatTypingPanel.repaint();
-          });
-    }
   }
 
   // end of Table import/export support

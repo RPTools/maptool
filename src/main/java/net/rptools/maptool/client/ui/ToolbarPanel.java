@@ -178,11 +178,7 @@ public class ToolbarPanel extends JToolBar {
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
 
-    add(
-        createJfxButton(
-            "net/rptools/maptool/client/image/libgdx.png",
-            I18N.getText("tools.mute.tooltip"),
-            I18N.getText("tools.unmute.tooltip")));
+    add(createGdxButton("net/rptools/maptool/client/image/libgdx.png"));
 
     // the "Select Map" button
     mapselect = createZoneSelectionButton();
@@ -411,10 +407,8 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
-  private JToggleButton createJfxButton(
-      final String icon, String mutetooltip, String unmutetooltip) {
+  private JToggleButton createGdxButton(final String icon) {
     final JToggleButton button = new JToggleButton();
-    button.setToolTipText(mutetooltip);
     button.addActionListener(
         e -> {
           MapTool.getFrame().addGdx();

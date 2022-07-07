@@ -1205,7 +1205,6 @@ public class ZoneRenderer extends JComponent
 
     // Rendering pipeline
     if (zone.drawBoard() && !skipDrawing) {
-      Rectangle fill = new Rectangle(getWidth(), getHeight());
       timer.start("board");
       renderBoard(g2d, view);
       timer.stop("board");
@@ -1391,24 +1390,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("visionOverlayPlayer");
     }
 
-    renderOverlays(g2d, view);
-    // g2d.setColor(Color.red);
-    // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
-    // Area area = new
-    // Area(meta.getArea().getBounds()).createTransformedArea(AffineTransform.getScaleInstance(getScale(),
-    // getScale()));
-    // area =
-    // area.createTransformedArea(AffineTransform.getTranslateInstance(zoneScale.getOffsetX(),
-    // zoneScale.getOffsetY()));
-    // g2d.draw(area);
-    // }
-    SwingUtil.restoreAntiAliasing(g2d, oldAA);
-    if (resetClip) {
-      g2d.setClip(null);
-    }
-  }
-
-  private void renderOverlays(Graphics2D g2d, PlayerView view) {
     timer.start("overlays");
     for (ZoneOverlay overlay : overlayList) {
       String msg = null;
@@ -1432,6 +1413,20 @@ public class ZoneRenderer extends JComponent
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
+    // g2d.setColor(Color.red);
+    // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
+    // Area area = new
+    // Area(meta.getArea().getBounds()).createTransformedArea(AffineTransform.getScaleInstance(getScale(),
+    // getScale()));
+    // area =
+    // area.createTransformedArea(AffineTransform.getTranslateInstance(zoneScale.getOffsetX(),
+    // zoneScale.getOffsetY()));
+    // g2d.draw(area);
+    // }
+    SwingUtil.restoreAntiAliasing(g2d, oldAA);
+    if (resetClip) {
+      g2d.setClip(null);
+    }
   }
 
   private void delayRendering(ItemRenderer renderer) {

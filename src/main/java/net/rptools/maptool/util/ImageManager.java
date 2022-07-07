@@ -85,7 +85,6 @@ public class ImageManager {
   static {
     try {
       TRANSFERING_IMAGE = ImageUtil.getCompatibleImage(UNKNOWN_IMAGE_PNG);
-
     } catch (IOException ioe) {
       log.error("static for 'unknown.png':  not resolved; IOException", ioe);
       TRANSFERING_IMAGE = ImageUtil.createCompatibleImage(10, 10, 0);
