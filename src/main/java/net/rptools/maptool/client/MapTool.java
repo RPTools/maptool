@@ -968,8 +968,6 @@ public class MapTool {
     MapTool.campaign = campaign;
     ZoneRenderer currRenderer = null;
 
-    // Clean up
-    new CampaignManager().clearCampaignData();
 
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
