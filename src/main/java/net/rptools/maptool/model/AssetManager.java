@@ -514,15 +514,24 @@ public class AssetManager {
    * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(URL url) throws IOException {
+    return createAsset(url, null);
+  }
+
+  public static Asset createAsset(URL url, Asset.Type assetType) throws IOException {
     // Create a temporary file from the downloaded URL
     File newFile = File.createTempFile("remote", null, null);
     try {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
-      Asset temp =
-          Asset.createAssetDetectType(
-              FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
-      return temp;
+      if (assetType != null) {
+        return Asset.createAsset(
+            FileUtil.getNameWithoutExtension(url),
+            FileUtils.readFileToByteArray(newFile),
+            assetType);
+      } else {
+        return Asset.createAssetDetectType(
+            FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
+      }
     } finally {
       newFile.delete();
     }
