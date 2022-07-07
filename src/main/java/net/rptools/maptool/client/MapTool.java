@@ -83,7 +83,6 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
-import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -967,7 +966,6 @@ public class MapTool {
     // Load up the new
     MapTool.campaign = campaign;
     ZoneRenderer currRenderer = null;
-
 
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
