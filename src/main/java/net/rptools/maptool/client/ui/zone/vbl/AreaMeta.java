@@ -103,7 +103,7 @@ public class AreaMeta {
     return isHole;
   }
 
-  public void addPoint(float x, float y) {
+  public void addPoint(double x, double y) {
     // Cut out redundant points
     // TODO: This works ... in concept, but in practice it can create holes that pop outside of
     // their parent bounds
