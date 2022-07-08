@@ -179,6 +179,8 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.addProperty("timeInMs", System.currentTimeMillis());
     cinfo.addProperty("timeDate", getTimeDate());
     cinfo.addProperty("isoTimeDate", getIsoTimeDate());
+    cinfo.addProperty("isHosting", MapTool.isHostingServer());
+    cinfo.addProperty("isPersonalServer", MapTool.isPersonalServer());
 
     JsonObject dialogs = new JsonObject();
     Set<String> dialogNames = HTMLDialog.getDialogNames();
