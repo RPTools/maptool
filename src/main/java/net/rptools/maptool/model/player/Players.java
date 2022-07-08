@@ -191,7 +191,7 @@ public class Players {
   private PlayerInfo getPlayerInfo(String name) {
     try {
       var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      if (!playerDatabase.isPlayerRegistered(name)) {
+      if (!playerDatabase.playerExists(name)) {
         return null;
       }
       Player player = playerDatabase.getPlayer(name);
