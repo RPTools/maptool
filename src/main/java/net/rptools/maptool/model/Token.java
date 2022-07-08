@@ -2466,9 +2466,10 @@ public class Token extends BaseModel implements Cloneable {
       speechName = "";
     }
     if (terrainModifiersIgnored == null) {
-      terrainModifiersIgnored = new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
+      terrainModifiersIgnored =
+          new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
     }
-    if(terrainModifierOperation == null) {
+    if (terrainModifierOperation == null) {
       terrainModifierOperation = TerrainModifierOperation.NONE;
     }
 
