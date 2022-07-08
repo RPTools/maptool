@@ -290,7 +290,7 @@ public class GdxRenderer extends ApplicationAdapter
 
   private float getDpiScale() {
     int resolution = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
-    return resolution/96.0f;
+    return resolution / 96.0f;
   }
 
   @Override
@@ -1745,7 +1745,6 @@ public class GdxRenderer extends ApplicationAdapter
         tmpWorldCoord.x *= dpiScale;
         tmpWorldCoord.y *= dpiScale;
 
-
         gdxTokenRectangle.set(
             tmpWorldCoord.x,
             tmpWorldCoord.y,
@@ -3199,8 +3198,8 @@ public class GdxRenderer extends ApplicationAdapter
   public void setScale(Scale scale) {
     var dpiScale = getDpiScale();
 
-    offsetX = (int)(scale.getOffsetX()  * dpiScale * -1);
-    offsetY = (int)(scale.getOffsetY() * dpiScale);
+    offsetX = (int) (scale.getOffsetX() * dpiScale * -1);
+    offsetY = (int) (scale.getOffsetY() * dpiScale);
     zoom = (float) (1f / scale.getScale() / dpiScale);
     updateCam();
   }
