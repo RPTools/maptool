@@ -21,13 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.GeometryUtil.PointNode;
+import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
   Area area;
-  Point2D centerPoint;
-  List<AreaFace> faceList = new ArrayList<AreaFace>();
+  List<Coordinate> vertices = new ArrayList<>();
 
   // Only used during construction
   boolean isHole;
@@ -37,46 +41,62 @@ public class AreaMeta {
 
   public AreaMeta() {}
 
-  public Point2D getCenterPoint() {
-    if (centerPoint == null) {
-      centerPoint =
-          new Point2D.Double(
-              area.getBounds().x + area.getBounds().width / 2,
-              area.getBounds().y + area.getBounds().height / 2);
-    }
-    return centerPoint;
-  }
-
   /**
    * @param origin
    * @param faceAway If `true`, only return segments facing away from origin.
    * @return
    */
-  public List<VisibleAreaSegment> getFacingSegments(
-      GeometryFactory geometryFactory, Point2D origin, boolean faceAway) {
-    List<VisibleAreaSegment> segments = new ArrayList<>();
-    List<AreaFace> currentSegmentFaces = new ArrayList<>();
+  public List<LineString> getFacingSegments(
+      GeometryFactory geometryFactory,
+      Coordinate origin,
+      boolean faceAway,
+      PreparedGeometry vision) {
+    final var requiredOrientation = faceAway ? Orientation.CLOCKWISE : Orientation.COUNTERCLOCKWISE;
+    List<LineString> segments = new ArrayList<>();
+    List<Coordinate> currentSegmentPoints = new ArrayList<>();
 
-    for (AreaFace face : faceList) {
-      double originAngle = GeometryUtil.getAngle(origin, face.getMidPoint());
-      double delta = Math.abs(GeometryUtil.getAngleDelta(originAngle, face.getFacing()));
+    Coordinate current = null;
+    for (Coordinate coordinate : vertices) {
+      assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
 
-      boolean shouldIncludeFace = (delta > 90) == faceAway;
+      final var previous = current;
+      current = coordinate;
+      if (previous == null) {
+        continue;
+      }
+
+      final var faceLineSegment = new LineSegment(previous, coordinate);
+      final var orientation = faceLineSegment.orientationIndex(origin);
+      final var shouldIncludeFace =
+          (orientation == requiredOrientation)
+              && vision.intersects(faceLineSegment.toGeometry(geometryFactory));
+
       if (shouldIncludeFace) {
         // Since we're including this face, the existing segment can be extended.
-        currentSegmentFaces.add(face);
-      } else if (!currentSegmentFaces.isEmpty()) {
+        if (currentSegmentPoints.isEmpty()) {
+          // Also need the first point.
+          currentSegmentPoints.add(faceLineSegment.p0);
+        }
+        currentSegmentPoints.add(faceLineSegment.p1);
+      } else if (!currentSegmentPoints.isEmpty()) {
         // Since we're skipping this face, the segment is broken and we must start a new one.
-        segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
-        currentSegmentFaces = new ArrayList<>();
+        segments.add(
+            geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
+        currentSegmentPoints.clear();
       }
     }
+    assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
     // In case there is still current segment, we add it.
-    if (!currentSegmentFaces.isEmpty()) {
-      segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
+    if (!currentSegmentPoints.isEmpty()) {
+      segments.add(
+          geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
     }
 
     return segments;
+  }
+
+  private static Coordinate toCoordinate(Point2D point2D) {
+    return new Coordinate(point2D.getX(), point2D.getY());
   }
 
   public boolean isHole() {
@@ -132,7 +152,7 @@ public class AreaMeta {
       pointNodeList.previous = trueLastPoint;
     }
     computeIsHole();
-    computeFaces();
+    computeVertices();
 
     // Don't need point list anymore
     pointNodeList = null;
@@ -158,10 +178,11 @@ public class AreaMeta {
     isHole = angle < 0;
   }
 
-  private void computeFaces() {
+  private void computeVertices() {
     PointNode node = pointNodeList;
+    vertices.add(toCoordinate(node.point));
     do {
-      faceList.add(new AreaFace(node.point, node.next.point));
+      vertices.add(toCoordinate(node.next.point));
       node = node.next;
     } while (!node.point.equals(pointNodeList.point));
   }
